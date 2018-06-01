@@ -1,0 +1,5 @@
+node_modules
+manager/bower_components
+config/default.json
+venv
+build
