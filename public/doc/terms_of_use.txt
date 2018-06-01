@@ -1,0 +1,224 @@
+Charte de bonne utilisation des moyens informatiques de la plate-forme GenOuest
+Version du 09/09/2010
+
+
+Préambule
+
+La plate-forme GenOuest est hébergée physiquement dans les locaux de l'Institut de Recherche en Informatique et Systèmes Aléatoires (IRISA), qui est une unité mixte de recherche dont les partenaires sont : l'INRIA, le CNRS, l'Université de Rennes 1, l'INSA de Rennes (ci-après désignés ensemble par : « les partenaires »). GenOuest est soumise aux règles de fonctionnement de l'Institut et de ses partenaires.
+
+La présente charte est dérivée de la charte approuvée le conseil de laboratoire de l'IRISA le 16 décembre 2005.
+
+Pourquoi une charte informatique ?
+
+La présente charte a pour objectif de fixer les règles déontologiques pour une bonne utilisation des moyens informatiques de GenOuest.
+Par la signature de cette charte, tout Utilisateur atteste avoir pris connaissance des règles d'utilisation en vigueur, de la législation,
+des sanctions encourues en cas de non-respect de ces règles et s'engage à en respecter toutes les dispositions.
+
+Définitions
+
+« Moyens Informatiques » : tout équipement informatique accessible (serveur de calcul, de gestion, de stockage) mis à disposition des Utilisateurs et accessible directement ou à distance.
+
+« Services Internet » : mise à disposition par des serveurs locaux ou distants de moyens d'échange d'informations, de stockage ou de calcul.
+
+« Utilisateur » : toute personne permanent ou temporaire (quel que soit son établissement d'origine) collaborant avec la plate-forme et disposant dans le cadre de cette collaboration d'un compte informatique sur la plate-forme GenOuest.
+
+« Administrateur » : toute personne de statut permanent ou temporaire, habilitée par le directeur de la plate-forme à administrer les ressources informatiques partagées de la plate-forme GenOuest.
+
+« Site Web Thématique » : site web hébergé par la plate-forme GenOuest et destiné à contenir des informations en lien avec un thème des activités scientifiques et techniques d'un partenaire de la plate-forme GenOuest ou de OUEST-genopole®.
+
+« Espace Thématique » : espace et ressources dédiés à l'hébergement d'un Site Web Thématique.
+
+Autorisation d'accès
+
+L'utilisation des ressources informatiques de GenOuest est soumise à autorisation préalable, et cette autorisation est concrétisée par l'ouverture d'un compte. Les comptes informatiques sont nominatifs et rattachés à une structure : UMR, EPST, ..., équipe de recherche. L'ouverture d'un compte est effectuée à la demande du responsable, du correspondant informatique ou d'un permanent du projet, de l'équipe concernée. Si l'Utilisateur n'est pas membre de l'IRISA, la demande de compte devra être validée par le directeur de sa structure.
+
+Cette autorisation est strictement personnelle et ne doit en aucun cas être cédée, même temporairement, à un tiers.
+
+Cette autorisation ne vaut que pour des activités conformes aux missions des partenaires et respectant la législation en vigueur.
+L'activité professionnelle est celle prévue par les partenaires de la plate-forme GenOuest, c'est-à- dire :
+
+les activités d'enseignement et de recherche, de développement technique, de transfert de technologies, de diffusion d'informations scientifiques et techniques, d'expérimentation de nouveaux services présentant un caractère
+d'innovation technique.
+
+La direction de la plate-forme GenOuest se réserve le droit de retirer à tout moment cette autorisation et ce, sans préavis.
+
+Droits et devoirs des Utilisateurs
+
+Chaque Utilisateur doit user raisonnablement de toutes les ressources partagées auxquelles il a l'autorisation d'accéder et respecter les recommandations émises par GenOuest. Les ressources partagées ou mises à la disposition exclusive d'un
+Utilisateur sont destinées à être utilisées principalement et prioritairement pour mener à bien son activité professionnelle. L'utilisation à des fins privées n'est pas tolérée.
+
+Tout Utilisateur est responsable de l'utilisation qu'il fait des ressources informatiques de GenOuest à partir des comptes qui lui ont été ouverts. L'utilisation par l'Utilisateur de matériel personnel pour accéder aux ressources informatiques de l'IRISA et à Internet via Renater, que ce soit depuis les locaux de l'IRISA ou depuis son domicile est soumis aux
+mêmes règles. Il doit donc, à son niveau et à l'aide des recommandations fournies par la direction de la plate-forme GenOuest ou les Administrateurs des
+ressources auxquelles il accède, contribuer à la sécurité.
+
+Règles de sécurité
+
+Tout Utilisateur doit choisir des mots de passe sûrs respectant les recommandations des Administrateurs. Ces mots de passe doivent être gardés secrets et en aucun cas être communiqués à qui que ce soit, personnes travaillant à l'IRISA incluses.
+Tout Utilisateur est responsable des possibilités d'accès à des informations situées sur des machines de GenOuest qu'il donne à un tiers, que ces accès puissent être établis en interne ou depuis l'extérieur. Cela concerne en
+premier lieu les propres fichiers de l'Utilisateur mais cela concerne aussi, plus globalement, toute information à laquelle il a lui-même accès. En particulier, l'Utilisateur doit veiller à positionner correctement les
+autorisations d'accès à ses fichiers stockés sur des serveurs de données accessibles à tous les Utilisateurs ou à la protection des données stockées
+sur son poste de travail individuel s'il en est Administrateur. Les Utilisateurs ne doivent pas utiliser des comptes autres que ceux pour
+lesquels ils ont obtenu une autorisation. Ils doivent s'abstenir de toute tentative de s'approprier ou de déchiffrer le mot de passe d'un autre Utilisateur.
+Le développement comme l'utilisation de programmes mettant sciemment en cause l'intégrité des systèmes informatiques sont interdits.
+Tout Utilisateur doit respecter les modalités de raccordement des matériels aux réseaux de communication internes et externes, telles qu'elles sont
+fixées par les responsables informatiques du site sur lequel il se trouve, y compris lors de ses déplacements professionnels. Ces raccordements ne
+peuvent être modifiés qu'avec leur autorisation préalable. Ces modalités couvrent à la fois des aspects matériel (connexion physique) et logiciel (connexion logique).
+Tout constat de violation, tentative de violation ou soupçon de violation d'un système informatique doit être signalé à l'un des Administrateurs
+système du groupe de machines concernées et à l'un des correspondants sécurité du site. Les Utilisateurs sont tenus de respecter les consignes des Administrateurs et des responsables informatiques.
+
+
+Utilisation d'Internet
+
+Tout Utilisateur doit en particulier se conformer aux chartes du réseau RENATER qui est le fournisseur d'accès Internet de l'IRISA.
+L'Utilisateur doit faire usage des Services Internet dans le cadre exclusif de ses activités professionnelles et dans le respect de principes généraux et des règles propres aux divers sites qui les proposent ainsi que dans le respect de la législation en vigueur.
+
+En particulier :
+Il ne doit pas se connecter ou essayer de se connecter sur un serveur autrement que par les dispositions prévues par ce serveur ou sans y être autorisé par les responsables habilités;
+Il ne doit pas se livrer à des actions mettant sciemment en péril la sécurité ou le bon fonctionnement des ressources informatiques auxquelles il accède;
+Il ne doit pas usurper l'identité d'une autre personne et il ne doit pas intercepter de communications entre tiers;
+Il ne doit pas utiliser ces services pour proposer ou rendre accessible aux tiers des données et informations confidentielles ou contraires à la législation en vigueur;
+Il ne doit pas déposer des documents sur un serveur sauf si celui-ci le permet ou sans y être autorisé par les responsables habilités.
+
+
+Règles de bon usage de la communication électronique
+
+Les Moyens Informatiques de la plate-forme permettent d'utiliser de nombreux supports de communication électronique (courrier, documents
+accessibles par le WEB, ...) L'usage de ces supports de communication doit se faire dans le respect des règles suivantes :
+
+Tout Utilisateur doit faire preuve de la plus grande correction dans ses communications quel que soit le service utilisé.
+Tout Utilisateur doit veiller à ce que le contenu de ses communications soit conforme à la législation en vigueur, en France comme à l'étranger.
+Tout Utilisateur doit s'abstenir de porter atteinte par la nature de ses communications à l'image ou aux intérêts de la plate-forme et de ses partenaires.
+Tout Utilisateur doit préciser s'il s'exprime à titre personnel ou au nom de la plate-forme ou du/des partenaires et ce, particulièrement dans toute communication à diffusion publique, sans que cet avertissement puisse aller à l'encontre des autres règles de bon usage décrites ci-dessus.
+
+Site Web Thématique
+
+1.L'ouverture d'un Site Web Thématique implique la désignation d'un Utilisateur comme responsable (faisant office d'Administrateur) ainsi que d'un ensemble d'Utilisateurs habilités à intervenir sur les données qui y seront placées (pages web, base de données, etc.). La direction de la plate-forme doit être tenue informée de tout changement de responsable ou d'Utilisateur habilité.
+2.Un Site Web Thématique a un caractère exclusivement professionnel et ne peut contenir que des informations liées aux activités scientifiques, techniques de la plate-forme ou de ses partenaires, dans le respect des règles fixées par la présente charte.
+3.Après consultation du Comité des Utilisateurs, le directeur de la plate-forme GenOuest  se réserve le droit de suspendre temporairement ou définitivement l'accès à un Site Web Thématique présentant un contenu non conforme aux critères fixés par la présente charte. Le responsable désigné du site web est averti du fait et des raisons de la mise hors ligne du site web. Il lui est possible d'apporter les modifications nécessaires à la mise en conformité du site web, pour une remise en ligne après contrôle.
+4.Un Site Web Thématique est ouvert pour une durée maximale de 2 ans, renouvelable. Au terme de cette période, le directeur de la plate-forme
+prend contact avec le responsable désigné du site web pour convenir d'une éventuelle prolongation de 2 ans. Sans réponse du responsable dans un délai de 1 mois, le directeur de la plate-forme se réserve le droit de mettre le site web hors-ligne. Après une période de 1 mois suivant la mise hors-ligne, et sans manifestation de la part du responsable ou d'un Utilisateur habilité, le directeur de la plate-forme se réserve le droit de supprimer le site web.
+
+
+Utilisation des Logiciels
+
+L'utilisation des logiciels (source ou binaire) doit se faire dans le respect des dispositions du code de propriété intellectuelle, des recommandations fixées par les titulaires de droits et des engagements pris par le ou les partenaires de la plate-forme (dans les contrats de licences par exemple).
+
+En particulier :
+La reproduction des logiciels est interdite sauf si la licence l'autorise. Seul l'établissement d'une copie de sauvegarde pourra être autorisé si elle n'a pas déjà été assurée par les services compétents.
+Il est interdit d'installer sur un système de la plate-forme GenOuest un logiciel commercial quelconque, sans s'être assuré préalablement auprès du directeur de la plate-forme que l'INRIA (tutelle de gestion de la plate-forme) y est autorisé.
+L'utilisation permanente de logiciels à contribution volontaire (shareware)devra être signalée au directeur de la plate-forme afin de régulariser rapidement cet usage.
+
+
+Informatique et Libertés
+
+La loi du 06/01/1978 - n°78-17 modifiée par la loi du 6 août 2004 :
+"Informatique et Libertés" protège tout individu contre tout usage non autorisé, abusif, ou malveillant, d'informations le concernant et figurant dans un fichier
+informatique quelconque. Elle prévoit en particulier que :
+La création de tout fichier contenant des informations nominatives doit faire l'objet de formalités préalables à sa mise en oeuvre auprès de la
+commission nationale de l'informatique et des libertés (CNIL). À l'IRISA, ces démarches sont entreprises par le Service des Affaires Juridiques du
+Siège (SAJ) de l'INRIA, en liaison avec le responsable du service administratif.
+Toute personne sur laquelle des informations figurent dans un tel fichier doit être informée de l'existence de ce fichier, de sa finalité, de l'existence d'un droit d'accès et des modalités de mise en oeuvre de celui-ci, dès la collecte des informations la concernant.
+
+
+Respect de la confidentialité des informations
+
+Les Utilisateurs ne doivent pas tenter de lire, de copier, de divulguer ou de modifier les fichiers d'un autre Utilisateur sans y avoir été autorisés.
+Les Utilisateurs sont tenus à la réserve d'usage sur toute information relative au fonctionnement interne de la plate-forme GenOuest qu'ils auraient pu obtenir en utilisant ces ressources informatiques.
+Les Utilisateurs sont tenus de prendre, avec l'aide éventuelle du directeur de la plate-forme ou des Administrateurs de GenOuest, les mesures de protection des données nécessaires au respect des engagements de confidentialité pris par GenOuest vis-à-vis de tiers.
+
+Propriété intellectuelle - Respect de la vie privée
+
+Propriété intellectuelle
+L'utilisation des Moyens Informatiques doit se faire dans le respect des dispositions du Code de Propriété Intellectuelle. L'usage (reproduction, représentation) d'une oeuvre (photographie, dessin, oeuvre littéraire, musique, etc..) doit faire l'objet d'une autorisation de son auteur (cession de droits).
+
+Droit au nom, voix, et image
+L'utilisation des Moyens Informatiques doit également se faire dans le respect des dispositions du Code Civil relatives au respect de la vie privée.
+Notamment, toute utilisation du nom, de la voix ou de l'image d'une personne ne peut se faire sans son consentement exprès.
+
+Droits et devoirs des Administrateurs
+
+Les Administrateurs ont le devoir d'assurer le bon fonctionnement des réseaux et des Moyens Informatiques de la plate-forme. Ils ont le droit de prendre toutes dispositions nécessaires pour assumer cette responsabilité tout en respectant l'obligation de discrétion professionnelle. Ils ne doivent pas divulguer des informations qu'ils auraient été amenés à connaître dans le cadre de leurs fonctions, et en particulier lorsque celles-ci sont couvertes par le secret des correspondances ou relèvent de la vie privée des Utilisateurs et ne mettent en cause ni le bon fonctionnement technique des applications, ni leur sécurité, ni l'intérêt des partenaires de GenOuest.
+Un Administrateur peut prendre des mesures conservatoires (arrêt d'une exécution, suppression de droit d'accès, ...) pour pallier à un incident de
+fonctionnement ou de sécurité. Il peut également utiliser un outil de prise de main à distance à des fins de maintenance ou de support après avoir recueilli
+l'accord préalable de l'Utilisateur.
+
+Journalisation des connexions :
+
+Les connexions et les tentatives de connexions sur les postes de travail et les serveurs sont journalisées. Pour chaque connexion, sont conservés la date et
+l'heure, la durée, le nom de login utilisé et parfois l'adresse réseau de la source de la connexion. Ces journaux sont conservés 1 an au maximum, la durée
+moyenne étant de 3 mois.
+Les connexions sur les serveurs web et sur le serveur de messagerie sont également journalisées. Les journaux sont conservés 3 mois maximum.
+Un dispositif de métrologie réseau et une sonde de détection d'intrusion réseau sont également opérationnels. Les informations journalisées sont les adresses
+réseau source et destination, et différents éléments figurant dans l'en-tête des paquets réseau et le volume de données. Ces informations sont conservées 3
+mois et sont à la seule disposition des Administrateurs système et réseau.
+
+Non-respect de la Charte :
+Toute utilisation non conforme à la charte peut donner lieu à une suspension immédiate par le Directeur de la plate-forme et/ou à d'éventuelles poursuites
+disciplinaires et/ou pénales ou à d'éventuelles actions en réparation.
+
+Textes en vigueur
+Cette liste n'est pas exhaustive. Elle est fournie ici à titre d'information.
+
+Protection des personnes
+
+Textes nationaux :
+Code Civil : article 9 : Protection de la vie privée (nom, voix, image etc, ...)
+Loi du 29/07/1881 sur la "Liberté de la presse".
+Loi du 06/01/1978 - n°78-17 : "Informatique et Libertés".
+Loi du 30/09/1986 - n° 86-1067 : relative à la "liberté de communication".
+Loi 10/07/1991 - n°91-646 : sur le secret des correspondances émises par voie de télécommunications.
+Rapport de la CNIL « La cybersurveillance sur les lieux de travail » du 05/02/2002, reprenant largement le rapport de mars 2001 sur "La cybersurveillance des salariés dans l'entreprise".
+
+Textes européens :
+Décision 92/242/CEE du Conseil, du 31 mars 1992, en matière de sécurité des systèmes d'information.
+Directive 95/46/CE du Parlement européen et du Conseil, du 24 octobre 1995,
+relative à la protection des personnes physiques à l'égard du traitement des données à caractère personnel et à la libre circulation de
+ces données.
+Directive 2002/58/CE du Parlement européen et du Conseil, du 12 juillet 2002,
+concernant le traitement des données à caractère personnel et la protection de la vie privée dans le secteur des communications
+électroniques (directive " vie privée et communications électroniques").
+Décision 276/99/CE du Parlement européen et du Conseil, du 25 janvier 1999,
+adoptant un plan d'action communautaire pluriannuel visant à promouvoir une utilisation sûre d'Internet par la lutte contre les messages à contenu illicite et préjudiciable diffusés sur les réseaux mondiaux.
+
+Protection des logiciels et systèmes informatiques
+
+Textes nationaux :
+Code de la Propriété Intellectuelle (Titres II et III)
+Loi 05/01/1988 - n°88-19: relative à la fraude informatique.
+
+Textes européens :
+Directive 91/250/CEE du Conseil, du 14 mai 1991, concernant la protection juridique des programmes d'ordinateur.
+ADPIC 15/04/1994 : Accord communautaire européen sur les Droits de Propriété Intellectuelle touchant au Commerce.
+Directive 96/9/CE - 11/03/1996 : Directive européenne sur la protection des banques ou bases de données.
+Directive 2000/31/CE du Parlement européen et du Conseil, du 8 juin 2000,
+relative à certains aspects juridiques du commerce électronique dans le marché intérieur (« directive sur le commerce électronique »).
+
+Propriété intellectuelle
+Textes nationaux : Code de la Propriété Intellectuelle
+Textes européens :
+Directive 92/100/CEE du Conseil, du 19 novembre 1992,
+relative au droit de location et de prêt et à certains droits voisins du droit d'auteur dans le domaine de la propriété intellectuelle
+Directive 93/98/CEE du Conseil, du 29 octobre 1993,
+relative à l'harmonisation de la durée de protection du droit d'auteur et de certains droits voisins
+Directive 2001/29/CE du Parlement européen et du Conseil du 22 mai 2001
+sur l'harmonisation de certains aspects du droit d'auteur et des droits voisins dans la société de l'information
+
+Responsabilité des hébergeurs /éditeurs de sites web Internet
+Loi 29/07/1982 - n°82-652 : sur l'obligation de nommer un directeur de publication responsable pour tout service de communication.
+Circulaire du 07/10/1999 : relative aux sites internet des services et des établissements publics de l'État.
+Loi 01/08/2000 - n°2000-719 : sur la communication publique sur Internet, la responsabilité des créateurs de sites et celle des hébergeurs.
+
+Culture
+Loi du 04/08/1994 - n°94/665 : relative à l'emploi de la langue française.
+
+Accès au droit
+
+Legifrance : http://www.legifrance.gouv.fr/
+Europa : http://europa.eu.int/eur-lex/fr/index.html
+
+Direction de la Plate-forme Genouest
+INRIA/IRISA
+Campus de Beaulieu
+35042 Rennes Cedex
+
+(*) Nom de l'Utilisateur

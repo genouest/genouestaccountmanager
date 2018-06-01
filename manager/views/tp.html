@@ -1,0 +1,99 @@
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Calendar</h3>
+            </div>
+            <div class="panel-body">
+                <div ui-calendar="uiConfig.calendar" class="span8 calendar" ng-model="eventSources"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4" ng-if="selectedEvent">
+        <div ng-class="get_status(selectedEvent.over)">
+            <div class="panel-heading">
+                <h3 class="panel-title">Reservation</h3>
+            </div>
+            <div class="panel-body">
+                <div class="alert alert-success" ng-if="msg">{{msg}}</div>
+                <div class="alert alert-danger" ng-if="errmsg">{{errmsg}}</div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Owner</th>
+                                <td>{{selectedEvent.owner}}</td>
+                            </tr>
+                            <tr>
+                                <th>From</th>
+                                <td>{{selectedEvent.start.toISOString().slice(0,10)}}</td>
+                            </tr>
+                            <tr>
+                                <th>To</th>
+                                <td>{{selectedEvent.end.toISOString().slice(0,10)}}</td>
+                            </tr>
+                            <tr>
+                                <th>About</th>
+                                <td>{{selectedEvent.about}}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td ng-if="selectedEvent.over">Over</td>
+                                <td ng-if="! selectedEvent.over">Active</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive" ng-if="selectedEvent.students.length > 0">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Accounts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="account in selectedEvent.students">
+                                <td>{{account}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button ng-if="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-default" ng-click="cancel_reservation()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div ng-if="authorized" class="row">
+    <div class="col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">New reservation</h3>
+            </div>
+            <div class="panel-body">
+                <div class="alert alert-success" ng-if="resmsg">{{resmsg}}</div>
+                <div class="alert alert-danger" ng-if="reserrmsg">{{reserrmsg}}</div>
+                <form class="form form-group row">
+                    <div class="col-md-4">
+                        <label for="quantity" class="control-label">Number of students</label>
+                        <input ng-model="$parent.quantity" type="number" class="form-control"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="from_date" class="control-label">From</label>
+                        <input ng-model="$parent.from_date" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="to_date" class="control-label">To</label>
+                        <input ng-model="$parent.to_date" type="date" class="form-control" />
+                    </div>
+                </form>
+                <div class="form-group">
+                    <label for="about">About</label>
+                    <textarea class="form-control" ng-model="$parent.about" class="form-control"/>
+                </div>
+                <button class="btn btn-default" ng-click="reserve()">Reserve</button>
+            </div>
+        </div>
+    </div>
+</div>

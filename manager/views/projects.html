@@ -1,0 +1,75 @@
+<div class="row">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Project creation</h3>
+        </div>
+        <div class="panel-body">
+            <div ng-if="add_project_msg" class="alert alert-success">{{add_project_msg}}</div>
+            <div ng-if="add_project_error_msg" class="alert alert-danger">{{add_project_error_msg}}</div>
+            <!--div class="alert" ng-if="msg">{{msg}}</div-->
+            <form role="form" class="user-form form-horizonal">
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <label for="project_id">Name</label>
+                        <input placeholder="project name" type="text" id="project_id" ng-model="project_id" class="form-control"/>
+                    </div>
+                    <div class="col-sm-2">
+                        <label for="project_owner">Owner</label>
+                        <input placeholder="project owner" type="text" id="project_owner" ng-model="project_owner" class="form-control"/>
+                    </div>
+                    <div class="col-sm-2">
+                        <label for="project_group">Group</label>
+                        <input placeholder="project group" type="text" id="project_group" ng-model="project_group" class="form-control"/>
+                    </div>
+                    <div class="col-sm-2">
+                        <label for="project_size">Size</label>
+                        <input placeholder="project size in G" type="number" id="project_size" ng-model="project_size" class="form-control"/>
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="project_id">Expiration</label>
+                        <input type="date" id="project_expire" ng-model="project_expire" class="form-control">
+                    </div>
+                    <div class="col-sm-1">
+                        <label style="opacity: 0;">Create</label>
+                        <button type="button" class="btn btn-default" ng-click="add_project()">Create</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+<div class="row">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Projects</h3>
+        </div>
+        <div class="panel-body">
+            <div ng-if="project_msg" class="alert alert-info">{{project_msg}}</div>
+            <div class="table-responsive">
+                <table datatable="ng" class="table table-striped">
+                    <thead>
+                        <th>Project</th>
+                        <th>Owner</th>
+                        <th>Group</th>
+                        <th>Size</th>
+                        <th>Expire</th>
+                        <th></th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="project in projects">
+                            <td ><h4><span class="label label-primary">{{project.id}}</span></h4></td>
+                            <td><input type="text" ng-model="project.owner" class="form-control"/></td>
+                            <td><input type="text" ng-model="project.group" class="form-control"/></td>
+                            <td><input type="number" ng-model="project.size" class="form-control"/></td>
+                            <td><input type="date" ng-model="project.expire" class="form-control"/></td>
+                            <td><button class="btn btn-sm" ng-click="update_project(project)">Update</button></td>
+                            <td><button class="btn btn-warning btn-sm" ng-click="delete_project(project)">Delete</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

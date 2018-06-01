@@ -1,0 +1,225 @@
+{
+  "general": {
+    "readme": [
+      { "language": "francais",
+        "source_folder" : "/folder/with/readmes1/"
+      },
+      { "language": "english",
+        "source_folder" : "/folder/with/readme2/"
+      }
+    ],
+    "double_authentication_for_admin": true,
+    "db": "gomngr",
+    "url": "http://localhost:3000",
+    "admin": [ "osallou" ],
+    "support": "olivier.sallou@irisa.fr",
+    "accounts": "accounts@genouest.org",
+    "secret": "",
+    "script_dir": "/tmp",
+    "admin_ip": [ "127.0.0.1" ],
+    "usage_directory": "/tmp",
+    "home": "/home",
+    "main_groups": [ "", "genouest", "symbiose", "irisa"],
+    "quota": {
+        "home": {
+            "protocol": "http:",
+            "port": 8086,
+            "hostname": "gomngr",
+            "db": "goacct",
+            "series": "goacct.fixed.disk.home.*.user.#USER#"
+        },
+        "omaha": {
+            "protocol": "http:",
+            "port": 8086,
+            "hostname": "gomngr",
+            "db": "goacct",
+            "series": "goacct.fixed.disk.panasas-omaha.*.user.#USER#"
+        }
+    },
+    "plugin_script_dir": "/tmp/scripts"
+ },
+ "usage": [
+   {"name": "jobs", "link": "https://goacct.genouest.org/dashboard/db/goacct-cumulative-stats?var-userlist=#USER#"},
+   {"name": "disks", "link": "https://goacct.genouest.org/dashboard/db/goacct-user-disk-usage?var-userlist=#USER#"}
+ ],
+  "bills": {
+   "use": true,
+   "dir": "/genouestaccountmanager-bills"
+ },
+ "mongo": {
+    "host": "localhost",
+    "port": 27017
+ },
+ "mail": {
+    "host": "mailtrap.io",
+    "port": 25,
+    "secure": false,
+    "user": "",
+    "password": "",
+    "origin": ""
+  },
+  "ldap": {
+    "host": "localhost",
+    "dn": "dc=nodomain",
+    "admin_cn": "cn=admin",
+    "admin_dn": "dc=nodomain",
+    "admin_password": ""
+  },
+  "mysql": {
+    "host": "localhost",
+    "user": "root",
+    "password": "XXX"
+  },
+  "mailchimp": {
+    "apikey": "",
+    "list": "",
+    "template": ""
+  },
+  "tp": {
+    "prefix": "tp",
+    "group": {"name": "tps1", "gid": 1000},
+    "extra_expiration": 5,
+    "fake_mail_domain": "genouest.org"
+  },
+  "message": {
+    "activation": [
+      "Your account has been activated, you will be able to connect within one day.",
+      "Your credentials are:",
+      "Login: #UID#",
+      "Password: #PASSWORD#",
+      "Your declared IP address is: #IP#",
+      "",
+      "Notes:",
+      "- You should change your password at your first connection, with the command 'passwd'",
+      "- You can consult the README file in your home directory for more information.",
+      "",
+      "Citations, acknowledgements  :",
+      "The services proposed by the GenOuest platform to the Biogenouest commmunity have no financial compensations: in the case where studies made within the platform environment lead to a publication, we ask you to cite or thank the GenOuest bioinformatics platform with something like:",
+      "Study/Work made with the help of the GenOuest bioinformatics platform team (https://www.genouest.org).",
+      "",
+      "*------------------------- Cluster description---------------------*",
+      "Cluster:",
+      "Cluster nodes running Linux CentOS 6",
+      "Architecture x86_64, 140 to 520 GB RAM, 16 to 80 Processors Intel Xeon",
+      "To connect:",
+      "ssh #UID#@genossh.genouest.org [SSH key access]",
+      "To setup an environment, one should execute:",
+      "source /local/env/envXXX.sh",
+      "or XXX = name of a software with a version number (when available).",
+      "Example for java: source /local/env/envjava",
+      "or source /local/env/envjava-1.6.0_05.sh",
+      "A number of data banks are available and automatically udpated in directory /db.",
+      "The list of data banks with their location and format are available at http://banks.genouest.org/BmajWatcher"
+    ],
+    "activation_html": [
+      "<h2>Your GenOuest account has been activated</h2>",
+      "<p>You will be able to connect within one day.</p>",
+      "<br/>",
+      "<h3>Credentials</h3>",
+      "<p>Login    : <b>#UID#</b></p>",
+      "<p>Password : <b>#PASSWORD#</b></p>",
+      "<br/>",
+      "<h3>Notes</h3>",
+      "<p>- You should change your password at your first connection with the command 'passwd' or via https://my.genouest.org</p>",
+      "<p>- You can consult the README file in your home directory for more information.</p>",
+      "<br/>",
+      "<h3>Citations, acknowledgements</h3>",
+      "<p>The services proposed by the GenOuest platform to the Biogenouest commmunity have no financial compensations: in the case where studies made within the platform environment lead to a publication, we ask you to cite or thank the GenOuest bioinformatics platform with something like:</p>",
+      "<p>Study/Work made with the help of the GenOuest bioinformatics platform team (https://www.genouest.org).</p>",
+      "<br/>",
+      "<h3>Cluster informations</h3>",
+      "<p>Cluster nodes running Linux CentOS 7",
+      "<p>Architecture x86_64, 140 to 520 GB RAM, 16 to 80 Processors Intel Xeon</p>",
+      "<h5>To connect:</h5>",
+      "<p>ssh #UID#@genossh.genouest.org [SSH key access]</p>",
+      "<h5>To setup an environment, one should execute:</h5>",
+      "<p>source /local/env/envXXX.sh</p>",
+      "<p>or XXX = name of a software with a version number (when available).</p>",
+      "<p>Example for java: source /local/env/envjava</p>",
+      "<p>or source /local/env/envjava-1.6.0_05.sh</p>",
+      "<h5>Databanks</h5>",
+      "<p>A number of data banks are available and automatically udpated in directory /db.</p>",
+      "<p>The list of data banks with their location and format are available at http://banks.genouest.org/BmajWatcher</p>",
+      "<hr>"
+    ],
+    "reactivation": [
+      "Your account (#UID#) has been reactivated. Your password has been reset to #PASSWORD#.",
+      "Activation should be effective in the next hour.",
+      ""
+    ],
+    "reactivation_html": [
+      "<h2>Your account (#UID#) has been reactivated.</h2>",
+      "<p>Your password has been reset to <b>#PASSWORD#</b>.</p>",
+      "<p>Activation should be effective <b>in the next hour</b>.</p>",
+      "<hr>"
+    ],
+    "password_reset_request": [
+      "A password reset has been requested for your account #UID# on the GenOuest platform.",
+      "If this is an error or an abuse, simply trash this email, your password will not be modified.",
+      "If you really want to reset you password, click on the following link, a confirmation email will be sent afterward:",
+      ""
+    ],
+    "password_reset_request_html": [
+      "<h2>Password reset request</h2>",
+      "<p>A password reset has been requested for your account <b>#UID#</b> on the GenOuest platform.</p>",
+      "<p>If this is an error or an abuse, simply trash this email, your password will not be modified.</p>",
+      "<p>If you really want to reset you password, click on the following link, a confirmation email will be sent afterward:</p>",
+      "#LINK#",
+      "<br/>",
+      "<br/>",
+      "<hr>"
+    ],
+    "password_reset": [
+      "Your password has been reset as you requested. Your new password is #PASSWORD#.",
+      "The new password will be active within an hour.",
+      ""
+    ],
+    "password_reset_html": [
+      "<h2>Password reset</h2>",
+      "<p>Your password has been reset as you requested for your account #UID#.</p>",
+      "Your new password is <b>#PASSWORD#</b>.</p>",
+      "<br/>",
+      "<p>The new password will be active <b>within an hour</b>.</p>",
+      "<br/>",
+      "<hr>"
+    ],
+    "expiration": [
+      "Your account will expire at #EXPIRE#, if you wish to extend the duration of your account, please go to the following URL:",
+      "#LINK#",
+      ""
+    ],
+    "expiration_html": [
+      "<h2>GenOuest account expiration</h2>",
+      "<p>Your account will expire at #EXPIRE#</p>",
+      "<p>If you wish to extend the duration of your account, please go to the following URL:</p>",
+      "<p>#LINK#</p>",
+      "<hr>"
+    ],
+    "emailconfirmation": [
+     "You have created an account on GenOuest platform, please confirm your subscription at the following link:",
+     "#LINK#",
+     "You will receive an email when your account has been validated."
+    ],
+    "emailconfirmationhtml": [
+     "<h2>Welcome on the GenOuest core facility</h2>",
+     "<p>You have created an account on GenOuest platform, please confirm your subscription at the following link:</p>",
+     "<p>#LINK#</p>",
+     "<p>You will receive an email when your account has been validated.</p>",
+     "<hr>"
+    ],
+    "footer": [
+      "GenOuest BioInformatics Platform - support at support@genouest.org",
+      "Campus de Beaulieu",
+      "Avenue du General Leclerc",
+      "35000 RENNES"
+    ]
+    },
+    "plugins": [
+        {"name": "test", "display_name": "for testing", "admin_only":false}
+    ],
+    "plugin_config" : {
+        "test": {
+            "parameter1" : "test1"
+        }
+    }
+}

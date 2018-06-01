@@ -1,0 +1,43 @@
+
+<div class="row">
+    <div class="alert alert-danger" ng-if="err_msg">{{err_msg}}</div>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Event logs</h3>
+        </div>
+        <div class="panel-body">
+            <div class='table-responsive'>
+                <table datatable="ng" class="table table-striped" dt-options="options" >
+                    <thead>
+                        <th>ID</th><th>Owner</th><th>Date</th><th>Action</th><th>Logs</th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="log in logs">
+                            <td ng-class="get_status(log.status)">{{log._id}}</td>
+                            <td>{{log.owner}}</td>
+                            <td>{{date_convert(log.date)}}</td>
+                            <td>{{log.action}}</td>
+                            <td>
+                                <span ng-repeat="event in log.logs">
+                                    <div ng-click="getlog(log._id, event)"><h5><span class="label label-primary" style="cursor: pointer;">{{event}}</span></h5></div>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div ng-if="logcontent" class="row">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><b>{{event}}</b> file content</h3>
+        </div>
+        <div class="panel-body">
+            <div ng-bind-html="logcontent"></div>
+        </div>
+    </div>
+</div>

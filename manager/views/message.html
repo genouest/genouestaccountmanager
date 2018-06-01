@@ -1,0 +1,26 @@
+<div ng-if="msg" class="alert alert-success">{{msg}}</div>
+<div ng-if="error_msg" class="alert alert-danger">{{error_msg}}</div>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Send message to all users</h3>
+    </div>
+    <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="subject" class="col-form-label">Subject</label>
+                        <input class="form-control" id="subject" type="text" ng-model="subject" class="form-control"></input>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="message" class="col-form-label">Message</label>
+                        <textarea class="form-control" ng-model="message" rows="20" cols="100" class="form-control"></textarea>
+                    </div>
+                </div>
+        </div>
+        <button type="button" class="btn btn-default" ng-click="send()">Send</button>
+    </div>
+</div>
