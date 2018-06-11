@@ -12,7 +12,6 @@ var mysql = require('mysql');
 var notif = require('../routes/notif.js');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const request = require('request');
 
 var connection;
 

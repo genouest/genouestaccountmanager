@@ -7,7 +7,6 @@ var escapeshellarg = require('escapeshellarg');
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const request = require('request');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
