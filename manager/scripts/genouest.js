@@ -266,24 +266,70 @@ angular.module('genouest').controller('webmngrCtrl',
             $scope.websites = data;
           });
         });
-    };
+      };
     });
 
 
 angular.module('genouest').controller('messageCtrl',
-    function ($scope, $rootScope, User, Auth) {
+    function ($scope, $rootScope, $sce, $http, User, Auth) {
       $scope.msg = '';
       $scope.error_msg = '';
       $scope.session_user = Auth.getUser();
+      $scope.mailing_lists = User.get_mailing_lists();
       $scope.message = '';
       $scope.subject = '';
+      $scope.input_choices = ["HTML", "Text", "Markdown"];
+      $scope.input_type = "HTML";
+      $scope.mailing_list = '';
       $scope.send = function() {
-        User.sendMessage({},{message: $scope.message, subject: $scope.subject}).$promise.then(function(data){
+        $scope.msg = '';
+        $scope.error_msg = '';
+        if($scope.message === '' || $scope.subject === '' || $scope.mailing_list === ''){
+            $scope.error_msg = "You need a subject, text, and mailing list";
+            return;
+        }
+        User.sendMessage({},{message: $scope.message, subject: $scope.subject, list: $scope.mailing_list, input: $scope.input_type, from: $scope.from}).$promise.then(function(data){
           $scope.msg = 'Message sent';
         }, function(error){
             $scope.error_msg = error.data;
         });
     };
+
+    $scope.decode_template = function(list_name) {
+        $scope.msg = '';
+        var lists = $scope.mailing_lists;
+        var template = '';
+        for(var key in lists){
+          //if is a list with a name
+          if (lists[key].list_name==list_name){
+            //if template_html
+            if('template_html' in lists[key].config && $scope.input_type=="HTML"){
+              template = lists[key].config.template_html
+              $scope.message = atob(template);
+            //if template_markdown
+            } else if('template_markdown' in lists[key].config && $scope.input_type=="Markdown"){
+                template = lists[key].config.template_markdown
+                $scope.message = atob(template);
+            //if template_text
+            } else if('template_text' in lists[key].config && $scope.input_type=="Text"){
+                template = lists[key].config.template_text
+                $scope.message = atob(template);
+              };
+          };
+        }
+      };
+
+    //print html
+    $scope.trustAsHtml = function(message) {
+        return $sce.trustAsHtml(message);
+      };
+
+    //print markdown
+    $scope.trustAsMarkdown = function(message) {
+        var mark = marked(message);
+        return $sce.trustAsHtml(mark);
+    };
+
     });
 
 
@@ -582,7 +628,7 @@ angular.module('genouest').controller('usermngrCtrl',
             $scope.wrong_confirm_passwd = "Passwords are not identical";
             return;
         }
-        
+
         if($scope.password1.length < 10) {
             $scope.wrong_confirm_passwd = "Password must have 10 characters minimum";
             return;

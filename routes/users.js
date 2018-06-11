@@ -3,11 +3,13 @@ var router = express.Router();
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
+var markdown = require("markdown").markdown;
+var htmlToText = require('html-to-text');
 
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-
+const request = require('request');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
@@ -22,42 +24,12 @@ for(var i=0;i<plugins.length;i++){
     plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name})
 }
 
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
-
 var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif.js');
 
-var MAIL_CONFIG = CONFIG.mail;
-var transport = null;
-
 var get_ip = require('ipware')().get_ip;
-
-
-if(MAIL_CONFIG.host !== 'fake') {
-  if(MAIL_CONFIG.user !== undefined && MAIL_CONFIG.user !== '') {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-    auth: {
-        user: MAIL_CONFIG.user,
-        pass: MAIL_CONFIG.password
-    }
-  }));
-  }
-  else {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-  }));
-
-  }
-}
-
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
@@ -73,17 +45,15 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
+var MAIL_CONFIG = CONFIG.gomail;
+
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
-        if(transport!==null) {
-          transport.sendMail(mailOptions, function(error, response){
-            if(error){
-              logger.error(error);
-            }
-            resolve(errors);
-          });
-        }
-        else {
+        if(notif.mailSet()) {
+            notif.sendUser(mailOptions, function(err, response) {
+                resolve(errors);
+            });
+        } else {
           resolve(errors);
         }
     });
@@ -104,11 +74,10 @@ router.get('/user/:id/subscribed', function(req, res){
         if(user.email == undefined || user.email == ''){
             res.send({'subscribed': false});
             res.end();
-        }
-        else {
+        } else {
             notif.subscribed(user.email, function(is_subscribed) {
-                  res.send({'subscribed': is_subscribed});
-                  res.end();
+                res.send({'subscribed': is_subscribed});
+                res.end();
             });
         }
     });
@@ -304,9 +273,15 @@ router.get('/group', function(req, res){
 });
 
 router.post('/message', function(req, res){
+
     var sess = req.session;
     if(! sess.gomngr) {
       res.status(401).send('Not authorized');
+      return;
+    }
+
+    if(! notif.mailSet()){
+      res.status(403).send("Mail provider is not set");
       return;
     }
 
@@ -319,9 +294,25 @@ router.post('/message', function(req, res){
         res.status(401).send('Not authorized');
         return;
       }
+      var message = req.param('message');
+      var html_message = req.param('message');
 
-      notif.send(req.param('subject'), req.param('message'), function() {
-        res.send(null);
+      if(req.param('input') === "Markdown"){
+        html_message = markdown.toHTML(req.param('message'));
+        message =  htmlToText.fromString(html_message);
+      } else if (req.param('input') === "Html"){
+        message =  htmlToText.fromString(html_message);
+      }
+      var mailOptions = {
+                     //origin: MAIL_CONFIG.origin,
+                     origin: req.param('from'),
+                     subject: req.param('subject'),
+                     message: message,
+                     html_message: html_message
+                   };
+      notif.sendList(req.param('list'), mailOptions, function(err, response) {
+        res.send("");
+        return;
       });
     });
 });
@@ -518,11 +509,11 @@ router.delete_user = function(user, action_owner_id){
                    var msg_activ ="User " + user.uid + "has been deleted by " + action_owner_id;
                    var msg_activ_html = msg_activ;
                    var mailOptions = {
-                     from: MAIL_CONFIG.origin, // sender address
-                     to:  GENERAL_CONFIG.accounts, // list of receivers
+                     origin: MAIL_CONFIG.origin, // sender address
+                     destinations:  [GENERAL_CONFIG.accounts], // list of receivers
                      subject: 'Genouest account deletion: ' +user.uid, // Subject line
-                     text: msg_activ, // plaintext body
-                     html: msg_activ_html // html body
+                     message: msg_activ, // plaintext body
+                     html_message: msg_activ_html // html body
                    };
                    events_db.insert(
                        {
@@ -549,8 +540,8 @@ router.delete_user = function(user, action_owner_id){
                        }));
                    })
                    .then(function(){
-                       if(transport!==null) {
-                         transport.sendMail(mailOptions, function(error, response){
+                       if(notif.mailSet()) {
+                         notif.sendUser(mailOptions, function(error, response){
                              resolve(true);
                          });
                        }
@@ -717,11 +708,11 @@ router.get('/user/:id/activate', function(req, res) {
                         var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                         var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
                         var mailOptions = {
-                          from: MAIL_CONFIG.origin, // sender address
-                          to: user.email, // list of receivers
+                          origin: MAIL_CONFIG.origin, // sender address
+                          destinations: [user.email], // list of receivers
                           subject: 'Genouest account activation', // Subject line
-                          text: msg_activ, // plaintext body
-                          html: msg_activ_html // html body
+                          message: msg_activ, // plaintext body
+                          html_message: msg_activ_html // html body
                         };
                         events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
@@ -834,15 +825,15 @@ router.get('/user/:id/confirm', function(req, res) {
                             $push: {history: account_event}
                           }, function(err) {});
           var mailOptions = {
-            from: MAIL_CONFIG.origin, // sender address
-            to: GENERAL_CONFIG.accounts, // list of receivers
+            origin: MAIL_CONFIG.origin, // sender address
+            destinations: [GENERAL_CONFIG.accounts], // list of receivers
             subject: 'Genouest account registration: '+uid, // Subject line
-            text: 'New account registration waiting for approval: '+uid, // plaintext body
-            html: 'New account registration waiting for approval: '+uid // html body
+            message: 'New account registration waiting for approval: '+uid, // plaintext body
+            html_message: 'New account registration waiting for approval: '+uid // html body
           };
           events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.param('id') , 'logs': []}, function(err){});
-          if(transport!==null) {
-            transport.sendMail(mailOptions, function(error, response){
+          if(notif.mailSet()) {
+            notif.sendUser(mailOptions, function(error, response){
               if(error){
                 logger.error(error);
               }
@@ -956,14 +947,14 @@ router.post('/user/:id', function(req, res) {
       var msg_activ = CONFIG.message.emailconfirmation.join("\n").replace('#LINK#', link).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
       var msg_activ_html = CONFIG.message.emailconfirmationhtml.join("").replace('#LINK#', '<a href="'+link+'">'+link+'</a>').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
       var mailOptions = {
-        from: MAIL_CONFIG.origin, // sender address
-        to: user.email, // list of receivers
-        subject: 'GenOuest account registration', // Subject line
-        text: msg_activ,
-        html: msg_activ_html
+        origin: MAIL_CONFIG.origin, // sender address
+        destinations: [user.email], // list of receivers
+        subject: 'Genouest account registration', // Subject line
+        message: msg_activ,
+        html_message: msg_activ_html
       };
-      if(transport!==null) {
-        transport.sendMail(mailOptions, function(error, response){
+      if(notif.mailSet()) {
+        notif.sendUser(mailOptions, function(error, response){
           if(error){
             logger.error(error);
           }
@@ -1141,16 +1132,16 @@ router.get('/user/:id/passwordreset', function(req, res){
       var msg = CONFIG.message.password_reset_request.join("\n").replace('#UID#', user.uid)+"\n"+link+"\n"+CONFIG.message.footer.join("\n");
       var html_msg = CONFIG.message.password_reset_request_html.join("").replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer.join("<br/>");
       var mailOptions = {
-        from: MAIL_CONFIG.origin, // sender address
-        to: user.email, // list of receivers
+        origin: MAIL_CONFIG.origin, // sender address
+        destinations: [user.email], // list of receivers
         subject: 'GenOuest account password reset request',
-        text: msg,
-        html: html_msg
+        message: msg,
+        html_message: html_msg
       };
       events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.param('id') + ' password reset request', 'logs': []}, function(err){});
 
-      if(transport!==null) {
-        transport.sendMail(mailOptions, function(error, response){
+      if(notif.mailSet()) {
+        notif.sendUser(mailOptions, function(error, response){
           if(error){
             logger.error(error);
           }
@@ -1195,16 +1186,16 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
               var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
               var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
               var mailOptions = {
-                from: MAIL_CONFIG.origin, // sender address
-                to: user.email, // list of receivers
+                origin: MAIL_CONFIG.origin, // sender address
+                destinations: [user.email], // list of receivers
                 subject: 'GenOuest account password reset',
-                text: msg,
-                html: msg_html
+                message: msg,
+                html_message: msg_html
               };
               events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-              if(transport!==null) {
-                transport.sendMail(mailOptions, function(error, response){
+              if(notif.mailSet()) {
+                notif.sendUser(mailOptions, function(error, response){
                   if(error){
                     logger.error(error);
                   }
@@ -1304,11 +1295,11 @@ router.get('/user/:id/renew', function(req, res){
                   var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
 
                   var mailOptions = {
-                    from: MAIL_CONFIG.origin, // sender address
-                    to: user.email, // list of receivers
+                    origin: MAIL_CONFIG.origin, // sender address
+                    destinations: [user.email], // list of receivers
                     subject: 'Genouest account reactivation', // Subject line
-                    text: msg_activ, // plaintext body
-                    html: msg_activ_html // html body
+                    message: msg_activ, // plaintext body
+                    html_message: msg_activ_html // html body
                   };
                   var plugin_call = function(plugin_info, userId, data, adminId){
                       return new Promise(function (resolve, reject){
@@ -1583,6 +1574,24 @@ router.put('/user/:id', function(req, res) {
 
   });
 
+});
+
+router.get('/lists', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+        return;
+        }
+        notif.getLists(function(listOfLists) {
+            res.send(listOfLists);
+            return;
+        });
+    });
 });
 
 module.exports = router;

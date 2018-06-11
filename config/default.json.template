@@ -11,15 +11,15 @@
     "double_authentication_for_admin": true,
     "db": "gomngr",
     "url": "http://localhost:3000",
-    "admin": [ "osallou" ],
-    "support": "olivier.sallou@irisa.fr",
-    "accounts": "accounts@genouest.org",
+    "admin": [""],
+    "support": "",
+    "accounts": "",
     "secret": "",
     "script_dir": "/tmp",
     "admin_ip": [ "127.0.0.1" ],
     "usage_directory": "/tmp",
     "home": "/home",
-    "main_groups": [ "", "genouest", "symbiose", "irisa"],
+    "main_groups": [""],
     "quota": {
         "home": {
             "protocol": "http:",
@@ -46,18 +46,10 @@
    "use": true,
    "dir": "/genouestaccountmanager-bills"
  },
- "mongo": {
+  "mongo": {
     "host": "localhost",
     "port": 27017
  },
- "mail": {
-    "host": "mailtrap.io",
-    "port": 25,
-    "secure": false,
-    "user": "",
-    "password": "",
-    "origin": ""
-  },
   "ldap": {
     "host": "localhost",
     "dn": "dc=nodomain",
@@ -70,10 +62,13 @@
     "user": "root",
     "password": "XXX"
   },
-  "mailchimp": {
-    "apikey": "",
-    "list": "",
-    "template": ""
+  "gomail": {
+    "host": "",
+    "api_root": "",
+    "api_secret": "",
+    "main_list": "",
+    "origin": "",
+    "tag": ""
   },
   "tp": {
     "prefix": "tp",

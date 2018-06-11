@@ -15,33 +15,7 @@ var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users');
 
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
-var MAIL_CONFIG = CONFIG.mail;
-var transport = null;
-
-
-if(MAIL_CONFIG.host !== 'fake') {
-  if(MAIL_CONFIG.user !== undefined && MAIL_CONFIG.user !== '') {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-    auth: {
-        user: MAIL_CONFIG.user,
-        pass: MAIL_CONFIG.password
-    }
-  }));
-  }
-  else {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-  }));
-
-  }
-}
+var MAIL_CONFIG = CONFIG.gomail;
 
 function timeConverter(tsp){
   var a = new Date(tsp);
@@ -59,6 +33,10 @@ function timeConverter(tsp){
 // Find users expiring in less then 2 month
 users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}, function(err, users){
   var mail_sent = 0;
+  if (! notif.mailSet()){
+    console.log("Error: mail is not set");
+    process.exit(code=1);
+  }
   for(var i=0;i<users.length;i++){
     (function(index){
     var user = users[index];
@@ -68,13 +46,13 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
     var msg_activ = CONFIG.message.expiration.join("\n").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"\n"+CONFIG.message.footer.join("\n");
     var msg_activ_html = CONFIG.message.expiration_html.join("").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"<br/>"+CONFIG.message.footer.join("<br/>");
     var mailOptions = {
-      from: MAIL_CONFIG.origin, // sender address
-      to: user.email, // list of receivers
+      origin: MAIL_CONFIG.origin, // sender address
+      destinations: [user.email], // list of receivers
       subject: 'Genouest account expiration', // Subject line
-      text: msg_activ, // plaintext body
-      html: msg_activ_html // html body
+      message: msg_activ, // plaintext body
+      html_message: msg_activ_html // html body
     };
-    transport.sendMail(mailOptions, function(error, response){
+    notif.sendUser(mailOptions, function(error, response){
         if(error){
           console.log(error);
         }

@@ -7,7 +7,7 @@ var escapeshellarg = require('escapeshellarg');
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-
+const request = require('request');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
@@ -22,9 +22,6 @@ for(var i=0;i<plugins.length;i++){
     plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name})
 }
 
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
-
 var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
@@ -32,35 +29,11 @@ var notif = require('../routes/notif.js');
 var fdbs = require('../routes/database.js');
 var fwebs = require('../routes/web.js');
 var fusers = require('../routes/users.js');
+var notif = require('../routes/notif.js');
 
-var MAIL_CONFIG = CONFIG.mail;
-var transport = null;
+var MAIL_CONFIG = CONFIG.gomail;
 
 var get_ip = require('ipware')().get_ip;
-
-
-if(MAIL_CONFIG.host !== 'fake') {
-  if(MAIL_CONFIG.user !== undefined && MAIL_CONFIG.user !== '') {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-    auth: {
-        user: MAIL_CONFIG.user,
-        pass: MAIL_CONFIG.password
-    }
-  }));
-  }
-  else {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-  }));
-
-  }
-}
-
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
@@ -73,22 +46,6 @@ var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
-
-var send_notif = function(mailOptions, data) {
-    return new Promise(function (resolve, reject){
-        if(transport!==null) {
-          transport.sendMail(mailOptions, function(error, response){
-            if(error){
-              logger.error(error);
-            }
-            resolve(data);
-          });
-        }
-        else {
-          resolve(data);
-        }
-    });
-};
 
 var create_tp_users_db = function(owner, quantity, duration, end_date){
     // Duration in days
@@ -187,18 +144,19 @@ var send_user_passwords = function(owner, from_date, to_date, users){
         msg_html += "<p>In case of issue, you can contact us at " + CONFIG.general.support + "</p>";
 
         users_db.findOne({'uid': owner}).then(function(user_owner){
-            var mailOptions = {
-              from: CONFIG.mail.origin, // sender address
-              to: [user_owner.email, CONFIG.general.accounts], // list of receivers
-              subject: '[TP accounts reservation]' + owner,
-              text: msg,
-              html: msg_html
+            if( notif.mailSet()){
+                var mailOptions = {
+                    origin: CONFIG.gomail.origin, // sender address
+                    destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
+                    subject: '[TP accounts reservation ]' + owner,
+                    message: msg,
+                    html_message: msg_html
+                };
+                notif.sendUser(mailOptions, function(err, response) {
+                    resolve(users);
+                });
             };
-            send_notif(mailOptions, users).then(function(users){
-                resolve(users);
-            });
         });
-
     });
 };
 

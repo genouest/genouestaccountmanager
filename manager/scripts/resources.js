@@ -313,6 +313,12 @@
               method: 'POST',
               isArray: false,
               cache: false
+          },
+          get_mailing_lists: {
+              url: prefix+'/lists',
+              method: 'GET',
+              isArray: true,
+              cache: false
           }
           });
       }
