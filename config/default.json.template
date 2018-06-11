@@ -46,18 +46,10 @@
    "use": true,
    "dir": "/genouestaccountmanager-bills"
  },
- "mongo": {
+  "mongo": {
     "host": "localhost",
     "port": 27017
  },
- "mail": {
-    "host": "mailtrap.io",
-    "port": 25,
-    "secure": false,
-    "user": "",
-    "password": "",
-    "origin": ""
-  },
   "ldap": {
     "host": "localhost",
     "dn": "dc=nodomain",
@@ -70,10 +62,12 @@
     "user": "root",
     "password": "XXX"
   },
-  "mailchimp": {
-    "apikey": "",
-    "list": "",
-    "template": ""
+  "gomail": {
+    "host": "",
+    "api_root": "",
+    "api_secret": "",
+    "main_list": "",
+    "origin": ""
   },
   "tp": {
     "prefix": "tp",

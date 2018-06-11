@@ -9,8 +9,10 @@ var monk = require('monk'),
     events_db = db.get('events');
 
 var mysql = require('mysql');
+var notif = require('../routes/notif.js');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const request = require('request');
 
 var connection;
 
@@ -41,36 +43,6 @@ function handleDisconnect() {
 }
 
 handleDisconnect();
-
-
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
-
-var MAIL_CONFIG = CONFIG.mail;
-var transport = null;
-
-
-if(MAIL_CONFIG.host !== 'fake') {
-  if(MAIL_CONFIG.user !== undefined && MAIL_CONFIG.user !== '') {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-    auth: {
-        user: MAIL_CONFIG.user,
-        pass: MAIL_CONFIG.password
-    }
-  }));
-  }
-  else {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-  }));
-
-  }
-}
 
 /**
 * Change owner
@@ -155,12 +127,12 @@ router.post('/database/:id', function(req, res) {
   }
   users_db.findOne({_id: sess.gomngr}, function(err, session_user){
 
-      if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
-      }
-      else {
+    }
+    else {
         session_user.is_admin = false;
-      }
+    }
 
     if (req.param('owner')!=undefined && req.param('owner') != session_user.uid && ! session_user.is_admin){
         res.status(401).send('Not authorized, cant declare a database for a different user');
@@ -244,16 +216,16 @@ router.post('/database/:id', function(req, res) {
                       msg += " User: " + req.param('id')+"\n";
                       msg += " Password: " + password+"\n";
                       var mailOptions = {
-                        from: CONFIG.mail.origin, // sender address
-                        to: session_user.email+","+CONFIG.general.accounts, // list of receivers
+                        origin: CONFIG.gomail.origin, // sender address
+                        destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
                         subject: 'Database creation', // Subject line
-                        text: msg, // plaintext body
-                        html: msg // html body
+                        message: msg, // plaintext body
+                        html_message: msg // html body
                       };
                       events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' created by ' +  session_user.uid, 'logs': []}, function(err){});
 
-                      if(transport!==null) {
-                        transport.sendMail(mailOptions, function(error, response){
+                      if(notif.mailSet()) {
+                        notif.sendUser(mailOptions, function(error, response){
                           if(error){
                             logger.error(error);
                           }
