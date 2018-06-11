@@ -46,7 +46,7 @@
    "use": true,
    "dir": "/genouestaccountmanager-bills"
  },
-  "mongo": {
+ "mongo": {
     "host": "localhost",
     "port": 27017
  },
