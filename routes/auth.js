@@ -6,7 +6,6 @@ var goldap = require('../routes/goldap.js');
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const request = require('request');
 
 const u2f = require('u2f');
 

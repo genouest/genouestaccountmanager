@@ -11,7 +11,8 @@ const request = require('request');
 
 
 var mail_set = false;
-if(CONFIG.gomail.api_secret && CONFIG.gomail.host && CONFIG.gomail.host !== 'fake' && CONFIG.gomail.api_root && CONFIG.gomail.origin && CONFIG.gomail.main_list){
+
+if(CONFIG.gomail.api_secret && CONFIG.gomail.host && CONFIG.gomail.host !== 'fake' && CONFIG.gomail.api_root && CONFIG.gomail.main_list && CONFIG.gomail.origin){
     mail_set = true;
     var baseRequest = request.defaults({
         baseUrl: CONFIG.gomail.host + CONFIG.gomail.api_root,
@@ -126,8 +127,8 @@ module.exports = {
                 callback();
                 return;
             }
-                events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
-                callback();
+            events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
+            callback();
         });
 
     },
@@ -215,7 +216,6 @@ module.exports = {
             uri: "/mail/" + mailing_list,
             body: mailOptions
         }
-
         baseRequest.post(options, function(err, res, body) {
             if(err){
                 logger.error("Failed to send mail : " + err);
