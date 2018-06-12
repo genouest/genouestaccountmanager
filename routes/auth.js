@@ -4,11 +4,8 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var goldap = require('../routes/goldap.js');
 var Promise = require('promise');
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-
 
 const u2f = require('u2f');
 
@@ -22,6 +19,7 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
+var notif = require('../routes/notif.js');
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
     users_db = db.get('users');
@@ -35,50 +33,7 @@ var ldap_manager = {
   }
 }
 
-var MAIL_CONFIG = CONFIG.mail;
-var transport = null;
-
-
-if(MAIL_CONFIG.host !== 'fake') {
-  if(MAIL_CONFIG.user !== undefined && MAIL_CONFIG.user !== '') {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-    auth: {
-        user: MAIL_CONFIG.user,
-        pass: MAIL_CONFIG.password
-    }
-  }));
-  }
-  else {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-  }));
-
-  }
-}
-
-
 var attemps = {};
-
-var send_notif = function(mailOptions) {
-    return new Promise(function (resolve, reject){
-        if(transport!==null) {
-          transport.sendMail(mailOptions, function(error, response){
-            if(error){
-              logger.error(error);
-            }
-            resolve({'status': true});
-          });
-        }
-        else {
-          resolve({'status': false});
-        }
-    });
-};
 
 router.get('/logout', function(req, res) {
   req.session.destroy();
@@ -91,7 +46,11 @@ router.get('/mail/auth/:id', function(req, res) {
     if(!req.session.is_logged){
         return res.status(401).send('You need to login first');
     }
-    var password = Math.random().toString(36).substring(7);
+
+    if(! notif.mailSet()){
+        return res.status(403).send('No mail provider set : cannot send mail');
+    }
+    var password = Math.random().toString(36).slice(-10);
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err) {
             return res.status(404).send('User not found');
@@ -99,15 +58,16 @@ router.get('/mail/auth/:id', function(req, res) {
         var msg_token = "You requested a temporary token to login to application. This token will be valid for 10 minutes only.\n";
         msg_token = "Token: -- " + password + " -- \n";
         var mailOptions = {
-          from: MAIL_CONFIG.origin, // sender address
-          to: user.email, // list of receivers
+          origin: MAIL_CONFIG.origin, // sender address
+          destinations: [user.email], // list of receivers
           subject: 'Authentication mail token request', // Subject line
-          text: msg_token, // plaintext body
+          message: msg_token, // plaintext body
         };
         var expire = new Date().getTime() + 60*10*1000;
         req.session.mail_token = {'token': password, 'expire': expire, 'user': user._id};
-        send_notif(mailOptions).then(function(status){
-            return res.send(status);
+        notif.sendUser(mailOptions, function(err, response) {
+            if(err){return res.send({'status': false});};
+            return res.send({'status': true});
         });
     });
 

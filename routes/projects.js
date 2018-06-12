@@ -7,42 +7,12 @@ var escapeshellarg = require('escapeshellarg');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
-
 var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif.js');
 
-var MAIL_CONFIG = CONFIG.mail;
-var transport = null;
-
 var get_ip = require('ipware')().get_ip;
-
-
-if(MAIL_CONFIG.host !== 'fake') {
-  if(MAIL_CONFIG.user !== undefined && MAIL_CONFIG.user !== '') {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-    auth: {
-        user: MAIL_CONFIG.user,
-        pass: MAIL_CONFIG.password
-    }
-  }));
-  }
-  else {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-  }));
-
-  }
-}
-
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
