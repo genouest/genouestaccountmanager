@@ -137,7 +137,7 @@
               isArray: false,
               cache: true
             }
-          });
+        });
       }
 
       function Database($resource) {
