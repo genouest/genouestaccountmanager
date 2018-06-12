@@ -255,11 +255,11 @@
                 <div class="form-group row">
                     <div class="col-sm-4">
                         <label for="password" class="col-form-label">New password</label>
-                        <input placeholder="10 characters min" id="password" type="password" ng-model="password1" class="form-control"/>
+                        <input id="password" type="password" ng-model="password1" class="form-control"/>
                     </div>
                     <div class="col-sm-4">
                         <label for="confirm_password" class="col-form-label">Confirm password</label>
-                        <input placeholder="10 characters min" id="confirm_password" type="password" ng-model="password2" class="form-control"/>
+                        <input id="confirm_password" type="password" ng-model="password2" class="form-control"/>
                     </div>
                 </div>
                 <button type="button" class="btn btn-default" ng-click="update_password()">Change password</button>
@@ -309,6 +309,76 @@
                 </div>
             </div>
         </div>
+
+        <div class="panel panel-primary" ng-if="session_user.is_admin">
+            <div class="panel-heading">
+                <h3 class="panel-title">Projects</h3>
+            </div>
+            <div class="panel-body">
+                <div ng-if="add_to_project_msg" class="alert alert-success alert-dismissible" role="alert">
+                    {{add_to_project_msg}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div ng-if="add_to_project_grp_msg" class="alert alert-success alert-dismissible" role="alert">
+                    {{add_to_project_grp_msg}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div ng-if="add_to_project_error_msg" class="alert alert-warning alert-dismissible" role="alert">
+                    {{add_to_project_error_msg}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div ng-if="remove_from_project_msg" class="alert alert-success alert-dismissible" role="alert">
+                    {{remove_from_project_msg}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div ng-if="remove_from_project_error_msg" class="alert alert-warning alert-dismissible" role="alert">
+                    {{remove_from_project_error_msg}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-6">
+                        <label for="newproject" class="col-form-label">Projects</label>
+                        <select id="newproject" ng-model="user.newproject" ng-options="project as project.id for project in projects" class="form-control"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-default" ng-click="add_to_project()">Add to project</button>
+                </div>
+                <hr/>
+                <div class="table-responsive">
+                    <table ng-if="user_projects.length > 0" class="table table-striped">
+                        <thead>
+                            <th>Name</th>
+                            <th>Group</th>
+                            <th>Owner?</th>
+                            <th>User in group?</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="project in user_projects">
+                                <td>{{project.id}}</td>
+                                <td>{{project.group}}</td>
+                                <td><span ng-if="project.owner">&#x2714</span></td>
+                                <td><span ng-if="project.member">&#x2714</span></td>
+                                <td><div confirm-delete on-confirm="remove_from_project(project.id)"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
 
         <div class="panel panel-primary">
             <div class="panel-heading">

@@ -89,18 +89,42 @@
               isArray: false,
               cache: false
           },
+            get_users: {
+              url: prefix+'/project/:name',
+              method: 'GET',
+              isArray: true,
+              cache: false
+          },
+            get_projects_in_group: {
+              url: prefix+'/group/:name/projects',
+              method: 'GET',
+              isArray: true,
+              cache: false
+          },
             update: {
               url: prefix+'/project/:name',
               method: 'POST',
               isArray: false,
               cache: false
           },
-          delete: {
-            url: prefix+'/project/:name',
-            method: 'DELETE',
-            isArray: false,
-            cache: false
-          }
+            request: {
+              url: prefix+'/project/:name/request',
+              method: 'POST',
+              isArray: false,
+              cache: false
+          },
+            remove_request: {
+              url: prefix+'/project/:name/request',
+              method: 'PUT',
+              isArray: false,
+              cache: false
+          },
+            delete: {
+              url: prefix+'/project/:name',
+              method: 'DELETE',
+              isArray: false,
+              cache: false
+            }
           });
       }
 
@@ -307,13 +331,25 @@
               method: 'DELETE',
               isArray: false,
               cache: false
-          },
-          update_quota: {
+            },
+            update_quota: {
               url: prefix+'/user/:name/quota',
               method: 'POST',
               isArray: false,
               cache: false
-          }
+            },
+            add_to_project: {
+              url: prefix+'/user/:name/project/:project',
+              method: 'POST',
+              isArray: false,
+              cache: false
+            },
+            remove_from_project: {
+              url: prefix+'/user/:name/project/:project',
+              method: 'DELETE',
+              isArray: false,
+              cache: false
+            }
           });
       }
 

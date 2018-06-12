@@ -71,7 +71,7 @@ function timeConverter(tsp){
 }
 
 // Find users expiring
-users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}, function(err, users){
+users_db.find({is_fake: {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}, function(err, users){
   var mail_sent = 0;
   for(var i=0;i<users.length;i++){
     (function(index) {
@@ -91,7 +91,7 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
           console.log(error);
         }
         var fid = new Date().getTime();
-        var new_password = Math.random().toString(36).slice(-10);
+        var new_password = Math.random().toString(36).substring(7);
         user.password = new_password;
         goldap.reset_password(user, fid, function(err) {
             if(err) { console.log(user.uid + ': failed to reset password') }

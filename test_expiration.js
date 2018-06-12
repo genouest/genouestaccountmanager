@@ -65,8 +65,8 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
     console.log('User will expire: '+user.uid);
     var link = CONFIG.general.url +
                 encodeURI('/manager/index.html#/user/'+user.uid+'/renew/'+user.regkey);
-    var msg_activ = CONFIG.message.expiration.join("\n").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"\n"+CONFIG.message.footer.join("\n");
-    var msg_activ_html = CONFIG.message.expiration_html.join("").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"<br/>"+CONFIG.message.footer.join("<br/>");
+    var msg_activ = CONFIG.message.expiration.join("\n").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration)).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
+    var msg_activ_html = CONFIG.message.expiration.join("<br/>").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration)).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
     var mailOptions = {
       from: MAIL_CONFIG.origin, // sender address
       to: user.email, // list of receivers

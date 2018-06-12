@@ -65,6 +65,7 @@ var monk = require('monk'),
     databases_db = db.get('databases'),
     web_db = db.get('web'),
     users_db = db.get('users'),
+    projects_db = db.get('projects'),
     events_db = db.get('events');
 
 
@@ -652,7 +653,7 @@ router.get('/user/:id/activate', function(req, res) {
           res.end();
           return;
         }
-        user.password = Math.random().toString(36).slice(-10);
+        user.password = Math.random().toString(36).substring(7);
         var minuid = 1000;
         var mingid = 1000;
         users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
@@ -714,8 +715,8 @@ router.get('/user/:id/activate', function(req, res) {
                     fs.writeFile(script_file, script, function(err) {
                       fs.chmodSync(script_file,0755);
                       notif.add(user.email, function(){
-                        var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
-                        var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
+                        var msg_activ = CONFIG.message.activation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
+                        var msg_activ_html = CONFIG.message.activation.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
                         var mailOptions = {
                           from: MAIL_CONFIG.origin, // sender address
                           to: user.email, // list of receivers
@@ -958,7 +959,7 @@ router.post('/user/:id', function(req, res) {
       var mailOptions = {
         from: MAIL_CONFIG.origin, // sender address
         to: user.email, // list of receivers
-        subject: 'GenOuest account registration', // Subject line
+        subject: 'Genouest account registration', // Subject line
         text: msg_activ,
         html: msg_activ_html
       };
@@ -1000,7 +1001,7 @@ router.get('/user/:id/expire', function(req, res){
         session_user.is_admin = false;
       }
       if(session_user.is_admin){
-        var new_password = Math.random().toString(36).slice(-10);
+        var new_password = Math.random().toString(36).substring(7);
         user.password = new_password;
         var fid = new Date().getTime();
         goldap.reset_password(user, fid, function(err) {
@@ -1138,8 +1139,8 @@ router.get('/user/:id/passwordreset', function(req, res){
       var link = CONFIG.general.url +
                 encodeURI('/user/'+req.param('id')+'/passwordreset/'+key);
       var html_link = "<a href=\""+link+"\">"+link+"</a>";
-      var msg = CONFIG.message.password_reset_request.join("\n").replace('#UID#', user.uid)+"\n"+link+"\n"+CONFIG.message.footer.join("\n");
-      var html_msg = CONFIG.message.password_reset_request_html.join("").replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer.join("<br/>");
+      var msg = CONFIG.message.password_reset_request.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+link+"\n"+CONFIG.message.footer.join("\n");
+      var html_msg = CONFIG.message.password_reset_request.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+html_link+"<br/>"+CONFIG.message.footer.join("<br/>");
       var mailOptions = {
         from: MAIL_CONFIG.origin, // sender address
         to: user.email, // list of receivers
@@ -1174,7 +1175,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
     }
     if(req.param('key') == user.regkey) {
       // reset the password
-      var new_password = Math.random().toString(36).slice(-10);
+      var new_password = Math.random().toString(36).substring(7);
       user.password = new_password;
       var fid = new Date().getTime();
       goldap.reset_password(user, fid, function(err) {
@@ -1192,8 +1193,8 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
             fs.writeFile(script_file, script, function(err) {
               fs.chmodSync(script_file,0755);
               // Now send email
-              var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
-              var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
+              var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
+              var msg_html = CONFIG.message.password_reset.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
               var mailOptions = {
                 from: MAIL_CONFIG.origin, // sender address
                 to: user.email, // list of receivers
@@ -1201,14 +1202,14 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                 text: msg,
                 html: msg_html
               };
-              events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+              events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
               if(transport!==null) {
                 transport.sendMail(mailOptions, function(error, response){
                   if(error){
                     logger.error(error);
                   }
-                  res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/passwordresetconfirm');
+                  res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/login');
                   res.end();
                 });
               }
@@ -1278,7 +1279,7 @@ router.get('/user/:id/renew', function(req, res){
         session_user.is_admin = false;
       }
       if(session_user.is_admin){
-        var new_password = Math.random().toString(36).slice(-10);
+        var new_password = Math.random().toString(36).substring(7);
         user.password = new_password;
         var fid = new Date().getTime();
         goldap.reset_password(user, fid, function(err) {
@@ -1301,7 +1302,7 @@ router.get('/user/:id/renew', function(req, res){
                 fs.chmodSync(script_file,0755);
                 notif.add(user.email, function(){
                   var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
-                  var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
+                  var msg_activ_html = CONFIG.message.reactivation.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
 
                   var mailOptions = {
                     from: MAIL_CONFIG.origin, // sender address
@@ -1583,6 +1584,128 @@ router.put('/user/:id', function(req, res) {
 
   });
 
+});
+
+//TODO : Verify session user is admin or in project
+
+router.get('/project/:id', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, user){
+        if(err || user == null){
+            res.status(404).send('User not found');
+            return;
+        }
+        users_db.find({'projects': req.param('id')}, function(err, users_in_project){
+            res.send(users_in_project);
+            res.end();
+        });
+    });
+});
+
+router.post('/user/:id/project/:project', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            res.end();
+            return;
+        }
+        newproject = req.param('project');
+        uid = req.param('id');
+        var fid = new Date().getTime();
+        users_db.findOne({uid: uid}, function(err, user){
+            if(!user || err) {
+                res.status(404).send('User does not exists')
+                res.end();
+                return;
+            }
+            if (!user.projects){
+                user.projects = [];
+            }
+            for(var g=0; g < user.projects.length; g++){
+                if(newproject == user.projects[g]) {
+                    res.send({message:'User is already in project : nothing was done.'});
+                    res.end();
+                    return;
+                }
+            }
+            user.projects.push(newproject);
+            users_db.update({_id: user._id}, {'$set': { projects: user.projects}}, function(err){
+                if(err){
+                    res.status(403).send('Could not update user');
+                    res.end();
+                    return;
+                }
+                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to project ' + newproject , 'logs': []}, function(err){});
+                res.send({message: 'User added to project', fid: fid});
+                res.end();
+                return;
+            });
+        });
+    });
+});
+
+router.delete('/user/:id/project/:project', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            res.end();
+            return;
+        }
+        oldproject = req.param('project');
+        uid = req.param('id');
+        var fid = new Date().getTime();
+        users_db.findOne({uid: uid}, function(err, user){
+            if(! user) {
+                res.status(404).send('User ' + uid + ' not found');
+                res.end();
+                return;
+            }
+            projects_db.findOne({id:oldproject}, function(err, project){
+                if(err){
+                    console.log(err);
+                    res.status(500).send("Error");
+                    res.end();
+                    return;
+                }
+                if( project && uid === project.owner && ! req.param('force')){
+                    res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
+                    res.end();
+                    return;
+                }
+                tempprojects = [];
+                for(var g=0; g < user.projects.length; g++){
+                    if(oldproject != user.projects[g]) {
+                        tempprojects.push(user.projects[g]);
+                    }
+                }
+                users_db.update({_id: user._id}, {'$set': { projects: tempprojects}}, function(err){
+                    if(err){
+                        res.status(403).send('Could not update user');
+                        res.end();
+                        return;
+                    }
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from project ' + oldproject , 'logs': []}, function(err){});
+                    res.send({message: 'User removed from project', fid: fid});
+                    res.end();
+                    return;
+                });
+            });
+        });
+    });
 });
 
 module.exports = router;

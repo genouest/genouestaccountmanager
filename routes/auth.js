@@ -91,7 +91,7 @@ router.get('/mail/auth/:id', function(req, res) {
     if(!req.session.is_logged){
         return res.status(401).send('You need to login first');
     }
-    var password = Math.random().toString(36).slice(-10);
+    var password = Math.random().toString(36).substring(7);
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err) {
             return res.status(404).send('User not found');

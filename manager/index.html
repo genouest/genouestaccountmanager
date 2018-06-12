@@ -18,7 +18,7 @@
     <!-- build:css styles/vendor.css -->
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="bower_components/angular-datatables/dist/datatables.bootstrap.css"/>
+    <link rel="stylesheet" href="bower_components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css"/>
     <link rel="stylesheet" href="bower_components/fullcalendar/dist/fullcalendar.css"/>
     <!--<link rel="stylesheet" href="bower_components/allmighty-autocomplete/style/autocomplete.css">-->
 
@@ -73,12 +73,17 @@
                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/user">Users</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/group">Groups</a></li>
-                              <li role="presentation"><a role="menuitem" tabindex="-1" href="#/project">Projects</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/message">Send message</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/database">Databases</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/web">Web sites</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/logs">Logs</a></li>
                           </ul>
+                        </li>
+                        <li ng-if="is_logged">
+                            <a href="#/project">
+                                <i class="glyphicon glyphicon-user"></i>
+                                Projects
+                            </a>
                         </li>
                         <li ng-if="is_logged">
                             <a href="" ng-click="logout()">
