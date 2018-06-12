@@ -631,7 +631,7 @@ router.get('/user/:id/activate', function(req, res) {
           res.end();
           return;
         }
-        user.password = Math.random().toString(36).substring(7);
+        user.password = Math.random().toString(36).slice(-10);
         var minuid = 1000;
         var mingid = 1000;
         users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
@@ -693,8 +693,8 @@ router.get('/user/:id/activate', function(req, res) {
                     fs.writeFile(script_file, script, function(err) {
                       fs.chmodSync(script_file,0755);
                       notif.add(user.email, function(){
-                        var msg_activ = CONFIG.message.activation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
-                        var msg_activ_html = CONFIG.message.activation.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
+                        var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
+                        var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
                         var mailOptions = {
                           origin: MAIL_CONFIG.origin, // sender address
                           destinations: [user.email], // list of receivers
@@ -979,7 +979,7 @@ router.get('/user/:id/expire', function(req, res){
         session_user.is_admin = false;
       }
       if(session_user.is_admin){
-        var new_password = Math.random().toString(36).substring(7);
+        var new_password = Math.random().toString(36).slice(-10);
         user.password = new_password;
         var fid = new Date().getTime();
         goldap.reset_password(user, fid, function(err) {
@@ -1117,8 +1117,8 @@ router.get('/user/:id/passwordreset', function(req, res){
       var link = CONFIG.general.url +
                 encodeURI('/user/'+req.param('id')+'/passwordreset/'+key);
       var html_link = "<a href=\""+link+"\">"+link+"</a>";
-      var msg = CONFIG.message.password_reset_request.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+link+"\n"+CONFIG.message.footer.join("\n");
-      var html_msg = CONFIG.message.password_reset_request.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+html_link+"<br/>"+CONFIG.message.footer.join("<br/>");
+      var msg = CONFIG.message.password_reset_request.join("\n").replace('#UID#', user.uid)+"\n"+link+"\n"+CONFIG.message.footer.join("\n");
+      var html_msg = CONFIG.message.password_reset_request_html.join("").replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer.join("<br/>");
       var mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
@@ -1153,7 +1153,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
     }
     if(req.param('key') == user.regkey) {
       // reset the password
-      var new_password = Math.random().toString(36).substring(7);
+      var new_password = Math.random().toString(36).slice(-10);
       user.password = new_password;
       var fid = new Date().getTime();
       goldap.reset_password(user, fid, function(err) {
@@ -1171,8 +1171,8 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
             fs.writeFile(script_file, script, function(err) {
               fs.chmodSync(script_file,0755);
               // Now send email
-              var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
-              var msg_html = CONFIG.message.password_reset.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
+              var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
+              var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
               var mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address
                 destinations: [user.email], // list of receivers
@@ -1180,14 +1180,14 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                 message: msg,
                 html_message: msg_html
               };
-              events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+              events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
               if(notif.mailSet()) {
                 notif.sendUser(mailOptions, function(error, response){
                   if(error){
                     logger.error(error);
                   }
-                  res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/login');
+                  res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/passwordresetconfirm');
                   res.end();
                 });
               }
@@ -1257,7 +1257,7 @@ router.get('/user/:id/renew', function(req, res){
         session_user.is_admin = false;
       }
       if(session_user.is_admin){
-        var new_password = Math.random().toString(36).substring(7);
+        var new_password = Math.random().toString(36).slice(-10);
         user.password = new_password;
         var fid = new Date().getTime();
         goldap.reset_password(user, fid, function(err) {
@@ -1280,7 +1280,7 @@ router.get('/user/:id/renew', function(req, res){
                 fs.chmodSync(script_file,0755);
                 notif.add(user.email, function(){
                   var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
-                  var msg_activ_html = CONFIG.message.reactivation.join("<br/>").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
+                  var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
 
                   var mailOptions = {
                     origin: MAIL_CONFIG.origin, // sender address

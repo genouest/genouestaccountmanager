@@ -213,7 +213,7 @@ module.exports = {
 
   add: function(user, fid, callback) {
 
-    var password = Math.random().toString(36).substring(7);
+    var password = Math.random().toString(36).slice(-10);
     var user_ldif = "";
     var group_ldif = "";
     user_ldif += "dn: uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\n";
