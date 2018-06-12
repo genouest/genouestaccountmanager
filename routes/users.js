@@ -293,7 +293,6 @@ router.post('/message', function(req, res){
         res.status(401).send('Not authorized');
         return;
       }
-<<<<<<< HEAD
       var message = req.param('message');
       var html_message = req.param('message');
 
@@ -313,18 +312,6 @@ router.post('/message', function(req, res){
       notif.sendList(req.param('list'), mailOptions, function(err, response) {
         res.send("");
         return;
-=======
-
-      var mailOptions = {
-                     origin: MAIL_CONFIG.origin,
-                     subject: req.param('subject'),
-                     message: req.param('message'),
-                     html_message: req.param('message')
-                   };
-
-      notif.sendList(mailOptions, function(err, response) {
-        res.send(null);
->>>>>>> upstream/master
       });
     });
 });
