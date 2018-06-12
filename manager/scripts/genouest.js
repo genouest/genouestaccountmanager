@@ -39,6 +39,10 @@ angular.module('genouest', ['genouest.resources', 'ngSanitize', 'ngCookies', 'ng
             templateUrl: 'views/pending.html',
             controller: 'pendingCtrl'
         });
+        $routeProvider.when('/passwordresetconfirm', {
+            templateUrl: 'views/passwordresetconfirm.html',
+            controller: 'passwordresetconfirmCtrl'
+        });
         $routeProvider.when('/message', {
             templateUrl: 'views/message.html',
             controller: 'messageCtrl'
@@ -142,12 +146,12 @@ angular.module('genouest').controller('logsCtrl',
           return time;
         }
 
-      $scope.options = DTOptionsBuilder.newOptions().withOption('order', [[0, 'desc']]);
       $scope.get_status = function(status){
           if(status!=0 && status!=undefined) {
               return "alert alert-warning";
           }
       }
+      $scope.options = DTOptionsBuilder.newOptions().withOption('order', [[0, 'desc']]);
       $scope.logs = GOActionLog.list();
       //console.log(GOLog.get());
       $scope.getlog = function(log_id, event_file) {
@@ -762,9 +766,14 @@ angular.module('genouest').controller('usermngrCtrl',
             $scope.wrong_confirm_passwd = "Passwords are not identical";
             return;
         }
+        if($scope.password1.length < 10) {
+            $scope.wrong_confirm_passwd = "Password must have 10 characters minimum";
+            return;
+        }
         User.update_password({name: $routeParams.id},{password: $scope.password1}).$promise.then(function(data){
             $scope.update_passwd = data.message;
         });
+
         $scope.update_passwd = '';
         $scope.wrong_confirm_passwd = '';
 
@@ -1278,6 +1287,10 @@ angular.module('genouest').controller('mainCtrl',
 });
 
 angular.module('genouest').controller('pendingCtrl',
+    function ($rootScope, $scope, $location, Auth) {
+});
+
+angular.module('genouest').controller('passwordresetconfirmCtrl',
     function ($rootScope, $scope, $location, Auth) {
 });
 
