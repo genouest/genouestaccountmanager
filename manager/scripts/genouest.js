@@ -299,7 +299,7 @@ angular.module('genouest').controller('messageCtrl',
     };
 
     $scope.decode_template = function(list_name) {
-        $scope.msg = '';
+        $scope.message = '';
         var lists = $scope.mailing_lists;
         var template = '';
         for(var key in lists){
