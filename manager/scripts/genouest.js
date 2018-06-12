@@ -272,6 +272,9 @@ angular.module('genouest').controller('webmngrCtrl',
 
 angular.module('genouest').controller('messageCtrl',
     function ($scope, $rootScope, $sce, $http, User, Auth) {
+      User.get_mail_config().$promise.then(function(data){
+        $scope.origin = data.origin;
+      });
       $scope.msg = '';
       $scope.error_msg = '';
       $scope.session_user = Auth.getUser();
@@ -288,7 +291,7 @@ angular.module('genouest').controller('messageCtrl',
             $scope.error_msg = "You need a subject, text, and mailing list";
             return;
         }
-        User.sendMessage({},{message: $scope.message, subject: $scope.subject, list: $scope.mailing_list, input: $scope.input_type, from: $scope.from}).$promise.then(function(data){
+        User.sendMessage({},{message: $scope.message, subject: $scope.subject, list: $scope.mailing_list, input: $scope.input_type, from: $scope.origin}).$promise.then(function(data){
           $scope.msg = 'Message sent';
         }, function(error){
             $scope.error_msg = error.data;

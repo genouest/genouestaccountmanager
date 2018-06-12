@@ -65,9 +65,14 @@ module.exports = {
                 callback([]);
                 return;
             }
+//Return all lists if no tag set
             var listOfLists = [];
             for ( var i = 0; i < body["lists"].length; i++){
                 var name_list = body["lists"][i];
+                if( ! CONFIG.gomail.tag ){
+                    listOfLists.push({"list_name":name_list , "config": body["info"][name_list]});
+                    continue;
+                }
                 if (body["info"][name_list]["tags"] && body["info"][name_list]["tags"].indexOf(CONFIG.gomail.tag) >= 0){
                     listOfLists.push({"list_name":name_list , "config": body["info"][name_list]});
                 }

@@ -1584,12 +1584,33 @@ router.get('/lists', function(req, res){
     users_db.findOne({_id: sess.gomngr}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
-        return;
+            return;
         }
         notif.getLists(function(listOfLists) {
             res.send(listOfLists);
             return;
         });
+    });
+});
+
+router.get('/config', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+        if(notif.mailSet()) {
+            var optionDict = {main_list: MAIL_CONFIG.main_list, origin: MAIL_CONFIG.origin};
+            res.send(optionDict);
+            return;
+        }
+        res.status(404).send("Mail not set");
+        return;
     });
 });
 
