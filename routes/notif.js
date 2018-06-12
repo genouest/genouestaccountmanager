@@ -1,7 +1,5 @@
 var CONFIG = require('config');
 var fs = require('fs');
-var mcapi = require('mailchimp-api/mailchimp');
-
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     web_db = db.get('web'),
@@ -9,116 +7,203 @@ var monk = require('monk'),
     events_db = db.get('events');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const request = require('request');
 
-mc = null;
-if(CONFIG.mailchimp.apikey){
-    mc = new mcapi.Mailchimp(CONFIG.mailchimp.apikey);
+
+var mail_set = false;
+if(CONFIG.gomail.api_secret && CONFIG.gomail.host && CONFIG.gomail.host !== 'fake' && CONFIG.gomail.api_root && CONFIG.gomail.main_list && CONFIG.gomail.origin){
+    mail_set = true;
+    var baseRequest = request.defaults({
+        baseUrl: CONFIG.gomail.host + CONFIG.gomail.api_root,
+        headers: {'Authorization': CONFIG.gomail.api_secret},
+        json: true,
+        timeout: 1500,
+    })
 }
 
 module.exports = {
+
+    mailSet: function(){
+        return mail_set;
+    },
 
     subscribed: function(email, callback) {
         if(email.indexOf("@fake")>-1){
             callback(false);
             return;
         }
-        if(mc == null){
+        if(! mail_set){
             callback(false);
             return;
         }
-        mc.lists.memberInfo({id: CONFIG.mailchimp.list, emails:[{email: email}]}, function(data) {
-            if(data && data.success_count == 1 && data.data[0].status == 'subscribed'){
-                callback(true);
-                return;
-            }
-            else {
+        const options = {
+            uri: "/mail/opt/" + CONFIG.gomail.main_list + "/" + email,
+        }
+
+        baseRequest(options, function(err, res, body) {
+            if(err || res.statusCode !== 200){
                 callback(false);
                 return;
             }
+            callback(body["status"]);
+            return;
+        })
+    },
+
+    add: function(email, callback) {
+        if(email==undefined ||email==null || email=='' || ! mail_set) {
+            callback();
+            return;
+        }
+        if(email.indexOf("@fake")>-1){
+            callback();
+            return;
+        }
+
+        const options = {
+            uri: "/mail/opt/" + CONFIG.gomail.main_list,
+            body: {'email': [email]}
+        }
+
+        baseRequest.put(options, function(err, res, body) {
+            if(err || res.statusCode !== 200){
+                events_db.insert({'date': new Date().getTime(), 'action': 'subscription error ' + email + ' to mailing list' , 'logs': []}, function(err){});
+                logger.error("Failed to add "+email+" to mailing list");
+                logger.error(res);
+                callback();
+                return;
+            }
+            events_db.insert({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []}, function(err){});
+            callback();
+        });
+    },
+
+    remove: function(email, callback) {
+        if(email==undefined ||email==null || email=='' || ! mail_set) {
+            callback();
+            return;
+        }
+        if(email.indexOf("@fake")>-1){
+            callback();
+            return;
+        }
+
+        const options = {
+            uri: "/mail/opt/" + CONFIG.gomail.main_list,
+            body: {'email': [email]}
+        }
+
+        baseRequest.delete(options, function(err, res, body) {
+            if(err || res.statusCode !== 200){
+                events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + email + 'in mailing list' , 'logs': []}, function(err){});
+                logger.error("Failed to remove "+email+" from mailing list");
+                callback();
+                return;
+            }
+                events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
+                callback();
         });
 
     },
 
-  add: function(email, callback) {
-    if(email==undefined ||email==null || email=='' || mc==null) {
-      callback();
-      return;
-    }
-    if(email.indexOf("@fake")>-1){
-        callback();
-        return;
-    }
-    mc.lists.subscribe({id: CONFIG.mailchimp.list, email:{email: email}, double_optin: false, update_existing: true, send_welcome: true }, function(data) {
-      events_db.insert({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []}, function(err){});
-      callback();
-    }, function(error) {
-      events_db.insert({'date': new Date().getTime(), 'action': 'subscription error ' + email + ' to mailing list' , 'logs': []}, function(err){});
-      logger.error("Failed to add "+email+" to mailing list");
-    });
-  },
-  remove: function(email, callback) {
-    if(email==undefined ||email==null || email=='' || mc==null) {
-      callback();
-      return;
-    }
-    if(email.indexOf("@fake")>-1){
-        callback();
-        return;
-    }
-    try {
-        mc.lists.unsubscribe({id: CONFIG.mailchimp.list, email:{email: email}, delete_member: true}, function(data) {
-            events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
+    modify: function(oldemail, newemail, callback) {
+        logger.debug("Update email " + oldemail + " ==> " + newemail);
+        if(newemail==undefined ||newemail==null || newemail=='' || ! mail_set ) {
             callback();
+            return;
+        }
+        if(newemail.indexOf("@fake")>-1){
+            callback();
+            return;
+        }
+
+        if(newemail === oldemail){
+            callback();
+            return;
+        }
+
+        const options = {
+            uri: "/mail/opt/" + CONFIG.gomail.main_list,
+            body: {'email': [newemail]}
+        }
+
+        baseRequest.put(options, function(err, res, body) {
+            if(err){
+                events_db.insert({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
+                logger.error("Failed to add "+newemail+" to mailing list : " + err );
+                callback();
+                return;
+            }
+            if(res.statusCode !== 200){
+                events_db.insert({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
+                logger.error("Failed to add "+newemail+" to mailing list : error code " + res.statusCode);
+                callback();
+                return;
+            }
+            options.body = {'email': [oldemail]};
+            baseRequest.delete(options, function(err, res, body) {
+                if(err){
+                    events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []}, function(err){});
+                    logger.error("Failed to unsubscribe " + oldemail + ": "+ err);
+                    callback();
+                    return;
+                }
+                if(res.statusCode !== 200){
+                    events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []}, function(err){});
+                    logger.error("Failed to unsubscribe " + oldemail + ": error code "+ res.statusCode);
+                    callback();
+                    return;
+                }
+                events_db.insert({'date': new Date().getTime(), 'action': 'update ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
+                logger.info(oldemail+' unsubscribed');
+                callback();
+            });
         });
-    }
-    catch(err) {
-        callback();
-    }
+    },
 
-  },
-  modify: function(oldemail, newemail, callback) {
-    logger.debug("Update email " + oldemail + " ==> " + newemail);
-    if(newemail==undefined ||newemail==null || newemail=='' || mc==null) {
-      callback();
-      return;
+    sendUser: function(mailOptions, callback) {
+        const options = {
+            uri: "/mail",
+            body: mailOptions
+        }
+
+        baseRequest.post(options, function(err, res, body) {
+            if(err){
+                logger.error("Failed to send mail : " + err);
+                callback("Failed to send mail : " + err, false);
+                return;
+            }
+            if(res.statusCode !== 200){
+                logger.error("Failed to send mail : error code " + res.statusCode);
+                callback("Failed to send mail : error code " + res.statusCode, false);
+                return;
+            }
+
+            callback("", false);
+        });
+
+    },
+
+    sendList: function(mailOptions, callback) {
+        const options = {
+            uri: "/mail/" + CONFIG.gomail.main_list,
+            body: mailOptions
+        }
+
+        baseRequest.post(options, function(err, res, body) {
+            if(err){
+                logger.error("Failed to send mail : " + err);
+                callback("Failed to send mail : " + err, false);
+                return;
+            }
+            if(res.statusCode !== 200){
+                logger.error("Failed to send mail : error code " + res.statusCode);
+                callback("Failed to send mail : error code " + res.statusCode, false);
+                return;
+            }
+
+            callback("", true);
+        });
+
     }
-    if(newemail.indexOf("@fake")>-1){
-        callback();
-        return;
-    }
-    mc.lists.subscribe({id: CONFIG.mailchimp.list, email:{email: newemail}, double_optin: false, update_existing: true, send_welcome: true }, function(data) {
-      logger.info(newemail+' subscribed');
-      mc.lists.unsubscribe({id: CONFIG.mailchimp.list, email:{email: oldemail}, delete_member: true, send_notify: false }, function(data) {
-        events_db.insert({'date': new Date().getTime(), 'action': 'update ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
-        logger.info(oldemail+' unsubscribed');
-        callback();
-      }, function(error){
-          events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []}, function(err){});
-          logger.error("Failed to unsubscribe " + oldemail + ": "+ error);
-      });
-    }, function(error) {
-      events_db.insert({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
-      logger.error("Failed to add "+newemail+" to mailing list");
-    });
-  },
-  send: function(subject, msg, callback) {
-    mc.campaigns.create({type: 'plaintext',
-                         options: {
-                          list_id: CONFIG.mailchimp.list,
-                          subject: subject,
-                          from_email: CONFIG.general.support,
-                          from_name: 'GenOuest Platform'
-                        },
-                        content: {
-                          text: msg
-                        }
-                        }, function(data){
-                              mc.campaigns.send({cid: data.id}, function(data){
-                                callback();
-                              });
-
-                          });
-
-  }
-
 };
