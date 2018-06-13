@@ -6,7 +6,6 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
-
 var CONFIG = require('config');
 var notif = require('./routes/notif.js');
 
@@ -15,33 +14,7 @@ var monk = require('monk'),
     users_db = db.get('users');
     projects_db = db.get('projects')
 
-var nodemailer = require('nodemailer');
-var smtpTransport = require('nodemailer-smtp-transport');
-var MAIL_CONFIG = CONFIG.mail;
-var transport = null;
-
-
-if(MAIL_CONFIG.host !== 'fake') {
-  if(MAIL_CONFIG.user !== undefined && MAIL_CONFIG.user !== '') {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-    auth: {
-        user: MAIL_CONFIG.user,
-        pass: MAIL_CONFIG.password
-    }
-  }));
-  }
-  else {
-  transport = nodemailer.createTransport(smtpTransport({
-    host: MAIL_CONFIG.host, // hostname
-    secureConnection: MAIL_CONFIG.secure, // use SSL
-    port: MAIL_CONFIG.port, // port for secure SMTP
-  }));
-
-  }
-}
+var MAIL_CONFIG = CONFIG.gomail;
 
 function timeConverter(tsp){
   var a = new Date(tsp);
@@ -76,16 +49,16 @@ users_db.find({status: STATUS_ACTIVE}, function(err, users){
       }
   }
   for(var i=0;i<notifs.length;i++){
-    var notif = notifs[i];
+    var notification = notifs[i];
     var mailOptions = {
-      from: MAIL_CONFIG.origin, // sender address
-      to: CONFIG.general.accounts, // list of receivers
+      origin: MAIL_CONFIG.origin, // sender address
+      destinations: [CONFIG.general.accounts], // list of receivers
       subject: 'Quota expiration', // Subject line
-      text: notif, // plaintext body
-      html: notif // html body
+      message: notification, // plaintext body
+      html_message: notification // html body
     };
-    if(MAIL_CONFIG.host !== 'fake') {
-        transport.sendMail(mailOptions, function(error, response){
+    if(notif.mailSet()) {
+        notif.sendUser(mailOptions, function(error, response){
             if(error){
               console.log(error);
             }

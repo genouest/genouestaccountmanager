@@ -9,8 +9,21 @@ body { padding-top: 70px; }
   padding: 7px 10px;
 }
 
+.navbar-inverse{
+  background-color: #343a40;
+}
+
+.navbar-inverse .dropdown-menu{
+  background-color: #343a40;
+}
+
 .panel {
   margin-bottom: 50px;
+}
+
+.panel-primary > .panel-heading{
+  background-color: #6c757d;
+
 }
 
 .paginate_button {
