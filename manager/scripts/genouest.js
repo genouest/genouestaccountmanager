@@ -302,22 +302,52 @@ angular.module('genouest').controller('messageCtrl',
         $scope.message = '';
         var lists = $scope.mailing_lists;
         var template = '';
-        for(var key in lists){
-          //if is a list with a name
-          if (lists[key].list_name==list_name){
-            //if template_html
-            if('template_html' in lists[key].config && $scope.input_type=="HTML"){
-              template = lists[key].config.template_html
-              $scope.message = atob(template);
-            //if template_markdown
-            } else if('template_markdown' in lists[key].config && $scope.input_type=="Markdown"){
-                template = lists[key].config.template_markdown
+        var footer = '';
+        var header = '';
+        for(var i = 0; i < lists.length; key++){
+           //if is a list with a name
+          if (lists[i].list_name==list_name){
+            if ($scope.input_type=="HTML"){
+                // Case template
+              if('template_html' in lists[i].config){
+                template = lists[i].config.template_html;
                 $scope.message = atob(template);
-            //if template_text
-            } else if('template_text' in lists[key].config && $scope.input_type=="Text"){
-                template = lists[key].config.template_text
-                $scope.message = atob(template);
+                return;
+              } else if (lists[i].config.header_html) {
+                header = lists[i].config.header_html;
+                header += "<br>";
+              } else if (lists[i].config.footer_html) {
+                footer = lists[i].config.footer_html;
               };
+              $scope.message = atob(header+footer);
+              return;
+            } else if ($scope.input_type=="Markdown"){
+              if('template_markdown' in lists[i].config){
+                template = lists[i].config.template_markdown;
+                $scope.message = atob(template);
+                return;
+              } else if (lists[i].config.header_markdown) {
+                header = lists[i].config.header_markdown;
+                header += "<br>";
+              } else if (lists[i].config.footer_markdown) {
+                footer = lists[i].config.footer_markdown,;
+              };
+              $scope.message = atob(header+footer);
+              return;
+            } else if ($scope.input_type=="Text") {
+              if('template_text' in lists[i].config){
+                template = lists[i].config.template_text;
+                $scope.message = atob(template);
+                return;
+              } else if (lists[i].config.header_text) {
+                header = lists[i].config.header_text;
+                header += "<br>";
+              } else if (lists[i].config.footer_text) {
+                footer = lists[i].config.footer_text;
+              };
+              $scope.message = atob(header+footer);
+              return;
+            };
           };
         }
       };
