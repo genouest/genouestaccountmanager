@@ -313,10 +313,12 @@ angular.module('genouest').controller('messageCtrl',
                 template = lists[i].config.template_html;
                 $scope.message = atob(template);
                 return;
-              } else if (lists[i].config.header_html) {
+              };
+              if (lists[i].config.header_html) {
                 header = lists[i].config.header_html;
                 header += "<br>";
-              } else if (lists[i].config.footer_html) {
+              };
+              if (lists[i].config.footer_html) {
                 footer = lists[i].config.footer_html;
               };
               $scope.message = atob(header+footer);
@@ -326,10 +328,12 @@ angular.module('genouest').controller('messageCtrl',
                 template = lists[i].config.template_markdown;
                 $scope.message = atob(template);
                 return;
-              } else if (lists[i].config.header_markdown) {
+              };
+              if (lists[i].config.header_markdown) {
                 header = lists[i].config.header_markdown;
                 header += "<br>";
-              } else if (lists[i].config.footer_markdown) {
+              };
+              if (lists[i].config.footer_markdown) {
                 footer = lists[i].config.footer_markdown,;
               };
               $scope.message = atob(header+footer);
@@ -339,10 +343,12 @@ angular.module('genouest').controller('messageCtrl',
                 template = lists[i].config.template_text;
                 $scope.message = atob(template);
                 return;
-              } else if (lists[i].config.header_text) {
+              };
+              if (lists[i].config.header_text) {
                 header = lists[i].config.header_text;
                 header += "<br>";
-              } else if (lists[i].config.footer_text) {
+              };
+              if (lists[i].config.footer_text) {
                 footer = lists[i].config.footer_text;
               };
               $scope.message = atob(header+footer);
