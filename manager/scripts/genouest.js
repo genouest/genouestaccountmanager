@@ -304,7 +304,7 @@ angular.module('genouest').controller('messageCtrl',
         var template = '';
         var footer = '';
         var header = '';
-        for(var i = 0; i < lists.length; key++){
+        for(var i = 0; i < lists.length; i++){
            //if is a list with a name
           if (lists[i].list_name==list_name){
             if ($scope.input_type=="HTML"){
