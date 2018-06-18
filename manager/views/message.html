@@ -1,26 +1,71 @@
 <div ng-if="msg" class="alert alert-success">{{msg}}</div>
 <div ng-if="error_msg" class="alert alert-danger">{{error_msg}}</div>
+
 <div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">Send message to all users</h3>
-    </div>
-    <div class="panel-body">
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label for="subject" class="col-form-label">Subject</label>
-                        <input class="form-control" id="subject" type="text" ng-model="subject" class="form-control"></input>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="form-group">
-                        <label for="message" class="col-form-label">Message</label>
-                        <textarea class="form-control" ng-model="message" rows="20" cols="100" class="form-control"></textarea>
-                    </div>
-                </div>
+  <div class="panel-heading">
+    <h3 class="panel-title">Send message to all users</h3>
+  </div>
+  <div class="panel-body">
+    <div class="row">
+      <div class="col-sm-2">
+        <div class="form-group">
+          <label for="mailing_list" class="col-form-label">Mailing list</label>
+          <select id="mailing_list" ng-model="mailing_list" ng-change="decode_template(mailing_list)" ng-options="list.list_name as list.list_name for list in mailing_lists" class="form-control" />
         </div>
-        <button type="button" class="btn btn-default" ng-click="send()">Send</button>
+      </div>
     </div>
+    <div class="row">
+      <div class="col-sm-2">
+        <div class="form-group">
+          <label for="input_type" class="col-form-label">Input type</label>
+          <select id="input_type" ng-change="decode_template(mailing_list)" ng-model="input_type" ng-options="input for input in input_choices" class="form-control" />
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label for="from" class="col-form-label">From</label>
+          <input class="form-control" id="from" type="text" ng-model="origin" class="form-control"></input>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label for="subject" class="col-form-label">Subject</label>
+          <input class="form-control" id="subject" type="text" ng-model="subject" class="form-control"></input>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="form-group">
+          <label for="message" class="col-form-label">Message</label>
+          <textarea class="form-control" ng-model="message" rows="20" cols="100" class="form-control"></textarea>
+        </div>
+      </div>
+    </div>
+    <!-- Button trigger modal -->
+    <button type="button" ng-if="message && (input_type == 'HTML' || input_type == 'Markdown')" class="btn btn-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">
+      Viewer
+    </button>
+
+    <button type="button" class="btn btn-default" ng-click="send()">Send</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" style="z-index: 1500;" id="HTML_viewer" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <p ng-if="input_type == 'HTML'" data-ng-bind-html="trustAsHtml(message)"></p>
+        <p ng-if="input_type == 'Markdown'" data-ng-bind-html="trustAsMarkdown(message)"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>

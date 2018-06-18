@@ -3,6 +3,8 @@ var router = express.Router();
 var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
+var markdown = require("markdown").markdown;
+var htmlToText = require('html-to-text');
 
 var Promise = require('promise');
 const winston = require('winston');
@@ -271,6 +273,7 @@ router.get('/group', function(req, res){
 });
 
 router.post('/message', function(req, res){
+
     var sess = req.session;
     if(! sess.gomngr) {
       res.status(401).send('Not authorized');
@@ -291,16 +294,25 @@ router.post('/message', function(req, res){
         res.status(401).send('Not authorized');
         return;
       }
+      var message = req.param('message');
+      var html_message = req.param('message');
 
+      if(req.param('input') === "Markdown"){
+        html_message = markdown.toHTML(req.param('message'));
+        message =  htmlToText.fromString(html_message);
+      } else if (req.param('input') === "Html"){
+        message =  htmlToText.fromString(html_message);
+      }
       var mailOptions = {
-                     origin: MAIL_CONFIG.origin,
+                     //origin: MAIL_CONFIG.origin,
+                     origin: req.param('from'),
                      subject: req.param('subject'),
-                     message: req.param('message'),
-                     html_message: req.param('message')
+                     message: message,
+                     html_message: html_message
                    };
-
-      notif.sendList(mailOptions, function(err, response) {
-        res.send(null);
+      notif.sendList(req.param('list'), mailOptions, function(err, response) {
+        res.send("");
+        return;
       });
     });
 });
@@ -1683,6 +1695,46 @@ router.delete('/user/:id/project/:project', function(req, res){
                 });
             });
         });
+    });
+});
+
+
+router.get('/lists', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+        notif.getLists(function(listOfLists) {
+            res.send(listOfLists);
+            return;
+        });
+    });
+});
+
+router.get('/config', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+        if(notif.mailSet()) {
+            var optionDict = {main_list: MAIL_CONFIG.main_list, origin: MAIL_CONFIG.origin};
+            res.send(optionDict);
+            return;
+        }
+        res.status(404).send("Mail not set");
+        return;
     });
 });
 

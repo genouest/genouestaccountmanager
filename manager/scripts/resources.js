@@ -350,6 +350,19 @@
               isArray: false,
               cache: false
             }
+          },
+          get_mailing_lists: {
+              url: prefix+'/lists',
+              method: 'GET',
+              isArray: true,
+              cache: false
+          },
+          get_mail_config: {
+            url: prefix+'/config',
+            method: 'GET',
+            isArray: false,
+            cache: false
+          }
           });
       }
 

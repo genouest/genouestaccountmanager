@@ -71,6 +71,7 @@ app.get('/log/user/:id', logs);
 app.get('/log', logs);
 app.post('/message', users);
 app.get('/group', users);
+app.get('/config', users);
 app.post('/group/:id', users);
 app.put('/group/:id', users)
 app.delete('/group/:id', users);
@@ -97,6 +98,7 @@ app.get('/user/:id/renew/:regkey', users);
 app.get('/user/:id/activate', users);
 app.get('/user/:id/confirm', users);
 app.get('/user/:id/passwordreset', users);
+app.get('/lists', users),
 app.post('/user/:id/passwordreset', users);
 app.get('/user/:id/passwordreset/:key', users);
 app.post('/user/:id/cloud', users);
