@@ -11,6 +11,7 @@ const request = require('request');
 
 
 var mail_set = false;
+
 if(CONFIG.gomail.api_secret && CONFIG.gomail.host && CONFIG.gomail.host !== 'fake' && CONFIG.gomail.api_root && CONFIG.gomail.main_list && CONFIG.gomail.origin){
     mail_set = true;
     var baseRequest = request.defaults({
@@ -46,6 +47,37 @@ module.exports = {
                 return;
             }
             callback(body["status"]);
+            return;
+        })
+    },
+
+    getLists: function(callback){
+        if(! mail_set){
+            logger.error("Mail is not set properly");
+            callback([]);
+            return;
+        }
+        const options = {
+            uri: "/list",
+        }
+        baseRequest(options, function(err, res, body) {
+            if(err || res.statusCode !== 200){
+                callback([]);
+                return;
+            }
+//Return all lists if no tag set
+            var listOfLists = [];
+            for ( var i = 0; i < body["lists"].length; i++){
+                var name_list = body["lists"][i];
+                if( ! CONFIG.gomail.tag ){
+                    listOfLists.push({"list_name":name_list , "config": body["info"][name_list]});
+                    continue;
+                }
+                if (body["info"][name_list]["tags"] && body["info"][name_list]["tags"].indexOf(CONFIG.gomail.tag) >= 0){
+                    listOfLists.push({"list_name":name_list , "config": body["info"][name_list]});
+                }
+            }
+            callback(listOfLists);
             return;
         })
     },
@@ -100,8 +132,8 @@ module.exports = {
                 callback();
                 return;
             }
-                events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
-                callback();
+            events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
+            callback();
         });
 
     },
@@ -184,12 +216,11 @@ module.exports = {
 
     },
 
-    sendList: function(mailOptions, callback) {
+    sendList: function(mailing_list, mailOptions, callback) {
         const options = {
-            uri: "/mail/" + CONFIG.gomail.main_list,
+            uri: "/mail/" + mailing_list,
             body: mailOptions
         }
-
         baseRequest.post(options, function(err, res, body) {
             if(err){
                 logger.error("Failed to send mail : " + err);
