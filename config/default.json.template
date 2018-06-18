@@ -37,19 +37,19 @@
         }
     },
     "plugin_script_dir": "/tmp/scripts"
- },
- "usage": [
+  },
+  "usage": [
    {"name": "jobs", "link": "https://goacct.genouest.org/dashboard/db/goacct-cumulative-stats?var-userlist=#USER#"},
    {"name": "disks", "link": "https://goacct.genouest.org/dashboard/db/goacct-user-disk-usage?var-userlist=#USER#"}
- ],
+  ],
   "bills": {
    "use": true,
    "dir": "/genouestaccountmanager-bills"
- },
+  },
   "mongo": {
     "host": "localhost",
     "port": 27017
- },
+  },
   "ldap": {
     "host": "localhost",
     "dn": "dc=nodomain",
@@ -208,13 +208,13 @@
       "Avenue du General Leclerc",
       "35000 RENNES"
     ]
-    },
-    "plugins": [
-        {"name": "test", "display_name": "for testing", "admin_only":false}
-    ],
-    "plugin_config" : {
-        "test": {
-            "parameter1" : "test1"
-        }
+  },
+  "plugins": [
+    {"name": "test", "display_name": "for testing", "admin_only":false}
+  ],
+  "plugin_config" : {
+    "test": {
+      "parameter1" : "test1"
     }
+  }
 }
