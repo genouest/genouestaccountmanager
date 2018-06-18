@@ -315,13 +315,13 @@ angular.module('genouest').controller('messageCtrl',
                 return;
               };
               if (lists[i].config.header_html) {
-                header = lists[i].config.header_html;
-                header += "<br>";
+                header = atob(lists[i].config.header_html);
+                header += "\n";
               };
               if (lists[i].config.footer_html) {
-                footer = lists[i].config.footer_html;
+                footer = atob(lists[i].config.footer_html);
               };
-              $scope.message = atob(header+footer);
+              $scope.message = header+footer;
               return;
             } else if ($scope.input_type=="Markdown"){
               if('template_markdown' in lists[i].config){
@@ -329,14 +329,14 @@ angular.module('genouest').controller('messageCtrl',
                 $scope.message = atob(template);
                 return;
               };
-              if (lists[i].config.header_markdown) {
-                header = lists[i].config.header_markdown;
-                header += "<br>";
+              if (lists[i].config.header_markdown){
+                header = atob(lists[i].config.header_markdown);
+                header += "\n";
               };
-              if (lists[i].config.footer_markdown) {
-                footer = lists[i].config.footer_markdown,;
+              if (lists[i].config.footer_markdown){
+                footer = atob(lists[i].config.footer_markdown);
               };
-              $scope.message = atob(header+footer);
+              $scope.message = header+footer;
               return;
             } else if ($scope.input_type=="Text") {
               if('template_text' in lists[i].config){
@@ -345,13 +345,13 @@ angular.module('genouest').controller('messageCtrl',
                 return;
               };
               if (lists[i].config.header_text) {
-                header = lists[i].config.header_text;
-                header += "<br>";
+                header = atob(lists[i].config.header_text);
+                header += "\n";
               };
               if (lists[i].config.footer_text) {
-                footer = lists[i].config.footer_text;
+                footer = atob(lists[i].config.footer_text);
               };
-              $scope.message = atob(header+footer);
+              $scope.message = header+footer;
               return;
             };
           };
