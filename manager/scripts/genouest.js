@@ -266,24 +266,109 @@ angular.module('genouest').controller('webmngrCtrl',
             $scope.websites = data;
           });
         });
-    };
+      };
     });
 
 
 angular.module('genouest').controller('messageCtrl',
-    function ($scope, $rootScope, User, Auth) {
+    function ($scope, $rootScope, $sce, $http, User, Auth) {
+      User.get_mail_config().$promise.then(function(data){
+        $scope.origin = data.origin;
+      });
       $scope.msg = '';
       $scope.error_msg = '';
       $scope.session_user = Auth.getUser();
+      $scope.mailing_lists = User.get_mailing_lists();
       $scope.message = '';
       $scope.subject = '';
+      $scope.input_choices = ["HTML", "Text", "Markdown"];
+      $scope.input_type = "HTML";
+      $scope.mailing_list = '';
       $scope.send = function() {
-        User.sendMessage({},{message: $scope.message, subject: $scope.subject}).$promise.then(function(data){
+        $scope.msg = '';
+        $scope.error_msg = '';
+        if($scope.message === '' || $scope.subject === '' || $scope.mailing_list === ''){
+            $scope.error_msg = "You need a subject, text, and mailing list";
+            return;
+        }
+        User.sendMessage({},{message: $scope.message, subject: $scope.subject, list: $scope.mailing_list, input: $scope.input_type, from: $scope.origin}).$promise.then(function(data){
           $scope.msg = 'Message sent';
         }, function(error){
             $scope.error_msg = error.data;
         });
     };
+
+    $scope.decode_template = function(list_name) {
+        $scope.message = '';
+        var lists = $scope.mailing_lists;
+        var template = '';
+        var footer = '';
+        var header = '';
+        for(var i = 0; i < lists.length; i++){
+           //if is a list with a name
+          if (lists[i].list_name==list_name){
+            if ($scope.input_type=="HTML"){
+                // Case template
+              if('template_html' in lists[i].config){
+                template = lists[i].config.template_html;
+                $scope.message = atob(template);
+                return;
+              };
+              if (lists[i].config.header_html) {
+                header = atob(lists[i].config.header_html);
+                header += "\n";
+              };
+              if (lists[i].config.footer_html) {
+                footer = atob(lists[i].config.footer_html);
+              };
+              $scope.message = header+footer;
+              return;
+            } else if ($scope.input_type=="Markdown"){
+              if('template_markdown' in lists[i].config){
+                template = lists[i].config.template_markdown;
+                $scope.message = atob(template);
+                return;
+              };
+              if (lists[i].config.header_markdown){
+                header = atob(lists[i].config.header_markdown);
+                header += "\n";
+              };
+              if (lists[i].config.footer_markdown){
+                footer = atob(lists[i].config.footer_markdown);
+              };
+              $scope.message = header+footer;
+              return;
+            } else if ($scope.input_type=="Text") {
+              if('template_text' in lists[i].config){
+                template = lists[i].config.template_text;
+                $scope.message = atob(template);
+                return;
+              };
+              if (lists[i].config.header_text) {
+                header = atob(lists[i].config.header_text);
+                header += "\n";
+              };
+              if (lists[i].config.footer_text) {
+                footer = atob(lists[i].config.footer_text);
+              };
+              $scope.message = header+footer;
+              return;
+            };
+          };
+        }
+      };
+
+    //print html
+    $scope.trustAsHtml = function(message) {
+        return $sce.trustAsHtml(message);
+      };
+
+    //print markdown
+    $scope.trustAsMarkdown = function(message) {
+        var mark = marked(message);
+        return $sce.trustAsHtml(mark);
+    };
+
     });
 
 
@@ -582,7 +667,7 @@ angular.module('genouest').controller('usermngrCtrl',
             $scope.wrong_confirm_passwd = "Passwords are not identical";
             return;
         }
-        
+
         if($scope.password1.length < 10) {
             $scope.wrong_confirm_passwd = "Password must have 10 characters minimum";
             return;

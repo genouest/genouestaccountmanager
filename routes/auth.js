@@ -13,6 +13,7 @@ const u2f = require('u2f');
 var CONFIG = require('config');
 const APP_ID= CONFIG.general.url;
 var GENERAL_CONFIG = CONFIG.general;
+var MAIL_CONFIG = CONFIG.gomail;
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -26,7 +27,7 @@ var monk = require('monk'),
 
 var ldap_manager = {
   auth: function(uid, password) {
-    if(MAIL_CONFIG.ldap.host == 'fake') {
+    if(CONFIG.ldap.host == 'fake') {
       return true;
     }
     return false;
