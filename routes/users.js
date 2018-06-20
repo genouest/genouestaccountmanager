@@ -1578,7 +1578,7 @@ router.put('/user/:id', function(req, res) {
 
 //TODO : Verify session user is admin or in project
 
-router.get('/project/:id', function(req, res){
+router.get('/project/:id/users', function(req, res){
     var sess = req.session;
     if(! sess.gomngr) {
       res.status(401).send('Not authorized');

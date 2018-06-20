@@ -77,6 +77,12 @@
 
       function Project($resource) {
         return $resource(prefix+'/project', {}, {
+            get: {
+              url: prefix+'/project/:id',
+              method: 'GET',
+              isArray: false,
+              cache: false
+            },
             list: {
               url: prefix+'/project',
               method: 'GET',
@@ -90,7 +96,7 @@
               cache: false
           },
             get_users: {
-              url: prefix+'/project/:name',
+              url: prefix+'/project/:name/users',
               method: 'GET',
               isArray: true,
               cache: false

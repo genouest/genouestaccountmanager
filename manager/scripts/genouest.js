@@ -91,6 +91,14 @@ angular.module('genouest', ['genouest.resources', 'ngSanitize', 'ngCookies', 'ng
             templateUrl: 'views/info.html',
             controller: 'userextendCtrl'
         });
+        $routeProvider.when('/admin/projects', {
+            templateUrl: 'views/projects_admin.html',
+            controller: 'projectsadminmngrCtrl'
+        });
+        $routeProvider.when('/admin/project/:project_id', {
+            templateUrl: 'views/project.html',
+            controller: 'projectmngrCtrl'
+        });
         $routeProvider.otherwise({
             redirectTo: '/'
         });
@@ -372,90 +380,63 @@ angular.module('genouest').controller('messageCtrl',
 
     });
 
-
-angular.module('genouest').controller('projectsmngrCtrl',
+angular.module('genouest').controller('projectmngrCtrl',
     function($scope, $rootScope, $routeParams, $log, $location, Project, Auth, Group, User, GOLog) {
 
-        $scope.project_list = function(refresh_requests = false){
-            $scope.projects = [];
-            Project.list().$promise.then(function(data) {
-                for(var i=0;i<data.length;i++){
-                    data[i].expire = new Date(data[i].expire);
-                    if (! refresh_requests){ continue;};
-                    if (data[i]["add_requests"]){
-                        for(var j=0;j<data[i]["add_requests"].length;j++){
-                            $scope.add_requests.push({'project': data[i], 'user': data[i]["add_requests"][j]});
+        $scope.show_project_users = function(project_id) {
+            Project.get({id: project_id}).$promise.then(function(data) {
+                data.expire = new Date(data.expire);
+                Project.get_users({name: data.id}).$promise.then(function(user_list){
+                    $scope.project = data;
+                    $scope.users = user_list;
+                    $scope.oldGroup = $scope.project.group;
+                    for(var i = 0; i<user_list.length;i++){
+                        if(user_list[i].group.indexOf($scope.project.group) >= 0 || user_list[i].secondarygroups.indexOf($scope.project.group) >= 0){
+                            $scope.users[i].access=true;
                         }
                     }
-                    if (data[i]["remove_requests"]){
-                        for(var j=0;j<data[i]["remove_requests"].length;j++){
-                            $scope.remove_requests.push({'project': data[i], 'user': data[i]["remove_requests"][j]});
-                        }
-                    }
-                }
-            $scope.projects = data;
+                });
             });
         };
 
-//Set up the requests properly to avoid nested ng-repeat (datatables issues)
-        $scope.add_requests = [];
-        $scope.remove_requests = [];
-        $scope.project_list(true);
-        $scope.session_user = Auth.getUser();
-        $scope.new_project = {};
+
+        $scope.project = {};
+        $scope.groups = [];
         $scope.users = [];
-        $scope.new_user = null;
-        if ($scope.session_user.is_admin){
-            Group.list().$promise.then(function(data) {
-                $scope.groups = data;
-            });
-        } else {
-            $scope.groups = [];
-        };
+        $scope.show_project_users($routeParams.project_id);
+        Group.list().$promise.then(function(data) {
+            $scope.groups = data;
+        });
 
-        $scope.date_convert = function timeConverter(tsp){
-            var a = new Date(tsp);
-            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            var year = a.getFullYear();
-            var month = months[a.getMonth()];
-            var date = a.getDate();
-            var hour = a.getHours();
-            var min = a.getMinutes();
-            var sec = a.getSeconds();
-            var time = date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-            return time;
-        }
-
-        $scope.add_project = function(){
-            if(! $scope.new_project.id || ! $scope.new_project.group || ! $scope.new_project.owner) {
-                $scope.add_project_error_msg = "Project Id, group, and owner are required fields " + $scope.new_project.id + $scope.new_project.group + $scope.new_project.owner ;
+        $scope.add_user = function(project, user_id){
+            $scope.admin_user_msg = "";
+            $scope.admin_user_error_msg = "";
+            if(! user_id){
+                $scope.admin_user_error_msg = "User Id must not be empty";
                 return;
-            }
-            $scope.add_project_msg = '';
-            $scope.add_project_error_msg = '';
-            Project.add({},{
-                'id': $scope.new_project.id,
-                'owner': $scope.new_project.owner,
-                'group': $scope.new_project.group,
-                'size': $scope.new_project.size,
-                'description': $scope.new_project.description,
-                'access': $scope.new_project.access,
-                'orga': $scope.new_project.orga,
-                'path': $scope.new_project.path,
-                'expire': new Date($scope.new_project.expire).getTime()}).$promise.then(function(data)
-            {
-                $scope.add_project_msg = data.message;
-                $scope.project_list();
-                User.add_to_project({name: $scope.new_project.owner, project: $scope.new_project.id},{}).$promise.then(function(data){
-                    User.add_group({name: $scope.new_project.owner, group: $scope.new_project.group},{}).$promise.then(function(data){
-                    }, function(error){
-                        $scope.add_project_error_msg = error.data;
-                    });
+            };
+            $scope.admin_user_msg = "";
+            $scope.admin_user_error_msg = "";
+            User.add_to_project({name: user_id, project: project.id},{}).$promise.then(function(data){
+                $scope.admin_user_msg = data.message;
+                User.add_group({name: user_id, group: project.group},{}).$promise.then(function(data){
+                    $scope.show_project_users(project.id)
                 }, function(error){
-                    $scope.add_project_error_msg = error.data;
+                    $scope.admin_user_err_msg = error.data;
                 });
             }, function(error){
-                $scope.add_project_error_msg = error.data;
+                $scope.admin_user_err_msg = error.data;
+            });
+        };
+
+        $scope.remove_user = function(project,user_id){
+            $scope.admin_user_msg = "";
+            $scope.admin_user_error_msg = "";
+            User.remove_from_project({name: user_id, project: project.id},{}).$promise.then(function(data){
+                $scope.admin_user_msg = data.message;
+                $scope.show_project_users(project.id);
+            }, function(error){
+                $scope.admin_user_error_msg = error.data;
             });
         };
 
@@ -491,17 +472,95 @@ angular.module('genouest').controller('projectsmngrCtrl',
             };
         };
 
-        $scope.request_user = function(project, user_id, request_type){
-            $scope.request_msg = '';
-            $scope.request_err_msg = '';
-            if (! user_id ) {
-                $scope.request_err_msg = 'Genouest id is required';
+       $scope.delete_project = function(project, user_list){
+            $scope.project_msg = '';
+            var promises_list = [];
+            for(var i = 0; i < user_list.length; i++){
+                var promise = User.remove_from_project({name: user_list[i].uid, project: project.id, force:true},{});
+            }
+            Project.delete({'name': project.id}).$promise.then(function(data){
+                $scope.selectedProject = "";
+                $scope.project_list();
+            });
+        };
+
+    });
+
+angular.module('genouest').controller('projectsadminmngrCtrl',
+    function($scope, $rootScope, $routeParams, $log, $location, Project, Auth, Group, User, GOLog) {
+
+        $scope.project_list = function(refresh_requests = false){
+            $scope.projects = [];
+            Project.list().$promise.then(function(data) {
+                for(var i=0;i<data.length;i++){
+                    data[i].expire = new Date(data[i].expire);
+                    if (! refresh_requests){ continue;};
+                    $scope.add_requests = [];
+                    $scope.remove_requests = [];
+                    $scope.requests_number = 0;
+                    if (data[i]["add_requests"]){
+                        for(var j=0;j<data[i]["add_requests"].length;j++){
+                            $scope.add_requests.push({'project': data[i], 'user': data[i]["add_requests"][j]});
+                        }
+                        $scope.requests_number += data[i]["add_requests"].length;
+                    }
+                    if (data[i]["remove_requests"]){
+                        for(var j=0;j<data[i]["remove_requests"].length;j++){
+                            $scope.remove_requests.push({'project': data[i], 'user': data[i]["remove_requests"][j]});
+                        }
+                        $scope.requests_number += data[i]["remove_requests"].length;
+                    }
+                }
+                if($scope.requests_number > 0){$scope.requests_visible = true;};
+                $scope.projects = data;
+            });
+        };
+
+        $scope.add_requests = [];
+        $scope.requests_visible = false;
+        $scope.remove_requests = [];
+        $scope.requests_number = 0;
+        $scope.project_list(true);
+        $scope.session_user = Auth.getUser();
+        $scope.new_project = {};
+        $scope.users = [];
+        $scope.new_user = null;
+        $scope.groups = []
+        Group.list().$promise.then(function(data) {
+            $scope.groups = data;
+        });
+
+
+        $scope.add_project = function(){
+            if(! $scope.new_project.id || ! $scope.new_project.group || ! $scope.new_project.owner) {
+                $scope.add_project_error_msg = "Project Id, group, and owner are required fields " + $scope.new_project.id + $scope.new_project.group + $scope.new_project.owner ;
                 return;
-            };
-            Project.request({'name': project.id},{'request': request_type, 'user': user_id}).$promise.then(function(data){
-                $scope.request_msg = data.message;
+            }
+            $scope.add_project_msg = '';
+            $scope.add_project_error_msg = '';
+            Project.add({},{
+                'id': $scope.new_project.id,
+                'owner': $scope.new_project.owner,
+                'group': $scope.new_project.group,
+                'size': $scope.new_project.size,
+                'description': $scope.new_project.description,
+                'access': $scope.new_project.access,
+                'orga': $scope.new_project.orga,
+                'path': $scope.new_project.path,
+                'expire': new Date($scope.new_project.expire).getTime()}).$promise.then(function(data)
+            {
+                $scope.add_project_msg = data.message;
+                $scope.project_list();
+                User.add_to_project({name: $scope.new_project.owner, project: $scope.new_project.id},{}).$promise.then(function(data){
+                    User.add_group({name: $scope.new_project.owner, group: $scope.new_project.group},{}).$promise.then(function(data){
+                    }, function(error){
+                        $scope.add_project_error_msg = error.data;
+                    });
+                }, function(error){
+                    $scope.add_project_error_msg = error.data;
+                });
             }, function(error){
-                $scope.request_err_msg  = error.data;
+                $scope.add_project_error_msg = error.data;
             });
         };
 
@@ -511,7 +570,7 @@ angular.module('genouest').controller('projectsmngrCtrl',
             $scope.request_grp_msg = "";
             User.add_to_project({name: user_id, project: project.id},{}).$promise.then(function(data){
                 $scope.request_mngt_msg = data.message;
-                Project.remove_request({'name': project.id},{'request': 'add', 'user': user_id}).$promise.then(function(data){ 
+                Project.remove_request({'name': project.id},{'request': 'add', 'user': user_id}).$promise.then(function(data){
                     $scope.project_list(true);
                     User.add_group({name: user_id, group: project.group},{}).$promise.then(function(data){
                         $scope.request_grp_msg = data.message;
@@ -541,58 +600,75 @@ angular.module('genouest').controller('projectsmngrCtrl',
             });
         };
 
-        $scope.add_user = function(project, user_id){
-            $scope.admin_user_msg = "";
-            $scope.admin_user_error_msg = "";
-            if(! user_id){
-                $scope.admin_user_error_msg = "User Id must not be empty";
-                return;
-            };
-            $scope.admin_user_msg = "";
-            $scope.admin_user_error_msg = "";
-            User.add_to_project({name: user_id, project: project.id},{}).$promise.then(function(data){
-                $scope.admin_user_msg = data.message;
-                User.add_group({name: user_id, group: project.group},{}).$promise.then(function(data){
-                    $scope.show_project_users(project)
-                }, function(error){
-                    $scope.admin_user_err_msg = error.data;
-                });
-            }, function(error){
-                $scope.admin_user_err_msg = error.data;
-            });
-        };
-
-        $scope.remove_user = function(project, user_id){
-            $scope.admin_user_msg = "";
-            $scope.admin_user_error_msg = "";
-            User.remove_from_project({name: user_id, project: project.id},{}).$promise.then(function(data){
-                $scope.admin_user_msg = data.message;
-                $scope.show_project_users(project);
-            }, function(error){
-                $scope.admin_user_error_msg = error.data;
-            });
-        };
-
-        $scope.remove_request = function(project_id, user_id, request_type){
+        $scope.remove_request = function(project, user_id, request_type){
             $scope.request_mngt_msg = "";
             $scope.request_mngt_error_msg = "";
-            Project.remove_request({'name': project_id},{'request': request_type, 'user': user_id}).$promise.then(function(data){
+            Project.remove_request({'name': project.id},{'request': request_type, 'user': user_id}).$promise.then(function(data){
                 $scope.request_mngt_msg = data.message;
-                $scope.project_list();
+                $scope.project_list(true);
             }, function(error){
                 $scope.request_mngt_error_msg  = error.data;
             });
         };
 
-        $scope.delete_project = function(project, user_list){
-            $scope.project_msg = '';
-            var promises_list = [];
-            for(var i = 0; i < user_list.length; i++){
-                var promise = User.remove_from_project({name: user_list[i].uid, project: project.id, force:true},{});
-            }
-            Project.delete({'name': project.id}).$promise.then(function(data){
-                $scope.selectedProject = "";
-                $scope.project_list();
+        $scope.show_project_users = function(project) {
+            $scope.msg = '';
+            $scope.rm_prj_err_msg = '';
+            $scope.rm_prj_msg_ok = '';
+            var project_name = project.id;
+            Project.get_users({name: project_name}).$promise.then(function(user_list){
+                $scope.users = user_list;
+                $scope.selectedProject = project;
+                $scope.oldGroup = project.group;
+                for(var i = 0; i<user_list.length;i++){
+                    if(user_list[i].group.indexOf($scope.selectedProject.group) >= 0 || user_list[i].secondarygroups.indexOf($scope.selectedProject.group) >= 0){
+                        $scope.users[i].access=true;
+                    }
+                }
+            });
+        };
+
+});
+
+angular.module('genouest').controller('projectsmngrCtrl',
+    function($scope, $rootScope, $routeParams, $log, $location, Project, Auth, Group, User, GOLog) {
+
+        $scope.project_list = function(){
+            $scope.projects = [];
+            Project.list().$promise.then(function(data) {
+                for(var i=0;i<data.length;i++){
+                    data[i].expire = new Date(data[i].expire);
+                }
+            $scope.projects = data;
+            });
+        };
+
+        $scope.add_requests = [];
+        $scope.remove_requests = [];
+        $scope.project_list();
+        $scope.session_user = Auth.getUser();
+        $scope.new_project = {};
+        $scope.users = [];
+        $scope.new_user = null;
+        if ($scope.session_user.is_admin){
+            Group.list().$promise.then(function(data) {
+                $scope.groups = data;
+            });
+        } else {
+            $scope.groups = [];
+        };
+
+        $scope.request_user = function(project, user_id, request_type){
+            $scope.request_msg = '';
+            $scope.request_err_msg = '';
+            if (! user_id ) {
+                $scope.request_err_msg = 'Genouest id is required';
+                return;
+            };
+            Project.request({'name': project.id},{'request': request_type, 'user': user_id}).$promise.then(function(data){
+                $scope.request_msg = data.message;
+            }, function(error){
+                $scope.request_err_msg  = error.data;
             });
         };
 

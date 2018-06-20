@@ -50,6 +50,37 @@ router.get('/project', function(req, res){
     });
 });
 
+router.get('/project/:id', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, user){
+        if(err || user == null){
+            res.status(404).send('User not found');
+            return;
+        }
+        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+            res.status(401).send('Admin only');
+            return;
+        }
+        projects_db.findOne({'id': req.param('id')}, function(err, project){
+            if(err){
+                console.log(err)
+                res.status(500).send("Error retrieving project");
+                return;
+            }
+            if (! project){
+                res.status(404).send("Project " + req.param('id') + " not found");
+                return;
+            }
+            res.send(project);
+            return;
+        });
+    });
+})
+
 router.post('/project', function(req, res){
     var sess = req.session;
     if(! sess.gomngr) {
