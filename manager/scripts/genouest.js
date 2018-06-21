@@ -491,7 +491,7 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
 
         $scope.project_list = function(refresh_requests = false){
             $scope.projects = [];
-            Project.list().$promise.then(function(data) {
+            Project.list({'all':"true"}).$promise.then(function(data) {
                 for(var i=0;i<data.length;i++){
                     data[i].expire = new Date(data[i].expire);
                     if (! refresh_requests){ continue;};
