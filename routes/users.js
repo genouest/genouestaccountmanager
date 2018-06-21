@@ -58,6 +58,171 @@ var send_notif = function(mailOptions, fid, errors) {
     });
 };
 
+var create_admin_group = function(group_name, owner_name){
+    return new Promise(function (resolve, reject){
+        var mingid = 1000;
+        groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
+          if(!err && data && data.length>0){
+            mingid = data[0].gid+1;
+          }
+          var fid = new Date().getTime();
+          group = {name: group_name, gid: mingid, owner: owner_name};
+          groups_db.insert(group, function(err){
+            goldap.add_group(group, fid, function(err){
+              var script = "#!/bin/bash\n";
+              script += "set -e \n"
+              script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
+              var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
+              fs.writeFile(script_file, script, function(err) {
+                fs.chmodSync(script_file,0755);
+                group.fid = fid;
+                resolve(group);
+                return;
+              });
+            });
+          });
+        });
+
+    });
+}
+var create_admin_user = function(user_name, group){
+    return new Promise(function (resolve, reject){
+        var password = null;
+        if(process.env.MY_ADMIN_PASSWORD){
+            password = process.env.MY_ADMIN_PASSWORD;
+        }
+        else {
+            password = Math.random().toString(36).slice(-10);
+            console.log('Generated admin password:' + user.password);
+        }
+
+        var user = {
+          status: STATUS_ACTIVE,
+          uid: user_name,
+          firstname: 'admin',
+          lastname: 'admin',
+          email: process.env.MY_ADMIN_EMAIL || CONFIG.general.support,
+          address: "",
+          lab: "",
+          responsible: "",
+          group: group.name,
+          secondarygroups: [],
+          maingroup: "",
+          why: "",
+          ip: "",
+          regkey: Math.random().toString(36).slice(-10),
+          is_genouest: true,
+          is_fake: false,
+          uidnumber: -1,
+          gidnumber: -1,
+          cloud: false,
+          duration: 3,
+          expiration: new Date().getTime() + 1000*3600*24*3,
+          loginShell: '/bin/bash',
+          history: []
+        }
+
+        var minuid = 1000;
+        var mingid = 1000;
+        users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
+            if(!err && data && data.length>0){
+                minuid = data[0].uidnumber+1;
+            }
+
+
+            user.uidnumber = minuid;
+            user.gidnumber = group.gid;
+            var fid = new Date().getTime();
+            goldap.add(user, fid, function(err) {
+              if(!err){
+                users_db.insert(user, function(err){
+                    var script = "#!/bin/bash\n";
+                    script += "set -e \n"
+                    script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
+                    script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
+                    script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
+                    script += "fi\n"
+                    script += "sleep 3\n";
+                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
+                    if (typeof CONFIG.general.readme == "object") {
+                      CONFIG.general.readme.forEach(function(dict) {
+                        script += "ln -s " + dict.source_folder + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/" + dict.language + "\n";
+                      });
+                    } else {
+                      script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
+                    };
+                    script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
+                    script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
+                    script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
+                    script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
+                    script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
+                    fs.writeFile(script_file, script, function(err) {
+                      fs.chmodSync(script_file,0755);
+                        var plugin_call = function(plugin_info, userId, data, adminId){
+                            return new Promise(function (resolve, reject){
+                                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                                    resolve(true);
+                                });
+                            });
+                        };
+                        Promise.all(plugins_info.map(function(plugin_info){
+                            return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                        })).then(function(results){
+                            return send_notif(mailOptions, fid, []);
+                        }, function(err){
+                            return send_notif(mailOptions, fid, err);
+                        }).then(function(errs){
+                            resolve(user);
+                        });
+                  });
+                });
+
+              }
+              else {
+                  console.log('Failed to create admin user');
+                  resolve(null);
+              }
+            });
+
+        });
+
+
+    });
+}
+
+router.create_admin = function(default_admin, default_admin_group){
+    users_db.findOne({'uid': default_admin}).then(function(user){
+        if(user){
+            console.log('admin already exists, skipping');
+        }
+        else {
+            console.log('should create admin');
+            groups_db.findOne({name: default_admin}).then(function(group){
+
+                if(group){
+                    console.log('group already exists');
+                    create_admin_user(default_admin, group).then(function(user){
+                        console.log('admin user created');
+                    });
+                }
+                else {
+                    create_admin_group(default_admin_group, default_admin).then(function(group){
+                        console.log('admin group created');
+                        create_admin_user(default_admin, group).then(function(user){
+                            console.log('admin user created');
+                        });
+                    })
+                }
+            })
+        }
+    });
+}
+
 router.get('/user/:id/subscribed', function(req, res){
     var sess = req.session;
     if(! sess.gomngr) {
@@ -698,8 +863,8 @@ router.get('/user/:id/activate', function(req, res) {
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
                     script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                    script += "chown -R "+user.uid+":"+user.group+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-                    script += "chown -R "+user.uid+":"+user.group+" /omaha-beach/"+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
                       fs.chmodSync(script_file,0755);
@@ -1367,7 +1532,7 @@ router.put('/user/:id/ssh', function(req, res) {
           script += "  mkdir -p ~"+user.uid+"/.ssh\n";
           script += "  chmod -R 700 ~"+user.uid+"/.ssh\n";
           script += "  touch  ~"+user.uid+"/.ssh/authorized_keys\n";
-          script += "  chown -R "+user.uid+":"+user.group+" ~"+user.uid+"/.ssh/\n";
+          script += "  chown -R "+user.uidnumber+":"+user.gidnumber+" ~"+user.uid+"/.ssh/\n";
           script += "fi\n";
           script += "echo "+user.ssh+" >> ~"+user.uid+"/.ssh/authorized_keys\n";
           var fid = new Date().getTime();
@@ -1534,7 +1699,7 @@ router.put('/user/:id', function(req, res) {
                       script += "\tmkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"\n";
                       script += "fi\n";
                       script += "mv "+CONFIG.general.home+"/"+user.oldmaingroup+"/"+user.oldgroup+"/"+user.uid+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/\n";
-                      script += "chown -R "+user.uid+":"+user.group+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/"+user.uid+"\n";
+                      script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/"+user.uid+"\n";
                       events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                     }
                   }

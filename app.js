@@ -40,6 +40,13 @@ var tp = require('./routes/tp');
 var CONFIG = require('config');
 
 
+const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
+const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
+
+if(MY_ADMIN_USER !== null){
+    users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+}
+
 var app = express();
 app.use(logger('combined'));
 // view engine setup

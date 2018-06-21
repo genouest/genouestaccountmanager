@@ -3,3 +3,4 @@ manager/bower_components
 config/default.json
 venv
 build
+tests/.env
