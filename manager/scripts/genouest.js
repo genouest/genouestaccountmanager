@@ -569,7 +569,7 @@ angular.module('genouest').controller('userextendCtrl',
 angular.module('genouest').controller('usermngrCtrl',
   function($scope, $rootScope, $routeParams, $log, $http, $location, $window, $timeout, User, Group, Quota, Database, Web, Auth, GOLog, GOActionLog) {
     $scope.session_user = Auth.getUser();
-    $scope.maingroups = ['genouest', 'irisa', 'symbiose'];
+    $scope.maingroups = [];
     $scope.selected_group = '';
     $scope.password1 = '';
     $scope.password2 = '';
@@ -577,6 +577,14 @@ angular.module('genouest').controller('usermngrCtrl',
     $scope.plugins = [];
     $scope.plugin_data = {};
     $scope.u2f = null;
+
+    $http({
+      method: 'GET',
+      url: '../conf'
+    }).then(function successCallback(response) {
+        $scope.maingroups = response.data.main_groups;
+    });
+
     $http({
       method: 'GET',
       url: '../plugin'
@@ -636,10 +644,6 @@ angular.module('genouest').controller('usermngrCtrl',
       };
 
     $scope.plugin_update = function(plugin) {
-        // TODO send update to plugin with plugin_data
-        // plugin is in charge of setting plugin_data.plugin content that will be posted
-        console.log("should update " + plugin);
-        console.log($scope.plugin_data[plugin]);
         $scope.plugin_data[plugin].alert = null;
         $http({
           method: 'POST',

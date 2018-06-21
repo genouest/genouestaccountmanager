@@ -35,6 +35,7 @@ var projects = require('./routes/projects');
 var quota = require('./routes/quota');
 var plugin = require('./routes/plugin');
 var tp = require('./routes/tp');
+var conf = require('./routes/conf');
 
 
 var CONFIG = require('config');
@@ -71,6 +72,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/', routes);
+app.get('/conf', conf);
 app.get('/ip', users);
 app.get('/log/status/:id/:status', logs);
 app.get('/log/:id', logs);
