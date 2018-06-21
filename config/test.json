@@ -50,7 +50,7 @@
     "admin_password": "my"
   },
   "mysql": {
-    "host": "my",
+    "host": "mysql",
     "user": "root",
     "password": "my"
   },
