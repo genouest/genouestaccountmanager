@@ -4,3 +4,5 @@ config/default.json
 venv
 build
 tests/.env
+tests/cron
+tests/home_dir
