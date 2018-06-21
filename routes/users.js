@@ -87,7 +87,7 @@ var create_admin_group = function(group_name, owner_name){
 }
 var create_admin_user = function(user_name, group){
     return new Promise(function (resolve, reject){
-        var password = = Math.random().toString(36).slice(-10);
+        var password = Math.random().toString(36).slice(-10);
         if(process.env.MY_ADMIN_PASSWORD){
             password = process.env.MY_ADMIN_PASSWORD;
         }
