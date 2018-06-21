@@ -121,15 +121,29 @@ angular.module('genouest', ['genouest.resources', 'ngSanitize', 'ngCookies', 'ng
 }]);
 
 angular.module('genouest').controller('genouestCtrl',
-    function ($rootScope) {
+    function ($scope, $rootScope, $http) {
         $rootScope.alerts = [];
         $rootScope.closeAlert = function (index) {
             $rootScope.alerts.splice(index, 1);
         };
+        $scope.config = {}
+        $http({
+          method: 'GET',
+          url: '/conf'
+        }).then(function successCallback(response) {
+            $scope.config = response.data;
+        });
 
     });
 angular.module('genouest').controller('registeredCtrl',
-    function ($rootScope) {
+    function ($scope, $rootScope, $http) {
+        $scope.config = {}
+        $http({
+          method: 'GET',
+          url: '/conf'
+        }).then(function successCallback(response) {
+            $scope.config = response.data;
+        });
     });
 angular.module('genouest').controller('logsCtrl',
     function ($scope, $rootScope, User, Auth, GOLog, GOActionLog, DTOptionsBuilder) {
@@ -577,12 +591,14 @@ angular.module('genouest').controller('usermngrCtrl',
     $scope.plugins = [];
     $scope.plugin_data = {};
     $scope.u2f = null;
-
+    $scope.config = {};
     $http({
       method: 'GET',
       url: '../conf'
     }).then(function successCallback(response) {
         $scope.maingroups = response.data.main_groups;
+        $scope.config = response.data;
+
     });
 
     $http({
@@ -1092,6 +1108,13 @@ angular.module('genouest').controller('registerCtrl',
 
     $scope.uid = null;
     $scope.duration = 365;
+    $scope.config = {}
+    $http({
+      method: 'GET',
+      url: '/conf'
+    }).then(function successCallback(response) {
+        $scope.config = response.data;
+    });
 
     IP.get().$promise.then(function(data) {
       var ips = data.ip.split(',');

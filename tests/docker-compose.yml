@@ -88,6 +88,7 @@ services:
             - mongo
             - openldap
             - mysql
+            - gomail-web
         command: node app.js
 
     cron:
