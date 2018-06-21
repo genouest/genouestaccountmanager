@@ -87,20 +87,19 @@ var create_admin_group = function(group_name, owner_name){
 }
 var create_admin_user = function(user_name, group){
     return new Promise(function (resolve, reject){
-        var password = null;
+        var password = = Math.random().toString(36).slice(-10);
         if(process.env.MY_ADMIN_PASSWORD){
             password = process.env.MY_ADMIN_PASSWORD;
         }
         else {
-            password = Math.random().toString(36).slice(-10);
             console.log('Generated admin password:' + user.password);
         }
 
         var user = {
           status: STATUS_ACTIVE,
           uid: user_name,
-          firstname: 'admin',
-          lastname: 'admin',
+          firstname: user_name,
+          lastname: user_name,
           email: process.env.MY_ADMIN_EMAIL || CONFIG.general.support,
           address: "",
           lab: "",
@@ -119,7 +118,8 @@ var create_admin_user = function(user_name, group){
           duration: 3,
           expiration: new Date().getTime() + 1000*3600*24*3,
           loginShell: '/bin/bash',
-          history: []
+          history: [],
+          password: password
         }
 
         var minuid = 1000;
@@ -129,12 +129,12 @@ var create_admin_user = function(user_name, group){
                 minuid = data[0].uidnumber+1;
             }
 
-
             user.uidnumber = minuid;
             user.gidnumber = group.gid;
             var fid = new Date().getTime();
             goldap.add(user, fid, function(err) {
               if(!err){
+                delete user.password;
                 users_db.insert(user, function(err){
                     var script = "#!/bin/bash\n";
                     script += "set -e \n"

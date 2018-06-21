@@ -15,14 +15,14 @@
     "support": "support@my.org",
     "accounts": "accounts@my.org",
     "secret": "test",
-    "script_dir": "/opt/my",
+    "script_dir": "/opt/my/scripts",
     "admin_ip": [],
     "usage_directory": "/tmp",
     "home": "/home",
     "main_groups": ["", "my"],
     "quota": {
     },
-    "plugin_script_dir": "/opt/my/scripts"
+    "plugin_script_dir": "/opt/my/plugin-scripts"
  },
  "usage": [
  ],
