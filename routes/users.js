@@ -58,7 +58,7 @@ var send_notif = function(mailOptions, fid, errors) {
     });
 };
 
-var create_admin_group = function(group_name, owner_name){
+var create_extra_group = function(group_name, owner_name){
     return new Promise(function (resolve, reject){
         var mingid = 1000;
         groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
@@ -85,7 +85,7 @@ var create_admin_group = function(group_name, owner_name){
 
     });
 }
-var create_admin_user = function(user_name, group){
+var create_extra_user = function(user_name, group, internal_user){
     return new Promise(function (resolve, reject){
         var password = Math.random().toString(36).slice(-10);
         if(process.env.MY_ADMIN_PASSWORD){
@@ -110,7 +110,7 @@ var create_admin_user = function(user_name, group){
           why: "",
           ip: "",
           regkey: Math.random().toString(36).slice(-10),
-          is_genouest: true,
+          is_genouest: internal_user,
           is_fake: false,
           uidnumber: -1,
           gidnumber: -1,
@@ -207,14 +207,14 @@ router.create_admin = function(default_admin, default_admin_group){
 
                 if(group){
                     console.log('group already exists');
-                    create_admin_user(default_admin, group).then(function(user){
+                    create_extra_user(default_admin, group, true).then(function(user){
                         console.log('admin user created');
                     });
                 }
                 else {
-                    create_admin_group(default_admin_group, default_admin).then(function(group){
+                    create_extra_group(default_admin_group, default_admin).then(function(group){
                         console.log('admin group created');
-                        create_admin_user(default_admin, group).then(function(user){
+                        create_extra_user(default_admin, group, true).then(function(user){
                             console.log('admin user created');
                         });
                     })
