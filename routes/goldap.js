@@ -58,7 +58,7 @@ module.exports = {
           attributes: ['dn']
         };
 
-        client.search('ou=people,dc=genouest,dc=org', opts, function(err, res) {
+        client.search('ou=people,' + CONFIG.ldap.dn, opts, function(err, res) {
             if(err) {
                 logger.error('Could not find ' + uid);
                 callback(err);

@@ -178,6 +178,7 @@ var create_admin_user = function(user_name, group){
                             return send_notif(mailOptions, fid, err);
                         }).then(function(errs){
                             resolve(user);
+                            return;
                         });
                   });
                 });
