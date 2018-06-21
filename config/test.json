@@ -19,7 +19,7 @@
     "admin_ip": [],
     "usage_directory": "/tmp",
     "home": "/home",
-    "main_groups": [ "", "my"],
+    "main_groups": ["", "my"],
     "quota": {
     },
     "plugin_script_dir": "/opt/my/scripts"
@@ -41,7 +41,7 @@
    "main_list": "mytestlist",
    "origin": "support@my.org",
    "tag": ""
- },
+  },
   "ldap": {
     "host": "openldap",
     "dn": "dc=my,dc=org",
@@ -142,7 +142,7 @@
      "<hr>"
     ],
     "footer": [
-      "this is from MY",
+      "this is from MY"
     ]
     },
     "plugins": [
