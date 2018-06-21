@@ -40,18 +40,22 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div class="col-sm-2">
+                            <div class="col-sm-11">
                                 <label for="project_description">Description</label>
-                                <textarea id="project_description" ng-model="project.description" class="form-control"/>
+                                <textarea rows="2" id="project_description" ng-model="project.description" class="form-control"/>
                             </div>
-                            <div class="col-sm-2">
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-3">
                                 <label for="update_project_path">Path</label>
                                 <input type="text" id="update_project_path" ng-model="project.path" class="form-control"/>
                             </div>
-                            <div class="col-sm-1">
-                                <label style="opacity: 0;">Update project</label>
-                                <button type="button" class="btn btn-success" ng-click="update_project(project)">Update project</button>
-                            </div>
+                        </div>
+                        <div class="form-group row">
+                          <div class="col-sm-2">
+                            <label style="opacity: 0;">Update project</label>
+                            <button type="button" class="btn btn-success" ng-click="update_project(project)">Update project</button>
+                          </div>
                         </div>
                     </form>
                 </div>
@@ -103,4 +107,3 @@
         </div>
     </div>
 </div>
-

@@ -46,7 +46,7 @@
                     <form role="form" class="user-form form-horizontal">
                         <div class="form-group">
                             <div class="col-sm-3">
-                                <label for="new_user"">New project member</label>
+                                <label for="new_user">New project member</label>
                                 <input placeholder="User Genouest id" id="new_user" type="text" ng-model="new_user" class="form-control"></input>
                             </div>
                             <div class="col-sm-3">
@@ -70,55 +70,44 @@
                     <h3 class="panel-title">Project overview</h3>
                 </div>
                 <div class="panel-body">
-                    <form role="form" class="user-form form-horizonal">
-                        <div class="form-group row">
-                <div class="col-sm-2">
-                    <label for="project_id">Name</label>
-                    <input placeholder="project name" type="text" id="project_id" ng-model="new_project.id" class="form-control"/>
-                </div>
-                <div class="col-sm-2">
-                    <label for="project_owner">Owner</label>
-                    <input placeholder="project owner" type="text" id="project_owner" ng-model="new_project.owner" class="form-control"/>
-                </div>
-                <div class="col-sm-2">
-                    <label for="project_group">Group</label>
-                    <select id="project_group"  ng-model="new_project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
-                </div>
-                <div class="col-sm-2">
-                    <label for="project_size">Size</label>
-                    <input placeholder="project size in G" type="number" id="project_size" ng-model="new_project.size" class="form-control"/>
-                </div>
-                <div class="col-sm-2">
-                    <label for="project_expire">Expiration</label>
-                    <input type="date" id="project_expire" ng-model="new_project.expire" class="form-control"/>
-                </div>
-                <div class="col-sm-2">
-                    <label for="project_org">Financing</label>
-                    <input placeholder="Ex : CNRS" type="text" id="project_org" ng-model="new_project.orga" class="form-control"/>
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-sm-2">
-                    <label for="project_description">Description</label>
-                    <textarea id="project_description" ng-model="new_project.description" class="form-control"/>
-                </div>
-                <div class="col-sm-2">
-                    <label for="project_access">Write permissions</label>
-                    <select id="project_access" ng-model="new_project.access" ng-init="new_project.access='Group'" class="form-control">
-                        <option value="Group" ng-selected="true" >Group</option>
-                        <option value="Data manager">Data manager</option>
-                    </select>
-                </div>
-                <div class="col-sm-2">
-                    <label for="project_path">Path</label>
-                    <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" ng-model="new_project.path" class="form-control"/>
-                </div>
-                <div class="col-sm-1">
-                    <label style="opacity: 0;">Create</label>
-                    <button type="button" class="btn btn-success" ng-click="add_project()">Create</button>
-                </div>
-            </div>
-            </form>                   
+                  <div class="table-responsive">
+                      <table class="table table-striped">
+                          <tbody>
+                            <tr>
+                              <td><b>Name</b></td>
+                              <td>{{selectedProject.id}}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Owner</b></td>
+                              <td>{{selectedProject.owner}}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Group</b></td>
+                              <td>{{selectedProject.group}}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Size</b></td>
+                              <td>{{selectedProject.size}} Gb</td>
+                            </tr>
+                            <tr>
+                              <td><b>Expiration</b></td>
+                              <td>{{selectedProject.expire}}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Financing</b></td>
+                              <td>{{selectedProject.orga}}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Write permissions</b></td>
+                              <td>{{selectedProject.access}}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Description</td>
+                              <td>{{selectedProject.description}}</td>
+                            </tr>
+                          </tbody>
+                      </table>
+                  </div>
                 </div>
             </div>
             <div class="panel panel-primary">
@@ -134,7 +123,10 @@
                             <tbody>
                                 <tr ng-repeat="user in users">
                                     <td>{{user.uid}}</td>
-                                    <td><span ng-if="session_user.uid === selectedProject.owner">{{user.mail}}</span><span ng-if="session_user.uid !== selectedProject.owner">Restricted to owner</span></td>
+                                    <td>
+                                      <span ng-if="session_user.uid === selectedProject.owner">{{user.mail}}</span>
+                                      <span ng-if="session_user.uid !== selectedProject.owner">Restricted to owner</span>
+                                    </td>
                                     <td><span ng-if="user.access">&#10003</span></td>
                                     <td><span ng-if="user.uid === selectedProject.owner">&#10003</span></td>
                                 </tr>
@@ -146,4 +138,3 @@
         </div>
     </div>
 </div>
-
