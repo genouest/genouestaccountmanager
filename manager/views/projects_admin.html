@@ -1,4 +1,6 @@
 <div class='row'>
+
+    <div ng-if="notification" class="alert alert-success">{{notification}}</div>
     <div class="panel panel-default">
     <div class="panel-heading" ng-click="requests_visible=!requests_visible" style="cursor: pointer;">
       <h3 class="panel-title">{{requests_number}} request(s) waiting </h3>

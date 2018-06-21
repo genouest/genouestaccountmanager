@@ -480,7 +480,7 @@ angular.module('genouest').controller('projectmngrCtrl',
                 var promise = User.remove_from_project({name: user_list[i].uid, project: project.id, force:true},{});
             }
             Project.delete({'name': project.id}).$promise.then(function(data){
-                $window.location.href = '#/admin/projects';
+                $window.location.href = '#/admin/projects?deleted=ok';
             });
         };
 
@@ -516,6 +516,10 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
             });
         };
 
+        $scope.notification = "";
+        if($routeParams.deleted == "ok"){
+            $scope.notification = "Project was deleted successfully";
+        };
         $scope.add_requests = [];
         $scope.requests_visible = false;
         $scope.remove_requests = [];
@@ -532,6 +536,7 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
 
 
         $scope.add_project = function(){
+            $scope.notification = "";
             if(! $scope.new_project.id || ! $scope.new_project.group || ! $scope.new_project.owner) {
                 $scope.add_project_error_msg = "Project Id, group, and owner are required fields " + $scope.new_project.id + $scope.new_project.group + $scope.new_project.owner ;
                 return;
@@ -565,6 +570,7 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
         };
 
         $scope.validate_add_request = function(project, user_id){
+            $scope.notification = "";
             $scope.request_mngt_msg = "";
             $scope.request_mngt_error_msg = "";
             $scope.request_grp_msg = "";
@@ -586,6 +592,7 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
         };
 
         $scope.validate_remove_request = function(project, user_id){
+            $scope.notification = "";
             $scope.request_mngt_msg = "";
             $scope.request_mngt_error_msg = "";
             User.remove_from_project({name: user_id, project: project.id},{}).$promise.then(function(data){
@@ -601,6 +608,7 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
         };
 
         $scope.remove_request = function(project, user_id, request_type){
+            $scope.notification = "";
             $scope.request_mngt_msg = "";
             $scope.request_mngt_error_msg = "";
             Project.remove_request({'name': project.id},{'request': request_type, 'user': user_id}).$promise.then(function(data){
@@ -608,23 +616,6 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
                 $scope.project_list(true);
             }, function(error){
                 $scope.request_mngt_error_msg  = error.data;
-            });
-        };
-
-        $scope.show_project_users = function(project) {
-            $scope.msg = '';
-            $scope.rm_prj_err_msg = '';
-            $scope.rm_prj_msg_ok = '';
-            var project_name = project.id;
-            Project.get_users({name: project_name}).$promise.then(function(user_list){
-                $scope.users = user_list;
-                $scope.selectedProject = project;
-                $scope.oldGroup = project.group;
-                for(var i = 0; i<user_list.length;i++){
-                    if(user_list[i].group.indexOf($scope.selectedProject.group) >= 0 || user_list[i].secondarygroups.indexOf($scope.selectedProject.group) >= 0){
-                        $scope.users[i].access=true;
-                    }
-                }
             });
         };
 
