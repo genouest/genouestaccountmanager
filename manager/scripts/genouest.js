@@ -381,7 +381,7 @@ angular.module('genouest').controller('messageCtrl',
     });
 
 angular.module('genouest').controller('projectmngrCtrl',
-    function($scope, $rootScope, $routeParams, $log, $location, Project, Auth, Group, User, GOLog) {
+    function($scope, $rootScope, $routeParams, $log, $window, $location, Project, Auth, Group, User, GOLog) {
 
         $scope.show_project_users = function(project_id) {
             Project.get({id: project_id}).$promise.then(function(data) {
@@ -403,6 +403,7 @@ angular.module('genouest').controller('projectmngrCtrl',
         $scope.project = {};
         $scope.groups = [];
         $scope.users = [];
+        console.log($window.location);
         $scope.show_project_users($routeParams.project_id);
         Group.list().$promise.then(function(data) {
             $scope.groups = data;
@@ -479,8 +480,7 @@ angular.module('genouest').controller('projectmngrCtrl',
                 var promise = User.remove_from_project({name: user_list[i].uid, project: project.id, force:true},{});
             }
             Project.delete({'name': project.id}).$promise.then(function(data){
-                $scope.selectedProject = "";
-                $scope.project_list();
+                $window.location.href = '#/admin/projects';
             });
         };
 
