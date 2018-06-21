@@ -1,5 +1,6 @@
 {
   "general": {
+    "name": "my",
     "readme": [
       { "language": "francais",
         "source_folder" : "/opt/my/readmes/readmes1/"
@@ -10,7 +11,7 @@
     ],
     "double_authentication_for_admin": false,
     "db": "gomngr",
-    "url": "http://my:3000",
+    "url": "http://localhost:3000",
     "admin": [ "admin" ],
     "support": "support@my.org",
     "accounts": "accounts@my.org",
@@ -20,6 +21,7 @@
     "usage_directory": "/tmp",
     "home": "/home",
     "main_groups": ["", "my"],
+    "default_main_group": "my",
     "quota": {
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
@@ -35,7 +37,7 @@
     "port": 27017
  },
  "gomail": {
-   "host": "http://gomail-web",
+   "host": "http://gomail-web:6643",
    "api_root": "/api/v1",
    "api_secret": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1cm46Z29tYWlsL2FwaSIsInVzZXIiOm51bGx9.tGWpP4bvihUI25i0FPjxLy1jrbPVPZ4nKkxxU_y5_O8",
    "main_list": "mytestlist",

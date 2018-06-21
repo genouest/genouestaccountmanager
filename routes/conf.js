@@ -12,7 +12,11 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 
 router.get('/conf', function(req, res){
-    res.send({'main_groups': CONFIG.general.main_groups});
+    res.send({
+        'main_groups': CONFIG.general.main_groups,
+        'name': CONFIG.general.name,
+        'support': CONFIG.general.support
+    });
     res.end();
 });
 

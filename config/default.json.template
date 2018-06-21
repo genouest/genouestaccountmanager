@@ -1,5 +1,6 @@
 {
   "general": {
+    "name": "my entity",
     "readme": [
       { "language": "francais",
         "source_folder" : "/folder/with/readmes1/"
@@ -20,6 +21,7 @@
     "usage_directory": "/tmp",
     "home": "/home",
     "main_groups": [""],
+    "default_main_group": "",
     "quota": {
         "home": {
             "protocol": "http:",

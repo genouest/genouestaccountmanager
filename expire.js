@@ -60,7 +60,7 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
     var mailOptions = {
       origin: MAIL_CONFIG.origin, // sender address
       destinations: [CONFIG.general.support], // list of receivers
-      subject: 'Genouest account expiration: '+user.uid, // Subject line
+      subject: CONFIG.general.name + ' account expiration: ' + user.uid, // Subject line
       message: msg_activ, // plaintext body
       html_message: msg_activ_html // html body
     };

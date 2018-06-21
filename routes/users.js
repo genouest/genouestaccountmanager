@@ -676,7 +676,7 @@ router.delete_user = function(user, action_owner_id){
                    var mailOptions = {
                      origin: MAIL_CONFIG.origin, // sender address
                      destinations:  [GENERAL_CONFIG.accounts], // list of receivers
-                     subject: 'Genouest account deletion: ' +user.uid, // Subject line
+                     subject: GENERAL_CONFIG.name + ' account deletion: ' +user.uid, // Subject line
                      message: msg_activ, // plaintext body
                      html_message: msg_activ_html // html body
                    };
@@ -875,7 +875,7 @@ router.get('/user/:id/activate', function(req, res) {
                         var mailOptions = {
                           origin: MAIL_CONFIG.origin, // sender address
                           destinations: [user.email], // list of receivers
-                          subject: 'Genouest account activation', // Subject line
+                          subject: GENERAL_CONFIG.name + ' account activation', // Subject line
                           message: msg_activ, // plaintext body
                           html_message: msg_activ_html // html body
                         };
@@ -992,7 +992,7 @@ router.get('/user/:id/confirm', function(req, res) {
           var mailOptions = {
             origin: MAIL_CONFIG.origin, // sender address
             destinations: [GENERAL_CONFIG.accounts], // list of receivers
-            subject: 'Genouest account registration: '+uid, // Subject line
+            subject: GENERAL_CONFIG.name + ' account registration: '+uid, // Subject line
             message: 'New account registration waiting for approval: '+uid, // plaintext body
             html_message: 'New account registration waiting for approval: '+uid // html body
           };
@@ -1077,6 +1077,7 @@ router.post('/user/:id', function(req, res) {
       }
 
       var regkey = Math.random().toString(36).substring(7);
+      var default_main_group = GENERAL_CONFIG.default_main_group || "";
       var user = {
         status: STATUS_PENDING_EMAIL,
         uid: req.param('id'),
@@ -1088,7 +1089,7 @@ router.post('/user/:id', function(req, res) {
         responsible: req.param('responsible'),
         group: req.param('group'),
         secondarygroups: [],
-        maingroup: 'genouest',
+        maingroup: default_main_group,
         why: req.param('why'),
         ip: req.param('ip'),
         regkey: regkey,
@@ -1114,7 +1115,7 @@ router.post('/user/:id', function(req, res) {
       var mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
-        subject: 'Genouest account registration', // Subject line
+        subject: GENERAL_CONFIG.name + ' account registration', // Subject line
         message: msg_activ,
         html_message: msg_activ_html
       };
@@ -1299,7 +1300,7 @@ router.get('/user/:id/passwordreset', function(req, res){
       var mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
-        subject: 'GenOuest account password reset request',
+        subject: GENERAL_CONFIG.name + ' account password reset request',
         message: msg,
         html_message: html_msg
       };
@@ -1353,7 +1354,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
               var mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address
                 destinations: [user.email], // list of receivers
-                subject: 'GenOuest account password reset',
+                subject: GENERAL_CONFIG.name + ' account password reset',
                 message: msg,
                 html_message: msg_html
               };
@@ -1462,7 +1463,7 @@ router.get('/user/:id/renew', function(req, res){
                   var mailOptions = {
                     origin: MAIL_CONFIG.origin, // sender address
                     destinations: [user.email], // list of receivers
-                    subject: 'Genouest account reactivation', // Subject line
+                    subject: GENERAL_CONFIG.name + ' account reactivation', // Subject line
                     message: msg_activ, // plaintext body
                     html_message: msg_activ_html // html body
                   };
