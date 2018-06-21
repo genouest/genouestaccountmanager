@@ -1,6 +1,6 @@
 FROM ubuntu
 
-RUN apt-get update && apt-get install -y curl ldap-utils
+RUN apt-get update && apt-get install -y curl ldap-utils openssh-client putty-tools
 COPY gomngr.sh /opt/gomngr.sh
 COPY crontab /etc/cron.d/my-cron
 RUN chmod 0644 /etc/cron.d/my-cron

@@ -34,10 +34,6 @@ services:
             - GOMAIL_REDIS_HOST=gomail-redis
             - GOMAIL_SUPPORT=support@my.org
             - GOMAIL_LISTS=mytestlist
-            - MY_ADMIN_USER=admin
-            - MY_ADMIN_GROUP=admin
-            - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL}
-            - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD}
         depends_on:
             - gomail-rabbitmq
             - gomail-redis
@@ -71,16 +67,34 @@ services:
         environment:
             - LDAP_SERVER_HOST=openldap
 
-
     my:
         image: osallou/my
+        build:
+            context: .
+            dockerfile: Dockerfile
         ports:
             - "3000:3000"
         environment:
             - NODE_ENV=test
             - LDAP_SERVER_HOST=openldap
+            - MY_ADMIN_USER=admin
+            - MY_ADMIN_GROUP=admin
+            - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL}
+            - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD}
+        volumes:
+            - ${MYDIR}/home_dir:/home
+            - ${MYDIR}/cron:/opt/my/scripts
         depends_on:
             - mongo
             - openldap
             - mysql
         command: node app.js
+
+    cron:
+        image: osallou/mycron
+        build:
+            context: .
+            dockerfile: Dockerfile-cron
+        volumes:
+            - ${MYDIR}/home_dir:/home
+            - ${MYDIR}/cron:/opt/my/scripts
