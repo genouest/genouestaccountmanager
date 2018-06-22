@@ -96,6 +96,8 @@ services:
         build:
             context: .
             dockerfile: Dockerfile-cron
+        environment:
+            - NODE_ENV=test            
         volumes:
             - ${MYDIR}/home_dir:/home
             - ${MYDIR}/cron:/opt/my/scripts

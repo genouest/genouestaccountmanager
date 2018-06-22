@@ -83,12 +83,10 @@ app.all('*', function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            console.log('got token');
             users_db.findOne({_id: token}, function(err, session_user){
                 if(err){
                     return res.status(403).send('Invalid token').end();
                 }
-                console.log('session user', session_user);
                 req.session.gomngr = token;
                 req.session.is_logged = true;
                 next();
@@ -115,7 +113,7 @@ app.post('/message', users);
 app.get('/group', users);
 app.get('/config', users);
 app.post('/group/:id', users);
-app.put('/group/:id', users)
+app.put('/group/:id', users);
 app.delete('/group/:id', users);
 app.get('/group/:id', users);
 app.get('/user', users);

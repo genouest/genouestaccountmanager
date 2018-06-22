@@ -46,6 +46,39 @@ var STATUS_EXPIRED = 'Expired';
 
 var MAIL_CONFIG = CONFIG.gomail;
 
+
+const { spawn } = require('child_process');
+
+const runningEnv = process.env.NODE_ENV || 'prod';
+
+// util function to execute scripts immediatly, for test purpose only
+// on dev/prod, scripts should be executed by cron only
+var if_dev_execute_scripts = function(){
+    return new Promise(function (resolve, reject){
+        if (runningEnv !== 'test'){
+            resolve();
+            return;
+        }
+        console.log('In *test* environment, check for scripts to execute');
+        let cron_bin_script = CONFIG.general.cron_bin_script || null;
+        if(cron_bin_script === null){
+            console.error('cron script not defined');
+            reject({'err': 'cron script not defined'});
+            return;
+        }
+        var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+        procScript.on('exit', function (code, signal) {
+          console.log(cron_bin_script + ' process exited with ' +
+                      `code ${code} and signal ${signal}`);
+          resolve();
+        });
+    });
+}
+
+router.use('*', function(req, res, next){
+    if_dev_execute_scripts().then(function(){next();});
+});
+
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
         if(notif.mailSet()) {
