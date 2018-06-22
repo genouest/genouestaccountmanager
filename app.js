@@ -70,6 +70,39 @@ app.use(session({
 app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+var monk = require('monk'),
+    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
+    users_db = db.get('users');
+
+
+app.all('*', function(req, res, next){
+    var token = req.headers['x-api-key'] || null;
+    if(token){
+        if(req.session.gomngr){
+            req.session.gomngr=null;
+            req.session.is_logged = false;
+        }
+        try{
+            console.log('got token');
+            users_db.findOne({_id: token}, function(err, session_user){
+                if(err){
+                    return res.status(403).send('Invalid token').end();
+                }
+                console.log('session user', session_user);
+                req.session.gomngr = token;
+                req.session.is_logged = true;
+                next();
+            });
+        }
+        catch(error){
+            console.error('Invalid token', error);
+            return res.status(403).send('Invalid token').end();
+        }
+    }else{
+        next();
+    }
+});
+
 
 app.get('/', routes);
 app.get('/conf', conf);
