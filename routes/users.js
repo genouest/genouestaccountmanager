@@ -558,45 +558,49 @@ router.post('/user/:id/group/:group', function(req, res){
     var uid = req.param('id');
     var secgroup = req.param('group');
     users_db.findOne({uid: uid}, function(err, user){
-      if(secgroup == user.group) {
-        res.send({message: 'group is user main\'s group'});
-        res.end();
-        return;
-      }
-      for(var g=0;g < user.secondarygroups.length;g++){
-        if(secgroup == user.secondarygroups[g]) {
-          res.send({message: 'group is already set'});
-          res.end();
+        if(err || user == null){
+          res.status(404).send('User not found');
           return;
         }
-      }
-      user.secondarygroups.push(secgroup);
-      var fid = new Date().getTime();
-      // Now add group
-      goldap.change_user_groups(user, [secgroup], [], fid, function() {
-        // remove from ldap
-        // delete home
-        var script = "#!/bin/bash\n";
-        script += "set -e \n"
-        script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-
-        var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-        fs.writeFile(script_file, script, function(err) {
-          fs.chmodSync(script_file,0755);
-
-          users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
-            if(err){
-              res.send({message: 'Could not update user'});
-              res.end();
-              return;
-            }
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-            res.send({message: 'User added to group', fid: fid});
+        if(secgroup == user.group) {
+            res.send({message: 'group is user main\'s group'});
             res.end();
             return;
-          });
+        }
+        for(var g=0;g < user.secondarygroups.length;g++){
+            if(secgroup == user.secondarygroups[g]) {
+                res.send({message: 'group is already set'});
+                res.end();
+                return;
+            }
+        }
+        user.secondarygroups.push(secgroup);
+        var fid = new Date().getTime();
+        // Now add group
+        goldap.change_user_groups(user, [secgroup], [], fid, function() {
+            // remove from ldap
+            // delete home
+            var script = "#!/bin/bash\n";
+            script += "set -e \n"
+            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
+
+            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
+            fs.writeFile(script_file, script, function(err) {
+                fs.chmodSync(script_file,0755);
+
+                users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
+                    if(err){
+                        res.send({message: 'Could not update user'});
+                        res.end();
+                        return;
+                    }
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                    res.send({message: 'User added to group', fid: fid});
+                    res.end();
+                    return;
+                });
+            });
         });
-      });
     });
   });
 
