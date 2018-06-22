@@ -1,6 +1,6 @@
 process.env.NODE_ENV = 'test';
 
-
+let CONFIG = require('config');
 //Require the dev-dependencies
 let chai = require('chai');
 let chaiHttp = require('chai-http');
@@ -8,6 +8,8 @@ let chaiHttp = require('chai-http');
 let should = chai.should();
 let expect = chai.expect;
 let assert = chai.assert;
+
+let fs = require('fs');
 
 chai.use(chaiHttp);
 
@@ -17,6 +19,7 @@ var user_token_id = null;
 var test_user_id = 'test' + Math.random().toString(10).slice(-6);
 var test_group_id = 'test' + Math.random().toString(10).slice(-6);
 var user_test_password = null;
+var user_info = null;
 
 describe('My', () => {
     beforeEach((done) => { //Before each test we empty the database
@@ -207,6 +210,7 @@ describe('My', () => {
                     .set('X-Api-Key', token_id)
                     .end((err, res) => {
                         res.should.have.status(200);
+                        user_info = res.body;
                         assert(res.body.status == 'Active');
                         setTimeout(function(){
                             chai.request('http://localhost:8025')
@@ -235,6 +239,56 @@ describe('My', () => {
                     });
             });
       });
+
+      it('Admin add test user to admin secondary group', (done) => {
+         // router.post('/user/:id/group/:group'
+         chai.request('http://localhost:3000')
+             .post('/user/' + test_user_id + '/group/admin')
+             .set('X-Api-Key', token_id)
+             .end((err, res) => {
+                 res.should.have.status(200);
+                 assert(res.body.fid);
+                 done();
+             });
+      });
+
+      it('test user is in admin secondary group', (done) => {
+         // router.post('/user/:id/group/:group'
+         chai.request('http://localhost:3000')
+             .get('/user/' + test_user_id)
+             .set('X-Api-Key', token_id)
+             .end((err, res) => {
+                 res.should.have.status(200);
+                 assert(res.body.secondarygroups.indexOf('admin') >= 0);
+                 done();
+             });
+      });
+
+      it('Activated user has home dir', (done) => {
+          // Run a timer every seconds for a max of 5 seconds to let creation script be executed
+          var nb_timer = 0;
+
+          let check_home = function(){
+              let base_home = process.env.MY_HOME || './tests/home_dir';
+              let home_path = base_home + '/' + user_info.maingroup + '/' + test_group_id + '/' + test_user_id;
+              if(fs.existsSync(home_path)){
+                  clearInterval(timer);
+                  done();
+              }
+              else {
+
+                  if(nb_timer>5){
+                      clearInterval(timer);
+                      assert(false);
+                      done();
+                  }
+                  nb_timer += 1;
+              }
+          }
+          var timer = setInterval(check_home, 1000);
+
+      });
+
 
   });
 
