@@ -76,7 +76,10 @@ var if_dev_execute_scripts = function(){
 }
 
 router.use('*', function(req, res, next){
-    if_dev_execute_scripts().then(function(){next();});
+    res.on("finish", function() {
+      if_dev_execute_scripts().then(function(){});
+    });
+    next();
 });
 
 var send_notif = function(mailOptions, fid, errors) {
