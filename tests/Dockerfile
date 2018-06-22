@@ -1,6 +1,9 @@
 FROM node
 
-RUN apt-get update && apt-get install -y ldap-utils
+RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
+COPY gomngr.sh /opt/gomngr.sh
+
+RUN echo build 1
 RUN git clone -b tests https://github.com/genouest/genouestaccountmanager.git /root/genouestaccountmanager
 WORKDIR /root/genouestaccountmanager
 
