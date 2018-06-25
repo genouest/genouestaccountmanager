@@ -42,10 +42,22 @@ router.get('/project', function(req, res){
                 });
             };
         } else {
-            projects_db.find({}, function(err, projects){
-                res.send(projects);
-                return;
-            });
+            if (req.param('all') === "true"){
+                projects_db.find({}, function(err, projects){
+                    res.send(projects);
+                    return;
+                });
+            } else {
+                if (! user.projects) {
+                    res.send([]);
+                    return;
+                } else {
+                    projects_db.find({id: {$in : user.projects}}, function(err, projects){
+                        res.send(projects);
+                        return;
+                    });
+                };
+            };
         };
     });
 });

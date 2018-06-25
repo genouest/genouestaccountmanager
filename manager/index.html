@@ -49,7 +49,7 @@
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav pull-right" ng-controller="userCtrl">
                         <li ng-if="is_logged" class='dropdown'>
-                            <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Usage <span class="caret"></span></a>
+                            <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <i class="glyphicon glyphicon-signal"></i> Usage <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUsage">
                                 <li role="presentation" ng-repeat="usage in usages">
                                     <a role="menuitem" tabindex="-1" href="{{usage.link}}" target="_blank">{{usage.name}}</a>
@@ -65,26 +65,26 @@
                         <li ng-if="is_logged">
                             <a href="#/user/{{user.uid}}">
                                 <i class="glyphicon glyphicon-user"></i>
-                                {{user.uid}}
+                                My profile
+                            </a>
+                        </li>
+                        <li ng-if="is_logged">
+                            <a href="#/project">
+                                <i class="glyphicon glyphicon-briefcase"></i>
+                                My projects
                             </a>
                         </li>
                         <li ng-if="user.is_admin" class='dropdown'>
-                            <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
+                            <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-cog"></i> Admin <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/user">Users</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/group">Groups</a></li>
-                              <li role="presentation"><a role="menuitem" tabindex="-1" href="#/admin/projects">Projects managment</a></li>
+                              <li role="presentation"><a role="menuitem" tabindex="-1" href="#/admin/projects">Projects</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/message">Send message</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/database">Databases</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/web">Web sites</a></li>
                               <li role="presentation"><a role="menuitem" tabindex="-1" href="#/logs">Logs</a></li>
                           </ul>
-                        </li>
-                        <li ng-if="is_logged">
-                            <a href="#/project">
-                                <i class="glyphicon glyphicon-user"></i>
-                                Projects
-                            </a>
                         </li>
                         <li ng-if="is_logged">
                             <a href="" ng-click="logout()">
