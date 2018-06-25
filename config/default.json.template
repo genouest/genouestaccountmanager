@@ -69,6 +69,10 @@
     "main_list": "",
     "origin": "",
     "tag": ""
+    "optin_message":"",
+    "optin_message_html":"",
+    "optout_message":"",
+    "optout_message_html":"",
   },
   "tp": {
     "prefix": "tp",

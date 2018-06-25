@@ -94,7 +94,7 @@ module.exports = {
 
         const options = {
             uri: "/mail/opt/" + CONFIG.gomail.main_list,
-            body: {'email': [email]}
+            body: {'email': [email], 'message': CONFIG.gomail.optin_message, 'message_html': CONFIG.gomail.optin_message_html}
         }
 
         baseRequest.put(options, function(err, res, body) {
@@ -122,7 +122,7 @@ module.exports = {
 
         const options = {
             uri: "/mail/opt/" + CONFIG.gomail.main_list,
-            body: {'email': [email]}
+            body: {'email': [email], 'message': CONFIG.gomail.optin_message, 'message_html': CONFIG.gomail.optin_message_html}
         }
 
         baseRequest.delete(options, function(err, res, body) {
@@ -156,7 +156,7 @@ module.exports = {
 
         const options = {
             uri: "/mail/opt/" + CONFIG.gomail.main_list,
-            body: {'email': [newemail]}
+            body: {'email': [newemail], 'message': CONFIG.gomail.optin_message, 'message_html': CONFIG.gomail.optin_message_html}
         }
 
         baseRequest.put(options, function(err, res, body) {
