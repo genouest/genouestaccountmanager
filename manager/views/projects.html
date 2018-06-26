@@ -34,7 +34,7 @@
   <div class="well ng-scope">
       <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
-  <div class="panel panel-default" ng-if="session_user.uid === selectedProject.owner || session_user.is_admin">
+  <div class="panel panel-default" ng-if="session_user.uid === selectedProject.owner">
     <div class="panel-heading" ng-click="manager_visible=!manager_visible" style="cursor: pointer;">
       <h2 class="panel-title">Management console</h2>
     </div>
