@@ -492,12 +492,14 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
         $scope.project_list = function(refresh_requests = false){
             $scope.projects = [];
             Project.list({'all':"true"}).$promise.then(function(data) {
-                for(var i=0;i<data.length;i++){
-                    data[i].expire = new Date(data[i].expire);
-                    if (! refresh_requests){ continue;};
+                if (refresh_requests){
                     $scope.add_requests = [];
                     $scope.remove_requests = [];
                     $scope.requests_number = 0;
+                }
+                for(var i=0;i<data.length;i++){
+                    data[i].expire = new Date(data[i].expire);
+                    if (! refresh_requests){ continue;};
                     if (data[i]["add_requests"]){
                         for(var j=0;j<data[i]["add_requests"].length;j++){
                             $scope.add_requests.push({'project': data[i], 'user': data[i]["add_requests"][j]});
