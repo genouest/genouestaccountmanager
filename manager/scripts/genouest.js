@@ -1058,11 +1058,12 @@ angular.module('genouest').controller('usermngrCtrl',
         if(newproject){
             User.add_to_project({name: $scope.user.uid, project: newproject.id},{}).$promise.then(function(data){
                 $scope.add_to_project_msg = data.message;
-                $scope.user_projects.push({id:newproject.id, owner:false});
                 User.add_group({name: $scope.user.uid, group: newproject.group},{}).$promise.then(function(data){
                     $scope.add_to_project_grp_msg = data.message;
+                    $scope.user_projects.push({id:newproject.id, owner:false, member:true});
                 }, function(error){
                     $scope.request_mngt_error_msg = error.data;
+                    $scope.user_projects.push({id:newproject.id, owner:false, member:false});
                 });
             }, function(error){
                 $scope.add_to_project_error_msg = error.data;
