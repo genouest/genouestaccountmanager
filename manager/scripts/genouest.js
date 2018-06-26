@@ -966,25 +966,27 @@ angular.module('genouest').controller('usermngrCtrl',
         } else {
             $scope.user = user;
         }
-
-        Project.list().$promise.then(function(data) {
-            $scope.projects = data;
-            $scope.user_projects = [];
-            for(var i=0; i<data.length;i++){
-                if (user.projects.indexOf(data[i].id) >= 0){
-                    var is_owner = false;
-                    var user_in_group = false;
-                    if(user.uid === data[i].owner){
-                        is_owner = true;
+        $scope.projects = [];
+        $scope.user_projects = [];
+        if(user.is_admin) {
+            Project.list({all: "true"}).$promise.then(function(data) {
+                $scope.projects = data;
+                $scope.user_projects = [];
+                for(var i=0; i<data.length;i++){
+                    if (user.projects.indexOf(data[i].id) >= 0){
+                        var is_owner = false;
+                        var user_in_group = false;
+                        if(user.uid === data[i].owner){
+                            is_owner = true;
+                        }
+                        if(user.group.indexOf(data[i].group) >= 0 || user.secondarygroups.indexOf(data[i].group >= 0)){
+                            user_in_group = true;
+                        }
+                        $scope.user_projects.push({id:data[i].id, owner:is_owner, group: data[i].group, member:user_in_group});
                     }
-                    if(user.group.indexOf(data[i].group) >= 0 || user.secondarygroups.indexOf(data[i].group >= 0)){
-                        user_in_group = true;
-                    }
-                    $scope.user_projects.push({id:data[i].id, owner:is_owner, group: data[i].group, member:user_in_group});
                 }
-            }
-        });
-
+            });
+        }
         User.is_subscribed({name: user.uid}).$promise.then(function(data){
             $scope.subscribed = data.subscribed;
         });
@@ -1042,7 +1044,17 @@ angular.module('genouest').controller('usermngrCtrl',
 
 
     $scope.add_to_project = function() {
+        $scope.add_to_project_msg = "";
+        $scope.add_to_project_grp_msg = "";
+        $scope.add_to_project_error_msg = "";
+        $scope.request_mngt_error_msg = "";
         var newproject = $scope.user.newproject;
+        for(var i=0; i<$scope.user_projects.length; i++){
+            if(newproject.id === $scope.user_projects[i].id){
+                $scope.add_to_project_error_msg = "User is already in project";
+                return;
+            }
+        }
         if(newproject){
             User.add_to_project({name: $scope.user.uid, project: newproject.id},{}).$promise.then(function(data){
                 $scope.add_to_project_msg = data.message;
