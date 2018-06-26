@@ -597,6 +597,7 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
             $scope.notification = "";
             $scope.request_mngt_msg = "";
             $scope.request_mngt_error_msg = "";
+            $scope.request_grp_msg = "";
             User.remove_from_project({name: user_id, project: project.id},{}).$promise.then(function(data){
                 $scope.request_mngt_msg = data.message;
                 Project.remove_request({'name': project.id},{'request': 'remove', 'user': user_id}).$promise.then(function(data){
@@ -613,6 +614,7 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
             $scope.notification = "";
             $scope.request_mngt_msg = "";
             $scope.request_mngt_error_msg = "";
+            $scope.request_grp_msg = "";
             Project.remove_request({'name': project.id},{'request': request_type, 'user': user_id}).$promise.then(function(data){
                 $scope.request_mngt_msg = data.message;
                 $scope.project_list(true);
