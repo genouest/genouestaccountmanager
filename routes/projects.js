@@ -302,7 +302,7 @@ router.put('/project/:id/request', function(req, res){
                 project.add_requests = temp_requests;
             } else if (req.param('request') === "remove" ){
                 for(var i=0;i<project.remove_requests.length;i++){
-                    if( ! project.remove_requests[i] === req.param('user')){
+                    if( project.remove_requests[i] !== req.param('user')){
                         temp_requests.push(project.remove_requests[i]);
                     }
                 }
