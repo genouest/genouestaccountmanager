@@ -1,0 +1,161 @@
+<div class='row'>
+
+    <div ng-if="notification" class="alert alert-success">{{notification}}</div>
+    <div class="panel panel-default">
+    <div class="panel-heading" ng-click="requests_visible=!requests_visible" style="cursor: pointer;">
+      <h3 class="panel-title">{{requests_number}} request(s) waiting </h3>
+    </div>
+    <div ng-if="requests_visible" class="panel-body">
+      <div class="row">
+        <div ng-if="request_mngt_msg" class="alert alert-success">{{request_mngt_msg}}</div>
+        <div ng-if="request_grp_msg" class="alert alert-success">{{request_grp_msg}}</div>
+        <div ng-if="request_mngt_error_msg" class="alert alert-danger">{{request_mngt_error_msg}}</div>
+        <div class="col-md-6">
+          <div class="panel panel-warning">
+            <div class="panel-heading">
+              <h3 class="panel-title">Add user</h3>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive">
+                <table datatable="ng" class="table table-striped">
+                  <thead>
+                    <th>Project</th>
+                    <th>User</th>
+                    <th></th>
+                    <th></th>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="request in add_requests">
+                      <td>{{request.project.id}}</td>
+                      <td>{{request.user}}</td>
+                      <td ng-click="validate_add_request(request.project,request.user)" style="cursor: pointer;"><h4><span class="label label-success">Add</span></h4></td>
+                      <td ng-click="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><h4><span class="label label-danger">Cancel</span></h4></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="panel panel-warning">
+            <div class="panel-heading">
+              <h3 class="panel-title">Remove user</h3>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive">
+                <table datatable="ng" class="table table-striped">
+                  <thead>
+                    <th>Project</th>
+                    <th>User</th>
+                    <th></th>
+                    <th></th>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="request in remove_requests">
+                      <td>{{request.project.id}}</td>
+                      <td>{{request.user}}</td>
+                      <td><button type="button" class="btn btn-success" ng-click="validate_remove_request(request.project,request.user)">Remove</button></td>
+                      <td><button type="button" class="btn btn-danger" ng-click="remove_request(request.project,request.user, 'remove')">Cancel</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">All projects</h3>
+    </div>
+    <div class="panel-body">
+      <div class="table-responsive">
+        <table datatable="ng" class="table table-striped">
+          <thead>
+            <th>Project</th>
+            <th>Owner</th>
+            <th>Group</th>
+            <th>Path</th>
+            <th>Size (Go)</th>
+            <th>Expiration</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="project in projects">
+              <td><a ng-href="#/admin/project/{{project.id}}"><h4><span class="label label-primary">{{project.id}}</span></h4></a></td>
+              <td>{{project.owner}}</td>
+              <td>{{project.group}}</td>
+              <td>{{project.path}}</td>
+              <td>{{project.size}}</td>
+              <td>{{project.expire | date}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">Project creation</h3>
+  </div>
+  <div class="panel-body">
+    <div ng-if="add_project_msg" class="alert alert-success">{{add_project_msg}}</div>
+    <div ng-if="add_project_error_msg" class="alert alert-danger">{{add_project_error_msg}}</div>
+    <form role="form" class="user-form form-horizonal">
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label for="project_id">Name</label>
+          <input placeholder="project name" type="text" id="project_id" ng-model="new_project.id" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+          <label for="project_owner">Owner</label>
+          <input placeholder="project owner" type="text" id="project_owner" ng-model="new_project.owner" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+          <label for="project_group">Group</label>
+          <select id="project_group"  ng-model="new_project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+          <label for="project_size">Size</label>
+          <input placeholder="project size in G" type="number" id="project_size" ng-model="new_project.size" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+          <label for="project_expire">Expiration</label>
+          <input type="date" id="project_expire" ng-model="new_project.expire" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+          <label for="project_org">Financing</label>
+          <input placeholder="Ex : CNRS" type="text" id="project_org" ng-model="new_project.orga" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-12">
+          <label for="project_description">Description</label>
+          <textarea rows="2" id="project_description" ng-model="new_project.description" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label for="project_access">Write permissions</label>
+          <select id="project_access" ng-model="new_project.access" ng-init="new_project.access='Group'" class="form-control">
+            <option value="Group" ng-selected="true" >Group</option>
+            <option value="Data manager">Data manager</option>
+          </select>
+        </div>
+        <div class="col-sm-3">
+          <label for="project_path">Path</label>
+          <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" ng-model="new_project.path" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label style="opacity: 0;">Create</label>
+          <button type="button" class="btn btn-success" ng-click="add_project()">Create</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+</div>

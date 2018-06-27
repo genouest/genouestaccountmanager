@@ -36,6 +36,7 @@ var monk = require('monk'),
     databases_db = db.get('databases'),
     web_db = db.get('web'),
     users_db = db.get('users'),
+    projects_db = db.get('projects'),
     events_db = db.get('events');
 
 
@@ -1781,6 +1782,129 @@ router.put('/user/:id', function(req, res) {
   });
 
 });
+
+//TODO : Verify session user is admin or in project
+
+router.get('/project/:id/users', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, user){
+        if(err || user == null){
+            res.status(404).send('User not found');
+            return;
+        }
+        users_db.find({'projects': req.param('id')}, function(err, users_in_project){
+            res.send(users_in_project);
+            res.end();
+        });
+    });
+});
+
+router.post('/user/:id/project/:project', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            res.end();
+            return;
+        }
+        newproject = req.param('project');
+        uid = req.param('id');
+        var fid = new Date().getTime();
+        users_db.findOne({uid: uid}, function(err, user){
+            if(!user || err) {
+                res.status(404).send('User does not exists')
+                res.end();
+                return;
+            }
+            if (!user.projects){
+                user.projects = [];
+            }
+            for(var g=0; g < user.projects.length; g++){
+                if(newproject == user.projects[g]) {
+                    res.send({message:'User is already in project : nothing was done.'});
+                    res.end();
+                    return;
+                }
+            }
+            user.projects.push(newproject);
+            users_db.update({_id: user._id}, {'$set': { projects: user.projects}}, function(err){
+                if(err){
+                    res.status(403).send('Could not update user');
+                    res.end();
+                    return;
+                }
+                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to project ' + newproject , 'logs': []}, function(err){});
+                res.send({message: 'User added to project', fid: fid});
+                res.end();
+                return;
+            });
+        });
+    });
+});
+
+router.delete('/user/:id/project/:project', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            res.end();
+            return;
+        }
+        oldproject = req.param('project');
+        uid = req.param('id');
+        var fid = new Date().getTime();
+        users_db.findOne({uid: uid}, function(err, user){
+            if(! user) {
+                res.status(404).send('User ' + uid + ' not found');
+                res.end();
+                return;
+            }
+            projects_db.findOne({id:oldproject}, function(err, project){
+                if(err){
+                    console.log(err);
+                    res.status(500).send("Error");
+                    res.end();
+                    return;
+                }
+                if( project && uid === project.owner && ! req.param('force')){
+                    res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
+                    res.end();
+                    return;
+                }
+                tempprojects = [];
+                for(var g=0; g < user.projects.length; g++){
+                    if(oldproject != user.projects[g]) {
+                        tempprojects.push(user.projects[g]);
+                    }
+                }
+                users_db.update({_id: user._id}, {'$set': { projects: tempprojects}}, function(err){
+                    if(err){
+                        res.status(403).send('Could not update user');
+                        res.end();
+                        return;
+                    }
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from project ' + oldproject , 'logs': []}, function(err){});
+                    res.send({message: 'User removed from project', fid: fid});
+                    res.end();
+                    return;
+                });
+            });
+        });
+    });
+});
+
 
 router.get('/lists', function(req, res){
     var sess = req.session;
