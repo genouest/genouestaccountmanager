@@ -70,15 +70,33 @@
 
               </div>
             </form>
+            <h5>Projects associated with this group :</h5>
+            <div class="table">
+                <table class="table table-striped">
+                  <thead>
+                    <th>Project</th><th>Owner</th>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="project in projects">
+                      <td>{{project.id}}</td>
+                      <td>{{project.owner}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+            <br>
+            <h5>Group members</h5>
             <div class="table-responsive">
                 <table datatable="ng" class="table table-striped">
                   <thead>
-                    <th>User</th><th>Email</th>
+                    <th>User</th><th>Email</th><th>In associated project?</th><th>Main group?</th>
                   </thead>
                   <tbody>
                     <tr ng-repeat="user in users">
                       <td><a ng-href="#/user/{{user.uid}}"><h4><span class="label label-primary">{{user.uid}}</span></h4></a></td>
                       <td>{{user.email}}</td>
+                      <td><span ng-if="user.authorized">&#10003</span></td>
+                      <td><span ng-if="user.group == selectedGroup.name">&#10003</span></td>
                     </tr>
                   </tbody>
                 </table>
