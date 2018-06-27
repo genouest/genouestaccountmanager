@@ -432,12 +432,12 @@ angular.module('genouest').controller('projectmngrCtrl',
 
         $scope.remove_user = function(project,user_id){
             $scope.admin_user_msg = "";
-            $scope.admin_user_error_msg = "";
+            $scope.admin_user_err_msg = "";
             User.remove_from_project({name: user_id, project: project.id},{}).$promise.then(function(data){
                 $scope.admin_user_msg = data.message;
                 $scope.show_project_users(project.id);
             }, function(error){
-                $scope.admin_user_error_msg = error.data;
+                $scope.admin_user_err_msg = error.data;
             });
         };
 
@@ -475,7 +475,6 @@ angular.module('genouest').controller('projectmngrCtrl',
 
        $scope.delete_project = function(project, user_list){
             $scope.project_msg = '';
-            var promises_list = [];
             for(var i = 0; i < user_list.length; i++){
                 var promise = User.remove_from_project({name: user_list[i].uid, project: project.id, force:true},{});
             }
