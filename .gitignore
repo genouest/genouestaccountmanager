@@ -1,5 +1,6 @@
 node_modules
 manager/bower_components
 config/default.json
+config/test.json
 venv
 build
