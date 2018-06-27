@@ -637,7 +637,6 @@ angular.module('genouest').controller('projectsmngrCtrl',
             $scope.projects = data;
             });
         };
-
         $scope.add_requests = [];
         $scope.remove_requests = [];
         $scope.project_list();
@@ -660,6 +659,18 @@ angular.module('genouest').controller('projectsmngrCtrl',
                 $scope.request_err_msg = 'Genouest id is required';
                 return;
             };
+            if (request_type === "add"){
+                for(var i = 0; i < $scope.users.length; i++){
+                    if($scope.users[i].uid === user_id){
+                        $scope.request_err_msg = 'User is already in project';
+                        return;
+                    }
+                }
+            }
+            if (request_type === "remove" && $scope.selectedProject.owner === user_id){
+                $scope.request_err_msg = 'You cannot remove the project owner';
+                return;
+            }
             Project.request({'name': project.id},{'request': request_type, 'user': user_id}).$promise.then(function(data){
                 $scope.request_msg = data.message;
             }, function(error){
