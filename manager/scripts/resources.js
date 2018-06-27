@@ -53,25 +53,25 @@
               method: 'POST',
               isArray: false,
               cache: false
-          },
-          get: {
-            url: prefix+'/group/:name',
-            method: 'GET',
-            isArray: true,
-            cache: false
-          },
-          delete: {
+            },
+            get: {
+              url: prefix+'/group/:name',
+              method: 'GET',
+              isArray: true,
+              cache: false
+            },
+            delete: {
               url: prefix+'/group/:name',
               method: 'DELETE',
               isArray: false,
               cache: false
-          },
-          update: {
+            },
+            update: {
               url: prefix+'/group/:name',
               method: 'PUT',
               isArray: false,
               cache: false
-          }
+            }
         });
       }
 
@@ -94,44 +94,44 @@
               method: 'POST',
               isArray: false,
               cache: false
-          },
+            },
             get_users: {
               url: prefix+'/project/:name/users',
               method: 'GET',
               isArray: true,
               cache: false
-          },
+            },
             get_projects_in_group: {
               url: prefix+'/group/:name/projects',
               method: 'GET',
               isArray: true,
               cache: false
-          },
+            },
             update: {
               url: prefix+'/project/:name',
               method: 'POST',
               isArray: false,
               cache: false
-          },
+            },
             request: {
               url: prefix+'/project/:name/request',
               method: 'POST',
               isArray: false,
               cache: false
-          },
+            },
             remove_request: {
               url: prefix+'/project/:name/request',
               method: 'PUT',
               isArray: false,
               cache: false
-          },
+            },
             delete: {
               url: prefix+'/project/:name',
               method: 'DELETE',
               isArray: false,
               cache: false
             }
-          });
+        });
       }
 
 
@@ -178,7 +178,7 @@
               isArray: false,
               cache: false
             }
-          });
+        });
       }
 
       function Web($resource) {
@@ -213,7 +213,7 @@
               isArray: false,
               cache: false
             }
-          });
+        });
       }
 
       function User($resource) {
@@ -368,7 +368,7 @@
             isArray: false,
             cache: false
             }
-          });
+        });
       }
 
       function Logout($resource) {
