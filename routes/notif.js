@@ -57,20 +57,15 @@ module.exports = {
             callback(false);
             return;
         }
-
         const options = {
             uri: "/list/" + list,
         }
 
         baseRequest(options, function(err, res, body) {
-
             if(err || res.statusCode !== 200){
                 callback([]);
                 return;
             }
-
-            console.log(body["members"]);
-
             callback(body["members"]);
             return;
         })
