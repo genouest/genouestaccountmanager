@@ -70,7 +70,7 @@ var create_tp_users_db = function(owner, quantity, duration, end_date){
                   responsible: owner,
                   group: CONFIG.tp.group.name,
                   secondarygroups: [],
-                  maingroup: 'genouest',
+                  maingroup: CONFIG.general.default_main_group,
                   why: 'TP/Training',
                   ip: '',
                   regkey: '',

@@ -1,0 +1,2 @@
+* * * * * root /opt/gomngr.sh /opt/my/scripts http://my:3000 >> /var/log/cron.log 2>&1
+# empty line

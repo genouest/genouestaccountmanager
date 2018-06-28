@@ -1,0 +1,103 @@
+version: '3'
+
+services:
+
+    mysql:
+        image: mariadb
+        environment:
+            - MYSQL_ROOT_PASSWORD=my
+
+    mongo:
+        image: mongo
+
+    mailhog:
+        image: mailhog/mailhog
+        ports:
+            - "8025:8025"
+
+    gomail-rabbitmq:
+        image: rabbitmq
+        hostname: gomail-rabbitmq
+        environment:
+            - RABBITMQ_DEFAULT_USER=gomail
+            - RABBITMQ_DEFAULT_PASS=gomail
+
+    gomail-redis:
+        image: redis
+
+    gomail-web:
+        image: osallou/gomail
+        environment:
+            - RABBITMQ_URL=amqp://gomail:gomail@gomail-rabbitmq:5672/%2F
+            - GOMAIL_HREF=http://gomail-web:6643
+            - GOMAIL_SECRET=test
+            - GOMAIL_REDIS_HOST=gomail-redis
+            - GOMAIL_SUPPORT=support@my.org
+            - GOMAIL_LISTS=mytestlist
+        depends_on:
+            - gomail-rabbitmq
+            - gomail-redis
+        command: gunicorn -c gunicorn_conf.py -b 0.0.0.0:6643 gomail.app:app
+
+    gomail-executor:
+        image: osallou/gomail
+        depends_on:
+            - gomail-rabbitmq
+        environment:
+            - RABBITMQ_URL=amqp://gomail:gomail@gomail-rabbitmq:5672/%2F
+            - GOMAIL_MAIL_HOST=mailhog
+            - GOMAIL_MAIL_PORT=1025
+            - GOMAIL_MAIL_ORIGIN=support@my.org
+            - GOMAIL_SECRET=test
+        command: python3 gomail/executor.py
+
+    openldap:
+        image: dinkel/openldap
+        environment:
+            - "SLAPD_PASSWORD=my"
+            - "SLAPD_DOMAIN=my.org"
+        volumes:
+            #- ${MYDIR}/openldap/data/etc:/etc/ldap
+            #- ${MYDIR}/openldap/data/lib:/var/lib/ldap
+            - ${MYDIR}/ldap-data:/etc/ldap/prepopulate:ro
+    phpldapadmin:
+        image: dinkel/phpldapadmin
+        ports:
+            - "8080:80"
+        environment:
+            - LDAP_SERVER_HOST=openldap
+
+    my:
+        image: osallou/my
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "3000:3000"
+        environment:
+            - NODE_ENV=test
+            - LDAP_SERVER_HOST=openldap
+            - MY_ADMIN_USER=admin
+            - MY_ADMIN_GROUP=admin
+            - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL}
+            - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD}
+        volumes:
+            - ${MYDIR}/home_dir:/home
+            - ${MYDIR}/cron:/opt/my/scripts
+        depends_on:
+            - mongo
+            - openldap
+            - mysql
+            - gomail-web
+        command: node app.js
+
+    cron:
+        image: osallou/mycron
+        build:
+            context: .
+            dockerfile: Dockerfile-cron
+        environment:
+            - NODE_ENV=test            
+        volumes:
+            - ${MYDIR}/home_dir:/home
+            - ${MYDIR}/cron:/opt/my/scripts

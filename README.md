@@ -93,11 +93,28 @@ User is also set as memberOf for main group.
 
     forever start -o out.log -e err.log app.js
 
+
 ## Starting from
 
 ### An empty LDAP
 
-First step is to create the first admin user. To do so, register as a basic user via the Web UI and confirm the email.
+First step is to create the first admin user (must be defined as admin in config file).
+
+At application start, one can use environment variables to automatically create an internal user and group:
+
+* disable, if set, double_authentication_for_admin in configuration
+
+Then launch add with following env vars:
+
+* MY_ADMIN_USER=admin
+* MY_ADMIN_GROUP=admin
+* MY_ADMIN_EMAIL=admin@my.org
+* MY_ADMIN_PASSWORD=XXXX
+
+If specified env vars refer to an exiting group or user, then their creation is skipped.
+
+
+Else, to add some extra users, register as a basic user via the Web UI and confirm the email.
 Once this is done:
 
 * disable, if set, double_authentication_for_admin in configuration
@@ -112,7 +129,7 @@ Once this is done:
 * Login in the Web UI to check login/password verification
 * Optionally, re-enable double_authentication_for_admin in config
 
-All other users will use standard registration process via WEB UI and admin wil be able to validate them via the UI (as well as for other admin).
+All other users will use standard registration process via WEB UI and admin will be able to validate them via the UI (as well as for other admin).
 
 ### From an existing/populated LDAP
 
@@ -125,7 +142,7 @@ If an LDAP database already contains users, one need to:
     # If everything is fine
     node import_from_ldap.js --import --admin admin_user_id # Check first with no import
 
-Users will not be added to mailchimp mailing list.
+Users will not be added to mailing list.
 
 
 ## Development
@@ -154,8 +171,8 @@ expiration deactivates accounts if their expiration date is reached.
 
 ## Mailing
 
-Users are subcsribed to a mailing list based on their email address. The email address of account is *MANDATORY*.
-This is used to broadcast messages to all users. Mailing list is using mailchimp.
+Users are subscribed to a mailing list based on their email address. The email address of account is *MANDATORY*.
+This is used to broadcast messages to all users. Mailing list is using gomail.
 
 Standard smtp configuration is used for user notifications.
 
@@ -187,3 +204,4 @@ Basically a plugin must react on user activation/deactivation, provide an Angula
 
 With env variable *export gomngr_auth=fake*, one can disable authentication password verification (**FOR TESTING ONLY**)
 
+In *tests* directory, a docker-compose is available to setup whole infrastructure but needs adaptation if needed to use in production (volumes, database url, ...)

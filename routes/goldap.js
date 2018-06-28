@@ -58,27 +58,32 @@ module.exports = {
           attributes: ['dn']
         };
 
-        client.search('ou=people,dc=genouest,dc=org', opts, function(err, res) {
+        client.search('ou=people,' + CONFIG.ldap.dn, opts, function(err, res) {
             if(err) {
                 logger.error('Could not find ' + uid);
                 callback(err);
             }
-              res.on('searchEntry', function(entry) {
+            let foundMatch = false;
+            res.on('searchEntry', function(entry) {
                 var user_dn = entry.object['dn'];
+                foundMatch = true;
                 client.bind(user_dn, password, function(err) {
                     callback(err);
                 });
-              });
-              res.on('searchReference', function(referral) {
-              });
-              res.on('error', function(err) {
+            });
+            res.on('searchReference', function(referral) {
+            });
+            res.on('error', function(err) {
                 logger.error('error ' + err.message);
                 callback(err.message);
-              });
-              res.on('end', function(result) {
-              });
             });
-             });
+            res.on('end', function(result) {
+                if(! foundMatch){
+                    callback('no user found');
+                }
+            });
+        });
+    });
 
     var bind_options = {
       binddn: 'uid='+uid+'ou=people,'+CONFIG.ldap.dn,

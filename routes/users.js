@@ -36,6 +36,7 @@ var monk = require('monk'),
     databases_db = db.get('databases'),
     web_db = db.get('web'),
     users_db = db.get('users'),
+    projects_db = db.get('projects'),
     events_db = db.get('events');
 
 
@@ -45,6 +46,42 @@ var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
 var MAIL_CONFIG = CONFIG.gomail;
+
+
+const { spawn } = require('child_process');
+
+const runningEnv = process.env.NODE_ENV || 'prod';
+
+// util function to execute scripts immediatly, for test purpose only
+// on dev/prod, scripts should be executed by cron only
+var if_dev_execute_scripts = function(){
+    return new Promise(function (resolve, reject){
+        if (runningEnv !== 'test'){
+            resolve();
+            return;
+        }
+        console.log('In *test* environment, check for scripts to execute');
+        let cron_bin_script = CONFIG.general.cron_bin_script || null;
+        if(cron_bin_script === null){
+            console.error('cron script not defined');
+            reject({'err': 'cron script not defined'});
+            return;
+        }
+        var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+        procScript.on('exit', function (code, signal) {
+          console.log(cron_bin_script + ' process exited with ' +
+                      `code ${code} and signal ${signal}`);
+          resolve();
+        });
+    });
+}
+
+router.use('*', function(req, res, next){
+    res.on("finish", function() {
+      if_dev_execute_scripts().then(function(){});
+    });
+    next();
+});
 
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
@@ -57,6 +94,172 @@ var send_notif = function(mailOptions, fid, errors) {
         }
     });
 };
+
+var create_extra_group = function(group_name, owner_name){
+    return new Promise(function (resolve, reject){
+        var mingid = 1000;
+        groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
+          if(!err && data && data.length>0){
+            mingid = data[0].gid+1;
+          }
+          var fid = new Date().getTime();
+          group = {name: group_name, gid: mingid, owner: owner_name};
+          groups_db.insert(group, function(err){
+            goldap.add_group(group, fid, function(err){
+              var script = "#!/bin/bash\n";
+              script += "set -e \n"
+              script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
+              var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
+              fs.writeFile(script_file, script, function(err) {
+                fs.chmodSync(script_file,0755);
+                group.fid = fid;
+                resolve(group);
+                return;
+              });
+            });
+          });
+        });
+
+    });
+}
+var create_extra_user = function(user_name, group, internal_user){
+    return new Promise(function (resolve, reject){
+        var password = Math.random().toString(36).slice(-10);
+        if(process.env.MY_ADMIN_PASSWORD){
+            password = process.env.MY_ADMIN_PASSWORD;
+        }
+        else {
+            console.log('Generated admin password:' + user.password);
+        }
+
+        var user = {
+          status: STATUS_ACTIVE,
+          uid: user_name,
+          firstname: user_name,
+          lastname: user_name,
+          email: process.env.MY_ADMIN_EMAIL || CONFIG.general.support,
+          address: "",
+          lab: "",
+          responsible: "",
+          group: group.name,
+          secondarygroups: [],
+          maingroup: "",
+          why: "",
+          ip: "",
+          regkey: Math.random().toString(36).slice(-10),
+          is_genouest: internal_user,
+          is_fake: false,
+          uidnumber: -1,
+          gidnumber: -1,
+          cloud: false,
+          duration: 3,
+          expiration: new Date().getTime() + 1000*3600*24*3,
+          loginShell: '/bin/bash',
+          history: [],
+          password: password
+        }
+
+        var minuid = 1000;
+        var mingid = 1000;
+        users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
+            if(!err && data && data.length>0){
+                minuid = data[0].uidnumber+1;
+            }
+
+            user.uidnumber = minuid;
+            user.gidnumber = group.gid;
+            var fid = new Date().getTime();
+            goldap.add(user, fid, function(err) {
+              if(!err){
+                delete user.password;
+                users_db.insert(user, function(err){
+                    var script = "#!/bin/bash\n";
+                    script += "set -e \n"
+                    script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
+                    script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
+                    script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
+                    script += "fi\n"
+                    script += "sleep 3\n";
+                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
+                    if (typeof CONFIG.general.readme == "object") {
+                      CONFIG.general.readme.forEach(function(dict) {
+                        script += "ln -s " + dict.source_folder + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/" + dict.language + "\n";
+                      });
+                    } else {
+                      script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
+                    };
+                    script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
+                    script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
+                    script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
+                    script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
+                    script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
+                    fs.writeFile(script_file, script, function(err) {
+                      fs.chmodSync(script_file,0755);
+                        var plugin_call = function(plugin_info, userId, data, adminId){
+                            return new Promise(function (resolve, reject){
+                                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                                    resolve(true);
+                                });
+                            });
+                        };
+                        Promise.all(plugins_info.map(function(plugin_info){
+                            return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                        })).then(function(results){
+                            return send_notif(mailOptions, fid, []);
+                        }, function(err){
+                            return send_notif(mailOptions, fid, err);
+                        }).then(function(errs){
+                            resolve(user);
+                            return;
+                        });
+                  });
+                });
+
+              }
+              else {
+                  console.log('Failed to create admin user');
+                  resolve(null);
+              }
+            });
+
+        });
+
+
+    });
+}
+
+router.create_admin = function(default_admin, default_admin_group){
+    users_db.findOne({'uid': default_admin}).then(function(user){
+        if(user){
+            console.log('admin already exists, skipping');
+        }
+        else {
+            console.log('should create admin');
+            groups_db.findOne({name: default_admin}).then(function(group){
+
+                if(group){
+                    console.log('group already exists');
+                    create_extra_user(default_admin, group, true).then(function(user){
+                        console.log('admin user created');
+                    });
+                }
+                else {
+                    create_extra_group(default_admin_group, default_admin).then(function(group){
+                        console.log('admin group created');
+                        create_extra_user(default_admin, group, true).then(function(user){
+                            console.log('admin user created');
+                        });
+                    })
+                }
+            })
+        }
+    });
+}
 
 router.get('/user/:id/subscribed', function(req, res){
     var sess = req.session;
@@ -356,45 +559,49 @@ router.post('/user/:id/group/:group', function(req, res){
     var uid = req.param('id');
     var secgroup = req.param('group');
     users_db.findOne({uid: uid}, function(err, user){
-      if(secgroup == user.group) {
-        res.send({message: 'group is user main\'s group'});
-        res.end();
-        return;
-      }
-      for(var g=0;g < user.secondarygroups.length;g++){
-        if(secgroup == user.secondarygroups[g]) {
-          res.send({message: 'group is already set'});
-          res.end();
+        if(err || user == null){
+          res.status(404).send('User not found');
           return;
         }
-      }
-      user.secondarygroups.push(secgroup);
-      var fid = new Date().getTime();
-      // Now add group
-      goldap.change_user_groups(user, [secgroup], [], fid, function() {
-        // remove from ldap
-        // delete home
-        var script = "#!/bin/bash\n";
-        script += "set -e \n"
-        script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-
-        var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-        fs.writeFile(script_file, script, function(err) {
-          fs.chmodSync(script_file,0755);
-
-          users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
-            if(err){
-              res.send({message: 'Could not update user'});
-              res.end();
-              return;
-            }
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-            res.send({message: 'User added to group', fid: fid});
+        if(secgroup == user.group) {
+            res.send({message: 'group is user main\'s group'});
             res.end();
             return;
-          });
+        }
+        for(var g=0;g < user.secondarygroups.length;g++){
+            if(secgroup == user.secondarygroups[g]) {
+                res.send({message: 'group is already set'});
+                res.end();
+                return;
+            }
+        }
+        user.secondarygroups.push(secgroup);
+        var fid = new Date().getTime();
+        // Now add group
+        goldap.change_user_groups(user, [secgroup], [], fid, function() {
+            // remove from ldap
+            // delete home
+            var script = "#!/bin/bash\n";
+            script += "set -e \n"
+            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
+
+            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
+            fs.writeFile(script_file, script, function(err) {
+                fs.chmodSync(script_file,0755);
+
+                users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
+                    if(err){
+                        res.send({message: 'Could not update user'});
+                        res.end();
+                        return;
+                    }
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                    res.send({message: 'User added to group', fid: fid});
+                    res.end();
+                    return;
+                });
+            });
         });
-      });
     });
   });
 
@@ -510,7 +717,7 @@ router.delete_user = function(user, action_owner_id){
                    var mailOptions = {
                      origin: MAIL_CONFIG.origin, // sender address
                      destinations:  [GENERAL_CONFIG.accounts], // list of receivers
-                     subject: 'Genouest account deletion: ' +user.uid, // Subject line
+                     subject: GENERAL_CONFIG.name + ' account deletion: ' +user.uid, // Subject line
                      message: msg_activ, // plaintext body
                      html_message: msg_activ_html // html body
                    };
@@ -698,8 +905,8 @@ router.get('/user/:id/activate', function(req, res) {
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
                     script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                    script += "chown -R "+user.uid+":"+user.group+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-                    script += "chown -R "+user.uid+":"+user.group+" /omaha-beach/"+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
                       fs.chmodSync(script_file,0755);
@@ -709,7 +916,7 @@ router.get('/user/:id/activate', function(req, res) {
                         var mailOptions = {
                           origin: MAIL_CONFIG.origin, // sender address
                           destinations: [user.email], // list of receivers
-                          subject: 'Genouest account activation', // Subject line
+                          subject: GENERAL_CONFIG.name + ' account activation', // Subject line
                           message: msg_activ, // plaintext body
                           html_message: msg_activ_html // html body
                         };
@@ -826,7 +1033,7 @@ router.get('/user/:id/confirm', function(req, res) {
           var mailOptions = {
             origin: MAIL_CONFIG.origin, // sender address
             destinations: [GENERAL_CONFIG.accounts], // list of receivers
-            subject: 'Genouest account registration: '+uid, // Subject line
+            subject: GENERAL_CONFIG.name + ' account registration: '+uid, // Subject line
             message: 'New account registration waiting for approval: '+uid, // plaintext body
             html_message: 'New account registration waiting for approval: '+uid // html body
           };
@@ -911,6 +1118,7 @@ router.post('/user/:id', function(req, res) {
       }
 
       var regkey = Math.random().toString(36).substring(7);
+      var default_main_group = GENERAL_CONFIG.default_main_group || "";
       var user = {
         status: STATUS_PENDING_EMAIL,
         uid: req.param('id'),
@@ -922,7 +1130,7 @@ router.post('/user/:id', function(req, res) {
         responsible: req.param('responsible'),
         group: req.param('group'),
         secondarygroups: [],
-        maingroup: 'genouest',
+        maingroup: default_main_group,
         why: req.param('why'),
         ip: req.param('ip'),
         regkey: regkey,
@@ -948,7 +1156,7 @@ router.post('/user/:id', function(req, res) {
       var mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
-        subject: 'Genouest account registration', // Subject line
+        subject: GENERAL_CONFIG.name + ' account registration', // Subject line
         message: msg_activ,
         html_message: msg_activ_html
       };
@@ -1133,7 +1341,7 @@ router.get('/user/:id/passwordreset', function(req, res){
       var mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
-        subject: 'GenOuest account password reset request',
+        subject: GENERAL_CONFIG.name + ' account password reset request',
         message: msg,
         html_message: html_msg
       };
@@ -1187,7 +1395,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
               var mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address
                 destinations: [user.email], // list of receivers
-                subject: 'GenOuest account password reset',
+                subject: GENERAL_CONFIG.name + ' account password reset',
                 message: msg,
                 html_message: msg_html
               };
@@ -1296,7 +1504,7 @@ router.get('/user/:id/renew', function(req, res){
                   var mailOptions = {
                     origin: MAIL_CONFIG.origin, // sender address
                     destinations: [user.email], // list of receivers
-                    subject: 'Genouest account reactivation', // Subject line
+                    subject: GENERAL_CONFIG.name + ' account reactivation', // Subject line
                     message: msg_activ, // plaintext body
                     html_message: msg_activ_html // html body
                   };
@@ -1367,7 +1575,7 @@ router.put('/user/:id/ssh', function(req, res) {
           script += "  mkdir -p ~"+user.uid+"/.ssh\n";
           script += "  chmod -R 700 ~"+user.uid+"/.ssh\n";
           script += "  touch  ~"+user.uid+"/.ssh/authorized_keys\n";
-          script += "  chown -R "+user.uid+":"+user.group+" ~"+user.uid+"/.ssh/\n";
+          script += "  chown -R "+user.uidnumber+":"+user.gidnumber+" ~"+user.uid+"/.ssh/\n";
           script += "fi\n";
           script += "echo "+user.ssh+" >> ~"+user.uid+"/.ssh/authorized_keys\n";
           var fid = new Date().getTime();
@@ -1534,7 +1742,7 @@ router.put('/user/:id', function(req, res) {
                       script += "\tmkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"\n";
                       script += "fi\n";
                       script += "mv "+CONFIG.general.home+"/"+user.oldmaingroup+"/"+user.oldgroup+"/"+user.uid+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/\n";
-                      script += "chown -R "+user.uid+":"+user.group+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/"+user.uid+"\n";
+                      script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/"+user.uid+"\n";
                       events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                     }
                   }
@@ -1574,6 +1782,129 @@ router.put('/user/:id', function(req, res) {
   });
 
 });
+
+//TODO : Verify session user is admin or in project
+
+router.get('/project/:id/users', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, user){
+        if(err || user == null){
+            res.status(404).send('User not found');
+            return;
+        }
+        users_db.find({'projects': req.param('id')}, function(err, users_in_project){
+            res.send(users_in_project);
+            res.end();
+        });
+    });
+});
+
+router.post('/user/:id/project/:project', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            res.end();
+            return;
+        }
+        newproject = req.param('project');
+        uid = req.param('id');
+        var fid = new Date().getTime();
+        users_db.findOne({uid: uid}, function(err, user){
+            if(!user || err) {
+                res.status(404).send('User does not exists')
+                res.end();
+                return;
+            }
+            if (!user.projects){
+                user.projects = [];
+            }
+            for(var g=0; g < user.projects.length; g++){
+                if(newproject == user.projects[g]) {
+                    res.send({message:'User is already in project : nothing was done.'});
+                    res.end();
+                    return;
+                }
+            }
+            user.projects.push(newproject);
+            users_db.update({_id: user._id}, {'$set': { projects: user.projects}}, function(err){
+                if(err){
+                    res.status(403).send('Could not update user');
+                    res.end();
+                    return;
+                }
+                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to project ' + newproject , 'logs': []}, function(err){});
+                res.send({message: 'User added to project', fid: fid});
+                res.end();
+                return;
+            });
+        });
+    });
+});
+
+router.delete('/user/:id/project/:project', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            res.end();
+            return;
+        }
+        oldproject = req.param('project');
+        uid = req.param('id');
+        var fid = new Date().getTime();
+        users_db.findOne({uid: uid}, function(err, user){
+            if(! user) {
+                res.status(404).send('User ' + uid + ' not found');
+                res.end();
+                return;
+            }
+            projects_db.findOne({id:oldproject}, function(err, project){
+                if(err){
+                    console.log(err);
+                    res.status(500).send("Error");
+                    res.end();
+                    return;
+                }
+                if( project && uid === project.owner && ! req.param('force')){
+                    res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
+                    res.end();
+                    return;
+                }
+                tempprojects = [];
+                for(var g=0; g < user.projects.length; g++){
+                    if(oldproject != user.projects[g]) {
+                        tempprojects.push(user.projects[g]);
+                    }
+                }
+                users_db.update({_id: user._id}, {'$set': { projects: tempprojects}}, function(err){
+                    if(err){
+                        res.status(403).send('Could not update user');
+                        res.end();
+                        return;
+                    }
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from project ' + oldproject , 'logs': []}, function(err){});
+                    res.send({message: 'User removed from project', fid: fid});
+                    res.end();
+                    return;
+                });
+            });
+        });
+    });
+});
+
 
 router.get('/lists', function(req, res){
     var sess = req.session;

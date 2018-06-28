@@ -35,10 +35,18 @@ var projects = require('./routes/projects');
 var quota = require('./routes/quota');
 var plugin = require('./routes/plugin');
 var tp = require('./routes/tp');
+var conf = require('./routes/conf');
 
 
 var CONFIG = require('config');
 
+
+const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
+const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
+
+if(MY_ADMIN_USER !== null){
+    users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+}
 
 var app = express();
 app.use(logger('combined'));
@@ -62,8 +70,40 @@ app.use(session({
 app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+var monk = require('monk'),
+    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
+    users_db = db.get('users');
+
+
+app.all('*', function(req, res, next){
+    var token = req.headers['x-api-key'] || null;
+    if(token){
+        if(req.session.gomngr){
+            req.session.gomngr=null;
+            req.session.is_logged = false;
+        }
+        try{
+            users_db.findOne({_id: token}, function(err, session_user){
+                if(err){
+                    return res.status(403).send('Invalid token').end();
+                }
+                req.session.gomngr = token;
+                req.session.is_logged = true;
+                next();
+            });
+        }
+        catch(error){
+            console.error('Invalid token', error);
+            return res.status(403).send('Invalid token').end();
+        }
+    }else{
+        next();
+    }
+});
+
 
 app.get('/', routes);
+app.get('/conf', conf);
 app.get('/ip', users);
 app.get('/log/status/:id/:status', logs);
 app.get('/log/:id', logs);
@@ -73,7 +113,7 @@ app.post('/message', users);
 app.get('/group', users);
 app.get('/config', users);
 app.post('/group/:id', users);
-app.put('/group/:id', users)
+app.put('/group/:id', users);
 app.delete('/group/:id', users);
 app.get('/group/:id', users);
 app.get('/user', users);
@@ -108,15 +148,22 @@ app.post('/user/:id/group/:group', users);
 app.get('/user/:id/subscribed', users);
 app.delete('/user/:id/group/:group', users);
 app.delete('/user/:id', users);
+app.post('/user/:id/project/:project', users);
+app.delete('/user/:id/project/:project', users);
 app.get('/user/:id/usage', users);
+app.get('/project/:id/users', users);
+app.get('/group/:id/projects', projects);
 app.get('/ssh/:id', ssh);
 app.get('/ssh/:id/public', ssh);
 app.get('/ssh/:id/putty', ssh);
 app.get('/ssh/:id/private', ssh);
 app.get('/project', projects);
+app.get('/project/:id', projects);
 app.post('/project', projects);
 app.post('/project/:id', projects);
+app.post('/project/:id/request', projects);
 app.delete('/project/:id', projects);
+app.put('/project/:id/request', projects);
 app.get('/quota/:user/:id', quota);
 app.get('/plugin', plugin);
 app.get('/plugin/:id', plugin);
