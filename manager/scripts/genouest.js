@@ -399,11 +399,9 @@ angular.module('genouest').controller('projectmngrCtrl',
             });
         };
 
-
         $scope.project = {};
         $scope.groups = [];
         $scope.users = [];
-        console.log($window.location);
         $scope.show_project_users($routeParams.project_id);
         Group.list().$promise.then(function(data) {
             $scope.groups = data;
@@ -516,7 +514,6 @@ angular.module('genouest').controller('projectsadminmngrCtrl',
                 $scope.projects = data;
             });
         };
-
         $scope.notification = "";
         if($routeParams.deleted == "ok"){
             $scope.notification = "Project was deleted successfully";

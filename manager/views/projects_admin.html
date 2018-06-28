@@ -106,46 +106,61 @@
     <form role="form" class="user-form form-horizonal">
       <div class="form-group row">
         <div class="col-sm-2">
-          <label for="project_id">Name</label>
+          <label for="project_id">Name&nbsp; 
+            <span style="color:red">(required)&nbsp;</span> 
+            <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" onmouseenter="$(this).tooltip('show')"</span>
+          </label>
           <input placeholder="project name" type="text" id="project_id" ng-model="new_project.id" class="form-control"/>
         </div>
         <div class="col-sm-2">
-          <label for="project_owner">Owner</label>
+          <label for="project_owner">Owner&nbsp;
+            <span style="color:red">(required)&nbsp;</span>
+            <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" onmouseenter="$(this).tooltip('show')"</span>
+          </label>
           <input placeholder="project owner" type="text" id="project_owner" ng-model="new_project.owner" class="form-control"/>
         </div>
         <div class="col-sm-2">
-          <label for="project_group">Group</label>
-          <select id="project_group"  ng-model="new_project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
+          <label>Group&nbsp;
+            <span style="color:red">(required)&nbsp;</span>
+            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" onmouseenter="$(this).tooltip('show')"</span>
+          </label>
+          <select ng-model="new_project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
         </div>
         <div class="col-sm-2">
-          <label for="project_size">Size</label>
+          <label for="project_size">Size (GB)</label>
           <input placeholder="project size in G" type="number" id="project_size" ng-model="new_project.size" class="form-control"/>
         </div>
         <div class="col-sm-2">
-          <label for="project_expire">Expiration</label>
+          <label for="project_expire">Expiration date</label>
           <input type="date" id="project_expire" ng-model="new_project.expire" class="form-control"/>
         </div>
         <div class="col-sm-2">
-          <label for="project_org">Financing</label>
+          <label for="project_org">Financing&nbsp;
+            <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" onmouseenter="$(this).tooltip('show')"</span>
+          </label>
           <input placeholder="Ex : CNRS" type="text" id="project_org" ng-model="new_project.orga" class="form-control"/>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-sm-12">
           <label for="project_description">Description</label>
-          <textarea rows="2" id="project_description" ng-model="new_project.description" class="form-control"/>
+          <textarea placeholder="A short description for the project" rows="2" id="project_description" ng-model="new_project.description" class="form-control"/>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-sm-2">
-          <label for="project_access">Write permissions</label>
+          <label >Write permission&nbsp;
+            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" onmouseenter="$(this).tooltip('show')"</span>
+          </label>
           <select id="project_access" ng-model="new_project.access" ng-init="new_project.access='Group'" class="form-control">
             <option value="Group" ng-selected="true" >Group</option>
             <option value="Data manager">Data manager</option>
           </select>
         </div>
         <div class="col-sm-3">
-          <label for="project_path">Path</label>
+          <label >Path to project&nbsp;
+            <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" onmouseenter="$(this).tooltip('show')"</span>
+          </label>
           <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" ng-model="new_project.path" class="form-control"/>
         </div>
       </div>
