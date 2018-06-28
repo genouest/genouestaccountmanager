@@ -1905,6 +1905,25 @@ router.delete('/user/:id/project/:project', function(req, res){
     });
 });
 
+router.get('/list/:list', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+        var list_name = req.param('list');
+        notif.getMembers(list_name, function(members) {
+            res.send(members);
+            return;
+        });
+    });
+});
+
 
 router.get('/lists', function(req, res){
     var sess = req.session;

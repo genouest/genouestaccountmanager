@@ -321,6 +321,11 @@ angular.module('genouest').controller('messageCtrl',
         });
     };
 
+    $scope.generate_list_members = function(list_name) {
+      $scope.members = User.get_list_members({list: list_name});
+      return;
+    };
+
     $scope.decode_template = function(list_name) {
         $scope.message = '';
         var lists = $scope.mailing_lists;

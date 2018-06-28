@@ -51,6 +51,26 @@ module.exports = {
         })
     },
 
+    getMembers: function(list, callback) {
+        if(! mail_set){
+            logger.error("Mail is not set properly");
+            callback(false);
+            return;
+        }
+        const options = {
+            uri: "/list/" + list,
+        }
+
+        baseRequest(options, function(err, res, body) {
+            if(err || res.statusCode !== 200){
+                callback([]);
+                return;
+            }
+            callback(body["members"]);
+            return;
+        })
+    },
+
     getLists: function(callback){
         if(! mail_set){
             logger.error("Mail is not set properly");

@@ -7,11 +7,15 @@
   </div>
   <div class="panel-body">
     <div class="row">
-      <div class="col-sm-2">
+      <div class="col-md-2">
         <div class="form-group">
           <label for="mailing_list" class="col-form-label">Mailing list</label>
-          <select id="mailing_list" ng-model="mailing_list" ng-change="decode_template(mailing_list)" ng-options="list.list_name as list.list_name for list in mailing_lists" class="form-control" />
-        </div>
+            <select id="mailing_list" ng-model="mailing_list" ng-change="decode_template(mailing_list); generate_list_members(mailing_list);" ng-options="list.list_name as list.list_name for list in mailing_lists" class="form-control" />
+            <br ng-if="mailing_list"/>
+            <button type="button" ng-if="mailing_list" class="btn btn-primary" data-toggle="modal" data-target="#members_view">
+              View list members
+            </button>
+          </div>
       </div>
     </div>
     <div class="row">
@@ -62,6 +66,32 @@
       <div class="modal-body">
         <p ng-if="input_type == 'HTML'" data-ng-bind-html="trustAsHtml(message)"></p>
         <p ng-if="input_type == 'Markdown'" data-ng-bind-html="trustAsMarkdown(message)"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" style="z-index: 1500;" id="members_view" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="list-members">
+          <div class="table-responsive">
+            <table datatable="ng" class="table table-striped">
+              <thead>
+                <th>Email</th>
+              </thead>
+              <tbody>
+                <tr ng-repeat="member in members">
+                  <td>{{member}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
