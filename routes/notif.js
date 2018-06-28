@@ -94,7 +94,7 @@ module.exports = {
 
         const options = {
             uri: "/mail/opt/" + CONFIG.gomail.main_list,
-            body: {'email': [email]}
+            body: {'email': [email], 'message': CONFIG.gomail.optin_message, 'message_html': CONFIG.gomail.optin_message_html}
         }
 
         baseRequest.put(options, function(err, res, body) {
@@ -122,7 +122,7 @@ module.exports = {
 
         const options = {
             uri: "/mail/opt/" + CONFIG.gomail.main_list,
-            body: {'email': [email]}
+            body: {'email': [email], 'message': CONFIG.gomail.optout_message, 'message_html': CONFIG.gomail.optout_message_html}
         }
 
         baseRequest.delete(options, function(err, res, body) {
@@ -156,7 +156,7 @@ module.exports = {
 
         const options = {
             uri: "/mail/opt/" + CONFIG.gomail.main_list,
-            body: {'email': [newemail]}
+            body: {'email': [newemail], 'skip':true}
         }
 
         baseRequest.put(options, function(err, res, body) {
@@ -172,7 +172,7 @@ module.exports = {
                 callback();
                 return;
             }
-            options.body = {'email': [oldemail]};
+            options.body = {'email': [oldemail], 'skip':'true'};
             baseRequest.delete(options, function(err, res, body) {
                 if(err){
                     events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []}, function(err){});
