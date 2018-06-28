@@ -139,6 +139,7 @@ app.get('/user/:id/activate', users);
 app.get('/user/:id/confirm', users);
 app.get('/user/:id/passwordreset', users);
 app.get('/lists', users),
+app.get('/list/:list', users),
 app.post('/user/:id/passwordreset', users);
 app.get('/user/:id/passwordreset/:key', users);
 app.post('/user/:id/cloud', users);

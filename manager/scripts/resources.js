@@ -362,6 +362,12 @@
               isArray: true,
               cache: false
             },
+            get_list_members: {
+              url: prefix+'/list/:list',
+              method: 'GET',
+              isArray: true,
+              cache: false
+            },
             get_mail_config: {
             url: prefix+'/config',
             method: 'GET',
