@@ -108,21 +108,21 @@
         <div class="col-sm-2">
           <label for="project_id">Name&nbsp; 
             <span style="color:red">(required)&nbsp;</span> 
-            <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" onmouseenter="$(this).tooltip('show')"</span>
+            <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip </span>
           </label>
           <input placeholder="project name" type="text" id="project_id" ng-model="new_project.id" class="form-control"/>
         </div>
         <div class="col-sm-2">
           <label for="project_owner">Owner&nbsp;
             <span style="color:red">(required)&nbsp;</span>
-            <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" onmouseenter="$(this).tooltip('show')"</span>
+            <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" tooltip </span>
           </label>
           <input placeholder="project owner" type="text" id="project_owner" ng-model="new_project.owner" class="form-control"/>
         </div>
         <div class="col-sm-2">
           <label>Group&nbsp;
             <span style="color:red">(required)&nbsp;</span>
-            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" onmouseenter="$(this).tooltip('show')"</span>
+            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" tooltip </span>
           </label>
           <select ng-model="new_project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
         </div>
@@ -136,7 +136,7 @@
         </div>
         <div class="col-sm-2">
           <label for="project_org">Financing&nbsp;
-            <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" onmouseenter="$(this).tooltip('show')"</span>
+            <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip </span>
           </label>
           <input placeholder="Ex : CNRS" type="text" id="project_org" ng-model="new_project.orga" class="form-control"/>
         </div>
@@ -150,7 +150,7 @@
       <div class="form-group row">
         <div class="col-sm-2">
           <label >Write permission&nbsp;
-            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" onmouseenter="$(this).tooltip('show')"</span>
+            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip </span>
           </label>
           <select id="project_access" ng-model="new_project.access" ng-init="new_project.access='Group'" class="form-control">
             <option value="Group" ng-selected="true" >Group</option>
@@ -159,7 +159,7 @@
         </div>
         <div class="col-sm-3">
           <label >Path to project&nbsp;
-            <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" onmouseenter="$(this).tooltip('show')"</span>
+            <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" tooltip </span>
           </label>
           <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" ng-model="new_project.path" class="form-control"/>
         </div>

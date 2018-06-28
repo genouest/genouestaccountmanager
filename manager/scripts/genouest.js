@@ -25,6 +25,19 @@ angular.module('genouest', ['genouest.resources', 'ngSanitize', 'ngCookies', 'ng
         }
     }
   })
+.directive('tooltip', function(){
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs){
+            element.hover(function(){
+                element.tooltip('show');
+            }, function(){
+                element.tooltip('hide');
+            });
+        }
+    };
+})
+
 .config(['$routeProvider','$logProvider',
     function ($routeProvider) {
         $routeProvider.when('/', {
