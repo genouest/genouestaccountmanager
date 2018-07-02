@@ -22,37 +22,39 @@
           </div>
           <div class="col-sm-2">
             <label for="update_project_group">Group</label>
-            <select id="update_project_group"  ng-model="project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
+            <select id="update_project_group" ng-model="project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
           </div>
-          <div class="col-sm-1">
-            <label for="update_project_size">Size (Go)</label>
+          <div class="col-sm-2">
+            <label for="update_project_size">Size (GB)</label>
             <input id="update_project_size" type="text" ng-model="project.size" class="form-control"/>
           </div>
           <div class="col-sm-2">
-            <label for="update_project_exp">Expiration</label>
+            <label for="update_project_exp">Expiration date</label>
             <input type="date" id="update_project_exp" type="text" ng-model="project.expire" class="form-control"/>
           </div>
           <div class="col-sm-2">
-            <label for="project_access">Write permissions</label>
-            <select id="project_access" ng-model="project.access" class="form-control">
-              <option value="Group">Group</option>
-              <option value="Data manager">Data manager</option>
-            </select>
-          </div>
-          <div class="col-sm-2">
-            <label for="update_project_orga">Financing</label>
-            <input ype="text" id="update_project_orga" ng-model="project.orga" class="form-control"/>
+            <label >Financing</label>
+            <input type="text" id="update_project_orga" ng-model="project.orga" class="form-control"/>
           </div>
         </div>
         <div class="form-group row">
-          <div class="col-sm-11">
+          <div class="col-sm-12">
             <label for="project_description">Description</label>
             <textarea rows="2" id="project_description" ng-model="project.description" class="form-control"/>
           </div>
         </div>
         <div class="form-group row">
+          <div class="col-sm-2">
+          <label >Write permission&nbsp;
+            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip </span>
+          </label>
+          <select id="project_access" ng-model="project.access" class="form-control">
+              <option value="Group">Group</option>
+              <option value="Data manager">Data manager</option>
+            </select>
+          </div>
           <div class="col-sm-3">
-            <label for="update_project_path">Path</label>
+            <label for="update_project_path">Path to project</label>
             <input type="text" id="update_project_path" ng-model="project.path" class="form-control"/>
           </div>
         </div>

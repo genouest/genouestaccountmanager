@@ -72,39 +72,57 @@
         <table class="table table-striped">
           <tbody>
             <tr>
-              <td><b>Name</b></td>
+              <td><b>Name</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Project name" tooltip </span>
+              </td>
               <td>{{selectedProject.id}}</td>
             </tr>
             <tr>
-              <td><b>Owner</b></td>
+              <td><b>Owner</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" tooltip </span>
+              </td>
               <td>{{selectedProject.owner}}</td>
             </tr>
             <tr>
-              <td><b>Unix Group</b></td>
+              <td><b>Unix Group</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Unix group for members" tooltip </span>
+              </td>
               <td>{{selectedProject.group}}</td>
             </tr>
             <tr>
-              <td><b>Path</b></td>
+              <td><b>Path</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Path to project folder" tooltip </span>
+              </td>
               <td>{{selectedProject.path}}</td>
             </tr>
             <tr>
-              <td><b>Size</b></td>
+              <td><b>Size</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip </span>
+              </td>
               <td>{{selectedProject.size}} Gb</td>
             </tr>
             <tr>
-              <td><b>Expiration</b></td>
+              <td><b>Expiration</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Expiration date" tooltip </span>
+              </td>
               <td>{{selectedProject.expire | date}}</td>
             </tr>
             <tr>
-              <td><b>Financing</b></td>
+              <td><b>Financing</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Organism financing the project" tooltip </span>
+              </td>
               <td>{{selectedProject.orga}}</td>
             </tr>
             <tr>
-              <td><b>Write permissions</b></td>
+              <td><b>Write permissions</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip </span>
+              </td>
               <td>{{selectedProject.access}}</td>
             </tr>
             <tr>
-              <td><b>Description</td>
+              <td><b>Description</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Short project description" tooltip </span>
+              </td>
                 <td>{{selectedProject.description}}</td>
               </tr>
             </tbody>
