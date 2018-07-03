@@ -124,7 +124,7 @@
             <span style="color:red">(required)&nbsp;</span>
             <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" tooltip </span>
           </label>
-          <select ng-model="new_project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
+          <select ng-model="new_project.group" ng-options="group.name as group.name for group in groups | orderBy:'name'" class="form-control"/>
         </div>
         <div class="col-sm-2">
           <label for="project_size">Size (GB)</label>
