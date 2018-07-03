@@ -22,7 +22,7 @@
           </div>
           <div class="col-sm-2">
             <label for="update_project_group">Group</label>
-            <select id="update_project_group" ng-model="project.group" ng-options="group.name as group.name for group in groups" class="form-control"/>
+            <select id="update_project_group" ng-model="project.group" ng-options="group.name as group.name for group in groups | orderBy:'name'" class="form-control"/>
           </div>
           <div class="col-sm-2">
             <label for="update_project_size">Size (GB)</label>
