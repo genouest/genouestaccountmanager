@@ -42,7 +42,7 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
     var user = users[index];
     console.log('User will expire: '+user.uid);
     var link = CONFIG.general.url +
-                encodeURI('/manager/index.html#/user/'+user.uid+'/renew/'+user.regkey);
+                encodeURI('/manager/#/user/'+user.uid+'/renew/'+user.regkey);
     var msg_activ = CONFIG.message.expiration.join("\n").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"\n"+CONFIG.message.footer.join("\n");
     var msg_activ_html = CONFIG.message.expiration_html.join("").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"<br/>"+CONFIG.message.footer.join("<br/>");
     var mailOptions = {
