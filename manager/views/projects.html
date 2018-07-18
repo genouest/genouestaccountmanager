@@ -144,7 +144,7 @@
               <tr ng-repeat="user in users">
                 <td>{{user.uid}}</td>
                 <td>
-                  <span ng-if="session_user.uid === selectedProject.owner">{{user.mail}}</span>
+                  <span ng-if="session_user.uid === selectedProject.owner">{{user.email}}</span>
                   <span ng-if="session_user.uid !== selectedProject.owner">Restricted to owner</span>
                 </td>
                 <td><span ng-if="user.access">&#10003</span></td>
