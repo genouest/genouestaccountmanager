@@ -142,30 +142,26 @@ angular.module('genouest', ['genouest.resources', 'ngSanitize', 'ngCookies', 'ng
 }]);
 
 angular.module('genouest').controller('genouestCtrl',
-    function ($scope, $rootScope, $http) {
+    function ($scope, $rootScope, $http, Config) {
         $rootScope.alerts = [];
         $rootScope.closeAlert = function (index) {
             $rootScope.alerts.splice(index, 1);
         };
         $scope.config = {}
-        $http({
-          method: 'GET',
-          url: '/conf'
-        }).then(function successCallback(response) {
-            $scope.config = response.data;
+        Config.get().$promise.then(function(data){
+            $scope.config = data
         });
 
     });
+
 angular.module('genouest').controller('registeredCtrl',
-    function ($scope, $rootScope, $http) {
+    function ($scope, $rootScope, $http, Config) {
         $scope.config = {}
-        $http({
-          method: 'GET',
-          url: '/conf'
-        }).then(function successCallback(response) {
-            $scope.config = response.data;
+        Config.get().$promise.then(function(data){
+            $scope.config = data
         });
     });
+
 angular.module('genouest').controller('logsCtrl',
     function ($scope, $rootScope, User, Auth, GOLog, GOActionLog, DTOptionsBuilder) {
         $scope.date_convert = function timeConverter(tsp){
@@ -307,8 +303,8 @@ angular.module('genouest').controller('webmngrCtrl',
 
 
 angular.module('genouest').controller('messageCtrl',
-    function ($scope, $rootScope, $sce, $http, User, Auth) {
-      User.get_mail_config().$promise.then(function(data){
+    function ($scope, $rootScope, $sce, $http, User, Auth, Config) {
+      Config.get().$promise.then(function(data){
         $scope.origin = data.origin;
       });
       $scope.msg = '';
@@ -861,7 +857,7 @@ angular.module('genouest').controller('userextendCtrl',
 });
 
 angular.module('genouest').controller('usermngrCtrl',
-  function($scope, $rootScope, $routeParams, $log, $http, $location, $window, $timeout, User, Group, Quota, Database, Web, Auth, GOLog, GOActionLog, Project) {
+  function($scope, $rootScope, $routeParams, $log, $http, $location, $window, $timeout, User, Group, Quota, Database, Web, Auth, GOLog, GOActionLog, Project, Config) {
     $scope.session_user = Auth.getUser();
     $scope.maingroups = [];
     $scope.selected_group = '';
@@ -872,13 +868,11 @@ angular.module('genouest').controller('usermngrCtrl',
     $scope.plugin_data = {};
     $scope.u2f = null;
     $scope.config = {};
-    $http({
-      method: 'GET',
-      url: '../conf'
-    }).then(function successCallback(response) {
-        $scope.maingroups = response.data.main_groups;
-        $scope.config = response.data;
 
+
+    Config.get().$promise.then(function(data){
+        $scope.maingroups = data.main_groups;
+        $scope.config = data
     });
 
     $http({
@@ -1445,16 +1439,14 @@ angular.module('genouest').controller('loginCtrl',
 });
 
 angular.module('genouest').controller('registerCtrl',
-  function($scope, $rootScope, $routeParams, $log, $location, $window, $http, $timeout, IP, User, Auth) {
+  function($scope, $rootScope, $routeParams, $log, $location, $window, $http, $timeout, IP, User, Auth, Config) {
 
     $scope.uid = null;
     $scope.duration = 365;
     $scope.config = {}
-    $http({
-      method: 'GET',
-      url: '/conf'
-    }).then(function successCallback(response) {
-        $scope.config = response.data;
+
+    Config.get().$promise.then(function(data){
+        $scope.config = data
     });
 
     IP.get().$promise.then(function(data) {
