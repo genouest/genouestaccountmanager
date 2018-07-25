@@ -315,7 +315,7 @@ angular.module('genouest').controller('messageCtrl',
       $scope.subject = '';
       $scope.input_choices = ["HTML", "Text", "Markdown"];
       $scope.input_type = "HTML";
-      $scope.mailing_list = "";
+      $scope.mailing_list = '';
       $scope.send = function() {
         $scope.msg = '';
         $scope.error_msg = '';
