@@ -35,7 +35,7 @@
               paramDefault: {callback: '?'},
               method: 'GET',
               isArray: false,
-              cache: false
+              cache: true
             }
         });
       }
