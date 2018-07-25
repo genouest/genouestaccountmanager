@@ -29,6 +29,17 @@
         });
       }
 
+      function Config($resource) {
+        return $resource('/conf', {}, {
+            get: {
+              paramDefault: {callback: '?'},
+              method: 'GET',
+              isArray: false,
+              cache: false
+            }
+        });
+      }
+
       function IP($resource) {
         return $resource('/ip', {}, {
             get: {
@@ -368,12 +379,6 @@
               isArray: true,
               cache: false
             },
-            get_mail_config: {
-            url: prefix+'/config',
-            method: 'GET',
-            isArray: false,
-            cache: false
-            }
         });
       }
 
@@ -385,6 +390,7 @@
 
   angular.module('genouest.resources', ['ngResource'])
   .factory('Group', Group)
+  .factory('Config', Config)
   .factory('Project', Project)
   .factory('Quota', Quota)
   .factory('Database', Database)
