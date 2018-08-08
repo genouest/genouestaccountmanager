@@ -502,7 +502,7 @@ router.post('/message', function(req, res){
       if(req.param('input') === "Markdown"){
         html_message = markdown.toHTML(req.param('message'));
         message =  htmlToText.fromString(html_message);
-      } else if (req.param('input') === "Html"){
+      } else if (req.param('input') === "HTML"){
         message =  htmlToText.fromString(html_message);
       }
       var mailOptions = {
