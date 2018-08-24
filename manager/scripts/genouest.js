@@ -1012,6 +1012,7 @@ angular.module('genouest').controller('usermngrCtrl',
                 $scope.projects = data;
                 $scope.user_projects = [];
                 for(var i=0; i<data.length;i++){
+                    if(user.projects == null){user.projects = [];}
                     if (user.projects.indexOf(data[i].id) >= 0){
                         var is_owner = false;
                         var user_in_group = false;
