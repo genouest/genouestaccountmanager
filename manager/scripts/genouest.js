@@ -1068,6 +1068,15 @@ angular.module('genouest').controller('usermngrCtrl',
     $scope.website_url = "";
     $scope.website_description = "";
 
+    User.get_apikey({name: $routeParams.id}).$promise.then(function(data){
+      $scope.apikey = data.apikey;
+    });
+    $scope.generate_apikey = function(){
+        User.generate_apikey({name: $routeParams.id}).$promise.then(function(data){
+          $scope.apikey = data.apikey;
+        });
+    }    
+
     Database.listowner({name: $routeParams.id}).$promise.then(function(data){
       $scope.databases = data;
     });

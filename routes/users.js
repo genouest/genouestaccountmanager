@@ -261,6 +261,65 @@ router.create_admin = function(default_admin, default_admin_group){
     });
 }
 
+router.get('/user/:id/apikey', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+        users_db.findOne({uid: req.param('id')}, function(err, user){
+            if(!user) {
+                res.send({msg: 'User does not exists'})
+                res.end();
+                return;
+            }
+
+            if (user.apikey === undefined) {
+                res.send({'apikey': ''})
+                res.end();
+                return;
+            } else {
+                res.send({'apikey': user.apikey})
+                res.end();
+                return;
+            }
+        });
+    });
+});
+
+router.post('/user/:id/apikey', function(req, res){
+    var sess = req.session;
+    if(! sess.gomngr) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+        if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+
+        users_db.findOne({uid: req.param('id')}, function(err, user){
+            if(!user) {
+                res.send({msg: 'User does not exists'})
+                res.end();
+                return;
+            }
+
+            var apikey = Math.random().toString(36).slice(-10);
+            users_db.update({uid: req.param('id')}, {'$set':{'apikey': apikey}}, function(err, data){
+               res.send({'apikey': apikey});
+               res.end();
+            });
+        });
+    });
+});
+
 router.get('/user/:id/subscribed', function(req, res){
     var sess = req.session;
     if(! sess.gomngr) {
@@ -1637,6 +1696,11 @@ router.put('/user/:id', function(req, res) {
   */
 
   var sess = req.session;
+  if(sess.apikey !== undefined && sess.apikey) {
+    // Forbids by api key to avoid modyfing email address
+    res.status(401).send('Operation not authorized by API key');
+    return;
+  }
   if(! sess.gomngr) {
     res.status(401).send('Not authorized');
     return;

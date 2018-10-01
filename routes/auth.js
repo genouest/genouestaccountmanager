@@ -238,6 +238,17 @@ router.post('/auth/:id', function(req, res) {
       res.status(404).send('User not found');
       return;
     }
+    if (apikey !== "" && apikey === user.apikey) {
+        user.is_admin = false;
+        if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
+            user.is_admin = true;
+        }
+        sess.gomngr = user._id;
+        sess.apikey = true;
+        res.send({ user: user, msg: '', double_auth: need_double_auth});
+        res.end();
+        return;
+    }
     if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
         var checkDate = new Date();
         checkDate.setHours(checkDate.getHours() - 1);
