@@ -1071,11 +1071,11 @@ angular.module('genouest').controller('usermngrCtrl',
     User.get_apikey({name: $routeParams.id}).$promise.then(function(data){
       $scope.apikey = data.apikey;
     });
-    $scope.generate_apikey = function(){
-        User.generate_apikey({name: $routeParams.id}).$promise.then(function(data){
+    $scope.generate_apikey = function(uid){
+        User.generate_apikey({name: uid}, {}).$promise.then(function(data){
           $scope.apikey = data.apikey;
         });
-    }    
+    }
 
     Database.listowner({name: $routeParams.id}).$promise.then(function(data){
       $scope.databases = data;
