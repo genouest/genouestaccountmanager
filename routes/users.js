@@ -771,7 +771,7 @@ router.delete_user = function(user, action_owner_id){
                      resolve(false);
                      return;
                    }
-                   var msg_activ ="User " + user.uid + "has been deleted by " + action_owner_id;
+                   var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
                    var msg_activ_html = msg_activ;
                    var mailOptions = {
                      origin: MAIL_CONFIG.origin, // sender address
