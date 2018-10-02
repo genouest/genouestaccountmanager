@@ -1012,6 +1012,7 @@ angular.module('genouest').controller('usermngrCtrl',
                 $scope.projects = data;
                 $scope.user_projects = [];
                 for(var i=0; i<data.length;i++){
+                    if(user.projects == null){user.projects = [];}
                     if (user.projects.indexOf(data[i].id) >= 0){
                         var is_owner = false;
                         var user_in_group = false;
@@ -1066,6 +1067,15 @@ angular.module('genouest').controller('usermngrCtrl',
     $scope.website = "";
     $scope.website_url = "";
     $scope.website_description = "";
+
+    User.get_apikey({name: $routeParams.id}).$promise.then(function(data){
+      $scope.apikey = data.apikey;
+    });
+    $scope.generate_apikey = function(uid){
+        User.generate_apikey({name: uid}, {}).$promise.then(function(data){
+          $scope.apikey = data.apikey;
+        });
+    }
 
     Database.listowner({name: $routeParams.id}).$promise.then(function(data){
       $scope.databases = data;

@@ -228,15 +228,30 @@ router.get('/auth', function(req, res) {
 });
 
 router.post('/auth/:id', function(req, res) {
-  if(req.param('password') === undefined || req.param('password') === null || req.param('password') == "") {
-    res.status(401).send('Missing password');
-    return;
+  var apikey = req.headers['x-my-apikey'] || "";
+  if(apikey === ""){
+      if(req.param('password') === undefined || req.param('password') === null || req.param('password') == "") {
+        res.status(401).send('Missing password');
+        return;
+      }
   }
   users_db.findOne({uid: req.param('id')}, function(err, user){
     if(err) { logger.error(err); }
     if(! user) {
       res.status(404).send('User not found');
       return;
+    }
+    var sess = req.session;
+    if (apikey !== "" && apikey === user.apikey) {
+        user.is_admin = false;
+        if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
+            user.is_admin = true;
+        }
+        sess.gomngr = user._id;
+        sess.apikey = true;
+        res.send({ user: user, msg: '', double_auth: false});
+        res.end();
+        return;
     }
     if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
         var checkDate = new Date();
@@ -250,7 +265,7 @@ router.post('/auth/:id', function(req, res) {
         }
     }
     // Check bind with ldap
-    var sess = req.session;
+
     sess.is_logged = true;
     var need_double_auth = false;
 

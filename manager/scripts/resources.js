@@ -229,6 +229,18 @@
 
       function User($resource) {
         return $resource(prefix+'/user', {}, {
+            get_apikey: {
+                url: prefix + '/user/:name/apikey',
+                method: 'GET',
+                isArray: false,
+                cache: false
+            },
+            generate_apikey: {
+                url: prefix + '/user/:name/apikey',
+                method: 'POST',
+                isArray: false,
+                cache: false
+            },            
             is_subscribed: {
                 url: prefix+'/user/:name/subscribed',
                 method: 'GET',
