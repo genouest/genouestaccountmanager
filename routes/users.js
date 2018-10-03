@@ -433,18 +433,25 @@ router.put('/group/:id', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
-    groups_db.findOne({name: req.param('id')}, function(err, group){
-      var owner = req.param('owner');
-      if(! group) {
-        res.status(404).send('Group does not exists');
-        return;
-      }
-      events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'group owner modification ' + group.name + ' to ' +owner, 'logs': []}, function(err){});
-      groups_db.update({name: group.name}, {'$set':{'owner': owner}}, function(err, data){
-         res.send(data);
-         res.end();
+    var owner = req.param('owner');
+    users_db.findOne({uid: owner}, function(err, user){
+        if(!user || err) {
+            res.status(404).send('User does not exists')
+            res.end();
+            return;
+        }
+        groups_db.findOne({name: req.param('id')}, function(err, group){
+          if(! group) {
+            res.status(404).send('Group does not exists');
+            return;
+          }
+          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'group owner modification ' + group.name + ' to ' +owner, 'logs': []}, function(err){});
+          groups_db.update({name: group.name}, {'$set':{'owner': owner}}, function(err, data){
+             res.send(data);
+             res.end();
+          });
+        });
       });
-    });
   });
 });
 
@@ -463,40 +470,47 @@ router.post('/group/:id', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
-    groups_db.findOne({name: new RegExp(req.param('id'), 'i')}, function(err, group){
-      var owner = req.param('owner');
-      if(group) {
-        res.status(403).send('Group already exists');
-        return;
-      }
-      var mingid = 1000;
-
-      groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
-        if(!err && data && data.length>0){
-          mingid = data[0].gid+1;
+    var owner = req.param('owner');
+    users_db.findOne({uid: owner}, function(err, user){
+        if(!user || err) {
+            res.status(404).send('User does not exists')
+            res.end();
+            return;
         }
-        var fid = new Date().getTime();
-        group = {name: req.param('id'), gid: mingid, owner: owner};
-        groups_db.insert(group, function(err){
-          goldap.add_group(group, fid, function(err){
+        groups_db.findOne({name: new RegExp(req.param('id'), 'i')}, function(err, group){
+          if(group) {
+            res.status(403).send('Group already exists');
+            return;
+          }
+          var mingid = 1000;
 
-            var script = "#!/bin/bash\n";
-            script += "set -e \n"
-            script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-            var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-            fs.writeFile(script_file, script, function(err) {
-              events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+          groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
+            if(!err && data && data.length>0){
+              mingid = data[0].gid+1;
+            }
+            var fid = new Date().getTime();
+            group = {name: req.param('id'), gid: mingid, owner: owner};
+            groups_db.insert(group, function(err){
+              goldap.add_group(group, fid, function(err){
 
-              fs.chmodSync(script_file,0755);
-              group.fid = fid;
-              res.send(group);
-              res.end();
-              return;
+                var script = "#!/bin/bash\n";
+                script += "set -e \n"
+                script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
+                var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
+                fs.writeFile(script_file, script, function(err) {
+                  events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+
+                  fs.chmodSync(script_file,0755);
+                  group.fid = fid;
+                  res.send(group);
+                  res.end();
+                  return;
+                });
+              });
             });
           });
         });
       });
-    });
   });
 });
 

@@ -762,29 +762,39 @@ angular.module('genouest').controller('groupsmngrCtrl',
           $scope.msg = '';
           Group.list().$promise.then(function(data) {
             $scope.msg = 'Group updated';
+            $scope.rm_grp_err_msg = '';
           }, function(error){
-            $scope.msg = error.data;
+            $scope.msg = '';
+            $scope.rm_grp_err_msg = error.data;
           });
+        }, function(error){
+          $scope.msg = '';
+          $scope.rm_grp_err_msg = error.data;
         });
     };
 
     $scope.add_group = function(){
       if($scope.new_group == '') {
         return;
-      }      Group.add({name: $scope.new_group},{owner: $scope.new_group_user_id}).$promise.then(function(data){
+      }
+        Group.add({name: $scope.new_group},{owner: $scope.new_group_user_id}).$promise.then(function(data){
         $scope.err_msg = '';
         $scope.success_msg = '';
         GOLog.add(data.name, data.fid, 'Add group '+data.name);
         Group.list().$promise.then(function(data) {
           $scope.groups = data;
           $scope.success_msg = 'Group was created';
+          $scope.err_msg = '';
         }, function(error){
+          $scope.success_msg = '';
           $scope.err_msg = error.data;
         });
     }, function(error){
+        $scope.success_msg = '';
         $scope.err_msg = error.data;
     });
     }
+
     $scope.delete_group = function(selectedGroup) {
         Group.delete({name: selectedGroup.name}).$promise.then(function(data){
             $scope.rm_grp_msg_ok = data.message;
