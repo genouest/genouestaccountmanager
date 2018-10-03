@@ -623,7 +623,7 @@ router.post('/user/:id/group/:group', function(req, res){
           return;
         }
         if(secgroup == user.group) {
-            res.send({message: 'group is user main\'s group'});
+            res.send({message: 'Group is user main\'s group: '+user.group});
             res.end();
             return;
         }
@@ -681,7 +681,7 @@ router.delete('/user/:id/group/:group', function(req, res){
     var secgroup = req.param('group');
     users_db.findOne({uid: uid}, function(err, user){
       if(secgroup == user.group) {
-        res.send({message: 'group is user main\'s group'});
+        res.send({message: 'Group is user main\'s group: '+user.group});
         res.end();
         return;
       }
