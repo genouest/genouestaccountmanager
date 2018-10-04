@@ -425,12 +425,12 @@ router.put('/group/:id', function(req, res){
     return;
   }
   users_db.findOne({_id: sess.gomngr}, function(err, user){
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-      res.status(401).send('Not authorized');
-      return;
-    }
     if(err || user == null){
       res.status(404).send('User not found');
+      return;
+    }
+    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+      res.status(401).send('Not authorized');
       return;
     }
     var owner = req.param('owner');
