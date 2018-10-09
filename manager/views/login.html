@@ -24,12 +24,14 @@
                 </form>
             </div>
             <div ng-if="double_auth">
-
                 <form class="form-signin">
                     <div class="alert alert-warning">Double authentication is needed for admin access!!</div>
-                    <div class="alert alert-info">Insert your u2f device and press device</div>
                     <hr>
-                    <div class="alert alert-info">Or request a temporary email token</div>
+                    <div class="alert alert-info"><div class="glyphicon glyphicon-save"></div> Insert your u2f device and press device</div>
+                    <h4 class="text-center login-title"><b>or</b></h4>
+                    <div class="alert alert-info"><div class="glyphicon glyphicon-envelope"></div> Request a temporary email token</div>
+                    <div class="alert alert-success" ng-if="msg">{{msg}}</div>
+                    <div class="alert alert-danger" ng-if="error_msg">{{error_msg}}</div>
                     <div class="row">
                         <div class="col-md-4">
                                 <button type="button" class="btn btn-primary" ng-click="request_email_token()">Request</button>
@@ -40,7 +42,7 @@
                             </div>
                         </div>
                     </div>
-                        <button type="button" class="btn btn-primary btn-block btn-lg" ng-click="validate_email_token()">Check token</button>
+                    <button ng-if="$parent.mail_token" type="button" class="btn btn-primary btn-block btn-lg" ng-click="validate_email_token()">Check token</button>
                 </form>
             </div>
 
