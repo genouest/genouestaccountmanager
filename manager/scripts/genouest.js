@@ -1370,6 +1370,7 @@ angular.module('genouest').controller('loginCtrl',
           method: 'GET',
           url: '/mail/auth/' + $scope.uid
         }).then(function successCallback(response) {
+              $scope.error_msg = "";
               $scope.msg = "Mail token request send";
         });
     };
@@ -1386,7 +1387,8 @@ angular.module('genouest').controller('loginCtrl',
               $location.path('/');
               return;
         }, function errorCallback(response){
-            $scope.msg = "Failed to validate token";
+            $scope.msg = "";
+            $scope.error_msg = "Failed to validate token";
         });
     };
 
