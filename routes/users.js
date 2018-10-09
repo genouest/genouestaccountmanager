@@ -637,7 +637,7 @@ router.post('/user/:id/group/:group', function(req, res){
           return;
         }
         if(secgroup == user.group) {
-            res.send({message: 'group is user main\'s group'});
+            res.send({message: 'Group is user main\'s group: '+user.group});
             res.end();
             return;
         }
@@ -695,7 +695,7 @@ router.delete('/user/:id/group/:group', function(req, res){
     var secgroup = req.param('group');
     users_db.findOne({uid: uid}, function(err, user){
       if(secgroup == user.group) {
-        res.send({message: 'group is user main\'s group'});
+        res.send({message: 'Group is user main\'s group: '+user.group});
         res.end();
         return;
       }
@@ -785,7 +785,7 @@ router.delete_user = function(user, action_owner_id){
                      resolve(false);
                      return;
                    }
-                   var msg_activ ="User " + user.uid + "has been deleted by " + action_owner_id;
+                   var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
                    var msg_activ_html = msg_activ;
                    var mailOptions = {
                      origin: MAIL_CONFIG.origin, // sender address
