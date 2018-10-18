@@ -1309,7 +1309,7 @@ angular.module('genouest').controller('userCtrl',
          });
       }
       else {
-        if($location.path().indexOf("renew") == -1 && $location.path().indexOf("pending") == -1 && $location.path().indexOf("register") == -1) {
+        if($location.path().indexOf("passwordresetconfirm") == -1 && $location.path().indexOf("renew") == -1 && $location.path().indexOf("pending") == -1 && $location.path().indexOf("register") == -1) {
             $location.path('/login');
         }
       }
