@@ -336,7 +336,7 @@ var activate_tp_user = function(user, adminId){
                 script += "mkdir -p " + homeDir + "/user_guides\n";
                 if (typeof CONFIG.general.readme == "object") {
                   CONFIG.general.readme.forEach(function(dict) {
-                    script += "ln -s " + dict.path + " " + homeDir  +"/user_guides/" + dict.name + "\n";
+                    script += "ln -s " + dict.source_folder + " " + homeDir  +"/user_guides/" + dict.language + "\n";
                   });
                 } else {
                   script += "ln -s " + CONFIG.general.readme + " " + homeDir + "/user_guides/README\n";
