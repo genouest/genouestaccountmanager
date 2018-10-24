@@ -1656,6 +1656,7 @@ angular.module('genouest').controller('tpmngrCtrl',
                     'created': event.created,
                     'about': event.about,
                     'over': event.over,
+                    'group': event.group
                 });
             }
 
