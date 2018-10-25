@@ -40,6 +40,10 @@
     },
     "plugin_script_dir": "/tmp/scripts"
   },
+  "redis": {
+    "host": "localhost",
+    "port": 6379
+  },
   "usage": [
    {"name": "jobs", "link": "https://goacct.genouest.org/dashboard/db/goacct-cumulative-stats?var-userlist=#USER#"},
    {"name": "disks", "link": "https://goacct.genouest.org/dashboard/db/goacct-user-disk-usage?var-userlist=#USER#"}

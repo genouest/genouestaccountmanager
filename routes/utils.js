@@ -18,7 +18,7 @@ if (process.env.MY_REDIS_PORT) {
   CONFIG.redis.port = int(process.env.MY_REDIS_PORT)
 }
 
-if (CONFIG.redis !== undefined && CONFIG.redis.host !== undefined) {
+if (CONFIG.redis !== undefined && CONFIG.redis.host !== undefined && CONFIG.redis.host !== null) {
     redis_cfg = {host: CONFIG.redis.host, port: (CONFIG.redis.port || 6379)}
     logger.info("Using Redis", redis_cfg)
     redis_client = redis.createClient(redis_cfg)

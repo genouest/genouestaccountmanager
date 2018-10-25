@@ -37,6 +37,10 @@
     "host": "mongo",
     "port": 27017
  },
+ "redis": {
+    "host": "gomail-redis",
+    "port": 6379
+ },
  "gomail": {
    "host": "http://gomail-web:6643",
    "api_root": "/api/v1",

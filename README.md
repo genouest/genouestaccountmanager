@@ -45,6 +45,8 @@ Also needs nodejs, npm and bower installed
 
 Database used by softwaremanager is MongoDB. It also use OpenLDAP to insert LDIF files for account creation/update.
 
+An optional but recommended additional database is Redis. IF not willing to use Redis, set redis.host in config/default.json to *null*. This database is used to allocated user/group ids in a multi-process context.
+
 For an existing LDAP directory, one must import existing users and groups in mongo. There is no automatic script for this, but here is the following expecting schema to insert in MongoDB.
 
 Insert groups:
