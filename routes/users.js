@@ -27,17 +27,18 @@ var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif.js');
+var utils = require('../routes/utils.js')
 
-var get_ip = require('ipware')().get_ip;
+// var get_ip = require('ipware')().get_ip;
 
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
-    groups_db = db.get('groups'),
-    databases_db = db.get('databases'),
-    web_db = db.get('web'),
-    users_db = db.get('users'),
-    projects_db = db.get('projects'),
-    events_db = db.get('events');
+var monk = require('monk')
+var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + GENERAL_CONFIG.db)
+var groups_db = db.get('groups')
+var databases_db = db.get('databases')
+var web_db = db.get('web')
+var users_db = db.get('users')
+var projects_db = db.get('projects')
+var events_db = db.get('events')
 
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -97,11 +98,12 @@ var send_notif = function(mailOptions, fid, errors) {
 
 var create_extra_group = function(group_name, owner_name){
     return new Promise(function (resolve, reject){
-        var mingid = 1000;
-        groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
-          if(!err && data && data.length>0){
-            mingid = data[0].gid+1;
-          }
+        //var mingid = 1000;
+        //groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
+        utils.getGroupAvailableId().then(function (mingid) {
+          //if(!err && data && data.length>0){
+          //  mingid = data[0].gid+1;
+          //}
           var fid = new Date().getTime();
           group = {name: group_name, gid: mingid, owner: owner_name};
           groups_db.insert(group, function(err){
@@ -111,7 +113,7 @@ var create_extra_group = function(group_name, owner_name){
               script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
               var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
               fs.writeFile(script_file, script, function(err) {
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file, 0755);
                 group.fid = fid;
                 resolve(group);
                 return;
@@ -159,12 +161,12 @@ var create_extra_user = function(user_name, group, internal_user){
           password: password
         }
 
-        var minuid = 1000;
-        var mingid = 1000;
-        users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
-            if(!err && data && data.length>0){
-                minuid = data[0].uidnumber+1;
-            }
+        //var minuid = 1000;
+        //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
+        utils.getUserAvailableId().then(function (minuid) {
+            //if(!err && data && data.length>0){
+            //    minuid = data[0].uidnumber+1;
+            //}
 
             user.uidnumber = minuid;
             user.gidnumber = group.gid;
@@ -403,9 +405,11 @@ router.delete('/group/:id', function(req, res){
                       fs.chmodSync(script_file,0755);
                       group.fid = fid;
                       events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
-                      res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
-                      res.end();
-                      return;
+                      utils.freeGroupId(group.gid).then(function(){
+                        res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
+                        res.end();
+                        return;
+                      })
                     });
                   });
 
@@ -482,12 +486,12 @@ router.post('/group/:id', function(req, res){
             res.status(403).send('Group already exists');
             return;
           }
-          var mingid = 1000;
-
-          groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
-            if(!err && data && data.length>0){
-              mingid = data[0].gid+1;
-            }
+          //var mingid = 1000;
+          utils.getGroupAvailableId().then(function (mingid) {
+          //groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
+            //if(!err && data && data.length>0){
+            //  mingid = data[0].gid+1;
+            //}
             var fid = new Date().getTime();
             group = {name: req.param('id'), gid: mingid, owner: owner};
             groups_db.insert(group, function(err){
@@ -758,6 +762,8 @@ router.delete_user = function(user, action_owner_id){
                          'logs': []
                      }
                  ).then(function(){
+                   return utils.freeUserId(user.uidnumber)
+                 }).then(function(){
                      resolve(true);
                  });
              });
@@ -817,6 +823,9 @@ router.delete_user = function(user, action_owner_id){
                        return Promise.all(plugins_info.map(function(plugin_info){
                            return plugin_call(plugin_info, user.uid, user, action_owner_id);
                        }));
+                   })
+                   .then(function(){
+                     return utils.freeUserId(user.uidnumber)
                    })
                    .then(function(){
                        if(notif.mailSet()) {
@@ -923,38 +932,27 @@ router.get('/user/:id/activate', function(req, res) {
           return;
         }
         user.password = Math.random().toString(36).slice(-10);
-        var minuid = 1000;
-        var mingid = 1000;
-        users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
-          if(!err && data && data.length>0){
-            minuid = data[0].uidnumber+1;
-          }
-          groups_db.find({}, { sort: { gid: -1 }}, function(err, data){
-            if(!err && data && data.length>0){
-              var gfound = false;
-              for(var g=0; g<data.length;g++){
-                if(data[g].name == user.group) {
-                  logger.debug('Group exists, use it '+data[g].gid);
-                  logger.debug(data[g]);
-                  mingid = data[g].gid;
-                  gfound = true;
-                  break;
-                }
-              }
-              if(!gfound) {
-                mingid = data[0].gid+1;
-                res.status(403).send('Group '+user.group+' does not exists, please create it first')
+        //var minuid = 1000;
+        //var mingid = 1000;
+        utils.getUserAvailableId().then(function (minuid) {
+        //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
+          //if(!err && data && data.length>0){
+          //  minuid = data[0].uidnumber+1;
+          //}
+          groups_db.findOne({'name': user.group}, function(err, data){
+            if(err || data === undefined || data === null) {
+              res.status(403).send('Group '+user.group+' does not exists, please create it first')
                 res.end();
                 return
-              }
             }
+            
             user.uidnumber = minuid;
-            user.gidnumber = mingid;
+            user.gidnumber = data.gid;
             var fid = new Date().getTime();
             goldap.add(user, fid, function(err) {
               if(!err){
-                users_db.update({uid: req.param('id')},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: mingid, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(err){
-                  groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
+                users_db.update({uid: req.param('id')},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(err){
+                  //groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
 
                     var script = "#!/bin/bash\n";
                     script += "set -e \n"
@@ -1017,7 +1015,7 @@ router.get('/user/:id/activate', function(req, res) {
 
                       });
                     });
-                  });
+                  //});
                 });
 
               }

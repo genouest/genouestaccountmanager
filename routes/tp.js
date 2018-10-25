@@ -13,28 +13,31 @@ var GENERAL_CONFIG = CONFIG.general
 var plugins = CONFIG.plugins
 
 if (plugins === undefined) {
-    plugins = []
+  plugins = []
 }
-var plugins_modules = {};
-var plugins_info = [];
 
-for(var i=0;i<plugins.length;i++){
-    plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
+var plugins_modules = {}
+var plugins_info = []
+
+for (var i = 0; i < plugins.length; i++) {
+    plugins_modules[plugins[i].name] = require('../plugins/' + plugins[i].name)
     plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name})
 }
 
-var cookieParser = require('cookie-parser');
+var cookieParser = require('cookie-parser')
 
-var goldap = require('../routes/goldap.js');
-var notif = require('../routes/notif.js');
-var fdbs = require('../routes/database.js');
-var fwebs = require('../routes/web.js');
-var fusers = require('../routes/users.js');
-var notif = require('../routes/notif.js');
+var goldap = require('../routes/goldap.js')
+var notif = require('../routes/notif.js')
+var fdbs = require('../routes/database.js')
+var fwebs = require('../routes/web.js')
+var fusers = require('../routes/users.js')
+var notif = require('../routes/notif.js')
 
-var MAIL_CONFIG = CONFIG.gomail;
+var utils = require('../routes/utils.js')
 
-var get_ip = require('ipware')().get_ip;
+// var MAIL_CONFIG = CONFIG.gomail;
+
+// var get_ip = require('ipware')().get_ip;
 
 var monk = require('monk')
 var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db)
@@ -43,21 +46,22 @@ var groups_db = db.get('groups')
 var reservation_db = db.get('reservations')
 var events_db = db.get('events')
 
-var STATUS_PENDING_EMAIL = 'Waiting for email approval';
-var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
-var STATUS_ACTIVE = 'Active';
-var STATUS_EXPIRED = 'Expired';
+var STATUS_PENDING_EMAIL = 'Waiting for email approval'
+var STATUS_PENDING_APPROVAL = 'Waiting for admin approval'
+var STATUS_ACTIVE = 'Active'
+var STATUS_EXPIRED = 'Expired'
 
 var createExtraGroup = function (ownerName) {
   return new Promise(function (resolve, reject) {
-    var mingid = 1000
-    groups_db.find({}, { limit: 1, sort: { gid: -1 } }, function (err, data) {
-      if (!err && data && data.length > 0) {
-        mingid = data[0].gid + 1
-      }
+    // var mingid = 1000
+    utils.getGroupAvailableId().then(function (mingid) {
+    // groups_db.find({}, { limit: 1, sort: { gid: -1 } }, function (err, data) {
+    //  if (!err && data && data.length > 0) {
+    //    mingid = data[0].gid + 1
+    //  }
       var fid = new Date().getTime()
       var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName }
-      groups_db.insert(group, function(err){
+      groups_db.insert(group, function(err) {
         goldap.add_group(group, fid, function(err) {
           var script = "#!/bin/bash\n";
           script += "set -e \n"
@@ -92,9 +96,12 @@ var deleteExtraGroup = function (group) {
           fs.writeFile(script_file, script, function(err) {
             fs.chmodSync(script_file,0o755);
             group.fid = fid;
-            events_db.insert({ 'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
-            resolve()
-            return
+            utils.freeGroupId(group.gid).then(function(){
+                events_db.insert({ 'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
+                resolve()
+                return
+            })
+            
           })
         })
     })
@@ -107,10 +114,10 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
         logger.debug("create_tp_users ", owner, quantity, duration);
         // TODO get account ids
         var minuid = 1000;
-        users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}).then(function(data){
-            if(data && data.length>0){
-              minuid = data[0].uidnumber+1;
-            }
+        //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}).then(function(data){
+            //if(data && data.length>0){
+            //  minuid = data[0].uidnumber+1;
+            //}
             var users = [];
             for(var i=0;i<quantity;i++){
                 logger.debug("create user ", CONFIG.tp.prefix + minuid);
@@ -150,18 +157,24 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
             }).then(function(activated_users){
                 resolve(activated_users);
             });
-        });
+        //});
     });
 };
 
-var create_tp_user_db = function(user) {
+var create_tp_user_db = function (user) {
     return new Promise(function (resolve, reject){
         logger.debug("create_tp_user_db", user.uid);
         try {
-            users_db.insert(user).then(function(data){
+            utils.getUserAvailableId().then(function (uid) {
+              user.uid = CONFIG.tp.prefix + uid
+              user.lastname = uid
+              user.email = CONFIG.tp.prefix + uid + "@fake." + CONFIG.tp.fake_mail_domain
+              user.uidnumber = uid
+              users_db.insert(user).then(function(data){
                 user.password = Math.random().toString(36).substring(2);
                 resolve(user);
-            });
+              });
+            })
         }
         catch(exception){
             logger.error(exception);
@@ -189,6 +202,8 @@ var send_user_passwords = function(owner, from_date, to_date, users){
             msg_html += "<tr><td align=\"left\" valign=\"top\">" + users[i].uid + "</td><td align=\"left\" valign=\"top\">" + users[i].password + "</td><td align=\"left\" valign=\"top\">" + users[i].email + "</td></tr>";
         }
         msg_html += "</tbody></table>";
+        msg += "New TP group: " + users[0].group + "\n";
+        msg_html += "<hr><p>Users are in the group <strong>" + users[0].group + "</strong></p>";
         msg += "Users can create an SSH key at " + CONFIG.general.url + " in SSH Keys section\n";
         msg_html += "<hr>";
         msg_html += "<h2>Access</h2>";
@@ -236,6 +251,8 @@ var delete_tp_user = function(user, admin_id){
                 return fwebs.delete_webs(user);
             }).then(function(web_res){
                 return fusers.delete_user(user, admin_id);
+            }).then(function(){
+                return utils.freeUserId(user.uidnumber)
             }).then(function(){
                 resolve(true);
             });

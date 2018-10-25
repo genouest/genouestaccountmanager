@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -36,6 +38,7 @@ var quota = require('./routes/quota');
 var plugin = require('./routes/plugin');
 var tp = require('./routes/tp');
 var conf = require('./routes/conf');
+var utils = require('./routes/utils.js');
 
 
 var CONFIG = require('config');
@@ -83,7 +86,7 @@ app.all('*', function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            users_db.findOne({_id: token}, function(err, session_user){
+            users_db.findOne({'_id': token}, function(err, session_user){
                 if(err){
                     return res.status(403).send('Invalid token').end();
                 }
@@ -221,9 +224,13 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
+// Setup list of available user/group ids
+utils.loadAvailableIds().then(function (alreadyLoaded) {
 
-if (!module.parent) {
-  http.createServer(app).listen(app.get('port'), function(){
-    console.log('Server listening on port ' + app.get('port'));
-  });
-}
+    if (!module.parent) {
+    http.createServer(app).listen(app.get('port'), function(){
+        console.log('Server listening on port ' + app.get('port'));
+    });
+    }
+
+})

@@ -4,6 +4,8 @@ var CONFIG = require('config');
 
 var tps = require('./routes/tp.js');
 
+var utils = require('./routes/utils.js')
+
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users'),
