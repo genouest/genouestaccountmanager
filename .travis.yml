@@ -9,8 +9,10 @@ services:
 
 before_install:
   - docker build -t osallou/my .
+  - npm install
 
 script:
+  - 
   - npm install -g mocha
   - cd tests && docker-compose up -d
   - sleep 120 && mocha -t 10000
