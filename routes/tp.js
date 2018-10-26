@@ -412,6 +412,8 @@ var activate_tp_user = function(user, adminId){
                     homeDir = CONFIG.general.home + "/" + user.maingroup + "/" + user.group + '/' + user.uid;
                 }
                 script += "mkdir -p " + homeDir + "/.ssh\n";
+                script += utils.addReadmes(homeDir);
+                /*
                 script += "mkdir -p " + homeDir + "/user_guides\n";
                 if (typeof CONFIG.general.readme == "object") {
                   CONFIG.general.readme.forEach(function(dict) {
@@ -420,6 +422,7 @@ var activate_tp_user = function(user, adminId){
                 } else {
                   script += "ln -s " + CONFIG.general.readme + " " + homeDir + "/user_guides/README\n";
                 };
+                */
                 script += "touch " + homeDir + "/.ssh/authorized_keys\n";
                 script += "echo \"Host *\" > " + homeDir + "/.ssh/config\n";
                 script += "echo \"  StrictHostKeyChecking no\" >> " + homeDir + "/.ssh/config\n";

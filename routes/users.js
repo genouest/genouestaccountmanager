@@ -183,6 +183,8 @@ var create_extra_user = function(user_name, group, internal_user){
                     script += "fi\n"
                     script += "sleep 3\n";
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += utils.addReadmes(CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid);
+                    /*
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
                     if (typeof CONFIG.general.readme == "object") {
                       CONFIG.general.readme.forEach(function(dict) {
@@ -191,6 +193,7 @@ var create_extra_user = function(user_name, group, internal_user){
                     } else {
                       script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
                     };
+                    */
                     script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
                     script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
@@ -962,6 +965,8 @@ router.get('/user/:id/activate', function(req, res) {
                     script += "fi\n"
                     script += "sleep 3\n";
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += utils.addReadmes(CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid);
+                    /*
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
                     if (typeof CONFIG.general.readme == "object") {
                       CONFIG.general.readme.forEach(function(dict) {
@@ -970,6 +975,7 @@ router.get('/user/:id/activate', function(req, res) {
                     } else {
                       script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
                     };
+                    */
                     script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
                     script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";

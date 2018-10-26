@@ -35,6 +35,20 @@ var userIds = []
 var groupIds = []
 var idsLoaded = false
 
+exports.addReadmes = function(userHome) {
+  cmd = "if [ ! -e " + userHome + "/user_guides ]; then\n";
+  cmd += "    mkdir -p " + userHome + "/user_guides\n";
+  if (typeof CONFIG.general.readme == "object") {
+    CONFIG.general.readme.forEach(function(dict) {
+      cmd += "    ln -s " + dict.source_folder + " " + userHome + "/user_guides/" + dict.language + "\n";
+    });
+  } else {
+    cmd += "    ln -s " + CONFIG.general.readme + " "+ userHome + "/user_guides/README\n";
+  }
+  cmd += "fi\n";
+  return cmd
+}
+
 
 exports.isInitOver = function () {
   return new Promise(function (resolve, reject) {  
