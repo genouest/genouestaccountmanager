@@ -86,11 +86,11 @@ app.all('*', function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            users_db.findOne({'_id': token}, function(err, session_user){
+            users_db.findOne({'apikey': token}, function(err, session_user){
                 if(err){
                     return res.status(403).send('Invalid token').end();
                 }
-                req.session.gomngr = token;
+                req.session.gomngr = session_user._id;
                 req.session.is_logged = true;
                 next();
             });
