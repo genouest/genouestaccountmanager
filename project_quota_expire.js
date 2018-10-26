@@ -1,5 +1,5 @@
 /**
-* Test expiration date of user, if lower than 2 month, send an email to user
+* Test expiration date of project, if lower than 2 month, send an email to admins
 */
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -30,7 +30,7 @@ function timeConverter(tsp){
   return time;
 }
 
-// Find users expiring in less then 2 month
+// Find project expiring in less then 2 month
 projects_db.find({}, function(err, projects){
   var mail_sent = 0;
   var notifs = [];
@@ -38,7 +38,7 @@ projects_db.find({}, function(err, projects){
       var project = projects[i];
       if(project.expire !== undefined && project.expire!=null) {
           if(project.expire < new Date().getTime() + 1000*3600*24*30) {
-              var msg = "Quota for project "+project.id+" partition will expire at "+new Date(project.expire);
+              var msg = "Project "+project.id+" will expire at "+new Date(project.expire);
               notifs.push(msg);
           }
       }
@@ -48,7 +48,7 @@ projects_db.find({}, function(err, projects){
     var mailOptions = {
       origin: MAIL_CONFIG.origin, // sender address
       destinations: [CONFIG.general.accounts], // list of receivers
-      subject: 'Quota expiration', // Subject line
+      subject: 'Project expiration', // Subject line
       message: notification, // plaintext body
       html_message: notification // html body
     };
