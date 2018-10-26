@@ -155,7 +155,7 @@ router.get('/ssh/:id', function(req, res) {
         script += "chown " + user.uid + ":" + user.group + " " + sshDir + "/*\n";
 
         fs.writeFile(script_file, script, function(err) {
-            fs.chmodSync(script_file,0755);
+            fs.chmodSync(script_file,0o755);
             events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
             res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
             res.end();

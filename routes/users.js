@@ -113,7 +113,7 @@ var create_extra_group = function(group_name, owner_name){
               script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
               var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
               fs.writeFile(script_file, script, function(err) {
-                fs.chmodSync(script_file, 0755);
+                fs.chmodSync(script_file, 0o755);
                 group.fid = fid;
                 resolve(group);
                 return;
@@ -205,7 +205,7 @@ var create_extra_user = function(user_name, group, internal_user){
                     script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
-                      fs.chmodSync(script_file,0755);
+                      fs.chmodSync(script_file,0o755);
                         var plugin_call = function(plugin_info, userId, data, adminId){
                             return new Promise(function (resolve, reject){
                                 plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
@@ -406,7 +406,7 @@ router.delete('/group/:id', function(req, res){
                     script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
                     var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
-                      fs.chmodSync(script_file,0755);
+                      fs.chmodSync(script_file,0o755);
                       group.fid = fid;
                       events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
                       utils.freeGroupId(group.gid).then(function(){
@@ -508,7 +508,7 @@ router.post('/group/:id', function(req, res){
                 fs.writeFile(script_file, script, function(err) {
                   events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
 
-                  fs.chmodSync(script_file,0755);
+                  fs.chmodSync(script_file,0o755);
                   group.fid = fid;
                   res.send(group);
                   res.end();
@@ -668,7 +668,7 @@ router.post('/user/:id/group/:group', function(req, res){
 
             var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
             fs.writeFile(script_file, script, function(err) {
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file,0o755);
 
                 users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
                     if(err){
@@ -734,7 +734,7 @@ router.delete('/user/:id/group/:group', function(req, res){
 
         var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
         fs.writeFile(script_file, script, function(err) {
-          fs.chmodSync(script_file,0755);
+          fs.chmodSync(script_file,0o755);
 
           users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
             if(err){
@@ -790,7 +790,7 @@ router.delete_user = function(user, action_owner_id){
 
                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                fs.writeFile(script_file, script, function(err) {
-                 fs.chmodSync(script_file,0755);
+                 fs.chmodSync(script_file,0o755);
                  users_db.remove({_id: user._id}, function(err){
                    if(err){
                      resolve(false);
@@ -989,7 +989,7 @@ router.get('/user/:id/activate', function(req, res) {
                     script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
-                      fs.chmodSync(script_file,0755);
+                      fs.chmodSync(script_file,0o755);
                       notif.add(user.email, function(){
                         var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                         var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1300,7 +1300,7 @@ router.get('/user/:id/expire', function(req, res){
               fs.writeFile(script_file, script, function(err) {
                 events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file,0o755);
                 // Now remove from mailing list
                 try {
                   notif.remove(user.email, function(err){
@@ -1381,7 +1381,7 @@ router.post('/user/:id/passwordreset', function(req, res){
             script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
             var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
             fs.writeFile(script_file, script, function(err) {
-              fs.chmodSync(script_file,0755);
+              fs.chmodSync(script_file,0o755);
               res.send({message:'Password updated'});
               return;
            });
@@ -1468,7 +1468,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
             script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
             var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
             fs.writeFile(script_file, script, function(err) {
-              fs.chmodSync(script_file,0755);
+              fs.chmodSync(script_file,0o755);
               // Now send email
               var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
               var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1576,7 +1576,7 @@ router.get('/user/:id/renew', function(req, res){
               var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
               fs.writeFile(script_file, script, function(err) {
                 events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file,0o755);
                 notif.add(user.email, function(){
                   var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                   var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1663,7 +1663,7 @@ router.put('/user/:id/ssh', function(req, res) {
           fs.writeFile(script_file, script, function(err) {
             events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-            fs.chmodSync(script_file,0755);
+            fs.chmodSync(script_file,0o755);
             user.fid = fid;
             user.ssh = req.param('ssh');
             res.send(user);
@@ -1836,7 +1836,7 @@ router.put('/user/:id', function(req, res) {
                   fs.writeFile(script_file, script, function(err) {
                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                    fs.chmodSync(script_file,0755);
+                    fs.chmodSync(script_file,0o755);
                     if(user.oldemail!=user.email && !user.is_fake) {
                       notif.modify(user.oldemail, user.email, function() {
                         user.fid = fid;

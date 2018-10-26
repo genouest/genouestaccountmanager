@@ -9,7 +9,7 @@ var groupsDb = db.get('groups')
 var usersDb = db.get('users')
 
 var redis = require("redis")
-redis_client = null
+var redis_client = null
 
 if (process.env.MY_REDIS_HOST) {
   CONFIG.redis.host = process.env.MY_REDIS_HOST
@@ -19,7 +19,7 @@ if (process.env.MY_REDIS_PORT) {
 }
 
 if (CONFIG.redis !== undefined && CONFIG.redis.host !== undefined && CONFIG.redis.host !== null) {
-    redis_cfg = {host: CONFIG.redis.host, port: (CONFIG.redis.port || 6379)}
+    let redis_cfg = {host: CONFIG.redis.host, port: (CONFIG.redis.port || 6379)}
     logger.info("Using Redis", redis_cfg)
     redis_client = redis.createClient(redis_cfg)
 } else {
@@ -88,13 +88,17 @@ exports.moveExtraDirs = function(userUID, oldUserGroupName, newUserGroupName, us
   for(let i=0;i < CONFIG.general.user_extra_dirs.length; i++){
     oldExtraDir = CONFIG.general.user_extra_dirs[i].replace("#USER#", userUID).replace("#GROUP#", oldUserGroupName)
     extraDir = CONFIG.general.user_extra_dirs[i].replace("#USER#", userUID).replace("#GROUP#", newUserGroupName)
+    if (extraDir == oldExtraDir) {
+      cmd += "# extra dir not modified: " + extraDir + "\n";
+      continue;
+    }
     if (extraDir == CONFIG.general.user_extra_dirs[i]) {
       logger.error("Extra dir is not user specific, skipping", extraDir);
       continue;
     }
     cmd += "if [ -e " + oldExtraDir + " ]; then\n";
     cmd += "    mv " + oldExtraDir + " " +extraDir + "\n";
-    cmd += "    chown -R " + userID + ":" + userGid + " " + extraDir + "\n";
+    cmd += "    chown -R " + userID + ":" + userGID + " " + extraDir + "\n";
     cmd += "else\n";
     cmd += '    echo "Directory does not exists"\n';
     cmd += "fi\n";
