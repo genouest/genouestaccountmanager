@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express');
+var cors = require('cors')
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -52,6 +53,7 @@ if(MY_ADMIN_USER !== null){
 }
 
 var app = express();
+app.use(cors())
 app.use(logger('combined'));
 // view engine setup
 app.set('port', process.env.PORT || 3000);
