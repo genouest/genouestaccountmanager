@@ -199,9 +199,10 @@ var create_extra_user = function(user_name, group, internal_user){
                     script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
-                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
                       fs.chmodSync(script_file,0755);
@@ -785,6 +786,7 @@ router.delete_user = function(user, action_owner_id){
                script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn +" \"uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\"\n";
                script += "rm -rf "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
                script += "rm -rf /omaha-beach/"+user.uid+"\n";
+               script += utils.deleteExtraDirs(user.uid, user.group);
 
                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                fs.writeFile(script_file, script, function(err) {
@@ -984,6 +986,7 @@ router.get('/user/:id/activate', function(req, res) {
                     script += "mkdir -p /omaha-beach/"+user.uid+"\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
                       fs.chmodSync(script_file,0755);
@@ -1825,6 +1828,7 @@ router.put('/user/:id', function(req, res) {
                       script += "fi\n";
                       script += "mv "+CONFIG.general.home+"/"+user.oldmaingroup+"/"+user.oldgroup+"/"+user.uid+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/\n";
                       script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/"+user.uid+"\n";
+                      script += utils.moveExtraDirs(user.uid, user.oldgroup, user.group, user.uidnumber, user.gidnumber);
                       events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                     }
                   }

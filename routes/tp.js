@@ -429,8 +429,8 @@ var activate_tp_user = function(user, adminId){
                 script += "echo \"   UserKnownHostsFile=/dev/null\" >> " + homeDir + "/.ssh/config\n";
                 script += "chmod 700 " + homeDir + "/.ssh\n";
                 script += "mkdir -p /omaha-beach/" + user.uid + "\n";
-                script += "chown -R " + user.uid + ":" + user.group + " " + CONFIG.general.home + "/" + user.maingroup + "/" + user.group + '/' + user.uid + "\n";
-                script += "chown -R " + user.uid + ":" + user.group + " /omaha-beach/" + user.uid+"\n";
+                script += "chown -R " + user.uidnumber+":"+user.gidnumber + " " + CONFIG.general.home + "/" + user.maingroup + "/" + user.group + '/' + user.uid + "\n";
+                script += "chown -R " + user.uidnumber+":"+user.gidnumber + " /omaha-beach/" + user.uid+"\n";
                 var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                 fs.writeFile(script_file, script, function(err) {
                     fs.chmodSync(script_file, 0o755);

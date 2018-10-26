@@ -36,7 +36,7 @@ var groupIds = []
 var idsLoaded = false
 
 exports.addReadmes = function(userHome) {
-  cmd = "if [ ! -e " + userHome + "/user_guides ]; then\n";
+  let cmd = "if [ ! -e " + userHome + "/user_guides ]; then\n";
   cmd += "    mkdir -p " + userHome + "/user_guides\n";
   if (typeof CONFIG.general.readme == "object") {
     CONFIG.general.readme.forEach(function(dict) {
@@ -47,6 +47,58 @@ exports.addReadmes = function(userHome) {
   }
   cmd += "fi\n";
   return cmd
+}
+
+exports.addExtraDirs = function(userUID, userGroupName, userID, userGID) {
+  cmd = "";
+  if (CONFIG.general.user_extra_dirs === undefined) { return cmd }
+  for(let i=0;i < CONFIG.general.user_extra_dirs.length; i++){
+    extraDir = CONFIG.general.user_extra_dirs[i].replace("#USER#", userUID).replace("#GROUP#", userGroupName);
+    if (extraDir == CONFIG.general.user_extra_dirs[i]) {
+      logger.error("Extra dir is not user specific, skipping", extraDir);
+      continue;
+    }
+    cmd += "if [ ! -e " + extraDir + " ]; then\n";
+    cmd += "    mkdir -p " + extraDir + "\n";
+    cmd += "    chown -R " + userID + ":" + userGID + " " + extraDir + "\n";
+    cmd += "fi\n";
+  }
+}
+
+exports.deleteExtraDirs = function(userUID, userGroupName) {
+  cmd = "";
+  if (CONFIG.general.user_extra_dirs === undefined) { return cmd }
+  for(let i=0;i < CONFIG.general.user_extra_dirs.length; i++){
+    extraDir = CONFIG.general.user_extra_dirs[i].replace("#USER#", userUID).replace("#GROUP#", userGroupName)
+    if (extraDir == CONFIG.general.user_extra_dirs[i]) {
+      logger.error("Extra dir is not user specific, skipping", extraDir);
+      continue;
+    }
+    cmd += "if [ -e " + extraDir + " ]; then\n";
+    cmd += "    rm -rf " + extraDir + "\n";
+    cmd += "else\n";
+    cmd += '    echo "Directory does not exists"\n';
+    cmd += "fi\n";
+  }
+}
+
+exports.moveExtraDirs = function(userUID, oldUserGroupName, newUserGroupName, userID, userGID) {
+  cmd = "";
+  if (CONFIG.general.user_extra_dirs === undefined) { return cmd }
+  for(let i=0;i < CONFIG.general.user_extra_dirs.length; i++){
+    oldExtraDir = CONFIG.general.user_extra_dirs[i].replace("#USER#", userUID).replace("#GROUP#", oldUserGroupName)
+    extraDir = CONFIG.general.user_extra_dirs[i].replace("#USER#", userUID).replace("#GROUP#", newUserGroupName)
+    if (extraDir == CONFIG.general.user_extra_dirs[i]) {
+      logger.error("Extra dir is not user specific, skipping", extraDir);
+      continue;
+    }
+    cmd += "if [ -e " + oldExtraDir + " ]; then\n";
+    cmd += "    mv " + oldExtraDir + " " +extraDir + "\n";
+    cmd += "    chown -R " + userID + ":" + userGid + " " + extraDir + "\n";
+    cmd += "else\n";
+    cmd += '    echo "Directory does not exists"\n';
+    cmd += "fi\n";
+  }
 }
 
 

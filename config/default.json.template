@@ -38,7 +38,8 @@
             "series": "goacct.fixed.disk.panasas-omaha.*.user.#USER#"
         }
     },
-    "plugin_script_dir": "/tmp/scripts"
+    "plugin_script_dir": "/tmp/scripts",
+    "user_extra_dirs": []
   },
   "redis": {
     "host": "localhost",

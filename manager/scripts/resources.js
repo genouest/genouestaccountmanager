@@ -147,7 +147,7 @@
 
 
       function Quota($resource) {
-        return $resource(prefix+'/disk', {}, {
+        return $resource(prefix+'/quota', {}, {
             get: {
               url: prefix+'/quota/:name/:disk',
               method: 'GET',
