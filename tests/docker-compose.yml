@@ -34,6 +34,8 @@ services:
             - GOMAIL_REDIS_HOST=gomail-redis
             - GOMAIL_SUPPORT=support@my.org
             - GOMAIL_LISTS=mytestlist
+        ports:
+            - "6643:6643"
         depends_on:
             - gomail-rabbitmq
             - gomail-redis
@@ -56,10 +58,12 @@ services:
         environment:
             - "SLAPD_PASSWORD=my"
             - "SLAPD_DOMAIN=my.org"
+        ports:
+            - "3890:389"
         volumes:
             #- ${MYDIR}/openldap/data/etc:/etc/ldap
             #- ${MYDIR}/openldap/data/lib:/var/lib/ldap
-            - ${MYDIR}/ldap-data:/etc/ldap/prepopulate:ro
+            - ./ldap-data:/etc/ldap/prepopulate:ro
     phpldapadmin:
         image: dinkel/phpldapadmin
         ports:
@@ -69,9 +73,6 @@ services:
 
     my:
         image: osallou/my
-        build:
-            context: .
-            dockerfile: Dockerfile
         ports:
             - "3000:3000"
         environment:
@@ -79,11 +80,11 @@ services:
             - LDAP_SERVER_HOST=openldap
             - MY_ADMIN_USER=admin
             - MY_ADMIN_GROUP=admin
-            - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL}
-            - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD}
+            - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL:-admin@my.org}
+            - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD:-admin}
         volumes:
-            - ${MYDIR}/home_dir:/home
-            - ${MYDIR}/cron:/opt/my/scripts
+            - ./home_dir:/home
+            - ./cron:/opt/my/scripts
         depends_on:
             - mongo
             - openldap
@@ -99,5 +100,5 @@ services:
         environment:
             - NODE_ENV=test            
         volumes:
-            - ${MYDIR}/home_dir:/home
-            - ${MYDIR}/cron:/opt/my/scripts
+            - ./home_dir:/home
+            - ./cron:/opt/my/scripts
