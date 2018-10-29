@@ -18,16 +18,17 @@ if(plugins === undefined){
 }
 var plugins_modules = {};
 var plugins_info = [];
-for(var i=0;i<plugins.length;i++){
+
+for(i = 0; i< plugins.length; i++){
     plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name})
+    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
 }
 
 var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif.js');
-var utils = require('../routes/utils.js')
+var utils = require('../routes/utils.js');
 
 // var get_ip = require('ipware')().get_ip;
 
@@ -1717,11 +1718,12 @@ router.put('/user/:id', function(req, res) {
   */
 
   var sess = req.session;
+  /*
   if(sess.apikey !== undefined && sess.apikey) {
     // Forbids by api key to avoid modyfing email address
     res.status(401).send('Operation not authorized by API key');
     return;
-  }
+  }*/
   if(! sess.gomngr) {
     res.status(401).send('Not authorized');
     return;
