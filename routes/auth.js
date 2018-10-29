@@ -310,9 +310,19 @@ router.post('/auth/:id', function(req, res) {
         }
         else{
             attemps[user.uid]['attemps'] = 0;
-            res.send({ user: user, msg: '', double_auth: need_double_auth});
-            res.end();
-            return;
+            if (!user.apikey) {
+                var apikey = Math.random().toString(36).slice(-10);
+                user.apikey = apikey;
+                users_db.update({uid: user.uid}, {'$set':{'apikey': apikey}}, function(err, data){
+                    res.send({ user: user, msg: '', double_auth: need_double_auth});
+                    res.end();
+                    return;
+                });
+            } else {
+                res.send({ user: user, msg: '', double_auth: need_double_auth});
+                res.end();
+                return;
+            }
         }
       });
     }
