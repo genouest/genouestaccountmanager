@@ -62,7 +62,8 @@
     "dn": "dc=nodomain",
     "admin_cn": "cn=admin",
     "admin_dn": "dc=nodomain",
-    "admin_password": ""
+    "admin_password": "",
+    "team": "genouest"
   },
   "mysql": {
     "host": "localhost",
