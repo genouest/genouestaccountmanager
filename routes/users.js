@@ -1,3 +1,4 @@
+/*jslint es6 */
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
@@ -18,11 +19,6 @@ if(plugins === undefined){
 }
 var plugins_modules = {};
 var plugins_info = [];
-
-for(i = 0; i< plugins.length; i++){
-    plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
-}
 
 var cookieParser = require('cookie-parser');
 
@@ -50,6 +46,11 @@ var STATUS_EXPIRED = 'Expired';
 var MAIL_CONFIG = CONFIG.gomail;
 
 const runningEnv = process.env.NODE_ENV || 'prod';
+
+for(i = 0; i< plugins.length; i++){
+  plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
+  plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
+}
 
 // util function to execute scripts immediatly, for test purpose only
 // on dev/prod, scripts should be executed by cron only
@@ -201,8 +202,8 @@ var create_extra_user = function(user_name, group, internal_user){
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
+                    //script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
                     script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
@@ -786,7 +787,7 @@ router.delete_user = function(user, action_owner_id){
                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
                script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn +" \"uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\"\n";
                script += "rm -rf "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-               script += "rm -rf /omaha-beach/"+user.uid+"\n";
+               // script += "rm -rf /omaha-beach/"+user.uid+"\n";
                script += utils.deleteExtraDirs(user.uid, user.group);
 
                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
@@ -984,9 +985,9 @@ router.get('/user/:id/activate', function(req, res) {
                     script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
-                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
+                    // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    // script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
                     script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {

@@ -148,12 +148,12 @@ function _loadAvailableIds () {
     if (CONFIG.general.minuid === undefined) {
       logger.warn('Min and max user ids not defined in config, using some defaults (10000/40000)')
       CONFIG.general.minuid = 10000
-      CONFIG.general.maxuid = 80000
+      CONFIG.general.maxuid = 40000
     }
     if (CONFIG.general.mingid === undefined) {
       logger.warn('Min and max group ids not defined in config, using some defaults (10000/40000)')
-      CONFIG.general.mingid = 1000
-      CONFIG.general.maxgid = 8000
+      CONFIG.general.mingid = 10000
+      CONFIG.general.maxgid = 40000
     }
 
     if (redis_client === null) {
