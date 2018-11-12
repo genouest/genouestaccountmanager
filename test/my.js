@@ -50,7 +50,7 @@ describe('My', () => {
             .send({'password': 'admin'})
             .end((err, res) => {
                 res.should.have.status(200);
-                token_id = res.body.user._id;
+                token_id = res.body.user.apikey;
                 assert(res.body.user.status == 'Active');
                 done();
             });

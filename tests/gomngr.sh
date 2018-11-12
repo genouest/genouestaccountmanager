@@ -10,6 +10,8 @@ if [ "a$2" == "a" ]; then
  exit 1
 fi
 
+echo "$(date) Execute cron tasks"
+
 if [ -e /tmp/gomngr.lock ]; then
   exit 1
 fi
