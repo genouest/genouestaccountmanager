@@ -226,7 +226,7 @@ module.exports = {
     user_ldif += "sn: "+user.lastname+"\n";
     if(user.is_genouest){
       if (CONFIG.ldap.team === undefined) { CONFIG.ldap.team = "genouest" }
-      user_ldif += "ou: " + CONFIG.ldap.team + \n";
+      user_ldif += "ou: " + CONFIG.ldap.team + "\n";
     } else if (user.is_fake) {
       user_ldif += "ou: fake\n";
     } else {
