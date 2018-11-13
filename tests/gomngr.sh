@@ -5,9 +5,16 @@ if [ "a$1" == "a" ]; then
  exit 1
 fi
 
+MYURL="http://localhost:3000"
 if [ "a$2" == "a" ]; then
- echo "Missing gomngr url (http://x.y.z) parameter"
- exit 1
+ if [ -z $GOMNGRURL ]; then
+   echo "Missing gomngr url (http://x.y.z) parameter"
+   exit 1
+ else
+   MYURL=$GOMNGRURL
+ fi
+else
+  MYURL=$2
 fi
 
 echo "$(date) Execute cron tasks"
@@ -24,7 +31,7 @@ while read p; do
   $p &> $p.log
   EXITCODE=$?
   filename=$(basename $p)
-  curl -v "$2/log/status/$filename/$EXITCODE"
+  curl -v "$MYURL/log/status/$filename/$EXITCODE"
   mv $p $p.done
 done </tmp/gomngr.list
 

@@ -98,7 +98,8 @@ services:
             context: .
             dockerfile: Dockerfile-cron
         environment:
-            - NODE_ENV=test            
+            - NODE_ENV=test
+            - GOMNGRURL=http://my:3000
         volumes:
             - ./home_dir:/home
             - ./cron:/opt/my/scripts
