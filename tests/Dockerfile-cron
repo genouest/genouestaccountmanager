@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM osallou/my
 
 RUN apt-get update && apt-get install -y curl ldap-utils openssh-client putty-tools cron
 COPY gomngr.sh /opt/gomngr.sh
