@@ -63,6 +63,7 @@ exports.addExtraDirs = function(userUID, userGroupName, userID, userGID) {
     cmd += "    chown -R " + userID + ":" + userGID + " " + extraDir + "\n";
     cmd += "fi\n";
   }
+  return cmd;
 }
 
 exports.deleteExtraDirs = function(userUID, userGroupName) {
@@ -80,6 +81,7 @@ exports.deleteExtraDirs = function(userUID, userGroupName) {
     cmd += '    echo "Directory does not exists"\n';
     cmd += "fi\n";
   }
+  return cmd;
 }
 
 exports.moveExtraDirs = function(userUID, oldUserGroupName, newUserGroupName, userID, userGID) {
@@ -103,6 +105,7 @@ exports.moveExtraDirs = function(userUID, oldUserGroupName, newUserGroupName, us
     cmd += '    echo "Directory does not exists"\n';
     cmd += "fi\n";
   }
+  return cmd;
 }
 
 
