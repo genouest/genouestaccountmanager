@@ -71,7 +71,7 @@ services:
         environment:
             - LDAP_SERVER_HOST=openldap
 
-    my:
+    my-app:
         image: osallou/my
         ports:
             - "3000:3000"
@@ -92,11 +92,13 @@ services:
             - gomail-web
         command: node app.js
 
-    cron:
+    my-cron:
         image: osallou/mycron
         build:
             context: .
             dockerfile: Dockerfile-cron
+        depends_on:
+            - my-app
         environment:
             - NODE_ENV=test
             - GOMNGRURL=http://my:3000
