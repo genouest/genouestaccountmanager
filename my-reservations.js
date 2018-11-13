@@ -7,6 +7,7 @@ var CONFIG = require('config')
 var monk = require('monk')
 var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db)
 var reservation_db = db.get('reservations')
+var users_db = db.get('users')
 
 var winston = require('winston')
 const myconsole = new (winston.transports.Console)({
