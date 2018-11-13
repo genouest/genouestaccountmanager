@@ -7,7 +7,7 @@ RUN mkdir -p /root/genouestaccountmanager
 WORKDIR /root/genouestaccountmanager
 
 
-COPY *.js *.json /root/genouestaccountmanager/
+COPY *.js *.json .bowerrc /root/genouestaccountmanager/
 RUN npm install
 
 RUN mkdir plugins public routes views tests test manager config
