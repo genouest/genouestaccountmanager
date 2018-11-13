@@ -1371,7 +1371,7 @@ angular.module('genouest').controller('loginCtrl',
           url: '/mail/auth/' + $scope.uid
         }).then(function successCallback(response) {
               $scope.error_msg = "";
-              $scope.msg = "Mail token request send";
+              $scope.msg = "Mail token request sent";
         });
     };
 

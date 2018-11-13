@@ -30,7 +30,7 @@ router.get('/log', function(req, res){
             res.status(401).send('Not authorized');
             return;
           }
-        events_db.find({}, function(err, events){
+        events_db.find({}, {limit: 200, sort: {date: -1}}, function(err, events){
             res.send(events);
             res.end();
         });
