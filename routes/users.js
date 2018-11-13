@@ -1755,6 +1755,7 @@ router.put('/user/:id', function(req, res) {
         if(user.is_fake === undefined) {
             user.is_fake = false;
         }
+        userWasFake = user.is_fake;
 
         if(session_user.is_admin){
            user.is_fake = req.param('is_fake');
@@ -1840,14 +1841,20 @@ router.put('/user/:id', function(req, res) {
                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
                     fs.chmodSync(script_file,0o755);
+                    user.fid = fid;
                     if(user.oldemail!=user.email && !user.is_fake) {
                       notif.modify(user.oldemail, user.email, function() {
-                        user.fid = fid;
                         res.send(user);
                       });
-                    }
-                    else {
-                      user.fid = fid;
+                    } else if(userWasFake && !user.is_fake) {
+                      notif.add(user.email, function() {
+                        res.send(user);
+                      });
+                    }else if (!userWasFake && user.is_fake) {
+                      notif.remove(user.email, function(){
+                        res.send(user);
+                      })
+                    } else {
                       res.send(user);
                     }
                   });
