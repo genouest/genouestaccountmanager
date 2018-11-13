@@ -1,8 +1,15 @@
 #!/bin/bash
 
-if [ "a$1" == "a" ]; then
- echo "Missing script directory parameter"
- exit 1
+MYDIR=""
+if [ -z $GOMNGRSCRIPTDIR ]; then
+    MYDIR=$1
+else
+    MYDIR=$GOMNGRSCRIPTDIR
+fi
+
+if [ "a$MYDIR" == "a" ]; then
+   echo "Missing script directory parameter"
+   exit 1
 fi
 
 MYURL="http://localhost:3000"
@@ -25,7 +32,7 @@ fi
 
 touch /tmp/gomngr.lock
 
-ls $1/*.update | sort -n -t . -k 2 > /tmp/gomngr.list
+ls $MYDIR/*.update | sort -n -t . -k 2 > /tmp/gomngr.list
 
 while read p; do
   $p &> $p.log
