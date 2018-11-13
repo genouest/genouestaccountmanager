@@ -97,7 +97,7 @@ var deleteExtraGroup = function (group) {
             fs.chmodSync(script_file,0o755);
             group.fid = fid;
             utils.freeGroupId(group.gid).then(function(){
-                events_db.insert({ 'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
+                events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
                 resolve()
                 return
             })
@@ -251,8 +251,6 @@ var delete_tp_user = function(user, admin_id){
                 return fwebs.delete_webs(user);
             }).then(function(web_res){
                 return fusers.delete_user(user, admin_id);
-            }).then(function(){
-                return utils.freeUserId(user.uidnumber)
             }).then(function(){
                 resolve(true);
             });

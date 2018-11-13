@@ -135,7 +135,11 @@ program
       displayRes = []
       for(let i=0;i<reservations.length;i++){
         let res = reservations[i]
-        displayRes.push({'id': res._id, 'from': new Date(res.from), 'to': new Date(res.to), 'owner': res.owner, 'group': res.group ? res.group.name : ''})
+        let opened = res.created;
+        if (res.over) {
+          opened = false;
+        }
+        displayRes.push({'id': res._id, 'from': new Date(res.from), 'to': new Date(res.to), 'owner': res.owner, 'group': res.group ? res.group.name : '', 'opened': opened})
       }
       console.table(displayRes)
       process.exit(0)
