@@ -216,7 +216,7 @@ var create_extra_user = function(user_name, group, internal_user){
                             });
                         };
                         Promise.all(plugins_info.map(function(plugin_info){
-                            return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                            return plugin_call(plugin_info, user.uid, user, 'auto');
                         })).then(function(results){
                             return send_notif(mailOptions, fid, []);
                         }, function(err){
