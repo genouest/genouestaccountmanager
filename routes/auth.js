@@ -159,7 +159,7 @@ router.get('/u2f/register/:id', function(req, res) {
             return;
         }
         var sess = req.session;
-        if(!sess.gomngr || sess.gomngr!=user._id) {
+        if(!sess.gomngr || sess.gomngr.str!=user._id.str) {
             return res.status(401).send('You need to login first');
         }
         if(user.u2f !== undefined && user.u2f.keyHandle!=null){
@@ -173,7 +173,7 @@ router.get('/u2f/register/:id', function(req, res) {
 router.post('/u2f/register/:id', function(req, res) {
     users_db.findOne({uid: req.param('id')}, function(err, user){
         var sess = req.session;
-        if(err || !sess.gomngr || sess.gomngr!=user._id) {
+        if(err || !sess.gomngr || sess.gomngr.str!=user._id.str) {
             return res.status(401).send('You need to login first');
         }
         const registrationRequest = req.param('registrationRequest');

@@ -153,6 +153,7 @@
     ]
     },
     "plugins": [
+	    {"name": "test", "display_name": "Test"}
     ],
     "plugin_config" : {
         "test": {
