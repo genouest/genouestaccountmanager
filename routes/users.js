@@ -1075,7 +1075,7 @@ router.get('/user/:id', function(req, res) {
           user.quota.push(k);
       }
 
-      if(sess.gomngr == user._id || GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0){
+      if(sess.gomngr.str == user._id.str || GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0){
         res.json(user);
         return;
       }
@@ -1644,7 +1644,7 @@ router.put('/user/:id/ssh', function(req, res) {
 
       users_db.findOne({uid: req.param('id')}, function(err, user){
         // If not admin nor logged user
-        if(!session_user.is_admin && user._id != sess.gomngr) {
+        if(!session_user.is_admin && user._id.str != sess.gomngr.str) {
           res.status(401).send('Not authorized');
           return;
         }
@@ -1743,7 +1743,7 @@ router.put('/user/:id', function(req, res) {
           return;
         }
         // If not admin nor logged user
-        if(!session_user.is_admin && user._id != sess.gomngr) {
+        if(!session_user.is_admin && user._id.str != sess.gomngr.str) {
           res.status(401).send('Not authorized');
           return;
         }

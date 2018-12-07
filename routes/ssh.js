@@ -34,7 +34,7 @@ router.get('/ssh/:id/putty', function(req, res) {
             res.end();
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != sess.gomngr.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -67,7 +67,7 @@ router.get('/ssh/:id/private', function(req, res) {
             res.status(401).send('[admin user] not authorized to download private key');
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != sess.gomngr.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -96,7 +96,7 @@ router.get('/ssh/:id/public', function(req, res) {
             res.end();
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != sess.gomngr.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -125,7 +125,7 @@ router.get('/ssh/:id', function(req, res) {
             res.end();
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != sess.gomngr.str){
             res.status(401).send('Not authorized');
             return;
         }
