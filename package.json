@@ -27,6 +27,7 @@
     "hjs": "~0.0.6",
     "html-to-text": "^4.0.0",
     "ipware": "0.0.3",
+    "jsonwebtoken": "^8.4.0",
     "ldapjs": "^1.0.1",
     "markdown": "^0.5.0",
     "mongodb": "^3.1.8",

@@ -9,6 +9,7 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 const u2f = require('u2f');
+var jwt = require('jsonwebtoken');
 
 
 var CONFIG = require('config');
@@ -198,6 +199,11 @@ router.get('/auth', function(req, res) {
     // Authenticated
     //users_db.findOne({_id: req.cookies.gomngr}, function(err, user){
     users_db.findOne({_id: sess.gomngr}, function(err, user){
+      var token = jwt.sign(
+          { user: user._id },
+          CONFIG.general.secret,
+          {expiresIn: '2 days'}
+        );
       if(user.u2f) {user.u2f.keyHankdle = null;}
       if(user==null || err) {
         res.send({user: null, msg: err});
@@ -209,18 +215,18 @@ router.get('/auth', function(req, res) {
         user.is_admin = false;
       }
       if(user.status == STATUS_PENDING_EMAIL){
-        res.send({user: user, msg: 'Your account is waiting for email approval, check your mail inbox'});
+        res.send({token: token, user: user, msg: 'Your account is waiting for email approval, check your mail inbox'});
         return;
       }
       if(user.status == STATUS_PENDING_APPROVAL){
-        res.send({user: user, msg: 'Your account is waiting for admin approval'});
+        res.send({token: token, user: user, msg: 'Your account is waiting for admin approval'});
         return;
       }
       if(user.status == STATUS_EXPIRED){
-        res.send({user: user, msg: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
+        res.send({token: token, user: user, msg: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
         return;
       }
-      res.send({user: user, msg: ''});
+      res.send({token: token, user: user, msg: ''});
     });
   }
   else {
@@ -242,6 +248,11 @@ router.post('/auth/:id', function(req, res) {
       res.status(404).send('User not found');
       return;
     }
+    var usertoken = jwt.sign(
+        { user: user._id },
+        CONFIG.general.secret,
+        {expiresIn: '2 days'}
+      );
     var sess = req.session;
     if (apikey !== "" && apikey === user.apikey) {
         user.is_admin = false;
@@ -250,7 +261,7 @@ router.post('/auth/:id', function(req, res) {
         }
         sess.gomngr = user._id;
         sess.apikey = true;
-        res.send({ user: user, msg: '', double_auth: false});
+        res.send({token: usertoken, user: user, msg: '', double_auth: false});
         res.end();
         return;
     }
@@ -289,7 +300,7 @@ router.post('/auth/:id', function(req, res) {
      req.connection.socket.remoteAddress;
     if((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth=='fake') {
       // Skip auth
-      res.send({ user: user, msg: '', double_auth: need_double_auth});
+      res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
       res.end();
       return;
     }
@@ -305,7 +316,7 @@ router.post('/auth/:id', function(req, res) {
           }
           attemps[user.uid]['attemps'] += 1;
           attemps[user.uid]['last'] = new Date();
-          res.send({ user: null, msg: "Login error, remains "+(3-attemps[user.uid]['attemps'])+" attemps."});
+          res.send({user: null, msg: "Login error, remains "+(3-attemps[user.uid]['attemps'])+" attemps."});
           res.end();
           return;
         }
@@ -315,12 +326,12 @@ router.post('/auth/:id', function(req, res) {
                 var apikey = Math.random().toString(36).slice(-10);
                 user.apikey = apikey;
                 users_db.update({uid: user.uid}, {'$set':{'apikey': apikey}}, function(err, data){
-                    res.send({ user: user, msg: '', double_auth: need_double_auth});
+                    res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
                     res.end();
                     return;
                 });
             } else {
-                res.send({ user: user, msg: '', double_auth: need_double_auth});
+                res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
                 res.end();
                 return;
             }

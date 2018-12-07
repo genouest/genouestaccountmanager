@@ -16,7 +16,7 @@ if (process.env.NODE_ENV == 'dev') {
 }
 
 var winston = require('winston');
-
+var jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
       timestamp: true
@@ -82,15 +82,26 @@ var monk = require('monk'),
 
 app.all('*', function(req, res, next){
     var token = req.headers['x-api-key'] || null;
-    if(token){
+    var jwtToken = null;
+    var authorization = req.headers['authorization'] || null;
+    if (authorization) {
+        var elts = authorization.split(' ');
+        try {
+            jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
+        } catch(err) {
+            console.log('failed to decode jwt');
+            jwtToken = null;
+        }
+    }
+    if(jwtToken){
         if(req.session.gomngr){
             req.session.gomngr=null;
             req.session.is_logged = false;
         }
         try{
-            users_db.findOne({'apikey': token}, function(err, session_user){
+            users_db.findOne({'_id': jwtToken.user}, function(err, session_user){
                 if(err){
-                    return res.status(403).send('Invalid token').end();
+                    return res.status(401).send('Invalid token').end();
                 }
                 req.session.gomngr = session_user._id;
                 req.session.is_logged = true;
@@ -99,7 +110,27 @@ app.all('*', function(req, res, next){
         }
         catch(error){
             console.error('Invalid token', error);
-            return res.status(403).send('Invalid token').end();
+            return res.status(401).send('Invalid token').end();
+        }
+    }
+    else if(token){
+        if(req.session.gomngr){
+            req.session.gomngr=null;
+            req.session.is_logged = false;
+        }
+        try{
+            users_db.findOne({'apikey': token}, function(err, session_user){
+                if(err){
+                    return res.status(401).send('Invalid token').end();
+                }
+                req.session.gomngr = session_user._id;
+                req.session.is_logged = true;
+                next();
+            });
+        }
+        catch(error){
+            console.error('Invalid token', error);
+            return res.status(401).send('Invalid token').end();
         }
     }else{
         next();
