@@ -314,7 +314,7 @@ export class UserComponent implements OnInit {
       if(ws.name == siteName) {
         this.websiteService.remove(ws).subscribe(
           resp => { this.rmwebmsg = ''; this.web_list()},
-          err  => { this.rmwebmsg = err.error; console.log('failed to delete web site')}
+          err  => { this.rmwebmsg = err.error; console.log('failed to delete web site', err)}
         )
       }
     });

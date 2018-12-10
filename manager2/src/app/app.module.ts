@@ -102,7 +102,12 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
   ],
   bootstrap: [AppComponent],
   entryComponents: [
-    TestPluginComponent
+    TestPluginComponent,
+    GalaxyPluginComponent,
+    DataAccessPluginComponent,
+    PopulateHomePluginComponent,
+    GenostackPluginComponent,
+    QuotasPluginComponent
   ]
 })
 export class AppModule { }

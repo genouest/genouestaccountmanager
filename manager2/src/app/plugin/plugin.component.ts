@@ -5,7 +5,7 @@ import { BasePluginComponent } from './base-plugin/base-plugin.component';
 
 @Component({
   template: `
-  <div>
+  <div *ngIf="data">
     <div class="alert alert-info">Using this button, you can set your home, omaha-beach and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
  = "blank" >data-access </a> for easy access</div>
 
@@ -72,13 +72,13 @@ export class PopulateHomePluginComponent extends BasePluginComponent implements 
 
 @Component({
   template: `
-  <div class="table-responsive">
+  <div *ngIf="data" class="table-responsive">
   <table class="table table-striped ng-scope">
   <tr><th>Namespace</th><th>Used</th><th>Max</th></tr>
-  <tr *ngFor="let quota of data.quota.quotas">
+  <tr *ngFor="let quota of data.quotas">
   <td>{{quota.name}}</td>
-  <td>{{quota.value | number: 2}} G</td>
-  <td>{{quota.max | number: 2}} G</td>
+  <td>{{quota.value | number: '1.0-2'}} G</td>
+  <td>{{quota.max | number: '1.0-2'}} G</td>
   </tr>
   </table>
   </div>
