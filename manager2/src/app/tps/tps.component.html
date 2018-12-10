@@ -2,6 +2,7 @@
     <div class="col-md-8">
       <div class="btn-group">
         <button type="button" class="btn" (click)="prevMonth()">Previous</button>
+        <button type="button" class="btn" (click)="curMonth()">Today</button>
         <button type="button" class="btn" (click)="nextMonth()">Next</button>
         </div>
     </div>
@@ -10,7 +11,7 @@
     <div class="col-md-8">
         <div class="card bg-light">
             <div class="card-header">
-                <h3>Calendar</h3>
+                <h3>Calendar {{viewDate.toLocaleDateString()}}</h3>
             </div>
             <div class="card-body">
                 <mwl-calendar-month-view

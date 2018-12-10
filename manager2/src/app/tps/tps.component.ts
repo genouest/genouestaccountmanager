@@ -78,6 +78,11 @@ export class TpsComponent implements OnInit {
     this.refresh.next();
   }
 
+  curMonth() {
+    this.viewDate = new Date();
+    this.refresh.next();
+  }
+
   nextMonth() {
     this.viewDate.setMonth(this.viewDate.getMonth() + 1);
     this.refresh.next();
