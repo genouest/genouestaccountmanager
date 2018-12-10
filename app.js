@@ -73,6 +73,7 @@ app.use(session({
   cookie: { maxAge: 3600*1000}
 }))
 app.use('/manager', express.static(path.join(__dirname, 'manager')));
+app.use('/manager2', express.static(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 var monk = require('monk'),

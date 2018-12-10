@@ -1,0 +1,107 @@
+<div class="row">
+    <div class="col-md-8">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h3>Calendar</h3>
+            </div>
+            <div class="card-body">
+                <mwl-calendar-month-view
+                [viewDate]="viewDate"
+                [events]="events"
+                (eventClicked)="eventClicked($event)"
+                >
+              </mwl-calendar-month-view>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4" *ngIf="selectedEvent">
+        <div ng-class="get_status(selectedEvent.over)">
+            <div class="card-header">
+                <h3>Reservation</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
+                <div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Owner</th>
+                                <td>{{selectedEvent.owner}}</td>
+                            </tr>
+                            <tr>
+                                <th>From</th>
+                                <td>{{selectedEvent.start.toISOString().slice(0,10)}}</td>
+                            </tr>
+                            <tr>
+                                <th>To</th>
+                                <td>{{selectedEvent.end.toISOString().slice(0,10)}}</td>
+                            </tr>
+                            <tr>
+                                <th>About</th>
+                                <td>{{selectedEvent.about}}</td>
+                            </tr>
+                            <tr>
+                                <th>Group</th>
+                                <td>{{selectedEvent.group.name}}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td *ngIf="selectedEvent.over">Over</td>
+                                <td *ngIf="!selectedEvent.over">Active</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive" *ngIf="selectedEvent.students.length > 0">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Accounts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let account of selectedEvent.students">
+                                <td>{{account}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-default" (click)="cancel_reservation()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="authorized" class="row">
+    <div class="col-md-8">
+        <div class="card bg-light">
+            <div class="panel-header">
+                <h3>New reservation</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success" *ngIf="resmsg">{{resmsg}}</div>
+                <div class="alert alert-danger" *ngIf="reserrmsg">{{reserrmsg}}</div>
+                <form class="form form-group row">
+                    <div class="col-md-4">
+                        <label for="quantity" class="control-label">Number of students</label>
+                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="quantity" type="number" class="form-control"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="from_date" class="control-label">From</label>
+                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="fromDate" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="to_date" class="control-label">To</label>
+                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="toDate" type="date" class="form-control" />
+                    </div>
+                </form>
+                <div class="form-group">
+                    <label for="about">About</label>
+                    <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
+                </div>
+                <button class="btn btn-default" (click)="reserve()">Reserve</button>
+            </div>
+        </div>
+    </div>
+</div>

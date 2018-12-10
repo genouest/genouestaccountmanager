@@ -10,7 +10,7 @@ WORKDIR /root/genouestaccountmanager
 COPY *.js *.json .bowerrc /root/genouestaccountmanager/
 RUN npm install
 
-RUN mkdir plugins public routes views tests test manager config
+RUN mkdir plugins public routes views tests test manager manager2 config
 COPY config/test.json /root/genouestaccountmanager/config
 COPY plugins /root/genouestaccountmanager/plugins
 COPY public /root/genouestaccountmanager/public
@@ -19,6 +19,7 @@ COPY views /root/genouestaccountmanager/views
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
 COPY manager /root/genouestaccountmanager/manager
+COPY manager2 /root/genouestaccountmanager/manager2
 
 RUN npm install -g bower
 RUN bower install --allow-root

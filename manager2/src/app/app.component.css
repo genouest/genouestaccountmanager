@@ -1,0 +1,11 @@
+@import "../../node_modules/bootstrap/dist/css/bootstrap.css";
+
+.alert {
+    font-size: 13px;
+}
+
+.alert-info {
+    color: #34318f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}

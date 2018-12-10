@@ -1,0 +1,42 @@
+
+<div>
+    <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3>Event logs</h3>
+        </div>
+        <div class="card-body">
+            <div class='table-responsive'>
+                <table datatable [dtTrigger]="dtTrigger" class="table table-striped" [dtOptions]="dtOptions" >
+                    <thead>
+                        <tr><th>ID</th><th>Owner</th><th>Date</th><th>Action</th><th>Logs</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let log of logs">
+                            <td (class)="get_status(log.status)">{{log._id}}</td>
+                            <td>{{log.owner}}</td>
+                            <td>{{date_convert(log.date)}}</td>
+                            <td>{{log.action}}</td>
+                            <td>
+                                <span *ngFor="let event of log.logs">
+                                    <div (click)="getlog(log._id, event)"><h5><span class="label label-primary" style="cursor: pointer;">{{event}}</span></h5></div>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="logcontent">
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3><b>{{event}}</b> file content</h3>
+        </div>
+        <div class="card-body">
+            <div [innerHTML]="logcontent"></div>
+        </div>
+    </div>
+</div>
