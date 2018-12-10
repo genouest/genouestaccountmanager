@@ -84,6 +84,11 @@ router.post('/mail/auth/:id', function(req, res) {
         if(err) {
             return res.status(404).send('User not found');
         }
+        var usertoken = jwt.sign(
+            { user: user._id },
+            CONFIG.general.secret,
+            {expiresIn: '2 days'}
+          );
         var sess = req.session;
         var now = new Date().getTime()
         if(user._id != sess.mail_token['user'] || req.param('token') != sess.mail_token['token'] || now > sess.mail_token['expire']) {
@@ -97,7 +102,7 @@ router.post('/mail/auth/:id', function(req, res) {
         else {
             user.is_admin = false;
         }
-        res.send({'user': user});
+        res.send({'user': user, 'token': usertoken});
         res.end();
         return
     });
