@@ -8,7 +8,7 @@ var monk = require('monk'),
     events_db = db.get('events');
 
 var Promise = require('promise');
-var path_to_script = CONFIG.general.plugin_script_dir + "/remove_galaxy_user.py"
+var path_to_script = CONFIG.general.plugin_script_dir + "/remove_galaxy_user.py";
 
 
 var activate_user = function(userId, data, adminId){
@@ -41,7 +41,7 @@ var remove_user_from_galaxy = function(userId, data, adminId) {
    return new Promise(function (resolve, reject) {
         if(data.email === undefined || data.email == "") {
             console.log("[Galaxy] no email defined, skipping " + userId + "...");
-            resolve();
+            resolve(true);
             return;
         }
         var fid = new Date().getTime();
@@ -56,8 +56,8 @@ var remove_user_from_galaxy = function(userId, data, adminId) {
                 return;
             }
             fs.chmodSync(script_file,0755);
-            events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [data.uid+"."+fid+".data_access"]}, function(err){});
-                    resolve();
+            events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [data.uid+"."+fid+".galaxy"]}, function(err){});
+                    resolve(true)
             });
 
 

@@ -70,6 +70,27 @@ export class PopulateHomePluginComponent extends BasePluginComponent implements 
   }
 }
 
+@Component({
+  template: `
+  <div class="table-responsive">
+  <table class="table table-striped ng-scope">
+  <tr><th>Namespace</th><th>Used</th><th>Max</th></tr>
+  <tr *ngFor="let quota of data.quota.quotas">
+  <td>{{quota.name}}</td>
+  <td>{{quota.value | number: 2}} G</td>
+  <td>{{quota.max | number: 2}} G</td>
+  </tr>
+  </table>
+  </div>
+  `,
+})
+export class QuotasPluginComponent extends BasePluginComponent implements OnInit {
+  ngOnInit() {
+    this.pluginName = "quota";
+    this.loadData(this.userId);
+  }
+}
+
 
 @Component({
   template: `
@@ -113,6 +134,7 @@ export class PluginItems {
     new PluginItem("genostack", GenostackPluginComponent, null, null),
     new PluginItem("populate_home", PopulateHomePluginComponent, null, null),
     new PluginItem("data_access", DataAccessPluginComponent, null, null),
+    new PluginItem("quota", QuotasPluginComponent, null, null),
   ];
   constructor() {
   }
@@ -131,6 +153,8 @@ export class PluginItems {
       PluginItems.items.push(new PluginItem(pluginName, PopulateHomePluginComponent, null, null));
     } else if (pluginName == "data_access") {
       PluginItems.items.push(new PluginItem(pluginName, DataAccessPluginComponent, null, null));
+    } else if (pluginName == "quota") {
+      PluginItems.items.push(new PluginItem(pluginName, QuotasPluginComponent, null, null));
     }
   }
 

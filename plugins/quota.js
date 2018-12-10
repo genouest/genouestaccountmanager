@@ -91,12 +91,12 @@ module.exports = {
 
     activate: function(userId, data, adminId){
         return new Promise(function (resolve, reject){
-            resolve({'msg': 'nothing to do'});
+            resolve();
         });
     },
     deactivate: function(userId, data, adminId){
        return new Promise(function (resolve, reject){
-            resolve({'msg': 'nothing to do'});
+            resolve();
         });
     },
     template: function(){
@@ -117,6 +117,9 @@ module.exports = {
         return get_user_info(userId);
     },
     set_data: function(userId, data, adminId){
-        return {'msg': 'nothing to do'};
+        return new Promise(function(resolve, reject){
+           console.log("[Quotas] Nothing to do");
+           resolve();
+        });
     }
 }
