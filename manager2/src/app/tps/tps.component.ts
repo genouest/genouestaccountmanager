@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { TpserviceService } from './tpservice.service';
+import { CalendarEventTimesChangedEvent, CalendarView } from 'angular-calendar';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-tps',
   templateUrl: './tps.component.html',
-  styleUrls: ['./tps.component.css']
+  styleUrls: ['./tps.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TpsComponent implements OnInit {
 
@@ -23,6 +26,10 @@ export class TpsComponent implements OnInit {
   toDate: Date
   about: string
   authorized: boolean
+
+  refresh: Subject<any> = new Subject();
+
+  activeDayIsOpen: boolean = true;
 
   constructor(
     private authService: AuthService,
@@ -64,8 +71,16 @@ export class TpsComponent implements OnInit {
     this.events = [];
     this.authorized = (this.authService.profile.is_trainer || this.authService.profile.is_admin);
     this.listEvents();
+  }
 
+  prevMonth() {
+    this.viewDate.setMonth(this.viewDate.getMonth() - 1);
+    this.refresh.next();
+  }
 
+  nextMonth() {
+    this.viewDate.setMonth(this.viewDate.getMonth() + 1);
+    this.refresh.next();
   }
 
   reserve(){
@@ -108,8 +123,17 @@ export class TpsComponent implements OnInit {
     this.selectedEvent.end = event.end;
     if (! event.meta.group) {
       this.selectedEvent.group = {}
-    }
-    
+    } 
+  }
+
+  eventTimesChanged({
+    event,
+    newStart,
+    newEnd
+  }: CalendarEventTimesChangedEvent): void {
+    event.start = newStart;
+    event.end = newEnd;
+    this.refresh.next();
   }
 
   get_status(over) {

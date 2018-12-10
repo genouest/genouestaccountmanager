@@ -1,3 +1,11 @@
+<div class="row text-center">
+    <div class="col-md-8">
+      <div class="btn-group">
+        <button type="button" class="btn" (click)="prevMonth()">Previous</button>
+        <button type="button" class="btn" (click)="nextMonth()">Next</button>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-8">
         <div class="card bg-light">
@@ -9,6 +17,8 @@
                 [viewDate]="viewDate"
                 [events]="events"
                 (eventClicked)="eventClicked($event)"
+                [refresh]="refresh"
+                (eventTimesChanged)="eventTimesChanged($event)">
                 >
               </mwl-calendar-month-view>
             </div>
