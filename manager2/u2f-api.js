@@ -696,18 +696,18 @@ u2f.register = function(appId, registerRequests, registeredKeys, callback, opt_t
  * @param {number=} opt_timeoutSeconds
  */
 u2f.sendRegisterRequest = function(appId, registerRequests, registeredKeys, callback, opt_timeoutSeconds) {
-    console.log("sendRegisterRequest");
+    // console.log("sendRegisterRequest");
   u2f.getPortSingleton_(function(port) {
-      console.log("getPortSingleton_");
+      // console.log("getPortSingleton_");
     var reqId = ++u2f.reqCounter_;
     u2f.callbackMap_[reqId] = callback;
     var timeoutSeconds = (typeof opt_timeoutSeconds !== 'undefined' ?
         opt_timeoutSeconds : u2f.EXTENSION_TIMEOUT_SEC);
-        console.log("formatRegisterRequest_");
+        // console.log("formatRegisterRequest_");
     var req = u2f.formatRegisterRequest_(
         appId, registeredKeys, registerRequests, timeoutSeconds, reqId);
-        console.log("callback");
-        console.log(req);
+        // console.log("callback");
+        // console.log(req);
     port.postMessage(req);
   });
 };

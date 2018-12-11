@@ -27,7 +27,7 @@ export class MyDeleteConfirmComponent implements OnInit {
     this.isDeleting = false;
   }
   confirm() {
-    console.log('app-my-delete-confirm', this.onConfirm, this.data);
+    // console.log('app-my-delete-confirm', this.onConfirm, this.data);
 
     this.onConfirm(this.data);
   }
