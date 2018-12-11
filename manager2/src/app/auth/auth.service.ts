@@ -37,9 +37,9 @@ export class AuthService {
             //}
 
             if(! resp.body['user']['double_auth']) {
+              this.handleLoginCallback(resp.body['user']);
               this.authenticated = true;
               this.$authStatus.next(true);
-              this.handleLoginCallback(resp.body['user']);
               resolve(resp.body['user']);
               this.router.navigate(['/user/' + resp.body['user']['uid']]);
             } else {
@@ -77,9 +77,10 @@ export class AuthService {
             if(resp.body['token']) {
               resp.body['user']['token'] = resp.body['token'];
             }
+
+            this.handleLoginCallback(resp.body['user']);
             this.authenticated = true;
             this.$authStatus.next(true);
-            this.handleLoginCallback(resp.body['user']);
             resolve();
             this.router.navigate(['/user/' + resp.body['user']['uid']]);
           },
@@ -138,9 +139,9 @@ export class AuthService {
         //if(resp['token']) {
         //  resp['user']['token'] = resp['token'];
         //}
+        this._setSession(resp['user']);
         this.authenticated = true;
         this.$authStatus.next(true);
-        this._setSession(resp['user']);
       },
       err => {console.log('Error', err);}
     )

@@ -30,6 +30,7 @@ export class UserService {
 
   getUsages() {
     let user = this.authService.profile;
+
     let httpOptions = {
       //headers: new HttpHeaders({
       //  'x-api-key': user.apikey

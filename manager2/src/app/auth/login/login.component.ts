@@ -60,8 +60,8 @@ export class LoginComponent implements OnInit {
                 if(resp['token']) {
                   userData['token'] = resp['token'];
                 }
-                this.authenticated = true;
                 this.authService.handleLoginCallback(userData);
+                this.authenticated = true;
                 this.router.navigate(['/user/' + resp.body['user']['uid']]);
               },
               err => {
