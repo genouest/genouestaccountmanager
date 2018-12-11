@@ -40,9 +40,9 @@ export class AuthService {
               this.authenticated = true;
               this.$authStatus.next(true);
               resolve(resp.body['user']);
-              this.router.navigate(['/user/' + resp.body['user']['uid']]);
             } else {
               //this.accessToken = resp.body['user']['token'];
+              this.handleLoginCallback(resp.body['user']);
               resolve(resp.body['user']);
             }
 
@@ -138,9 +138,11 @@ export class AuthService {
         //if(resp['token']) {
         //  resp['user']['token'] = resp['token'];
         //}
-        this._setSession(resp['user']);
-        this.authenticated = true;
-        this.$authStatus.next(true);
+        if(resp['user']) {
+          this._setSession(resp['user']);
+          this.authenticated = true;
+          this.$authStatus.next(true);
+        }
       },
       err => {console.log('Error', err);}
     )

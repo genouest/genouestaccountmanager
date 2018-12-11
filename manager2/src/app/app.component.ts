@@ -22,8 +22,8 @@ export class AppComponent {
   ngAfterViewInit() {
     this.loginSubscription = this.authService.$authStatus.subscribe((authenticated: boolean) => {
       setTimeout(() => {
-      this.isLogged = authenticated;
       this.user = this.authService.userProfile;
+      this.isLogged = authenticated;
       })
       if(authenticated) {
         this.userService.getUsages().subscribe(

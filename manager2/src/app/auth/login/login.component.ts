@@ -87,6 +87,8 @@ export class LoginComponent implements OnInit {
           this._manageU2F(userData);
           //this.authService.handleLoginCallback(userData);
           //this.router.navigate(['/user/' + userData['uid']]);
+        } else {
+          this.router.navigate(['/user/' + userData['uid']]);
         }
       }
     ).catch( err => {this.msg = err.error;});
