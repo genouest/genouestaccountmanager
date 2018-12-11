@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 
+import u2fApi from 'u2f-api';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -9,7 +11,10 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   static SUCCESS: number = 0;
   static ERROR: number = 1;
@@ -37,14 +42,17 @@ export class LoginComponent implements OnInit {
       resp => {
         console.log('u2f', resp);
         this.u2f = resp['authRequest'];
-        setTimeout(function() {
-          this.window.u2f.sign(this.u2f.appId, this.u2f.challenge, [this.u2f], authResponse => {
+        //setTimeout(function() {
+          //this.window.u2f.sign(this.u2f.appId, this.u2f.challenge, [this.u2f], authResponse => {
+            u2fApi.sign([this.u2f], 5000).then(authResponse =>{
+            /*
             if(authResponse.errorCode) {
               console.log('Failed to sign challenge with device');
               this.msg = 'Failed to authenticate with device';
               this.msgstatus = this.ERROR
               return
             }
+            */
             let data = {
               'authRequest': this.u2f,
               'authResponse': authResponse
@@ -54,24 +62,24 @@ export class LoginComponent implements OnInit {
                 if(resp['errorCode']) {
                   console.log('Failed to validate token with device');
                   this.msg = 'Failed to authenticate with device';
-                  this.msgstatus = this.ERROR;
+                  this.msgstatus = LoginComponent.ERROR;
                   return                 
                 }
                 if(resp['token']) {
                   userData['token'] = resp['token'];
                 }
                 this.authService.handleLoginCallback(userData);
-                this.authenticated = true;
-                this.router.navigate(['/user/' + resp.body['user']['uid']]);
+                this.authService.authenticated = true;
+                this.router.navigate(['/user/' + userData['uid']]);
               },
               err => {
                 console.log('Failed to validate token with device');
                 this.msg = 'Failed to authenticate with device';
-                this.msgstatus = this.ERROR;
+                this.msgstatus = LoginComponent.ERROR;
               }
             )
           })
-        }, 5000)
+        //}, 5000)
       },
       err => console.log('failed to get u2f info')
     )

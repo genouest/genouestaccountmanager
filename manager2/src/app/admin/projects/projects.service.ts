@@ -16,7 +16,6 @@ export class ProjectsService {
   list(getAll: boolean): Observable<any[]> {
     let user = this.authService.profile;
     let params = new HttpParams();
-    console.log('getall', getAll)
     if(getAll) {
       params = params.append("all", "true");
     }
@@ -27,7 +26,6 @@ export class ProjectsService {
       //}),
       params: params
     };
-    console.log('list project', httpOptions);
     return this.http.get(
         environment.apiUrl + '/project',
         httpOptions
