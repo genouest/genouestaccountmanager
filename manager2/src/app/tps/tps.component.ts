@@ -59,6 +59,7 @@ export class TpsComponent implements OnInit {
           });
         }
         this.events = events;
+        this.refresh.next();
       },
       err => console.log('failed to log tp reservations')
     )    

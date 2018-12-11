@@ -35,6 +35,9 @@ export class AuthService {
             //if(resp.body['token']) {
             //  resp.body['user']['token'] = resp.body['token'];
             //}
+            if(resp.body['double_auth']) {
+              resp.body['user']['double_auth'] = resp.body['double_auth']
+            }
             if(! resp.body['user']['double_auth']) {
               this.handleLoginCallback(resp.body['user']);
               this.authenticated = true;
@@ -178,7 +181,9 @@ export class AuthInterceptor implements HttpInterceptor {
         this.auth.accessToken = localStorage.getItem('my-api-key');
       }
       if(this.auth.accessToken) {
-        authReq = req.clone({ setHeaders: { Authorization: 'bearer ' + this.auth.accessToken } });
+        authReq = req.clone({
+          setHeaders: { Authorization: 'bearer ' + this.auth.accessToken }
+        });
       }
       return next.handle(authReq).pipe(
         tap(event => {

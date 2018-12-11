@@ -201,6 +201,9 @@ export class ProjectsComponent implements OnInit {
     this.projects = [];
     this.projectService.list(true).subscribe(
       resp => {
+        if(resp.length == 0) {
+          return;
+        }
         if(refresh_requests) {
           this.add_requests = [];
           this.remove_requests = [];
