@@ -461,12 +461,13 @@ export class UserComponent implements OnInit {
       resp => {
         let registrationRequest = resp['registrationRequest'];
         this.u2f = "Please insert your key and press button";
-        this.timeoutId = setTimeout(function(){
-          this.window.u2f.register(
-            registrationRequest.appId, [registrationRequest], [], function(registrationResponse) {
+        //this.timeoutId = setTimeout(function(){
+          let ctx =this;
+          this.window['u2f'].register(
+            registrationRequest.appId, [registrationRequest], [], registrationResponse => {
               if(registrationResponse.errorCode) {
                 console.log("Association failed");
-                this.u2f = "Assocation failed";
+                ctx.u2f = "Assocation failed";
                 return;
             }
             // Send this registration response to the registration verification server endpoint
@@ -474,17 +475,16 @@ export class UserComponent implements OnInit {
                 registrationRequest: registrationRequest,
                 registrationResponse: registrationResponse
             }
-            this.userService.u2fSet(this.user.uid, data).subscribe(
+            ctx.userService.u2fSet(this.user.uid, data).subscribe(
               resp => {
-                this.u2f = null;
-                this.user.u2f = {'publicKey': resp['publicKey']};
+                ctx.u2f = null;
+                ctx.user.u2f = {'publicKey': resp['publicKey']};
               },
               err => console.log('failed to register device')
             )
-            }
-          )
+            }, 5000)
 
-        }, 5000);
+        //}, 5000);
       },
       err => console.log('failed to get u2f devices')
     )

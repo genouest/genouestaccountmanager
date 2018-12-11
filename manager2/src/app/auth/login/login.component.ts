@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 
-import u2fApi from 'u2f-api';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +12,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) { }
 
   static SUCCESS: number = 0;
@@ -43,42 +43,44 @@ export class LoginComponent implements OnInit {
         console.log('u2f', resp);
         this.u2f = resp['authRequest'];
         //setTimeout(function() {
-          //this.window.u2f.sign(this.u2f.appId, this.u2f.challenge, [this.u2f], authResponse => {
-            u2fApi.sign([this.u2f], 5000).then(authResponse =>{
-            /*
+          let ctx = this;
+          window['u2f'].sign(this.u2f.appId, this.u2f.challenge, [this.u2f], authResponse => {            
             if(authResponse.errorCode) {
-              console.log('Failed to sign challenge with device');
-              this.msg = 'Failed to authenticate with device';
-              this.msgstatus = this.ERROR
+              console.log('Failed to sign challenge with device', authResponse);
+              ctx.msg = 'Failed to authenticate with device';
+              ctx.msgstatus = LoginComponent.ERROR
               return
             }
-            */
+            
             let data = {
-              'authRequest': this.u2f,
+              'authRequest': ctx.u2f,
               'authResponse': authResponse
             }
-            this.authService.u2fCheck(userData['uid'], data).subscribe(
+            ctx.authService.u2fCheck(userData['uid'], data).subscribe(
               resp => {
                 if(resp['errorCode']) {
                   console.log('Failed to validate token with device');
-                  this.msg = 'Failed to authenticate with device';
-                  this.msgstatus = LoginComponent.ERROR;
+                  ctx.msg = 'Failed to authenticate with device';
+                  ctx.msgstatus = LoginComponent.ERROR;
                   return                 
                 }
                 if(resp['token']) {
                   userData['token'] = resp['token'];
                 }
-                this.authService.handleLoginCallback(userData);
-                this.authService.authenticated = true;
-                this.router.navigate(['/user/' + userData['uid']]);
+                console.log('auth with u2f success');
+                ctx.authService.handleLoginCallback(userData);
+                ctx.authService.authenticated = true;
+                
+                this.ngZone.run(() => { ctx.router.navigate(['/user/' + userData['uid']]); });
               },
               err => {
                 console.log('Failed to validate token with device');
-                this.msg = 'Failed to authenticate with device';
-                this.msgstatus = LoginComponent.ERROR;
+                ctx.msg = 'Failed to authenticate with device';
+                ctx.msgstatus = LoginComponent.ERROR;
               }
             )
-          })
+          }, 5000)
+        
         //}, 5000)
       },
       err => console.log('failed to get u2f info')

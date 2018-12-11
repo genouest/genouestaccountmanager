@@ -33,8 +33,6 @@
     "marked": "^0.5.2",
     "popper.js": "^1.14.6",
     "rxjs": "~6.3.3",
-    "u2f-api": "^1.0.9",
-    "u2f-api-polyfill": "^0.4.4",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
