@@ -44,57 +44,57 @@
               <div class="user-information">
                   <form role="form" class="user-form form-horizontal form-register">
                       <div class="form-group row">
-                          <label for="firstname" class="col-sm-2 col-form-label">First name</label>
-                          <div class="col-sm-6">
+                          <label for="firstname" class="col-4 col-form-label">First name</label>
+                          <div class="col-6">
                               <input type="text" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.firstname" class="form-control"/>
                           </div>
                       </div>
                       <div class="form-group row">
-                          <label for="lastname" class="col-sm-2 col-form-label">Last name</label>
-                          <div class="col-sm-6">
+                          <label for="lastname" class="col-4 col-form-label">Last name</label>
+                          <div class="col-6">
                               <input type="text" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lastname" class="form-control"/>
                           </div>
                       </div>
                       <div class="form-group row">
-                          <label for="email" class="col-sm-2 col-form-label label-control">Email</label>
-                          <div class="col-sm-6">
+                          <label for="email" class="col-4 col-form-label label-control">Email</label>
+                          <div class="col-6">
                               <input type="email" id="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.email" class="form-control"/>
                           </div>
                       </div>
                       <div class="form-group row">
-                          <label for="address" class="col-sm-2 col-form-label">Address</label>
-                          <div class="col-sm-6">
+                          <label for="address" class="col-4 col-form-label">Address</label>
+                          <div class="col-6">
                               <textarea id="address" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.address" class="form-control"></textarea>
                           </div>
                       </div>
                       <div class="form-group row">
-                          <label for="why" class="col-sm-2 col-form-label">Why</label>
-                          <div class="col-sm-6">
+                          <label for="why" class="col-4 col-form-label">Why</label>
+                          <div class="col-6">
                               <textarea id="why" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.why" class="form-control"></textarea>
                           </div>
                       </div>
                       <div class="form-group row">
-                          <label for="lab" class="col-sm-2 col-form-label">Laboratory</label>
-                          <div class="col-sm-6">
+                          <label for="lab" class="col-4 col-form-label">Laboratory</label>
+                          <div class="col-6">
                               <input type="text" id="lab" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lab" class="form-control"/>
                           </div>
                       </div>
                       <div class="form-group row">
-                          <label for="responsible" class="col-sm-2 col-form-label">Responsible</label>
-                          <div class="col-sm-6">
+                          <label for="responsible" class="col-4 col-form-label">Responsible</label>
+                          <div class="col-6">
                               <input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
                           </div>
                       </div>
                       <div ng-if="session_user.is_admin">
                           <div class="form-group row">
-                              <label for="key" class="col-sm-2 col-form-label">Key</label>
-                              <div class="col-sm-6">
+                              <label for="key" class="col-4 col-form-label">Key</label>
+                              <div class="col-6">
                                   <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.regkey" class="form-control" readonly/>
                               </div>
                           </div>
                           <div class="form-group row">
-                              <label for="group" class="col-sm-2 col-form-label">Group</label>
-                              <div class="col-sm-6">
+                              <label for="group" class="col-4 col-form-label">Group</label>
+                              <div class="col-6">
                                   <input disabled type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control"/>
                                   <select [(ngModel)]="user.group" [ngModelOptions]="{standalone: true}" class="form-control">
                                       <option *ngFor="let group of groups" [value]="group.name">{{group.name}}</option>
@@ -102,36 +102,36 @@
                               </div>
                           </div>
                           <div class="form-group row">
-                              <label for="mgroup" class="col-sm-2 col-form-label">Main group directory</label>
-                              <div class="col-sm-6">
+                              <label for="mgroup" class="col-4 col-form-label">Main group directory</label>
+                              <div class="col-6">
                                   <select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.maingroup" class="form-control">
                                     <option *ngFor="let item of config.main_groups" [value]="item">{{item}}</option>
                                   </select>
                               </div>
                           </div>
                           <div class="form-group row" *ngIf="user.secondarygroups && user.secondarygroups.length > 0">
-                              <label label for="sgroup" class="col-sm-2 col-form-label">Secondary groups</label>
-                              <div class="col-sm-6">
+                              <label label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
+                              <div class="col-6">
                                   <div *ngFor="let secondarygroup of user.secondarygroups">
                                       <input type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="secondarygroup" class="form-control" readonly/>
                                   </div>
                               </div>
                           </div>
                           <div class="form-group row">
-                              <label for="ip" class="col-sm-2 col-form-label">IP address</label>
-                              <div class="col-sm-6">
+                              <label for="ip" class="col-4 col-form-label">IP address</label>
+                              <div class="col-6">
                                   <input type="text" id="ip" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ip" class="form-control"/>
                               </div>
                           </div>
                           <div class="form-group row">
-                              <label for="loginShell" class="col-sm-2 col-form-label">Shell</label>
-                              <div class="col-sm-6">
+                              <label for="loginShell" class="col-4 col-form-label">Shell</label>
+                              <div class="col-6">
                                   <input type="text" id="loginShell" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.loginShell" class="form-control"/>
                               </div>
                           </div>
                           <div class="form-group row">
-                              <label for="duration" class="col-sm-2 col-form-label">Duration</label>
-                              <div class="col-sm-6">
+                              <label for="duration" class="col-4 col-form-label">Duration</label>
+                              <div class="col-6">
                                   <select [ngModelOptions]="{standalone: true}" [(ngModel)]="user.duration" class="form-control" >
                                       <option value="90">3 months</option>
                                       <option value="180">6 months</option>
@@ -141,21 +141,21 @@
                                   </select>
                               </div>
                           </div>
-                          <div class="form-check">
+                          <div class="form-check row">
                             <input id="staff" name="staff" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_genouest" type="checkbox" class="form-check-input">
-                              <label class="form-check-label" for="staff">                                  
+                              <label class="col-6 form-check-label" for="staff">                                  
                                   Staff member
                               </label>
                           </div>
-                          <div class="form-check">
-                              <label>
-                                  <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
+                          <div class="form-check row">
+                                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
+                              <label class="col-6 form-check-label">
                                   Fake/internal account
                               </label>
                           </div>
-                          <div class="form-check">
-                              <label>
-                                  <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
+                          <div class="form-check row">
+                                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
+                              <label class="col-6 form-check-label">
                                   Trainer account
                               </label>
                           </div>
@@ -163,14 +163,14 @@
 
                       <div ng-if="! session_user.is_admin">
                           <div class="form-group">
-                              <label for="group" class="col-sm-2 col-form-label">Group</label>
-                              <div class="col-sm-6">
+                              <label for="group" class="col-4 col-form-label">Group</label>
+                              <div class="col-6">
                                   <input type="text" id="group" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control" readonly/>
                               </div>
                           </div>
                           <div class="form-group">
-                              <label ng-if="user.secondarygroups.length > 0" label for="sgroup" class="col-sm-2 col-form-label">Secondary groups</label>
-                              <div class="col-sm-6">
+                              <label ng-if="user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
+                              <div class="col-6">
                                   <div *ngFor="let secondarygroup of user.secondarygroups">
                                       <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="secondarygroup" class="form-control" readonly/>
                                   </div>
@@ -230,7 +230,7 @@
         </div>
         <div class="card-body">
             <span>{{user.apikey}}</span>
-            <button class="btn btn-default" (click)="generate_apikey(user.uid)">Generate</button>
+            <button style="margin-left: 10px;" class="btn btn-default" (click)="generate_apikey(user.uid)">Generate</button>
         </div>
     </div>
     <div class="card bg-light">

@@ -32,12 +32,21 @@ export class AuthService {
               reject({'error': resp.body['msg']});
               return;
             }
-            if(resp.body['token']) {
-              resp.body['user']['token'] = resp.body['token'];
+            //if(resp.body['token']) {
+            //  resp.body['user']['token'] = resp.body['token'];
+            //}
+            // TODO REMOVE this set, only for double auth testing
+            resp.body['user']['double_auth'] = true;
+            if(! resp.body['user']['double_auth']) {
+              this.authenticated = true;
+              this.$authStatus.next(true);
+              this.handleLoginCallback(resp.body['user']);
+              resolve(resp.body['user']);
+              this.router.navigate(['/user/' + resp.body['user']['uid']]);
+            } else {
+              //this.accessToken = resp.body['user']['token'];
+              resolve(resp.body['user']);
             }
-            this.handleLoginCallback(resp.body['user']);
-            resolve();
-            this.router.navigate(['/user/' + resp.body['user']['uid']]);
 
           },
           err => {
@@ -45,6 +54,41 @@ export class AuthService {
           }
         )
       });
+  }
+
+  u2f(userId) {
+    return this.http.get(environment.apiUrl + '/u2f/auth/' + userId)   
+  }
+
+  u2fCheck(userId, u2fData) {
+    return this.http.post(environment.apiUrl + '/u2f/auth/' + userId, u2fData)   
+  }
+
+  checkEmailToken(userId, data) {
+    return new Promise((resolve, reject) => {
+      this.http.post(
+        environment.apiUrl + '/mail/auth/' + userId,
+        data,
+        { observe: 'response' }).subscribe(
+          resp => {
+            if(! resp.body['user']) {
+              reject({'error': resp.body['msg']});
+              return;
+            }
+            if(resp.body['token']) {
+              resp.body['user']['token'] = resp.body['token'];
+            }
+            this.authenticated = true;
+            this.$authStatus.next(true);
+            this.handleLoginCallback(resp.body['user']);
+            resolve();
+            this.router.navigate(['/user/' + resp.body['user']['uid']]);
+          },
+          err => {
+            reject(err);
+          }
+        )
+      });   
   }
 
   handleLoginCallback(authResult) {
@@ -60,11 +104,14 @@ export class AuthService {
 
   private _setSession(profile) {
     // Save authentication data and update login status subject
-    this.accessToken = profile.token;
     this.userProfile = profile;
-    this.authenticated = true;
-    this.$authStatus.next(true);
-    localStorage.setItem('my-api-key', profile.token);
+    /*
+    if(profile.token !== '') {
+      this.accessToken = profile.token;
+      this.authenticated = true;
+      this.$authStatus.next(true);
+      localStorage.setItem('my-api-key', profile.token);
+    }*/
   }
 
   logout() {
@@ -89,9 +136,11 @@ export class AuthService {
     };
     this.http.get(environment.apiUrl + '/auth', httpOptions).subscribe(
       resp =>{
-        if(resp['token']) {
-          resp['user']['token'] = resp['token'];
-        }
+        //if(resp['token']) {
+        //  resp['user']['token'] = resp['token'];
+        //}
+        this.authenticated = true;
+        this.$authStatus.next(true);
         this._setSession(resp['user']);
       },
       err => {console.log('Error', err);}
@@ -109,6 +158,10 @@ export class AuthService {
 
   passwordResetRequest(userId) {
     return this.http.get(environment.apiUrl + '/user/' + userId + '/passwordreset')   
+  }
+
+  emailTokenRequest(userId) {
+    return this.http.get(environment.apiUrl + '/mail/auth/' + userId)
   }
 }
 
@@ -128,8 +181,10 @@ export class AuthInterceptor implements HttpInterceptor {
       }
       return next.handle(authReq).pipe(
         tap(event => {
-          if (event instanceof HttpResponse) {
-          
+          if(event['body'] && event['body']['token']) {
+            this.auth.accessToken = event['body']['token'];
+            localStorage.setItem('my-api-key', event['body']['token']);
+            
           }
         }, error => {
           if(error.status == 401) {
