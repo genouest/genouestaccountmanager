@@ -19,7 +19,6 @@ COPY views /root/genouestaccountmanager/views
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
 COPY manager /root/genouestaccountmanager/manager
-COPY manager2 /root/genouestaccountmanager/manager2
 
 RUN npm install -g bower
 RUN bower install --allow-root
@@ -27,5 +26,7 @@ RUN mkdir -p /opt/my/readmes/readmes1
 RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts
 RUN mkdir -p /opt/my/plugin-scripts
+
+COPY manager2 /root/genouestaccountmanager/manager2
 
 ENTRYPOINT node app.js

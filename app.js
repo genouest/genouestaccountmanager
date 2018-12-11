@@ -98,16 +98,24 @@ app.all('*', function(req, res, next){
         if(req.session.gomngr){
             req.session.gomngr=null;
             req.session.is_logged = false;
+            req.session.mail_token = null;
         }
         try{
-            users_db.findOne({'_id': jwtToken.user}, function(err, session_user){
-                if(err){
-                    return res.status(401).send('Invalid token').end();
-                }
-                req.session.gomngr = session_user._id;
-                req.session.is_logged = true;
-                next();
-            });
+            if(jwtToken.isLogged) {
+                req.session.is_logged = true; 
+            }
+            if(jwtToken.mail_token) {
+                req.session.mail_token = jwtToken.mail_token;
+            }
+            if(jwtToken.user) {
+                users_db.findOne({'_id': jwtToken.user}, function(err, session_user){
+                    if(err){
+                        return res.status(401).send('Invalid token').end();
+                    }
+                    req.session.gomngr = session_user._id;
+                    next();
+                });
+            }
         }
         catch(error){
             console.error('Invalid token', error);

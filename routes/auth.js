@@ -68,9 +68,16 @@ router.get('/mail/auth/:id', function(req, res) {
         };
         var expire = new Date().getTime() + 60*10*1000;
         req.session.mail_token = {'token': password, 'expire': expire, 'user': user._id};
+
+        var usertoken = jwt.sign(
+            { user: user._id, isLogged: true, mail_token: req.session.mail_token },
+            CONFIG.general.secret,
+            {expiresIn: '2 days'}
+          ); 
+
         notif.sendUser(mailOptions, function(err, response) {
             if(err){return res.send({'status': false});};
-            return res.send({'status': true});
+            return res.send({'status': true, token: usertoken});
         });
     });
 
@@ -85,7 +92,7 @@ router.post('/mail/auth/:id', function(req, res) {
             return res.status(404).send('User not found');
         }
         var usertoken = jwt.sign(
-            { user: user._id },
+            { user: user._id, isLogged: true },
             CONFIG.general.secret,
             {expiresIn: '2 days'}
           );
@@ -144,10 +151,15 @@ router.post('/u2f/auth/:id', function(req, res) {
         if (result.successful) {
             // Success!
             // User is authenticated.
+            var usertoken = jwt.sign(
+                { user: user._id, isLogged: true },
+                CONFIG.general.secret,
+                {expiresIn: '2 days'}
+              );
             var sess = req.session;
             sess.gomngr = sess.u2f;
             sess.u2f = null;
-            return res.sendStatus(200);
+            return res.send({'token': usertoken, 'user': user});
         }
         else {
             sess.gomngr = null;
@@ -205,7 +217,7 @@ router.get('/auth', function(req, res) {
     //users_db.findOne({_id: req.cookies.gomngr}, function(err, user){
     users_db.findOne({_id: sess.gomngr}, function(err, user){
       var token = jwt.sign(
-          { user: user._id },
+          { user: user._id, isLogged: true },
           CONFIG.general.secret,
           {expiresIn: '2 days'}
         );
@@ -254,7 +266,7 @@ router.post('/auth/:id', function(req, res) {
       return;
     }
     var usertoken = jwt.sign(
-        { user: user._id },
+        { user: user._id, isLogged: true },
         CONFIG.general.secret,
         {expiresIn: '2 days'}
       );
@@ -299,6 +311,15 @@ router.post('/auth/:id', function(req, res) {
       user.is_admin = false;
       sess.gomngr = user._id;
     }
+
+    if(need_double_auth) {
+        usertoken = jwt.sign(
+            { isLogged: true },
+            CONFIG.general.secret,
+            {expiresIn: '2 days'}
+          );
+    }
+
     var ip = req.headers['x-forwarded-for'] ||
      req.connection.remoteAddress ||
      req.socket.remoteAddress ||
