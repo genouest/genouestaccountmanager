@@ -35,7 +35,6 @@ export class AuthService {
             //if(resp.body['token']) {
             //  resp.body['user']['token'] = resp.body['token'];
             //}
-
             if(! resp.body['user']['double_auth']) {
               this.handleLoginCallback(resp.body['user']);
               this.authenticated = true;

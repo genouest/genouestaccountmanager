@@ -115,6 +115,8 @@ app.all('*', function(req, res, next){
                     req.session.gomngr = session_user._id;
                     next();
                 });
+            } else {
+                next();
             }
         }
         catch(error){
