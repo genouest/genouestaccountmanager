@@ -35,8 +35,7 @@ export class AuthService {
             //if(resp.body['token']) {
             //  resp.body['user']['token'] = resp.body['token'];
             //}
-            // TODO REMOVE this set, only for double auth testing
-            resp.body['user']['double_auth'] = true;
+
             if(! resp.body['user']['double_auth']) {
               this.authenticated = true;
               this.$authStatus.next(true);
