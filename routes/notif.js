@@ -130,6 +130,27 @@ module.exports = {
         });
     },
 
+    create: function(name, callback) {
+        if(!name) {
+            callback();
+            return;
+        }
+        const options = {
+            uri: "/list/" + name,
+            body: {'name': name, 'tags': []}
+        }
+
+        baseRequest.post(options, function(err, res, body) {
+            if(err || res.statusCode !== 200){
+                logger.error("Failed to create list " + name);
+                callback();
+                return;
+            }
+            events_db.insert({'date': new Date().getTime(), 'action': 'create list ' + name , 'logs': []}, function(err){});
+            callback();
+        });
+    },
+
     remove: function(email, callback) {
         if(email==undefined ||email==null || email=='' || ! mail_set) {
             callback();

@@ -154,7 +154,7 @@ export class MessagesComponent implements OnInit {
 
   generate_list_members(event) {
     let list_name = this.mailing_list;
-    this.members = this.getListMembers(list_name).subscribe(
+    this.getListMembers(list_name).subscribe(
       resp => {
         this.members = resp;
         this.renderDataTables();

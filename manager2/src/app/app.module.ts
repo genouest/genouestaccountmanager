@@ -29,7 +29,7 @@ import { RegisteredInfoComponent } from "./info/RegisteredInfoComponent";
 import { PendingApprovalInfoComponent } from "./info/PendingApprovalInfoComponent";
 import { RenewInfoComponent } from "./info/RenewInfoComponent";
 import { PwdResetConfirmInfoComponent } from "./info/PwdResetConfirmInfoComponent";
-import { PluginDirective, PluginComponent, TestPluginComponent, GalaxyPluginComponent, DataAccessPluginComponent, PopulateHomePluginComponent, GenostackPluginComponent, QuotasPluginComponent } from './plugin/plugin.component';
+import { PluginDirective, PluginComponent, TestPluginComponent, GalaxyPluginComponent, DataAccessPluginComponent, PopulateHomePluginComponent, GenostackPluginComponent, QuotasPluginComponent, GomailPluginComponent } from './plugin/plugin.component';
 import { ProjectsComponent as UserProjectsComponent} from './user/projects/projects.component';
 import { RegisteredComponent } from './callback/registered/registered.component';
 import { PasswordResetConfirmComponent } from './callback/password-reset-confirm/password-reset-confirm.component';
@@ -75,6 +75,7 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
     PopulateHomePluginComponent,
     GenostackPluginComponent,
     QuotasPluginComponent,
+    GomailPluginComponent,
     PluginDirective,
     MyStatusFilterPipe,
     RegisteredComponent,
@@ -107,7 +108,8 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
     DataAccessPluginComponent,
     PopulateHomePluginComponent,
     GenostackPluginComponent,
-    QuotasPluginComponent
+    QuotasPluginComponent,
+    GomailPluginComponent
   ]
 })
 export class AppModule { }

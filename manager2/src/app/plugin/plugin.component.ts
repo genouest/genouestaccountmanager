@@ -6,10 +6,33 @@ import { BasePluginComponent } from './base-plugin/base-plugin.component';
 @Component({
   template: `
   <div *ngIf="data">
+  <div><input [ngModelOptions]="{standalone: true}" [(ngModel)]="data.newlist"/></div>
+  <div style="margin-top: 10px;"><button (click)="sendData()" type="button"  class="btn btn-default">Create</button></div>
+  </div>
+  <div *ngIf="data" class="table-responsive">
+  <table class="table table-striped ng-scope">
+  <tr><th>List</th></tr>
+  <tr *ngFor="let list of data.lists">
+  <td>{{list.list_name}}</td>
+  </tr>
+  </table>
+  </div>
+  `,
+})
+export class GomailPluginComponent extends BasePluginComponent implements OnInit {
+  ngOnInit() {
+    this.pluginName = "gomail";
+    this.loadData(this.userId);
+  }
+}
+
+@Component({
+  template: `
+  <div *ngIf="data">
     <div class="alert alert-info">Using this button, you can set your home, omaha-beach and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
  = "blank" >data-access </a> for easy access</div>
 
-  <div style="text-align:center;"><button ng-click="sendData()" type="button"  class="btn tbn-default">Update</button></div><br>
+  <div style="text-align:center;"><button (click)="sendData()" type="button"  class="btn btn-default">Update</button></div><br>
     <div *ngIf="data.api_status" class ="alert alert-danger">{{data.api_status}}</div>
     <div *ngIf="data.user_status" class ="alert alert-danger">{{data.user_status}}</div>
     <div *ngIf="data.my" class ="alert alert-success">{{data.my}}</div>
@@ -135,6 +158,7 @@ export class PluginItems {
     new PluginItem("populate_home", PopulateHomePluginComponent, null, null),
     new PluginItem("data_access", DataAccessPluginComponent, null, null),
     new PluginItem("quota", QuotasPluginComponent, null, null),
+    new PluginItem("gomail", GomailPluginComponent, null, null)
   ];
   constructor() {
   }
@@ -155,6 +179,8 @@ export class PluginItems {
       PluginItems.items.push(new PluginItem(pluginName, DataAccessPluginComponent, null, null));
     } else if (pluginName == "quota") {
       PluginItems.items.push(new PluginItem(pluginName, QuotasPluginComponent, null, null));
+    } else if (pluginName == "gomail") {
+      PluginItems.items.push(new PluginItem(pluginName, GomailPluginComponent, null, null));
     }
   }
 
