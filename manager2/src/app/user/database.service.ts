@@ -17,7 +17,7 @@ export class Database {
     this.type = type
     this.host = host
     this.owner = owner
-    this.create = false
+    this.create = create
   }
 
   toJson() {
