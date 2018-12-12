@@ -20,7 +20,7 @@ app.get('/ssh/:id/private', ssh);
 
 router.get('/ssh/:id/putty', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -34,7 +34,7 @@ router.get('/ssh/:id/putty', function(req, res) {
             res.end();
             return;
         }
-        if(user._id.str != sess.gomngr.str){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -49,7 +49,7 @@ router.get('/ssh/:id/putty', function(req, res) {
 
 router.get('/ssh/:id/private', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -67,7 +67,7 @@ router.get('/ssh/:id/private', function(req, res) {
             res.status(401).send('[admin user] not authorized to download private key');
             return;
         }
-        if(user._id.str != sess.gomngr.str){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -82,7 +82,7 @@ router.get('/ssh/:id/private', function(req, res) {
 
 router.get('/ssh/:id/public', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -96,7 +96,7 @@ router.get('/ssh/:id/public', function(req, res) {
             res.end();
             return;
         }
-        if(user._id.str != sess.gomngr.str){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -111,7 +111,7 @@ router.get('/ssh/:id/public', function(req, res) {
 
 router.get('/ssh/:id', function(req, res) {
     var sess = req.session;
-    if(!sess.gomngr) {
+    if(!req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -125,7 +125,7 @@ router.get('/ssh/:id', function(req, res) {
             res.end();
             return;
         }
-        if(user._id.str != sess.gomngr.str){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }

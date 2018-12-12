@@ -66,11 +66,11 @@ router.get('/plugin/:id', function(req, res) {
 
 router.get('/plugin/:id/:user', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;
@@ -91,11 +91,11 @@ router.get('/plugin/:id/:user', function(req, res) {
 
 router.post('/plugin/:id/:user', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;

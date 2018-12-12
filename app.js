@@ -82,6 +82,15 @@ var monk = require('monk'),
 
 
 app.all('*', function(req, res, next){
+
+    var logInfo = {
+        is_logged: false,
+        mail_token: null,
+        id: null,
+        u2f: null,
+        session_user: null
+    };
+
     var token = req.headers['x-api-key'] || null;
     var jwtToken = null;
     var authorization = req.headers['authorization'] || null;
@@ -103,9 +112,14 @@ app.all('*', function(req, res, next){
         try{
             if(jwtToken.isLogged) {
                 req.session.is_logged = true; 
+                logInfo.is_logged = true;
             }
             if(jwtToken.mail_token) {
                 req.session.mail_token = jwtToken.mail_token;
+                logInfo.mail_token = jwtToken.mail_token;
+            }
+            if(jwtToken.u2f) {
+                logInfo.u2f = jwtToken.u2f;
             }
             if(jwtToken.user) {
                 users_db.findOne({'_id': jwtToken.user}, function(err, session_user){
@@ -113,6 +127,9 @@ app.all('*', function(req, res, next){
                         return res.status(401).send('Invalid token').end();
                     }
                     req.session.gomngr = session_user._id;
+                    logInfo.id = session_user._id;
+                    logInfo.session_user = session_user;
+                    req.locals.logInfo = logInfo;
                     next();
                 });
             } else {
@@ -136,6 +153,13 @@ app.all('*', function(req, res, next){
                 }
                 req.session.gomngr = session_user._id;
                 req.session.is_logged = true;
+                logInfo.id = session_user._id;
+                logInfo.is_logged = true;
+                if(req.session.u2f){
+                    logInfo.u2f = req.session.u2f;
+                }
+                logInfo.session_user = session_user;
+                req.locals.logInfo = logInfo;
                 next();
             });
         }
@@ -144,7 +168,30 @@ app.all('*', function(req, res, next){
             return res.status(401).send('Invalid token').end();
         }
     }else{
-        next();
+        if(req.session.gomngr) {
+            logInfo.id = req.session.gomngr;
+        }
+        if(req.session.is_logged) {
+            logInfo.is_logged = req.session.is_logged;
+        }
+        if(req.session.mail_token) {
+            logInfo.mail_token = req.session.mail_token;
+        }
+        if(req.session.u2f) {
+            logInfo.u2f =req.session.u2f;
+        }
+        if(req.session.gomngr) {
+            users_db.findOne({'_id': req.session.gomngr}, function(err, session_user){
+                if(session_user){
+                    logInfo.session_user = session_user;
+                }
+                req.locals.logInfo = logInfo;
+                next();
+            });
+        } else {
+            req.locals.logInfo = logInfo;
+            next();
+        }
     }
 });
 

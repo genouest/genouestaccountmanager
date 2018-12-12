@@ -17,11 +17,11 @@ var monk = require('monk'),
 */
 router.put('/web/:id/owner/:old/:new', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }
@@ -43,11 +43,11 @@ router.put('/web/:id/owner/:old/:new', function(req, res) {
 
 router.get('/web', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }
@@ -67,11 +67,11 @@ router.get('/web', function(req, res) {
 
 router.get('/web/owner/:owner', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }
@@ -89,11 +89,11 @@ router.get('/web/owner/:owner', function(req, res) {
 
 router.post('/web/:id', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }
@@ -121,13 +121,13 @@ router.post('/web/:id', function(req, res) {
 
 router.delete('/web/:id', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
 
 
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }

@@ -46,7 +46,7 @@ router.get('/logout', function(req, res) {
 
 router.get('/mail/auth/:id', function(req, res) {
     // Request email token
-    if(!req.session.is_logged){
+    if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
 
@@ -68,9 +68,9 @@ router.get('/mail/auth/:id', function(req, res) {
         };
         var expire = new Date().getTime() + 60*10*1000;
         req.session.mail_token = {'token': password, 'expire': expire, 'user': user._id};
-
+        var mail_token = {'token': password, 'expire': expire, 'user': user._id};
         var usertoken = jwt.sign(
-            { user: user._id, isLogged: true, mail_token: req.session.mail_token },
+            { user: user._id, isLogged: true, mail_token: mail_token },
             CONFIG.general.secret,
             {expiresIn: '2 days'}
           ); 
@@ -84,7 +84,7 @@ router.get('/mail/auth/:id', function(req, res) {
 });
 router.post('/mail/auth/:id', function(req, res) {
     // Check email token
-    if(!req.session.is_logged){
+    if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
@@ -98,11 +98,12 @@ router.post('/mail/auth/:id', function(req, res) {
           );
         var sess = req.session;
         var now = new Date().getTime()
-        if(user._id != sess.mail_token['user'] || req.param('token') != sess.mail_token['token'] || now > sess.mail_token['expire']) {
+        if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.param('token') != req.local.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
             return res.status(403).send('Invalid or expired token');
         }
         sess.gomngr = sess.mail_token['user'];
         sess.mail_token = null;
+
         if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
             user.is_admin = true;
         }
@@ -117,7 +118,7 @@ router.post('/mail/auth/:id', function(req, res) {
 
 router.get('/u2f/auth/:id', function(req, res) {
     // challenge
-    if(!req.session.is_logged){
+    if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
     req.session.u2f = null;
@@ -135,7 +136,7 @@ router.get('/u2f/auth/:id', function(req, res) {
 });
 
 router.post('/u2f/auth/:id', function(req, res) {
-    if(!req.session.is_logged){
+    if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
@@ -143,7 +144,7 @@ router.post('/u2f/auth/:id', function(req, res) {
             res.status(404).send('User not found');
             return;
         }
-        if(!req.session.u2f || req.session.u2f != user._id){
+        if(!req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
             res.status(401).send('U2F not challenged or invalid user');
         }
         var publicKey = user.u2f.publicKey;
@@ -177,7 +178,7 @@ router.get('/u2f/register/:id', function(req, res) {
             return;
         }
         var sess = req.session;
-        if(!sess.gomngr || sess.gomngr.str!=user._id.str) {
+        if(!req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
             return res.status(401).send('You need to login first');
         }
         if(user.u2f !== undefined && user.u2f.keyHandle!=null){
@@ -191,7 +192,7 @@ router.get('/u2f/register/:id', function(req, res) {
 router.post('/u2f/register/:id', function(req, res) {
     users_db.findOne({uid: req.param('id')}, function(err, user){
         var sess = req.session;
-        if(err || !sess.gomngr || sess.gomngr.str!=user._id.str) {
+        if(err || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
             return res.status(401).send('You need to login first');
         }
         const registrationRequest = req.param('registrationRequest');
@@ -211,11 +212,11 @@ router.post('/u2f/register/:id', function(req, res) {
 
 router.get('/auth', function(req, res) {
   var sess = req.session;
-  if(sess.gomngr) {
+  if(req.locals.logInfo.id) {
   //if(req.cookies.gomngr !== undefined) {
     // Authenticated
     //users_db.findOne({_id: req.cookies.gomngr}, function(err, user){
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       var token = jwt.sign(
           { user: user._id, isLogged: true },
           CONFIG.general.secret,
@@ -266,7 +267,7 @@ router.post('/auth/:id', function(req, res) {
       return;
     }
     var usertoken = jwt.sign(
-        { user: user._id, isLogged: true },
+        { user: user._id, isLogged: true, u2f: user._id },
         CONFIG.general.secret,
         {expiresIn: '2 days'}
       );
@@ -314,7 +315,7 @@ router.post('/auth/:id', function(req, res) {
 
     if(need_double_auth) {
         usertoken = jwt.sign(
-            { isLogged: true },
+            { isLogged: true, u2f: user._id },
             CONFIG.general.secret,
             {expiresIn: '2 days'}
           );

@@ -271,11 +271,11 @@ router.create_admin = function(default_admin, default_admin_group){
 
 router.get('/user/:id/apikey', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;
@@ -302,11 +302,11 @@ router.get('/user/:id/apikey', function(req, res){
 
 router.post('/user/:id/apikey', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;
@@ -330,7 +330,7 @@ router.post('/user/:id/apikey', function(req, res){
 
 router.get('/user/:id/subscribed', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -354,11 +354,11 @@ router.get('/user/:id/subscribed', function(req, res){
 
 router.get('/group/:id', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -376,11 +376,11 @@ router.get('/group/:id', function(req, res){
 
 router.delete('/group/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
           res.status(404).send('User not found');
           return;
@@ -430,11 +430,11 @@ router.delete('/group/:id', function(req, res){
 
 router.put('/group/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -467,11 +467,11 @@ router.put('/group/:id', function(req, res){
 
 router.post('/group/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -537,11 +537,11 @@ router.get('/ip', function(req, res) {
 
 router.get('/group', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -560,7 +560,7 @@ router.get('/group', function(req, res){
 router.post('/message', function(req, res){
 
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -570,7 +570,7 @@ router.post('/message', function(req, res){
       return;
     }
 
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;
@@ -605,12 +605,12 @@ router.post('/message', function(req, res){
 // Get users listing - for admin
 router.get('/user', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
 
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -630,11 +630,11 @@ router.get('/user', function(req, res) {
 
 router.post('/user/:id/group/:group', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
       return;
@@ -692,11 +692,11 @@ router.post('/user/:id/group/:group', function(req, res){
 
 router.delete('/user/:id/group/:group', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
       return;
@@ -854,11 +854,11 @@ router.delete_user = function(user, action_owner_id){
 
 router.delete('/user/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
       return;
@@ -912,12 +912,12 @@ router.delete('/user/:id', function(req, res){
 router.get('/user/:id/activate', function(req, res) {
 
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
 
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(err || session_user == null){
         res.status(404).send('User not found');
         return;
@@ -1050,11 +1050,11 @@ router.get('/user/:id/activate', function(req, res) {
 // Get user - for logged user or admin
 router.get('/user/:id', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized, need to login first');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
     users_db.findOne({uid: req.param('id')}, function(err, user){
       if(err){
@@ -1075,7 +1075,7 @@ router.get('/user/:id', function(req, res) {
           user.quota.push(k);
       }
 
-      if(sess.gomngr.str == user._id.str || GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0){
+      if(session_user._id.str == user._id.str || GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0){
         res.json(user);
         return;
       }
@@ -1263,11 +1263,11 @@ router.post('/user/:id', function(req, res) {
 
 router.get('/user/:id/expire', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     users_db.findOne({uid: req.param('id')}, function(err, user){
       if(err){
         res.status(404).send('User not found');
@@ -1349,11 +1349,11 @@ router.get('/user/:id/expire', function(req, res){
 });
 router.post('/user/:id/passwordreset', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(session_user.uid != req.param('id')) {
          res.send({message: 'Not authorized'});
          return;
@@ -1541,11 +1541,11 @@ router.get('/user/:id/renew/:regkey', function(req, res){
 
 router.get('/user/:id/renew', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     users_db.findOne({uid: req.param('id')}, function(err, user){
       if(err){
         res.status(404).send('User not found');
@@ -1630,11 +1630,11 @@ router.get('/user/:id/renew', function(req, res){
 
 router.put('/user/:id/ssh', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! sess.gomreq.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
       }
@@ -1681,11 +1681,11 @@ router.put('/user/:id/ssh', function(req, res) {
 
 router.get('/user/:id/usage', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         usage=JSON.parse(JSON.stringify(CONFIG.usage));
         usages = [];
         for(var i=0;i<usage.length;i++){
@@ -1725,11 +1725,11 @@ router.put('/user/:id', function(req, res) {
     res.status(401).send('Operation not authorized by API key');
     return;
   }*/
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
       }
@@ -1743,7 +1743,7 @@ router.put('/user/:id', function(req, res) {
           return;
         }
         // If not admin nor logged user
-        if(!session_user.is_admin && user._id.str != sess.gomngr.str) {
+        if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
           res.status(401).send('Not authorized');
           return;
         }
@@ -1883,11 +1883,11 @@ router.put('/user/:id', function(req, res) {
 
 router.get('/project/:id/users', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -1901,11 +1901,11 @@ router.get('/project/:id/users', function(req, res){
 
 router.post('/user/:id/project/:project', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             res.end();
@@ -1948,11 +1948,11 @@ router.post('/user/:id/project/:project', function(req, res){
 
 router.delete('/user/:id/project/:project', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             res.end();
@@ -2003,11 +2003,11 @@ router.delete('/user/:id/project/:project', function(req, res){
 
 router.get('/list/:list', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;
@@ -2023,11 +2023,11 @@ router.get('/list/:list', function(req, res){
 
 router.get('/lists', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;

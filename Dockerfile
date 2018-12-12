@@ -7,8 +7,9 @@ RUN mkdir -p /root/genouestaccountmanager
 WORKDIR /root/genouestaccountmanager
 
 
-COPY *.js *.json .bowerrc /root/genouestaccountmanager/
+COPY *.json .bowerrc /root/genouestaccountmanager/
 RUN npm install
+COPY *.js /root/genouestaccountmanager/
 
 RUN mkdir plugins public routes views tests test manager manager2 config
 COPY config/test.json /root/genouestaccountmanager/config
@@ -27,6 +28,6 @@ RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts
 RUN mkdir -p /opt/my/plugin-scripts
 
-COPY manager2 /root/genouestaccountmanager/manager2
+COPY manager2/dist /root/genouestaccountmanager/manager2/dist
 
 ENTRYPOINT node app.js

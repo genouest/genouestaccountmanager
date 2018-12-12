@@ -49,11 +49,11 @@ handleDisconnect();
 */
 router.put('/database/:id/owner/:old/:new', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }
@@ -76,11 +76,11 @@ router.put('/database/:id/owner/:old/:new', function(req, res) {
 
 router.get('/database', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }
@@ -100,11 +100,11 @@ router.get('/database', function(req, res) {
 
 router.get('/database/owner/:owner', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
     }
@@ -121,11 +121,11 @@ router.get('/database/owner/:owner', function(req, res) {
 
 router.post('/database/:id', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
@@ -143,7 +143,7 @@ router.post('/database/:id', function(req, res) {
     if(req.param('owner')){
         owner = req.param('owner')
     }
-    if(req.param('create') == false || (req.param('type') != undefined && req.param('type') != mysql)){
+    if(req.param('create') == false || (req.param('type') != undefined && req.param('type') != 'mysql')){
         create_db = false;
     }
 
@@ -250,12 +250,12 @@ router.post('/database/:id', function(req, res) {
 
 router.delete('/database/:id', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
 
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
         if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
           session_user.is_admin = true;

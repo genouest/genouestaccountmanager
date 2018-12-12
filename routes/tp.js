@@ -454,11 +454,11 @@ var activate_tp_user = function(user, adminId){
 
 router.get('/tp', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({'_id': sess.gomngr}, function(err, user){
+    users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exists'})
             res.end();
@@ -483,11 +483,11 @@ router.post('/tp', function(req, res) {
 
 
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({'_id': sess.gomngr}, function(err, user){
+    users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exists'})
             res.end();
@@ -511,11 +511,11 @@ router.post('/tp', function(req, res) {
 
 router.delete('/tp/:id', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(403).send('Not authorized');
       return;
     }
-    users_db.findOne({'_id': sess.gomngr}, function(err, user){
+    users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exists'})
             res.end();
