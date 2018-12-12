@@ -90,6 +90,9 @@ app.all('*', function(req, res, next){
         u2f: null,
         session_user: null
     };
+    if(! req.locals) {
+        req.locals = {};
+    }
 
     var token = req.headers['x-api-key'] || null;
     var jwtToken = null;
@@ -133,6 +136,7 @@ app.all('*', function(req, res, next){
                     next();
                 });
             } else {
+                req.locals.logInfo = logInfo;
                 next();
             }
         }

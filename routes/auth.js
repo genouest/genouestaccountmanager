@@ -98,7 +98,7 @@ router.post('/mail/auth/:id', function(req, res) {
           );
         var sess = req.session;
         var now = new Date().getTime()
-        if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.param('token') != req.local.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
+        if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.param('token') != req.locals.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
             return res.status(403).send('Invalid or expired token');
         }
         sess.gomngr = sess.mail_token['user'];
