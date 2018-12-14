@@ -34,7 +34,7 @@
                 </tr></thead>
                 <tbody>
                   <tr *ngFor="let group of groups">
-                    <td (click)="show_group_users(group)" style="cursor: pointer;"><h4><span class="label label-primary">{{group.name}}</span></h4></td>
+                    <td (click)="show_group_users(group)" style="cursor: pointer;"><span class="label label-primary">{{group.name}}</span></td>
                     <td>{{group.gid}}</td>
                     <td>{{group.owner}}</td>
                   </tr>
@@ -90,7 +90,7 @@
                   </thead>
                   <tbody>
                     <tr *ngFor="let user of users">
-                      <td><a routerLink="/user/{{user.uid}}"><h4><span class="label label-primary">{{user.uid}}</span></h4></a></td>
+                      <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
                       <td>{{user.email}}</td>
                       <td><span *ngIf="user.authorized">x</span></td>
                       <td><span *ngIf="user.group == selectedGroup.name">x</span></td>

@@ -72,6 +72,8 @@ export class UserComponent implements OnInit {
 
   events: any = []
 
+  panel: number = 0;
+
   // Password mngt
   wrong_confirm_passwd: string
   update_passwd: string
@@ -378,6 +380,10 @@ export class UserComponent implements OnInit {
       },
       err => console.log('failed to renew')
     )
+  }
+  
+  switchTo(panel) {
+    this.panel = panel
   }
 
   generate_apikey(uid: string){

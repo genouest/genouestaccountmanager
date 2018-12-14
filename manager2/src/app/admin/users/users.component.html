@@ -1,10 +1,10 @@
 <div class="row">
     <div class="col-md-6">
-        <div class="panel panel-warning">
-            <div class="panel-heading">
-                <h3 class="panel-title">Pending email approval</h3>
+        <div class="card bg-light">
+            <div class="card-header bg-warning">
+                <h3>Pending email approval</h3>
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div class="table-responsive">
                     <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
                         <thead><tr>
@@ -12,7 +12,7 @@
                           </tr></thead>
                         <tbody>
                             <tr *ngFor="let user of users | statusFilter: STATUS_PENDING_EMAIL">
-                                <td><a routerLink="/user/{{user.uid}}"><h4><span class="label label-warning">{{user.uid}}</span></h4></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
                                 <td>{{user.uidnumber}}</td>
                                 <td>{{user.email}}</td>
                                 <!--td>{{user.status}}</td-->
@@ -25,11 +25,11 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="panel panel-warning">
-            <div class="panel-heading">
-                <h3 class="panel-title">Pending admin approval</h3>
+        <div class="card bg-light">
+            <div class="card-header bg-warning">
+                <h3>Pending admin approval</h3>
             </div>
-            <div class="panel-body">
+            <div class="card-body">
                 <div class="table-responsive">
                     <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
                         <thead><tr>
@@ -37,7 +37,7 @@
                         </tr></thead>
                         <tbody>
                             <tr *ngFor="let user of users | statusFilter: STATUS_PENDING_APPROVAL">
-                                <td><a routerLink="/user/{{user.uid}}"><h4><span class="label label-warning">{{user.uid}}</span></h4></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
                                 <td>{{user.uidnumber}}</td>
                                 <td>{{user.email}}</td>
                                 <!--td>{{user.status}}</td-->
@@ -52,11 +52,11 @@
 </div>
 <div class="row">
   <div class="col-sm-12">
-    <div class="panel panel-primary">
-        <div class="panel-heading">
-            <h3 class="panel-title">Active</h3>
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3>Active</h3>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <div class="table-responsive">
                 <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
                     <thead>
@@ -64,7 +64,7 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let user of users | statusFilter: STATUS_ACTIVE">
-                            <td><a routerLink="/user/{{user.uid}}"><h4><span class="label label-primary">{{user.uid}}</span></h4></a></td>
+                            <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
                             <td>{{user.uidnumber}}</td>
                             <td>{{user.email}}</td>
                             <!--td>{{user.status}}</td-->
@@ -79,11 +79,11 @@
 </div>
 <div class="row">
   <div class="col-sm-12">
-    <div class="panel panel-danger">
-        <div class="panel-heading">
-            <h3 class="panel-title">Expired</h3>
+    <div class="card bg-light">
+        <div class="card-header bg-danger">
+            <h3>Expired</h3>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <div class="table-responsive">
                 <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
                     <thead>
@@ -91,7 +91,7 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let user of users | statusFilter: STATUS_EXPIRED">
-                            <td><a routerLink="/user/{{user.uid}}"><h4><span class="label label-danger">{{user.uid}}</span></h4></a></td>
+                            <td><a routerLink="/user/{{user.uid}}"><span class="label label-danger">{{user.uid}}</span></a></td>
                             <td>{{user.uidnumber}}</td>
                             <td>{{user.email}}</td>
                             <!--td>{{user.status}}</td-->

@@ -25,7 +25,6 @@
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",          
               "src/styles.css",
-              "src/assets/css/theme.css",
               "node_modules/datatables.net-dt/css/jquery.dataTables.css"
             ],
             "scripts": [
@@ -67,7 +66,7 @@
                   "with": "src/environments/environment.local.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": false,
               "outputHashing": "all",
               "sourceMap": false,
               "extractCss": true,
@@ -75,7 +74,7 @@
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true,
+              "buildOptimizer": false,
               "budgets": [
                 {
                   "type": "initial",

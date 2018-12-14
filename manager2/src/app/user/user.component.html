@@ -34,8 +34,27 @@
 <div class="alert alert-warning" role="alert" *ngIf="del_msg">{{del_msg}}</div>
 <div class="alert alert-danger" role="alert" *ngIf="err_msg">{{err_msg}}</div>
 
+<div class="card text-center">
+    <div class="card-header">
+      <ul class="nav nav-pills card-header-pills">
+        <li class="nav-item" (click)="switchTo(0)">
+          <span class="nav-link">Information</span>
+        </li>
+        <li class="nav-item" (click)="switchTo(1)">
+          <span class="nav-link">SSH</span>
+        </li>
+        <li class="nav-item" (click)="switchTo(2)">
+            <span class="nav-link">Details</span>
+          </li>        
+        <li class="nav-item" (click)="switchTo(3)">
+          <span class="nav-link">History</span>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+
 <div class="row">
-  <div class="col-sm-6">
+  <div class="col-sm-6" *ngIf="panel == 0">
       <div class="card bg-light">
           <div class="card-header">
               <h4>Information</h4>
@@ -186,33 +205,9 @@
           </div>
 
       </div>
-
-      <div class="card bg-light">
-            <div class="card-header">
-                <h4>History</h4>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="dtEvents" datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" class="table table-striped">
-                        <thead><tr>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr></thead>
-                        <tbody>
-                            <tr *ngFor="let hist of events">
-                                <td>{{dateConvert(hist.date)}}</td>
-                                <td>{{hist.action}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-        </div>
-
   </div>
 
-  <div class="col-sm-6">
+  <div class="col-sm-6"*ngIf="panel == 0">
 
     <div class="card bg-light" *ngIf="user.u2f">
         <div class="card-header">
@@ -241,23 +236,7 @@
             <span>/home<span *ngIf="user.maingroup">/{{user.maingroup}}</span>/{{user.group}}/{{user.uid}}</span>
         </div>
     </div>
-    <div class="card bg-light">
-        <div class="card-header">
-            <h4>SSH keys</h4>
-        </div>
-        <div class="card-body">
-            <div class="alert alert-info" role="alert">
-                When generating a key, public key is automatically added to authorized keys, process takes one minute
-            </div>
-            <div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
-            <button class="btn btn-default" (click)="ssh_new_key()">Generate new key</button>
-            <hr/>
-            <h4 style="font-weight: normal;">Download</h4>
-            <a [routerLink]="['/ssh', {id: user.uid}, 'private']" target="_blank"><button class="btn btn-default">private rsa key</button></a>
-            <a [routerLink]="['/ssh', {id: user.uid}, 'putty']" target="_blank"><button class="btn btn-default">putty private key</button></a>
-            <a [routerLink]="['/ssh/', {id: user.uid}, 'public']" target="_blank"><button class="btn btn-default">public key</button></a>
-        </div>
-    </div>
+
     <div class="card bg-light">
         <div class="card-header">
             <h4>Update password</h4>
@@ -332,30 +311,6 @@
         </div>
     </div>
 
-
-    <div class="card bg-light">
-        <div class="card-header">
-            <h4>Add public SSH key</h4>
-        </div>
-        <div class="card-body">
-            <div *ngIf="ssh_message" class="alert alert-success alert-dismissible" role="alert">
-                {{ssh_message}}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div>
-                <form role="form" class="user-form form-inline">
-                    <div class="form-group">
-                        <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-default" (click)="update_ssh()">Add</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     <div class="card bg-light">
         <div class="card-header">
             <h4>Databases</h4>
@@ -404,69 +359,150 @@
                 </div>
         </div>
     </div>
-    <div class="card bg-light">
-        <div class="card-header">
-            <h4>Web sites</h4>
-        </div>
-        <div class="card-body">
-            <div ng-show="session_user.is_admin">
-                <div *ngIf="webmsg" class="alert alert-success alert-dismissible" role="alert">
-                    {{webmsg}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                  </div>
-                  <div *ngIf="rmwebmsg" class="alert alert-warning alert-dismissible" role="alert">
-                      {{rmwebmsg}}
-                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
+  </div> 
+  
+  <div class="col-md-6 col-sm-12" *ngIf="panel == 1">
+        <div class="card bg-light">
+                <div class="card-header">
+                    <h4>Add public SSH key</h4>
+                </div>
+                <div class="card-body">
+                    <div *ngIf="ssh_message" class="alert alert-success alert-dismissible" role="alert">
+                        {{ssh_message}}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                <div class="form-group row">
-                    <div class="col-sm-6">
-                        <label for="website_name">Web site name</label>
-                        <input placeholder="no space" id="website_name" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.name"/>
-                        <label for="website_url">Web site url</label>
-                        <input type="text" id="website_url" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.url"/>
-                        <label for="website_description">Web site short description</label>
-                        <input id="website_description" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.description"/>
+                    <div>
+                        <form role="form" class="user-form form-inline">
+                            <div class="form-group">
+                                <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-default" (click)="update_ssh()">Add</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="form-group">
-                    <button type="button" class="btn btn-default" (click)="web_add()">Create</button>
-                </div>
             </div>
-            <div>
-                <hr/>
-                <div class="table-responsive">
-                    <table *ngIf="websites && websites.length > 0" class="table table-striped">
-                        <thead>
-                            <th>Name</th><th>Url</th><th>Description</th><th></th>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let site of websites">
-                                <td>{{site.name}}</td>
-                                <td>{{site.url}}</td>
-                                <td>{{site.description}}</td>
-                                <td><app-my-delete-confirm [onConfirm]="web_delete" [data]="site.name"></app-my-delete-confirm></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div *ngFor="let template of plugins">
-        <div *ngIf="!template.admin_only || session_user.is_admin" class="card bg-light">
-            <div class="card-header">
-                <h4>{{template.display_name}}</h4>
-            </div>
-            <div class="card-body">
-                <app-plugin [pluginItem]="template.name" [userId]="user.uid"></app-plugin>
-            </div>
-        </div>
-    </div>
 
-  </div>  
+  </div>
+  <div  class="col-md-6 col-sm-12" *ngIf="panel == 1">
+        <div class="card bg-light">
+                <div class="card-header">
+                    <h4>SSH keys</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        When generating a key, public key is automatically added to authorized keys, process takes one minute
+                    </div>
+                    <div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
+                    <button class="btn btn-default" (click)="ssh_new_key()">Generate new key</button>
+                    <hr/>
+                    <h4 style="font-weight: normal;">Download</h4>
+                    <a [routerLink]="['/ssh', {id: user.uid}, 'private']" target="_blank"><button class="btn btn-default">private rsa key</button></a>
+                    <a [routerLink]="['/ssh', {id: user.uid}, 'putty']" target="_blank"><button class="btn btn-default">putty private key</button></a>
+                    <a [routerLink]="['/ssh/', {id: user.uid}, 'public']" target="_blank"><button class="btn btn-default">public key</button></a>
+                </div>
+            </div>
+  </div>
+
+  <div class="col-12" *ngIf="panel == 2">
+      <div class="row">
+        <div class="col-md-6 col-sm-12" *ngIf="panel == 2">
+            <div class="card bg-light">
+                    <div class="card-header">
+                        <h4>Web sites</h4>
+                    </div>
+                    <div class="card-body">
+                        <div ng-show="session_user.is_admin">
+                            <div *ngIf="webmsg" class="alert alert-success alert-dismissible" role="alert">
+                                {{webmsg}}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div *ngIf="rmwebmsg" class="alert alert-warning alert-dismissible" role="alert">
+                                  {{rmwebmsg}}
+                                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6">
+                                    <label for="website_name">Web site name</label>
+                                    <input placeholder="no space" id="website_name" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.name"/>
+                                    <label for="website_url">Web site url</label>
+                                    <input type="text" id="website_url" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.url"/>
+                                    <label for="website_description">Web site short description</label>
+                                    <input id="website_description" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.description"/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-default" (click)="web_add()">Create</button>
+                            </div>
+                        </div>
+                        <div>
+                            <hr/>
+                            <div class="table-responsive">
+                                <table *ngIf="websites && websites.length > 0" class="table table-striped">
+                                    <thead>
+                                        <th>Name</th><th>Url</th><th>Description</th><th></th>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let site of websites">
+                                            <td>{{site.name}}</td>
+                                            <td>{{site.url}}</td>
+                                            <td>{{site.description}}</td>
+                                            <td><app-my-delete-confirm [onConfirm]="web_delete" [data]="site.name"></app-my-delete-confirm></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <div class="col-md-6 col-sm-12" *ngFor="let template of plugins">
+                <div *ngIf="!template.admin_only || session_user.is_admin" class="card bg-light">
+                    <div class="card-header">
+                        <h4>{{template.display_name}}</h4>
+                    </div>
+                    <div class="card-body">
+                        <app-plugin [pluginItem]="template.name" [userId]="user.uid"></app-plugin>
+                    </div>
+                </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="col-12" *ngIf="panel == 3">
+    <div class="card bg-light">
+        <div class="card-header">
+            <h4>History</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dtEvents" datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" class="table table-striped">
+                    <thead><tr>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr *ngFor="let hist of events">
+                            <td>{{dateConvert(hist.date)}}</td>
+                            <td>{{hist.action}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+  </div>
 
 </div>
+
+</div>
+</div>
+
