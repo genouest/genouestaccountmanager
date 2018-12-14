@@ -18,6 +18,9 @@ var user_token_id = null;
 
 var test_user_id = 'test' + Math.random().toString(10).slice(-6);
 var test_group_id = 'test' + Math.random().toString(10).slice(-6);
+var test_web_id = 'webtest' + Math.random().toString(10).slice(-6);
+var test_db_id = 'dbtest' + Math.random().toString(10).slice(-6);
+var test_project_id = 'projecttest' + Math.random().toString(10).slice(-6);
 var user_test_password = null;
 var user_info = null;
 
@@ -83,7 +86,6 @@ describe('My', () => {
 
   describe('register user', () => {
       it('register user test', (done) => {
-        // console.log('register', test_user_id, test_group_id);
         chai.request('http://localhost:3000')
             .post('/user/' + test_user_id)
             .send({
@@ -116,7 +118,6 @@ describe('My', () => {
                                     gotMail = true;
                                     //regkey=XXXX
                                     let matches = raw.Data.match(/regkey=(\w+)/);
-                                    // console.log('matches', matches);
                                     assert(matches.length > 0);
                                     let regkey = matches[1];
                                     // Now confirm email
@@ -292,6 +293,153 @@ describe('My', () => {
 
   });
 
+  describe('admin actions', () => {
+    it('Admin declare web site', (done) => {
+        let website = {
+            name: test_web_id,
+            url: 'http://localhost/webtest',
+            description: 'some web site',
+            owner: 'user1'
+        }
+        chai.request('http://localhost:3000')
+            .post('/web/' + test_web_id)
+            .set('X-Api-Key', token_id)
+            .send(website)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.request('http://localhost:3000')
+                .get('/web')
+                .set('X-Api-Key', token_id)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    let found = false;
+                    for(let i=0; i<res.body.length; i++){
+                        if(res.body[i].name == test_web_id){
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert(found);
+                    done();
+                });
+            });
+    });
+    it('Admin change owner web site', (done) => {
+        let website = {
+            name: test_web_id,
+            url: 'http://localhost/webtest',
+            description: 'some web site'
+        }
+        chai.request('http://localhost:3000')
+            .put('/web/' + test_web_id + '/owner/user1/user2')
+            .set('X-Api-Key', token_id)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.request('http://localhost:3000')
+                .get('/web')
+                .set('X-Api-Key', token_id)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    let found = false;
+                    for(let i=0; i<res.body.length; i++){
+                        if(res.body[i].name == test_web_id && res.body[i].owner == 'user2'){
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert(found);
+                    done();
+                });
+            });
+    });
+
+    it('Admin delete web site', (done) => {
+
+        chai.request('http://localhost:3000')
+            .delete('/web/' + test_web_id)
+            .set('X-Api-Key', token_id)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.request('http://localhost:3000')
+                .get('/web')
+                .set('X-Api-Key', token_id)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    let found = false;
+                    for(let i=0; i<res.body.length; i++){
+                        if(res.body[i].name == test_web_id){
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert(!found);
+                    done();
+                });
+            });
+    });
+
+    it('Admin creates project', (done) => {
+        let project = {
+            'id': test_project_id,
+            'owner': test_user_id,
+            'group': test_group_id,
+            'size': 1,
+            'expire': 1546300800000,
+            'description': 'a test project',
+            'access': 'Group',
+            'orga': 'test',
+            'path': '/test'
+        }
+        chai.request('http://localhost:3000')
+            .post('/project')
+            .set('X-Api-Key', token_id)
+            .send(project)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.request('http://localhost:3000')
+                .get('/project?all=true')
+                .set('X-Api-Key', token_id)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    let found = false;
+                    for(let i=0; i<res.body.length; i++){
+                        if(res.body[i].id == test_project_id){
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert(found);
+                    done();
+                });
+            });
+    });
+
+    it('Admin adds user to project', (done) => {
+        chai.request('http://localhost:3000')
+        .post('/user/' + test_user_id + '/project/' + test_project_id)
+        .set('X-Api-Key', token_id)
+        .end((err, res) => {
+            res.should.have.status(200);
+            chai.request('http://localhost:3000')
+            .get('/project/' + test_project_id + '/users')
+            .set('X-Api-Key', token_id)
+            .end((err, res) => {
+                res.should.have.status(200);
+                let found = false;
+                for(let i=0; i<res.body.length; i++){
+                    if(res.body[i].uid == test_user_id){
+                        found = true;
+                        break;
+                    }
+                }
+                assert(found);
+                done();
+            });
+        });
+    });
+
+  });
+
   describe('user actions', () => {
       it('User can login', (done) => {
           // Need to wait for cron to run
@@ -301,11 +449,66 @@ describe('My', () => {
                   .end((err, res) => {
                       res.should.have.status(200);
                       assert(res.body.user !== null);
-                      token_id = res.body.user._id;
+                      user_token_id = res.body.user.apikey;
                       assert(res.body.user.status == 'Active');
                       done();
                   });
       });
+
+      it('User declare database', (done) => {
+        let db = {
+            name: test_db_id,
+            type: 'mysql'
+          }
+        chai.request('http://localhost:3000')
+            .post('/database/' + test_db_id)
+            .set('X-Api-Key', user_token_id)
+            .send(db)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.request('http://localhost:3000')
+                .get('/database')
+                .set('X-Api-Key', user_token_id)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    let found = false;
+                    for(let i=0; i<res.body.length; i++){
+                        if(res.body[i].name == test_db_id){
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert(found);
+                    done();
+                });
+            });
+    });
+
+    it('User delete database', (done) => {
+
+        chai.request('http://localhost:3000')
+            .delete('/database/' + test_db_id)
+            .set('X-Api-Key', user_token_id)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.request('http://localhost:3000')
+                .get('/database')
+                .set('X-Api-Key', user_token_id)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    let found = false;
+                    for(let i=0; i<res.body.length; i++){
+                        if(res.body[i].name == test_db_id){
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert(!found);
+                    done();
+                });
+            });
+    });
+
     });
 
 });
