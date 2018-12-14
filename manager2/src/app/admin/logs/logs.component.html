@@ -19,7 +19,7 @@
                             <td>{{log.action}}</td>
                             <td>
                                 <span *ngFor="let event of log.logs">
-                                    <div (click)="getlog(log._id, event)"><h5><span class="label label-primary" style="cursor: pointer;">{{event}}</span></h5></div>
+                                    <div (click)="getlog(log._id, event)"><span class="label label-primary" style="cursor: pointer;">{{event}}</span></div>
                                 </span>
                             </td>
                         </tr>
