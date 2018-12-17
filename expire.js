@@ -89,11 +89,11 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
 
                   });
               };
-              console.log('call plugins');
+              // console.log('call plugins');
               Promise.all(plugins_info.map(function(plugin_info){
                   return plugin_call(plugin_info, user.uid);
               })).then(function(results){
-                  console.log('after plugins');
+                  // console.log('after plugins');
                   fs.writeFile(script_file, script, function(err) {
                     fs.chmodSync(script_file,0755);
                     // Now remove from mailing list
