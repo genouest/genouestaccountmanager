@@ -30,7 +30,7 @@
   </div>
   <hr *ngIf="selectedProject">
   <div *ngIf="selectedProject">
-    <div class="well ng-scope">
+    <div class="well">
         <h4>Project <b>{{selectedProject.id}}</b></h4>
     </div>
     <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">

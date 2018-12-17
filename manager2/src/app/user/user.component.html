@@ -104,7 +104,7 @@
                               <input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
                           </div>
                       </div>
-                      <div ng-if="session_user.is_admin">
+                      <div *ngIf="session_user.is_admin">
                           <div class="form-group row">
                               <label for="key" class="col-4 col-form-label">Key</label>
                               <div class="col-6">
@@ -180,7 +180,7 @@
                           </div>
                       </div>
 
-                      <div ng-if="! session_user.is_admin">
+                      <div *ngIf="! session_user.is_admin">
                           <div class="form-group">
                               <label for="group" class="col-4 col-form-label">Group</label>
                               <div class="col-6">
@@ -188,7 +188,7 @@
                               </div>
                           </div>
                           <div class="form-group">
-                              <label ng-if="user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
+                              <label *ngIf="user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
                               <div class="col-6">
                                   <div *ngFor="let secondarygroup of user.secondarygroups">
                                       <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="secondarygroup" class="form-control" readonly/>
@@ -257,7 +257,7 @@
             <button type="button" class="btn btn-default" (click)="update_password()">Change password</button>
         </div>
     </div>
-    <div class="card bg-light" ng-if="session_user.is_admin">
+    <div class="card bg-light" *ngIf="session_user.is_admin">
         <div class="card-header">
             <h4>Secondary groups</h4>
         </div>
@@ -415,7 +415,7 @@
                         <h4>Web sites</h4>
                     </div>
                     <div class="card-body">
-                        <div ng-show="session_user.is_admin">
+                        <div *ngIf="session_user.is_admin">
                             <div *ngIf="webmsg" class="alert alert-success alert-dismissible" role="alert">
                                 {{webmsg}}
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">

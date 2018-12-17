@@ -30,8 +30,8 @@
                     <tr *ngFor="let request of add_requests">
                       <td>{{request.project.id}}</td>
                       <td>{{request.user}}</td>
-                      <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><h4><span class="label label-success">Add</span></h4></td>
-                      <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><h4><span class="label label-danger">Cancel</span></h4></td>
+                      <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span class="label label-success">Add</span></td>
+                      <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span class="label label-danger">Cancel</span></td>
                     </tr>
                   </tbody>
                 </table>
@@ -86,7 +86,7 @@
         </tr></thead>
         <tbody>
           <tr *ngFor="let project of projects">
-            <td><a routerLink="/admin/project/{{project.id}}"><h4><span class="label label-primary">{{project.id}}</span></h4></a></td>
+            <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
             <td>{{project.owner}}</td>
             <td>{{project.group}}</td>
             <td>{{project.path}}</td>
@@ -156,7 +156,7 @@
             <label >Write permission&nbsp;
               <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
             </label>
-            <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.access" ng-init="new_project.access='Group'" class="form-control">
+            <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.access" class="form-control">
               <option value="Group" [selected]="true" >Group</option>
               <option value="Data manager">Data manager</option>
             </select>

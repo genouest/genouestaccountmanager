@@ -26,7 +26,7 @@
         </div>
     </div>
     <div class="col-md-4" *ngIf="selectedEvent">
-        <div ng-class="get_status(selectedEvent.over)">
+        <div [ngClass]="get_status(selectedEvent.over)">
             <div class="card-header">
                 <h3>Reservation</h3>
             </div>

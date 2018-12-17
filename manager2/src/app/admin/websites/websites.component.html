@@ -18,8 +18,8 @@
                 </tr></thead>
                 <tbody>
                   <tr *ngFor="let web of websites">
-                    <td><h4><span class="label label-primary">{{web.name}}</span></h4></td>
-                    <td><a [routerLink]="['/user', {id: web.owner}]"><h4><span class="label label-primary">{{web.owner}}</span></h4></a></td>
+                    <td><span class="label label-primary">{{web.name}}</span></td>
+                    <td><a [routerLink]="['/user', {id: web.owner}]"><span class="label label-primary">{{web.owner}}</span></a></td>
                     <td>{{web.url}}</td>
                     <td>{{web.description}}</td>
                     <td></td>
@@ -47,7 +47,7 @@
               </div>
               <div class="col-sm-2">
                   <label for="owner_web_owner">Website owner</label>
-                  <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_web_owner" id="owner_web_owner" ng-model="owner_web_owner" class="form-control">
+                  <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_web_owner" id="owner_web_owner" class="form-control">
                       <option *ngFor="let user of users" [value]="user">{{user.uid}}</option>
                   </select>
               </div>
