@@ -15,6 +15,7 @@ import { PluginItems } from '../plugin/plugin.component';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { WindowWrapper } from '../windowWrapper.module';
+import { FlashMessagesService } from '../utils/flash/flash.component';
 
 
 /*
@@ -123,7 +124,8 @@ export class UserComponent implements OnInit {
     private groupService: GroupsService,
     private projectService: ProjectsService,
     private router: Router,
-    private window: WindowWrapper
+    private window: WindowWrapper,
+    private _flashMessagesService: FlashMessagesService
     ) {
     this.dtOptions = {
         order: [[0, 'desc']]
@@ -545,6 +547,7 @@ export class UserComponent implements OnInit {
   delete() {
     this.userService.delete(this.user.uid).subscribe(
       resp => {
+        this._flashMessagesService.show('User deleted', { cssClass: 'alert-success', timeout: 5000 });
         this.router.navigate(['/admin/user']);
       },
       err => console.log('failed to delete user')

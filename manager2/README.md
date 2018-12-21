@@ -30,3 +30,10 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+## Credits
+
+utils/flash is adapted from https://github.com/moff/angular2-flash-messages
+
+* License MIT
+* Author: Paul Moff

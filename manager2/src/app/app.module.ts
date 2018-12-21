@@ -41,6 +41,7 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 import { AuthInterceptor } from './auth/auth.service';
 import { BasePluginComponent } from './plugin/base-plugin/base-plugin.component';
 import { WindowWrapper, getWindow } from './windowWrapper.module';
+import { FlashComponent } from './utils/flash/flash.component';
 
 
 @NgModule({
@@ -82,7 +83,8 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
     PasswordResetConfirmComponent,
     UserExtendComponent,
     PendingAccountComponent,
-    BasePluginComponent
+    BasePluginComponent,
+    FlashComponent
   ],
   imports: [
     BrowserModule,
