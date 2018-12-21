@@ -545,7 +545,7 @@ export class UserComponent implements OnInit {
   delete() {
     this.userService.delete(this.user.uid).subscribe(
       resp => {
-        this.router.navigate(['/user']);
+        this.router.navigate(['/admin/user']);
       },
       err => console.log('failed to delete user')
     )
