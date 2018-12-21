@@ -46,6 +46,9 @@
               <li><a class="dropdown-item" routerLink="/admin/database">Databases</a></li>
               <li><a class="dropdown-item" routerLink="/admin/web">Web sites</a></li>
               <li><a class="dropdown-item" routerLink="/admin/log">Logs</a></li>
+              <li *ngFor="let plugin of plugins">
+                <a class="dropdown-item" routerLink="/admin/plugin/{{plugin.name}}">{{plugin.display_name}}</a>
+              </li>
             </ul>
           </li>          
           <li *ngIf="!isLogged" class="nav-item">

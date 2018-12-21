@@ -135,6 +135,33 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
   }
 }
 
+@Component({
+  template: `
+  <div>
+  <div *ngIf="data && data.alert" class="alert alert-warning">
+  <strong>Warning!</strong> {{data.alert}}
+  </div>
+  <table *ngIf="data.list" class="table table-dark">
+  <tr *ngFor="let l of data.list">
+    <td (click)="setData('selected', l)">{{l.id}}</td><td>{{l.type}}</td>
+  </tr>
+  </table>
+  <div>Selected</div>
+  <p *ngIf="data.selected">{{data.selected.id}} - {{data.selected.type}}
+  <div *ngIf="data">
+  <p>hello {{data.my}}</p>
+  <button (click)="sendData()">Test me</button>
+  </div>
+  </div>
+  `,
+})
+export class AdminExamplePluginComponent extends BasePluginComponent implements OnInit {
+  ngOnInit() {
+    this.pluginName = "adminexample";
+    this.loadData(this.userId);
+  }
+}
+
 
 
 
@@ -158,7 +185,8 @@ export class PluginItems {
     new PluginItem("populate_home", PopulateHomePluginComponent, null, null),
     new PluginItem("data_access", DataAccessPluginComponent, null, null),
     new PluginItem("quota", QuotasPluginComponent, null, null),
-    new PluginItem("gomail", GomailPluginComponent, null, null)
+    new PluginItem("gomail", GomailPluginComponent, null, null),
+    new PluginItem("adminexample", AdminExamplePluginComponent, null, null)
   ];
   constructor() {
   }

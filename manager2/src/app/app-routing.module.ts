@@ -24,6 +24,7 @@ import { PwdResetConfirmInfoComponent } from "./info/PwdResetConfirmInfoComponen
 import { RegisteredComponent } from './callback/registered/registered.component';
 import { PasswordResetConfirmComponent } from './callback/password-reset-confirm/password-reset-confirm.component';
 import { PendingAccountComponent } from './callback/pending-account/pending-account.component';
+import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
 
 const routes: Routes = [
   {
@@ -102,7 +103,14 @@ const routes: Routes = [
     canActivate: [
       AdminAuthGuard
     ]
-  }, 
+  },
+  {
+    path: 'admin/plugin/:id',
+    component: AdminpluginComponent,
+    canActivate: [
+      AdminAuthGuard
+    ]
+  },   
   {
     path: 'login',
     component: LoginComponent

@@ -29,7 +29,7 @@ import { RegisteredInfoComponent } from "./info/RegisteredInfoComponent";
 import { PendingApprovalInfoComponent } from "./info/PendingApprovalInfoComponent";
 import { RenewInfoComponent } from "./info/RenewInfoComponent";
 import { PwdResetConfirmInfoComponent } from "./info/PwdResetConfirmInfoComponent";
-import { PluginDirective, PluginComponent, TestPluginComponent, GalaxyPluginComponent, DataAccessPluginComponent, PopulateHomePluginComponent, GenostackPluginComponent, QuotasPluginComponent, GomailPluginComponent } from './plugin/plugin.component';
+import { PluginDirective, PluginComponent, TestPluginComponent, GalaxyPluginComponent, DataAccessPluginComponent, PopulateHomePluginComponent, GenostackPluginComponent, QuotasPluginComponent, GomailPluginComponent, AdminExamplePluginComponent } from './plugin/plugin.component';
 import { ProjectsComponent as UserProjectsComponent} from './user/projects/projects.component';
 import { RegisteredComponent } from './callback/registered/registered.component';
 import { PasswordResetConfirmComponent } from './callback/password-reset-confirm/password-reset-confirm.component';
@@ -41,6 +41,7 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 import { AuthInterceptor } from './auth/auth.service';
 import { BasePluginComponent } from './plugin/base-plugin/base-plugin.component';
 import { WindowWrapper, getWindow } from './windowWrapper.module';
+import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
 
 
 @NgModule({
@@ -82,7 +83,9 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
     PasswordResetConfirmComponent,
     UserExtendComponent,
     PendingAccountComponent,
-    BasePluginComponent
+    BasePluginComponent,
+    AdminpluginComponent,
+    AdminExamplePluginComponent
   ],
   imports: [
     BrowserModule,
@@ -109,7 +112,8 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
     PopulateHomePluginComponent,
     GenostackPluginComponent,
     QuotasPluginComponent,
-    GomailPluginComponent
+    GomailPluginComponent,
+    AdminExamplePluginComponent
   ]
 })
 export class AppModule { }

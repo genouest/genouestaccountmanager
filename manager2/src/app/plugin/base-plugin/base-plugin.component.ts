@@ -27,4 +27,8 @@ export class BasePluginComponent {
       err => console.log('failed to get plugin data:', err)
     );
   }
+
+  setData(attr, value) {
+    this.data[attr] = value;
+  }
 }
