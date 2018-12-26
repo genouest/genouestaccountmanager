@@ -38,7 +38,7 @@ export class AppComponent {
         this.pluginService.list().subscribe(
           resp => {
             for(let i=0;i<resp.length;i++){
-              if(resp[i].name.startsWith('admin')){
+              if(resp[i]['admin']){
                 this.plugins.push(resp[i]);
               }
             }

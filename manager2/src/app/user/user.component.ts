@@ -15,6 +15,7 @@ import { PluginItems } from '../plugin/plugin.component';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { WindowWrapper } from '../windowWrapper.module';
+import { FlashMessagesService } from '../utils/flash/flash.component';
 
 
 /*
@@ -123,7 +124,8 @@ export class UserComponent implements OnInit {
     private groupService: GroupsService,
     private projectService: ProjectsService,
     private router: Router,
-    private window: WindowWrapper
+    private window: WindowWrapper,
+    private _flashMessagesService: FlashMessagesService
     ) {
     this.dtOptions = {
         order: [[0, 'desc']]
@@ -177,7 +179,15 @@ export class UserComponent implements OnInit {
     )
     this.sub = this.route.params.subscribe(params => {
       this.pluginService.list().subscribe(
-        resp => this.plugins = resp,
+        resp => {
+          let plugins = [];
+          for(let i=0;i < resp.length; i++){
+            if(! resp[i]['admin']) {
+              plugins.push(resp[i]);
+            }
+          }
+          this.plugins = plugins;
+        },
         err => console.log('failed to get plugins:', err)
       )
       this.userService.getUser(params['id']).subscribe(
@@ -545,6 +555,7 @@ export class UserComponent implements OnInit {
   delete() {
     this.userService.delete(this.user.uid).subscribe(
       resp => {
+        this._flashMessagesService.show('User deleted', { cssClass: 'alert-success', timeout: 5000 });
         this.router.navigate(['/admin/user']);
       },
       err => console.log('failed to delete user')

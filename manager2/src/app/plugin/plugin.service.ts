@@ -9,11 +9,13 @@ export class Plugin {
   name: string
   url: string
   display_name: string
+  admin: boolean = false
 
-  constructor(name, url, display) {
+  constructor(name, url, display, admin) {
     this.name = name
     this.url = url
     this.display_name = display
+    this.admin = admin
   }
 }
 
@@ -38,7 +40,8 @@ export class PluginService {
           return new Plugin( 
               item.name,
               item.url,
-              item.display_name
+              item.display_name,
+              item.admin
           );
         });
       }));

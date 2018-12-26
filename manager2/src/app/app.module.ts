@@ -42,6 +42,7 @@ import { AuthInterceptor } from './auth/auth.service';
 import { BasePluginComponent } from './plugin/base-plugin/base-plugin.component';
 import { WindowWrapper, getWindow } from './windowWrapper.module';
 import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
+import { FlashComponent } from './utils/flash/flash.component';
 
 
 @NgModule({
@@ -85,7 +86,8 @@ import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component'
     PendingAccountComponent,
     BasePluginComponent,
     AdminpluginComponent,
-    AdminExamplePluginComponent
+    AdminExamplePluginComponent,
+    FlashComponent
   ],
   imports: [
     BrowserModule,

@@ -26,7 +26,8 @@ for(var i=0;i<plugins.length;i++){
     plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
     if(plugins[i].display_name === undefined) { plugins[i]['display_name'] = plugins[i].name; }
     if(plugins[i].admin_only === undefined) { plugins[i]['admin_only'] = false; }
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name, 'display_name': plugins[i]['display_name'], 'admin_only': plugins[i]['admin_only']})
+    if(plugins[i].admin === undefined) { plugins[i]['admin'] = false; }
+    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name, 'display_name': plugins[i]['display_name'], 'admin_only': plugins[i]['admin_only'], 'admin': plugins[i]['admin']})
 }
 /**
 Plugins must provide functions:

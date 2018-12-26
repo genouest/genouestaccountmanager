@@ -1,6 +1,7 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
+import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
 
 
 @Component({
@@ -13,7 +14,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private _flashMessagesService: FlashMessagesService
   ) { }
 
   static SUCCESS: number = 0;
