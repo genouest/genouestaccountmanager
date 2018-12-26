@@ -50,6 +50,10 @@ Plugins must provide functions:
 router.get('/plugin', function(req, res) {
     var plugin_list = []
     for(var i=0;i<plugins_info.length;i++){
+      if(plugins_modules[plugins_info[i].name].template === undefined) {
+        plugin_list.push(plugins_info[i]);
+        continue
+      }
         var template = plugins_modules[plugins_info[i].name].template();
         if(template !==null && template !== ""){
             plugin_list.push(plugins_info[i])
@@ -114,16 +118,6 @@ router.post('/plugin/:id/:user', function(req, res) {
     });
   });
 
-
-  /*
-  var plugin_res = plugins_modules[req.param('id')].set_data(req.param('user'), req.body);
-  if(plugin_res.error !== undefined) {
-      res.status(400).send(plugin_res.error);
-  }
-  else {
-      res.send(plugins_modules[req.param('id')].set_data(req.param('user'), req.body));
-  }
-  */
 
 });
 

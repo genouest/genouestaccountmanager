@@ -228,7 +228,7 @@
     ]
   },
   "plugins": [
-    {"name": "test", "display_name": "for testing", "admin_only":false}
+    {"name": "test", "display_name": "for testing", "admin_only": false, "admin": false}
   ],
   "plugin_config" : {
     "test": {

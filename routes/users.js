@@ -48,6 +48,9 @@ var MAIL_CONFIG = CONFIG.gomail;
 const runningEnv = process.env.NODE_ENV || 'prod';
 
 for(i = 0; i< plugins.length; i++){
+  if(plugins[i]['admin']) {
+    continue;
+  }
   plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
   plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
 }

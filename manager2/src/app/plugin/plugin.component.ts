@@ -1,6 +1,8 @@
-import { Component, ComponentFactoryResolver, Input, OnInit, OnChanges, ViewChild, SimpleChanges } from '@angular/core';
+import { Component, ComponentFactoryResolver, Input, OnInit, OnChanges, ViewChild, SimpleChanges, ViewChildren, QueryList } from '@angular/core';
 import { Directive, Type, ViewContainerRef } from '@angular/core';
 import { BasePluginComponent } from './base-plugin/base-plugin.component';
+import { DataTableDirective } from 'angular-datatables';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -137,29 +139,53 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
 
 @Component({
   template: `
-  <div>
-  <div *ngIf="data && data.alert" class="alert alert-warning">
-  <strong>Warning!</strong> {{data.alert}}
+<div *ngIf="data">
+  <div *ngIf="data.alert" class="alert alert-warning">
+    <strong>Warning!</strong> {{data.alert}}
   </div>
-  <table *ngIf="data.list" class="table table-dark">
-  <tr *ngFor="let l of data.list">
-    <td (click)="setData('selected', l)">{{l.id}}</td><td>{{l.type}}</td>
-  </tr>
-  </table>
-  <div>Selected</div>
-  <p *ngIf="data.selected">{{data.selected.id}} - {{data.selected.type}}
-  <div *ngIf="data">
-  <p>hello {{data.my}}</p>
-  <button (click)="sendData()">Test me</button>
+  <div class="row">
+    <div class="col-md-6">
+
+      <table id="dtAdminTestPlugin" datatable [dtTrigger]="dtTrigger" class="table table-striped">
+      <thead><tr><td>User</td><td>Quota</td><td>Expire</td></tr></thead>
+      <tbody>
+      <tr *ngFor="let l of data.list">
+        <td (click)="setData('selected', l)">{{l.id}}</td><td>{{l.quota}}</td><td>{{l.expire}}</td>
+      </tr>
+      </tbody>
+      </table>
+
+    </div>
+    <div class="col-md-6">
+
+      <form *ngIf="data.selected">
+        <div class="form-group">
+        <label>User</label>
+        <input readonly class="form-control" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="data.selected.id"/>
+        </div>
+        <div class="form-group">
+        <label>Quota (GB)</label>
+        <input class="form-control" type="number" [ngModelOptions]="{standalone: true}" [(ngModel)]="data.selected.quota"/>
+        </div>
+        <div class="form-group">
+        <label>Expiration</label>
+        <input class="form-control" type="date" [ngModelOptions]="{standalone: true}" [(ngModel)]="data.selected.expire"/>
+        </div>
+      </form>
+      <button *ngIf="data.selected" (click)="sendData()">Update</button>
+    </div>
   </div>
-  </div>
+</div>
   `,
 })
 export class AdminExamplePluginComponent extends BasePluginComponent implements OnInit {
+  
   ngOnInit() {
-    this.pluginName = "adminexample";
+    this.pluginName = "admintest";
+    console.log('load plugin for user', this.userId)
     this.loadData(this.userId);
   }
+
 }
 
 
@@ -186,7 +212,7 @@ export class PluginItems {
     new PluginItem("data_access", DataAccessPluginComponent, null, null),
     new PluginItem("quota", QuotasPluginComponent, null, null),
     new PluginItem("gomail", GomailPluginComponent, null, null),
-    new PluginItem("adminexample", AdminExamplePluginComponent, null, null)
+    new PluginItem("admintest", AdminExamplePluginComponent, null, null)
   ];
   constructor() {
   }
