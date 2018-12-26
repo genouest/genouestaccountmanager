@@ -150,7 +150,7 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
       <thead><tr><td>User</td><td>Quota</td><td>Expire</td></tr></thead>
       <tbody>
       <tr *ngFor="let l of data.list">
-        <td (click)="setData('selected', l)">{{l.id}}</td><td>{{l.quota}}</td><td>{{l.expire}}</td>
+        <td (click)="setData('selected', l)">{{l.id}}</td><td><div *ngFor="let q of l.quota">{{q.name}}:{{q.value}}</div></td><td>{{l.expire}}</td>
       </tr>
       </tbody>
       </table>
@@ -163,9 +163,9 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
         <label>User</label>
         <input readonly class="form-control" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="data.selected.id"/>
         </div>
-        <div class="form-group">
-        <label>Quota (GB)</label>
-        <input class="form-control" type="number" [ngModelOptions]="{standalone: true}" [(ngModel)]="data.selected.quota"/>
+        <div class="form-group" *ngFor="let q of data.selected.quota">
+        <label>{{q.name}} quota (GB)</label>
+        <input class="form-control" type="number" [ngModelOptions]="{standalone: true}" [(ngModel)]="q.value"/>
         </div>
         <div class="form-group">
         <label>Expiration</label>
