@@ -1,4 +1,4 @@
-FROM node
+FROM node:8-jessie
 
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
 COPY tests/gomngr.sh /opt/gomngr.sh
@@ -28,6 +28,8 @@ RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts
 RUN mkdir -p /opt/my/plugin-scripts
 
-COPY manager2/dist /root/genouestaccountmanager/manager2/dist
+COPY manager2 /root/genouestaccountmanager/manager2
+RUN npm install -g @angular/cli
+RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod && rm -rf src && rm -rf node_modules
 
 ENTRYPOINT node app.js
