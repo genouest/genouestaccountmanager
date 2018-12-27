@@ -10,6 +10,7 @@
     "my-accounts": "./my-accounts.js"
   },
   "dependencies": {
+    "amqplib": "^0.5.3",
     "bcryptjs": "^2.1.0",
     "body-parser": "~1.8.1",
     "command-line-args": "^4.0.7",

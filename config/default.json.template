@@ -41,6 +41,10 @@
     "plugin_script_dir": "/tmp/scripts",
     "user_extra_dirs": []
   },
+  "rabbitmq": {
+    "url": "amqp://localhost",
+    "exchange": "gomngr"
+  },
   "redis": {
     "host": "localhost",
     "port": 6379
