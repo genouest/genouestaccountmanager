@@ -210,6 +210,10 @@ Software supports plugins to add some info and basic tasks in Web UI in user inf
 Plugins are stored in plugins directory, there are examples available.
 Basically a plugin must react on user activation/deactivation, provide an Angular template and react on user update or plugin action. It must return a promise and always be successful (resolve, no reject).
 
+For manager2, plugin templates need to be defined in manager2/src/app/plugin/plugin.component.ts and declared in app.module.ts.
+
+The *admin* parameter of plugin definition specifies if plugin is linked to user (in user panel and linked to user lige cycle) or a global plugin that will be shown in *admin* menu (not linked to user life cycle)
+
 ## Testing
 
 With env variable *export gomngr_auth=fake*, one can disable authentication password verification (**FOR TESTING ONLY**)
