@@ -7,6 +7,12 @@ var monk = require('monk'),
 var Promise = require('promise');
 
 
+var volumes = [];
+if(CONFIG['plugin_config']['adminquotatest']) {
+    volumes = CONFIG['plugin_config']['adminquotatest']['volumes'];
+}
+
+
 module.exports = {
     get_data: function(userId, adminId){
         return new Promise(function (resolve, reject){
@@ -18,9 +24,25 @@ module.exports = {
                 for(let i=0;i<users.length;i++){
                     let user = users[i];
                     if(user.plugin && user.plugin.quota){
+                        if(CONFIG['plugin_config']['adminquotatest']) {
+                            let volumes = CONFIG['plugin_config']['adminquotatest']['volumes'];
+                            if(user.plugin.quota.value.length != volumes.length) {
+                                for(let i=0;i<volumes.length;i++){
+                                    let ok = false;
+                                    for(let j=0;j<user.plugin.quota.value.length;j++){
+                                        if(user.plugin.quota.value[j].id == volumes[i].id){
+                                            ok = true;
+                                        }
+                                    }
+                                    if(! ok){
+                                        user.plugin.quota.value.push(volumes[i])
+                                    }
+                                }
+                            }
+                        }
                         result.push({'id': user.uid, 'quota': user.plugin.quota.value, 'expire': user.plugin.quota.expire})
                     } else {
-                        result.push({'id': user.uid, 'quota': [100, 100], 'expire': 0})
+                        result.push({'id': user.uid, 'quota': volumes, 'expire': 0})
                     }
                 }
                 resolve({

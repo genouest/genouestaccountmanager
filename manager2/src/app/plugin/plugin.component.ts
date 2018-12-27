@@ -150,7 +150,7 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
       <thead><tr><td>User</td><td>Quota</td><td>Expire</td></tr></thead>
       <tbody>
       <tr *ngFor="let l of data.list">
-        <td (click)="setData('selected', l)">{{l.id}}</td><td><div *ngFor="let q of l.quota">{{q.name}}:{{q.value}}</div></td><td>{{l.expire}}</td>
+        <td (click)="setData('selected', l)">{{l.id}}</td><td><div *ngFor="let q of l.quota">{{q.id}}:{{q.value}}</div></td><td>{{l.expire}}</td>
       </tr>
       </tbody>
       </table>
@@ -164,7 +164,7 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
         <input readonly class="form-control" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="data.selected.id"/>
         </div>
         <div class="form-group" *ngFor="let q of data.selected.quota">
-        <label>{{q.name}} quota (GB)</label>
+        <label>{{q.id}} quota (GB)</label>
         <input class="form-control" type="number" [ngModelOptions]="{standalone: true}" [(ngModel)]="q.value"/>
         </div>
         <div class="form-group">
@@ -178,10 +178,10 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
 </div>
   `,
 })
-export class AdminExamplePluginComponent extends BasePluginComponent implements OnInit {
+export class AdminQuotaExamplePluginComponent extends BasePluginComponent implements OnInit {
   
   ngOnInit() {
-    this.pluginName = "admintest";
+    this.pluginName = "adminquotatest";
     console.log('load plugin for user', this.userId)
     this.loadData(this.userId);
   }
@@ -212,7 +212,7 @@ export class PluginItems {
     new PluginItem("data_access", DataAccessPluginComponent, null, null),
     new PluginItem("quota", QuotasPluginComponent, null, null),
     new PluginItem("gomail", GomailPluginComponent, null, null),
-    new PluginItem("admintest", AdminExamplePluginComponent, null, null)
+    new PluginItem("adminquotatest", AdminQuotaExamplePluginComponent, null, null)
   ];
   constructor() {
   }

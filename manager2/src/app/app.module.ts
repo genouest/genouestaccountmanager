@@ -29,7 +29,7 @@ import { RegisteredInfoComponent } from "./info/RegisteredInfoComponent";
 import { PendingApprovalInfoComponent } from "./info/PendingApprovalInfoComponent";
 import { RenewInfoComponent } from "./info/RenewInfoComponent";
 import { PwdResetConfirmInfoComponent } from "./info/PwdResetConfirmInfoComponent";
-import { PluginDirective, PluginComponent, TestPluginComponent, GalaxyPluginComponent, DataAccessPluginComponent, PopulateHomePluginComponent, GenostackPluginComponent, QuotasPluginComponent, GomailPluginComponent, AdminExamplePluginComponent } from './plugin/plugin.component';
+import { PluginDirective, PluginComponent, TestPluginComponent, GalaxyPluginComponent, DataAccessPluginComponent, PopulateHomePluginComponent, GenostackPluginComponent, QuotasPluginComponent, GomailPluginComponent, AdminQuotaExamplePluginComponent } from './plugin/plugin.component';
 import { ProjectsComponent as UserProjectsComponent} from './user/projects/projects.component';
 import { RegisteredComponent } from './callback/registered/registered.component';
 import { PasswordResetConfirmComponent } from './callback/password-reset-confirm/password-reset-confirm.component';
@@ -86,7 +86,7 @@ import { FlashComponent } from './utils/flash/flash.component';
     PendingAccountComponent,
     BasePluginComponent,
     AdminpluginComponent,
-    AdminExamplePluginComponent,
+    AdminQuotaExamplePluginComponent,
     FlashComponent
   ],
   imports: [
@@ -115,7 +115,7 @@ import { FlashComponent } from './utils/flash/flash.component';
     GenostackPluginComponent,
     QuotasPluginComponent,
     GomailPluginComponent,
-    AdminExamplePluginComponent
+    AdminQuotaExamplePluginComponent
   ]
 })
 export class AppModule { }

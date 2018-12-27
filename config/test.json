@@ -154,11 +154,17 @@
     },
     "plugins": [
 	    {"name": "test", "display_name": "Test", "admin": false},
-	    {"name": "admintest", "display_name": "TestAdmin", "admin": true}
+	    {"name": "adminquotatest", "display_name": "Quotas", "admin": true}
     ],
     "plugin_config" : {
         "test": {
             "parameter1" : "test1"
+        },
+        "adminquotatest": {
+          "volumes": [
+            {"id": "disk1", "value": 100},
+            {"id": "diskA", "value": 150}
+          ]
         }
     }
 }
