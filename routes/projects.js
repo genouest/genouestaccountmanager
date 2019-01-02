@@ -224,8 +224,8 @@ router.post('/project/:id/request', function(req, res){
           return;
         }
 //Add to request list
-        if(! sess.gomngr === project.owner ){
-          res.status(401).send('User ' + sess.gomngr + " is not project manager for project " + project.id);
+        if(! user.uid === project.owner ){
+          res.status(401).send('User ' + user.uid + " is not project manager for project " + project.id);
           return;
         }
         users_db.findOne({'uid': req.param('user')}, function(err, newuser){
