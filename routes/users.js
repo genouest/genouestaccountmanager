@@ -1633,7 +1633,7 @@ router.get('/user/:id/renew', function(req, res){
 
 router.put('/user/:id/ssh', function(req, res) {
   var sess = req.session;
-  if(! sess.gomreq.locals.logInfo.is_logged) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
@@ -1647,7 +1647,7 @@ router.put('/user/:id/ssh', function(req, res) {
 
       users_db.findOne({uid: req.param('id')}, function(err, user){
         // If not admin nor logged user
-        if(!session_user.is_admin && user._id.str != sess.gomngr.str) {
+        if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
           res.status(401).send('Not authorized');
           return;
         }
