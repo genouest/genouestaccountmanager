@@ -211,10 +211,11 @@ router.post('/database/:id', function(req, res) {
                       }
                       // Now send message
                       var msg = "Database created:\n";
-                      msg += " Host: " + CONFIG.mysql.host+"\n";
-                      msg += " Database: " + req.param('id')+"\n";
-                      msg += " User: " + req.param('id')+"\n";
-                      msg += " Password: " + password+"\n";
+                      msg += " Host: " + CONFIG.mysql.host + "\n";
+                      msg += " Database: " + req.param('id') + "\n";
+                      msg += " User: " + req.param('id') + "\n";
+                      msg += " Password: " + password + "\n";
+                      msg += " Owner: " + owner + "\n";
                       var mailOptions = {
                         origin: CONFIG.gomail.origin, // sender address
                         destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
