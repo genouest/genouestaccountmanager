@@ -19,7 +19,7 @@
                             <td>{{log.action}}</td>
                             <td>
                                 <span *ngFor="let event of log.logs">
-                                    <div (click)="getlog(log._id, event)"><span class="label label-primary" style="cursor: pointer;">{{event}}</span></div>
+                                    <div (click)="getlog(log._id, event)"><span [className]="(log.status && log.status > 0) ? 'label label-danger' : 'label label-primary'"  style="cursor: pointer;">{{event}}</span></div>
                                 </span>
                             </td>
                         </tr>
