@@ -61,6 +61,10 @@
     </button>
 
     <button type="button" class="btn btn-default" (click)="send()">Send</button>
+    <div class="row">
+      <div *ngIf="msg" class="alert alert-success">{{msg}}</div>
+      <div *ngIf="error_msg" class="alert alert-danger">{{error_msg}}</div>
+    </div>
   </div>
 </div>
 
