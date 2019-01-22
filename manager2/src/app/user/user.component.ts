@@ -171,12 +171,6 @@ export class UserComponent implements OnInit {
       err => console.log('failed to get config')
     )
 
-    this.userService.isSubscribed().subscribe(
-      resp =>{
-        this.subscribed = resp['subscribed']
-      },
-      err => {console.log('subscribedError',err);}
-    )
     this.sub = this.route.params.subscribe(params => {
       this.pluginService.list().subscribe(
         resp => {
@@ -197,6 +191,13 @@ export class UserComponent implements OnInit {
           this.loadUserInfo();
         },
         err => console.log('failed to get user ', params['id'])
+      )
+
+      this.userService.isSubscribed(params['id']).subscribe(
+        resp =>{
+          this.subscribed = resp['subscribed']
+        },
+        err => {console.log('subscribedError',err);}
       )
     });
   }

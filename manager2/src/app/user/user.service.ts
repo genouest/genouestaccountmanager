@@ -204,7 +204,7 @@ export class UserService {
       httpOptions)    
   }
 
-  isSubscribed() {
+  isSubscribed(id: string) {
     let user = this.authService.profile;
     let httpOptions = {
      // headers: new HttpHeaders({
@@ -212,7 +212,7 @@ export class UserService {
       //}),
     };
     return this.http.get(
-        environment.apiUrl + '/user/' + user.uid + '/subscribed',
+        environment.apiUrl + '/user/' + id + '/subscribed',
         httpOptions)
   }
 
