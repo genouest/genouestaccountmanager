@@ -10,6 +10,8 @@ import { Subject, Observable } from 'rxjs';
 
 import marked from 'marked';
 import { DataTableDirective } from 'angular-datatables';
+import { Router } from '@angular/router';
+import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
 
 @Component({
   selector: 'app-messages',
@@ -43,7 +45,9 @@ export class MessagesComponent implements OnInit {
     private configService: ConfigService,
     private userService: UserService,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    private _flashMessagesService: FlashMessagesService
   ) { }
 
   ngOnInit() {
@@ -144,7 +148,9 @@ export class MessagesComponent implements OnInit {
     }
     this.sendMessage(this.message, this.subject, this.mailing_list, this.input_type, this.origin).subscribe(
       resp => {
-        this.msg = "Message sent"
+        this.msg = "Message sent";
+        this._flashMessagesService.show('Message sent', { cssClass: 'alert-success', timeout: 5000 });
+        this.router.navigate(['/user', this.authService.profile.uid]);
       },
       err => {
         this.error_msg = err.error
