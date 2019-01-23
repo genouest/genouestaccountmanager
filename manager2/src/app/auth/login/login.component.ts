@@ -139,7 +139,11 @@ export class LoginComponent implements OnInit {
   }
 
   validate_email_token() {
-    let data = {'token': this.mail_token};
+    if(!this.mail_token) {
+      this.error_msg = 'Token is empty';
+      return;
+    }
+    let data = {'token': this.mail_token.trim()};
     this.authService.checkEmailToken(this.userId, data).then().catch(err => {
       this.msg = '';
       this.error_msg = 'Failed to validate token';
