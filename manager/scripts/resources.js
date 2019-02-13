@@ -147,7 +147,7 @@
 
 
       function Quota($resource) {
-        return $resource(prefix+'/disk', {}, {
+        return $resource(prefix+'/quota', {}, {
             get: {
               url: prefix+'/quota/:name/:disk',
               method: 'GET',
@@ -229,6 +229,18 @@
 
       function User($resource) {
         return $resource(prefix+'/user', {}, {
+            get_apikey: {
+                url: prefix + '/user/:name/apikey',
+                method: 'GET',
+                isArray: false,
+                cache: false
+            },
+            generate_apikey: {
+                url: prefix + '/user/:name/apikey',
+                method: 'POST',
+                isArray: false,
+                cache: false
+            },            
             is_subscribed: {
                 url: prefix+'/user/:name/subscribed',
                 method: 'GET',

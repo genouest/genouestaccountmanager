@@ -1,0 +1,70 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div class="container">
+  <nav class="navbar navbar-expand-lg navbar-fixed-top navbar-dark bg-dark navbar-inverse">
+    <a class="navbar-brand" routerLink="/">
+      <img class="d-inline-block align-top" style="width: 70px; height: 50px;" src="assets/images/logo-brand.png" alt="">
+          Account Manager
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li *ngIf="isLogged && usages.length > 0" class="nav-item dropdown">
+            <a href="" id="dropdownMenu0" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="oi oi-bar-chart"></i> Usage</a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu0">
+                  <li *ngFor="let usage of usages"><a class="dropdown-item" href="{{usage.link}}" target="_blank">{{usage.name}}</a></li>
+            </ul>
+          </li>  
+
+          <li *ngIf="isLogged" class="nav-item">
+            <a class="nav-link" routerLink="/tps">
+              <i class="glyphicon glyphicon-calendar"></i>
+              TP reservations
+            </a>
+          </li>
+          <li *ngIf="isLogged" class="nav-item">
+            <a class="nav-link" routerLink="/user/{{user.uid}}">
+              <i class="glyphicon glyphicon-user"></i>
+              My profile
+            </a>
+          </li>
+          <li *ngIf="isLogged" class="nav-item">
+            <a class="nav-link" routerLink="/project">
+              <i class="glyphicon glyphicon-briefcase"></i>
+              My projects
+            </a>
+          </li>
+
+          <li *ngIf="user && user.is_admin" class="nav-item dropdown">
+            <a href="" id="dropdownMenu1" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-cog"></i> Admin</a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li><a class="dropdown-item" routerLink="/admin/user">Users</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/group">Groups</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/project">Projects</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/message">Send message</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/database">Databases</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/web">Web sites</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/log">Logs</a></li>
+              <li *ngFor="let plugin of plugins">
+                <a class="dropdown-item" routerLink="/admin/plugin/{{plugin.name}}">{{plugin.display_name}}</a>
+              </li>
+            </ul>
+          </li>          
+          <li *ngIf="!isLogged" class="nav-item">
+            <a class="nav-link" routerLink="/login"><span class="oi oi-person" aria-hidden="true" title="login"> </span>Log In</a>
+          </li>
+          <li *ngIf="!isLogged" class="nav-item">
+            <a class="nav-link" routerLink="/register"><span class="oi oi-plus" aria-hidden="true" title="register"> </span>Sign In</a>
+          </li>          
+          <li *ngIf="isLogged" class="nav-item">
+            <a  class="nav-link" routerLink="/logout">Log Out</a>
+          </li>
+        </ul>
+    </div>
+  </nav>
+  <div class="col-sm-12">
+    <flash-messages></flash-messages>
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -37,6 +37,14 @@
     "host": "mongo",
     "port": 27017
  },
+ "rabbitmq": {
+  "url": null,
+  "exchange": "gomngr"
+  },
+ "redis": {
+    "host": "gomail-redis",
+    "port": 6379
+ },
  "gomail": {
    "host": "http://gomail-web:6643",
    "api_root": "/api/v1",
@@ -149,10 +157,19 @@
     ]
     },
     "plugins": [
+	    {"name": "test", "display_name": "Test", "admin": false},
+      {"name": "adminquotatest", "display_name": "Quotas", "admin": true},
+      {"name": "amqp", "display_name": "RabbitMQ", "admin": false}
     ],
     "plugin_config" : {
         "test": {
             "parameter1" : "test1"
+        },
+        "adminquotatest": {
+          "volumes": [
+            {"id": "disk1", "value": 100},
+            {"id": "diskA", "value": 150}
+          ]
         }
     }
 }

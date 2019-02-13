@@ -7,10 +7,12 @@
   </div>
   <div class="panel-body">
     <div class="row">
-      <div class="col-md-2">
+      <div class="col-md-4">
         <div class="form-group">
           <label for="mailing_list" class="col-form-label">Mailing list</label>
-            <select id="mailing_list" ng-model="mailing_list" ng-change="decode_template(mailing_list); generate_list_members(mailing_list);" ng-options="list.list_name as list.list_name for list in mailing_lists" class="form-control" />
+            <select id="mailing_list" placeholder="Choose your mainling list" ng-model="mailing_list" ng-change="decode_template(mailing_list); generate_list_members(mailing_list);" ng-options="list.list_name as list.list_name for list in mailing_lists" class="form-control" >
+              <option value="" disabled selected>Select your mailing list</option>
+            </select>
             <br ng-if="mailing_list"/>
             <button type="button" ng-if="mailing_list" class="btn btn-primary" data-toggle="modal" data-target="#members_view">
               View list members
@@ -38,7 +40,7 @@
       <div class="col-sm-4">
         <div class="form-group">
           <label for="subject" class="col-form-label">Subject</label>
-          <input class="form-control" id="subject" type="text" ng-model="subject" class="form-control"></input>
+          <input class="form-control" placeholder="Subject" id="subject" type="text" ng-model="subject" class="form-control"></input>
         </div>
       </div>
     </div>
@@ -46,7 +48,7 @@
       <div class="col-sm-12">
         <div class="form-group">
           <label for="message" class="col-form-label">Message</label>
-          <textarea class="form-control" ng-model="message" rows="20" cols="100" class="form-control"></textarea>
+          <textarea class="form-control" placeholder="Type your message" ng-model="message" rows="20" cols="100" class="form-control"></textarea>
         </div>
       </div>
     </div>

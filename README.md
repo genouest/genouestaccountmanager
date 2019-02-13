@@ -1,4 +1,22 @@
-# Genouest Manager
+# My Accounts Manager
+
+## About
+
+*My* has been developped at GenOuest bioinformatics core facility for internal use.
+Goal was to help us to manage our users:
+
+* registration but also expiration
+* self-service with password reset, database creation, ...
+* user life-cycle in general
+* temporary users creation for trainings
+* etc.
+
+While adding new features we tried to make it as open and general as possible, though some *genouest* references are still present in the code, and some choices may not match your personnal requirements. You may however adapt it to your needs. We expect future developments to remove some of the implementation decisions to make them more flexible (via config for example).
+
+Basically, *my* offers a Web UI for user and self-service management and updates LDAP information accordingly.
+Cron tasks will manage background scripts to create user home directories, etc.
+
+Web interface and user life cycle are linked to optional plugins. It is easy to add new ones to add features (execute *this* at user activation, execute *that* on user deletion, ...)
 
 ## Requirements
 
@@ -12,7 +30,6 @@ Home directories are built with the following rule
         /home/mygroup/myuserid
 
 main_groups is an optional subpath selected by user, not present by default.
-
 
 ## Config
 
@@ -28,7 +45,6 @@ and manager/index.html:
 
     <base href="/manager/" /> => <base href="/gomngr/manager/" />
 
-
 Optional double authentication for administrators with config parameter double_authentication_for_admin.
 It provides additional authentication via U2F devices or temporary email tokens.
 
@@ -40,10 +56,11 @@ Also needs nodejs, npm and bower installed
     npm install
     bower install
 
-
 ## Databases
 
 Database used by softwaremanager is MongoDB. It also use OpenLDAP to insert LDIF files for account creation/update.
+
+An optional but recommended additional database is Redis. If not willing to use Redis, set redis.host in config/default.json to *null*. This database is used to allocated user/group ids in a multi-process context.
 
 For an existing LDAP directory, one must import existing users and groups in mongo. There is no automatic script for this, but here is the following expecting schema to insert in MongoDB.
 
@@ -81,7 +98,7 @@ Insert users:
 
 Home directory will be build according to:
 
-    CONFIG.general.home + ?user.maingroup + user.group
+    CONFIG.general.home + user.maingroup + user.group
     Example:
         /home/mymaingroup/mygroup
         /home/mygroup #if mymaingroup is empty
@@ -92,7 +109,6 @@ User is also set as memberOf for main group.
 ## Running
 
     forever start -o out.log -e err.log app.js
-
 
 ## Starting from
 
@@ -112,7 +128,6 @@ Then launch add with following env vars:
 * MY_ADMIN_PASSWORD=XXXX
 
 If specified env vars refer to an exiting group or user, then their creation is skipped.
-
 
 Else, to add some extra users, register as a basic user via the Web UI and confirm the email.
 Once this is done:
@@ -139,11 +154,10 @@ If an LDAP database already contains users, one need to:
 * Import groups and users in gomngr database to sync gomgnr and ldap, to do so you can try the import_from_ldap script
 
     node import_from_ldap.js --test # Check first with no import
-    # If everything is fine
+    If everything is fine:
     node import_from_ldap.js --import --admin admin_user_id # Check first with no import
 
 Users will not be added to mailing list.
-
 
 ## Development
 
@@ -168,11 +182,10 @@ To manage user account expiration, add the following script to your cron:
 test_expiration check if user will expire *soon* and sends an email to the user so that he extends his account if needed.
 expiration deactivates accounts if their expiration date is reached.
 
-
 ## Mailing
 
 Users are subscribed to a mailing list based on their email address. The email address of account is *MANDATORY*.
-This is used to broadcast messages to all users. Mailing list is using gomail.
+This is used to broadcast messages to all users. Mailing list is using **gomail**.
 
 Standard smtp configuration is used for user notifications.
 
@@ -181,7 +194,6 @@ If you wish to use other mailing list system, or no mailing list, one can replac
 ## Stopping
 
 forever stop app.js
-
 
 ## Cron
 
@@ -192,13 +204,15 @@ Must be executed as root
 
 Script execution includes home directory manipulation and ldap modifications. LDAP tools (ldap-utils with ldapmodify etc...) must be installed where the cron job is executed.
 
-
 ## Plugins
 
 Software supports plugins to add some info and basic tasks in Web UI in user information page. Plugin needs to be declared in config file to be activated.
 Plugins are stored in plugins directory, there are examples available.
 Basically a plugin must react on user activation/deactivation, provide an Angular template and react on user update or plugin action. It must return a promise and always be successful (resolve, no reject).
 
+For manager2, plugin templates need to be defined in manager2/src/app/plugin/plugin.component.ts and declared in app.module.ts.
+
+The *admin* parameter of plugin definition specifies if plugin is linked to user (in user panel and linked to user lige cycle) or a global plugin that will be shown in *admin* menu (not linked to user life cycle)
 
 ## Testing
 

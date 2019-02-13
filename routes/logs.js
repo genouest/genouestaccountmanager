@@ -17,11 +17,11 @@ var monk = require('monk'),
 
 router.get('/log', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
           if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -30,7 +30,7 @@ router.get('/log', function(req, res){
             res.status(401).send('Not authorized');
             return;
           }
-        events_db.find({}, function(err, events){
+        events_db.find({}, {limit: 200, sort: {date: -1}}, function(err, events){
             res.send(events);
             res.end();
         });
@@ -39,11 +39,11 @@ router.get('/log', function(req, res){
 
 router.get('/log/user/:id', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
           if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -62,11 +62,11 @@ router.get('/log/status/:id/:status', function(req, res){
 
 router.get('/log/:id', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;

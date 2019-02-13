@@ -38,6 +38,10 @@
                                 <td>{{selectedEvent.about}}</td>
                             </tr>
                             <tr>
+                                <th>Group</th>
+                                <td>{{selectedEvent.group.name}}</td>
+                            </tr>
+                            <tr>
                                 <th>Status</th>
                                 <td ng-if="selectedEvent.over">Over</td>
                                 <td ng-if="! selectedEvent.over">Active</td>

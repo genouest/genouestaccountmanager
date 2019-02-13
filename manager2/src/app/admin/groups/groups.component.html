@@ -1,0 +1,104 @@
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3 class="panel-title">Group creation</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">Group creation can require a few minutes to be effective</div>
+            <div class="alert alert-success" *ngIf="success_msg">{{success_msg}}</div>
+            <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
+            <form role="form" class="user-form form-inline">
+              <div class="form-group">
+                <input placeholder="group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
+              </div>
+              <div class="form-group">
+                <input placeholder="group owner id" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
+              </div>
+              <div class="form-group">
+                <button type="button" class="btn btn-default" (click)="addGroup()">Create</button>
+              </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3>Groups</h3>
+        </div>
+        <div class="card-body">
+             <div class="table-responsive">
+              <table id="dtGroups" datatable [dtTrigger]="dtTriggerGroups" class="table table-striped">
+                <thead><tr>
+                  <th>Group</th>
+                  <th>gid</th>
+                  <th>owner</th>
+                </tr></thead>
+                <tbody>
+                  <tr *ngFor="let group of groups">
+                    <td (click)="show_group_users(group)" style="cursor: pointer;"><span class="label label-primary">{{group.name}}</span></td>
+                    <td>{{group.gid}}</td>
+                    <td>{{group.owner}}</td>
+                  </tr>
+                </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+
+<div class="row">
+    <div class="alert alert-success" *ngIf="rm_grp_msg_ok">{{rm_grp_msg_ok}}</div>
+</div>
+<div *ngIf="selectedGroup">
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3>Users in group {{selectedGroup.name}}</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger" *ngIf="rm_grp_err_msg">{{rm_grp_err_msg}}</div>
+            <div class="alert alert-info" *ngIf="msg">{{msg}}</div>
+            <form role="form" class="user-form form-horizontal form-register">
+              <div class="form-group">
+                  <label for="group_id" class="col-sm-2 col-form-label">Group owner id</label>
+                  <div class="col-sm-3">
+                      <input placeholder="group owner id" id="group_id" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedGroup.owner" class="form-control"/>
+                  </div>
+                  <button type="button" class="btn btn-default" (click)="updateGroup()">Update</button>
+              </div>
+              <div class="form-group">
+
+              </div>
+            </form>
+            <h5>Projects associated with this group :</h5>
+            <div class="table">
+                <table class="table table-striped">
+                  <thead>
+                    <th>Project</th><th>Owner</th>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let project of projects">
+                      <td>{{project.id}}</td>
+                      <td>{{project.owner}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+            <br>
+            <h5>Group members</h5>
+            <div class="table-responsive">
+                <table id="dtUsers" datatable [dtTrigger]="dtTriggerUsers" class="table table-striped">
+                  <thead>
+                    <tr><th>User</th><th>Email</th><th>In associated project?</th><th>Main group?</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let user of users">
+                      <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
+                      <td>{{user.email}}</td>
+                      <td><span *ngIf="user.authorized">x</span></td>
+                      <td><span *ngIf="user.group == selectedGroup.name">x</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+            <button class="btn btn-danger" (click)="delete_group(selectedGroup)">Delete</button>
+        </div>
+    </div>
+</div>

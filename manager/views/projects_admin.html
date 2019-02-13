@@ -7,9 +7,11 @@
     </div>
     <div ng-if="requests_visible" class="panel-body">
       <div class="row">
-        <div ng-if="request_mngt_msg" class="alert alert-success">{{request_mngt_msg}}</div>
-        <div ng-if="request_grp_msg" class="alert alert-success">{{request_grp_msg}}</div>
-        <div ng-if="request_mngt_error_msg" class="alert alert-danger">{{request_mngt_error_msg}}</div>
+        <div class="col-md-12">
+          <div ng-if="request_mngt_msg" class="alert alert-success">{{request_mngt_msg}}</div>
+          <div ng-if="request_grp_msg" class="alert alert-success">{{request_grp_msg}}</div>
+          <div ng-if="request_mngt_error_msg" class="alert alert-danger">{{request_mngt_error_msg}}</div>
+        </div>
         <div class="col-md-6">
           <div class="panel panel-warning">
             <div class="panel-heading">
@@ -106,8 +108,8 @@
     <form role="form" class="user-form form-horizonal">
       <div class="form-group row">
         <div class="col-sm-2">
-          <label for="project_id">Name&nbsp; 
-            <span style="color:red">(required)&nbsp;</span> 
+          <label for="project_id">Name&nbsp;
+            <span style="color:red">(required)&nbsp;</span>
             <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip </span>
           </label>
           <input placeholder="project name" type="text" id="project_id" ng-model="new_project.id" class="form-control"/>

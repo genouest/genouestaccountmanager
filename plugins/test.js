@@ -108,7 +108,7 @@ module.exports = {
         //return {'my': 'me'};
     },
     set_data: function(userId, data, adminId){
-        console.log(userId + " " + data)
+        // console.log(userId + " " + data)
         return set_user_info(userId, data, adminId);
         //return {'msg': 'nothing to do'};
     }

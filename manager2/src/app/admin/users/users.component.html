@@ -1,0 +1,106 @@
+<div class="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header bg-warning">
+                <h3>Pending email approval</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
+                        <thead><tr>
+                            <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
+                          </tr></thead>
+                        <tbody>
+                            <tr *ngFor="let user of users | statusFilter: STATUS_PENDING_EMAIL">
+                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
+                                <td>{{user.uidnumber}}</td>
+                                <td>{{user.email}}</td>
+                                <!--td>{{user.status}}</td-->
+                                <td>{{date_convert(user.expiration)}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header bg-warning">
+                <h3>Pending admin approval</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
+                        <thead><tr>
+                            <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr *ngFor="let user of users | statusFilter: STATUS_PENDING_APPROVAL">
+                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
+                                <td>{{user.uidnumber}}</td>
+                                <td>{{user.email}}</td>
+                                <!--td>{{user.status}}</td-->
+                                <td>{{date_convert(user.expiration)}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3>Active</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
+                    <thead>
+                        <tr><th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let user of users | statusFilter: STATUS_ACTIVE">
+                            <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
+                            <td>{{user.uidnumber}}</td>
+                            <td>{{user.email}}</td>
+                            <!--td>{{user.status}}</td-->
+                            <td>{{date_convert(user.expiration)}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+    <div class="card bg-light">
+        <div class="card-header bg-danger">
+            <h3>Expired</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table datatable [dtTrigger]="dtTrigger" class="table table-striped">
+                    <thead>
+                        <tr><th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let user of users | statusFilter: STATUS_EXPIRED">
+                            <td><a routerLink="/user/{{user.uid}}"><span class="label label-danger">{{user.uid}}</span></a></td>
+                            <td>{{user.uidnumber}}</td>
+                            <td>{{user.email}}</td>
+                            <!--td>{{user.status}}</td-->
+                            <td>{{date_convert(user.expiration)}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>

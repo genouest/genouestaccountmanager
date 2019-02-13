@@ -1,4 +1,7 @@
+"use strict";
+
 var express = require('express');
+var cors = require('cors')
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -13,7 +16,7 @@ if (process.env.NODE_ENV == 'dev') {
 }
 
 var winston = require('winston');
-
+var jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
       timestamp: true
@@ -27,7 +30,7 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var ssh = require('./routes/ssh');
 var auth = require('./routes/auth');
-var disks = require('./routes/disks');
+// var disks = require('./routes/disks');
 var database = require('./routes/database');
 var web = require('./routes/web');
 var logs = require('./routes/logs');
@@ -36,6 +39,7 @@ var quota = require('./routes/quota');
 var plugin = require('./routes/plugin');
 var tp = require('./routes/tp');
 var conf = require('./routes/conf');
+var utils = require('./routes/utils.js');
 
 
 var CONFIG = require('config');
@@ -49,6 +53,7 @@ if(MY_ADMIN_USER !== null){
 }
 
 var app = express();
+app.use(cors())
 app.use(logger('combined'));
 // view engine setup
 app.set('port', process.env.PORT || 3000);
@@ -68,6 +73,7 @@ app.use(session({
   cookie: { maxAge: 3600*1000}
 }))
 app.use('/manager', express.static(path.join(__dirname, 'manager')));
+app.use('/manager2', express.static(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 var monk = require('monk'),
@@ -76,28 +82,120 @@ var monk = require('monk'),
 
 
 app.all('*', function(req, res, next){
+
+    var logInfo = {
+        is_logged: false,
+        mail_token: null,
+        id: null,
+        u2f: null,
+        session_user: null
+    };
+    if(! req.locals) {
+        req.locals = {};
+    }
+
     var token = req.headers['x-api-key'] || null;
-    if(token){
+    var jwtToken = null;
+    var authorization = req.headers['authorization'] || null;
+    if (authorization) {
+        var elts = authorization.split(' ');
+        try {
+            jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
+        } catch(err) {
+            console.log('failed to decode jwt');
+            jwtToken = null;
+        }
+    }
+    if(jwtToken){
+        if(req.session.gomngr){
+            req.session.gomngr=null;
+            req.session.is_logged = false;
+            req.session.mail_token = null;
+        }
+        try{
+            if(jwtToken.isLogged) {
+                req.session.is_logged = true; 
+                logInfo.is_logged = true;
+            }
+            if(jwtToken.mail_token) {
+                req.session.mail_token = jwtToken.mail_token;
+                logInfo.mail_token = jwtToken.mail_token;
+            }
+            if(jwtToken.u2f) {
+                logInfo.u2f = jwtToken.u2f;
+            }
+            if(jwtToken.user) {
+                users_db.findOne({'_id': jwtToken.user}, function(err, session_user){
+                    if(err){
+                        return res.status(401).send('Invalid token').end();
+                    }
+                    req.session.gomngr = session_user._id;
+                    logInfo.id = session_user._id;
+                    logInfo.session_user = session_user;
+                    req.locals.logInfo = logInfo;
+                    next();
+                });
+            } else {
+                req.locals.logInfo = logInfo;
+                next();
+            }
+        }
+        catch(error){
+            console.error('Invalid token', error);
+            return res.status(401).send('Invalid token').end();
+        }
+    }
+    else if(token){
         if(req.session.gomngr){
             req.session.gomngr=null;
             req.session.is_logged = false;
         }
         try{
-            users_db.findOne({_id: token}, function(err, session_user){
+            users_db.findOne({'apikey': token}, function(err, session_user){
                 if(err){
-                    return res.status(403).send('Invalid token').end();
+                    return res.status(401).send('Invalid token').end();
                 }
-                req.session.gomngr = token;
+                req.session.gomngr = session_user._id;
                 req.session.is_logged = true;
+                logInfo.id = session_user._id;
+                logInfo.is_logged = true;
+                if(req.session.u2f){
+                    logInfo.u2f = req.session.u2f;
+                }
+                logInfo.session_user = session_user;
+                req.locals.logInfo = logInfo;
                 next();
             });
         }
         catch(error){
             console.error('Invalid token', error);
-            return res.status(403).send('Invalid token').end();
+            return res.status(401).send('Invalid token').end();
         }
     }else{
-        next();
+        if(req.session.gomngr) {
+            logInfo.id = req.session.gomngr;
+        }
+        if(req.session.is_logged) {
+            logInfo.is_logged = req.session.is_logged;
+        }
+        if(req.session.mail_token) {
+            logInfo.mail_token = req.session.mail_token;
+        }
+        if(req.session.u2f) {
+            logInfo.u2f =req.session.u2f;
+        }
+        if(req.session.gomngr) {
+            users_db.findOne({'_id': req.session.gomngr}, function(err, session_user){
+                if(session_user){
+                    logInfo.session_user = session_user;
+                }
+                req.locals.logInfo = logInfo;
+                next();
+            });
+        } else {
+            req.locals.logInfo = logInfo;
+            next();
+        }
     }
 });
 
@@ -127,7 +225,7 @@ app.post('/web/:id', web);
 app.put('/web/:id/owner/:old/:new', web);
 app.delete('/web/:id', web);
 app.post('/user/:id', users);
-app.get('/disk/:id', disks);
+// app.get('/disk/:id', disks);
 app.put('/user/:id', users);
 app.put('/user/:id/ssh', users);
 app.get('/user/:id', users);
@@ -137,6 +235,8 @@ app.get('/user/:id/renew/:regkey', users);
 app.get('/user/:id/activate', users);
 app.get('/user/:id/confirm', users);
 app.get('/user/:id/passwordreset', users);
+app.get('/user/:id/apikey', users);
+app.post('/user/:id/apikey', users);
 app.get('/lists', users),
 app.get('/list/:list', users),
 app.post('/user/:id/passwordreset', users);
@@ -219,9 +319,13 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
+// Setup list of available user/group ids
+utils.loadAvailableIds().then(function (alreadyLoaded) {
 
-if (!module.parent) {
-  http.createServer(app).listen(app.get('port'), function(){
-    console.log('Server listening on port ' + app.get('port'));
-  });
-}
+    if (!module.parent) {
+    http.createServer(app).listen(app.get('port'), function(){
+        console.log('Server listening on port ' + app.get('port'));
+    });
+    }
+
+})

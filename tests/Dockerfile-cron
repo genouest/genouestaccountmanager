@@ -1,9 +1,9 @@
-FROM ubuntu
+FROM osallou/my
 
-RUN apt-get update && apt-get install -y curl ldap-utils openssh-client putty-tools
+RUN apt-get update && apt-get install -y curl ldap-utils openssh-client putty-tools cron
 COPY gomngr.sh /opt/gomngr.sh
 COPY crontab /etc/cron.d/my-cron
 RUN chmod 0644 /etc/cron.d/my-cron
 RUN touch /var/log/cron.log
 
-CMD cron && tail -f /var/log/cron.log
+ENTRYPOINT cron && tail -f /var/log/cron.log

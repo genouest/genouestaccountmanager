@@ -20,7 +20,7 @@ app.get('/ssh/:id/private', ssh);
 
 router.get('/ssh/:id/putty', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -34,7 +34,7 @@ router.get('/ssh/:id/putty', function(req, res) {
             res.end();
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -49,7 +49,7 @@ router.get('/ssh/:id/putty', function(req, res) {
 
 router.get('/ssh/:id/private', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -67,7 +67,7 @@ router.get('/ssh/:id/private', function(req, res) {
             res.status(401).send('[admin user] not authorized to download private key');
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -82,7 +82,7 @@ router.get('/ssh/:id/private', function(req, res) {
 
 router.get('/ssh/:id/public', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -96,7 +96,7 @@ router.get('/ssh/:id/public', function(req, res) {
             res.end();
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -111,7 +111,7 @@ router.get('/ssh/:id/public', function(req, res) {
 
 router.get('/ssh/:id', function(req, res) {
     var sess = req.session;
-    if(!sess.gomngr) {
+    if(!req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -125,7 +125,7 @@ router.get('/ssh/:id', function(req, res) {
             res.end();
             return;
         }
-        if(user._id != sess.gomngr){
+        if(user._id.str != req.locals.logInfo.id.str){
             res.status(401).send('Not authorized');
             return;
         }
@@ -142,6 +142,7 @@ router.get('/ssh/:id', function(req, res) {
         var sshDir = homeDir + "/.ssh";
         script += "rm -f " + sshDir + "/id_rsa*\n";
         script += "touch " + sshDir + "/authorized_keys\n";
+        script += "chmod 644 " + sshDir + "/authorized_keys\n";
         // script += "mv " + sshDir + "/authorized_keys " + sshDir + "/authorized_keys." + fid +"\n";
         if(user.email){
             script += "ssh-keygen -t rsa -b 4096 -C \"" + user.email + "\"";
@@ -153,9 +154,12 @@ router.get('/ssh/:id', function(req, res) {
         script += "puttygen " + sshDir + "/id_rsa -o " + sshDir + "/id_rsa.ppk\n";
         script += "cat " + sshDir + "/id_rsa.pub >> " + sshDir + "/authorized_keys\n";
         script += "chown " + user.uid + ":" + user.group + " " + sshDir + "/*\n";
+        script += "chmod 600 " + sshDir + "/id_rsa\n";
+        script += "chmod 600 " + sshDir + "/id_rsa.pub\n";
+        script += "chmod 700 " + sshDir + "\n";
 
         fs.writeFile(script_file, script, function(err) {
-            fs.chmodSync(script_file,0755);
+            fs.chmodSync(script_file,0o755);
             events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
             res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
             res.end();

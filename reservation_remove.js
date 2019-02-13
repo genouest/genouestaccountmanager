@@ -41,7 +41,7 @@ reservation_db.find({
         Promise.all(reservation.accounts.map(function(user){
             return users_db.findOne({'uid': user});
         })).then(function(users){
-            return tps.delete_tp_users(users, 'auto');
+            return tps.delete_tp_users(users, reservation.group, 'auto');
         }).then(function(){
             console.log("[INFO] close reservation", reservations);
             Promise.all(reservations.map(function(reservation){

@@ -1,0 +1,91 @@
+<div class="row">
+    <i class="fa fa-male"></i>
+    <div class="col-md-6 col-md-offset-3 ">
+        <div *ngIf="msg">
+            <div class="alert alert-warning">{{msg}}</div>
+        </div>
+        <form class="form-register form-group">
+            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+            <i>Personal informations</i>
+            <hr>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label for="firstname">First name</label>
+                    <input (ngModelChange)="update_userid($event, 0)" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="firstname" type="text" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="lastname">Last name</label>
+                    <input (ngModelChange)="update_userid($event, 1)" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="lastname" type="text" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="email">User id</label>
+                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="userid" type="text" id="userid" class="form-control" required maxlength="12"/>
+
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">Professional email</label>
+                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="email" type="email" id="email" class="form-control" required autofocus>
+                <small id="emailHelp" class="form-text text-muted">Please provide a professional email address (please avoid gmail, yahoo, etc.).</small>
+            </div>
+            <br>
+            <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+            <i>Laboratory informations</i>
+            <hr>
+            <div class="form-group row">
+                <div class="col-md-6">
+                    <label for="lab">Laboratory</label>
+                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="lab" type="text" id="lab" class="form-control" required>
+                    <small id="labHelp" class="form-text text-muted">Research unit or laboratory.</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="responsible">Manager</label>
+                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="responsible" id="responsible" type="text" class="form-control" required>
+                    <small id="responsibleHelp" class="form-text text-muted">Director or supervisor name.</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="address" id="address" class="form-control" required autofocus></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="Team">Team</label>
+                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="group" type="text" id="team" class="form-control" placeholder="Lowercase and/or digits" required>
+                <small id="groupHelp" class="form-text text-muted">Use the <i>Institution_ResearchUnit</i> format (ex: <b>inra_umr1246, cnrs_umr3503</b>).</small>
+            </div>
+            <br>
+            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+            <i>Other informations</i>
+            <hr>
+            <div class="form-group">
+                <label for="why">Why do you need an account</label>
+                <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="why" id="why" class="form-control" required></textarea>
+                <small id="responsibleHelp" class="form-text text-muted">
+                    Please specify the scientific purpose of the usage and if you want to join a specific scientific group already present on our systems.
+                    You can also specify which kind of resources you would like to use (cluster, Galaxy, cloud) and the estimated amount of storage needed.
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="duration">Duration</label>
+                <select id="duration" [ngModelOptions]="{standalone: true}" [(ngModel)]="duration" class="form-control" required>
+                    <option value="90">3 months</option>
+                    <option value="180">6 months</option>
+                    <option value="365">1 year</option>
+                    <option value="730">2 years</option>
+                    <option value="1095">3 years</option>
+                </select>
+            </div>
+            <input type="hidden" [ngModelOptions]="{standalone: true}" [(ngModel)]="ip" type="text" id="ip" class="form-control" placeholder="IP Address" required>
+            <br>
+            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+            <i>Terms of use</i>
+            <hr>
+            <div class="checkbox">
+                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required>I agree with the <a target="_blank" href="/doc/terms_of_use.txt">terms of use</a> of the {{config.name}} platform</label>
+            </div>
+            <button type="button" class="btn btn-lg btn-primary btn-block" (click)="register();">Register</button>
+        </form>
+    </div>
+</div>

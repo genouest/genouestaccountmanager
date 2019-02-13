@@ -26,7 +26,8 @@ for(var i=0;i<plugins.length;i++){
     plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
     if(plugins[i].display_name === undefined) { plugins[i]['display_name'] = plugins[i].name; }
     if(plugins[i].admin_only === undefined) { plugins[i]['admin_only'] = false; }
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name, 'display_name': plugins[i]['display_name'], 'admin_only': plugins[i]['admin_only']})
+    if(plugins[i].admin === undefined) { plugins[i]['admin'] = false; }
+    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name, 'display_name': plugins[i]['display_name'], 'admin_only': plugins[i]['admin_only'], 'admin': plugins[i]['admin']})
 }
 /**
 Plugins must provide functions:
@@ -49,6 +50,10 @@ Plugins must provide functions:
 router.get('/plugin', function(req, res) {
     var plugin_list = []
     for(var i=0;i<plugins_info.length;i++){
+      if(plugins_modules[plugins_info[i].name].template === undefined) {
+        plugin_list.push(plugins_info[i]);
+        continue
+      }
         var template = plugins_modules[plugins_info[i].name].template();
         if(template !==null && template !== ""){
             plugin_list.push(plugins_info[i])
@@ -66,11 +71,11 @@ router.get('/plugin/:id', function(req, res) {
 
 router.get('/plugin/:id/:user', function(req, res) {
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;
@@ -91,11 +96,11 @@ router.get('/plugin/:id/:user', function(req, res) {
 
 router.post('/plugin/:id/:user', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -113,16 +118,6 @@ router.post('/plugin/:id/:user', function(req, res) {
     });
   });
 
-
-  /*
-  var plugin_res = plugins_modules[req.param('id')].set_data(req.param('user'), req.body);
-  if(plugin_res.error !== undefined) {
-      res.status(400).send(plugin_res.error);
-  }
-  else {
-      res.send(plugins_modules[req.param('id')].set_data(req.param('user'), req.body));
-  }
-  */
 
 });
 

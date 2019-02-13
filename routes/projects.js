@@ -22,11 +22,11 @@ var monk = require('monk'),
 
 router.get('/project', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -64,11 +64,11 @@ router.get('/project', function(req, res){
 
 router.get('/project/:id', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -95,12 +95,12 @@ router.get('/project/:id', function(req, res){
 
 router.post('/project', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -142,12 +142,12 @@ router.post('/project', function(req, res){
 
 router.delete('/project/:id', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;
@@ -168,12 +168,12 @@ router.delete('/project/:id', function(req, res){
 
 router.post('/project/:id', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;
@@ -209,11 +209,11 @@ router.post('/project/:id', function(req, res){
 
 router.post('/project/:id/request', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr){
+    if(! req.locals.logInfo.is_logged){
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;
@@ -224,8 +224,8 @@ router.post('/project/:id/request', function(req, res){
           return;
         }
 //Add to request list
-        if(! sess.gomngr === project.owner ){
-          res.status(401).send('User ' + sess.gomngr + " is not project manager for project " + project.id);
+        if(! user.uid === project.owner ){
+          res.status(401).send('User ' + user.uid + " is not project manager for project " + project.id);
           return;
         }
         users_db.findOne({'uid': req.param('user')}, function(err, newuser){
@@ -270,11 +270,11 @@ router.post('/project/:id/request', function(req, res){
 //Admin only, remove request
 router.put('/project/:id/request', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr){
+    if(! req.locals.logInfo.is_logged){
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -323,11 +323,11 @@ router.put('/project/:id/request', function(req, res){
 //Return all projects using this group
 router.get('/group/:id/projects', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr){
+    if(! req.locals.logInfo.is_logged){
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;

@@ -1,0 +1,81 @@
+import { Component, OnInit, Input, ViewChildren, QueryList } from '@angular/core';
+import { PluginService } from '../plugin.service';
+import { DataTableDirective } from 'angular-datatables';
+import { Subject } from 'rxjs';
+
+@Component({
+  template: '<div></div>',
+  styleUrls: ['./base-plugin.component.css']
+})
+export class BasePluginComponent {
+  @Input() userId: string;
+  pluginName: string;
+  data: any;
+
+  @ViewChildren(DataTableDirective)
+  tables: QueryList<DataTableDirective>;
+
+  dtTrigger: Subject<any> = new Subject()
+
+  constructor(private pluginService: PluginService) {}
+
+  ngOnDestroy(): void {
+    this.dtTrigger.unsubscribe();
+  }
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
+
+  renderDataTables(): void {
+    console.log('tables', this.tables);
+    this.dtTrigger.next();
+    this.tables.forEach(table => {
+      console.log('dttrigger?', table.dtTrigger)
+      if (table.dtTrigger) {
+        table.dtInstance.then((dt: DataTables.Api) => {
+          dt.clear();
+          dt.destroy();
+          table.dtTrigger.next();
+
+        });
+      }
+    });
+  }
+
+  loadData(userId: string) {
+    if (!userId) { return; }
+    this.userId = userId;
+    this.pluginService.get(this.pluginName, userId)
+    .subscribe(
+      resp => {
+        this.data = resp;
+        this.renderDataTables();
+      },
+      err => console.log('failed to get plugin data:', err)
+    );
+  }
+  sendData(){
+    this.pluginService.set(this.pluginName, this.userId, this.data)
+    .subscribe(
+      resp => this.data = resp,
+      err => console.log('failed to get plugin data:', err)
+    );
+  }
+
+  setData(attr, value) {
+    this.data[attr] = value;
+  }
+
+  date_convert(tsp){
+    var a = new Date(tsp);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    return time;
+  }
+}

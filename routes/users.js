@@ -1,3 +1,4 @@
+/*jslint es6 */
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
@@ -18,26 +19,23 @@ if(plugins === undefined){
 }
 var plugins_modules = {};
 var plugins_info = [];
-for(var i=0;i<plugins.length;i++){
-    plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name})
-}
 
 var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif.js');
+var utils = require('../routes/utils.js');
 
-var get_ip = require('ipware')().get_ip;
+// var get_ip = require('ipware')().get_ip;
 
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
-    groups_db = db.get('groups'),
-    databases_db = db.get('databases'),
-    web_db = db.get('web'),
-    users_db = db.get('users'),
-    projects_db = db.get('projects'),
-    events_db = db.get('events');
+var monk = require('monk')
+var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + GENERAL_CONFIG.db)
+var groups_db = db.get('groups')
+var databases_db = db.get('databases')
+var web_db = db.get('web')
+var users_db = db.get('users')
+var projects_db = db.get('projects')
+var events_db = db.get('events')
 
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -47,41 +45,49 @@ var STATUS_EXPIRED = 'Expired';
 
 var MAIL_CONFIG = CONFIG.gomail;
 
-
-const { spawn } = require('child_process');
-
 const runningEnv = process.env.NODE_ENV || 'prod';
+
+for(i = 0; i< plugins.length; i++){
+  if(plugins[i]['admin']) {
+    continue;
+  }
+  plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
+  plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
+}
 
 // util function to execute scripts immediatly, for test purpose only
 // on dev/prod, scripts should be executed by cron only
-var if_dev_execute_scripts = function(){
-    return new Promise(function (resolve, reject){
-        if (runningEnv !== 'test'){
+if (runningEnv === 'test'){
+  const { spawn } = require('child_process');
+  var if_dev_execute_scripts = function(){
+      return new Promise(function (resolve, reject){
+          if (runningEnv !== 'test'){
+              resolve();
+              return;
+          }
+          console.log('In *test* environment, check for scripts to execute');
+          let cron_bin_script = CONFIG.general.cron_bin_script || null;
+          if(cron_bin_script === null){
+              console.error('cron script not defined');
+              reject({'err': 'cron script not defined'});
+              return;
+          }
+          var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+          procScript.on('exit', function (code, signal) {
+            console.log(cron_bin_script + ' process exited with ' +
+                        `code ${code} and signal ${signal}`);
             resolve();
-            return;
-        }
-        console.log('In *test* environment, check for scripts to execute');
-        let cron_bin_script = CONFIG.general.cron_bin_script || null;
-        if(cron_bin_script === null){
-            console.error('cron script not defined');
-            reject({'err': 'cron script not defined'});
-            return;
-        }
-        var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
-        procScript.on('exit', function (code, signal) {
-          console.log(cron_bin_script + ' process exited with ' +
-                      `code ${code} and signal ${signal}`);
-          resolve();
-        });
-    });
-}
+          });
+      });
+  }
 
-router.use('*', function(req, res, next){
-    res.on("finish", function() {
-      if_dev_execute_scripts().then(function(){});
-    });
-    next();
-});
+  router.use('*', function(req, res, next){
+      res.on("finish", function() {
+        if_dev_execute_scripts().then(function(){});
+      });
+      next();
+  });
+}
 
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
@@ -97,11 +103,12 @@ var send_notif = function(mailOptions, fid, errors) {
 
 var create_extra_group = function(group_name, owner_name){
     return new Promise(function (resolve, reject){
-        var mingid = 1000;
-        groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
-          if(!err && data && data.length>0){
-            mingid = data[0].gid+1;
-          }
+        //var mingid = 1000;
+        //groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
+        utils.getGroupAvailableId().then(function (mingid) {
+          //if(!err && data && data.length>0){
+          //  mingid = data[0].gid+1;
+          //}
           var fid = new Date().getTime();
           group = {name: group_name, gid: mingid, owner: owner_name};
           groups_db.insert(group, function(err){
@@ -111,7 +118,7 @@ var create_extra_group = function(group_name, owner_name){
               script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
               var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
               fs.writeFile(script_file, script, function(err) {
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file, 0o755);
                 group.fid = fid;
                 resolve(group);
                 return;
@@ -159,12 +166,12 @@ var create_extra_user = function(user_name, group, internal_user){
           password: password
         }
 
-        var minuid = 1000;
-        var mingid = 1000;
-        users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
-            if(!err && data && data.length>0){
-                minuid = data[0].uidnumber+1;
-            }
+        //var minuid = 1000;
+        //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
+        utils.getUserAvailableId().then(function (minuid) {
+            //if(!err && data && data.length>0){
+            //    minuid = data[0].uidnumber+1;
+            //}
 
             user.uidnumber = minuid;
             user.gidnumber = group.gid;
@@ -181,6 +188,8 @@ var create_extra_user = function(user_name, group, internal_user){
                     script += "fi\n"
                     script += "sleep 3\n";
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += utils.addReadmes(CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid);
+                    /*
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
                     if (typeof CONFIG.general.readme == "object") {
                       CONFIG.general.readme.forEach(function(dict) {
@@ -189,17 +198,19 @@ var create_extra_user = function(user_name, group, internal_user){
                     } else {
                       script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
                     };
+                    */
                     script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
                     script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
-                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
+                    //script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
-                      fs.chmodSync(script_file,0755);
+                      fs.chmodSync(script_file,0o755);
                         var plugin_call = function(plugin_info, userId, data, adminId){
                             return new Promise(function (resolve, reject){
                                 plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
@@ -208,7 +219,7 @@ var create_extra_user = function(user_name, group, internal_user){
                             });
                         };
                         Promise.all(plugins_info.map(function(plugin_info){
-                            return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                            return plugin_call(plugin_info, user.uid, user, 'auto');
                         })).then(function(results){
                             return send_notif(mailOptions, fid, []);
                         }, function(err){
@@ -261,9 +272,68 @@ router.create_admin = function(default_admin, default_admin_group){
     });
 }
 
+router.get('/user/:id/apikey', function(req, res){
+    var sess = req.session;
+    if(! req.locals.logInfo.is_logged) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
+        if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+        users_db.findOne({uid: req.param('id')}, function(err, user){
+            if(!user) {
+                res.send({msg: 'User does not exists'})
+                res.end();
+                return;
+            }
+
+            if (user.apikey === undefined) {
+                res.send({'apikey': ''})
+                res.end();
+                return;
+            } else {
+                res.send({'apikey': user.apikey})
+                res.end();
+                return;
+            }
+        });
+    });
+});
+
+router.post('/user/:id/apikey', function(req, res){
+    var sess = req.session;
+    if(! req.locals.logInfo.is_logged) {
+      res.status(401).send('Not authorized');
+      return;
+    }
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
+        if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+
+        users_db.findOne({uid: req.param('id')}, function(err, user){
+            if(!user) {
+                res.send({msg: 'User does not exists'})
+                res.end();
+                return;
+            }
+
+            var apikey = Math.random().toString(36).slice(-10);
+            users_db.update({uid: req.param('id')}, {'$set':{'apikey': apikey}}, function(err, data){
+               res.send({'apikey': apikey});
+               res.end();
+            });
+        });
+    });
+});
+
 router.get('/user/:id/subscribed', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -287,11 +357,11 @@ router.get('/user/:id/subscribed', function(req, res){
 
 router.get('/group/:id', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -309,11 +379,11 @@ router.get('/group/:id', function(req, res){
 
 router.delete('/group/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
           res.status(404).send('User not found');
           return;
@@ -341,12 +411,14 @@ router.delete('/group/:id', function(req, res){
                     script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
                     var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
-                      fs.chmodSync(script_file,0755);
+                      fs.chmodSync(script_file,0o755);
                       group.fid = fid;
                       events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
-                      res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
-                      res.end();
-                      return;
+                      utils.freeGroupId(group.gid).then(function(){
+                        res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
+                        res.end();
+                        return;
+                      })
                     });
                   });
 
@@ -361,11 +433,11 @@ router.delete('/group/:id', function(req, res){
 
 router.put('/group/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -374,28 +446,35 @@ router.put('/group/:id', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
-    groups_db.findOne({name: req.param('id')}, function(err, group){
-      var owner = req.param('owner');
-      if(! group) {
-        res.status(404).send('Group does not exists');
-        return;
-      }
-      events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'group owner modification ' + group.name + ' to ' +owner, 'logs': []}, function(err){});
-      groups_db.update({name: group.name}, {'$set':{'owner': owner}}, function(err, data){
-         res.send(data);
-         res.end();
+    var owner = req.param('owner');
+    users_db.findOne({uid: owner}, function(err, user){
+        if(!user || err) {
+            res.status(404).send('User does not exists')
+            res.end();
+            return;
+        }
+        groups_db.findOne({name: req.param('id')}, function(err, group){
+          if(! group) {
+            res.status(404).send('Group does not exists');
+            return;
+          }
+          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'group owner modification ' + group.name + ' to ' +owner, 'logs': []}, function(err){});
+          groups_db.update({name: group.name}, {'$set':{'owner': owner}}, function(err, data){
+             res.send(data);
+             res.end();
+          });
+        });
       });
-    });
   });
 });
 
 router.post('/group/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -404,40 +483,47 @@ router.post('/group/:id', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
-    groups_db.findOne({name: new RegExp(req.param('id'), 'i')}, function(err, group){
-      var owner = req.param('owner');
-      if(group) {
-        res.status(403).send('Group already exists');
-        return;
-      }
-      var mingid = 1000;
-
-      groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
-        if(!err && data && data.length>0){
-          mingid = data[0].gid+1;
+    var owner = req.param('owner');
+    users_db.findOne({uid: owner}, function(err, user){
+        if(!user || err) {
+            res.status(404).send('User does not exists')
+            res.end();
+            return;
         }
-        var fid = new Date().getTime();
-        group = {name: req.param('id'), gid: mingid, owner: owner};
-        groups_db.insert(group, function(err){
-          goldap.add_group(group, fid, function(err){
+        groups_db.findOne({name: new RegExp(req.param('id'), 'i')}, function(err, group){
+          if(group) {
+            res.status(403).send('Group already exists');
+            return;
+          }
+          //var mingid = 1000;
+          utils.getGroupAvailableId().then(function (mingid) {
+          //groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
+            //if(!err && data && data.length>0){
+            //  mingid = data[0].gid+1;
+            //}
+            var fid = new Date().getTime();
+            group = {name: req.param('id'), gid: mingid, owner: owner};
+            groups_db.insert(group, function(err){
+              goldap.add_group(group, fid, function(err){
 
-            var script = "#!/bin/bash\n";
-            script += "set -e \n"
-            script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-            var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-            fs.writeFile(script_file, script, function(err) {
-              events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+                var script = "#!/bin/bash\n";
+                script += "set -e \n"
+                script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
+                var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
+                fs.writeFile(script_file, script, function(err) {
+                  events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
 
-              fs.chmodSync(script_file,0755);
-              group.fid = fid;
-              res.send(group);
-              res.end();
-              return;
+                  fs.chmodSync(script_file,0o755);
+                  group.fid = fid;
+                  res.send(group);
+                  res.end();
+                  return;
+                });
+              });
             });
           });
         });
       });
-    });
   });
 });
 
@@ -454,11 +540,11 @@ router.get('/ip', function(req, res) {
 
 router.get('/group', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -477,7 +563,7 @@ router.get('/group', function(req, res){
 router.post('/message', function(req, res){
 
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
@@ -487,7 +573,7 @@ router.post('/message', function(req, res){
       return;
     }
 
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
         res.status(404).send('User not found');
         return;
@@ -522,12 +608,12 @@ router.post('/message', function(req, res){
 // Get users listing - for admin
 router.get('/user', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
 
-  users_db.findOne({_id: sess.gomngr}, function(err, user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
       return;
@@ -547,11 +633,11 @@ router.get('/user', function(req, res) {
 
 router.post('/user/:id/group/:group', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
       return;
@@ -564,7 +650,7 @@ router.post('/user/:id/group/:group', function(req, res){
           return;
         }
         if(secgroup == user.group) {
-            res.send({message: 'group is user main\'s group'});
+            res.send({message: 'Group is user main\'s group: '+user.group});
             res.end();
             return;
         }
@@ -587,7 +673,7 @@ router.post('/user/:id/group/:group', function(req, res){
 
             var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
             fs.writeFile(script_file, script, function(err) {
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file,0o755);
 
                 users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
                     if(err){
@@ -609,11 +695,11 @@ router.post('/user/:id/group/:group', function(req, res){
 
 router.delete('/user/:id/group/:group', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
       return;
@@ -622,7 +708,7 @@ router.delete('/user/:id/group/:group', function(req, res){
     var secgroup = req.param('group');
     users_db.findOne({uid: uid}, function(err, user){
       if(secgroup == user.group) {
-        res.send({message: 'group is user main\'s group'});
+        res.send({message: 'Group is user main\'s group: '+user.group});
         res.end();
         return;
       }
@@ -653,7 +739,7 @@ router.delete('/user/:id/group/:group', function(req, res){
 
         var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
         fs.writeFile(script_file, script, function(err) {
-          fs.chmodSync(script_file,0755);
+          fs.chmodSync(script_file,0o755);
 
           users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
             if(err){
@@ -685,6 +771,8 @@ router.delete_user = function(user, action_owner_id){
                          'logs': []
                      }
                  ).then(function(){
+                   return utils.freeUserId(user.uidnumber)
+                 }).then(function(){
                      resolve(true);
                  });
              });
@@ -702,17 +790,18 @@ router.delete_user = function(user, action_owner_id){
                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
                script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn +" \"uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\"\n";
                script += "rm -rf "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-               script += "rm -rf /omaha-beach/"+user.uid+"\n";
+               // script += "rm -rf /omaha-beach/"+user.uid+"\n";
+               script += utils.deleteExtraDirs(user.uid, user.group);
 
                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                fs.writeFile(script_file, script, function(err) {
-                 fs.chmodSync(script_file,0755);
+                 fs.chmodSync(script_file,0o755);
                  users_db.remove({_id: user._id}, function(err){
                    if(err){
                      resolve(false);
                      return;
                    }
-                   var msg_activ ="User " + user.uid + "has been deleted by " + action_owner_id;
+                   var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
                    var msg_activ_html = msg_activ;
                    var mailOptions = {
                      origin: MAIL_CONFIG.origin, // sender address
@@ -746,6 +835,9 @@ router.delete_user = function(user, action_owner_id){
                        }));
                    })
                    .then(function(){
+                     return utils.freeUserId(user.uidnumber)
+                   })
+                   .then(function(){
                        if(notif.mailSet()) {
                          notif.sendUser(mailOptions, function(error, response){
                              resolve(true);
@@ -765,11 +857,11 @@ router.delete_user = function(user, action_owner_id){
 
 router.delete('/user/:id', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
       return;
@@ -823,12 +915,12 @@ router.delete('/user/:id', function(req, res){
 router.get('/user/:id/activate', function(req, res) {
 
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
 
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(err || session_user == null){
         res.status(404).send('User not found');
         return;
@@ -850,38 +942,27 @@ router.get('/user/:id/activate', function(req, res) {
           return;
         }
         user.password = Math.random().toString(36).slice(-10);
-        var minuid = 1000;
-        var mingid = 1000;
-        users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
-          if(!err && data && data.length>0){
-            minuid = data[0].uidnumber+1;
-          }
-          groups_db.find({}, { sort: { gid: -1 }}, function(err, data){
-            if(!err && data && data.length>0){
-              var gfound = false;
-              for(var g=0; g<data.length;g++){
-                if(data[g].name == user.group) {
-                  logger.debug('Group exists, use it '+data[g].gid);
-                  logger.debug(data[g]);
-                  mingid = data[g].gid;
-                  gfound = true;
-                  break;
-                }
-              }
-              if(!gfound) {
-                mingid = data[0].gid+1;
-                res.status(403).send('Group '+user.group+' does not exists, please create it first')
+        //var minuid = 1000;
+        //var mingid = 1000;
+        utils.getUserAvailableId().then(function (minuid) {
+        //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
+          //if(!err && data && data.length>0){
+          //  minuid = data[0].uidnumber+1;
+          //}
+          groups_db.findOne({'name': user.group}, function(err, data){
+            if(err || data === undefined || data === null) {
+              res.status(403).send('Group '+user.group+' does not exists, please create it first')
                 res.end();
                 return
-              }
             }
+            
             user.uidnumber = minuid;
-            user.gidnumber = mingid;
+            user.gidnumber = data.gid;
             var fid = new Date().getTime();
             goldap.add(user, fid, function(err) {
               if(!err){
-                users_db.update({uid: req.param('id')},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: mingid, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(err){
-                  groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
+                users_db.update({uid: req.param('id')},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(err){
+                  //groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
 
                     var script = "#!/bin/bash\n";
                     script += "set -e \n"
@@ -891,6 +972,8 @@ router.get('/user/:id/activate', function(req, res) {
                     script += "fi\n"
                     script += "sleep 3\n";
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += utils.addReadmes(CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid);
+                    /*
                     script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
                     if (typeof CONFIG.general.readme == "object") {
                       CONFIG.general.readme.forEach(function(dict) {
@@ -899,17 +982,19 @@ router.get('/user/:id/activate', function(req, res) {
                     } else {
                       script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
                     };
+                    */
                     script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
                     script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
                     script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
-                    script += "mkdir -p /omaha-beach/"+user.uid+"\n";
+                    // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
-                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    // script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
+                    script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
-                      fs.chmodSync(script_file,0755);
+                      fs.chmodSync(script_file,0o755);
                       notif.add(user.email, function(){
                         var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                         var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -944,7 +1029,7 @@ router.get('/user/:id/activate', function(req, res) {
 
                       });
                     });
-                  });
+                  //});
                 });
 
               }
@@ -968,11 +1053,11 @@ router.get('/user/:id/activate', function(req, res) {
 // Get user - for logged user or admin
 router.get('/user/:id', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized, need to login first');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
     users_db.findOne({uid: req.param('id')}, function(err, user){
       if(err){
@@ -993,7 +1078,7 @@ router.get('/user/:id', function(req, res) {
           user.quota.push(k);
       }
 
-      if(sess.gomngr == user._id || GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0){
+      if(session_user._id.str == user._id.str || GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0){
         res.json(user);
         return;
       }
@@ -1181,11 +1266,11 @@ router.post('/user/:id', function(req, res) {
 
 router.get('/user/:id/expire', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     users_db.findOne({uid: req.param('id')}, function(err, user){
       if(err){
         res.status(404).send('User not found');
@@ -1220,7 +1305,7 @@ router.get('/user/:id/expire', function(req, res){
               fs.writeFile(script_file, script, function(err) {
                 events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file,0o755);
                 // Now remove from mailing list
                 try {
                   notif.remove(user.email, function(err){
@@ -1267,11 +1352,11 @@ router.get('/user/:id/expire', function(req, res){
 });
 router.post('/user/:id/passwordreset', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(session_user.uid != req.param('id')) {
          res.send({message: 'Not authorized'});
          return;
@@ -1301,7 +1386,7 @@ router.post('/user/:id/passwordreset', function(req, res){
             script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
             var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
             fs.writeFile(script_file, script, function(err) {
-              fs.chmodSync(script_file,0755);
+              fs.chmodSync(script_file,0o755);
               res.send({message:'Password updated'});
               return;
            });
@@ -1388,7 +1473,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
             script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
             var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
             fs.writeFile(script_file, script, function(err) {
-              fs.chmodSync(script_file,0755);
+              fs.chmodSync(script_file,0o755);
               // Now send email
               var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
               var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1459,11 +1544,11 @@ router.get('/user/:id/renew/:regkey', function(req, res){
 
 router.get('/user/:id/renew', function(req, res){
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     users_db.findOne({uid: req.param('id')}, function(err, user){
       if(err){
         res.status(404).send('User not found');
@@ -1496,7 +1581,7 @@ router.get('/user/:id/renew', function(req, res){
               var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
               fs.writeFile(script_file, script, function(err) {
                 events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                fs.chmodSync(script_file,0755);
+                fs.chmodSync(script_file,0o755);
                 notif.add(user.email, function(){
                   var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                   var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1548,11 +1633,11 @@ router.get('/user/:id/renew', function(req, res){
 
 router.put('/user/:id/ssh', function(req, res) {
   var sess = req.session;
-  if(! sess.gomngr) {
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
       }
@@ -1562,7 +1647,7 @@ router.put('/user/:id/ssh', function(req, res) {
 
       users_db.findOne({uid: req.param('id')}, function(err, user){
         // If not admin nor logged user
-        if(!session_user.is_admin && user._id != sess.gomngr) {
+        if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
           res.status(401).send('Not authorized');
           return;
         }
@@ -1583,7 +1668,7 @@ router.put('/user/:id/ssh', function(req, res) {
           fs.writeFile(script_file, script, function(err) {
             events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-            fs.chmodSync(script_file,0755);
+            fs.chmodSync(script_file,0o755);
             user.fid = fid;
             user.ssh = req.param('ssh');
             res.send(user);
@@ -1599,11 +1684,11 @@ router.put('/user/:id/ssh', function(req, res) {
 
 router.get('/user/:id/usage', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         usage=JSON.parse(JSON.stringify(CONFIG.usage));
         usages = [];
         for(var i=0;i<usage.length;i++){
@@ -1637,11 +1722,17 @@ router.put('/user/:id', function(req, res) {
   */
 
   var sess = req.session;
-  if(! sess.gomngr) {
+  /*
+  if(sess.apikey !== undefined && sess.apikey) {
+    // Forbids by api key to avoid modyfing email address
+    res.status(401).send('Operation not authorized by API key');
+    return;
+  }*/
+  if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
   }
-  users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+  users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
       }
@@ -1655,7 +1746,7 @@ router.put('/user/:id', function(req, res) {
           return;
         }
         // If not admin nor logged user
-        if(!session_user.is_admin && user._id != sess.gomngr) {
+        if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
           res.status(401).send('Not authorized');
           return;
         }
@@ -1667,6 +1758,7 @@ router.put('/user/:id', function(req, res) {
         if(user.is_fake === undefined) {
             user.is_fake = false;
         }
+        userWasFake = user.is_fake;
 
         if(session_user.is_admin){
            user.is_fake = req.param('is_fake');
@@ -1743,6 +1835,7 @@ router.put('/user/:id', function(req, res) {
                       script += "fi\n";
                       script += "mv "+CONFIG.general.home+"/"+user.oldmaingroup+"/"+user.oldgroup+"/"+user.uid+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/\n";
                       script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/"+user.uid+"\n";
+                      script += utils.moveExtraDirs(user.uid, user.oldgroup, user.group, user.uidnumber, user.gidnumber);
                       events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                     }
                   }
@@ -1750,15 +1843,21 @@ router.put('/user/:id', function(req, res) {
                   fs.writeFile(script_file, script, function(err) {
                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                    fs.chmodSync(script_file,0755);
+                    fs.chmodSync(script_file,0o755);
+                    user.fid = fid;
                     if(user.oldemail!=user.email && !user.is_fake) {
                       notif.modify(user.oldemail, user.email, function() {
-                        user.fid = fid;
                         res.send(user);
                       });
-                    }
-                    else {
-                      user.fid = fid;
+                    } else if(userWasFake && !user.is_fake) {
+                      notif.add(user.email, function() {
+                        res.send(user);
+                      });
+                    }else if (!userWasFake && user.is_fake) {
+                      notif.remove(user.email, function(){
+                        res.send(user);
+                      })
+                    } else {
                       res.send(user);
                     }
                   });
@@ -1787,11 +1886,11 @@ router.put('/user/:id', function(req, res) {
 
 router.get('/project/:id/users', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
             return;
@@ -1805,11 +1904,11 @@ router.get('/project/:id/users', function(req, res){
 
 router.post('/user/:id/project/:project', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             res.end();
@@ -1852,11 +1951,11 @@ router.post('/user/:id/project/:project', function(req, res){
 
 router.delete('/user/:id/project/:project', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             res.end();
@@ -1907,11 +2006,11 @@ router.delete('/user/:id/project/:project', function(req, res){
 
 router.get('/list/:list', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;
@@ -1927,11 +2026,11 @@ router.get('/list/:list', function(req, res){
 
 router.get('/lists', function(req, res){
     var sess = req.session;
-    if(! sess.gomngr) {
+    if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
     }
-    users_db.findOne({_id: sess.gomngr}, function(err, session_user){
+    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;

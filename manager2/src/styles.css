@@ -1,0 +1,232 @@
+@import "../node_modules/angular-calendar/css/angular-calendar.css";
+
+body {
+    font-size: 13px !important;
+}
+
+.card-header h3{
+    font-size: 17px;
+}
+
+.label {
+    padding-left: 1em;
+    padding-right: 1em;
+    border-radius: 0;
+    font-weight: 300;
+}
+
+.label-primary {
+    color: white !important;
+    background-color: #008cba !important;
+}
+
+.label-danger {
+    color: white !important;
+    background-color: #f04124 !important;
+}
+
+.label-warning {
+    color: white !important;
+    background-color: #e99002 !important;
+}
+
+.bg-warning {
+    color: white !important;
+    background-color: #d08002 !important;
+}
+
+.bg-danger {
+    color: white !important;
+    background-color: #ea2f10 !important;
+}
+
+.navbar {
+    font-size: 13px !important;
+    color: white !important;
+    margin-bottom: 20px;
+}
+
+.dropdown-menu {
+    font-size: 13px !important;
+}
+
+.dropdown-item {
+    font-size: 13px !important;
+    color: white !important;    
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: white !important;
+}
+
+.userform label {
+    font-size: 12px !important;
+    width: 150px;
+}
+
+.col-form-label {
+    font-size: 12px !important;
+}
+
+.navbar-brand {
+    font-size: 19px !important;
+}
+
+button {
+    margin-right: 10px !important;
+}
+
+.card {
+    margin: 10px !important;
+}
+
+.logo-brand .navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.logo-brand .navbar-brand>img {
+  padding: 7px 10px;
+}
+
+.navbar-inverse{
+  background-color: #343a40 !important;
+}
+
+.navbar-inverse .dropdown-menu{
+  background-color: #343a40 !important;
+}
+
+.panel {
+  margin-bottom: 50px;
+}
+
+.panel-primary > .panel-heading{
+  background-color: #6c757d !important;
+
+}
+
+.paginate_button {
+  padding-left: 5px;
+}
+
+
+.user-information {
+  padding-left: 10px;
+}
+
+.status0 {
+  background-color: lightgrey;
+  padding: 10px;
+}
+
+.status1 {
+  background-color: orange;
+  padding: 10px;
+}
+
+.lost {
+  margin: 5px;
+}
+.lost button {
+  margin: 5px;
+}
+
+.user-form label {
+  width: 150px;
+}
+
+.form-register input {
+  margin-bottom: 10px !important;
+}
+
+.form-register textarea {
+  margin-bottom: 10px;
+}
+
+.form-signin
+{
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+}
+.form-signin .form-signin-heading, .form-signin .checkbox
+{
+    margin-bottom: 10px;
+}
+.form-signin .checkbox
+{
+    font-weight: normal;
+}
+.form-signin .form-control
+{
+    position: relative;
+    font-size: 16px;
+    height: auto;
+    padding: 10px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.form-signin .form-control:focus
+{
+    z-index: 2;
+}
+
+.form-signin input[type="text"]
+{
+    margin-bottom: -1px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.form-signin input[type="password"]
+{
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+.account-wall
+{
+    margin-top: 20px;
+    padding: 40px 0px 20px 0px;
+    background-color: #f7f7f7;
+    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
+
+.login-title
+{
+    color: black;
+    font-size: 18px;
+    font-weight: 400;
+    display: block;
+}
+
+.profile-img
+{
+    width: 74px;
+    height: 60px;
+    margin: 0 auto 10px;
+    display: block;
+}
+.need-help
+{
+    margin-top: 10px;
+}
+.new-account
+{
+    display: block;
+    margin-top: 10px;
+}
+
+.alert {
+    font-size: 13px;
+}
+
+.alert-info {
+    color: #34318f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}

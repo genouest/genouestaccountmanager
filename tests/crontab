@@ -1,2 +1,6 @@
 * * * * * root /opt/gomngr.sh /opt/my/scripts http://my:3000 >> /var/log/cron.log 2>&1
+0 3 1 * * root cd /root/genouestaccountmanager && /usr/local/bin/node /root/genouestaccountmanager/test_expiration.js >> /var/log/cron.log 2>&1
+0 3 2 * * root cd /root/genouestaccountmanager && /usr/local/bin/node /root/genouestaccountmanager/expire.js >> /var/log/cron.log 2>&1
+0 5 * * * root cd /root/genouestaccountmanager && /usr/local/bin/node /root/genouestaccountmanager/reservation_create.js >> /var/log/cron.log 2>&1
+0 6 * * * root cd /root/genouestaccountmanager && /usr/local/bin/node /root/genouestaccountmanager/reservation_remove.js >> /var/log/cron.log 2>&1
 # empty line
