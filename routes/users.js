@@ -377,6 +377,29 @@ router.get('/group/:id', function(req, res){
     });
 });
 
+router.delete_group = function(group, user){
+  return new Promise(function (resolve, reject){
+    groups_db.remove({'name': group.id}, function(err){
+      var fid = new Date().getTime();
+      goldap.delete_group(group, fid, function(err){
+        var script = "#!/bin/bash\n";
+        script += "set -e \n"
+        script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
+        var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
+        fs.writeFile(script_file, script, function(err) {
+          fs.chmodSync(script_file,0o755);
+          group.fid = fid;
+          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+          utils.freeGroupId(group.gid).then(function(){
+            resolve(true);;
+          })
+        });
+      });
+    });
+  };
+};
+
+
 router.delete('/group/:id', function(req, res){
   var sess = req.session;
   if(! req.locals.logInfo.is_logged) {
@@ -402,30 +425,11 @@ router.delete('/group/:id', function(req, res){
                   res.status(403).send('Group has some users, cannot delete it');
                   return;
               }
-              groups_db.remove({'name': req.param('id')}, function(err){
-                  var fid = new Date().getTime();
-                  goldap.delete_group(group, fid, function(err){
-
-                    var script = "#!/bin/bash\n";
-                    script += "set -e \n"
-                    script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-                    var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-                    fs.writeFile(script_file, script, function(err) {
-                      fs.chmodSync(script_file,0o755);
-                      group.fid = fid;
-                      events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
-                      utils.freeGroupId(group.gid).then(function(){
-                        res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
-                        res.end();
-                        return;
-                      })
-                    });
-                  });
-
-
+              router.delete_group(group, user).then(function(){
+                res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
+                res.end();
               });
           });
-
         });
     });
 });
@@ -748,9 +752,26 @@ router.delete('/user/:id/group/:group', function(req, res){
               return;
             }
             events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-            res.send({message: 'User removed from group', fid: fid});
-            res.end();
-            return;
+            users_db.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}, function(err, users_in_group){
+              if(users_in_group && users_in_group.length > 0){
+                res.send({message: 'User removed from group', fid: fid});
+                res.end();
+                return;
+              }
+              // If group is empty, delete it
+              groups_db.findOne({name: secgroup}, function(err, group){
+                if(err || !group) {
+                  res.send({message: 'User removed from group', fid: fid});
+                  res.end();
+                  return;
+                }
+                router.delete_group(group, user).then(function(){
+                  res.send({message: 'User removed from group. Empty group ' + secgroup + ' was deleted'});
+                  res.end();
+                  return;
+                });
+              });
+            });
           });
         });
       });
@@ -955,7 +976,7 @@ router.get('/user/:id/activate', function(req, res) {
                 res.end();
                 return
             }
-            
+
             user.uidnumber = minuid;
             user.gidnumber = data.gid;
             var fid = new Date().getTime();
