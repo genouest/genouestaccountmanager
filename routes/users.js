@@ -1863,6 +1863,15 @@ router.put('/user/:id', function(req, res) {
                   var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                   fs.writeFile(script_file, script, function(err) {
                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+		    users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
+                      if(users_in_group && users_in_group.length == 0){
+                        groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
+                          if(oldgroup){
+                            router.delete_group(oldgroup, session_user);
+                          }
+                        })
+                      }
+                    });
 
                     fs.chmodSync(script_file,0o755);
                     user.fid = fid;
@@ -1888,12 +1897,19 @@ router.put('/user/:id', function(req, res) {
           else {
             users_db.update({_id: user._id}, user, function(err){
               events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.param('id') , 'logs': []}, function(err){});
-
-              user.fid = null;
+	      users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
+	        if(users_in_group && users_in_group.length == 0){
+		  groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
+                    if(oldgroup){
+                      router.delete_group(oldgroup, session_user);
+                    }
+                  })
+		}
+	      });
+	      user.fid = null;
               res.send(user);
             });
           }
-
         });
         // End group
 
