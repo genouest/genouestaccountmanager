@@ -379,7 +379,7 @@ router.get('/group/:id', function(req, res){
 
 router.delete_group = function(group, user){
   return new Promise(function (resolve, reject){
-    groups_db.remove({'name': group.id}, function(err){
+    groups_db.remove({'name': group.name}, function(err){
       var fid = new Date().getTime();
       goldap.delete_group(group, fid, function(err){
         var script = "#!/bin/bash\n";
@@ -389,7 +389,7 @@ router.delete_group = function(group, user){
         fs.writeFile(script_file, script, function(err) {
           fs.chmodSync(script_file,0o755);
           group.fid = fid;
-          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
           utils.freeGroupId(group.gid).then(function(){
             resolve(true);;
           })
