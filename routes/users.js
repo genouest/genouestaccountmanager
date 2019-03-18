@@ -396,7 +396,7 @@ router.delete_group = function(group, user){
         });
       });
     });
-  };
+  });
 };
 
 
