@@ -155,6 +155,7 @@ describe('My', () => {
             })
             .end((err, res) => {
                 assert(res.body.status == 0)
+		done();
             });
       });
   });
@@ -324,6 +325,7 @@ describe('My', () => {
                         res.should.have.status(200);
 			user_info = res.body;
                         assert(res.body.status == 'Active');
+			done();
                     });
             });
       });
@@ -379,7 +381,7 @@ describe('My', () => {
       it('test user2 is in admin and group3 secondary group', (done) => {
          // router.post('/user/:id/group/:group'
          chai.request('http://localhost:3000')
-             .get('/user/' + test_user_id)
+             .get('/user/' + test_user_id2)
              .set('X-Api-Key', token_id)
              .end((err, res) => {
                  res.should.have.status(200);
@@ -639,7 +641,7 @@ describe('My', () => {
   describe('Test auto group suppression', () => {
     it('Remove user2 from secondary group test3', (done) => {
         chai.request('http://localhost:3000')
-        .post('/user/' + test_user_id2 + '/group/' + test_group_id3)
+        .delete('/user/' + test_user_id2 + '/group/' + test_group_id3)
         .set('X-Api-Key', token_id)
         .end((err, res) => {
             res.should.have.status(200);
