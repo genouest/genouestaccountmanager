@@ -377,7 +377,7 @@ router.get('/group/:id', function(req, res){
     });
 });
 
-router.delete_group = function(group, user){
+router.delete_group = function(group, admin_user_id){
   return new Promise(function (resolve, reject){
     groups_db.remove({'name': group.name}, function(err){
       var fid = new Date().getTime();
@@ -389,15 +389,32 @@ router.delete_group = function(group, user){
         fs.writeFile(script_file, script, function(err) {
           fs.chmodSync(script_file,0o755);
           group.fid = fid;
-          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+          events_db.insert({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
           utils.freeGroupId(group.gid).then(function(){
-            resolve(true);;
+            resolve(true);
           })
         });
       });
     });
   });
 };
+
+router.clear_user_groups = function(user, admin_user_id){
+  var allgroups = user.secondarygroups;
+  allgroups.push(user.group);
+  for(var i=0;i < allgroups.length;i++){
+    groups_db.findOne({name: allgroups[i]}, function(err, group){
+      if(group){
+        users_db.find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]}, function(err, users_in_group){
+          if(users_in_group && users_in_group.length == 0){
+	    router.delete_group(group, admin_user_id);
+          }
+        });
+      }
+    });
+  }
+}
+
 
 
 router.delete('/group/:id', function(req, res){
@@ -425,7 +442,7 @@ router.delete('/group/:id', function(req, res){
                   res.status(403).send('Group has some users, cannot delete it');
                   return;
               }
-              router.delete_group(group, user).then(function(){
+              router.delete_group(group, user.uid).then(function(){
                 res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
                 res.end();
               });
@@ -765,7 +782,7 @@ router.delete('/user/:id/group/:group', function(req, res){
                   res.end();
                   return;
                 }
-                router.delete_group(group, user).then(function(){
+                router.delete_group(group, session_user.uid).then(function(){
                   res.send({message: 'User removed from group. Empty group ' + secgroup + ' was deleted'});
                   res.end();
                   return;
@@ -778,7 +795,6 @@ router.delete('/user/:id/group/:group', function(req, res){
     });
   });
 });
-
 
 router.delete_user = function(user, action_owner_id){
     return new Promise(function (resolve, reject){
@@ -796,6 +812,7 @@ router.delete_user = function(user, action_owner_id){
                  }).then(function(){
                      resolve(true);
                  });
+		 router.clear_user_groups(user, action_owner_id);
              });
          }
          else {
@@ -822,6 +839,7 @@ router.delete_user = function(user, action_owner_id){
                      resolve(false);
                      return;
                    }
+		   router.clear_user_groups(user, action_owner_id);
                    var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
                    var msg_activ_html = msg_activ;
                    var mailOptions = {
@@ -1867,7 +1885,7 @@ router.put('/user/:id', function(req, res) {
                       if(users_in_group && users_in_group.length == 0){
                         groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
                           if(oldgroup){
-                            router.delete_group(oldgroup, session_user);
+                            router.delete_group(oldgroup, session_user.uid);
                           }
                         })
                       }
@@ -1901,7 +1919,7 @@ router.put('/user/:id', function(req, res) {
 	        if(users_in_group && users_in_group.length == 0){
 		  groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
                     if(oldgroup){
-                      router.delete_group(oldgroup, session_user);
+                      router.delete_group(oldgroup, session_user.uid);
                     }
                   })
 		}
