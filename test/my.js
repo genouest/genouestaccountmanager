@@ -17,7 +17,10 @@ var token_id = null;
 var user_token_id = null;
 
 var test_user_id = 'test' + Math.random().toString(10).slice(-6);
+var test_user_id2 = 'test2' + Math.random().toString(10).slice(-6);
 var test_group_id = 'test' + Math.random().toString(10).slice(-6);
+var test_group_id2 = 'test2' + Math.random().toString(10).slice(-6);
+var test_group_id3 = 'test3' + Math.random().toString(10).slice(-6);
 var test_web_id = 'webtest' + Math.random().toString(10).slice(-6);
 var test_db_id = 'dbtest' + Math.random().toString(10).slice(-6);
 var test_project_id = 'projecttest' + Math.random().toString(10).slice(-6);
@@ -135,6 +138,26 @@ describe('My', () => {
                 }, 1000);
             });
       });
+      it('register user test2', (done) => {
+        chai.request('http://localhost:3000')
+            .post('/user/' + test_user_id2)
+            .send({
+                'firstname': 'ftest2',
+                'lastname': 'ltest2',
+                'email': test_user_id2 + '@my.org',
+                'address': 'test address',
+                'lab': 'test',
+                'responsible': 'test manager',
+                'group': test_group_id2,
+                'why': 'because',
+                'ip': '127.0.0.1',
+                'duration': 365
+            })
+            .end((err, res) => {
+                assert(res.body.status == 0)
+		done();
+            });
+      });
   });
 
   describe('test user is in pending approval', () => {
@@ -198,7 +221,55 @@ describe('My', () => {
                           done();
                       });
               });
-      })
+      });
+
+      it('create group2', (done) => {
+          chai.request('http://localhost:3000')
+              .post('/group/' + test_group_id2)
+              .set('X-Api-Key', token_id)
+              .send({'owner': test_user_id2})
+              .end((err, res) => {
+                  res.should.have.status(200);
+                  chai.request('http://localhost:3000')
+                      .get('/group')
+                      .set('X-Api-Key', token_id)
+                      .end((err, res) => {
+                          let group_exists = false;
+                          for(var i=0;i<res.body.length;i++){
+                              if(res.body[i].name == test_group_id2){
+                                  group_exists = true;
+                                  break
+                              }
+                          }
+                          assert(group_exists);
+                          done();
+                      });
+              });
+      });
+
+      it('create group3', (done) => {
+          chai.request('http://localhost:3000')
+              .post('/group/' + test_group_id3)
+              .set('X-Api-Key', token_id)
+              .send({'owner': test_user_id2})
+              .end((err, res) => {
+                  res.should.have.status(200);
+                  chai.request('http://localhost:3000')
+                      .get('/group')
+                      .set('X-Api-Key', token_id)
+                      .end((err, res) => {
+                          let group_exists = false;
+                          for(var i=0;i<res.body.length;i++){
+                              if(res.body[i].name == test_group_id2){
+                                  group_exists = true;
+                                  break
+                              }
+                          }
+                          assert(group_exists);
+                          done();
+                      });
+              });
+      });
 
       it('activate user', (done) => {
         chai.request('http://localhost:3000')
@@ -241,10 +312,52 @@ describe('My', () => {
             });
       });
 
+      it('activate user2', (done) => {
+        chai.request('http://localhost:3000')
+            .get('/user/' + test_user_id2 + '/activate')
+            .set('X-Api-Key', token_id)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.request('http://localhost:3000')
+                    .get('/user/' + test_user_id2)
+                    .set('X-Api-Key', token_id)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+			user_info = res.body;
+                        assert(res.body.status == 'Active');
+			done();
+                    });
+            });
+      });
+
       it('Admin add test user to admin secondary group', (done) => {
          // router.post('/user/:id/group/:group'
          chai.request('http://localhost:3000')
              .post('/user/' + test_user_id + '/group/admin')
+             .set('X-Api-Key', token_id)
+             .end((err, res) => {
+                 res.should.have.status(200);
+                 assert(res.body.fid);
+                 done();
+             });
+      });
+
+      it('Add test user2 to admin secondary group', (done) => {
+         // router.post('/user/:id/group/:group'
+         chai.request('http://localhost:3000')
+             .post('/user/' + test_user_id2 + '/group/admin')
+             .set('X-Api-Key', token_id)
+             .end((err, res) => {
+                 res.should.have.status(200);
+                 assert(res.body.fid);
+                 done();
+             });
+      });
+
+      it('Add test user2 to group3 secondary group', (done) => {
+         // router.post('/user/:id/group/:group'
+         chai.request('http://localhost:3000')
+             .post('/user/' + test_user_id2 + '/group/' + test_group_id3)
              .set('X-Api-Key', token_id)
              .end((err, res) => {
                  res.should.have.status(200);
@@ -264,6 +377,20 @@ describe('My', () => {
                  done();
              });
       });
+
+      it('test user2 is in admin and group3 secondary group', (done) => {
+         // router.post('/user/:id/group/:group'
+         chai.request('http://localhost:3000')
+             .get('/user/' + test_user_id2)
+             .set('X-Api-Key', token_id)
+             .end((err, res) => {
+                 res.should.have.status(200);
+                 assert(res.body.secondarygroups.indexOf('admin') >= 0);
+                 assert(res.body.secondarygroups.indexOf(test_group_id3) >= 0);
+                 done();
+             });
+      });
+
 
       it('Activated user has home dir', (done) => {
           // Run a timer every seconds for a max of 5 seconds to let creation script be executed
@@ -509,6 +636,83 @@ describe('My', () => {
             });
     });
 
+  });
+
+  describe('Test auto group suppression', () => {
+    it('Remove user2 from secondary group test3', (done) => {
+        chai.request('http://localhost:3000')
+        .delete('/user/' + test_user_id2 + '/group/' + test_group_id3)
+        .set('X-Api-Key', token_id)
+        .end((err, res) => {
+            res.should.have.status(200);
+	    chai.request('http://localhost:3000')
+             .get('/user/' + test_user_id2)
+             .set('X-Api-Key', token_id)
+             .end((err, res) => {
+                 res.should.have.status(200);
+                 assert(res.body.secondarygroups.indexOf(test_group_id3) == '-1');
+                 done();
+             });
+        });
     });
+    it('Deleted group3, did not delete admin', (done) => {
+      chai.request('http://localhost:3000')
+        .get('/group')
+        .set('X-Api-Key', token_id)
+        .end((err, res) => {
+          let g3_was_deleted = true;
+	  let admin_was_not_deleted = false;
+          for(var i=0;i<res.body.length;i++){
+            if(res.body[i].name == test_group_id3){
+              g3_was_deleted = false;
+            }
+	    if(res.body[i].name == 'admin'){
+	      admin_was_not_deleted = true;
+            }
+          }
+          assert(g3_was_deleted);
+	  assert(admin_was_not_deleted);
+          done();
+        });
+    });
+
+    it('Deleted user2', (done) => {
+      chai.request('http://localhost:3000')
+        .delete('/user/' + test_user_id2)
+        .set('X-Api-Key', token_id)
+        .end((err, res) => {
+          res.should.have.status(200);
+          chai.request('http://localhost:3000')
+            .get('/user/' + test_user_id2)
+            .set('X-Api-Key', token_id)
+            .end((err, res) => {
+              res.should.have.status(404);
+              done();
+            });
+        });
+    });
+
+    it('Deleted group2, did not delete admin', (done) => {
+      chai.request('http://localhost:3000')
+        .get('/group')
+        .set('X-Api-Key', token_id)
+        .end((err, res) => {
+          let g2_was_deleted = true;
+          let admin_was_not_deleted = false;
+          for(var i=0;i<res.body.length;i++){
+            if(res.body[i].name == test_group_id2){
+              g2_was_deleted = false;
+            }
+            if(res.body[i].name == 'admin'){
+              admin_was_not_deleted = true;
+            }
+          }
+          assert(g2_was_deleted);
+          assert(admin_was_not_deleted);
+          done();
+        });
+    });
+
+  });
 
 });
