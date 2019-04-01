@@ -285,6 +285,12 @@ app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);
 
+// Default route if no match (for spa handling)
+app.get('*', function (request, response) {
+  response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
+});
+
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
