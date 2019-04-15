@@ -40,7 +40,13 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit() {
     this.configService.config.subscribe(
-      resp => this.config = resp,
+      resp => {
+        this.config = resp ;
+        if (resp['max_account']) {
+          this.msg = "Warning: we reached our user maximum capacity, your request may be rejected or you may be on waiting list"
+        }
+      
+      },
       err => console.log('failed to get config')
     )
     this.http.get('https://json.geoiplookup.io').subscribe(
