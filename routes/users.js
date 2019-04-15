@@ -331,6 +331,69 @@ router.post('/user/:id/apikey', function(req, res){
     });
 });
 
+/*
+app.put('/user/:id/subscribe', users);
+app.put('/user/:id/unsubscribe', users);
+*/
+router.put('/user/:id/subscribe', function(req, res){
+  var sess = req.session;
+  if(! req.locals.logInfo.is_logged) {
+    res.status(401).send('Not authorized');
+    return;
+  }
+  // if not user nor admin
+  if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    res.status(401).send('Not authorized');
+    return;
+  }
+  users_db.findOne({uid: req.param('id')}, function(err, user){
+      if(!user) {
+          res.send({msg: 'User does not exists'})
+          res.end();
+          return;
+      }
+      if(user.email == undefined || user.email == ''){
+          res.send({'subscribed': false});
+          res.end();
+      } else {
+          notif.add(user.email, function() {
+              res.send({'subscribed': true});
+              res.end();
+          });
+      }
+  });
+});
+
+router.put('/user/:id/unsubscribe', function(req, res){
+  var sess = req.session;
+  if(! req.locals.logInfo.is_logged) {
+    res.status(401).send('Not authorized');
+    return;
+  }
+  // if not user nor admin
+  if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    res.status(401).send('Not authorized');
+    return;
+  }
+  users_db.findOne({uid: req.param('id')}, function(err, user){
+      if(!user) {
+          res.send({msg: 'User does not exists'})
+          res.end();
+          return;
+      }
+      if(user.email == undefined || user.email == ''){
+          res.send({'unsubscribed': false});
+          res.end();
+      } else {
+          notif.remove(user.email, function() {
+              res.send({'unsubscribed': true});
+              res.end();
+          });
+      }
+  });
+});
+
+
 router.get('/user/:id/subscribed', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
