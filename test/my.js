@@ -37,6 +37,7 @@ describe('My', () => {
             });
     });
 
+  /*
   describe('/GET route', () => {
       it('it should GET redirected', (done) => {
         chai.request('http://localhost:3000')
@@ -48,6 +49,7 @@ describe('My', () => {
             });
       });
   });
+  */
 
   describe('/POST Login', () => {
       it('login should work', (done) => {
