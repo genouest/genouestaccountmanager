@@ -53,13 +53,18 @@
                                 <td>{{selectedEvent.about}}</td>
                             </tr>
                             <tr>
+                                <th>Quantity</th>
+                                <td>{{selectedEvent.quantity}}</td>
+                            </tr>
+                            <tr>
                                 <th>Group</th>
                                 <td>{{selectedEvent.group.name}}</td>
                             </tr>
                             <tr>
                                 <th>Status</th>
-                                <td *ngIf="selectedEvent.over">Over</td>
-                                <td *ngIf="!selectedEvent.over">Active</td>
+                                <td *ngIf="!selectedEvent.created">Pending</td>
+                                <td *ngIf="selectedEvent.created && selectedEvent.over">Over</td>
+                                <td *ngIf="selectedEvent.created && !selectedEvent.over">Active</td>
                             </tr>
                         </tbody>
                     </table>

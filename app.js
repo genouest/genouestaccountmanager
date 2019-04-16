@@ -246,6 +246,8 @@ app.post('/user/:id/quota', users);
 app.delete('/user/:id/cloud', users);
 app.post('/user/:id/group/:group', users);
 app.get('/user/:id/subscribed', users);
+app.put('/user/:id/subscribe', users);
+app.put('/user/:id/unsubscribe', users);
 app.delete('/user/:id/group/:group', users);
 app.delete('/user/:id', users);
 app.post('/user/:id/project/:project', users);
@@ -284,6 +286,12 @@ app.post('/u2f/auth/:id', auth);
 app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);
+
+// Default route if no match (for spa handling)
+app.get('*', function (request, response) {
+  response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
+});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

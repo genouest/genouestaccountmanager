@@ -50,6 +50,7 @@ export class TpsComponent implements OnInit {
               meta: {
                 'id': event._id,
                 'owner': event.owner,
+                'quantity': event.quantity,
                 'students': event.accounts,
                 'created': event.created,
                 'about': event.about,

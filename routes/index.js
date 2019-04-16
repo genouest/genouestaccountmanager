@@ -5,7 +5,7 @@ var GENERAL_CONFIG = CONFIG.general;
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.redirect(GENERAL_CONFIG.url+'/manager/#/');
+  res.redirect(GENERAL_CONFIG.url+'/manager2');
 });
 
 module.exports = router;

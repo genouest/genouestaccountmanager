@@ -165,6 +165,8 @@ export class UserComponent implements OnInit {
     this.delete_secondary_group = this.delete_secondary_group.bind(this);
     this.db_delete = this.db_delete.bind(this);
     this.delete = this.delete.bind(this);
+    this.subscribe = this.subscribe.bind(this);
+    this.unsubscribe = this.unsubscribe.bind(this);
 
     this.configService.config.subscribe(
       resp => this.config = resp,
@@ -272,6 +274,34 @@ export class UserComponent implements OnInit {
       },
       err => console.log('failed to get events')
     );
+  }
+
+  subscribe() {
+    let ctx = this;
+    this.userService.subscribe(this.user.uid).subscribe(
+      resp => {
+        if (resp['subscribed']) {
+          ctx.subscribed = true;
+        } else {
+          ctx.err_msg = "Failed to subscribe"
+        }
+      },
+      err => console.log('failed to subscribe')
+    )
+  }
+
+  unsubscribe() {
+    let ctx = this;
+    this.userService.unsubscribe(this.user.uid).subscribe(
+      resp => {
+        if (resp['unsubscribed']) {
+          ctx.subscribed = false;
+        } else {
+          ctx.err_msg = "Failed to unsubscribe"
+        }
+      },
+      err => console.log('failed to unsubscribe')
+    )
   }
 
   db_list() {

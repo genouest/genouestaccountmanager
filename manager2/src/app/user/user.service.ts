@@ -216,6 +216,24 @@ export class UserService {
         httpOptions)
   }
 
+  subscribe(id: string) {
+    let httpOptions = {
+    };
+    return this.http.put(
+      environment.apiUrl + '/user/' + id + '/subscribe/',
+      {},
+      httpOptions)     
+  }
+
+  unsubscribe(id: string) {
+    let httpOptions = {
+    };
+    return this.http.put(
+      environment.apiUrl + '/user/' + id + '/unsubscribe/',
+      {},
+      httpOptions)     
+  }
+
   getUser(id: string) {
     let httpOptions = {
       //headers: new HttpHeaders({

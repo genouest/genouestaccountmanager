@@ -2,8 +2,8 @@
   <div class="row">
       <div class="col-sm-6">
           <h2><b>{{user.uid}}</b>
-          <small *ngIf="subscribed" class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small>
-          <small *ngIf="! subscribed" class="oi oi-envelope-closed glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small>
+          <div *ngIf="subscribed"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
+          <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
            -
            <small>Expires: {{dateConvert(user.expiration)}}</small></h2>
           <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
@@ -439,7 +439,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-default" (click)="web_add()">Create</button>
+                                <button type="button" class="btn btn-default" (click)="web_add()">Declare owned site</button>
                             </div>
                         </div>
                         <div>

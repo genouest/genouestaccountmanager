@@ -89,23 +89,29 @@ var deleteExtraGroup = function (group) {
         resolve()
         return
     }
-    groups_db.remove({ 'name': group.name }, function () {
-        var fid = new Date().getTime()
-        goldap.delete_group(group, fid, function () {
-          var script = "#!/bin/bash\n";
-          script += "set -e \n"
-          script += "ldapdelete -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
-          var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update"
-          fs.writeFile(script_file, script, function(err) {
-            fs.chmodSync(script_file,0o755);
-            group.fid = fid;
-            utils.freeGroupId(group.gid).then(function(){
-                events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
-                resolve()
-                return
+    groups_db.findOne({'name': group.name}, function(err, group_to_remove){
+        if(err || group_to_remove == null) {
+            resolve()
+            return
+        }
+        groups_db.remove({ 'name': group.name }, function () {
+            var fid = new Date().getTime()
+            goldap.delete_group(group, fid, function () {
+            var script = "#!/bin/bash\n";
+            script += "set -e \n"
+            script += "ldapdelete -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
+            var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update"
+            fs.writeFile(script_file, script, function(err) {
+                fs.chmodSync(script_file,0o755);
+                group.fid = fid;
+                utils.freeGroupId(group.gid).then(function(){
+                    events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
+                    resolve()
+                    return
+                })
+                
             })
-            
-          })
+            })
         })
     })
   })

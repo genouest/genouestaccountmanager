@@ -1,6 +1,7 @@
 {
   "general": {
     "name": "my",
+    "max_account": 0,
     "readme": [
       { "language": "francais",
         "source_folder" : "/opt/my/readmes/readmes1/"
