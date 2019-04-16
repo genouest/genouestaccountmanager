@@ -82,7 +82,7 @@ export class ProjectComponent implements OnInit {
   show_project_users(projectId) {
     this.projectsService.get(projectId).subscribe(
       resp => {
-        resp.expire = new Date(resp.expire);
+        resp.expire = this.date_convert(resp.expire);
         this.project = resp;
         this.projectsService.getUsers(projectId).subscribe(
           resp => {
@@ -186,6 +186,17 @@ export class ProjectComponent implements OnInit {
       },
       err => this.prj_err_msg = err.error
     )
+  }
+
+  date_convert = function timeConverter(tsp){
+    var a = new Date(tsp);
+    // Really..?
+    var months = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var time =  year +'-' + month + '-' + date;
+    return time;
   }
 
 }
