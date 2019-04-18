@@ -108,6 +108,7 @@ export class AuthService {
   private _setSession(profile) {
     // Save authentication data and update login status subject
     this.userProfile = profile;
+    localStorage.setItem('my-user', JSON.stringify(profile))
     /*
     if(profile.token !== '') {
       this.accessToken = profile.token;
@@ -123,6 +124,7 @@ export class AuthService {
     this.authenticated = false;
     this.$authStatus.next(false);
     localStorage.removeItem('my-api-key');
+    localStorage.removeItem('my-user')
   }
 
   updateApiKey(token) {
@@ -154,10 +156,16 @@ export class AuthService {
   }
 
   get profile(): any {
+    if(! this.userProfile && localStorage.getItem('my-user')) {
+      return JSON.parse(localStorage.getItem('my-user'))
+    }
     return this.userProfile
   }
 
   get isLoggedIn(): boolean {
+   if(!this.authenticated && localStorage.getItem('my-api-key')) {
+     return true
+   }
    return this.authenticated
   }
 
