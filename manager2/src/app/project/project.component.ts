@@ -61,7 +61,7 @@ export class ProjectComponent implements OnInit {
         this.projects = resp;
         this.dtTrigger.next();
       },
-      err => console.log(err)
+      err => console.log('failed to get projects')
     )
   }
 
