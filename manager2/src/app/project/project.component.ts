@@ -53,7 +53,7 @@ export class ProjectComponent implements OnInit {
     this.manager_visible = true;
     this.session_user = this.authService.userProfile;
     this.users = [];
-    this.projectsService.list(true).subscribe(
+    this.projectsService.list(false).subscribe(
       resp => {
         for(var i=0;i<resp.length;i++){
           resp[i].expire = new Date(resp[i].expire);
