@@ -53,7 +53,7 @@ export class ProjectComponent implements OnInit {
     this.manager_visible = true;
     this.session_user = this.authService.userProfile;
     this.users = [];
-    this.projectsService.list(true).subscribe(
+    this.projectsService.list(false).subscribe(
       resp => {
         for(var i=0;i<resp.length;i++){
           resp[i].expire = new Date(resp[i].expire);
@@ -61,21 +61,8 @@ export class ProjectComponent implements OnInit {
         this.projects = resp;
         this.dtTrigger.next();
       },
-      err => console.log('failed to get services')
+      err => console.log('failed to get projects')
     )
-    this.userService.list().subscribe(
-      resp => {
-        this.users = resp;
-        this.dtTriggerUser.next();
-      },
-      err => console.log('failed to get users')
-    )
-    if (this.session_user.is_admin) {
-      this.groupService.list().subscribe(
-        resp => this.groups = resp,
-        err => console.log('failed to get groups')
-      )
-    }
   }
 
   show_project_users(project) {
