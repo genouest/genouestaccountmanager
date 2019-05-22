@@ -89,7 +89,7 @@ export class RegisterComponent implements OnInit {
       why: this.why
     }).subscribe(
       resp => {
-        this.msg = resp['message'];
+        this.msg = resp['msg'];
         this.msgstatus = resp['status'];
         if(resp['status'] == 0) {
           this.router.navigate(['/registered']);

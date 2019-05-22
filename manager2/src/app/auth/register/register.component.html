@@ -11,21 +11,21 @@
             <div class="form-group row">
                 <div class="col-md-4">
                     <label for="firstname">First name</label>
-                    <input (ngModelChange)="update_userid($event, 0)" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="firstname" type="text" class="form-control" required>
+                    <input autocomplete="given-name" (ngModelChange)="update_userid($event, 0)" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="firstname" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-4">
                     <label for="lastname">Last name</label>
-                    <input (ngModelChange)="update_userid($event, 1)" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="lastname" type="text" class="form-control" required>
+                    <input autocomplete="family-name" (ngModelChange)="update_userid($event, 1)" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="lastname" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-4">
                     <label for="email">User id</label>
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="userid" type="text" id="userid" class="form-control" required maxlength="12"/>
+                    <input autocomplete="username" [ngModelOptions]="{standalone: true}" [(ngModel)]="userid" type="text" id="userid" class="form-control" required maxlength="12"/>
 
                 </div>
             </div>
             <div class="form-group">
                 <label for="email">Professional email</label>
-                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="email" type="email" id="email" class="form-control" required autofocus>
+                <input autocomplete="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="email" type="email" id="email" class="form-control" required autofocus>
                 <small id="emailHelp" class="form-text text-muted">Please provide a professional email address (please avoid gmail, yahoo, etc.).</small>
             </div>
             <br>
@@ -83,9 +83,12 @@
             <i>Terms of use</i>
             <hr>
             <div class="checkbox">
-                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required>I agree with the <a target="_blank" href="/doc/terms_of_use.txt">terms of use</a> of the {{config.name}} platform</label>
+                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required>I agree with the <a target="_blank" aria-label="terms of user" href="/doc/terms_of_use.txt">terms of use</a> of the {{config.name}} platform</label>
             </div>
             <button type="button" class="btn btn-lg btn-primary btn-block" (click)="register();">Register</button>
+            <div *ngIf="msg">
+                <div class="alert alert-warning">{{msg}}</div>
+            </div>
         </form>
     </div>
 </div>
