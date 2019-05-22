@@ -12,10 +12,10 @@
         <div *ngIf="! double_auth">
             <form class="form-signin form-group">
                 <div class="form-group">
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="userId" id="sign_user_id" type="text" class="form-control" placeholder="User id" required autofocus>
+                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="userId" id="sign_user_id" type="text" class="form-control" placeholder="User id" autocomplete="username" required autofocus>
                 </div>
                 <div class="form-group">
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="password" id="sign_password" type="password" placeholder="Password" class="form-control" required>
+                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="password" id="sign_password" type="password" placeholder="Password" class="form-control" autocomplete="current-password" required>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-lg btn-primary btn-block" type="submit" (click)="login()">
@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-md-8">
                             <div class="form-group">
-                                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="mail_token" type="text" class="form-control" placeholder="Token received" autofocus/>
+                                <input autocomplete="one-time-code" [ngModelOptions]="{standalone: true}" [(ngModel)]="mail_token" type="text" class="form-control" placeholder="Token received" autofocus/>
                             </div>
                         </div>
                     </div>
