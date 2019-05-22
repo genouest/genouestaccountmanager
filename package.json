@@ -22,7 +22,7 @@
     "cors": "^2.8.4",
     "debug": "~2.0.0",
     "escapeshellarg": "^0.1.0",
-    "express": "~4.9.0",
+    "express": "^4.16.4",
     "express-session": "^1.9.2",
     "grunt": "^0.4.5",
     "hjs": "~0.0.6",
