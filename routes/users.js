@@ -1254,7 +1254,7 @@ router.get('/user/:id/confirm', function(req, res) {
 router.post('/user/:id', function(req, res) {
   logger.info('New register request for '+req.param('id'));
   if(req.param('ip').split('.').length != 4) {
-    res.send({'status': 1, 'msg': 'invalid data'});
+    res.send({'status': 1, 'msg': 'invalid ip address format'});
     return;
   }
   if(req.param('group')=='' || req.param('group')==null || req.param('group')==undefined) {
