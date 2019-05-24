@@ -103,7 +103,7 @@ app.all('*', function(req, res, next){
         try {
             jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
         } catch(err) {
-            wlooger.error('failed to decode jwt');
+            wlogger.error('failed to decode jwt');
             jwtToken = null;
         }
     }
@@ -142,7 +142,7 @@ app.all('*', function(req, res, next){
             }
         }
         catch(error){
-            wlooger.error('Invalid token', error);
+            wlogger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }
@@ -169,7 +169,7 @@ app.all('*', function(req, res, next){
             });
         }
         catch(error){
-            wlooger.error('Invalid token', error);
+            wlogger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }else{
@@ -333,7 +333,7 @@ utils.loadAvailableIds().then(function (alreadyLoaded) {
 
     if (!module.parent) {
     http.createServer(app).listen(app.get('port'), function(){
-        wlooger.info('Server listening on port ' + app.get('port'));
+        wlogger.info('Server listening on port ' + app.get('port'));
     });
     }
 
