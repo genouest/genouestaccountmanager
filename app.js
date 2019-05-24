@@ -19,7 +19,7 @@ var winston = require('winston');
 var jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
-      timestamp: true
+  label: 'gomngr'
 });
 winston.loggers.add('gomngr', {
     transports: [myconsole]
@@ -102,7 +102,7 @@ app.all('*', function(req, res, next){
         try {
             jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
         } catch(err) {
-            console.log('failed to decode jwt');
+            logger.error('failed to decode jwt');
             jwtToken = null;
         }
     }
@@ -114,7 +114,7 @@ app.all('*', function(req, res, next){
         }
         try{
             if(jwtToken.isLogged) {
-                req.session.is_logged = true; 
+                req.session.is_logged = true;
                 logInfo.is_logged = true;
             }
             if(jwtToken.mail_token) {
@@ -141,7 +141,7 @@ app.all('*', function(req, res, next){
             }
         }
         catch(error){
-            console.error('Invalid token', error);
+            logger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }
@@ -168,7 +168,7 @@ app.all('*', function(req, res, next){
             });
         }
         catch(error){
-            console.error('Invalid token', error);
+            logger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }else{
@@ -332,7 +332,7 @@ utils.loadAvailableIds().then(function (alreadyLoaded) {
 
     if (!module.parent) {
     http.createServer(app).listen(app.get('port'), function(){
-        console.log('Server listening on port ' + app.get('port'));
+        logger.info('Server listening on port ' + app.get('port'));
     });
     }
 
