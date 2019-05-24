@@ -22,7 +22,7 @@ const myconsole = new (winston.transports.Console)({
   label: 'gomngr',
   level: log_level
 });
-winston.loggers.add('gomngr', {
+const wlogger = winston.loggers.add('gomngr', {
     transports: [myconsole]
 });
 
@@ -103,7 +103,7 @@ app.all('*', function(req, res, next){
         try {
             jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
         } catch(err) {
-            logger.error('failed to decode jwt');
+            wlooger.error('failed to decode jwt');
             jwtToken = null;
         }
     }
@@ -142,7 +142,7 @@ app.all('*', function(req, res, next){
             }
         }
         catch(error){
-            logger.error('Invalid token', error);
+            wlooger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }
@@ -169,7 +169,7 @@ app.all('*', function(req, res, next){
             });
         }
         catch(error){
-            logger.error('Invalid token', error);
+            wlooger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }else{
@@ -333,7 +333,7 @@ utils.loadAvailableIds().then(function (alreadyLoaded) {
 
     if (!module.parent) {
     http.createServer(app).listen(app.get('port'), function(){
-        logger.info('Server listening on port ' + app.get('port'));
+        wlooger.info('Server listening on port ' + app.get('port'));
     });
     }
 
