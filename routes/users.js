@@ -233,7 +233,7 @@ var create_extra_user = function(user_name, group, internal_user){
 
               }
               else {
-                  logger.error('Failed to create admin user');
+                logger.error('Failed to create admin user', err);
                   resolve(null);
               }
             });
