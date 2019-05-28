@@ -65,7 +65,7 @@ var client = myldap.createClient({
 });
 
 console.log("Search for groups");
-client.search('ou=groups,' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, groups) {
+client.search('ou='+CONFIG.ldap.ou_groups+',' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, groups) {
     groups.on('searchEntry', function(entry) {
       //console.log('entry: ' + JSON.stringify(entry.object));
       record_group(entry.object);
@@ -107,7 +107,7 @@ function record_group(group){
 
 function search_users(){
     console.log("now search for users");
-    client.search('ou=people,' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, users) {
+    client.search('ou='+CONFIG.ldap.ou_people+',' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, users) {
     users.on('searchEntry', function(entry) {
       //console.log('entry: ' + JSON.stringify(entry.object));
       ldap_nb_users += 1;

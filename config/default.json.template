@@ -67,6 +67,8 @@
     "admin_cn": "cn=admin",
     "admin_dn": "dc=nodomain",
     "admin_password": "",
+    "ou_groups" : "Groups",
+    "ou_people": "People"
     "team": "genouest"
   },
   "mysql": {
