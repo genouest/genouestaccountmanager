@@ -59,7 +59,9 @@
     "dn": "dc=my,dc=org",
     "admin_cn": "cn=admin",
     "admin_dn": "dc=my,dc=org",
-    "admin_password": "my"
+    "admin_password": "my",
+    "ou_groups" : "Groups",
+    "ou_people": "People"
   },
   "mysql": {
     "host": "mysql",

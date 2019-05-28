@@ -28,8 +28,8 @@ module.exports = {
   reset_password: function(user, fid, callback){
 
     var user_ldif = "";
-    user_ldif += "dn: uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\n";
-    //user_ldif += "dn: cn="+user.firstname+" "+user.lastname+",ou=people,"+CONFIG.ldap.dn+"\n";
+    user_ldif += "dn: uid="+user.uid+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn+"\n";
+    //user_ldif += "dn: cn="+user.firstname+" "+user.lastname+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn+"\n";
     user_ldif += "changetype: modify\n";
     user_ldif += "replace: userpassword\n";
     user_ldif += "userpassword: "+user.password+"\n";
@@ -58,7 +58,7 @@ module.exports = {
           attributes: ['dn']
         };
 
-        client.search('ou=people,' + CONFIG.ldap.dn, opts, function(err, res) {
+        client.search('ou='+CONFIG.ldap.ou_people+',' + CONFIG.ldap.dn, opts, function(err, res) {
             if(err) {
               logger.error('Could not find ' + uid, err);
                 callback(err);
@@ -86,7 +86,7 @@ module.exports = {
     });
 
     var bind_options = {
-      binddn: 'uid='+uid+'ou=people,'+CONFIG.ldap.dn,
+      binddn: 'uid='+uid+'ou='+CONFIG.ldap.ou_people+','+CONFIG.ldap.dn,
       password: password
     }
 
@@ -122,7 +122,7 @@ module.exports = {
       return;
     }
     var user_ldif = "";
-    user_ldif += "dn: uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\n";
+    user_ldif += "dn: uid="+user.uid+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn+"\n";
     user_ldif += "changetype: modify\n";
     user_ldif += "replace: sn\n";
     user_ldif += "sn: "+user.lastname+"\n";
@@ -168,11 +168,11 @@ module.exports = {
       user_ldif += "replace: gidNumber\n";
       user_ldif += "gidNumber: "+user.gidnumber+"\n";
       // Group membership modification
-      user_ldif += "\ndn: cn="+user.oldgroup+",ou=groups,"+CONFIG.ldap.dn+"\n";
+      user_ldif += "\ndn: cn="+user.oldgroup+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
       user_ldif += "changetype: modify\n";
       user_ldif += "delete: memberUid\n";
       user_ldif += "memberUid: "+user.uid+"\n\n"
-      user_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
+      user_ldif += "dn: cn="+user.group+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
       user_ldif += "changetype: modify\n";
       user_ldif += "add: memberUid\n";
       user_ldif += "memberUid: "+user.uid+"\n"
@@ -189,7 +189,7 @@ module.exports = {
 
   add_group: function(group, fid, callback) {
     var user_ldif = "";
-    user_ldif += "dn: cn="+group.name+",ou=groups,"+CONFIG.ldap.dn+"\n";
+    user_ldif += "dn: cn="+group.name+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
     user_ldif += "objectClass: top\n";
     user_ldif += "objectClass: posixGroup\n";
     user_ldif += "gidNumber: "+group.gid+"\n";
@@ -206,7 +206,7 @@ module.exports = {
 
   delete_group: function(group, fid, callback) {
       var user_ldif = "";
-      user_ldif += "cn="+group.name+",ou=groups,"+CONFIG.ldap.dn+"\n";
+      user_ldif += "cn="+group.name+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
       user_ldif += "\n";
       fs.writeFile(CONFIG.general.script_dir+'/'+group.name+"."+fid+".ldif", user_ldif, function(err) {
         if(err) {
@@ -221,7 +221,7 @@ module.exports = {
     var password = Math.random().toString(36).slice(-10);
     var user_ldif = "";
     var group_ldif = "";
-    user_ldif += "dn: uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\n";
+    user_ldif += "dn: uid="+user.uid+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn+"\n";
     user_ldif += "cn: "+user.firstname+" "+user.lastname+"\n";
     user_ldif += "sn: "+user.lastname+"\n";
     if(user.is_genouest){
@@ -250,7 +250,7 @@ module.exports = {
 
     groups_db.findOne({'name': user.group}, function(err, group){
       if(err || group == null || group == undefined) {
-        user_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
+        user_ldif += "dn: cn="+user.group+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
         user_ldif += "objectClass: top\n";
         user_ldif += "objectClass: posixGroup\n";
         //user_ldif += "objectclass: groupofnames\n";
@@ -259,7 +259,7 @@ module.exports = {
         user_ldif += "description: group for "+user.group+"\n";
         user_ldif += "\n";
       }
-      group_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
+      group_ldif += "dn: cn="+user.group+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
       group_ldif += "changetype: modify\n";
       group_ldif += "add: memberUid\n";
       group_ldif += "memberUid: "+user.uid+"\n"
@@ -290,13 +290,13 @@ module.exports = {
     */
     var user_ldif = "";
     for(var ga=0;ga<group_add.length;ga++){
-      user_ldif += "dn: cn="+group_add[ga]+",ou=groups,"+CONFIG.ldap.dn+"\n";
+      user_ldif += "dn: cn="+group_add[ga]+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
       user_ldif += "changetype: modify\n";
       user_ldif += "add: memberUid\n";
       user_ldif += "memberUid: "+user.uid+"\n\n"
     }
     for(var gd=0;gd<group_remove.length;gd++){
-      user_ldif += "dn: cn="+group_remove[gd]+",ou=groups,"+CONFIG.ldap.dn+"\n";
+      user_ldif += "dn: cn="+group_remove[gd]+",ou="+CONFIG.ldap.ou_groups+","+CONFIG.ldap.dn+"\n";
       user_ldif += "changetype: modify\n";
       user_ldif += "delete: memberUid\n";
       user_ldif += "memberUid: "+user.uid+"\n\n"
