@@ -160,13 +160,20 @@ function record_user(user){
         secondary_groups = [];
     }
 
-    var homeDir = user.homeDirectory.split('/');
-    if("/" + homeDir[1] != CONFIG.general.home) {
+    if(! user.homeDirectory.startsWith(CONFIG.general.home)) {
         errors.push(user.uid + " home base dir != " + CONFIG.general.home);
         console.warn("[SKIP] ", user.uid, " invalid home dir");
         return;
     }
-    if(homeDir[homeDir.length-1] != user.uid || homeDir[homeDir.length-2] != ldap_groups[parseInt(user.gidNumber)].cn) {
+
+    // todo remove this two useless (or not) and ugly check
+    var homeDir = user.homeDirectory.split('/');
+    if(homeDir[homeDir.length-1] != user.uid) {
+        console.warn("[SKIP] ", user.uid, " invalid home dir");
+        errors.push(user.uid + " home end path, should end with " + "/" + user.uid + " vs /" + homeDir[homeDir.length-1]);
+        return;
+    }
+    if(CONFIG.general.use_group_in_path && homeDir[homeDir.length-2] != ldap_groups[parseInt(user.gidNumber)].cn) {
         console.warn("[SKIP] ", user.uid, " invalid home dir");
         errors.push(user.uid + " home end path, should be " + ldap_groups[parseInt(user.gidNumber)].cn + "/" + user.uid + " vs " + homeDir[homeDir.length-2] + "/" + homeDir[homeDir.length-1]);
         return;
