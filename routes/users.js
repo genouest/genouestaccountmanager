@@ -89,7 +89,7 @@ if (runningEnv === 'test'){
   });
 }
 
-var get_group_home = function (user) {
+function get_group_home (user) {
     group_path = CONFIG.general.home+'/'+user.group;
     if(user.maingroup!="" && user.maingroup!=null) {
         group_path = CONFIG.general.home+'/'+user.maingroup+'/'+user.group;
@@ -97,12 +97,13 @@ var get_group_home = function (user) {
     return group_path.replace(/\/+/g, '/');
 }
 
-var get_user_home = function (user) {
+function get_user_home (user) {
     // todo check  or not if user.uid exist
     user_home = CONFIG.general.home+"/"+user.uid;
     if(config.general.use_group_in_path) {
         user_home = get_group_home+"/"+user.uid;
     }
+    logger.info('home for  '+user.uid+' is '+user_home);
     return user_home.replace(/\/+/g, '/');
 }
 
