@@ -91,10 +91,11 @@ if (runningEnv === 'test'){
 
 var get_user_group_home = function (user) {
     return new Promise( function (resolve, reject) {
+        group_path = CONFIG.general.home+'/'+user.group;
         if(user.maingroup!="" && user.maingroup!=null) {
-            return CONFIG.general.home+'/'+user.maingroup+'/'+user.group;
+            group_path = CONFIG.general.home+'/'+user.maingroup+'/'+user.group;
         }
-        return CONFIG.general.home+'/'+user.group;
+        return group_path.replace(/\/+/g, '/')
     });
 }
 
@@ -103,12 +104,13 @@ var set_user_home = function (user) {
         // todo check if user is a reference in js :)
         if(!user.home) {
             // todo check  or not if user.uid exist
-            user.home = CONFIG.general.home+"/"+user.uid;
+            user_home = CONFIG.general.home+"/"+user.uid;
             if(config.general.use_group_in_path) {
-                user.home = get_user_group_home+user.uid;
+                user_home = get_user_group_home+"/"+user.uid;
             }
+            user.home = user_home.replace(/\/+/g, '/');
         }
-        user.home = user.home.replace(/(\/)+/g, "$1");
+        logger.info('home set to '+user.home+' for '+user.uid);
         return user; // hum... or maybe return user.home ...
     });
 }
