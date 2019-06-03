@@ -100,10 +100,9 @@ function get_group_home (user) {
 function get_user_home (user) {
     // todo check  or not if user.uid exist
     user_home = CONFIG.general.home+"/"+user.uid;
-    if(config.general.use_group_in_path) {
+    if(CONFIG.general.use_group_in_path) {
         user_home = get_group_home+"/"+user.uid;
     }
-    logger.info('home for  '+user.uid+' is '+user_home);
     return user_home.replace(/\/+/g, '/');
 }
 
@@ -170,6 +169,7 @@ var create_extra_user = function(user_name, group, internal_user){
           group: group.name,
           secondarygroups: [],
           maingroup: "",
+          home: "/tmp/home",
           why: "",
           ip: "",
           regkey: Math.random().toString(36).slice(-10),
@@ -1340,9 +1340,12 @@ router.post('/user/:id', function(req, res) {
         group: req.param('group'),
         secondarygroups: [],
         maingroup: default_main_group,
+        // todo: find a clean way to set it here
+        home: "/tmp/home",
         why: req.param('why'),
         ip: req.param('ip'),
         regkey: regkey,
+        is_genouest: false,
         is_fake: false,
         uidnumber: -1,
         gidnumber: -1,
@@ -1352,7 +1355,7 @@ router.post('/user/:id', function(req, res) {
         loginShell: '/bin/bash',
         history: [{action: 'register', date: new Date().getTime()}]
       }
-      user[CONFIG.general.internal_flag] = false,
+      // user[CONFIG.general.internal_flag] = false,
       user.home = get_user_home(user);
 
       events_db.insert({'owner': req.param('id'), 'date': new Date().getTime(), 'action': 'user registration ' + req.param('id') , 'logs': []}, function(err){});
