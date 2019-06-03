@@ -11,7 +11,7 @@ var http = require('http');
 var session = require('express-session');
 
 var log_level = 'info';
-if (process.env.NODE_ENV == 'dev' || process.env.NODE_DEBUG) {
+if (process.env.NODE_ENV == 'dev' || process.env.DEBUG) {
     log_level = 'debug';
 }
 
@@ -305,7 +305,7 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development' || process.env.NODE_DEBUG) {
+if (app.get('env') === 'development' || process.env.DEBUG) {
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
