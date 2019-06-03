@@ -251,7 +251,7 @@ router.create_admin = function(default_admin, default_admin_group){
         }
         else {
             logger.info('should create admin');
-            groups_db.findOne({name: default_admin}).then(function(group){
+            groups_db.findOne({name: default_admin_group}).then(function(group){
 
                 if(group){
                     logger.info('group already exists');
