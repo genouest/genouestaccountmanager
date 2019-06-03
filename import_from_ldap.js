@@ -135,8 +135,8 @@ function search_users(){
 function record_user(user){
     console.debug(user);
 
-    if(! user.dn.startsWith("uid=")){
-        console.warn("[SKIP] Invalid DN for user ", user.uid, ",DN= ", user.dn, ", should be uid=...");
+    if(! user.uid || user.uid == ""){
+        console.warn("[SKIP] Invalid Uid for user ", user.uid, ",DN= ", user.dn);
         return;
     }
 
