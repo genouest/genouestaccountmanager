@@ -89,7 +89,7 @@ if (runningEnv === 'test'){
   });
 }
 
-var get_user_group_home = function (user) {
+var get_group_home = function (user) {
     return new Promise( function (resolve, reject) {
         group_path = CONFIG.general.home+'/'+user.group;
         if(user.maingroup!="" && user.maingroup!=null) {
@@ -99,19 +99,14 @@ var get_user_group_home = function (user) {
     });
 }
 
-var set_user_home = function (user) {
+var get_user_home = function (user) {
     return new Promise( function (resolve, reject) {
-        // todo check if user is a reference in js :)
-        if(!user.home) {
-            // todo check  or not if user.uid exist
-            user_home = CONFIG.general.home+"/"+user.uid;
-            if(config.general.use_group_in_path) {
-                user_home = get_user_group_home+"/"+user.uid;
-            }
-            user.home = user_home.replace(/\/+/g, '/');
+        // todo check  or not if user.uid exist
+        user_home = CONFIG.general.home+"/"+user.uid;
+        if(config.general.use_group_in_path) {
+            user_home = get_group_home+"/"+user.uid;
         }
-        logger.info('home set to '+user.home+' for '+user.uid);
-        return user; // hum... or maybe return user.home ...
+        return user_home.replace(/\/+/g, '/');
     });
 }
 
@@ -202,7 +197,7 @@ var create_extra_user = function(user_name, group, internal_user){
 
             user.uidnumber = minuid;
             user.gidnumber = group.gid;
-            set_user_home(user);
+            user.home = get_user_home(user);
             var fid = new Date().getTime();
             goldap.add(user, fid, function(err) {
               if(!err){
@@ -1089,7 +1084,7 @@ router.get('/user/:id/activate', function(req, res) {
 
             user.uidnumber = minuid;
             user.gidnumber = data.gid;
-            set_user_home(user); // should set user.home
+            user.home = get_user_home(user);
             var fid = new Date().getTime();
             goldap.add(user, fid, function(err) {
               if(!err){
@@ -1361,6 +1356,7 @@ router.post('/user/:id', function(req, res) {
         history: [{action: 'register', date: new Date().getTime()}]
       }
       user[CONFIG.general.internal_flag] = false,
+      user.home = get_user_home(user);
 
       events_db.insert({'owner': req.param('id'), 'date': new Date().getTime(), 'action': 'user registration ' + req.param('id') , 'logs': []}, function(err){});
 
@@ -1940,6 +1936,7 @@ router.put('/user/:id', function(req, res) {
             user.ip = req.param('ip');
             user.is_genouest = req.param('is_genouest');
             user.maingroup = req.param('maingroup');
+            user.home = get_user_home(user);
             if(user.group == '' || user.group == null) {
               res.status(403).send('Some mandatory fields are empty');
               return;
@@ -1947,7 +1944,6 @@ router.put('/user/:id', function(req, res) {
           }
 
           if(user.status == STATUS_ACTIVE){
-            set_user_home(user);
 
             users_db.update({_id: user._id}, user, function(err){
               if(session_user.is_admin) {
@@ -1965,10 +1961,10 @@ router.put('/user/:id', function(req, res) {
                   if(session_user.is_admin && CONFIG.general.use_group_in_path) {
                     if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                       // If group modification, change home location
-                        script += "if [ ! -e "+get_user_group_home(user)+" ]; then\n"
-                        script += "\tmkdir -p "+get_user_group_home(user)+"\n";
+                        script += "if [ ! -e "+get_group_home(user)+" ]; then\n"
+                        script += "\tmkdir -p "+get_group_home(user)+"\n";
                       script += "fi\n";
-                      script += "mv "+user.oldhome+" "+get_user_group_home(user)+"/\n";
+                      script += "mv "+user.oldhome+" "+get_group_home(user)+"/\n";
                       script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
                       script += utils.moveExtraDirs(user.uid, user.oldgroup, user.group, user.uidnumber, user.gidnumber);
                       events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
