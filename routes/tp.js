@@ -142,6 +142,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                   group: userGroup.name,
                   secondarygroups: [],
                   maingroup: CONFIG.general.default_main_group,
+                  home: "/tmp/home",
                   why: 'TP/Training',
                   ip: '',
                   regkey: '',
@@ -154,6 +155,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                   loginShell: '/bin/bash',
                   history: []
               };
+              user.home = get_user_home(user);
               users.push(user);
               minuid++;
             }
