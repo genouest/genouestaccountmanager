@@ -140,6 +140,11 @@ function record_user(user){
         return;
     }
 
+    if(! user.cn || user.cn == ""){
+        console.warn("[SKIP] Invalid Cn for user ", user.cn, ",DN= ", user.dn);
+        return;
+    }
+
     var is_fake = false;
     if(! user.mail || user.mail == ""){
         console.warn("User ", user.uid, " has not email declared, tagging user as a fake/service user");
@@ -147,12 +152,17 @@ function record_user(user){
     }
 
     var regkey = Math.random().toString(36).substring(7);
-
-    console.debug("gid: ",user.gidNumber);
+    var uid = parseInt(user.uidNumber);
     var gid = parseInt(user.gidNumber);
+    console.warn(user.uid, ": uidNumber:", uid, "gidNumber: ", gid);
+    
     if(ldap_groups[gid] === undefined) {
-        console.warn("[SKIP] user ", user.uid, " has no valid group id: ", gid);
-        return;
+        console.warn("User ", user.uid, " has no valid group id: ", gid);
+	if(CONFIG.general.use_group_in_path)
+	{
+	    console.warn("[SKIP] User ", user.uid," as group are needed for home path");
+	    return;
+	}
     }
 
     var secondary_groups = ldap_secondary_groups[user.uid];
@@ -160,23 +170,28 @@ function record_user(user){
         secondary_groups = [];
     }
 
-    if(! user.homeDirectory.startsWith(CONFIG.general.home)) {
+    console.warn("Home dir for ", user.uid, " is set to", user.homeDirectory);
+    
+    if(! user.homeDirectory || ! user.homeDirectory.startsWith(CONFIG.general.home)) {
         errors.push(user.uid + " home base dir != " + CONFIG.general.home);
         console.warn("[SKIP] ", user.uid, " invalid home dir");
         return;
     }
 
-    // todo remove this two useless (or not) and ugly check
     var homeDir = user.homeDirectory.split('/');
     if(homeDir[homeDir.length-1] != user.uid) {
         console.warn("[SKIP] ", user.uid, " invalid home dir");
         errors.push(user.uid + " home end path, should end with " + "/" + user.uid + " vs /" + homeDir[homeDir.length-1]);
         return;
     }
-    if(CONFIG.general.use_group_in_path && homeDir[homeDir.length-2] != ldap_groups[parseInt(user.gidNumber)].cn) {
-        console.warn("[SKIP] ", user.uid, " invalid home dir");
-        errors.push(user.uid + " home end path, should be " + ldap_groups[parseInt(user.gidNumber)].cn + "/" + user.uid + " vs " + homeDir[homeDir.length-2] + "/" + homeDir[homeDir.length-1]);
-        return;
+    
+    if(CONFIG.general.use_group_in_path)
+    {
+	if (ldap_groups[gid] && homeDir[homeDir.length-2] != ldap_groups[gid].cn) {
+            console.warn("[SKIP] ", user.uid, " invalid home dir");
+            errors.push(user.uid + " home end path, should be " + ldap_groups[gid].cn + "/" + user.uid + " vs " + homeDir[homeDir.length-2] + "/" + homeDir[homeDir.length-1]);
+            return;
+	}
     }
 
     if(homeDir.length > 4){
@@ -206,16 +221,17 @@ function record_user(user){
         address: "unknown",
         lab: "unknown",
         responsible: "unknown",
-        group: ldap_groups[parseInt(user.gidNumber)].cn,
+        group: (ldap_groups[gid] ? ldap_groups[gid].cn : ''), //todo: maybe use default group from config
         secondarygroups: secondary_groups,
         maingroup: MAIN_GROUP,
+	home: user.homeDirectory,
         why: "",
         ip: "",
         regkey: regkey,
         is_genouest: false,
         is_fake: is_fake,
-        uidnumber: parseInt(user.uidNumber),
-        gidnumber: parseInt(user.gidNumber),
+	uidnumber: uid,
+        gidnumber: gid,
         cloud: false,
         duration: 365,
         expiration: new Date().getTime() + 1000*3600*24*365,
