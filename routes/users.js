@@ -101,7 +101,7 @@ function get_user_home (user) {
     // todo check  or not if user.uid exist
     user_home = CONFIG.general.home+"/"+user.uid;
     if(CONFIG.general.use_group_in_path) {
-        user_home = get_group_home+"/"+user.uid;
+        user_home = get_group_home(user)+"/"+user.uid;
     }
     return user_home.replace(/\/+/g, '/');
 }
