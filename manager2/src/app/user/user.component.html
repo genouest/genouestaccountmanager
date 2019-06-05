@@ -45,7 +45,7 @@
         </li>
         <li class="nav-item" (click)="switchTo(2)">
             <span class="nav-link">Details</span>
-          </li>        
+          </li>
         <li class="nav-item" (click)="switchTo(3)">
           <span class="nav-link">History</span>
         </li>
@@ -162,7 +162,7 @@
                           </div>
                           <div class="form-check row">
                             <input id="staff" name="staff" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_genouest" type="checkbox" class="form-check-input">
-                              <label class="col-6 form-check-label" for="staff">                                  
+                              <label class="col-6 form-check-label" for="staff">
                                   Staff member
                               </label>
                           </div>
@@ -233,7 +233,7 @@
             <h4>Home directory</h4>
         </div>
         <div class="card-body">
-            <span>/home<span *ngIf="user.maingroup">/{{user.maingroup}}</span>/{{user.group}}/{{user.uid}}</span>
+            <span>{{user.home}}</span>
         </div>
     </div>
 
@@ -345,7 +345,7 @@
                     <div class="form-group">
                         <button type="button" class="btn btn-default" (click)="db_add()">Create</button>
                     </div>
-                
+
                 <div class="table-responsive">
                     <table *ngIf="databases && databases.length > 0" class="table table-striped">
                         <thead>
@@ -361,8 +361,8 @@
                 </div>
         </div>
     </div>
-  </div> 
-  
+  </div>
+
   <div class="col-md-6 col-sm-12" *ngIf="panel == 1">
         <div class="card bg-light">
                 <div class="card-header">
@@ -507,4 +507,3 @@
 
 </div>
 </div>
-
