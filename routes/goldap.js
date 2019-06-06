@@ -23,12 +23,75 @@ var options = {
 };
 
 
+function  get_user_dn(user, callback) {
+    // todo: factorize with bind exported function
+    // todo: find if it is a good idea, as uid may not be unique ... but dn are ... Or maybe for uid unicity on ldap import ...
+    // maybe add the email as filter too (or another)
+    // todo: find other impact of "do not use uid in dn" on other part of this file, for example on bind and on group modification
+    
+    var client = myldap.createClient({
+       url: 'ldap://' +  CONFIG.ldap.host
+     });
+     client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
+       if(err) {
+           logger.error('Failed to bind as admin to ldap', err);
+           callback(err);
+       }
+     });
+
+    var user_dn_list = [];
+    
+    var opts = {
+        filter: '(uid=' + user.uid + ')',
+        scope: 'sub',
+        attributes: ['dn']
+    };
+    
+    client.search('ou='+CONFIG.ldap.ou_people+',' + CONFIG.ldap.dn, opts, function(err, res) {
+        if(err) {
+            logger.error('Could not find ' + uid, err);
+            callback(err);
+        }
+
+        res.on('searchEntry', function(entry) {
+	    logger.info('dn found: ', entry.object['dn'].trim(), ' for ', user.uid);
+            user_dn_list.push(entry.object['dn'].trim());            
+        });
+        res.on('error', function(err) {
+            logger.error('error ', err);
+	    callback(err);
+	});
+        res.on('end', function(result) {
+	    if (user_dn_list.length > 1) {
+		logger.warn('more than one entry have been found', user_dn_list);
+	    }
+	    else if(user_dn_list.length == 0){
+                logger.error('no user found for uid', user.uid);
+            }
+	    callback(undefined, user_dn_list);           
+        });
+	
+    });
+
+}
+
 module.exports = {
 
   reset_password: function(user, fid, callback){
 
+      var cur_user_dn = "uid="+user.uid+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn;
+      get_user_dn(user, function (err, res){
+	  if (err)
+	  {
+	      logger.warn(err);
+	  }
+	  else {
+	      cur_user_dn = res[0];
+	  }
+      });
+      
     var user_ldif = "";
-    user_ldif += "dn: uid="+user.uid+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn+"\n";
+    user_ldif += "dn: "+cur_user_dn+"\n";
     //user_ldif += "dn: cn="+user.firstname+" "+user.lastname+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn+"\n";
     user_ldif += "changetype: modify\n";
     user_ldif += "replace: userpassword\n";
@@ -116,13 +179,24 @@ module.exports = {
     -
     delete: description
     */
+      cur_user_dn = "uid="+user.uid+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn;
+      get_user_dn(user, function (err, res){
+	  if (err)
+	  {
+	      logger.warn(err);
+	  }
+	  else {
+	      cur_user_dn = res[0];
+	  }
+      });
+      
     if(! user.is_fake && (user.firstname == '' || user.lastname == '')) {
       logger.debug('firstname or lastname empty');
       callback();
       return;
     }
     var user_ldif = "";
-    user_ldif += "dn: uid="+user.uid+",ou="+CONFIG.ldap.ou_people+","+CONFIG.ldap.dn+"\n";
+    user_ldif += "dn: "+cur_user_dn+"\n";
     user_ldif += "changetype: modify\n";
     user_ldif += "replace: sn\n";
     user_ldif += "sn: "+user.lastname+"\n";
