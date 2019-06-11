@@ -1,4 +1,4 @@
-FROM node:8-jessie
+FROM node:latest
 
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
 COPY tests/gomngr.sh /opt/gomngr.sh
