@@ -14,7 +14,7 @@ before_install:
 
 script:
   - npm install -g mocha
+  - npm install -g nyc
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose up -d
-  - cd $TRAVIS_BUILD_DIR && sleep 180 && docker ps && mocha -t 10000
+  - cd $TRAVIS_BUILD_DIR && sleep 180 && docker ps && nyc --reporter=text mocha -- -t 10000
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose down
-
