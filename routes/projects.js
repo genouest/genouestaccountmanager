@@ -79,7 +79,7 @@ router.get('/project/:id', function(req, res){
         }
         projects_db.findOne({'id': req.param('id')}, function(err, project){
             if(err){
-                console.log(err)
+                logger.info(err)
                 res.status(500).send("Error retrieving project");
                 return;
             }
