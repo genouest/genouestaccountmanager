@@ -1,4 +1,4 @@
-FROM node:12-stretch
+FROM node:10.16-stretch
 
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
 COPY tests/gomngr.sh /opt/gomngr.sh
