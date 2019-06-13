@@ -139,13 +139,11 @@ module.exports = {
       user_ldif += "ou: external\n";
       user_ldif += "-\n";
       }
-      user_ldif += "replace: homeDirectory\n";
-      if(user.maingroup!="" & user.maingroup!=null) {
-          user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.maingroup+'/'+user.group+'/'+user.uid+"\n";
+      if(user.home) {
+        user_ldif += "replace: homeDirectory\n";
+        user_ldif += 'homeDirectory: '+user.home+"\n";
       }
-      else {
-          user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.group+'/'+user.uid+"\n";
-      }
+
       user_ldif += "-\n";
       //user_ldif += "replace: mail\n";
       //user_ldif += "mail: "+user.email+"\n";
@@ -234,11 +232,12 @@ module.exports = {
     }
     user_ldif += "givenName: "+user.firstname+"\n";
     user_ldif += "mail: "+user.email+"\n";
-    if(user.maingroup!="" & user.maingroup!=null) {
-        user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.maingroup+'/'+user.group+'/'+user.uid+"\n";
+    if(user.home) {
+        user_ldif += 'homeDirectory: '+user.home+"\n";
     }
     else {
-        user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.group+'/'+user.uid+"\n";
+        logger.error("user does not have any home", user);
+        // todo, should we stop here ?
     }
     user_ldif += "loginShell: /bin/bash\n";
     user_ldif += "userpassword: "+user.password+"\n";

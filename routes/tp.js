@@ -142,6 +142,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                   group: userGroup.name,
                   secondarygroups: [],
                   maingroup: CONFIG.general.default_main_group,
+                  home: "/tmp/home",
                   why: 'TP/Training',
                   ip: '',
                   regkey: '',
@@ -154,6 +155,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                   loginShell: '/bin/bash',
                   history: []
               };
+              user.home = get_user_home(user);
               users.push(user);
               minuid++;
             }
@@ -353,12 +355,15 @@ var insert_ldap_user = function(user, fid){
 
             user_ldif += "givenName: "+user.firstname+"\n";
             user_ldif += "mail: " + user.email + "\n";
-            if(user.maingroup!="" && user.maingroup!=null) {
-                user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.maingroup+'/'+user.group+'/'+user.uid+"\n";
+
+            if(user.home) {
+                user_ldif += 'homeDirectory: '+user.home+"\n";
             }
             else {
-                user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.group+'/'+user.uid+"\n";
+                logger.error("user does not have any home", user);
+                // todo, should we stop here ?
             }
+
             user_ldif += "loginShell: "+user.loginShell+"\n";
             user_ldif += "userpassword: "+user.password+"\n";
             user_ldif += "uidNumber: "+user.uidnumber+"\n";
@@ -414,10 +419,7 @@ var activate_tp_user = function(user, adminId){
                 script += "fi\n"
                 script += "sleep 3\n";
 
-                var homeDir = CONFIG.general.home + "/" + user.group + '/' + user.uid;
-                if(user.maingroup!==undefined && user.maingroup!=""){
-                    homeDir = CONFIG.general.home + "/" + user.maingroup + "/" + user.group + '/' + user.uid;
-                }
+                var homeDir = user.home;
                 script += "mkdir -p " + homeDir + "/.ssh\n";
                 script += utils.addReadmes(homeDir);
                 /*
@@ -436,7 +438,7 @@ var activate_tp_user = function(user, adminId){
                 script += "echo \"   UserKnownHostsFile=/dev/null\" >> " + homeDir + "/.ssh/config\n";
                 script += "chmod 700 " + homeDir + "/.ssh\n";
                 // script += "mkdir -p /omaha-beach/" + user.uid + "\n";
-                script += "chown -R " + user.uidnumber+":"+user.gidnumber + " " + CONFIG.general.home + "/" + user.maingroup + "/" + user.group + '/' + user.uid + "\n";
+                script += "chown -R " + user.uidnumber+":"+user.gidnumber + " " + user.home + "\n";
                 // script += "chown -R " + user.uidnumber+":"+user.gidnumber + " /omaha-beach/" + user.uid+"\n";
                 script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                 var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";

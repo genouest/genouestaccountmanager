@@ -20,6 +20,7 @@
     "admin_ip": [ "127.0.0.1" ],
     "usage_directory": "/tmp",
     "home": "/home",
+    "use_group_in_path": true,
     "main_groups": [""],
     "default_main_group": "",
     "quota": {
