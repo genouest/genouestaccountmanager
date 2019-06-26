@@ -1,4 +1,4 @@
-FROM node:8-jessie
+FROM node:12.4.0-stretch
 
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
 COPY tests/gomngr.sh /opt/gomngr.sh
@@ -19,17 +19,17 @@ COPY routes /root/genouestaccountmanager/routes
 COPY views /root/genouestaccountmanager/views
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
-COPY manager /root/genouestaccountmanager/manager
-
-RUN npm install -g bower
-RUN bower install --allow-root
+# Disable old manager
+#COPY manager /root/genouestaccountmanager/manager
+#RUN npm install -g bower
+#RUN bower install --allow-root
 RUN mkdir -p /opt/my/readmes/readmes1
 RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts
 RUN mkdir -p /opt/my/plugin-scripts
 
 COPY manager2 /root/genouestaccountmanager/manager2
-RUN npm install -g @angular/cli
+RUN npm install -g @angular/cli@7.0.3
 RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod && rm -rf src && rm -rf node_modules
 
 ENTRYPOINT node app.js
