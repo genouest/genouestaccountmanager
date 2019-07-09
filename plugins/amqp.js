@@ -9,17 +9,17 @@ var sendMsg = function(action, userId, data, adminId){
         amqp.connect(CONFIG.rabbitmq.url).then(function(_conn) {
             conn = _conn;
             return conn.createChannel();
-          }).then(ch => {
+        }).then(ch => {
             return ch.assertExchange(CONFIG.rabbitmq.exchange, 'direct').then(() => {
                 console.log('publish msg');
                 ch.publish(CONFIG.rabbitmq.exchange, action, Buffer.from(JSON.stringify(data)))
                 return ch.close()
             })
-          })
-          .then(() => {
-              conn.close()
-              resolve(true)
-          })
+        })
+            .then(() => {
+		conn.close()
+		resolve(true)
+            })
 
     });
 };
