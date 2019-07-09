@@ -143,21 +143,21 @@ router.post('/project', function(req, res){
 router.delete('/project/:id', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+	res.status(401).send('Not authorized');
+	return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-      if(err || user == null){
-        res.status(404).send('User not found');
-        return;
-      }
-      if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
-        return;
-      }
-      projects_db.remove({'id': req.param('id')}, function(err){
-          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.param('id') , 'logs': []}, function(err){});
+	if(err || user == null){
+            res.status(404).send('User not found');
+            return;
+	}
+	if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+	}
+	projects_db.remove({'id': req.param('id')}, function(err){
+            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.param('id') , 'logs': []}, function(err){});
 
             res.send({'message': 'Project deleted'});
             return;
@@ -169,101 +169,101 @@ router.delete('/project/:id', function(req, res){
 router.post('/project/:id', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+	res.status(401).send('Not authorized');
+	return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-      if(err || user == null){
-        res.status(404).send('User not found');
-        return;
-      }
-      if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
-        return;
-      }
-      projects_db.findOne({'id': req.param('id')}, function(err, project){
-         if(err || project == null){
-            res.status(401).send('Not authorized or project not found');
+	if(err || user == null){
+            res.status(404).send('User not found');
             return;
-         }
-        new_project = { '$set': {
-            'owner': req.param('owner'),
-            'group': req.param('group'),
-            'size': req.param('size'),
-            'expire': req.param('expire'),
-            'description': req.param('description'),
-            'access': req.param('access'),
-            'orga': req.param('orga'),
-            'path': req.param('path')
-        }}
-        projects_db.update({'id': req.param('id')}, new_project, function(err){
-            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
-            res.send({'message': 'Project updated'});
+	}
+	if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+            res.status(401).send('Not authorized');
             return;
-        });
+	}
+	projects_db.findOne({'id': req.param('id')}, function(err, project){
+            if(err || project == null){
+		res.status(401).send('Not authorized or project not found');
+		return;
+            }
+            new_project = { '$set': {
+		'owner': req.param('owner'),
+		'group': req.param('group'),
+		'size': req.param('size'),
+		'expire': req.param('expire'),
+		'description': req.param('description'),
+		'access': req.param('access'),
+		'orga': req.param('orga'),
+		'path': req.param('path')
+            }}
+            projects_db.update({'id': req.param('id')}, new_project, function(err){
+		events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
+		res.send({'message': 'Project updated'});
+		return;
+            });
 
-      });
+	});
     });
 });
 
 router.post('/project/:id/request', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged){
-      res.status(401).send('Not authorized');
-      return;
+	res.status(401).send('Not authorized');
+	return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-      if(err || user == null){
-        res.status(404).send('User not found');
-        return;
-      }
-      projects_db.findOne({'id': req.param('id')}, function(err, project){
-        if(err || project == null){
-          res.status(404).send('Project ' + req.param('id') + ' not found');
-          return;
-        }
-//Add to request list
-        if(! user.uid === project.owner ){
-          res.status(401).send('User ' + user.uid + " is not project manager for project " + project.id);
-          return;
-        }
-        users_db.findOne({'uid': req.param('user')}, function(err, newuser){
-          if(err || newuser == null){
-            res.status(404).send('User ' + req.param('user') + ' not found');
+	if(err || user == null){
+            res.status(404).send('User not found');
             return;
-          }
-          if(newuser.projects && newuser.projects.indexOf(project.id) >= 0 && req.param('request') === 'add'){
-            res.status(403).send('User ' + req.param('user') + ' is already in project : cannot add');
-            return;
-          }
-//Backward compatibility
-          if (! project.add_requests){
-            project.add_requests = [];
-          }
-          if (! project.remove_requests){
-            project.remove_requests = [];
-          }
-          if ( project.add_requests.indexOf(req.param('user')) >= 0 || project.remove_requests.indexOf(req.param('user')) >= 0){
-            res.status(403).send('User ' + req.param('user') + 'is already in a request : aborting');
-            return;
-          }
-          if (req.param('request') === 'add'){
-            project.add_requests.push(req.param('user'));
-          } else if (req.param('request') === 'remove') {
-            project.remove_requests.push(req.param('user'));
-          }
-          new_project = { '$set': {
-              'add_requests': project.add_requests,
-              'remove_requests': project.remove_requests
-          }}
-          projects_db.update({'id': req.param('id')}, new_project, function(err){
-            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.param('request') + ' for user ' + req.param('uid') + ' in project ' + project.id , 'logs': []}, function(err){});
-            res.send({'message': 'Request sent'});
-            return;
-          });
-        });
-      });
+	}
+	projects_db.findOne({'id': req.param('id')}, function(err, project){
+            if(err || project == null){
+		res.status(404).send('Project ' + req.param('id') + ' not found');
+		return;
+            }
+	    //Add to request list
+            if(! user.uid === project.owner ){
+		res.status(401).send('User ' + user.uid + " is not project manager for project " + project.id);
+		return;
+            }
+            users_db.findOne({'uid': req.param('user')}, function(err, newuser){
+		if(err || newuser == null){
+		    res.status(404).send('User ' + req.param('user') + ' not found');
+		    return;
+		}
+		if(newuser.projects && newuser.projects.indexOf(project.id) >= 0 && req.param('request') === 'add'){
+		    res.status(403).send('User ' + req.param('user') + ' is already in project : cannot add');
+		    return;
+		}
+		//Backward compatibility
+		if (! project.add_requests){
+		    project.add_requests = [];
+		}
+		if (! project.remove_requests){
+		    project.remove_requests = [];
+		}
+		if ( project.add_requests.indexOf(req.param('user')) >= 0 || project.remove_requests.indexOf(req.param('user')) >= 0){
+		    res.status(403).send('User ' + req.param('user') + 'is already in a request : aborting');
+		    return;
+		}
+		if (req.param('request') === 'add'){
+		    project.add_requests.push(req.param('user'));
+		} else if (req.param('request') === 'remove') {
+		    project.remove_requests.push(req.param('user'));
+		}
+		new_project = { '$set': {
+		    'add_requests': project.add_requests,
+		    'remove_requests': project.remove_requests
+		}}
+		projects_db.update({'id': req.param('id')}, new_project, function(err){
+		    events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.param('request') + ' for user ' + req.param('uid') + ' in project ' + project.id , 'logs': []}, function(err){});
+		    res.send({'message': 'Request sent'});
+		    return;
+		});
+            });
+	});
     });
 });
 

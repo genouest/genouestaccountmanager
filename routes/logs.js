@@ -18,18 +18,18 @@ var monk = require('monk'),
 router.get('/log', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+	res.status(401).send('Not authorized');
+	return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-          if(err || user == null){
+        if(err || user == null){
             res.status(404).send('User not found');
             return;
-          }
-          if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+        }
+        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
             res.status(401).send('Not authorized');
             return;
-          }
+        }
         events_db.find({}, {limit: 200, sort: {date: -1}}, function(err, events){
             res.send(events);
             res.end();
@@ -40,14 +40,14 @@ router.get('/log', function(req, res){
 router.get('/log/user/:id', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+	res.status(401).send('Not authorized');
+	return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-          if(err || user == null){
+        if(err || user == null){
             res.status(404).send('User not found');
             return;
-          }
+        }
         events_db.find({'owner': req.param('id')}, function(err, events){
             res.send(events);
             res.end();
@@ -63,33 +63,33 @@ router.get('/log/status/:id/:status', function(req, res){
 router.get('/log/:id', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+	res.status(401).send('Not authorized');
+	return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-      if(err || user == null){
-        res.status(404).send('User not found');
-        return;
-      }
-      if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
-        return;
-      }
+	if(err || user == null){
+            res.status(404).send('User not found');
+            return;
+	}
+	if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+	}
 
-      file = req.param('id')+'.log';
-      log_file = GENERAL_CONFIG.script_dir+'/'+file;
-      fs.readFile(log_file, 'utf8', function (err,data) {
-        if (err) {
-          res.status(500).send(err);
-          res.end();
-          return;
-        }
-        res.send({log: data})
-        res.end();
-        return;
-      });
+	file = req.param('id')+'.log';
+	log_file = GENERAL_CONFIG.script_dir+'/'+file;
+	fs.readFile(log_file, 'utf8', function (err,data) {
+            if (err) {
+		res.status(500).send(err);
+		res.end();
+		return;
+            }
+            res.send({log: data})
+            res.end();
+            return;
+	});
 
-  });
+    });
 });
 
 module.exports = router;
