@@ -187,14 +187,14 @@
       "<hr>"
     ],
     "password_reset": [
-      "Your password has been reset as you requested. Your new password is #PASSWORD#.",
+      "Your password has been reset as you requested. Your new password is ** #PASSWORD# **.",
       "The new password will be active within an hour.",
       ""
     ],
     "password_reset_html": [
       "<h2>Password reset</h2>",
       "<p>Your password has been reset as you requested for your account #UID#.</p>",
-      "Your new password is <b>#PASSWORD#</b>.</p>",
+      "Your new password is ** <b>#PASSWORD#</b> **.</p>",
       "<br/>",
       "<p>The new password will be active <b>within an hour</b>.</p>",
       "<br/>",
