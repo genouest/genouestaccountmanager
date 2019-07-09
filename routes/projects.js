@@ -4,6 +4,7 @@ var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
 
+const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 var CONFIG = require('config');
