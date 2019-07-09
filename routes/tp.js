@@ -13,7 +13,7 @@ var GENERAL_CONFIG = CONFIG.general
 var plugins = CONFIG.plugins
 
 if (plugins === undefined) {
-  plugins = []
+    plugins = []
 }
 
 var plugins_modules = {}
@@ -55,66 +55,66 @@ var STATUS_ACTIVE = 'Active'
 var STATUS_EXPIRED = 'Expired'
 
 var createExtraGroup = function (ownerName) {
-  return new Promise(function (resolve, reject) {
-    // var mingid = 1000
-    utils.getGroupAvailableId().then(function (mingid) {
-    // groups_db.find({}, { limit: 1, sort: { gid: -1 } }, function (err, data) {
-    //  if (!err && data && data.length > 0) {
-    //    mingid = data[0].gid + 1
-    //  }
-      var fid = new Date().getTime()
-      var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName }
-      groups_db.insert(group, function(err) {
-        goldap.add_group(group, fid, function(err) {
-          var script = "#!/bin/bash\n";
-          script += "set -e \n"
-          script += "ldapadd -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
-          var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update";
-          fs.writeFile(script_file, script, function(err) {
-            fs.chmodSync(script_file,0o755)
-            group.fid = fid
-            resolve(group)
-            return
-          })
+    return new Promise(function (resolve, reject) {
+        // var mingid = 1000
+        utils.getGroupAvailableId().then(function (mingid) {
+            // groups_db.find({}, { limit: 1, sort: { gid: -1 } }, function (err, data) {
+            //  if (!err && data && data.length > 0) {
+            //    mingid = data[0].gid + 1
+            //  }
+            var fid = new Date().getTime()
+            var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName }
+            groups_db.insert(group, function(err) {
+                goldap.add_group(group, fid, function(err) {
+                    var script = "#!/bin/bash\n";
+                    script += "set -e \n"
+                    script += "ldapadd -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
+                    var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update";
+                    fs.writeFile(script_file, script, function(err) {
+                        fs.chmodSync(script_file,0o755)
+                        group.fid = fid
+                        resolve(group)
+                        return
+                    })
+                })
+            })
         })
-      })
     })
-  })
 }
 
 
 var deleteExtraGroup = function (group) {
-  return new Promise(function (resolve, reject) {
-    if (group === undefined || group === null) {
-        resolve()
-        return
-    }
-    groups_db.findOne({'name': group.name}, function(err, group_to_remove){
-        if(err || group_to_remove == null) {
+    return new Promise(function (resolve, reject) {
+        if (group === undefined || group === null) {
             resolve()
             return
         }
-        groups_db.remove({ 'name': group.name }, function () {
-            var fid = new Date().getTime()
-            goldap.delete_group(group, fid, function () {
-            var script = "#!/bin/bash\n";
-            script += "set -e \n"
-            script += "ldapdelete -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
-            var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update"
-            fs.writeFile(script_file, script, function(err) {
-                fs.chmodSync(script_file,0o755);
-                group.fid = fid;
-                utils.freeGroupId(group.gid).then(function(){
-                    events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
-                    resolve()
-                    return
+        groups_db.findOne({'name': group.name}, function(err, group_to_remove){
+            if(err || group_to_remove == null) {
+                resolve()
+                return
+            }
+            groups_db.remove({ 'name': group.name }, function () {
+                var fid = new Date().getTime()
+                goldap.delete_group(group, fid, function () {
+                    var script = "#!/bin/bash\n";
+                    script += "set -e \n"
+                    script += "ldapdelete -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
+                    var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update"
+                    fs.writeFile(script_file, script, function(err) {
+                        fs.chmodSync(script_file,0o755);
+                        group.fid = fid;
+                        utils.freeGroupId(group.gid).then(function(){
+                            events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
+                            resolve()
+                            return
+                        })
+                        
+                    })
                 })
-                
-            })
             })
         })
     })
-  })
 }
 
 var create_tp_users_db = function (owner, quantity, duration, end_date, userGroup) {
@@ -124,48 +124,48 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
         // TODO get account ids
         var minuid = 1000;
         //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}).then(function(data){
-            //if(data && data.length>0){
-            //  minuid = data[0].uidnumber+1;
-            //}
-            var users = [];
-            for(var i=0;i<quantity;i++){
-                logger.debug("create user ", CONFIG.tp.prefix + minuid);
-                var user = {
-                  status: STATUS_PENDING_APPROVAL,
-                  uid: CONFIG.tp.prefix + minuid,
-                  firstname: CONFIG.tp.prefix,
-                  lastname: minuid,
-                  email: CONFIG.tp.prefix + minuid + "@fake." + CONFIG.tp.fake_mail_domain,
-                  address: '',
-                  lab: '',
-                  responsible: owner,
-                  group: userGroup.name,
-                  secondarygroups: [],
-                  maingroup: CONFIG.general.default_main_group,
-                  why: 'TP/Training',
-                  ip: '',
-                  regkey: '',
-                  is_genouest: false,
-                  is_fake: true,
-                  uidnumber: minuid,
-                  gidnumber: userGroup.gid,
-                  duration: duration,
-                  expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
-                  loginShell: '/bin/bash',
-                  history: []
-              };
-              users.push(user);
-              minuid++;
-            }
-            Promise.all(users.map(function(user){
-                logger.debug("map users to create_tp_user_db ", user);
-                return create_tp_user_db(user);
-            })).then(function(results){
-                logger.debug("now activate users");
-                return activate_tp_users(owner, results);
-            }).then(function(activated_users){
-                resolve(activated_users);
-            });
+        //if(data && data.length>0){
+        //  minuid = data[0].uidnumber+1;
+        //}
+        var users = [];
+        for(var i=0;i<quantity;i++){
+            logger.debug("create user ", CONFIG.tp.prefix + minuid);
+            var user = {
+                status: STATUS_PENDING_APPROVAL,
+                uid: CONFIG.tp.prefix + minuid,
+                firstname: CONFIG.tp.prefix,
+                lastname: minuid,
+                email: CONFIG.tp.prefix + minuid + "@fake." + CONFIG.tp.fake_mail_domain,
+                address: '',
+                lab: '',
+                responsible: owner,
+                group: userGroup.name,
+                secondarygroups: [],
+                maingroup: CONFIG.general.default_main_group,
+                why: 'TP/Training',
+                ip: '',
+                regkey: '',
+                is_genouest: false,
+                is_fake: true,
+                uidnumber: minuid,
+                gidnumber: userGroup.gid,
+                duration: duration,
+                expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
+                loginShell: '/bin/bash',
+                history: []
+            };
+            users.push(user);
+            minuid++;
+        }
+        Promise.all(users.map(function(user){
+            logger.debug("map users to create_tp_user_db ", user);
+            return create_tp_user_db(user);
+        })).then(function(results){
+            logger.debug("now activate users");
+            return activate_tp_users(owner, results);
+        }).then(function(activated_users){
+            resolve(activated_users);
+        });
         //});
     });
 };
@@ -175,14 +175,14 @@ var create_tp_user_db = function (user) {
         logger.debug("create_tp_user_db", user.uid);
         try {
             utils.getUserAvailableId().then(function (uid) {
-              user.uid = CONFIG.tp.prefix + uid
-              user.lastname = uid
-              user.email = CONFIG.tp.prefix + uid + "@fake." + CONFIG.tp.fake_mail_domain
-              user.uidnumber = uid
-              users_db.insert(user).then(function(data){
-                user.password = Math.random().toString(36).substring(2);
-                resolve(user);
-              });
+                user.uid = CONFIG.tp.prefix + uid
+                user.lastname = uid
+                user.email = CONFIG.tp.prefix + uid + "@fake." + CONFIG.tp.fake_mail_domain
+                user.uidnumber = uid
+                users_db.insert(user).then(function(data){
+                    user.password = Math.random().toString(36).substring(2);
+                    resolve(user);
+                });
             })
         }
         catch(exception){
@@ -300,12 +300,12 @@ router.exec_tp_reservation = function(reservation_id){
                         reservation.accounts.push(activated_users[i].uid);
                     }
                     try{
-                    send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(function(){
-                        reservation_db.update({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}}).then(function(err){
-                            logger.debug("reservation ", reservation);
-                            resolve(reservation);
+                        send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(function(){
+                            reservation_db.update({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}}).then(function(err){
+                                logger.debug("reservation ", reservation);
+                                resolve(reservation);
+                            });
                         });
-                    });
                     }
                     catch(exception){
                         logger.error(exception);
@@ -382,14 +382,14 @@ var insert_ldap_user = function(user, fid){
                     reject(user);
                 }
                 if(group_ldif != "") {
-                  fs.writeFile(CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif", group_ldif, function(err) {
-                    resolve(user);
-                  });
+                    fs.writeFile(CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif", group_ldif, function(err) {
+                        resolve(user);
+                    });
                 }
                 else {
-                  resolve(user);
+                    resolve(user);
                 }
-              });
+            });
         });
 
     });
@@ -400,8 +400,8 @@ var activate_tp_user = function(user, adminId){
         users_db.findOne({'uid': user.uid}, function(err, db_user){
             if(err || !db_user) {
                 logger.error("failure:",err,db_user);
-              reject(user);
-              return;
+                reject(user);
+                return;
             }
             logger.debug("activate", user.uid);
             var fid = new Date().getTime();
@@ -421,14 +421,14 @@ var activate_tp_user = function(user, adminId){
                 script += "mkdir -p " + homeDir + "/.ssh\n";
                 script += utils.addReadmes(homeDir);
                 /*
-                script += "mkdir -p " + homeDir + "/user_guides\n";
-                if (typeof CONFIG.general.readme == "object") {
+                  script += "mkdir -p " + homeDir + "/user_guides\n";
+                  if (typeof CONFIG.general.readme == "object") {
                   CONFIG.general.readme.forEach(function(dict) {
-                    script += "ln -s " + dict.source_folder + " " + homeDir  +"/user_guides/" + dict.language + "\n";
+                  script += "ln -s " + dict.source_folder + " " + homeDir  +"/user_guides/" + dict.language + "\n";
                   });
-                } else {
+                  } else {
                   script += "ln -s " + CONFIG.general.readme + " " + homeDir + "/user_guides/README\n";
-                };
+                  };
                 */
                 script += "touch " + homeDir + "/.ssh/authorized_keys\n";
                 script += "echo \"Host *\" > " + homeDir + "/.ssh/config\n";
@@ -464,8 +464,8 @@ var activate_tp_user = function(user, adminId){
 router.get('/tp', function(req, res) {
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
@@ -493,8 +493,8 @@ router.post('/tp', function(req, res) {
 
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
@@ -509,9 +509,9 @@ router.post('/tp', function(req, res) {
             return;
         }
         tp_reservation(user.uid, req.param('from'), req.param('to'), req.param('quantity'), req.param('about')).then(function(reservation){
-                res.send({'reservation': reservation, 'msg': 'Reservation done'});
-                res.end();
-                return;
+            res.send({'reservation': reservation, 'msg': 'Reservation done'});
+            res.end();
+            return;
         });
 
     });
@@ -521,8 +521,8 @@ router.post('/tp', function(req, res) {
 router.delete('/tp/:id', function(req, res) {
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(403).send('Not authorized');
-      return;
+        res.status(403).send('Not authorized');
+        return;
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
@@ -540,7 +540,7 @@ router.delete('/tp/:id', function(req, res) {
         // add filter
         var filter = {};
         if(is_admin) {
-          filter = {_id: req.param('id')};
+            filter = {_id: req.param('id')};
         }
         else{
             filter = {_id: req.param('id'), owner: user.uid};
@@ -589,23 +589,23 @@ var to_date = new Date();
 to_date.setDate(to_date.getDate() + 14);
 
 tp_reservation("osallou", from_date, to_date, 4).then(function(reservation){
-    exec_tp_reservation(reservation._id).then(function(res){
-        console.log(res);
-        process.exit(0);
+exec_tp_reservation(reservation._id).then(function(res){
+console.log(res);
+process.exit(0);
 
-    });
+});
 });
 */
 /*
-users_db.find({'uid': 'tp0'}).then(function(users){
-    try {
-        return delete_tp_users(users, 'auto');
-    }
-    catch(exception){
-        console.log("[ERROR]", exception);
-        return;
-    }
-}).then(function(){
-    process.exit(0);
-});
+  users_db.find({'uid': 'tp0'}).then(function(users){
+  try {
+  return delete_tp_users(users, 'auto');
+  }
+  catch(exception){
+  console.log("[ERROR]", exception);
+  return;
+  }
+  }).then(function(){
+  process.exit(0);
+  });
 */

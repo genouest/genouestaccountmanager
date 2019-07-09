@@ -19,7 +19,7 @@ var winston = require('winston');
 var jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
-      timestamp: true
+    timestamp: true
 });
 winston.loggers.add('gomngr', {
     transports: [myconsole]
@@ -67,10 +67,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({
-  secret: CONFIG.general.secret,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: 3600*1000}
+    secret: CONFIG.general.secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 3600*1000}
 }))
 app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', express.static(path.join(__dirname, 'manager2/dist/my-ui')));
@@ -289,7 +289,7 @@ app.get('/logout', auth);
 
 // Default route if no match (for spa handling)
 app.get('*', function (request, response) {
-  response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
+    response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
 });
 
 
@@ -331,9 +331,9 @@ module.exports = app;
 utils.loadAvailableIds().then(function (alreadyLoaded) {
 
     if (!module.parent) {
-    http.createServer(app).listen(app.get('port'), function(){
-        console.log('Server listening on port ' + app.get('port'));
-    });
+        http.createServer(app).listen(app.get('port'), function(){
+            console.log('Server listening on port ' + app.get('port'));
+        });
     }
 
 })
