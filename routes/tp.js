@@ -163,7 +163,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                 logger.debug("map users to create_tp_user_db ", user);
                 return create_tp_user_db(user);
             })).then(function(results){
- x               logger.debug("now activate users");
+                logger.debug("now activate users");
                 return activate_tp_users(owner, results);
             }).then(function(activated_users){
                 resolve(activated_users);
