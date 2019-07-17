@@ -1464,7 +1464,7 @@ router.post('/user/:id/passwordreset', function(req, res){
     return;
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-      if(session_user.uid != req.param('id')) {
+      if(session_user.uid != req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
          res.send({message: 'Not authorized'});
          return;
       }
