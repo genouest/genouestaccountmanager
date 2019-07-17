@@ -187,15 +187,6 @@ function record_user(user){
         return;
     }
 
-    if(CONFIG.general.use_group_in_path)
-    {
-        if (ldap_groups[gid] && homeDir[homeDir.length-2] != ldap_groups[gid].cn) {
-            console.warn("[SKIP] ", user.uid, " invalid home dir");
-            errors.push(user.uid + " home end path, should be " + ldap_groups[gid].cn + "/" + user.uid + " vs " + homeDir[homeDir.length-2] + "/" + homeDir[homeDir.length-1]);
-            return;
-        }
-    }
-
     if(homeDir.length > 4){
         var int_home_dir = homeDir.slice(2, homeDir.length-2).join("/");
         if(int_home_dir === undefined){
