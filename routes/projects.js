@@ -4,6 +4,9 @@ var bcrypt = require('bcryptjs');
 var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
 
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
+
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
@@ -79,7 +82,7 @@ router.get('/project/:id', function(req, res){
         }
         projects_db.findOne({'id': req.param('id')}, function(err, project){
             if(err){
-                console.log(err)
+                logger.error(err)
                 res.status(500).send("Error retrieving project");
                 return;
             }
@@ -345,4 +348,3 @@ router.get('/group/:id/projects', function(req, res){
 });
 
 module.exports = router;
-
