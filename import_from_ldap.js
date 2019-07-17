@@ -158,11 +158,11 @@ function record_user(user){
 
     if(ldap_groups[gid] === undefined) {
         console.warn("User ", user.uid, " has no valid group id: ", gid);
-	if(CONFIG.general.use_group_in_path)
-	{
-	    console.warn("[SKIP] User ", user.uid," as group are needed for home path");
-	    return;
-	}
+        if(CONFIG.general.use_group_in_path)
+        {
+            console.warn("[SKIP] User ", user.uid," as group are needed for home path");
+            return;
+        }
     }
 
     var secondary_groups = ldap_secondary_groups[user.uid];
@@ -183,15 +183,6 @@ function record_user(user){
         console.warn("[SKIP] ", user.uid, " invalid home dir");
         errors.push(user.uid + " home end path, should end with " + "/" + user.uid + " vs /" + homeDir[homeDir.length-1]);
         return;
-    }
-
-    if(CONFIG.general.use_group_in_path)
-    {
-	if (ldap_groups[gid] && homeDir[homeDir.length-2] != ldap_groups[gid].cn) {
-            console.warn("[SKIP] ", user.uid, " invalid home dir");
-            errors.push(user.uid + " home end path, should be " + ldap_groups[gid].cn + "/" + user.uid + " vs " + homeDir[homeDir.length-2] + "/" + homeDir[homeDir.length-1]);
-            return;
-	}
     }
 
     if(homeDir.length > 4){
@@ -224,13 +215,13 @@ function record_user(user){
         group: (ldap_groups[gid] ? ldap_groups[gid].cn : ''), //todo: maybe use default group from config
         secondarygroups: secondary_groups,
         maingroup: MAIN_GROUP,
-	home: user.homeDirectory,
+        home: user.homeDirectory,
         why: "",
         ip: "",
         regkey: regkey,
         is_genouest: false,
         is_fake: is_fake,
-	uidnumber: uid,
+        uidnumber: uid,
         gidnumber: gid,
         cloud: false,
         duration: 365,
