@@ -23,8 +23,8 @@
     "usage_directory": "/tmp",
     "use_group_in_path": true,
     "home": "/home",
-    "main_groups": ["", "my"],
-    "default_main_group": "my",
+    "main_groups": ["genouest", "my"],
+    "default_main_group": "genouest",
     "quota": {
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
@@ -60,7 +60,8 @@
     "dn": "dc=my,dc=org",
     "admin_cn": "cn=admin",
     "admin_dn": "dc=my,dc=org",
-    "admin_password": "my"
+    "admin_password": "my",
+    "team": "genouest"
   },
   "mysql": {
     "host": "mysql",
@@ -159,7 +160,7 @@
     ]
     },
     "plugins": [
-	    {"name": "test", "display_name": "Test", "admin": false},
+            {"name": "test", "display_name": "Test", "admin": false},
       {"name": "adminquotatest", "display_name": "Quotas", "admin": true},
       {"name": "amqp", "display_name": "RabbitMQ", "admin": false}
     ],
