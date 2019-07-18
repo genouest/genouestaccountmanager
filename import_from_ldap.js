@@ -205,7 +205,7 @@ function record_user(user){
         why: "",
         ip: "",
         regkey: regkey,
-        is_genouest: false,
+        is_internal: false,
         is_fake: is_fake,
         uidnumber: parseInt(user.uidNumber),
         gidnumber: parseInt(user.gidNumber),

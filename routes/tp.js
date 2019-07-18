@@ -145,7 +145,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                   why: 'TP/Training',
                   ip: '',
                   regkey: '',
-                  is_genouest: false,
+                  is_internal: false,
                   is_fake: true,
                   uidnumber: minuid,
                   gidnumber: userGroup.gid,

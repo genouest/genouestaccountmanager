@@ -154,7 +154,7 @@ var create_extra_user = function(user_name, group, internal_user){
           why: "",
           ip: "",
           regkey: Math.random().toString(36).slice(-10),
-          is_genouest: internal_user,
+          is_internal: internal_user,
           is_fake: false,
           uidnumber: -1,
           gidnumber: -1,
@@ -1321,7 +1321,7 @@ router.post('/user/:id', function(req, res) {
         why: req.param('why'),
         ip: req.param('ip'),
         regkey: regkey,
-        is_genouest: false,
+        is_internal: false,
         is_fake: false,
         uidnumber: -1,
         gidnumber: -1,
@@ -1816,7 +1816,7 @@ router.put('/user/:id', function(req, res) {
   group: req.param('group'),
   ip: req.param('ip'),
   regkey: regkey,
-  is_genouest: false,
+  is_internal: false,
   expiration: new Date().getTime() + 1000*3600*24*req.param('duration'),
   loginShell: '/bin/bash',
   history: [{action: 'register', date: new Date().getTime()}],
@@ -1907,7 +1907,7 @@ router.put('/user/:id', function(req, res) {
             user.group = req.param('group');
             user.gidnumber = group.gid;
             user.ip = req.param('ip');
-            user.is_genouest = req.param('is_genouest');
+            user.is_internal = req.param('is_internal');
             user.maingroup = req.param('maingroup');
             if(user.group == '' || user.group == null) {
               res.status(403).send('Some mandatory fields are empty');
