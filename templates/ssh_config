@@ -1,0 +1,4 @@
+# Test Generated file for {{ user.email }}
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
