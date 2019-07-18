@@ -6,8 +6,6 @@ var Promise = require('promise');
 const commandLineArgs = require('command-line-args');
 const getUsage = require('command-line-usage');
 
-const MAIN_GROUP="genouest";
-
 const optionDefinitions = [
       { name: 'help', description: 'Display this usage guide.', alias: 'h', type: Boolean},
       { name: 'test', alias: 't', type: Boolean, description: 'do not import in db, just test' },
@@ -201,7 +199,7 @@ function record_user(user){
         responsible: "unknown",
         group: ldap_groups[parseInt(user.gidNumber)].cn,
         secondarygroups: secondary_groups,
-        maingroup: MAIN_GROUP,
+        maingroup: CONFIG.general.default_main_group,
         why: "",
         ip: "",
         regkey: regkey,
