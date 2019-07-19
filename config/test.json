@@ -48,6 +48,10 @@
     "host": "gomail-redis",
     "port": 6379
  },
+ "nodemailer": {
+     "origin": "support@my.org",
+     "smtp": "smtp.my.org"
+ }
  "gomail": {
    "host": "http://gomail-web:6643",
    "api_root": "/api/v1",
