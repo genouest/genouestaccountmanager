@@ -1,6 +1,6 @@
 /*jslint es6 */
 var express = require('express');
-var router = express.Rqouter();
+var router = express.Router();
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var goldap = require('../routes/goldap.js');
