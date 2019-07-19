@@ -1,6 +1,6 @@
 /*jslint es6 */
 var express = require('express');
-var router = express.Router();
+var router = express.Rqouter();
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var goldap = require('../routes/goldap.js');
@@ -11,18 +11,20 @@ const logger = winston.loggers.get('gomngr');
 const u2f = require('u2f');
 var jwt = require('jsonwebtoken');
 
-
 var CONFIG = require('config');
 const APP_ID= CONFIG.general.url;
 var GENERAL_CONFIG = CONFIG.general;
-var MAIL_CONFIG = CONFIG.gomail;
+
+const MAILER = CONFIG.general.mailer;
+const MAIL_CONFIG = CONFIG[MAILER];
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
-var notif = require('../routes/notif.js');
+
+var notif = require('../routes/notif_'+MAILER+'.js');
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
     users_db = db.get('users');
@@ -73,7 +75,7 @@ router.get('/mail/auth/:id', function(req, res) {
             { user: user._id, isLogged: true, mail_token: mail_token },
             CONFIG.general.secret,
             {expiresIn: '2 days'}
-          ); 
+          );
 
         notif.sendUser(mailOptions, function(err, response) {
             if(err){return res.send({'status': false});};
