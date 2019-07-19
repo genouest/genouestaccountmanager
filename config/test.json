@@ -25,6 +25,7 @@
     "home": "/home",
     "main_groups": ["genouest", "my"],
     "default_main_group": "genouest",
+    "mailer" : "gomail",
     "quota": {
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
