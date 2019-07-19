@@ -37,7 +37,6 @@ var notif = require('../routes/notif_'+MAILER+'.js');
 var fdbs = require('../routes/database.js')
 var fwebs = require('../routes/web.js')
 var fusers = require('../routes/users.js')
-var notif = require('../routes/notif.js')
 
 var utils = require('../routes/utils.js')
 
