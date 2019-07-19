@@ -1,0 +1,78 @@
+var CONFIG = require('config');
+var fs = require('fs');
+var monk = require('monk'),
+    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
+    web_db = db.get('web'),
+    users_db = db.get('users'),
+    events_db = db.get('events');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
+const request = require('request');
+
+
+var mail_set = false;
+
+if(CONFIG.nodemailer){
+    mail_set = true;
+}
+
+module.exports = {
+
+    mailSet: function(){
+        return mail_set;
+    },
+
+    subscribed: function(email, callback) {
+        logger.warn("subscribed: no mailing list configured", email);
+        callback(false);
+        return;
+    },
+
+    getMembers: function(list, callback) {
+        logger.warn("getMembers: no mailing list configured", list);
+        callback(false);
+        return;
+    },
+
+    getLists: function(callback){
+        logger.warn("getLists: no mailing list configured");
+        callback([]);
+        return;
+    },
+
+    add: function(email, callback) {
+        logger.warn("add: no mailing list configured", email);
+        callback();
+        return;
+    },
+
+    create: function(name, callback) {
+        logger.warn("create: no mailing list configured", name);
+        callback();
+        return;
+    },
+
+    remove: function(email, callback) {
+        logger.warn("remove: no mailing list configured", email);
+        callback();
+        return;
+    },
+
+    modify: function(oldemail, newemail, callback) {
+        logger.warn("remove: no mailing list configured", oldemail, newemail);
+        callback();
+        return;
+    },
+
+    sendUser: function(mailOptions, callback) {
+        logger.error("sendUser: Nodemailer not yet implemented in My");
+        callback("Nodemailer not yet implemented in My" , false);
+        return;
+    },
+
+    sendList: function(mailing_list, mailOptions, callback) {
+        logger.warn("sendList: no mailing list configured", mailing_list, mailOptions);
+        callback("no mailing list configured", false);
+        return;
+    }
+};
