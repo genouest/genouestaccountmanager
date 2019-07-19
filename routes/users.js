@@ -15,6 +15,8 @@ var GENERAL_CONFIG = CONFIG.general;
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
+// todo: find a cleaner way to allow registration if no mail are configured
+if (!MAIL_CONFIG.origin) { MAIL_CONFIG.origin = 'nomail@nomail.org'; }
 
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
