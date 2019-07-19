@@ -9,10 +9,13 @@ var monk = require('monk'),
     events_db = db.get('events');
 
 var mysql = require('mysql');
-var notif = require('../routes/notif.js');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const request = require('request');
+
+const MAILER = CONFIG.general.mailer;
+const MAIL_CONFIG = CONFIG[MAILER];
+var notif = require('../routes/notif_'+MAILER+'.js');
 
 var connection;
 
@@ -219,7 +222,7 @@ router.post('/database/:id', function(req, res) {
                       msg += " Password: " + password + "\n";
                       msg += " Owner: " + owner + "\n";
                       var mailOptions = {
-                        origin: CONFIG.gomail.origin, // sender address
+                        origin: MAIL_CONFIG.origin, // sender address
                         destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
                         subject: 'Database creation', // Subject line
                         message: msg, // plaintext body
