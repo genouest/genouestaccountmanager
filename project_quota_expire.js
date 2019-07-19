@@ -8,14 +8,16 @@ var STATUS_EXPIRED = 'Expired';
 
 
 var CONFIG = require('config');
-var notif = require('./routes/notif.js');
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users');
     projects_db = db.get('projects')
 
-var MAIL_CONFIG = CONFIG.gomail;
+const MAILER = CONFIG.general.mailer;
+const MAIL_CONFIG = CONFIG[MAILER];
+
+var notif = require('../routes/notif_'+MAILER+'.js');
 
 function timeConverter(tsp){
   var a = new Date(tsp);

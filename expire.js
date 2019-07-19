@@ -8,7 +8,6 @@ var STATUS_EXPIRED = 'Expired';
 
 var CONFIG = require('config');
 var goldap = require('./routes/goldap.js');
-var notif = require('./routes/notif.js');
 var fs = require('fs');
 
 var Promise = require('promise');
@@ -18,7 +17,10 @@ var monk = require('monk'),
     users_db = db.get('users');
     events_db = db.get('events');
 
-var MAIL_CONFIG = CONFIG.gomail;
+const MAILER = CONFIG.general.mailer;
+const MAIL_CONFIG = CONFIG[MAILER];
+
+var notif = require('./routes/notif_'+MAILER+'.js');
 
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
