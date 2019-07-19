@@ -66,13 +66,13 @@ module.exports = {
 
     sendUser: function(mailOptions, callback) {
         logger.error("sendUser: Nodemailer not yet implemented in My");
-        callback("Nodemailer not yet implemented in My" , false);
+        callback("Nodemailer not yet implemented in My" , true);
         return;
     },
 
     sendList: function(mailing_list, mailOptions, callback) {
         logger.warn("sendList: no mailing list configured", mailing_list, mailOptions);
-        callback("no mailing list configured", false);
+        callback("no mailing list configured", true);
         return;
     }
 };
