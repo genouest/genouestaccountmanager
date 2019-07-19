@@ -22,6 +22,7 @@
     "home": "/home",
     "main_groups": [""],
     "default_main_group": "",
+    "mailer" : "gomail",
     "quota": {
         "home": {
             "protocol": "http:",
