@@ -75,6 +75,10 @@
     "user": "root",
     "password": "XXX"
   },
+  "nodemailer": {
+     "origin": "",
+     "smtp": ""
+  }
   "gomail": {
     "host": "",
     "api_root": "",
