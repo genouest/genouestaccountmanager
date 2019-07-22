@@ -574,7 +574,7 @@ router.post('/group/:id', function(req, res){
             res.end();
             return;
         }
-        groups_db.findOne({name: new RegExp(req.param('id'), 'i')}, function(err, group){
+        groups_db.findOne({name: new RegExp("^" + req.param('id') + "$", 'i')}, function(err, group){
           if(group) {
             res.status(403).send('Group already exists');
             return;
