@@ -80,8 +80,18 @@ module.exports = {
     },
 
     sendUser: function(mailOptions, callback) {
-        logger.error("sendUser: Nodemailer not yet implemented in My");
-        callback("Nodemailer not yet implemented in My" , true);
+
+        let info =  transporter.sendMail({
+            from: mailOptions.origin,
+            to: mailOptions.destinations.join(),
+            subject: mailOptions.subject,
+            html: mailOptions.html_message
+        });
+
+        logger.info("Message sent: %s", info.messageId);
+        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+        callback("" , true);
         return;
     },
 
