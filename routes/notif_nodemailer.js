@@ -1,19 +1,34 @@
-var CONFIG = require('config');
-var fs = require('fs');
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    web_db = db.get('web'),
-    users_db = db.get('users'),
-    events_db = db.get('events');
+const CONFIG = require('config');
+const fs = require('fs');
+const monk = require('monk'),
+      db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
+      web_db = db.get('web'),
+      users_db = db.get('users'),
+      events_db = db.get('events');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const request = require('request');
-
+const nodemailer = require("nodemailer");
 
 var mail_set = false;
+// mailset should be a isnull on transporter (or not)
+var transporter = null;
 
 if(CONFIG.nodemailer){
-    mail_set = true;
+    transporter = nodemailer.createTransport({
+        host: CONFIG.nodemailer.host,
+        port: CONFIG.nodemailer.port,
+        secure: false, // upgrade later with STARTTLS
+    });
+
+    transporter.verify(function(error, success) {
+        if (error) {
+            console.log(error);
+        } else {
+            mail_set =true;
+            console.log("Smtp Server is ready to take our messages");
+        }
+    });
 }
 
 module.exports = {
