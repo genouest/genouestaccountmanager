@@ -63,6 +63,9 @@ export class RegisterComponent implements OnInit {
     } else {
       last = event
     }
+    if (event === undefined || event === null || first === "" || last === "") {
+      return
+    }
     if(this.firstname && this.lastname) {
       this.userid = first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', '');
     }
