@@ -88,8 +88,8 @@ module.exports = {
             html: mailOptions.html_message
         });
 
-        logger.info("Message sent: %s", info.messageId);
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+        logger.info("Message sent to " + info.to + ":" + info.subject);
+
 
         callback("" , true);
         return;
