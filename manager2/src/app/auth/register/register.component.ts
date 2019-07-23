@@ -79,6 +79,16 @@ export class RegisterComponent implements OnInit {
       this.msgstatus = 1;
       return;
     }
+    if(this.userid === undefined || this.userid === "") {
+      this.msg="User identifier invalid (empty)"
+      this.msgstatus = 1;
+      return;
+    }
+    if(this.userid.length < 4) {
+      this.msg="User identifier too short (min 4 characters)"
+      this.msgstatus = 1;
+      return;
+    }
     this.userService.register(this.userid, {
       firstname: this.firstname,
       lastname: this.lastname,
