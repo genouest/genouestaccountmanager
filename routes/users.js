@@ -65,16 +65,16 @@ if (runningEnv === 'test'){
               resolve();
               return;
           }
-          console.log('In *test* environment, check for scripts to execute');
+          logger.info('In *test* environment, check for scripts to execute');
           let cron_bin_script = CONFIG.general.cron_bin_script || null;
           if(cron_bin_script === null){
-              console.error('cron script not defined');
+              logger.error('cron script not defined');
               reject({'err': 'cron script not defined'});
               return;
           }
           var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
           procScript.on('exit', function (code, signal) {
-            console.log(cron_bin_script + ' process exited with ' +
+            logger.info(cron_bin_script + ' process exited with ' +
                         `code ${code} and signal ${signal}`);
             resolve();
           });
@@ -136,7 +136,7 @@ var create_extra_user = function(user_name, group, internal_user){
             password = process.env.MY_ADMIN_PASSWORD;
         }
         else {
-            console.log('Generated admin password:' + user.password);
+            logger.info('Generated admin password:' + user.password);
         }
 
         var user = {
@@ -233,7 +233,7 @@ var create_extra_user = function(user_name, group, internal_user){
 
               }
               else {
-                  console.log('Failed to create admin user');
+                logger.error('Failed to create admin user', err);
                   resolve(null);
               }
             });
@@ -247,23 +247,22 @@ var create_extra_user = function(user_name, group, internal_user){
 router.create_admin = function(default_admin, default_admin_group){
     users_db.findOne({'uid': default_admin}).then(function(user){
         if(user){
-            console.log('admin already exists, skipping');
+            logger.info('admin already exists, skipping');
         }
         else {
-            console.log('should create admin');
+            logger.info('should create admin');
             groups_db.findOne({name: default_admin_group}).then(function(group){
-
                 if(group){
-                    console.log('group already exists');
+                    logger.info('group already exists');
                     create_extra_user(default_admin, group, true).then(function(user){
-                        console.log('admin user created');
+                        logger.info('admin user created');
                     });
                 }
                 else {
                     create_extra_group(default_admin_group, default_admin).then(function(group){
-                        console.log('admin group created');
+                        logger.info('admin group created');
                         create_extra_user(default_admin, group, true).then(function(user){
-                            console.log('admin user created');
+                            logger.info('admin user created');
                         });
                     })
                 }
@@ -2090,7 +2089,7 @@ router.delete('/user/:id/project/:project', function(req, res){
             }
             projects_db.findOne({id:oldproject}, function(err, project){
                 if(err){
-                    console.log(err);
+                    logger.info(err);
                     res.status(500).send("Error");
                     res.end();
                     return;

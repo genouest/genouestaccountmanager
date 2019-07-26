@@ -109,7 +109,7 @@ var deleteExtraGroup = function (group) {
                     resolve()
                     return
                 })
-                
+
             })
             })
         })
@@ -281,7 +281,7 @@ router.delete_tp_users = function(users, group, admin_id){
             deleteExtraGroup(group).then(function(){
                 resolve(users);
             })
-            
+
         });
     });
 
@@ -372,7 +372,7 @@ var insert_ldap_user = function(user, fid){
             group_ldif += "add: memberUid\n";
             group_ldif += "memberUid: "+user.uid+"\n";
         }
-        catch(exception){logger.error("[ERROR]", exception);}
+        catch(exception){logger.error(exception);}
         logger.debug("switch to ACTIVE");
         users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE}}).then(function(data){
             logger.debug("write exec script");
@@ -590,7 +590,7 @@ to_date.setDate(to_date.getDate() + 14);
 
 tp_reservation("osallou", from_date, to_date, 4).then(function(reservation){
     exec_tp_reservation(reservation._id).then(function(res){
-        console.log(res);
+        logger.info(res);
         process.exit(0);
 
     });
@@ -602,7 +602,7 @@ users_db.find({'uid': 'tp0'}).then(function(users){
         return delete_tp_users(users, 'auto');
     }
     catch(exception){
-        console.log("[ERROR]", exception);
+        logger.info("[ERROR]", exception);
         return;
     }
 }).then(function(){

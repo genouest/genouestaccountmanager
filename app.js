@@ -11,7 +11,7 @@ var http = require('http');
 var session = require('express-session');
 
 var log_level = 'info';
-if (process.env.NODE_ENV == 'dev') {
+if (process.env.NODE_ENV == 'dev' || process.env.DEBUG) {
     log_level = 'debug';
 }
 
@@ -19,9 +19,10 @@ var winston = require('winston');
 var jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
-      timestamp: true
+  label: 'gomngr',
+  level: log_level
 });
-winston.loggers.add('gomngr', {
+const wlogger = winston.loggers.add('gomngr', {
     transports: [myconsole]
 });
 
@@ -102,7 +103,7 @@ app.all('*', function(req, res, next){
         try {
             jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
         } catch(err) {
-            console.log('failed to decode jwt');
+            wlogger.error('failed to decode jwt');
             jwtToken = null;
         }
     }
@@ -114,7 +115,7 @@ app.all('*', function(req, res, next){
         }
         try{
             if(jwtToken.isLogged) {
-                req.session.is_logged = true; 
+                req.session.is_logged = true;
                 logInfo.is_logged = true;
             }
             if(jwtToken.mail_token) {
@@ -141,7 +142,7 @@ app.all('*', function(req, res, next){
             }
         }
         catch(error){
-            console.error('Invalid token', error);
+            wlogger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }
@@ -168,7 +169,7 @@ app.all('*', function(req, res, next){
             });
         }
         catch(error){
-            console.error('Invalid token', error);
+            wlogger.error('Invalid token', error);
             return res.status(401).send('Invalid token').end();
         }
     }else{
@@ -304,7 +305,7 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
+if (app.get('env') === 'development' || process.env.DEBUG) {
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
@@ -313,17 +314,17 @@ if (app.get('env') === 'development') {
         });
     });
 }
-
+else {
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
-});
-
+  app.use(function(err, req, res, next) {
+      res.status(err.status || 500);
+      res.render('error', {
+          message: err.message,
+          error: {}
+      });
+  });
+}
 
 module.exports = app;
 
@@ -332,7 +333,7 @@ utils.loadAvailableIds().then(function (alreadyLoaded) {
 
     if (!module.parent) {
     http.createServer(app).listen(app.get('port'), function(){
-        console.log('Server listening on port ' + app.get('port'));
+        wlogger.info('Server listening on port ' + app.get('port'));
     });
     }
 
