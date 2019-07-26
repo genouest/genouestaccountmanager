@@ -114,7 +114,7 @@ module.exports = {
      });
      client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
        if(err) {
-           logger.error('Failed to bind as admin to ldap');
+         logger.error('Failed to bind as admin to ldap', err);
            callback(err);
        }
        var opts = {
@@ -125,7 +125,7 @@ module.exports = {
 
         client.search('ou=people,' + CONFIG.ldap.dn, opts, function(err, res) {
             if(err) {
-                logger.error('Could not find ' + uid);
+              logger.error('Could not find ' + uid, err);
                 callback(err);
             }
             let foundMatch = false;
@@ -139,8 +139,8 @@ module.exports = {
             res.on('searchReference', function(referral) {
             });
             res.on('error', function(err) {
-                logger.error('error ' + err.message);
-                callback(err.message);
+              logger.error('error ', err);
+                callback(err);
             });
             res.on('end', function(result) {
                 if(! foundMatch){
