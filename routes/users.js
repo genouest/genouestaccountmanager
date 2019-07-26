@@ -470,7 +470,7 @@ router.clear_user_groups = function(user, admin_user_id){
       if(group){
         users_db.find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]}, function(err, users_in_group){
           if(users_in_group && users_in_group.length == 0){
-	    router.delete_group(group, admin_user_id);
+            router.delete_group(group, admin_user_id);
           }
         });
       }
@@ -875,7 +875,7 @@ router.delete_user = function(user, action_owner_id){
                  }).then(function(){
                      resolve(true);
                  });
-		 router.clear_user_groups(user, action_owner_id);
+                 router.clear_user_groups(user, action_owner_id);
              });
          }
          else {
@@ -902,7 +902,7 @@ router.delete_user = function(user, action_owner_id){
                      resolve(false);
                      return;
                    }
-		   router.clear_user_groups(user, action_owner_id);
+                   router.clear_user_groups(user, action_owner_id);
                    var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
                    var msg_activ_html = msg_activ;
                    var mailOptions = {
@@ -1459,7 +1459,7 @@ router.post('/user/:id/passwordreset', function(req, res){
     return;
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-      if(session_user.uid != req.param('id')) {
+      if(session_user.uid != req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
          res.send({message: 'Not authorized'});
          return;
       }
@@ -1944,7 +1944,7 @@ router.put('/user/:id', function(req, res) {
                   var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                   fs.writeFile(script_file, script, function(err) {
                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-		    users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
+                    users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
                       if(users_in_group && users_in_group.length == 0){
                         groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
                           if(oldgroup){
@@ -1978,16 +1978,16 @@ router.put('/user/:id', function(req, res) {
           else {
             users_db.update({_id: user._id}, user, function(err){
               events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.param('id') , 'logs': []}, function(err){});
-	      users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
-	        if(users_in_group && users_in_group.length == 0){
-		  groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
+              users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
+                if(users_in_group && users_in_group.length == 0){
+                  groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
                     if(oldgroup){
                       router.delete_group(oldgroup, session_user.uid);
                     }
                   })
-		}
-	      });
-	      user.fid = null;
+                }
+              });
+              user.fid = null;
               res.send(user);
             });
           }
