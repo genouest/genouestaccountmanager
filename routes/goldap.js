@@ -71,6 +71,7 @@ function  get_user_dn(user) {
                 }
                 else if(user_dn_list.length == 0){
                     logger.error('no user found for uid', user.uid);
+                    reject('no user found for uid');
                 }
                 resolve(user_dn_list[0]);
                 return;
