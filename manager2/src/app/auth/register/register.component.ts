@@ -63,6 +63,9 @@ export class RegisterComponent implements OnInit {
     } else {
       last = event
     }
+    if (event === undefined || event === null || first === "" || last === "") {
+      return
+    }
     if(this.firstname && this.lastname) {
       this.userid = first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', '');
     }
@@ -73,6 +76,16 @@ export class RegisterComponent implements OnInit {
     this.msgstatus = 0;
     if(! this.agree) {
       this.msg="You must agree with the terms of use";
+      this.msgstatus = 1;
+      return;
+    }
+    if(this.userid === undefined || this.userid === "") {
+      this.msg="User identifier invalid (empty)"
+      this.msgstatus = 1;
+      return;
+    }
+    if(this.userid.length < 4) {
+      this.msg="User identifier too short (min 4 characters)"
       this.msgstatus = 1;
       return;
     }

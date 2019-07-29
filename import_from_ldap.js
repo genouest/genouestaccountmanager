@@ -25,11 +25,11 @@ const usage = getUsage(sections);
 const commands = commandLineArgs(optionDefinitions);
 
 if(commands.h || (commands.test === undefined && commands.import === undefined)){
-    console.log(usage);
+    console.info(usage);
     return;
 }
 if(commands.import && commands.admin===undefined){
-    console.log("missing admin option for import");
+    console.error("missing admin option for import");
     return;
 }
 
@@ -64,20 +64,21 @@ var client = myldap.createClient({
   url: 'ldap://' +  CONFIG.ldap.host
 });
 
+
 console.log("Search for groups");
 client.search('ou=groups,' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, groups) {
     groups.on('searchEntry', function(entry) {
-      //console.log('entry: ' + JSON.stringify(entry.object));
+      console.debug('entry: ' + JSON.stringify(entry.object));
       record_group(entry.object);
     });
     groups.on('searchReference', function(referral) {
-      //console.log('referral: ' + referral.uris.join());
+      console.debug('referral: ' + referral.uris.join());
     });
     groups.on('error', function(err) {
       console.error('error: ' + err.message);
     });
     groups.on('end', function(result) {
-      console.log('LDAP group status error: ' + result.status);
+      console.debug('LDAP group status error: ' + result.status);
       search_users();
     });
 
@@ -90,7 +91,7 @@ function record_group(group){
     * entry: {"dn":"cn=recomgen,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["mbahin","smottier","vwucher","clebeguec","mrimbaul","mbunel","scorrear","spaillar","bhedan"],"cn":"recomgen","gidNumber":"20885","objectClass":["posixGroup","top"]}
     */
     if(! group.dn.startsWith("cn") || group.objectClass.indexOf("posixGroup") == -1) {return;}
-    console.log("manage group: " + group.dn);
+    console.info("manage group: " + group.dn);
     ldap_groups[parseInt(group.gidNumber)] = group;
     if(group.memberUid !== undefined){
         for(var i=0;i<group.memberUid.length;i++){
@@ -109,22 +110,22 @@ function search_users(){
     console.log("now search for users");
     client.search('ou=people,' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, users) {
     users.on('searchEntry', function(entry) {
-      //console.log('entry: ' + JSON.stringify(entry.object));
+      console.debug('entry: ' + JSON.stringify(entry.object));
       ldap_nb_users += 1;
       record_user(entry.object);
     });
     users.on('searchReference', function(referral) {
-      //console.log('referral: ' + referral.uris.join());
+      console.debug('referral: ' + referral.uris.join());
     });
     users.on('error', function(err) {
       console.error('error: ' + err.message);
     });
     users.on('end', function(result) {
       mongo_imports().then(function(res){;
-          console.log('LDAP user status error: ' + result.status);
-          console.log("Users are put in active status for 1 year");
-          console.log("Number of imported users: ", ldap_managed_users);
-          console.log("[Errors] ", errors);
+          console.info('LDAP user status error: ' + result.status);
+          console.info("Users are put in active status for 1 year");
+          console.info("Number of imported users: ", ldap_managed_users);
+          console.info("[Errors] ", errors);
           process.exit(0);
       })
     });
@@ -134,6 +135,7 @@ function search_users(){
 
 function record_user(user){
     console.debug(user);
+
 
     if(! user.uid || user.uid == ""){
         console.warn("[SKIP] Invalid Uid for user ", user.uid, ",DN= ", user.dn);
@@ -154,7 +156,6 @@ function record_user(user){
     var regkey = Math.random().toString(36).substring(7);
     var uid = parseInt(user.uidNumber);
     var gid = parseInt(user.gidNumber);
-    console.warn(user.uid, ": uidNumber:", uid, "gidNumber: ", gid);
 
     if(ldap_groups[gid] === undefined) {
         console.warn("User ", user.uid, " has no valid group id: ", gid);
@@ -175,13 +176,6 @@ function record_user(user){
     if(! user.homeDirectory || ! user.homeDirectory.startsWith(CONFIG.general.home)) {
         errors.push(user.uid + " home base dir != " + CONFIG.general.home);
         console.warn("[SKIP] ", user.uid, " invalid home dir");
-        return;
-    }
-
-    var homeDir = user.homeDirectory.split('/');
-    if(homeDir[homeDir.length-1] != user.uid) {
-        console.warn("[SKIP] ", user.uid, " invalid home dir");
-        errors.push(user.uid + " home end path, should end with " + "/" + user.uid + " vs /" + homeDir[homeDir.length-1]);
         return;
     }
 
@@ -234,7 +228,7 @@ function record_user(user){
 
 
 function finalize_user(user){
-    //console.log("Record user," , user);
+    console.debug("Record user," , user);
     ldap_managed_users += 1;
     if(commands.import){
         mongo_users.push(user);
@@ -252,7 +246,7 @@ var mongo_imports = function(){
         })).then(function(results_group){
             for(var i=0;i<results_group.length;i++){
                 if(results_group[i].ok!=1){
-                    console.log("[ERROR] during group import in db: ", results_group[i]);
+                    console.error("during group import in db: ", results_group[i]);
                     break;
                 }
             }
@@ -261,7 +255,7 @@ var mongo_imports = function(){
             })).then(function(results_account){
                 for(var i=0;i<results_account.length;i++){
                     if(results_account[i].ok!=1){
-                        console.log("[ERROR] during user import in db: ", results_account[i]);
+                        console.error("during user import in db: ", results_account[i]);
                         break;
                     }
                 }

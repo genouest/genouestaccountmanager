@@ -72,6 +72,7 @@ export class LoginComponent implements OnInit {
                 console.log('auth with u2f success');
                 ctx.authService.handleLoginCallback(userData);
                 ctx.authService.authenticated = true;
+                ctx.authService.$authStatus.next(true);
                 
                 this.ngZone.run(() => { ctx.router.navigate(['/user/' + userData['uid']]); });
               },
