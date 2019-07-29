@@ -227,7 +227,7 @@ var send_user_passwords = function(owner, from_date, to_date, users){
                 var mailOptions = {
                     origin: CONFIG.gomail.origin, // sender address
                     destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
-                    subject: '[TP accounts reservation ]' + owner,
+                    subject: '[TP accounts reservation] ' + owner,
                     message: msg,
                     html_message: msg_html
                 };
