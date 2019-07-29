@@ -177,8 +177,6 @@ function record_user(user){
         return;
     }
 
-    console.debug("HOME ", homeDir);
-
     var go_user = {
         status: "Active",
         uid: user.uid,
