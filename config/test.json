@@ -59,7 +59,8 @@
     "dn": "dc=my,dc=org",
     "admin_cn": "cn=admin",
     "admin_dn": "dc=my,dc=org",
-    "admin_password": "my"
+    "admin_password": "my",
+    "team" : "genouest"
   },
   "mysql": {
     "host": "mysql",
@@ -158,7 +159,7 @@
     ]
     },
     "plugins": [
-	    {"name": "test", "display_name": "Test", "admin": false},
+            {"name": "test", "display_name": "Test", "admin": false},
       {"name": "adminquotatest", "display_name": "Quotas", "admin": true},
       {"name": "amqp", "display_name": "RabbitMQ", "admin": false}
     ],

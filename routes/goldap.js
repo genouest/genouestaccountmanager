@@ -201,7 +201,7 @@ module.exports = {
                   if(user.is_admin){
                       if(user.is_internal){
                           user_ldif += "replace: ou\n";
-                          user_ldif += "ou: genouest\n";
+                          user_ldif += "ou: "+CONFIG.ldap.team+"\n";
                           user_ldif += "-\n";
                       }
                       else {
@@ -299,7 +299,6 @@ module.exports = {
     user_ldif += "cn: "+user.firstname+" "+user.lastname+"\n";
     user_ldif += "sn: "+user.lastname+"\n";
     if(user.is_internal){
-      if (CONFIG.ldap.team === undefined) { CONFIG.ldap.team = "genouest" }
       user_ldif += "ou: " + CONFIG.ldap.team + "\n";
     } else if (user.is_fake) {
       user_ldif += "ou: fake\n";
