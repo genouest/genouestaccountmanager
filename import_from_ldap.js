@@ -121,21 +121,19 @@ function search_users(){
       console.error('error: ' + err.message);
     });
     users.on('end', function(result) {
-      mongo_imports().then(function(res){;
-          console.info('LDAP user status error: ' + result.status);
-          console.info("Users are put in active status for 1 year");
-          console.info("Number of imported users: ", ldap_managed_users);
-          console.info("[Errors] ", errors);
-          process.exit(0);
-      })
+        mongo_imports().then(function(res){
+            console.info('LDAP user status error: ' + result.status);
+            console.info("Users are put in active status for 1 year");
+            console.info("Number of imported users: ", ldap_managed_users);
+            console.info("[Errors] ", errors);
+            process.exit(0);
+        });
     });
-
 });
 }
 
 function record_user(user){
     console.debug(user);
-
 
     if(! user.uid || user.uid == ""){
         console.warn("[SKIP] Invalid Uid for user ", user.uid, ",DN= ", user.dn);
@@ -179,22 +177,6 @@ function record_user(user){
         return;
     }
 
-    if(homeDir.length > 4){
-        var int_home_dir = homeDir.slice(2, homeDir.length-2).join("/");
-        if(int_home_dir === undefined){
-            errors.push("Invalid homeDirectory ", user.homeDirectory);
-            console.warn("[SKIP] ", user.uid, " invalid home dir");
-            return;
-        }
-
-        if(CONFIG.general.main_groups.indexOf(int_home_dir) === -1 && undeclared_home_groups.indexOf(int_home_dir) === -1) {
-            errors.push(user.homeDirectory);
-            errors.push('Need to add ' + int_home_dir + ' to CONFIG.general.home_groups');
-            undeclared_home_groups.push(int_home_dir);
-        }
-
-    }
-
     console.debug("HOME ", homeDir);
 
     var go_user = {
@@ -222,7 +204,7 @@ function record_user(user){
         expiration: new Date().getTime() + 1000*3600*24*365,
         loginShell: user.loginShell,
         history: []
-      }
+    };
     finalize_user(go_user);
 }
 
@@ -262,8 +244,7 @@ var mongo_imports = function(){
                 resolve(true);
             });
 
-
         });
     });
 
-}
+};
