@@ -9,8 +9,7 @@ const getUsage = require('command-line-usage');
 const optionDefinitions = [
     { name: 'help', description: 'Display this usage guide.', alias: 'h', type: Boolean},
     { name: 'test', alias: 't', type: Boolean, description: 'do not import in db, just test' },
-    { name: 'import', alias: 'i', type: Boolean, description: 'import in db' },
-    { name: 'admin', alias: 'a', type: String, description: 'admin user id'}
+    { name: 'import', alias: 'i', type: Boolean, description: 'import in db' }
 ];
 
 const sections = [
@@ -24,10 +23,6 @@ const commands = commandLineArgs(optionDefinitions);
 
 if(commands.h || (commands.test === undefined && commands.import === undefined)){
     console.info(usage);
-    return;
-}
-if(commands.import && commands.admin===undefined){
-    console.error("missing admin option for import");
     return;
 }
 
@@ -118,7 +113,7 @@ function finalize_user(user){
 
 var mongo_imports = function(){
     return new Promise(function (resolve, reject){
-        if(! commands.import){
+        if(commands.test){
             resolve(true);
         }
         Promise.all(mongo_users.map(function(user_import){
