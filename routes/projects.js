@@ -10,10 +10,13 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
+const MAILER = CONFIG.general.mailer;
+const MAIL_CONFIG = CONFIG[MAILER];
+
 var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
-var notif = require('../routes/notif.js');
+var notif = require('../routes/notif_'+MAILER+'.js');
 
 var get_ip = require('ipware')().get_ip;
 

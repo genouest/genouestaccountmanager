@@ -1,6 +1,6 @@
 var fs = require('fs');
 var CONFIG = require('config');
-var notif = require('../routes/notif.js');
+var notif = require('../routes/notif_gomail.js');
 var Promise = require('promise');
 
 var activate_user = function(userId, data, adminId){
@@ -64,4 +64,3 @@ module.exports = {
       });
     }
 }
-

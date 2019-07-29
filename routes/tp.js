@@ -10,6 +10,9 @@ const logger = winston.loggers.get('gomngr')
 var CONFIG = require('config')
 var GENERAL_CONFIG = CONFIG.general
 
+const MAILER = CONFIG.general.mailer;
+const MAIL_CONFIG = CONFIG[MAILER];
+
 var plugins = CONFIG.plugins
 
 if (plugins === undefined) {
@@ -30,15 +33,12 @@ for (var i = 0; i < plugins.length; i++) {
 var cookieParser = require('cookie-parser')
 
 var goldap = require('../routes/goldap.js')
-var notif = require('../routes/notif.js')
+var notif = require('../routes/notif_'+MAILER+'.js');
 var fdbs = require('../routes/database.js')
 var fwebs = require('../routes/web.js')
 var fusers = require('../routes/users.js')
-var notif = require('../routes/notif.js')
 
 var utils = require('../routes/utils.js')
-
-// var MAIL_CONFIG = CONFIG.gomail;
 
 // var get_ip = require('ipware')().get_ip;
 
@@ -227,7 +227,7 @@ var send_user_passwords = function(owner, from_date, to_date, users){
         users_db.findOne({'uid': owner}).then(function(user_owner){
             if( notif.mailSet()){
                 var mailOptions = {
-                    origin: CONFIG.gomail.origin, // sender address
+                    origin: MAIL_CONFIG.origin, // sender address
                     destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
                     subject: '[TP accounts reservation ]' + owner,
                     message: msg,

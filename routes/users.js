@@ -13,6 +13,13 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
+const MAILER = CONFIG.general.mailer;
+var MAIL_CONFIG = {};
+// todo: more and more ugly init...
+if (CONFIG[MAILER]) { MAIL_CONFIG = CONFIG[MAILER]; }
+// todo: find a cleaner way to allow registration if no mail are configured
+if (!MAIL_CONFIG.origin) { MAIL_CONFIG.origin = 'nomail@nomail.org'; }
+
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
     plugins = [];
@@ -23,7 +30,7 @@ var plugins_info = [];
 var cookieParser = require('cookie-parser');
 
 var goldap = require('../routes/goldap.js');
-var notif = require('../routes/notif.js');
+var notif = require('../routes/notif_'+MAILER+'.js');
 var utils = require('../routes/utils.js');
 
 // var get_ip = require('ipware')().get_ip;
@@ -42,8 +49,6 @@ var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
-
-var MAIL_CONFIG = CONFIG.gomail;
 
 const runningEnv = process.env.NODE_ENV || 'prod';
 
