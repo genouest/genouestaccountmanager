@@ -256,6 +256,11 @@ module.exports = {
                       }
                       callback(err);
                   });
+                  return filer.ldap_modify_user(user, user_dn, fid);
+              })
+          .then(
+              created_file => {
+                  logger.info("File Created: ", created_file);
               })
           .catch(error => { // reject()
               logger.error('Modify Failed for: ' + user.uid, error);
