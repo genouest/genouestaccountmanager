@@ -5,7 +5,7 @@ var http = require('http');
 var myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const filer = require('file.js');
+const filer = require('../routes/file.js');
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
