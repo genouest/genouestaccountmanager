@@ -1,10 +1,11 @@
 var CONFIG = require('config');
 var fs = require('fs');
 //var LDAP = require('ldap-client');
-var http = require('http')
+var http = require('http');
 var myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const filer = require('file.js');
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
@@ -97,6 +98,12 @@ module.exports = {
                   fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
                       callback(err);
                   });
+                  /* every thing before this should be removed */
+                  return filer.ldap_reset_password(user, user_dn, fid);
+              })
+          .then(
+              created_file => {
+                  logger.info("File Created: ", created_file);
               })
           .catch(error => { // reject()
               logger.error('Password not updated for: '+ user.uid, error);
