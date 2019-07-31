@@ -88,8 +88,7 @@ module.exports = {
             html: mailOptions.html_message
         });
 
-        logger.info("Message sent to " + info.to + ":" + info.subject);
-
+        logger.info("Message sent to " + mailOptions.destinations.join() + ":" + mailOptions.subject);
 
         callback("" , true);
         return;
