@@ -49,17 +49,23 @@ function create_file (name, data) {
             fs.mkdirSync(filepath, { recursive: true });
             fs.chmodSync(filepath, tpl.filepathmode);
 
-            nunjucks.render(tpl.template, data, function (err, content) {
+            nunjucks.renderString(tpl.filename, data, function (err, filename) {
                 if (err) {
                     reject(err);
                     return;
                 }
 
-                // todo find if we need to render filename too
-                fs.writeFileSync(filepath + "/" + tpl.filename, content);
-                fs.chmodSync(filepath + "/" + tpl.filename, tpl.filenamemode);
-                resolve (filepath + "/" + tpl.filename);
-                return;
+                nunjucks.render(tpl.template, data, function (err, content) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+
+                    fs.writeFileSync(filepath + "/" + filename, content);
+                    fs.chmodSync(filepath + "/" + filename, tpl.filenamemode);
+                    resolve (filepath + "/" + filename);
+                    return;
+                });
             });
         });
     });
