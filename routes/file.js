@@ -24,7 +24,12 @@ const tplconf = {
     ldap_replace_password: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_replace_password",
+        template_file: "ldap_replace_password.ldif",
+    },
+    ldap_modify_user: {
+        filename: "{{ user.uid }}.{{ fid }}.ldif",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "ldap_modify_user.ldif",
     }
 };
 
@@ -94,5 +99,9 @@ module.exports = {
     /* template for goldap.js */
     ldap_reset_password: function (user, user_dn, fid) {
         return create_file('ldap_replace_password', { user: user, dn: user_dn, fid: fid });
+    },
+
+    ldap_modify_user: function (user, user_dn, fid) {
+        return create_file('ldap_modify_user', { user: user, dn: user_dn, fid: fid });
     }
 };
