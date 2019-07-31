@@ -98,10 +98,10 @@ module.exports = {
 
     /* template for goldap.js */
     ldap_reset_password: function (user, user_dn, fid) {
-        return create_file('ldap_replace_password', { user: user, dn: user_dn, fid: fid });
+        return create_file('ldap_replace_password', { user: user, user_dn: user_dn, fid: fid });
     },
 
     ldap_modify_user: function (user, user_dn, fid) {
-        return create_file('ldap_modify_user', { user: user, dn: user_dn, fid: fid });
+        return create_file('ldap_modify_user', { user: user, user_dn: user_dn, fid: fid });
     }
 };
