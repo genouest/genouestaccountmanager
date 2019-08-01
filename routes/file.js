@@ -51,6 +51,11 @@ const tplconf = {
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "ldap_add_user_to_group.ldif",
     },
+    ldap_change_user_groups: {
+        filename: "{{ user.uid }}.{{ fid }}.ldif",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "ldap_change_user_groups.ldif",
+    },
 };
 
 
@@ -141,6 +146,8 @@ module.exports = {
         return create_file('ldap_add_user_to_group', { user: user, fid: fid });
     },
 
-
+    ldap_change_user_groups: function (user, group_add, group_remove, fid) { // will use user.group
+        return create_file('ldap_change_user_groups', { user: user, group_add: group_add, group_remove: group_remove, fid: fid });
+    },
 
 };
