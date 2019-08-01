@@ -42,12 +42,12 @@ const tplconf = {
         template_file: "ldap/delete_group.ldif",
     },
     ldap_add_user: {
-        filename: "group_{{user.group }}_{{ user.uid }}.{{ fid }}.ldif",
+        filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "ldap/add_user.ldif",
     },
     ldap_add_user_to_group: {
-        filename: "{{ user.uid }}.{{ fid }}.ldif",
+        filename: "group_{{user.group }}_{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "ldap/add_user_to_group.ldif",
     },
