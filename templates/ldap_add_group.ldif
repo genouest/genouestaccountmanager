@@ -1,0 +1,6 @@
+dn: cn={{ group.name }},ou=groups,{{ CONFIG.ldap.dn }}
+objectClass: top
+objectClass: posixGroup
+gidNumber: {{ group.gid }}
+cn: {{ group.name }}
+description: group for {{ group.name }}

@@ -269,20 +269,29 @@ module.exports = {
   },
 
   add_group: function(group, fid, callback) {
-    var user_ldif = "";
-    user_ldif += "dn: cn="+group.name+",ou=groups,"+CONFIG.ldap.dn+"\n";
-    user_ldif += "objectClass: top\n";
-    user_ldif += "objectClass: posixGroup\n";
-    user_ldif += "gidNumber: "+group.gid+"\n";
-    user_ldif += "cn: "+group.name+"\n";
-    user_ldif += "description: group for "+group.name+"\n";
-    user_ldif += "\n";
-    fs.writeFile(CONFIG.general.script_dir+'/'+group.name+"."+fid+".ldif", user_ldif, function(err) {
-      if(err) {
-          logger.error(err);
-      }
-      callback(err);
-    });
+      var user_ldif = "";
+      user_ldif += "dn: cn="+group.name+",ou=groups,"+CONFIG.ldap.dn+"\n";
+      user_ldif += "objectClass: top\n";
+      user_ldif += "objectClass: posixGroup\n";
+      user_ldif += "gidNumber: "+group.gid+"\n";
+      user_ldif += "cn: "+group.name+"\n";
+      user_ldif += "description: group for "+group.name+"\n";
+      user_ldif += "\n";
+      fs.writeFile(CONFIG.general.script_dir+'/'+group.name+"."+fid+".ldif", user_ldif, function(err) {
+          if(err) {
+              logger.error(err);
+          }
+          callback(err);
+      });
+      filer.ldap_add_group(group, fid)
+          .then(
+              created_file => {
+                  logger.info("File Created: ", created_file);
+              })
+          .catch(error => { // reject()
+              logger.error('Add Group Failed for: ' + group.name, error);
+              callback(error);
+          });
   },
 
   delete_group: function(group, fid, callback) {
@@ -290,11 +299,21 @@ module.exports = {
       user_ldif += "cn="+group.name+",ou=groups,"+CONFIG.ldap.dn+"\n";
       user_ldif += "\n";
       fs.writeFile(CONFIG.general.script_dir+'/'+group.name+"."+fid+".ldif", user_ldif, function(err) {
-        if(err) {
-            logger.error(err);
-        }
-        callback(err);
+          if(err) {
+              logger.error(err);
+          }
+          callback(err);
       });
+
+      filer.ldap_delete_group(group, fid)
+          .then(
+              created_file => {
+                  logger.info("File Created: ", created_file);
+              })
+          .catch(error => { // reject()
+              logger.error('Delete Group Failed for: ' + group.name, error);
+              callback(error);
+          });
   },
 
   add: function(user, fid, callback) {
