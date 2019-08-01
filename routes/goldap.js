@@ -382,7 +382,7 @@ module.exports = {
                 .then(
                     created_file => {
                         logger.info("File Created: ", created_file);
-                        return filer.ldap_add_user_to_group(user);
+                        return filer.ldap_add_user_to_group(user, fid);
                     })
                 .then(
                     created_file => {
