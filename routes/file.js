@@ -24,37 +24,37 @@ const tplconf = {
     ldap_replace_password: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_replace_password.ldif",
+        template_file: "ldap/replace_password.ldif",
     },
     ldap_modify_user: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_modify_user.ldif",
+        template_file: "ldap/modify_user.ldif",
     },
     ldap_add_group: {
         filename: "{{ group.name }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_add_group.ldif",
+        template_file: "ldap/add_group.ldif",
     },
     ldap_delete_group: {
         filename: "{{ group.name }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_delete_group.ldif",
+        template_file: "ldap/delete_group.ldif",
     },
     ldap_add_user: {
         filename: "group_{{user.group }}_{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_add_user.ldif",
+        template_file: "ldap/add_user.ldif",
     },
     ldap_add_user_to_group: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_add_user_to_group.ldif",
+        template_file: "ldap/add_user_to_group.ldif",
     },
     ldap_change_user_groups: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap_change_user_groups.ldif",
+        template_file: "ldap/change_user_groups.ldif",
     },
 };
 
