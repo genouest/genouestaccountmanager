@@ -377,6 +377,21 @@ module.exports = {
           callback(err);
         }
       });
+
+      filer.ldap_add_user(user, group, fid)
+            .then(
+                created_file => {
+                    logger.info("File Created: ", created_file);
+                    return filer.ldap_add_user_to_group(user);
+                })
+            .then(
+                created_file => {
+                    logger.info("File Created: ", created_file);
+                })
+            .catch(error => { // reject()
+                logger.error('Add User Failed for: ' + user.uid, error);
+                callback(error);
+            });
     });
 
   },

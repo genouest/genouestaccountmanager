@@ -1,0 +1,31 @@
+dn: uid={{ user.uid }},ou=people,{{ CONFIG.ldap.dn }}
+cn: {{ user.firstname }} {{ user.lastname }}
+sn: {{ user.lastname }}
+{% if user.is_internal %}
+ou: {{ CONFIG.ldap.team }}
+{% elif user.is_fake %}
+ou: fake
+{% else %}
+ou: external
+{% endif %}
+givenName: {{ user.firstname }}
+mail: {{ user.email }}
+{% if user.home %}
+homeDirectory: {{ user.home }}
+{% endif %}
+loginShell: /bin/bash
+userpassword: {{ user.password }}
+uidNumber: {{ user.uidnumber }}
+gidNumber: {{ user.gidnumber }}
+objectClass: top
+objectClass: posixAccount
+objectClass: inetOrgPerson
+
+{% if not group %}
+dn: cn={{ user.group }},ou=groups,{{ CONFIG.ldap.dn }}
+objectClass: top
+objectClass: posixGroup
+gidNumber: {{ user.gidnumber }}
+cn: {{ user.group }}
+description: group for {{ user.group }}
+{% endif %}
