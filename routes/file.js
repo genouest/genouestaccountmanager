@@ -63,6 +63,12 @@ const tplconf = {
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "user/create_extra_group.sh",
     },
+    user_create_extra_user: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/create_extra_user.sh",
+    },
+
 };
 
 /* Example Usage */
@@ -157,9 +163,13 @@ module.exports = {
     },
 
     /* method for users.js */
-    // Todo: should find a clean way to giv the path from
-    user_create_extra_group: function (group, fid) { // will use user.group
+    // Todo: should find a clean way to giv the path from ldap_add_group (same for all user method which need ldif path
+    user_create_extra_group: function (group, fid) {
         return create_file('user_create_extra_group', { group: group, fid: fid });
+    },
+
+    user_create_extra_user: function (user, fid) {
+        return create_file('user_create_extra_user', { user: user, fid: fid });
     },
 
 

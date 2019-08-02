@@ -142,7 +142,7 @@ var create_extra_group = function(group_name, owner_name){
                                 logger.info("File Created: ", created_file);
                             })
                         .catch(error => { // reject()
-                            logger.error('Create Group Failed for: ' + group, error);
+                            logger.error('Create Group Failed for: ' + group.name, error);
                             callback(error);
                         });
 
@@ -153,7 +153,7 @@ var create_extra_group = function(group_name, owner_name){
                     fs.writeFile(script_file, script, function(err) {
                         fs.chmodSync(script_file, 0o755);
                         group.fid = fid;
-                        resolve(group); // hum why a resolve here ? ...
+                        resolve(group);
                         return;
                     });
                 });
@@ -216,6 +216,17 @@ var create_extra_user = function(user_name, group, internal_user){
                 if(!err){
                     delete user.password;
                     users_db.insert(user, function(err){
+
+                        filer.user_create_extra_user(user, fid)
+                            .then(
+                                created_file => {
+                                    logger.info("File Created: ", created_file);
+                                })
+                            .catch(error => { // reject()
+                                logger.error('Create User Failed for: ' + user.uid, error);
+                                callback(error);
+                            });
+
                         var script = "#!/bin/bash\n";
                         script += "set -e \n"
                         script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
