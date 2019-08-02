@@ -21,6 +21,7 @@ const tplconf = {
         filepath_mode: 0o700,
         template_file: "ssh_config",
     },
+    /* config for goldap.js */
     ldap_replace_password: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
@@ -56,8 +57,13 @@ const tplconf = {
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "ldap/change_user_groups.ldif",
     },
+    /* config for users.js */
+    user_create_extra_group: {
+        filename: "{{ group.name }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/create_extra_group.sh",
+    },
 };
-
 
 /* Example Usage */
 
@@ -121,7 +127,7 @@ module.exports = {
         return create_file('ssh_config', { user: user });
     },
 
-    /* template for goldap.js */
+    /* method for goldap.js */
     ldap_reset_password: function (user, user_dn, fid) {
         return create_file('ldap_replace_password', { user: user, user_dn: user_dn, fid: fid });
     },
@@ -149,5 +155,12 @@ module.exports = {
     ldap_change_user_groups: function (user, group_add, group_remove, fid) { // will use user.group
         return create_file('ldap_change_user_groups', { user: user, group_add: group_add, group_remove: group_remove, fid: fid });
     },
+
+    /* method for users.js */
+    // Todo: should find a clean way to giv the path from
+    user_create_extra_group: function (group, fid) { // will use user.group
+        return create_file('user_create_extra_group', { group: group, fid: fid });
+    },
+
 
 };

@@ -135,6 +135,17 @@ var create_extra_group = function(group_name, owner_name){
             group = {name: group_name, gid: mingid, owner: owner_name};
             groups_db.insert(group, function(err){
                 goldap.add_group(group, fid, function(err){
+
+                    filer.user_create_extra_group(group, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Create Group Failed for: ' + group, error);
+                            callback(error);
+                        });
+
                     var script = "#!/bin/bash\n";
                     script += "set -e \n"
                     script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
@@ -142,11 +153,9 @@ var create_extra_group = function(group_name, owner_name){
                     fs.writeFile(script_file, script, function(err) {
                         fs.chmodSync(script_file, 0o755);
                         group.fid = fid;
-                        resolve(group);
+                        resolve(group); // hum why a resolve here ? ...
                         return;
                     });
-
-
                 });
             });
         });
