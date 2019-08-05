@@ -974,6 +974,17 @@ router.delete_user = function(user, action_owner_id){
             var allgroups = user.secondarygroups;
             allgroups.push(user.group);
             goldap.change_user_groups(user, [], allgroups, fid, function() {
+
+                filer.user_delete(user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Delete User Failed for: ' + user.uid, error);
+                        callback(error);
+                    });
+
                 // remove from ldap
                 // delete home
                 var script = "#!/bin/bash\n";

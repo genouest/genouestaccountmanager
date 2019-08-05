@@ -88,6 +88,13 @@ const tplconf = {
         template_file: "user/change_group.sh",
         filepath_mode: 0o755,
     },
+    user_delete_user: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/delete_user.sh",
+        filepath_mode: 0o755,
+    },
+
 };
 
 /* Example Usage */
@@ -208,6 +215,10 @@ module.exports = {
     // Todo: should find if we should only have one template for all the ldapmodify (as they are only call to ldif file with fid)
     user_change_group: function (user, fid) {
         return create_file('user_change_group', { user: user, fid: fid });
+    },
+
+    user_delete_user: function (user, fid) {
+        return create_file('user_delete_user', { user: user, fid: fid });
     },
 
 };
