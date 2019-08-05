@@ -817,6 +817,17 @@ router.post('/user/:id/group/:group', function(req, res){
             var fid = new Date().getTime();
             // Now add group
             goldap.change_user_groups(user, [secgroup], [], fid, function() {
+
+                filer.user_change_group(user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Group Change Failed for: ' + user.uid, error);
+                        callback(error);
+                    });
+
                 // remove from ldap
                 // delete home
                 var script = "#!/bin/bash\n";
@@ -883,6 +894,17 @@ router.delete('/user/:id/group/:group', function(req, res){
             var fid = new Date().getTime();
             // Now add group
             goldap.change_user_groups(user, [], [secgroup], fid, function() {
+
+                filer.user_change_group(user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Group Change Failed for: ' + user.uid, error);
+                        callback(error);
+                    });
+
                 // remove from ldap
                 // delete home
                 var script = "#!/bin/bash\n";

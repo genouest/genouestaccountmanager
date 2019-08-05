@@ -82,6 +82,12 @@ const tplconf = {
         template_file: "user/add_group.sh",
         filepath_mode: 0o755,
     },
+    user_change_group: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/change_group.sh",
+        filepath_mode: 0o755,
+    },
 };
 
 /* Example Usage */
@@ -144,7 +150,6 @@ function create_file (name, data) {
 
 module.exports = {
 
-
     set_suffix: function (suffix) {
         filename_suffix = suffix;
     },
@@ -199,6 +204,10 @@ module.exports = {
 
     user_add_group: function (group, fid) {
         return create_file('user_add_group', { group: group, fid: fid });
+    },
+    // Todo: should find if we should only have one template for all the ldapmodify (as they are only call to ldif file with fid)
+    user_change_group: function (user, fid) {
+        return create_file('user_change_group', { user: user, fid: fid });
     },
 
 };
