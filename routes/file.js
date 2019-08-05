@@ -4,7 +4,7 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var fs = require('fs');
 
-const filename_suffix = ".nunjuck";
+var filename_suffix = ".nunjuck";
 
 // Todo: move utils function which manage file content here
 // var utils = require('../routes/utils.js');
