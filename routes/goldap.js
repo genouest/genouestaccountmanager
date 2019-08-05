@@ -6,7 +6,6 @@ var myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
-filer.set_suffix('goldap.njk');
 
 
 var monk = require('monk'),
