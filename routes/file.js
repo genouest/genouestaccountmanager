@@ -76,6 +76,12 @@ const tplconf = {
         template_file: "user/delete_group.sh",
         filepath_mode: 0o755,
     },
+    user_add_group: {
+        filename: "{{ group.name }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/add_group.sh",
+        filepath_mode: 0o755,
+    },
 };
 
 /* Example Usage */
@@ -134,6 +140,8 @@ function create_file (name, data) {
 }
 
 
+/* Todo: find if we should export create_file or not */
+
 module.exports = {
 
 
@@ -188,4 +196,9 @@ module.exports = {
     user_delete_group: function (group, fid) {
         return create_file('user_delete_group', { group: group, fid: fid });
     },
+
+    user_add_group: function (group, fid) {
+        return create_file('user_add_group', { group: group, fid: fid });
+    },
+
 };

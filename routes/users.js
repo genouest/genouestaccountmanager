@@ -648,6 +648,15 @@ router.post('/group/:id', function(req, res){
                     group = {name: req.param('id'), gid: mingid, owner: owner};
                     groups_db.insert(group, function(err){
                         goldap.add_group(group, fid, function(err){
+                            filer.user_add_group(group, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Add Group Failed for: ' + group.name, error);
+                                    callback(error);
+                                });
 
                             var script = "#!/bin/bash\n";
                             script += "set -e \n"
