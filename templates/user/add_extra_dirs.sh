@@ -1,10 +1,13 @@
 # todo find a clean way to use user and group
 
 {% for item in CONFIG.general.user_extra_dirs %}
-if [ ! -e "{{ item | replace("#USER#", user.uid) | replace ("#GROUP#", user.group) }}" ]
+
+extra_dir="{{ item | replace("#USER#", user.uid) | replace ("#GROUP#", user.group) }}"
+
+if [ ! -e "$extra_dir" ]
 then
-    mkdir -p "{{ item | replace("#USER#", user.uid) | replace ("#GROUP#", user.group) }}"
-    chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "{{ item | replace("#USER#", user.uid)| replace ("#GROUP#", user.group) }}"
-fi;
+    mkdir -p "$extra_dir"
+    chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$extra_dir"
+fi
 
 {% endfor %}
