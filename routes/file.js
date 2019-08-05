@@ -62,13 +62,20 @@ const tplconf = {
         filename: "{{ group.name }}.{{ fid }}.update",
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "user/create_extra_group.sh",
+        filepath_mode: 0o755,
     },
     user_create_extra_user: {
         filename: "{{ user.uid }}.{{ fid }}.update",
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "user/create_extra_user.sh",
+        filepath_mode: 0o755,
     },
-
+    user_delete_group: {
+        filename: "{{ group.name }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/delete_group.sh",
+        filepath_mode: 0o755,
+    },
 };
 
 /* Example Usage */
@@ -178,5 +185,7 @@ module.exports = {
         return create_file('user_create_extra_user', { user: user, fid: fid });
     },
 
-
+    user_delete_group: function (group, fid) {
+        return create_file('user_delete_group', { group: group, fid: fid });
+    },
 };

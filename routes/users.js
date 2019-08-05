@@ -492,8 +492,20 @@ router.delete_group = function(group, admin_user_id){
         groups_db.remove({'name': group.name}, function(err){
             var fid = new Date().getTime();
             goldap.delete_group(group, fid, function(err){
+
+
+                filer.user_delete_group(group, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Delete Group Failed for: ' + group.name, error);
+                        callback(error);
+                    });
+
                 var script = "#!/bin/bash\n";
-                script += "set -e \n"
+                script += "set -e \n";
                 script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
                 var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
                 fs.writeFile(script_file, script, function(err) {
