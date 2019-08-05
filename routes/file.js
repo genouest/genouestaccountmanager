@@ -4,7 +4,7 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var fs = require('fs');
 
-const filename_suffix = ".test.nunjuck";
+const filename_suffix = ".nunjuck";
 
 // Todo: move utils function which manage file content here
 // var utils = require('../routes/utils.js');
@@ -128,6 +128,12 @@ function create_file (name, data) {
 
 
 module.exports = {
+
+
+    set_suffix: function (suffix) {
+        filename_suffix = suffix;
+    },
+
     /* template for Test */
     create_ssh_config: function (user) {
         return create_file('ssh_config', { user: user });
