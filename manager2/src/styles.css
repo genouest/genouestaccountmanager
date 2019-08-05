@@ -52,7 +52,7 @@ body {
 
 .dropdown-item {
     font-size: 13px !important;
-    color: white !important;    
+    color: white !important;
 }
 
 .navbar-dark .navbar-nav .nav-link {
@@ -206,8 +206,7 @@ button {
 
 .profile-img
 {
-    width: 74px;
-    height: 60px;
+    max-width: 330px;
     margin: 0 auto 10px;
     display: block;
 }
