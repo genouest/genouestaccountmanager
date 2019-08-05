@@ -9,6 +9,8 @@ var filename_suffix = ".nunjuck";
 // Todo: move utils function which manage file content here
 // var utils = require('../routes/utils.js');
 
+// Todo: Manage mail template with nunjuck
+
 // Todo use conf for template directory
 nunjucks.configure('templates', { autoescape: true });
 
