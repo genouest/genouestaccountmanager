@@ -141,10 +141,11 @@ var create_extra_group = function(group_name, owner_name){
                         .then(
                             created_file => {
                                 logger.info("File Created: ", created_file);
+                                resolve(group);  // todo: find if needed
                             })
                         .catch(error => { // reject()
                             logger.error('Create Group Failed for: ' + group.name, error);
-                            callback(error);
+                            return;
                         });
 
                     var script = "#!/bin/bash\n";
@@ -222,10 +223,11 @@ var create_extra_user = function(user_name, group, internal_user){
                             .then(
                                 created_file => {
                                     logger.info("File Created: ", created_file);
+                                    resolve(user); // todo: find if needed
                                 })
                             .catch(error => { // reject()
                                 logger.error('Create User Failed for: ' + user.uid, error);
-                                callback(error);
+                                return;
                             });
 
                         var script = "#!/bin/bash\n";
@@ -498,10 +500,11 @@ router.delete_group = function(group, admin_user_id){
                     .then(
                         created_file => {
                             logger.info("File Created: ", created_file);
+                            resolve(true); // todo: find if needded
                         })
                     .catch(error => { // reject()
                         logger.error('Delete Group Failed for: ' + group.name, error);
-                        callback(error);
+                        return;
                     });
 
                 var script = "#!/bin/bash\n";
@@ -655,7 +658,7 @@ router.post('/group/:id', function(req, res){
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Add Group Failed for: ' + group.name, error);
-                                    callback(error);
+                                    return;
                                 });
 
                             var script = "#!/bin/bash\n";
@@ -825,7 +828,7 @@ router.post('/user/:id/group/:group', function(req, res){
                         })
                     .catch(error => { // reject()
                         logger.error('Group Change Failed for: ' + user.uid, error);
-                        callback(error);
+                        return;
                     });
 
                 // remove from ldap
@@ -902,7 +905,7 @@ router.delete('/user/:id/group/:group', function(req, res){
                         })
                     .catch(error => { // reject()
                         logger.error('Group Change Failed for: ' + user.uid, error);
-                        callback(error);
+                        return;
                     });
 
                 // remove from ldap
@@ -979,10 +982,11 @@ router.delete_user = function(user, action_owner_id){
                     .then(
                         created_file => {
                             logger.info("File Created: ", created_file);
+                            resolve(true); // todo: find if needed
                         })
                     .catch(error => { // reject()
                         logger.error('Delete User Failed for: ' + user.uid, error);
-                        callback(error);
+                        return;
                     });
 
                 // remove from ldap
@@ -1175,7 +1179,7 @@ router.get('/user/:id/activate', function(req, res) {
                                         })
                                     .catch(error => { // reject()
                                         logger.error('Add User Failed for: ' + user.uid, error);
-                                        callback(error);
+                                        return;
                                     });
 
                                 //groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
@@ -1521,7 +1525,7 @@ router.get('/user/:id/expire', function(req, res){
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Expire User Failed for: ' + user.uid, error);
-                                    callback(error);
+                                    return;
                                 });
 
 
@@ -1619,7 +1623,7 @@ router.post('/user/:id/passwordreset', function(req, res){
                             })
                         .catch(error => { // reject()
                             logger.error('Reset Password Failed for: ' + user.uid, error);
-                            callback(error);
+                            return;
                         });
 
                     var script = "#!/bin/bash\n";
@@ -1717,7 +1721,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                                 })
                             .catch(error => { // reject()
                                 logger.error('Reset Password Failed for: ' + user.uid, error);
-                                callback(error);
+                                return;
                             });
 
                         var script = "#!/bin/bash\n";
@@ -1831,7 +1835,7 @@ router.get('/user/:id/renew', function(req, res){
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Renew User Failed for: ' + user.uid, error);
-                                    callback(error);
+                                    return;
                                 });
 
                             var script = "#!/bin/bash\n";
@@ -1924,7 +1928,7 @@ router.put('/user/:id/ssh', function(req, res) {
                         })
                     .catch(error => { // reject()
                         logger.error('Add Ssh Key Failed for: ' + user.uid, error);
-                        callback(error);
+                        return;
                     });
 
 
@@ -2108,7 +2112,7 @@ router.put('/user/:id', function(req, res) {
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Modify User Failed for: ' + user.uid, error);
-                                    callback(error);
+                                    return;
                                 });
 
                             var script = "#!/bin/bash\n";
