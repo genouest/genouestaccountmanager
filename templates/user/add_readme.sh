@@ -6,3 +6,4 @@ then
     ln -s "{{ item.source_folder }}" "{{ user.home }}/user_guides/{{ item.language }}"
     {% endfor %}
 fi
+# add_readme.sh

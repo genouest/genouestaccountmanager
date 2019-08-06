@@ -19,3 +19,4 @@ then
 fi
 
 {% endfor %}
+# move_extra_dirs.sh

@@ -11,4 +11,4 @@ changetype: modify
 delete: memberUid
 memberUid: {{ user.uid }}
 
-{% endfor %}
+{% endfor %}# change_user_groups.ldif

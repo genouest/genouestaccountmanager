@@ -44,3 +44,4 @@ changetype: modify
 add: memberUid
 memberUid: {{ user.uid }}
 {% endif %}
+# modify_user.ldif

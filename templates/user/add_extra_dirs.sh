@@ -11,3 +11,4 @@ then
 fi
 
 {% endfor %}
+# add_extra_dirs.sh

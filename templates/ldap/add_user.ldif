@@ -29,3 +29,4 @@ gidNumber: {{ user.gidnumber }}
 cn: {{ user.group }}
 description: group for {{ user.group }}
 {% endif %}
+# add_user.ldif

@@ -16,3 +16,4 @@ then
 fi
 
 {% include "user/move_extra_dirs.sh" %}
+# modify_user.sh

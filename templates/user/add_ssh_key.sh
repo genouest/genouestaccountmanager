@@ -10,3 +10,4 @@ if [ ! -e "{{ user.home }}/.ssh" ]; then
 fi
 
 echo {{ user.ssh }} >> "{{ user.home }}/.ssh/authorized_keys"
+# add_ssh_key.sh

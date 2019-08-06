@@ -1,1 +1,2 @@
 cn={{ group.name }},ou=groups,{{ CONFIG.ldap.dn }}
+# delete_group.ldif

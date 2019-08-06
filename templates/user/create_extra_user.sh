@@ -20,3 +20,4 @@ chmod 700 "{{ user.home }}/.ssh"
 chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "{{ user.home }}"
 
 {% include "user/add_extra_dirs.sh" %}
+# create_extra_user.sh

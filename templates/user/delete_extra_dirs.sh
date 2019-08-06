@@ -8,3 +8,4 @@ then
 fi
 
 {% endfor %}
+# delete_extra_dirs.sh

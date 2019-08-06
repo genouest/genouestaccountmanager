@@ -11,3 +11,4 @@ then
 fi
 
 {% include "user/delete_extra_dirs.sh" %}
+# delete_user.sh

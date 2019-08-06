@@ -19,3 +19,4 @@ echo '  UserKnownHostsFile=/dev/null' >> "{{ user.home }}/.ssh/config"
 chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "{{ user.home }}"
 
 {% include "user/add_extra_dirs.sh" %}
+# add_user.sh
