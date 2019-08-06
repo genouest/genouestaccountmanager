@@ -217,11 +217,11 @@ module.exports = {
         return create_file('user_delete_group', { group: group, fid: fid });
     },
 
+    // Todo: should find if we should only have one template for all the ldapmodify (as they are only call to ldif file with fid)
     user_add_group: function (group, fid) {
         return create_file('user_add_group', { group: group, fid: fid });
     },
 
-    // Todo: should find if we should only have one template for all the ldapmodify (as they are only call to ldif file with fid)
     // Todo: maybe add the group list in this method (it is not needed now as it is done in ldap)
     user_change_group: function (user, fid) {
         return create_file('user_change_group', { user: user, fid: fid });
