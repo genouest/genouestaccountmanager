@@ -24,7 +24,7 @@ const tplconf = {
         template_file: "ssh_config",
     },
     /* config for goldap.js */
-    ldap_replace_password: {
+    ldap_reset_password: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "ldap/replace_password.ldif",
@@ -102,6 +102,31 @@ const tplconf = {
         template_file: "user/add_user.sh",
         filepath_mode: 0o755,
     },
+    user_expire_user: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/expire_user.sh",
+        filepath_mode: 0o755,
+    },
+    user_reset_password: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/reset_password.sh",
+        filepath_mode: 0o755,
+    },
+    user_renew_user: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/renew_user.sh",
+        filepath_mode: 0o755,
+    },
+
+    user_add_ssh_key: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/add_ssh_key.sh",
+        filepath_mode: 0o755,
+    },
 
 };
 
@@ -176,7 +201,7 @@ module.exports = {
 
     /* method for goldap.js */
     ldap_reset_password: function (user, user_dn, fid) {
-        return create_file('ldap_replace_password', { user: user, user_dn: user_dn, fid: fid });
+        return create_file('ldap_reset_password', { user: user, user_dn: user_dn, fid: fid });
     },
 
     ldap_modify_user: function (user, user_dn, fid) {
@@ -236,4 +261,19 @@ module.exports = {
         return create_file('user_add_user', { user: user, fid: fid });
     },
 
+    user_expire_user: function (user, fid) {
+        return create_file('user_expire_user', { user: user, fid: fid });
+    },
+
+    user_reset_password: function (user, user_dn, fid) {
+        return create_file('user_reset_password', { user: user, fid: fid });
+    },
+
+    user_renew_user: function (user, fid) {
+        return create_file('user_renew_user', { user: user, fid: fid });
+    },
+
+    user_add_ssh_key: function (user, fid) {
+        return create_file('user_add_ssh_key', { user: user, fid: fid });
+    },
 };

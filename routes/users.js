@@ -1513,6 +1513,18 @@ router.get('/user/:id/expire', function(req, res){
                     else {
                         user.history.push({'action': 'expire', date: new Date().getTime()});
                         users_db.update({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}}, function(err){
+
+                            filer.user_expire_user(user, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Expire User Failed for: ' + user.uid, error);
+                                    callback(error);
+                                });
+
+
                             var script = "#!/bin/bash\n";
                             script += "set -e \n"
                             script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
@@ -1600,6 +1612,16 @@ router.post('/user/:id/passwordreset', function(req, res){
                     return;
                 }
                 else {
+                    filer.user_reset_password(user, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Reset Password Failed for: ' + user.uid, error);
+                            callback(error);
+                        });
+
                     var script = "#!/bin/bash\n";
                     script += "set -e \n"
                     script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
@@ -1687,6 +1709,17 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                 else {
                     user.history.push({'action': 'password reset', date: new Date().getTime()});
                     users_db.update({uid: user.uid},{'$set': {history: user.history}}, function(err){
+                        // Todo: find if we need another template (or not)
+                        filer.user_reset_password(user, fid)
+                            .then(
+                                created_file => {
+                                    logger.info("File Created: ", created_file);
+                                })
+                            .catch(error => { // reject()
+                                logger.error('Reset Password Failed for: ' + user.uid, error);
+                                callback(error);
+                            });
+
                         var script = "#!/bin/bash\n";
                         script += "set -e \n"
                         script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
@@ -1791,6 +1824,16 @@ router.get('/user/:id/renew', function(req, res){
                     else {
                         user.history.push({'action': 'reactivate', date: new Date().getTime()});
                         users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}}, function(err){
+                            filer.user_renew_user(user, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Renew User Failed for: ' + user.uid, error);
+                                    callback(error);
+                                });
+
                             var script = "#!/bin/bash\n";
                             script += "set -e \n"
                             script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
@@ -1873,6 +1916,18 @@ router.put('/user/:id/ssh', function(req, res) {
             // Update SSH Key
             users_db.update({_id: user._id}, {'$set': {ssh: req.param('ssh')}}, function(err){
                 user.ssh = escapeshellarg(req.param('ssh'));
+
+                filer.user_add_ssh_key(user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Add Ssh Key Failed for: ' + user.uid, error);
+                        callback(error);
+                    });
+
+
                 var script = "#!/bin/bash\n";
                 script += "set -e \n";
                 script += "if [ ! -e ~"+user.uid+"/.ssh ]; then\n";
