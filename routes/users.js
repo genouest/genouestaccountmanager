@@ -36,14 +36,14 @@ var utils = require('../routes/utils.js');
 
 // var get_ip = require('ipware')().get_ip;
 
-var monk = require('monk')
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + GENERAL_CONFIG.db)
-var groups_db = db.get('groups')
-var databases_db = db.get('databases')
-var web_db = db.get('web')
-var users_db = db.get('users')
-var projects_db = db.get('projects')
-var events_db = db.get('events')
+var monk = require('monk');
+var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + GENERAL_CONFIG.db);
+var groups_db = db.get('groups');
+var databases_db = db.get('databases');
+var web_db = db.get('web');
+var users_db = db.get('users');
+var projects_db = db.get('projects');
+var events_db = db.get('events');
 
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -85,7 +85,7 @@ if (runningEnv === 'test'){
                 resolve();
             });
         });
-    }
+    };
 
     router.use('*', function(req, res, next){
         res.on("finish", function() {
@@ -136,34 +136,23 @@ var create_extra_group = function(group_name, owner_name){
             group = {name: group_name, gid: mingid, owner: owner_name};
             groups_db.insert(group, function(err){
                 goldap.add_group(group, fid, function(err){
-
                     filer.user_create_extra_group(group, fid)
                         .then(
                             created_file => {
                                 logger.info("File Created: ", created_file);
                                 resolve(group);  // todo: find if needed
+                                return;
                             })
                         .catch(error => { // reject()
                             logger.error('Create Group Failed for: ' + group.name, error);
                             return;
                         });
-
-                    var script = "#!/bin/bash\n";
-                    script += "set -e \n"
-                    script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-                    var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-                    fs.writeFile(script_file, script, function(err) {
-                        fs.chmodSync(script_file, 0o755);
-                        group.fid = fid;
-                        resolve(group);
-                        return;
-                    });
                 });
             });
         });
 
     });
-}
+};
 
 var create_extra_user = function(user_name, group, internal_user){
     return new Promise(function (resolve, reject){
@@ -201,7 +190,7 @@ var create_extra_user = function(user_name, group, internal_user){
             loginShell: '/bin/bash',
             history: [],
             password: password
-        }
+        };
 
         //var minuid = 1000;
         //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}, function(err, data){
@@ -218,7 +207,7 @@ var create_extra_user = function(user_name, group, internal_user){
                 if(!err){
                     delete user.password;
                     users_db.insert(user, function(err){
-
+                        // todo: do something if err
                         filer.user_create_extra_user(user, fid)
                             .then(
                                 created_file => {
@@ -230,69 +219,36 @@ var create_extra_user = function(user_name, group, internal_user){
                                 return;
                             });
 
-                        var script = "#!/bin/bash\n";
-                        script += "set -e \n"
-                        script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                        script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
-                        script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
-                        script += "fi\n"
-                        script += "sleep 3\n";
-                        script += "mkdir -p "+user.home+"/.ssh\n";
-                        script += utils.addReadmes(user.home);
-                        /*
-                          script += "mkdir -p "+user.home+"/user_guides\n";
-                          if (typeof CONFIG.general.readme == "object") {
-                          CONFIG.general.readme.forEach(function(dict) {
-                          script += "ln -s " + dict.source_folder + " "+user.home+"/user_guides/" + dict.language + "\n";
-                          });
-                          } else {
-                          script += "ln -s " + CONFIG.general.readme + " "+user.home+"/user_guides/README\n";
-                          };
-                        */
-                        script += "touch "+user.home+"/.ssh/authorized_keys\n";
-                        script += "echo \"Host *\" > "+user.home+"/.ssh/config\n";
-                        script += "echo \"  StrictHostKeyChecking no\" >> "+user.home+"/.ssh/config\n";
-                        script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+user.home+"/.ssh/config\n";
-                        script += "chmod 700 "+user.home+"/.ssh\n";
-                        script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
-                        // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                        //script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
-                        script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
-                        var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                        fs.writeFile(script_file, script, function(err) {
-                            fs.chmodSync(script_file,0o755);
-                            var plugin_call = function(plugin_info, userId, data, adminId){
-                                return new Promise(function (resolve, reject){
-                                    plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                                        resolve(true);
-                                    });
+
+                        // todo: find if we need to call plugin in .then of the filer call
+                        var plugin_call = function(plugin_info, userId, data, adminId){
+                            return new Promise(function (resolve, reject){
+                                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                                    resolve(true);
                                 });
-                            };
-                            Promise.all(plugins_info.map(function(plugin_info){
-                                return plugin_call(plugin_info, user.uid, user, 'auto');
-                            })).then(function(results){
-                                return send_notif(mailOptions, fid, []);
-                            }, function(err){
-                                return send_notif(mailOptions, fid, err);
-                            }).then(function(errs){
-                                resolve(user);
-                                return;
                             });
+                        };
+                        Promise.all(plugins_info.map(function(plugin_info){
+                            return plugin_call(plugin_info, user.uid, user, 'auto');
+                        })).then(function(results){
+                            // todo: find if we need to set mailOptions
+                            return send_notif(mailOptions, fid, []);
+                        }, function(err){
+                            return send_notif(mailOptions, fid, err);
+                        }).then(function(errs){
+                            resolve(user);
+                            return;
                         });
                     });
-
                 }
                 else {
                     logger.error('Failed to create admin user', err);
                     resolve(null);
                 }
             });
-
         });
-
-
     });
-}
+};
 
 router.create_admin = function(default_admin, default_admin_group){
     users_db.findOne({'uid': default_admin}).then(function(user){
@@ -314,12 +270,12 @@ router.create_admin = function(default_admin, default_admin_group){
                         create_extra_user(default_admin, group, true).then(function(user){
                             logger.info('admin user created');
                         });
-                    })
+                    });
                 }
-            })
+            });
         }
     });
-}
+};
 
 router.get('/user/:id/apikey', function(req, res){
     var sess = req.session;
@@ -334,17 +290,17 @@ router.get('/user/:id/apikey', function(req, res){
         }
         users_db.findOne({uid: req.param('id')}, function(err, user){
             if(!user) {
-                res.send({msg: 'User does not exists'})
+                res.send({msg: 'User does not exists'});
                 res.end();
                 return;
             }
 
             if (user.apikey === undefined) {
-                res.send({'apikey': ''})
+                res.send({'apikey': ''});
                 res.end();
                 return;
             } else {
-                res.send({'apikey': user.apikey})
+                res.send({'apikey': user.apikey});
                 res.end();
                 return;
             }
@@ -366,7 +322,7 @@ router.post('/user/:id/apikey', function(req, res){
 
         users_db.findOne({uid: req.param('id')}, function(err, user){
             if(!user) {
-                res.send({msg: 'User does not exists'})
+                res.send({msg: 'User does not exists'});
                 res.end();
                 return;
             }
@@ -397,7 +353,7 @@ router.put('/user/:id/subscribe', function(req, res){
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
@@ -426,7 +382,7 @@ router.put('/user/:id/unsubscribe', function(req, res){
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
@@ -451,7 +407,7 @@ router.get('/user/:id/subscribed', function(req, res){
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
@@ -495,29 +451,21 @@ router.delete_group = function(group, admin_user_id){
             var fid = new Date().getTime();
             goldap.delete_group(group, fid, function(err){
 
-
                 filer.user_delete_group(group, fid)
                     .then(
                         created_file => {
                             logger.info("File Created: ", created_file);
-                            resolve(true); // todo: find if needded
                         })
                     .catch(error => { // reject()
                         logger.error('Delete Group Failed for: ' + group.name, error);
                         return;
                     });
 
-                var script = "#!/bin/bash\n";
-                script += "set -e \n";
-                script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-                var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
-                    group.fid = fid;
-                    events_db.insert({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
-                    utils.freeGroupId(group.gid).then(function(){
-                        resolve(true);
-                    })
+                // todo: find if we need to insert event in .then of the filer call
+                group.fid = fid;
+                events_db.insert({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+                utils.freeGroupId(group.gid).then(function(){
+                    resolve(true);
                 });
             });
         });
@@ -595,7 +543,7 @@ router.put('/group/:id', function(req, res){
         var owner = req.param('owner');
         users_db.findOne({uid: owner}, function(err, user){
             if(!user || err) {
-                res.status(404).send('User does not exists')
+                res.status(404).send('User does not exists');
                 res.end();
                 return;
             }
@@ -632,7 +580,7 @@ router.post('/group/:id', function(req, res){
         var owner = req.param('owner');
         users_db.findOne({uid: owner}, function(err, user){
             if(!user || err) {
-                res.status(404).send('User does not exists')
+                res.status(404).send('User does not exists');
                 res.end();
                 return;
             }
@@ -661,19 +609,12 @@ router.post('/group/:id', function(req, res){
                                     return;
                                 });
 
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n"
-                            script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-                            var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
-                                events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
-
-                                fs.chmodSync(script_file,0o755);
-                                group.fid = fid;
-                                res.send(group);
-                                res.end();
-                                return;
-                            });
+                            // todo: find if we need to insert event in .then of the filer call
+                            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+                            group.fid = fid;
+                            res.send(group);
+                            res.end();
+                            return;
                         });
                     });
                 });
@@ -831,27 +772,17 @@ router.post('/user/:id/group/:group', function(req, res){
                         return;
                     });
 
-                // remove from ldap
-                // delete home
-                var script = "#!/bin/bash\n";
-                script += "set -e \n"
-                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
-
-                    users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
-                        if(err){
-                            res.send({message: 'Could not update user'});
-                            res.end();
-                            return;
-                        }
-                        events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                        res.send({message: 'User added to group', fid: fid});
+                // todo: find if we need to update db in the filer then call, or maybe before change ldap group
+                users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
+                    if(err){
+                        res.send({message: 'Could not update user'});
                         res.end();
                         return;
-                    });
+                    }
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                    res.send({message: 'User added to group', fid: fid});
+                    res.end();
+                    return;
                 });
             });
         });
@@ -908,41 +839,31 @@ router.delete('/user/:id/group/:group', function(req, res){
                         return;
                     });
 
-                // remove from ldap
-                // delete home
-                var script = "#!/bin/bash\n";
-                script += "set -e \n"
-                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
-
-                    users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
-                        if(err){
-                            res.send({message: 'Could not update user'});
+                // todo: find if we need to update db in the filer then call, or maybe before change ldap group
+                users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
+                    if(err){
+                        res.send({message: 'Could not update user'});
+                        res.end();
+                        return;
+                    }
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                    users_db.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}, function(err, users_in_group){
+                        if(users_in_group && users_in_group.length > 0){
+                            res.send({message: 'User removed from group', fid: fid});
                             res.end();
                             return;
                         }
-                        events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                        users_db.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}, function(err, users_in_group){
-                            if(users_in_group && users_in_group.length > 0){
+                        // If group is empty, delete it
+                        groups_db.findOne({name: secgroup}, function(err, group){
+                            if(err || !group) {
                                 res.send({message: 'User removed from group', fid: fid});
                                 res.end();
                                 return;
                             }
-                            // If group is empty, delete it
-                            groups_db.findOne({name: secgroup}, function(err, group){
-                                if(err || !group) {
-                                    res.send({message: 'User removed from group', fid: fid});
-                                    res.end();
-                                    return;
-                                }
-                                router.delete_group(group, session_user.uid).then(function(){
-                                    res.send({message: 'User removed from group. Empty group ' + secgroup + ' was deleted'});
-                                    res.end();
-                                    return;
-                                });
+                            router.delete_group(group, session_user.uid).then(function(){
+                                res.send({message: 'User removed from group. Empty group ' + secgroup + ' was deleted'});
+                                res.end();
+                                return;
                             });
                         });
                     });
@@ -964,7 +885,7 @@ router.delete_user = function(user, action_owner_id){
                         'logs': []
                     }
                 ).then(function(){
-                    return utils.freeUserId(user.uidnumber)
+                    return utils.freeUserId(user.uidnumber);
                 }).then(function(){
                     resolve(true);
                 });
@@ -989,74 +910,59 @@ router.delete_user = function(user, action_owner_id){
                         return;
                     });
 
-                // remove from ldap
-                // delete home
-                var script = "#!/bin/bash\n";
-                //script += "set -e \n"
-                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn +" \"uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\"\n";
-                // todo: should never rm -rf from a variable
-                script += "rm -rf "+user.home+"\n";
-                // script += "rm -rf /omaha-beach/"+user.uid+"\n";
-                script += utils.deleteExtraDirs(user.uid, user.group);
 
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
-                    users_db.remove({_id: user._id}, function(err){
-                        if(err){
-                            resolve(false);
-                            return;
+                // todo: find if we need to remove db user in the filer then call, or maybe chain promise
+                users_db.remove({_id: user._id}, function(err){
+                    if(err){
+                        resolve(false);
+                        return;
+                    }
+                    router.clear_user_groups(user, action_owner_id);
+                    var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
+                    var msg_activ_html = msg_activ;
+                    var mailOptions = {
+                        origin: MAIL_CONFIG.origin, // sender address
+                        destinations:  [GENERAL_CONFIG.accounts], // list of receivers
+                        subject: GENERAL_CONFIG.name + ' account deletion: ' +user.uid, // Subject line
+                        message: msg_activ, // plaintext body
+                        html_message: msg_activ_html // html body
+                    };
+                    events_db.insert(
+                        {
+                            'owner': action_owner_id,
+                            'date': new Date().getTime(),
+                            'action': 'delete user ' + user.uid ,
+                            'logs': [user.uid+"."+fid+".update"]
                         }
-                        router.clear_user_groups(user, action_owner_id);
-                        var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
-                        var msg_activ_html = msg_activ;
-                        var mailOptions = {
-                            origin: MAIL_CONFIG.origin, // sender address
-                            destinations:  [GENERAL_CONFIG.accounts], // list of receivers
-                            subject: GENERAL_CONFIG.name + ' account deletion: ' +user.uid, // Subject line
-                            message: msg_activ, // plaintext body
-                            html_message: msg_activ_html // html body
-                        };
-                        events_db.insert(
-                            {
-                                'owner': action_owner_id,
-                                'date': new Date().getTime(),
-                                'action': 'delete user ' + user.uid ,
-                                'logs': [user.uid+"."+fid+".update"]
-                            }
-
-                        ).then(function(){
-                            // Call remove method of plugins if defined
-                            var plugin_call = function(plugin_info, userId, user, adminId){
-                                return new Promise(function (resolve, reject){
-                                    if(plugins_modules[plugin_info.name].remove === undefined) {
-                                        resolve(true);
-                                    }
-                                    plugins_modules[plugin_info.name].remove(userId, user, adminId).then(function(){
-                                        resolve(true);
-                                    });
-                                });
-                            };
-                            return Promise.all(plugins_info.map(function(plugin_info){
-                                return plugin_call(plugin_info, user.uid, user, action_owner_id);
-                            }));
-                        })
-                            .then(function(){
-                                return utils.freeUserId(user.uidnumber)
-                            })
-                            .then(function(){
-                                if(notif.mailSet()) {
-                                    notif.sendUser(mailOptions, function(error, response){
-                                        resolve(true);
-                                    });
-                                }
-                                else {
+                    ).then(function(){
+                        // Call remove method of plugins if defined
+                        var plugin_call = function(plugin_info, userId, user, adminId){
+                            return new Promise(function (resolve, reject){
+                                if(plugins_modules[plugin_info.name].remove === undefined) {
                                     resolve(true);
                                 }
+                                plugins_modules[plugin_info.name].remove(userId, user, adminId).then(function(){
+                                    resolve(true);
+                                });
                             });
-
-                    });
+                        };
+                        return Promise.all(plugins_info.map(function(plugin_info){
+                            return plugin_call(plugin_info, user.uid, user, action_owner_id);
+                        }));
+                    })
+                        .then(function(){
+                            return utils.freeUserId(user.uidnumber);
+                        })
+                        .then(function(){
+                            if(notif.mailSet()) {
+                                notif.sendUser(mailOptions, function(error, response){
+                                    resolve(true);
+                                });
+                            }
+                            else {
+                                resolve(true);
+                            }
+                        });
                 });
             });
         }
@@ -1140,7 +1046,7 @@ router.get('/user/:id/activate', function(req, res) {
 
         users_db.findOne({uid: req.param('id')}, function(err, user){
             if(!user) {
-                res.status(403).send('User does not exists')
+                res.status(403).send('User does not exists');
                 res.end();
                 return;
             }
@@ -1159,9 +1065,9 @@ router.get('/user/:id/activate', function(req, res) {
                 //}
                 groups_db.findOne({'name': user.group}, function(err, data){
                     if(err || data === undefined || data === null) {
-                        res.status(403).send('Group '+user.group+' does not exists, please create it first')
+                        res.status(403).send('Group '+user.group+' does not exists, please create it first');
                         res.end();
-                        return
+                        return;
                     }
 
                     user.uidnumber = minuid;
@@ -1182,92 +1088,48 @@ router.get('/user/:id/activate', function(req, res) {
                                         return;
                                     });
 
-                                //groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
+                                // todo: same as all todo, find if we need to notif in the filer then call or maybe join all promise
+                                notif.add(user.email, function(){
+                                    var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
+                                    var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
+                                    var mailOptions = {
+                                        origin: MAIL_CONFIG.origin, // sender address
+                                        destinations: [user.email], // list of receivers
+                                        subject: GENERAL_CONFIG.name + ' account activation', // Subject line
+                                        message: msg_activ, // plaintext body
+                                        html_message: msg_activ_html // html body
+                                    };
+                                    events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                                var script = "#!/bin/bash\n";
-                                script += "set -e \n"
-                                script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                                script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
-                                script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
-                                script += "fi\n"
-                                script += "sleep 3\n";
-                                script += "mkdir -p "+user.home+"/.ssh\n";
-                                script += utils.addReadmes(user.home);
-                                /*
-                                  script += "mkdir -p "+user.home+"/user_guides\n";
-                                  if (typeof CONFIG.general.readme == "object") {
-                                  CONFIG.general.readme.forEach(function(dict) {
-                                  script += "ln -s " + dict.source_folder + " "+user.home+"/user_guides/" + dict.language + "\n";
-                                  });
-                                  } else {
-                                  script += "ln -s " + CONFIG.general.readme + " "+user.home+"/user_guides/README\n";
-                                  };
-                                */
-                                script += "touch "+user.home+"/.ssh/authorized_keys\n";
-                                script += "echo \"Host *\" > "+user.home+"/.ssh/config\n";
-                                script += "echo \"  StrictHostKeyChecking no\" >> "+user.home+"/.ssh/config\n";
-                                script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+user.home+"/.ssh/config\n";
-                                script += "chmod 700 "+user.home+"/.ssh\n";
-                                // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                                script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
-                                // script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
-                                script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
-                                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                                fs.writeFile(script_file, script, function(err) {
-                                    fs.chmodSync(script_file,0o755);
-                                    notif.add(user.email, function(){
-                                        var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
-                                        var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
-                                        var mailOptions = {
-                                            origin: MAIL_CONFIG.origin, // sender address
-                                            destinations: [user.email], // list of receivers
-                                            subject: GENERAL_CONFIG.name + ' account activation', // Subject line
-                                            message: msg_activ, // plaintext body
-                                            html_message: msg_activ_html // html body
-                                        };
-                                        events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-
-                                        var plugin_call = function(plugin_info, userId, data, adminId){
-                                            return new Promise(function (resolve, reject){
-                                                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                                                    resolve(true);
-                                                });
+                                    var plugin_call = function(plugin_info, userId, data, adminId){
+                                        return new Promise(function (resolve, reject){
+                                            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                                                resolve(true);
                                             });
-                                        };
-                                        Promise.all(plugins_info.map(function(plugin_info){
-                                            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                                        })).then(function(results){
-                                            return send_notif(mailOptions, fid, []);
-                                        }, function(err){
-                                            return send_notif(mailOptions, fid, err);
-                                        }).then(function(errs){
-                                            res.send({msg: 'Activation in progress', fid: fid, error: errs});
-                                            res.end();
-                                            return;
                                         });
-
-
+                                    };
+                                    Promise.all(plugins_info.map(function(plugin_info){
+                                        return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                                    })).then(function(results){
+                                        return send_notif(mailOptions, fid, []);
+                                    }, function(err){
+                                        return send_notif(mailOptions, fid, err);
+                                    }).then(function(errs){
+                                        res.send({msg: 'Activation in progress', fid: fid, error: errs});
+                                        res.end();
+                                        return;
                                     });
                                 });
-                                //});
                             });
-
                         }
                         else {
                             res.send({msg: err});
                         }
                     });
-
-
-
                 });
             });
-
         });
-
-
     });
-
 });
 
 // Get user - for logged user or admin
@@ -1293,7 +1155,7 @@ router.get('/user/:id', function(req, res) {
             else {
                 user.is_admin = false;
             }
-            user.quota = []
+            user.quota = [];
             for(var k in GENERAL_CONFIG.quota) {
                 user.quota.push(k);
             }
@@ -1483,7 +1345,6 @@ router.post('/user/:id', function(req, res) {
             res.end();
             return;
         }
-
     });
 });
 
@@ -1528,63 +1389,48 @@ router.get('/user/:id/expire', function(req, res){
                                     return;
                                 });
 
+                            // todo: find where to call event insert
+                            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n"
-                            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                            script += "if [ -e ~"+user.uid+"/.ssh/authorized_keys ]; then\n";
-                            script += "  mv  ~"+user.uid+"/.ssh/authorized_keys ~"+user.uid+"/.ssh/authorized_keys.expired\n";
-                            script += "fi\n";
-
-                            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
-                                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-
-                                fs.chmodSync(script_file,0o755);
-                                // Now remove from mailing list
-                                try {
-                                    notif.remove(user.email, function(err){
-                                        var plugin_call = function(plugin_info, userId, user, adminId){
-                                            return new Promise(function (resolve, reject){
-                                                plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
-                                                    resolve(true);
-                                                });
+                            // Now remove from mailing list
+                            try {
+                                notif.remove(user.email, function(err){
+                                    var plugin_call = function(plugin_info, userId, user, adminId){
+                                        return new Promise(function (resolve, reject){
+                                            plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
+                                                resolve(true);
                                             });
-                                        };
-                                        Promise.all(plugins_info.map(function(plugin_info){
-                                            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                                        })).then(function(data){
-                                            res.send({message: 'Operation in progress', fid: fid, error: []});
-                                            res.end();
-                                            return;
-                                        }, function(errs){
-                                            res.send({message: 'Operation in progress', fid: fid, error: errs});
-                                            res.end();
                                         });
+                                    };
+                                    Promise.all(plugins_info.map(function(plugin_info){
+                                        return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                                    })).then(function(data){
+                                        res.send({message: 'Operation in progress', fid: fid, error: []});
+                                        res.end();
+                                        return;
+                                    }, function(errs){
+                                        res.send({message: 'Operation in progress', fid: fid, error: errs});
+                                        res.end();
                                     });
-                                }
-                                catch(err) {
-                                    res.send({message: 'Operation in progress, user not in mailing list', fid: fid, error: error});
-                                    res.end();
-                                    return;
-                                }
-                            });
-
-                            return;
+                                });
+                            }
+                            catch(err) {
+                                res.send({message: 'Operation in progress, user not in mailing list', fid: fid, error: error});
+                                res.end();
+                                return;
+                            }
                         });
                     }
                 });
-
             }
             else {
                 res.status(401).send('Not authorized');
                 return;
             }
-
         });
     });
-
 });
+
 router.post('/user/:id/passwordreset', function(req, res){
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
@@ -1625,22 +1471,13 @@ router.post('/user/:id/passwordreset', function(req, res){
                             logger.error('Reset Password Failed for: ' + user.uid, error);
                             return;
                         });
-
-                    var script = "#!/bin/bash\n";
-                    script += "set -e \n"
-                    script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                    var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                    fs.writeFile(script_file, script, function(err) {
-                        fs.chmodSync(script_file,0o755);
-                        res.send({message:'Password updated'});
-                        return;
-                    });
+                    res.send({message:'Password updated'});
                 }
             });
-
         });
     });
 });
+
 //app.get('/user/:id/passwordreset', users);
 router.get('/user/:id/passwordreset', function(req, res){
     var key = Math.random().toString(36).substring(7);
@@ -1686,10 +1523,9 @@ router.get('/user/:id/passwordreset', function(req, res){
                 });
             }
             else {
-                res.send({message: 'Could not send an email, please contact the support'})
+                res.send({message: 'Could not send an email, please contact the support'});
             }
         });
-
     });
 });
 
@@ -1724,41 +1560,33 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                                 return;
                             });
 
-                        var script = "#!/bin/bash\n";
-                        script += "set -e \n"
-                        script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                        var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                        fs.writeFile(script_file, script, function(err) {
-                            fs.chmodSync(script_file,0o755);
-                            // Now send email
-                            var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
-                            var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
-                            var mailOptions = {
-                                origin: MAIL_CONFIG.origin, // sender address
-                                destinations: [user.email], // list of receivers
-                                subject: GENERAL_CONFIG.name + ' account password reset',
-                                message: msg,
-                                html_message: msg_html
-                            };
-                            events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                        // Now send email
+                        var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
+                        var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
+                        var mailOptions = {
+                            origin: MAIL_CONFIG.origin, // sender address
+                            destinations: [user.email], // list of receivers
+                            subject: GENERAL_CONFIG.name + ' account password reset',
+                            message: msg,
+                            html_message: msg_html
+                        };
+                        events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                            if(notif.mailSet()) {
-                                notif.sendUser(mailOptions, function(error, response){
-                                    if(error){
-                                        logger.error(error);
-                                    }
-                                    res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/passwordresetconfirm');
-                                    res.end();
-                                });
-                            }
-                            else {
-                                res.send({message: 'Could not send an email, please contact the support'})
-                            }
-                        });
+                        if(notif.mailSet()) {
+                            notif.sendUser(mailOptions, function(error, response){
+                                if(error){
+                                    logger.error(error);
+                                }
+                                res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/passwordresetconfirm');
+                                res.end();
+                            });
+                        }
+                        else {
+                            res.send({message: 'Could not send an email, please contact the support'})
+                        }
                     });
                 }
             });
-
         }
         else {
             res.status(401).send('Invalid authorization key.');
@@ -1838,59 +1666,44 @@ router.get('/user/:id/renew', function(req, res){
                                     return;
                                 });
 
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n"
-                            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                            script += "if [ -e ~"+user.uid+"/.ssh/authorized_keys.expired ]; then\n";
-                            script += "  mv  ~"+user.uid+"/.ssh/authorized_keys.expired ~"+user.uid+"/.ssh/authorized_keys\n";
-                            script += "fi\n";
-                            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
-                                events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                                fs.chmodSync(script_file,0o755);
-                                notif.add(user.email, function(){
-                                    var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
-                                    var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
-
-                                    var mailOptions = {
-                                        origin: MAIL_CONFIG.origin, // sender address
-                                        destinations: [user.email], // list of receivers
-                                        subject: GENERAL_CONFIG.name + ' account reactivation', // Subject line
-                                        message: msg_activ, // plaintext body
-                                        html_message: msg_activ_html // html body
-                                    };
-                                    var plugin_call = function(plugin_info, userId, data, adminId){
-                                        return new Promise(function (resolve, reject){
-                                            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                                                resolve(true);
-                                            });
+                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                            notif.add(user.email, function(){
+                                var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
+                                var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
+                                var mailOptions = {
+                                    origin: MAIL_CONFIG.origin, // sender address
+                                    destinations: [user.email], // list of receivers
+                                    subject: GENERAL_CONFIG.name + ' account reactivation', // Subject line
+                                    message: msg_activ, // plaintext body
+                                    html_message: msg_activ_html // html body
+                                };
+                                var plugin_call = function(plugin_info, userId, data, adminId){
+                                    return new Promise(function (resolve, reject){
+                                        plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                                            resolve(true);
                                         });
-                                    };
-                                    Promise.all(plugins_info.map(function(plugin_info){
-                                        return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                                    })).then(function(results){
-                                        return send_notif(mailOptions, fid, []);
-                                    }, function(err){
-                                        return send_notif(mailOptions, fid, err);
-                                    }).then(function(errs){
-                                        res.send({message: 'Activation in progress', fid: fid, error: errs});
-                                        res.end();
-                                        return;
                                     });
+                                };
+                                Promise.all(plugins_info.map(function(plugin_info){
+                                    return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                                })).then(function(results){
+                                    return send_notif(mailOptions, fid, []);
+                                }, function(err){
+                                    return send_notif(mailOptions, fid, err);
+                                }).then(function(errs){
+                                    res.send({message: 'Activation in progress', fid: fid, error: errs});
+                                    res.end();
+                                    return;
                                 });
                             });
-
-                            return;
                         });
                     }
                 });
-
             }
             else {
                 res.status(401).send('Not authorized');
                 return;
             }
-
         });
     });
 
@@ -1920,6 +1733,9 @@ router.put('/user/:id/ssh', function(req, res) {
             // Update SSH Key
             users_db.update({_id: user._id}, {'$set': {ssh: req.param('ssh')}}, function(err){
                 user.ssh = escapeshellarg(req.param('ssh'));
+                var fid = new Date().getTime();
+                user.fid = fid;
+                user.ssh = req.param('ssh');
 
                 filer.user_add_ssh_key(user, fid)
                     .then(
@@ -1931,29 +1747,10 @@ router.put('/user/:id/ssh', function(req, res) {
                         return;
                     });
 
+                events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                var script = "#!/bin/bash\n";
-                script += "set -e \n";
-                script += "if [ ! -e ~"+user.uid+"/.ssh ]; then\n";
-                script += "  mkdir -p ~"+user.uid+"/.ssh\n";
-                script += "  chmod -R 700 ~"+user.uid+"/.ssh\n";
-                script += "  touch  ~"+user.uid+"/.ssh/authorized_keys\n";
-                script += "  chown -R "+user.uidnumber+":"+user.gidnumber+" ~"+user.uid+"/.ssh/\n";
-                script += "fi\n";
-                script += "echo "+user.ssh+" >> ~"+user.uid+"/.ssh/authorized_keys\n";
-                var fid = new Date().getTime();
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-
-                    fs.chmodSync(script_file,0o755);
-                    user.fid = fid;
-                    user.ssh = req.param('ssh');
-                    res.send(user);
-                    res.end();
-                    return;
-                });
-
+                res.send(user);
+                res.end();
             });
         });
     });
@@ -1970,10 +1767,10 @@ router.get('/user/:id/usage', function(req, res){
         usage=JSON.parse(JSON.stringify(CONFIG.usage));
         usages = [];
         for(var i=0;i<usage.length;i++){
-            usage[i]['link'] = usage[i]['link'].replace('#USER#', req.param('id'))
+            usage[i]['link'] = usage[i]['link'].replace('#USER#', req.param('id'));
             usages.push(usage[i]);
         }
-        res.send({'usages': usages})
+        res.send({'usages': usages});
         res.end();
         return;
     });
@@ -2115,52 +1912,37 @@ router.put('/user/:id', function(req, res) {
                                     return;
                                 });
 
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n";
-                            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                            if(session_user.is_admin && CONFIG.general.use_group_in_path) {
-                                if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
-                                    // If group modification, change home location
-                                    script += "if [ ! -e "+user.group_home+" ]; then\n";
-                                    script += "\tmkdir -p "+user.group_home+"\n";
-                                    script += "fi\n";
-                                    script += "mv "+user.oldhome+" "+user.group_home+"/\n";
-                                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
-                                    script += utils.moveExtraDirs(user.uid, user.oldgroup, user.group, user.uidnumber, user.gidnumber);
-                                    events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
-                                }
+                            if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
+                                events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                             }
-                            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
-                                events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                                users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
-                                    if(users_in_group && users_in_group.length == 0){
-                                        groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
-                                            if(oldgroup){
-                                                router.delete_group(oldgroup, session_user.uid);
-                                            }
-                                        })
-                                    }
-                                });
 
-                                fs.chmodSync(script_file,0o755);
-                                user.fid = fid;
-                                if(user.oldemail!=user.email && !user.is_fake) {
-                                    notif.modify(user.oldemail, user.email, function() {
-                                        res.send(user);
+                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                            users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
+                                if(users_in_group && users_in_group.length == 0){
+                                    groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
+                                        if(oldgroup){
+                                            router.delete_group(oldgroup, session_user.uid);
+                                        }
                                     });
-                                } else if(userWasFake && !user.is_fake) {
-                                    notif.add(user.email, function() {
-                                        res.send(user);
-                                    });
-                                }else if (!userWasFake && user.is_fake) {
-                                    notif.remove(user.email, function(){
-                                        res.send(user);
-                                    })
-                                } else {
-                                    res.send(user);
                                 }
                             });
+
+                            user.fid = fid;
+                            if(user.oldemail!=user.email && !user.is_fake) {
+                                notif.modify(user.oldemail, user.email, function() {
+                                    res.send(user);
+                                });
+                            } else if(userWasFake && !user.is_fake) {
+                                notif.add(user.email, function() {
+                                    res.send(user);
+                                });
+                            }else if (!userWasFake && user.is_fake) {
+                                notif.remove(user.email, function(){
+                                    res.send(user);
+                                });
+                            } else {
+                                res.send(user);
+                            }
                         });
                     });
                 }
@@ -2173,7 +1955,7 @@ router.put('/user/:id', function(req, res) {
                                     if(oldgroup){
                                         router.delete_group(oldgroup, session_user.uid);
                                     }
-                                })
+                                });
                             }
                         });
                         user.fid = null;
@@ -2181,12 +1963,8 @@ router.put('/user/:id', function(req, res) {
                     });
                 }
             });
-            // End group
-
         });
-
     });
-
 });
 
 //TODO : Verify session user is admin or in project
@@ -2226,7 +2004,7 @@ router.post('/user/:id/project/:project', function(req, res){
         var fid = new Date().getTime();
         users_db.findOne({uid: uid}, function(err, user){
             if(!user || err) {
-                res.status(404).send('User does not exists')
+                res.status(404).send('User does not exists');
                 res.end();
                 return;
             }
