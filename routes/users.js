@@ -975,7 +975,7 @@ router.delete_user = function(user, action_owner_id){
             allgroups.push(user.group);
             goldap.change_user_groups(user, [], allgroups, fid, function() {
 
-                filer.user_delete(user, fid)
+                filer.user_delete_user(user, fid)
                     .then(
                         created_file => {
                             logger.info("File Created: ", created_file);
@@ -1167,6 +1167,17 @@ router.get('/user/:id/activate', function(req, res) {
                     goldap.add(user, fid, function(err) {
                         if(!err){
                             users_db.update({uid: req.param('id')},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(err){
+
+                                filer.user_add_user(user, fid)
+                                    .then(
+                                        created_file => {
+                                            logger.info("File Created: ", created_file);
+                                        })
+                                    .catch(error => { // reject()
+                                        logger.error('Add User Failed for: ' + user.uid, error);
+                                        callback(error);
+                                    });
+
                                 //groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
 
                                 var script = "#!/bin/bash\n";

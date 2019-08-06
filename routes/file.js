@@ -96,6 +96,12 @@ const tplconf = {
         template_file: "user/delete_user.sh",
         filepath_mode: 0o755,
     },
+    user_add_user: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/add_user.sh",
+        filepath_mode: 0o755,
+    },
 
 };
 
@@ -198,7 +204,7 @@ module.exports = {
     },
 
     /* method for users.js */
-    // Todo: should find a clean way to giv the path from ldap_add_group (same for all user method which need ldif path
+    // Todo: should find a clean way to give the path from ldap_add_group (same for all user method which need ldif path
     user_create_extra_group: function (group, fid) {
         return create_file('user_create_extra_group', { group: group, fid: fid });
     },
@@ -214,13 +220,20 @@ module.exports = {
     user_add_group: function (group, fid) {
         return create_file('user_add_group', { group: group, fid: fid });
     },
+
     // Todo: should find if we should only have one template for all the ldapmodify (as they are only call to ldif file with fid)
+    // Todo: maybe add the group list in this method (it is not needed now as it is done in ldap)
     user_change_group: function (user, fid) {
         return create_file('user_change_group', { user: user, fid: fid });
     },
 
     user_delete_user: function (user, fid) {
         return create_file('user_delete_user', { user: user, fid: fid });
+    },
+
+    // Todo: find if we should use the same template for create_extra_user and add_user
+    user_add_user: function (user, fid) {
+        return create_file('user_add_user', { user: user, fid: fid });
     },
 
 };
