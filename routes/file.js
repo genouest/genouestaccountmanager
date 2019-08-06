@@ -4,7 +4,7 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var fs = require('fs');
 
-var filename_suffix = ".nunjuck";
+var filename_suffix = "";
 
 // Todo: move utils function which manage file content here
 // var utils = require('../routes/utils.js');
@@ -12,7 +12,11 @@ var filename_suffix = ".nunjuck";
 // Todo: Manage mail template with nunjuck
 
 // Todo use conf for template directory
-nunjucks.configure('templates', { autoescape: true });
+nunjucks.configure('templates', {
+    autoescape: true,
+    trimBlocks: true,
+    lstripBlocks: true
+});
 
 // Todo, move this in config file
 const tplconf = {
