@@ -88,18 +88,6 @@ module.exports = {
         get_user_dn(user)
             .then(
                 user_dn => { // resolve()
-                    // todo: replace this with another then and another promise
-                    let user_ldif = "";
-                    user_ldif += "dn: "+user_dn+"\n";
-                    //user_ldif += "dn: cn="+user.firstname+" "+user.lastname+",ou=people,"+CONFIG.ldap.dn+"\n";
-                    user_ldif += "changetype: modify\n";
-                    user_ldif += "replace: userpassword\n";
-                    user_ldif += "userpassword: "+user.password+"\n";
-
-                    fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
-                        callback(err);
-                    });
-                    /* every thing before this should be removed */
                     return filer.ldap_reset_password(user, user_dn, fid);
                 })
             .then(
@@ -198,65 +186,6 @@ module.exports = {
         get_user_dn(user)
             .then(
                 user_dn => { // resolve()
-
-                    var user_ldif = "";
-                    user_ldif += "dn: "+user_dn+"\n";
-                    user_ldif += "changetype: modify\n";
-                    user_ldif += "replace: sn\n";
-                    user_ldif += "sn: "+user.lastname+"\n";
-                    user_ldif += "-\n";
-
-                    if(user.is_admin){
-                        if(user.is_internal){
-                            user_ldif += "replace: ou\n";
-                            user_ldif += "ou: "+CONFIG.ldap.team+"\n";
-                            user_ldif += "-\n";
-                        }
-                        else {
-                            user_ldif += "replace: ou\n";
-                            user_ldif += "ou: external\n";
-                            user_ldif += "-\n";
-                        }
-                    }
-                    if(user.home) {
-                        user_ldif += "replace: homeDirectory\n";
-                        user_ldif += 'homeDirectory: '+user.home+"\n";
-                        user_ldif += "-\n";
-                    }
-                    if(user.firstname) {
-                        user_ldif += "replace: givenName\n";
-                        user_ldif += "givenName: "+user.firstname+"\n";
-                        user_ldif += "-\n";
-                    }
-                    if(! user.is_fake) {
-                        user_ldif += "replace: mail\n";
-                        user_ldif += "mail: "+user.email+"\n";
-                        user_ldif += "-\n";
-                    }
-                    user_ldif += "replace: loginShell\n";
-                    user_ldif += "loginShell: /bin/bash\n";
-
-                    if(user.is_admin && user.oldgroup != user.group) {
-                        user_ldif += "-\n";
-                        user_ldif += "replace: gidNumber\n";
-                        user_ldif += "gidNumber: "+user.gidnumber+"\n";
-                        // Group membership modification
-                        user_ldif += "\ndn: cn="+user.oldgroup+",ou=groups,"+CONFIG.ldap.dn+"\n";
-                        user_ldif += "changetype: modify\n";
-                        user_ldif += "delete: memberUid\n";
-                        user_ldif += "memberUid: "+user.uid+"\n\n";
-                        user_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
-                        user_ldif += "changetype: modify\n";
-                        user_ldif += "add: memberUid\n";
-                        user_ldif += "memberUid: "+user.uid+"\n";
-                    }
-
-                    fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
-                        if(err) {
-                            logger.error(err);
-                        }
-                        callback(err);
-                    });
                     return filer.ldap_modify_user(user, user_dn, fid);
                 })
             .then(
@@ -270,20 +199,6 @@ module.exports = {
     },
 
     add_group: function(group, fid, callback) {
-        var user_ldif = "";
-        user_ldif += "dn: cn="+group.name+",ou=groups,"+CONFIG.ldap.dn+"\n";
-        user_ldif += "objectClass: top\n";
-        user_ldif += "objectClass: posixGroup\n";
-        user_ldif += "gidNumber: "+group.gid+"\n";
-        user_ldif += "cn: "+group.name+"\n";
-        user_ldif += "description: group for "+group.name+"\n";
-        user_ldif += "\n";
-        fs.writeFile(CONFIG.general.script_dir+'/'+group.name+"."+fid+".ldif", user_ldif, function(err) {
-            if(err) {
-                logger.error(err);
-            }
-            callback(err);
-        });
         filer.ldap_add_group(group, fid)
             .then(
                 created_file => {
@@ -296,16 +211,6 @@ module.exports = {
     },
 
     delete_group: function(group, fid, callback) {
-        var user_ldif = "";
-        user_ldif += "cn="+group.name+",ou=groups,"+CONFIG.ldap.dn+"\n";
-        user_ldif += "\n";
-        fs.writeFile(CONFIG.general.script_dir+'/'+group.name+"."+fid+".ldif", user_ldif, function(err) {
-            if(err) {
-                logger.error(err);
-            }
-            callback(err);
-        });
-
         filer.ldap_delete_group(group, fid)
             .then(
                 created_file => {
@@ -318,67 +223,11 @@ module.exports = {
     },
 
     add: function(user, fid, callback) {
-
-        var password = Math.random().toString(36).slice(-10);
-        var user_ldif = "";
-        var group_ldif = "";
-        user_ldif += "dn: uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\n";
-        user_ldif += "cn: "+user.firstname+" "+user.lastname+"\n";
-        user_ldif += "sn: "+user.lastname+"\n";
-        if(user.is_internal){
-            user_ldif += "ou: " + CONFIG.ldap.team + "\n";
-        } else if (user.is_fake) {
-            user_ldif += "ou: fake\n";
-        } else {
-            user_ldif += "ou: external\n";
-        }
-        user_ldif += "givenName: "+user.firstname+"\n";
-        user_ldif += "mail: "+user.email+"\n";
-        if(user.home) {
-            user_ldif += 'homeDirectory: '+user.home+"\n";
-        }
-        else {
-            logger.error("user does not have any home", user);
-            // todo, should we stop here ?
-        }
-        user_ldif += "loginShell: /bin/bash\n";
-        user_ldif += "userpassword: "+user.password+"\n";
-        user_ldif += "uidNumber: "+user.uidnumber+"\n";
-        user_ldif += "gidNumber: "+user.gidnumber+"\n";
-        user_ldif += "objectClass: top\n";
-        user_ldif += "objectClass: posixAccount\n";
-        user_ldif += "objectClass: inetOrgPerson\n\n";
-
         groups_db.findOne({'name': user.group}, function(err, group){
-            if(err || group == null || group == undefined) {
-                user_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
-                user_ldif += "objectClass: top\n";
-                user_ldif += "objectClass: posixGroup\n";
-                //user_ldif += "objectclass: groupofnames\n";
-                user_ldif += "gidNumber: "+user.gidnumber+"\n";
-                user_ldif += "cn: "+user.group+"\n";
-                user_ldif += "description: group for "+user.group+"\n";
-                user_ldif += "\n";
+            if(err) {
+                logger.error(err);
+                callback(err);
             }
-            group_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
-            group_ldif += "changetype: modify\n";
-            group_ldif += "add: memberUid\n";
-            group_ldif += "memberUid: "+user.uid+"\n"
-
-            fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
-                if(err) {
-                    logger.error(err);
-                }
-                if(group_ldif != "") {
-                    fs.writeFile(CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif", group_ldif, function(err) {
-                        callback(err);
-                    });
-                }
-                else {
-                    callback(err);
-                }
-            });
-
             filer.ldap_add_user(user, group, fid)
                 .then(
                     created_file => {
@@ -398,32 +247,6 @@ module.exports = {
     },
 
     change_user_groups: function(user, group_add, group_remove, fid, callback) {
-        /*
-          dn: cn=XXX,ou=groups,dc=genouest,dc=org
-          changetype: modify
-          delete: memberUid / add: memberUid
-          memberUid: YYY
-        */
-        var user_ldif = "";
-        for(var ga=0;ga<group_add.length;ga++){
-            user_ldif += "dn: cn="+group_add[ga]+",ou=groups,"+CONFIG.ldap.dn+"\n";
-            user_ldif += "changetype: modify\n";
-            user_ldif += "add: memberUid\n";
-            user_ldif += "memberUid: "+user.uid+"\n\n";
-        }
-        for(var gd=0;gd<group_remove.length;gd++){
-            user_ldif += "dn: cn="+group_remove[gd]+",ou=groups,"+CONFIG.ldap.dn+"\n";
-            user_ldif += "changetype: modify\n";
-            user_ldif += "delete: memberUid\n";
-            user_ldif += "memberUid: "+user.uid+"\n\n";
-        }
-        fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
-            if(err) {
-                logger.error(err);
-            }
-            callback(err);
-        });
-
         filer.ldap_change_user_groups(user, group_add, group_remove, fid)
             .then(
                 created_file => {
