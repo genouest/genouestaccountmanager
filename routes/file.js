@@ -120,11 +120,16 @@ const tplconf = {
         template_file: "user/renew_user.sh",
         filepath_mode: 0o755,
     },
-
     user_add_ssh_key: {
         filename: "{{ user.uid }}.{{ fid }}.update",
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "user/add_ssh_key.sh",
+        filepath_mode: 0o755,
+    },
+    user_modify_user: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "user/modify_user.sh",
         filepath_mode: 0o755,
     },
 
@@ -276,4 +281,9 @@ module.exports = {
     user_add_ssh_key: function (user, fid) {
         return create_file('user_add_ssh_key', { user: user, fid: fid });
     },
+
+     user_modify_user: function (user, fid) {
+        return create_file('user_modify_user', { user: user, fid: fid });
+    },
+
 };

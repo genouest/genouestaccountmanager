@@ -2101,16 +2101,26 @@ router.put('/user/:id', function(req, res) {
                                 res.status(403).send('Group '+user.group+' does not exists, please create it first');
                                 return;
                             }
+                            filer.user_modify_user(user, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Modify User Failed for: ' + user.uid, error);
+                                    callback(error);
+                                });
+
                             var script = "#!/bin/bash\n";
-                            script += "set -e \n"
+                            script += "set -e \n";
                             script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
                             if(session_user.is_admin && CONFIG.general.use_group_in_path) {
                                 if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                                     // If group modification, change home location
-                                    script += "if [ ! -e "+get_group_home(user)+" ]; then\n"
-                                    script += "\tmkdir -p "+get_group_home(user)+"\n";
+                                    script += "if [ ! -e "+user.group_home+" ]; then\n";
+                                    script += "\tmkdir -p "+user.group_home+"\n";
                                     script += "fi\n";
-                                    script += "mv "+user.oldhome+" "+get_group_home(user)+"/\n";
+                                    script += "mv "+user.oldhome+" "+user.group_home+"/\n";
                                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
                                     script += utils.moveExtraDirs(user.uid, user.oldgroup, user.group, user.uidnumber, user.gidnumber);
                                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
