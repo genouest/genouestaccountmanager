@@ -12,7 +12,7 @@ if [ "$oh" != "$nh" ]
 then
     mkdir -p $(dirname "$nh")
     mv "$oh" "$nh"
-    chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$nh"
+    chown -R {{ user.uid }}:{{ user.uid }} "$nh"
 fi
 
 {% include "user/move_extra_dirs.sh" %}

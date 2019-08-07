@@ -7,7 +7,7 @@ extra_dir="{{ item | replace("#USER#", user.uid) | replace ("#GROUP#", user.grou
 if [ ! -e "$extra_dir" ]
 then
     mkdir -p "$extra_dir"
-    chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$extra_dir"
+    chown -R {{ user.uid }}:{{ user.uid }} "$extra_dir"
 fi
 
 {% endfor %}
