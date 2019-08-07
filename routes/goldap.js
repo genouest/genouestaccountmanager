@@ -1,5 +1,4 @@
 var CONFIG = require('config');
-var fs = require('fs');
 //var LDAP = require('ldap-client');
 var http = require('http');
 var myldap = require('ldapjs');
