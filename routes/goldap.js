@@ -148,7 +148,7 @@ module.exports = {
         var bind_options = {
             binddn: 'uid='+uid+'ou=people,'+CONFIG.ldap.dn,
             password: password
-        }
+        };
 
         var fb_options = {
             base: CONFIG.ldap.dn,
@@ -156,7 +156,7 @@ module.exports = {
             scope: 'sub',
             attrs: '',
             password: password
-        }
+        };
 
     },
 
@@ -190,6 +190,7 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
+                    callback();
                 })
             .catch(error => { // reject()
                 logger.error('Modify Failed for: ' + user.uid, error);
@@ -202,7 +203,7 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
-                    callback(null);
+                    callback();
                 })
             .catch(error => { // reject()
                 logger.error('Add Group Failed for: ' + group.name, error);
@@ -215,7 +216,7 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
-                    callback(null);
+                    callback();
                 })
             .catch(error => { // reject()
                 logger.error('Delete Group Failed for: ' + group.name, error);
@@ -238,7 +239,7 @@ module.exports = {
                 .then(
                     created_file => {
                         logger.info("File Created: ", created_file);
-                        callback(null);
+                        callback();
                     })
                 .catch(error => { // reject()
                     logger.error('Add User Failed for: ' + user.uid, error);
@@ -253,7 +254,7 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
-                    callback(null);
+                    callback();
                 })
             .catch(error => { // reject()
                 logger.error('User Group Change Failed for: ' + user.uid, error);
