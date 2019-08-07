@@ -202,6 +202,7 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
+                    callback(null);
                 })
             .catch(error => { // reject()
                 logger.error('Add Group Failed for: ' + group.name, error);
@@ -214,6 +215,7 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
+                    callback(null);
                 })
             .catch(error => { // reject()
                 logger.error('Delete Group Failed for: ' + group.name, error);
@@ -236,6 +238,7 @@ module.exports = {
                 .then(
                     created_file => {
                         logger.info("File Created: ", created_file);
+                        callback(null);
                     })
                 .catch(error => { // reject()
                     logger.error('Add User Failed for: ' + user.uid, error);
@@ -250,11 +253,11 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
+                    callback(null);
                 })
             .catch(error => { // reject()
                 logger.error('User Group Change Failed for: ' + user.uid, error);
                 callback(error);
             });
     },
-
 };
