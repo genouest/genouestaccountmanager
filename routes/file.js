@@ -157,27 +157,34 @@ function create_file (name, data) {
     return new Promise( function (resolve, reject) {
         const tpl = tplconf[name];
 
+        logger.info('Try to create file for:', tpl, data);
+
         /* always add config in data */
         data.CONFIG = CONFIG;
 
         nunjucks.renderString(tpl.filepath, data, function (err, filepath) {
             if (err) {
+                logger.error(err);
                 reject(err);
                 return;
             }
 
             fs.mkdirSync(filepath, { recursive: true });
+
             if (tpl.filepath_mode) {
                 fs.chmodSync(filepath, tpl.filepath_mode);
             }
+
             nunjucks.renderString(tpl.filename + filename_suffix , data, function (err, filename) {
                 if (err) {
+                    logger.error(err);
                     reject(err);
                     return;
                 }
 
                 nunjucks.render(tpl.template_file, data, function (err, content) {
                     if (err) {
+                        logger.error(err);
                         reject(err);
                         return;
                     }
