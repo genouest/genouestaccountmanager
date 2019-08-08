@@ -42,9 +42,7 @@ var tp = require('./routes/tp');
 var conf = require('./routes/conf');
 var utils = require('./routes/utils.js');
 
-
 var CONFIG = require('config');
-
 
 const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
 const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
@@ -55,7 +53,16 @@ if(MY_ADMIN_USER !== null){
 
 var app = express();
 app.use(cors())
-app.use(logger('combined'));
+
+if (process.env.MY_ACCESS_LOG) {
+    var fs = require('fs');
+    var accessLogStream = fs.createWriteStream(process.env.MY_ACCESS_LOG, { flags: 'a' });
+    app.use(logger('combined', { stream: accessLogStream }));
+}
+else {
+    app.use(logger('combined'));
+}
+
 // view engine setup
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
