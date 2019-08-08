@@ -92,6 +92,7 @@ module.exports = {
             .then(
                 created_file => {
                     logger.info("File Created: ", created_file);
+                    callback();
                 })
             .catch(error => { // reject()
                 logger.error('Password not updated for: '+ user.uid, error);
