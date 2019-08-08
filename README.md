@@ -106,6 +106,18 @@ Home directory will be build according to:
 Secondary groups can be added to a user. In this case, user will be added as a memberOf of this group.
 User is also set as memberOf for main group.
 
+## Logging
+
+By default all logging is done on standard output and error.
+
+You may want to have the access log (http log) to a specific file using environment variable:
+
+```
+MY_ACCESS_LOG=/var/log/my.access.log /usr/bin/node /opt/my/app.js
+```
+
+Please note that it will affect only express http log, for application log you will have to redirect the standard output to file.
+
 ## Running
 
     forever start -o out.log -e err.log app.js
