@@ -157,7 +157,7 @@ function create_file (name, data) {
     return new Promise( function (resolve, reject) {
         const tpl = tplconf[name];
 
-        logger.info('Try to create file for:', tpl, data);
+        console.trace();
 
         /* always add config in data */
         data.CONFIG = CONFIG;
