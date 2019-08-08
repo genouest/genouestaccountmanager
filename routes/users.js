@@ -123,6 +123,17 @@ var send_notif = function(mailOptions, fid, errors) {
     });
 };
 
+// TODO: should clean all method here to always use the same order
+// 1 insert in mongo
+// 2 create ldap file
+// 3 create shell script file
+// 4 insert event
+// 5 do some extra work (if needed)
+// 6 launch all plugin promise
+// 7 notify user (if needed)
+// With all of this with same dependencies
+
+
 var create_extra_group = function(group_name, owner_name){
     return new Promise(function (resolve, reject){
         //var mingid = 1000;
@@ -448,21 +459,19 @@ router.delete_group = function(group, admin_user_id){
     return new Promise(function (resolve, reject){
         groups_db.remove({'name': group.name}, function(err){
             var fid = new Date().getTime();
+            group.fid = fid;
             goldap.delete_group(group, fid, function(err){
-
                 filer.user_delete_group(group, fid)
                     .then(
                         created_file => {
                             logger.info("File Created: ", created_file);
+                            events_db.insert({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
                         })
                     .catch(error => { // reject()
                         logger.error('Delete Group Failed for: ' + group.name, error);
                         return;
                     });
 
-                // todo: find if we need to insert event in .then of the filer call
-                group.fid = fid;
-                events_db.insert({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
                 utils.freeGroupId(group.gid).then(function(){
                     resolve(true);
                 });
@@ -580,7 +589,6 @@ router.post('/group/:id', function(req, res){
         users_db.findOne({uid: owner}, function(err, user){
             if(!user || err) {
                 res.status(404).send('User does not exists');
-                res.end();
                 return;
             }
             groups_db.findOne({name: new RegExp("^" + req.param('id') + "$", 'i')}, function(err, group){
@@ -597,23 +605,22 @@ router.post('/group/:id', function(req, res){
                     var fid = new Date().getTime();
                     group = {name: req.param('id'), gid: mingid, owner: owner};
                     groups_db.insert(group, function(err){
+                        group.fid = fid;
                         goldap.add_group(group, fid, function(err){
+
                             filer.user_add_group(group, fid)
                                 .then(
                                     created_file => {
                                         logger.info("File Created: ", created_file);
+                                        events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
+                                        res.send(group);
+                                        return;
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Add Group Failed for: ' + group.name, error);
+                                    res.status(500).send('Add Group Failed');
                                     return;
                                 });
-
-                            // todo: find if we need to insert event in .then of the filer call
-                            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
-                            group.fid = fid;
-                            res.send(group);
-                            res.end();
-                            return;
                         });
                     });
                 });
@@ -760,28 +767,27 @@ router.post('/user/:id/group/:group', function(req, res){
             var fid = new Date().getTime();
             // Now add group
             goldap.change_user_groups(user, [secgroup], [], fid, function() {
-
-                filer.user_change_group(user, fid)
-                    .then(
-                        created_file => {
-                            logger.info("File Created: ", created_file);
-                        })
-                    .catch(error => { // reject()
-                        logger.error('Group Change Failed for: ' + user.uid, error);
-                        return;
-                    });
-
-                // todo: find if we need to update db in the filer then call, or maybe before change ldap group
                 users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
                     if(err){
                         res.send({message: 'Could not update user'});
-                        res.end();
                         return;
                     }
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                    res.send({message: 'User added to group', fid: fid});
-                    res.end();
-                    return;
+                    filer.user_change_group(user, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                                res.send({message: 'User added to group', fid: fid});
+                                return;
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Group Change Failed for: ' + user.uid, error);
+                            res.status(500).send('Change Group Failed');
+                            return;
+                        });
+
+
+
                 });
             });
         });
@@ -827,45 +833,42 @@ router.delete('/user/:id/group/:group', function(req, res){
             var fid = new Date().getTime();
             // Now add group
             goldap.change_user_groups(user, [], [secgroup], fid, function() {
-
-                filer.user_change_group(user, fid)
-                    .then(
-                        created_file => {
-                            logger.info("File Created: ", created_file);
-                        })
-                    .catch(error => { // reject()
-                        logger.error('Group Change Failed for: ' + user.uid, error);
-                        return;
-                    });
-
-                // todo: find if we need to update db in the filer then call, or maybe before change ldap group
                 users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
                     if(err){
                         res.send({message: 'Could not update user'});
                         res.end();
                         return;
                     }
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                    users_db.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}, function(err, users_in_group){
-                        if(users_in_group && users_in_group.length > 0){
-                            res.send({message: 'User removed from group', fid: fid});
-                            res.end();
+                    filer.user_change_group(user, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+
+                                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+
+                                users_db.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}, function(err, users_in_group) {
+                                    if(users_in_group && users_in_group.length > 0){
+                                        res.send({message: 'User removed from group', fid: fid});
+                                        return;
+                                    }
+                                    // If group is empty, delete it
+                                    groups_db.findOne({name: secgroup}, function(err, group){
+                                        if(err || !group) {
+                                            res.send({message: 'User removed from group', fid: fid});
+                                            return;
+                                        }
+                                        router.delete_group(group, session_user.uid).then(function(){
+                                            res.send({message: 'User removed from group. Empty group ' + secgroup + ' was deleted'});
+                                            return;
+                                        });
+                                    });
+                                });
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Group Change Failed for: ' + user.uid, error);
+                            res.status(500).send('Change Group Failed');
                             return;
-                        }
-                        // If group is empty, delete it
-                        groups_db.findOne({name: secgroup}, function(err, group){
-                            if(err || !group) {
-                                res.send({message: 'User removed from group', fid: fid});
-                                res.end();
-                                return;
-                            }
-                            router.delete_group(group, session_user.uid).then(function(){
-                                res.send({message: 'User removed from group. Empty group ' + secgroup + ' was deleted'});
-                                res.end();
-                                return;
-                            });
                         });
-                    });
                 });
             });
         });
@@ -897,25 +900,20 @@ router.delete_user = function(user, action_owner_id){
             var allgroups = user.secondarygroups;
             allgroups.push(user.group);
             goldap.change_user_groups(user, [], allgroups, fid, function() {
-
-                filer.user_delete_user(user, fid)
-                    .then(
-                        created_file => {
-                            logger.info("File Created: ", created_file);
-                            resolve(true); // todo: find if needed
-                        })
-                    .catch(error => { // reject()
-                        logger.error('Delete User Failed for: ' + user.uid, error);
-                        return;
-                    });
-
-
-                // todo: find if we need to remove db user in the filer then call, or maybe chain promise
                 users_db.remove({_id: user._id}, function(err){
                     if(err){
                         resolve(false);
                         return;
                     }
+                    filer.user_delete_user(user, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Delete User Failed for: ' + user.uid, error);
+                            return;
+                        });
                     router.clear_user_groups(user, action_owner_id);
                     var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
                     var msg_activ_html = msg_activ;
@@ -926,6 +924,7 @@ router.delete_user = function(user, action_owner_id){
                         message: msg_activ, // plaintext body
                         html_message: msg_activ_html // html body
                     };
+                    // todo: clean this as freeid and send mail should not depend on event and plugin to be done
                     events_db.insert(
                         {
                             'owner': action_owner_id,
@@ -1084,10 +1083,10 @@ router.get('/user/:id/activate', function(req, res) {
                                         })
                                     .catch(error => { // reject()
                                         logger.error('Add User Failed for: ' + user.uid, error);
+                                        res.status(500).send('Add User Failed');
                                         return;
                                     });
 
-                                // todo: same as all todo, find if we need to notif in the filer then call or maybe join all promise
                                 notif.add(user.email, function(){
                                     var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                                     var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1385,6 +1384,7 @@ router.get('/user/:id/expire', function(req, res){
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Expire User Failed for: ' + user.uid, error);
+                                    res.status(500).send('Expire User Failed');
                                     return;
                                 });
 
@@ -1468,6 +1468,7 @@ router.post('/user/:id/passwordreset', function(req, res){
                             })
                         .catch(error => { // reject()
                             logger.error('Reset Password Failed for: ' + user.uid, error);
+                            res.status(500).send('Reset Password Failed');
                             return;
                         });
                     res.send({message:'Password updated'});
@@ -1556,6 +1557,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                                 })
                             .catch(error => { // reject()
                                 logger.error('Reset Password Failed for: ' + user.uid, error);
+                                res.status(500).send('Reset Password Failed');
                                 return;
                             });
 
@@ -1581,7 +1583,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                             });
                         }
                         else {
-                            res.send({message: 'Could not send an email, please contact the support'})
+                            res.send({message: 'Could not send an email, please contact the support'});
                         }
                     });
                 }
@@ -1659,13 +1661,14 @@ router.get('/user/:id/renew', function(req, res){
                                 .then(
                                     created_file => {
                                         logger.info("File Created: ", created_file);
+                                        events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Renew User Failed for: ' + user.uid, error);
+                                    res.status(500).send('Renew User Failed');
                                     return;
                                 });
 
-                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
                             notif.add(user.email, function(){
                                 var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                                 var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1740,16 +1743,15 @@ router.put('/user/:id/ssh', function(req, res) {
                     .then(
                         created_file => {
                             logger.info("File Created: ", created_file);
+                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+                            res.send(user);
+                            res.end();
                         })
                     .catch(error => { // reject()
                         logger.error('Add Ssh Key Failed for: ' + user.uid, error);
+                        res.status(500).send('Ssh Key Failed');
                         return;
                     });
-
-                events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-
-                res.send(user);
-                res.end();
             });
         });
     });
@@ -1905,6 +1907,7 @@ router.put('/user/:id', function(req, res) {
                                 .then(
                                     created_file => {
                                         logger.info("File Created: ", created_file);
+                                        events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
                                     })
                                 .catch(error => { // reject()
                                     logger.error('Modify User Failed for: ' + user.uid, error);
@@ -1915,7 +1918,6 @@ router.put('/user/:id', function(req, res) {
                                 events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                             }
 
-                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
                             users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
                                 if(users_in_group && users_in_group.length == 0){
                                     groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
