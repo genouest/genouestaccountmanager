@@ -281,7 +281,7 @@ module.exports = {
         return create_file('user_expire_user', { user: user, fid: fid });
     },
 
-    user_reset_password: function (user, user_dn, fid) {
+    user_reset_password: function (user, fid) {
         return create_file('user_reset_password', { user: user, fid: fid });
     },
 
