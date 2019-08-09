@@ -136,6 +136,13 @@ const tplconf = {
         template_file: "user/modify_user.sh",
         filename_mode: 0o755,
     },
+    /* config for ssh.js */
+    ssh_keygen: {
+        filename: "{{ user.uid }}.{{ fid }}.update",
+        filepath: "{{ CONFIG.general.script_dir }}",
+        template_file: "ssh/keygen.sh",
+        filename_mode: 0o755,
+    },
 
 };
 
@@ -203,7 +210,7 @@ function create_file (name, data) {
 
 
 /* Todo: find if we should export create_file or not */
-
+/* Todo: add method for project template (create project and add user to project) */
 module.exports = {
 
     set_suffix: function (suffix) {
@@ -293,8 +300,11 @@ module.exports = {
         return create_file('user_add_ssh_key', { user: user, fid: fid });
     },
 
-     user_modify_user: function (user, fid) {
-        return create_file('user_modify_user', { user: user, fid: fid });
+
+    /* method for ssh.js */
+    ssh_keygen: function (user, fid) {
+        return create_file('ssh_keygen', { user: user, fid: fid });
     },
+
 
 };
