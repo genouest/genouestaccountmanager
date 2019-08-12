@@ -1,8 +1,6 @@
-
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
-var fs = require('fs');
 var path = require('path');
 var http = require('http');
 const winston = require('winston');

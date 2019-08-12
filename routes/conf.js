@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
-var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
 var markdown = require("markdown").markdown;
 var htmlToText = require('html-to-text');
