@@ -3,6 +3,8 @@ cn: {{ user.firstname }} {{ user.lastname }}
 sn: {{ user.lastname }}
 {% if user.is_internal %}
 ou: {{ CONFIG.ldap.team }}
+{% elif user.is_tp %}
+ou: tp
 {% elif user.is_fake %}
 ou: fake
 {% else %}
