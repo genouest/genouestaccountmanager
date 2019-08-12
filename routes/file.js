@@ -164,7 +164,7 @@ function create_file (name, data) {
     return new Promise( function (resolve, reject) {
         const tpl = tplconf[name];
 
-        console.trace();
+        // console.trace();
 
         /* always add config in data */
         data.CONFIG = CONFIG;
@@ -263,6 +263,10 @@ module.exports = {
 
     user_delete_group: function (group, fid) {
         return create_file('user_delete_group', { group: group, fid: fid });
+    },
+
+    user_modify_user: function (user, fid) {
+        return create_file('user_modify_user', { user: user, fid: fid });
     },
 
     // Todo: should find if we should only have one template for all the ldapmodify (as they are only call to ldif file with fid)
