@@ -408,58 +408,37 @@ var activate_tp_user = function(user, adminId){
         users_db.findOne({'uid': user.uid}, function(err, db_user){
             if(err || !db_user) {
                 logger.error("failure:",err,db_user);
-              reject(user);
-              return;
+                reject(user);
+                return;
             }
             logger.debug("activate", user.uid);
             var fid = new Date().getTime();
             insert_ldap_user(user, fid).then(function(user){
-                var script = "#!/bin/bash\n";
-                script += "set -e \n"
-                script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
-                script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
-                script += "fi\n"
-                script += "sleep 3\n";
 
-                var homeDir = user.home;
-                script += "mkdir -p " + homeDir + "/.ssh\n";
-                script += utils.addReadmes(homeDir);
-                /*
-                script += "mkdir -p " + homeDir + "/user_guides\n";
-                if (typeof CONFIG.general.readme == "object") {
-                  CONFIG.general.readme.forEach(function(dict) {
-                    script += "ln -s " + dict.source_folder + " " + homeDir  +"/user_guides/" + dict.language + "\n";
-                  });
-                } else {
-                  script += "ln -s " + CONFIG.general.readme + " " + homeDir + "/user_guides/README\n";
-                };
-                */
-                script += "touch " + homeDir + "/.ssh/authorized_keys\n";
-                script += "echo \"Host *\" > " + homeDir + "/.ssh/config\n";
-                script += "echo \"  StrictHostKeyChecking no\" >> " + homeDir + "/.ssh/config\n";
-                script += "echo \"   UserKnownHostsFile=/dev/null\" >> " + homeDir + "/.ssh/config\n";
-                script += "chmod 700 " + homeDir + "/.ssh\n";
-                // script += "mkdir -p /omaha-beach/" + user.uid + "\n";
-                script += "chown -R " + user.uidnumber+":"+user.gidnumber + " " + user.home + "\n";
-                // script += "chown -R " + user.uidnumber+":"+user.gidnumber + " /omaha-beach/" + user.uid+"\n";
-                script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file, 0o755);
-                    var plugin_call = function(plugin_info, userId, data, adminId){
-                        return new Promise(function (resolve, reject){
-                            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                                resolve(true);
-                            });
+                filer.user_add_user(user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Add User Failed for: ' + user.uid, error);
 
-                        });
-                    };
-                    Promise.all(plugins_info.map(function(plugin_info){
-                        return plugin_call(plugin_info, user.uid, user, adminId);
-                    })).then(function(results){
-                        resolve(user);
+                        return;
                     });
+
+                // todo: should write plugins.js and add all the plugin call into it
+                var plugin_call = function(plugin_info, userId, data, adminId){
+                    return new Promise(function (resolve, reject){
+                        plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                            resolve(true);
+                        });
+
+                    });
+                };
+                Promise.all(plugins_info.map(function(plugin_info){
+                    return plugin_call(plugin_info, user.uid, user, adminId);
+                })).then(function(results){
+                    resolve(user);
                 });
             });
         });
