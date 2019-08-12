@@ -349,58 +349,21 @@ var tp_reservation = function(userId, from_date, to_date, quantity, about){
 var insert_ldap_user = function(user, fid){
     return new Promise(function (resolve, reject){
         logger.debug("prepare ldap scripts");
-        try{
-            var user_ldif = "";
-            var group_ldif = "";
-            user_ldif += "dn: uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\n";
-            user_ldif += "cn: "+user.firstname+" "+user.lastname+"\n";
-            user_ldif += "sn: "+user.lastname+"\n";
-            user_ldif += "ou: tp\n";
-
-            user_ldif += "givenName: "+user.firstname+"\n";
-            user_ldif += "mail: " + user.email + "\n";
-
-            if(user.home) {
-                user_ldif += 'homeDirectory: '+user.home+"\n";
+        goldap.add(user, fid, function(err) {
+            if(!err){
+                logger.debug("switch to ACTIVE");
+                users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE}}).then(function(data){
+                    // todo : maybe check db update to reject or not the Promise
+                    logger.debug("write exec script");
+                });
+                resolve(user);
             }
             else {
-                logger.error("user does not have any home", user);
-                // todo, should we stop here ?
+                logger.error(err);
+                reject (user);
+                return;
             }
-
-            user_ldif += "loginShell: "+user.loginShell+"\n";
-            user_ldif += "userpassword: "+user.password+"\n";
-            user_ldif += "uidNumber: "+user.uidnumber+"\n";
-            user_ldif += "gidNumber: "+user.gidnumber+"\n";
-            user_ldif += "objectClass: top\n";
-            user_ldif += "objectClass: posixAccount\n";
-            user_ldif += "objectClass: inetOrgPerson\n\n";
-
-            group_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
-            group_ldif += "changetype: modify\n";
-            group_ldif += "add: memberUid\n";
-            group_ldif += "memberUid: "+user.uid+"\n";
-        }
-        catch(exception){logger.error(exception);}
-        logger.debug("switch to ACTIVE");
-        users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE}}).then(function(data){
-            logger.debug("write exec script");
-            fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
-                if(err) {
-                    logger.error(err);
-                    reject(user);
-                }
-                if(group_ldif != "") {
-                  fs.writeFile(CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif", group_ldif, function(err) {
-                    resolve(user);
-                  });
-                }
-                else {
-                  resolve(user);
-                }
-              });
-        });
-
+            });
     });
 };
 
@@ -454,14 +417,14 @@ router.get('/tp', function(req, res) {
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
         reservation_db.find({}, function(err, reservations){
             res.send(reservations);
             res.end();
-        })
+        });
     });
 });
 
@@ -483,7 +446,7 @@ router.post('/tp', function(req, res) {
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
