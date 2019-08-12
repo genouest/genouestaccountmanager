@@ -1,121 +1,124 @@
-var express = require('express')
-var router = express.Router()
+var express = require('express');
+var router = express.Router();
 // var bcrypt = require('bcryptjs')
-var fs = require('fs')
+// var fs = require('fs')
 // var escapeshellarg = require('escapeshellarg')
 
-var Promise = require('promise')
-const winston = require('winston')
-const logger = winston.loggers.get('gomngr')
-var CONFIG = require('config')
-var GENERAL_CONFIG = CONFIG.general
+var Promise = require('promise');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
+var CONFIG = require('config');
+var GENERAL_CONFIG = CONFIG.general;
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
 
-var plugins = CONFIG.plugins
+var plugins = CONFIG.plugins;
 
 if (plugins === undefined) {
-  plugins = []
+    plugins = [];
 }
 
-var plugins_modules = {}
-var plugins_info = []
+var plugins_modules = {};
+var plugins_info = [];
 
 for (var i = 0; i < plugins.length; i++) {
     if(plugins[i]['admin']) {
         continue;
     }
-    plugins_modules[plugins[i].name] = require('../plugins/' + plugins[i].name)
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name})
+    plugins_modules[plugins[i].name] = require('../plugins/' + plugins[i].name);
+    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
 }
 
-var cookieParser = require('cookie-parser')
+var cookieParser = require('cookie-parser');
 
-var goldap = require('../routes/goldap.js')
+var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif_'+MAILER+'.js');
-var fdbs = require('../routes/database.js')
-var fwebs = require('../routes/web.js')
-var fusers = require('../routes/users.js')
+var fdbs = require('../routes/database.js');
+var fwebs = require('../routes/web.js');
+var fusers = require('../routes/users.js');
+const filer = require('../routes/file.js');
 
-var utils = require('../routes/utils.js')
+var utils = require('../routes/utils.js');
 
 // var get_ip = require('ipware')().get_ip;
 
-var monk = require('monk')
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db)
-var users_db = db.get('users')
-var groups_db = db.get('groups')
-var reservation_db = db.get('reservations')
-var events_db = db.get('events')
+var monk = require('monk');
+var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
+var users_db = db.get('users');
+var groups_db = db.get('groups');
+var reservation_db = db.get('reservations');
+var events_db = db.get('events');
 
-var STATUS_PENDING_EMAIL = 'Waiting for email approval'
-var STATUS_PENDING_APPROVAL = 'Waiting for admin approval'
-var STATUS_ACTIVE = 'Active'
-var STATUS_EXPIRED = 'Expired'
+var STATUS_PENDING_EMAIL = 'Waiting for email approval';
+var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
+var STATUS_ACTIVE = 'Active';
+var STATUS_EXPIRED = 'Expired';
 
 var createExtraGroup = function (ownerName) {
-  return new Promise(function (resolve, reject) {
-    // var mingid = 1000
-    utils.getGroupAvailableId().then(function (mingid) {
-    // groups_db.find({}, { limit: 1, sort: { gid: -1 } }, function (err, data) {
-    //  if (!err && data && data.length > 0) {
-    //    mingid = data[0].gid + 1
-    //  }
-      var fid = new Date().getTime()
-      var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName }
-      groups_db.insert(group, function(err) {
-        goldap.add_group(group, fid, function(err) {
-          var script = "#!/bin/bash\n";
-          script += "set -e \n"
-          script += "ldapadd -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
-          var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update";
-          fs.writeFile(script_file, script, function(err) {
-            fs.chmodSync(script_file,0o755)
-            group.fid = fid
-            resolve(group)
-            return
-          })
-        })
-      })
-    })
-  })
-}
+    return new Promise(function (resolve, reject) {
+        // var mingid = 1000
+        utils.getGroupAvailableId().then(function (mingid) {
+            // groups_db.find({}, { limit: 1, sort: { gid: -1 } }, function (err, data) {
+            //  if (!err && data && data.length > 0) {
+            //    mingid = data[0].gid + 1
+            //  }
+            var fid = new Date().getTime();
+            var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
+            groups_db.insert(group, function(err) {
+                group.fid = fid;
+                goldap.add_group(group, fid, function(err) {
+                    filer.user_add_group(group, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Add Group Failed for: ' + group.name, error);
+                        });
+                    resolve(group);
+                    return;
+                });
+            });
+        });
+    });
+};
 
 
 var deleteExtraGroup = function (group) {
-  return new Promise(function (resolve, reject) {
-    if (group === undefined || group === null) {
-        resolve()
-        return
-    }
-    groups_db.findOne({'name': group.name}, function(err, group_to_remove){
-        if(err || group_to_remove == null) {
-            resolve()
-            return
+    return new Promise(function (resolve, reject) {
+        if (group === undefined || group === null) {
+            resolve();
+            return;
         }
-        groups_db.remove({ 'name': group.name }, function () {
-            var fid = new Date().getTime()
-            goldap.delete_group(group, fid, function () {
-            var script = "#!/bin/bash\n";
-            script += "set -e \n"
-            script += "ldapdelete -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
-            var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update"
-            fs.writeFile(script_file, script, function(err) {
-                fs.chmodSync(script_file,0o755);
+        groups_db.findOne({'name': group.name}, function(err, group_to_remove){
+            if(err || group_to_remove == null) {
+                resolve();
+                return;
+            }
+            groups_db.remove({ 'name': group.name }, function () {
+                var fid = new Date().getTime();
                 group.fid = fid;
-                utils.freeGroupId(group.gid).then(function(){
-                    events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
-                    resolve()
-                    return
-                })
-
-            })
-            })
-        })
-    })
-  })
-}
+                goldap.delete_group(group, fid, function () {
+                    filer.user_delete_group(group, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Delete Group Failed for: ' + group.name, error);
+                            return;
+                        });
+                    utils.freeGroupId(group.gid).then(function(){
+                        events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
+                        resolve();
+                        return;
+                    });
+                });
+            });
+        });
+    });
+};
 
 var create_tp_users_db = function (owner, quantity, duration, end_date, userGroup) {
     // Duration in days
