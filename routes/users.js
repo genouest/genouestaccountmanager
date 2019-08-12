@@ -1062,7 +1062,13 @@ router.get('/user/:id/activate', function(req, res) {
                 //  minuid = data[0].uidnumber+1;
                 //}
                 groups_db.findOne({'name': user.group}, function(err, data){
-                    if(err || data === undefined || data === null) {
+                    if (err)
+                    {
+                        logger.error(err);
+                        res.send({msg: err});
+                        return;
+                    }
+                    if(!data) {
                         res.status(403).send('Group '+user.group+' does not exists, please create it first');
                         res.end();
                         return;
@@ -1121,6 +1127,7 @@ router.get('/user/:id/activate', function(req, res) {
                             });
                         }
                         else {
+                            logger.error(err);
                             res.send({msg: err});
                         }
                     });
