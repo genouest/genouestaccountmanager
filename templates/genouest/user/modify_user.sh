@@ -4,6 +4,8 @@ set -e
 
 ldapmodify -h {{ CONFIG.ldap.host }} -cx -w {{ CONFIG.ldap.admin_password }} -D {{ CONFIG.ldap.admin_cn }},{{ CONFIG.ldap.admin_dn }} -f "{{ CONFIG.general.script_dir }}/{{ user.uid }}.{{ fid }}.ldif"
 
+{% if user.oldhome %}
+
 # remove last / to secure mv
 oh=$(echo "{{ user.oldhome }}" | sed -e s:/$::g)
 nh=$(echo "{{ user.home }}" | sed -e s:/$::g)
@@ -16,4 +18,7 @@ then
 fi
 
 {% include "user/move_extra_dirs.sh" %}
+
+{% endif %}
+
 # modify_user.sh
