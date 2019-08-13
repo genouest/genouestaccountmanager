@@ -133,7 +133,7 @@
     "project_update_project": {
         "filename": "{{ user.uid }}.{{ fid }}.update",
         "filepath": "{{ CONFIG.general.script_dir }}",
-        "template_file": "project/delete_project.sh",
+        "template_file": "project/update_project.sh",
         "filename_mode": "755"
     },
     "project_delete_project": {
