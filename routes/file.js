@@ -176,5 +176,27 @@ module.exports = {
         return create_file('ssh_keygen', { user: user, fid: fid });
     },
 
+    /* method for projects.js */
+
+    project_add_project: function (project, fid) {
+        return create_file('project_add_project', { project: project, fid: fid });
+    },
+
+    project_delete_project: function (project, fid) {
+        return create_file('project_delete_project', { project: project, fid: fid });
+    },
+
+    project_update_project: function (project, fid) {
+        return create_file('project_update_project', { project: project, fid: fid });
+    },
+
+    project_add_user_to_project: function (project, user, fid) {
+        return create_file('project_add_user_to_project', { project: project, user: user, fid: fid });
+    },
+
+    project_add_group_to_project: function (project, group, fid) {
+        return create_file('project_add_group_to_project', { project: project, group: group, fid: fid });
+    },
+
 
 };

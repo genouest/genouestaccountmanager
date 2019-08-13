@@ -111,5 +111,35 @@
       "filepath": "{{ CONFIG.general.script_dir }}",
       "template_file": "ssh/keygen.sh",
       "filename_mode": "755"
-    }
+    },
+    "project_add_project": {
+        "filename": "{{ user.uid }}.{{ fid }}.update",
+        "filepath": "{{ CONFIG.general.script_dir }}",
+        "template_file": "project/add_project.sh",
+        "filename_mode": "755"
+    },
+    "project_add_user_to_project": {
+        "filename": "{{ user.uid }}.{{ fid }}.update",
+        "filepath": "{{ CONFIG.general.script_dir }}",
+        "template_file": "project/add_user_to_project.sh",
+        "filename_mode": "755"
+    },
+    "project_add_group_to_project": {
+        "filename": "{{ user.uid }}.{{ fid }}.update",
+        "filepath": "{{ CONFIG.general.script_dir }}",
+        "template_file": "project/add_user_to_project.sh",
+        "filename_mode": "755"
+    },
+    "project_update_project": {
+        "filename": "{{ user.uid }}.{{ fid }}.update",
+        "filepath": "{{ CONFIG.general.script_dir }}",
+        "template_file": "project/delete_project.sh",
+        "filename_mode": "755"
+    },
+    "project_delete_project": {
+        "filename": "{{ user.uid }}.{{ fid }}.update",
+        "filepath": "{{ CONFIG.general.script_dir }}",
+        "template_file": "project/delete_project.sh",
+        "filename_mode": "755"
+    },
 }
