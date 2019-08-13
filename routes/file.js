@@ -17,7 +17,7 @@ nunjucks.configure(templates_dir, {
 });
 
 
-const tplconf = require('../' + templates_dir + '/templates.config');
+const tplconf = require('../' + templates_dir + '/templates.json');
 
 function create_file (name, data) {
     return new Promise( function (resolve, reject) {
