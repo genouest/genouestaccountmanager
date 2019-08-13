@@ -141,5 +141,5 @@
         "filepath": "{{ CONFIG.general.script_dir }}",
         "template_file": "project/delete_project.sh",
         "filename_mode": "755"
-    },
+    }
 }
