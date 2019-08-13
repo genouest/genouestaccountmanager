@@ -1,5 +1,4 @@
 {
-    /* config for goldap.js */
     ldap_reset_password: {
         filename: "{{ user.uid }}.{{ fid }}.ldif",
         filepath: "{{ CONFIG.general.script_dir }}",
@@ -35,7 +34,6 @@
         filepath: "{{ CONFIG.general.script_dir }}",
         template_file: "ldap/change_user_groups.ldif",
     },
-    /* config for users.js */
     user_create_extra_group: {
         filename: "{{ group.name }}.{{ fid }}.update",
         filepath: "{{ CONFIG.general.script_dir }}",
@@ -108,7 +106,6 @@
         template_file: "user/modify_user.sh",
         filename_mode: 0o755,
     },
-    /* config for ssh.js */
     ssh_keygen: {
         filename: "{{ user.uid }}.{{ fid }}.update",
         filepath: "{{ CONFIG.general.script_dir }}",
