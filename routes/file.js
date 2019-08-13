@@ -1,164 +1,23 @@
 const nunjucks = require('nunjucks');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-var CONFIG = require('config');
-var fs = require('fs');
-
-var filename_suffix = "";
+const CONFIG = require('config');
+const fs = require('fs');
+const templates_dir = 'templates/' + CONFIG.general.templates;
 
 // Todo: move utils function which manage file content here
 // var utils = require('../routes/utils.js');
 
 // Todo: Manage mail template with nunjuck
 
-// Todo use conf for template directory
-nunjucks.configure('templates', {
+nunjucks.configure(templates_dir, {
     autoescape: true,
     trimBlocks: true,
     lstripBlocks: true
 });
 
-// Todo, move this in config file
-const tplconf = {
-    ssh_config: {
-        filename: "config",
-        filename_mode: 0o600,
-        filepath: "{{ user.home }}/.ssh",
-        filepath_mode: 0o700,
-        template_file: "ssh_config",
-    },
-    /* config for goldap.js */
-    ldap_reset_password: {
-        filename: "{{ user.uid }}.{{ fid }}.ldif",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap/replace_password.ldif",
-    },
-    ldap_modify_user: {
-        filename: "{{ user.uid }}.{{ fid }}.ldif",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap/modify_user.ldif",
-    },
-    ldap_add_group: {
-        filename: "{{ group.name }}.{{ fid }}.ldif",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap/add_group.ldif",
-    },
-    ldap_delete_group: {
-        filename: "{{ group.name }}.{{ fid }}.ldif",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap/delete_group.ldif",
-    },
-    ldap_add_user: {
-        filename: "{{ user.uid }}.{{ fid }}.ldif",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap/add_user.ldif",
-    },
-    ldap_add_user_to_group: {
-        filename: "group_{{ user.group }}_{{ user.uid }}.{{ fid }}.ldif",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap/add_user_to_group.ldif",
-    },
-    ldap_change_user_groups: {
-        filename: "{{ user.uid }}.{{ fid }}.ldif",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ldap/change_user_groups.ldif",
-    },
-    /* config for users.js */
-    user_create_extra_group: {
-        filename: "{{ group.name }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/create_extra_group.sh",
-        filename_mode: 0o755,
-    },
-    user_create_extra_user: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/create_extra_user.sh",
-        filename_mode: 0o755,
-    },
-    user_delete_group: {
-        filename: "{{ group.name }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/delete_group.sh",
-        filename_mode: 0o755,
-    },
-    user_add_group: {
-        filename: "{{ group.name }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/add_group.sh",
-        filename_mode: 0o755,
-    },
-    user_change_group: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/change_group.sh",
-        filename_mode: 0o755,
-    },
-    user_delete_user: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/delete_user.sh",
-        filename_mode: 0o755,
-    },
-    user_add_user: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/add_user.sh",
-        filename_mode: 0o755,
-    },
-    user_expire_user: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/expire_user.sh",
-        filename_mode: 0o755,
-    },
-    user_reset_password: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/reset_password.sh",
-        filename_mode: 0o755,
-    },
-    user_renew_user: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/renew_user.sh",
-        filename_mode: 0o755,
-    },
-    user_add_ssh_key: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/add_ssh_key.sh",
-        filename_mode: 0o755,
-    },
-    user_modify_user: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "user/modify_user.sh",
-        filename_mode: 0o755,
-    },
-    /* config for ssh.js */
-    ssh_keygen: {
-        filename: "{{ user.uid }}.{{ fid }}.update",
-        filepath: "{{ CONFIG.general.script_dir }}",
-        template_file: "ssh/keygen.sh",
-        filename_mode: 0o755,
-    },
 
-};
-
-/* Example Usage */
-
-/*
-file.create_ssh_config(user)
-    .then(
-        data => { // resolve()
-            logger.info('File created: ', data);
-        })
-    .catch(error => { // reject()
-        logger.error('File not created: ', error);
-    });
-*/
-
+const tplconf = require('../' + templates_dir + '/templates.config');
 
 function create_file (name, data) {
     return new Promise( function (resolve, reject) {
@@ -182,7 +41,7 @@ function create_file (name, data) {
                 fs.chmodSync(filepath, tpl.filepath_mode);
             }
 
-            nunjucks.renderString(tpl.filename + filename_suffix , data, function (err, filename) {
+            nunjucks.renderString(tpl.filename, data, function (err, filename) {
                 if (err) {
                     logger.error(err);
                     reject(err);
