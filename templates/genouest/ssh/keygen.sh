@@ -2,7 +2,7 @@
 
 set -e
 
-sshDir = "{{ user.home }}/.ssh"
+sshDir="{{ user.home }}/.ssh"
 rm -f $sshDir/id_rsa*
 touch $sshDir/authorized_keys
 chmod 644 $sshDir/authorized_keys
@@ -19,3 +19,4 @@ chown -R {{ user.uidnumber }}:{{ user.gidnumber }} $sshDir
 chmod 600 $sshDir/id_rsa
 chmod 600 $sshDir/id_rsa.pub
 chmod 700 $sshDir
+# keygen.sh
