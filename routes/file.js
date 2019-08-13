@@ -21,6 +21,13 @@ const tplconf = require('../' + templates_dir + '/templates.json');
 
 function create_file (name, data) {
     return new Promise( function (resolve, reject) {
+
+        if (!tplconf[name]) {
+            logger.warn('Templates file are missing for ' + name);
+            reject('Templates file are missing for ' + name);
+            return;
+        }
+
         const tpl = tplconf[name];
 
         // console.trace();
