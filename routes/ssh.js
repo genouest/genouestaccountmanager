@@ -3,8 +3,9 @@ var router = express.Router();
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var Promise = require('promise');
-const filer = require('../routes/file.js');
+const logger = winston.loggers.get('gomngr');
 
+const filer = require('../routes/file.js');
 var CONFIG = require('config');
 
 var monk = require('monk'),
@@ -30,7 +31,7 @@ router.get('/ssh/:id/putty', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
@@ -38,12 +39,12 @@ router.get('/ssh/:id/putty', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var maingroup = "";
-        if(user.maingroup!== undefined && user.maingroup!=""){
-            maingroup = "/"+ user.maingroup;
-        }
         var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa.ppk");
+        res.download(sshDir + "/id_rsa.ppk", "id_rsa.ppk", function (err) {
+            if (err) {
+                logger.error(err);
+            }
+        });
     });
 });
 
@@ -59,7 +60,7 @@ router.get('/ssh/:id/private', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
@@ -71,12 +72,12 @@ router.get('/ssh/:id/private', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var maingroup = "";
-        if(user.maingroup!== undefined && user.maingroup!==""){
-            maingroup = "/"+ user.maingroup;
-        }
         var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa");
+        res.download(sshDir + "/id_rsa", "id_rsa", function (err) {
+            if (err) {
+                logger.error(err);
+            }
+        });
     });
 });
 
@@ -92,7 +93,7 @@ router.get('/ssh/:id/public', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
@@ -100,12 +101,12 @@ router.get('/ssh/:id/public', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var maingroup = "";
-        if(user.maingroup!== undefined && user.maingroup!==""){
-            maingroup = "/"+ user.maingroup;
-        }
         var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa.pub");
+        res.download(sshDir + "/id_rsa.pub", "id_rsa.ppk", function (err) {
+            if (err) {
+                logger.error(err);
+            }
+        });
     });
 });
 
@@ -121,7 +122,7 @@ router.get('/ssh/:id', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exists'});
             res.end();
             return;
         }
