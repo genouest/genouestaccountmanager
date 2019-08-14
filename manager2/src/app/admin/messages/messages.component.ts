@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { ConfigService } from 'src/app/config.service';
 import { UserService } from 'src/app/user/user.service';
 
@@ -22,6 +22,8 @@ export class MessagesComponent implements OnInit {
 
   @ViewChildren(DataTableDirective)
   tables: QueryList<DataTableDirective>;
+
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
 
   dtTrigger: Subject<any> = new Subject()
 
@@ -65,9 +67,9 @@ export class MessagesComponent implements OnInit {
           lists.push(resp[i].list_name)
         }
         this.mailing_lists = lists;
-        if(lists.length > 0) {
+        /*if(lists.length > 0) {
           this.mailing_list = lists[0];
-        }
+        }*/
       },
       err => console.log('failed to get mailing lists')
     )
@@ -83,11 +85,15 @@ export class MessagesComponent implements OnInit {
 
   renderDataTables(): void {
     if ($('#dtMembers').DataTable() !== undefined) {
-      $('#dtMembers').DataTable().clear();
-      $('#dtMembers').DataTable().destroy();
-    }  
-
+      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        dtInstance.destroy();
+        this.dtTrigger.next();     
+      });
+    
+    }
+    else {
     this.dtTrigger.next();
+    }
    
   }
 
