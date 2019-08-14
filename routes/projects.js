@@ -139,7 +139,7 @@ router.post('/project', function(req, res){
                 }
                 projects_db.insert(new_project, function(err){
                     var fid = new Date().getTime();
-                     filer.projects_add_project(new_project, fid)
+                     filer.project_add_project(new_project, fid)
                         .then(
                             created_file => {
                                 logger.info("File Created: ", created_file);
@@ -183,7 +183,7 @@ router.delete('/project/:id', function(req, res){
       }
         projects_db.remove({'id': req.param('id')}, function(err){
             var fid = new Date().getTime();
-            filer.projects_delete_project({'id': req.param('id')}, fid)
+            filer.project_delete_project({'id': req.param('id')}, fid)
                 .then(
                     created_file => {
                         logger.info("File Created: ", created_file);
@@ -238,7 +238,7 @@ router.post('/project/:id', function(req, res){
         projects_db.update({'id': req.param('id')}, new_project, function(err){
             var fid = new Date().getTime();
             new_project.id =  req.param('id');
-            filer.projects_update_project(new_project, fid)
+            filer.project_update_project(new_project, fid)
                 .then(
                     created_file => {
                         logger.info("File Created: ", created_file);
