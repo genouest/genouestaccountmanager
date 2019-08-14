@@ -1873,7 +1873,13 @@ router.put('/user/:id', function(req, res) {
             // Get group gid
             //groups_db.findOne({'name': user.group}, function(err, group){
             groups_db.findOne({'name': req.param('group')}, function(err, group){
-                if(err || group == null || group == undefined) {
+                if (err)
+                {
+                    logger.error(err);
+                    res.send({msg: err});
+                    return;
+                }
+                if(!group) {
                     res.status(403).send('Group '+req.param('group')+' does not exists, please create it first');
                     return;
                 }
@@ -1907,7 +1913,8 @@ router.put('/user/:id', function(req, res) {
                         var fid = new Date().getTime();
                         goldap.modify(user, fid, function(err){
                             if(err) {
-                                res.status(403).send('Group '+user.group+' does not exists, please create it first');
+                                logger.error(err);
+                                res.send({msg: err});
                                 return;
                             }
                             filer.user_modify_user(user, fid)
