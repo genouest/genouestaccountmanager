@@ -29,7 +29,7 @@ RUN mkdir -p /opt/my/scripts
 RUN mkdir -p /opt/my/plugin-scripts
 
 COPY manager2 /root/genouestaccountmanager/manager2
-RUN npm install -g @angular/cli@7.0.3
+RUN npm install -g "@angular/cli@~7.0.3"
 RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod && rm -rf src && rm -rf node_modules
 
 ENTRYPOINT node app.js
