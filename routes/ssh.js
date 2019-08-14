@@ -3,6 +3,7 @@ var router = express.Router();
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var Promise = require('promise');
+const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 const filer = require('../routes/file.js');
