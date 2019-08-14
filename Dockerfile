@@ -19,6 +19,7 @@ COPY routes /root/genouestaccountmanager/routes
 COPY views /root/genouestaccountmanager/views
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
+COPY templates /root/genouestaccountmanager/templates
 # Disable old manager
 #COPY manager /root/genouestaccountmanager/manager
 #RUN npm install -g bower
