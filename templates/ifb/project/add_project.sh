@@ -2,5 +2,6 @@
 
 set -e
 
-echo "should do something or not with {{ project.id }}"
+/usr/local/bin/num create-project {{ project.id }}
+
 # add_project.sh

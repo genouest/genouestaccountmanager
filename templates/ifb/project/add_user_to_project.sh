@@ -2,5 +2,5 @@
 
 set -e
 
-echo "should do something or not with {{ project.id }} and {{ user.uid }}"
+/usr/local/bin/num add-user-to-project --notify {{ user.uid }} {{ project.id }}
 # add_user_to_project.sh
