@@ -136,7 +136,7 @@ router.post('/project', function(req, res){
                     'path': req.param('path'),
                     'orga': req.param('orga'),
                     'access': req.param('access')
-                }
+                };
                 projects_db.insert(new_project, function(err){
                     var fid = new Date().getTime();
                      filer.project_add_project(new_project, fid)
@@ -225,41 +225,40 @@ router.post('/project/:id', function(req, res){
             return;
          }
           // todo rename this as it is not new
-        new_project = { '$set': {
-            'owner': req.param('owner'),
-            'group': req.param('group'),
-            'size': req.param('size'),
-            'expire': req.param('expire'),
-            'description': req.param('description'),
-            'access': req.param('access'),
-            'orga': req.param('orga'),
-            'path': req.param('path')
-        }}
-        projects_db.update({'id': req.param('id')}, new_project, function(err){
-            var fid = new Date().getTime();
-            new_project.id =  req.param('id');
-            filer.project_update_project(new_project, fid)
-                .then(
-                    created_file => {
-                        logger.info("File Created: ", created_file);
-                        return filer.project_add_user_to_project(new_project, user, fid);
-                    })
-                .then(
-                    created_file => {
-                        logger.info("File Created: ", created_file);
+          new_project =  {
+              'owner': req.param('owner'),
+              'group': req.param('group'),
+              'size': req.param('size'),
+              'expire': req.param('expire'),
+              'description': req.param('description'),
+              'access': req.param('access'),
+              'orga': req.param('orga'),
+              'path': req.param('path')
+          };
+          projects_db.update({'id': req.param('id')}, { '$set': new_project }, function(err){
+              var fid = new Date().getTime();
+              new_project.id =  req.param('id');
+              filer.project_update_project(new_project, fid)
+                  .then(
+                      created_file => {
+                          logger.info("File Created: ", created_file);
+                          return filer.project_add_user_to_project(new_project, user, fid);
+                      })
+                  .then(
+                      created_file => {
+                          logger.info("File Created: ", created_file);
 
-                    })
-                .catch(error => { // reject()
-                    logger.error('Update Project Failed for: ' + new_project.id, error);
-                    res.status(500).send('Add Project Failed');
-                    return;
-                });
+                      })
+                  .catch(error => { // reject()
+                      logger.error('Update Project Failed for: ' + new_project.id, error);
+                      res.status(500).send('Add Project Failed');
+                      return;
+                  });
 
-            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
-            res.send({'message': 'Project updated'});
-            return;
-        });
-
+              events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
+              res.send({'message': 'Project updated'});
+              return;
+          });
       });
     });
 });
@@ -310,11 +309,11 @@ router.post('/project/:id/request', function(req, res){
           } else if (req.param('request') === 'remove') {
             project.remove_requests.push(req.param('user'));
           }
-          new_project = { '$set': {
+          new_project =  {
               'add_requests': project.add_requests,
               'remove_requests': project.remove_requests
-          }}
-          projects_db.update({'id': req.param('id')}, new_project, function(err){
+          };
+            projects_db.update({'id': req.param('id')}, { '$set': new_project }, function(err){
             events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.param('request') + ' for user ' + req.param('uid') + ' in project ' + project.id , 'logs': []}, function(err){});
             res.send({'message': 'Request sent'});
             return;
@@ -365,11 +364,11 @@ router.put('/project/:id/request', function(req, res){
                 }
                 project.remove_requests = temp_requests;
             };
-            new_project = { '$set': {
+            new_project = {
                 'add_requests': project.add_requests,
                 'remove_requests': project.remove_requests
-            }}
-            projects_db.update({'id': req.param('id')}, new_project, function(err){
+            };
+            projects_db.update({'id': req.param('id')}, { '$set': new_project }, function(err){
                 res.send({'message': 'Request removed'});
                 return;
             });
