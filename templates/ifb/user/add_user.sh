@@ -2,7 +2,7 @@
 
 set -e
 
-/usr/local/bin/num --notify --firstname={{ user.firstname }} --lastname={{ user.lastname }} --email={{ user.email }}
+/usr/local/bin/num --notify --firstname={{ user.firstname }} --lastname={{ user.lastname }} --email={{ user.email }} {% if user.password %}--password={{ user.password }}{% endif %}
 
 # warning: disable ldap as it should have been done by num, but we don't know what is the dn created yet
 
