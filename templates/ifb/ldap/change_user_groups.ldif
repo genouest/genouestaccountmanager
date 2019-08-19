@@ -1,0 +1,14 @@
+{% for group in group_add %}
+dn: cn={{ group }},ou=groups,{{ CONFIG.ldap.dn }}
+changetype: modify
+add: memberUid
+memberUid: {{ user.uid }}
+
+{% endfor %}
+{% for group in group_remove %}
+dn: cn={{ group_remove[gd] }},ou=groups,{{ CONFIG.ldap.dn }}
+changetype: modify
+delete: memberUid
+memberUid: {{ user.uid }}
+
+{% endfor %}# change_user_groups.ldif
