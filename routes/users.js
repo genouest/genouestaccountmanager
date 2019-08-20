@@ -2040,6 +2040,20 @@ router.post('/user/:id/project/:project', function(req, res){
                     res.end();
                     return;
                 }
+
+                filer.project_add_user_to_project(newproject, user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Add User to Project Failed for: ' + new_project.id, error);
+                        res.status(500).send('Add Project Failed');
+                        return;
+                    });
+
+
                 events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to project ' + newproject , 'logs': []}, function(err){});
                 res.send({message: 'User added to project', fid: fid});
                 res.end();
