@@ -43,7 +43,7 @@
     "user_create_extra_user": {
       "filename": "{{ user.uid }}.{{ fid }}.update",
       "filepath": "{{ CONFIG.general.script_dir }}",
-      "template_file": "user/create_extra_user.sh",
+      "template_file": "user/add_user.sh",
       "filename_mode": "755"
     },
     "user_delete_group": {
