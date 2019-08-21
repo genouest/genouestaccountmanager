@@ -30,7 +30,7 @@ router.get('/ssh/:id/putty', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exist'})
             res.end();
             return;
         }
@@ -59,7 +59,7 @@ router.get('/ssh/:id/private', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exist'})
             res.end();
             return;
         }
@@ -92,7 +92,7 @@ router.get('/ssh/:id/public', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exist'})
             res.end();
             return;
         }
@@ -121,7 +121,7 @@ router.get('/ssh/:id', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exist'})
             res.end();
             return;
         }

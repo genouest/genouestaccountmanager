@@ -78,7 +78,7 @@ exports.deleteExtraDirs = function(userUID, userGroupName) {
     cmd += "if [ -e " + extraDir + " ]; then\n";
     cmd += "    rm -rf " + extraDir + "\n";
     cmd += "else\n";
-    cmd += '    echo "Directory does not exists"\n';
+    cmd += '    echo "Directory does not exist"\n';
     cmd += "fi\n";
   }
   return cmd;
@@ -101,7 +101,7 @@ exports.moveExtraDirs = function(userUID, oldUserGroupName, newUserGroupName, us
     }
     cmd += "    chown -R " + userID + ":" + userGID + " " + extraDir + "\n";
     cmd += "else\n";
-    cmd += '    echo "Directory does not exists"\n';
+    cmd += '    echo "Directory does not exist"\n';
     cmd += "fi\n";
   }
   return cmd;

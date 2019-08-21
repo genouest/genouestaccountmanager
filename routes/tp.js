@@ -469,7 +469,7 @@ router.get('/tp', function(req, res) {
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exist'})
             res.end();
             return;
         }
@@ -498,7 +498,7 @@ router.post('/tp', function(req, res) {
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exist'})
             res.end();
             return;
         }
@@ -526,7 +526,7 @@ router.delete('/tp/:id', function(req, res) {
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'})
+            res.send({msg: 'User does not exist'})
             res.end();
             return;
         }
