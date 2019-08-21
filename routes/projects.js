@@ -142,14 +142,7 @@ router.post('/project', function(req, res){
                      filer.project_add_project(new_project, fid)
                         .then(
                             created_file => {
-                                logger.info("File Created: ", created_file);
-                                return filer.project_add_user_to_project(new_project, owner, fid);
-                            })
-                        .then(
-                            created_file => {
-                                logger.info("File Created: ", created_file);
-
-                            })
+                                logger.info("File Created: ", created_file);                            })
                         .catch(error => { // reject()
                             logger.error('Add Project Failed for: ' + new_project.id, error);
                             res.status(500).send('Add Project Failed');
@@ -247,12 +240,6 @@ router.post('/project/:id', function(req, res){
                         .then(
                             created_file => {
                                 logger.info("File Created: ", created_file);
-                                return filer.project_add_user_to_project(new_project, owner, fid);
-                            })
-                        .then(
-                            created_file => {
-                                logger.info("File Created: ", created_file);
-
                             })
                         .catch(error => { // reject()
                             logger.error('Update Project Failed for: ' + new_project.id, error);
