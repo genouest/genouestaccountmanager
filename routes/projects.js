@@ -143,7 +143,7 @@ router.post('/project', function(req, res){
                         .then(
                             created_file => {
                                 logger.info("File Created: ", created_file);
-                                return filer.project_add_user_to_project(new_project, user, fid);
+                                return filer.project_add_user_to_project(new_project, owner, fid);
                             })
                         .then(
                             created_file => {
@@ -211,55 +211,61 @@ router.post('/project/:id', function(req, res){
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-      if(err || user == null){
-        res.status(404).send('User not found');
-        return;
-      }
-      if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
-        return;
-      }
-      projects_db.findOne({'id': req.param('id')}, function(err, project){
-         if(err || project == null){
-            res.status(401).send('Not authorized or project not found');
+        if(err || user == null){
+            res.status(404).send('User not found');
             return;
-         }
-          // todo rename this as it is not new
-          new_project =  {
-              'owner': req.param('owner'),
-              'group': req.param('group'),
-              'size': req.param('size'),
-              'expire': req.param('expire'),
-              'description': req.param('description'),
-              'access': req.param('access'),
-              'orga': req.param('orga'),
-              'path': req.param('path')
-          };
-          projects_db.update({'id': req.param('id')}, { '$set': new_project }, function(err){
-              var fid = new Date().getTime();
-              new_project.id =  req.param('id');
-              filer.project_update_project(new_project, fid)
-                  .then(
-                      created_file => {
-                          logger.info("File Created: ", created_file);
-                          return filer.project_add_user_to_project(new_project, user, fid);
-                      })
-                  .then(
-                      created_file => {
-                          logger.info("File Created: ", created_file);
+        }
+        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+            res.status(401).send('Not authorized');
+            return;
+        }
+        users_db.findOne({'uid': req.param('owner')}, function(err, owner){
+            if(err || owner == null){
+                res.status(404).send('User not found');
+                return;
+            }
+            projects_db.findOne({'id': req.param('id')}, function(err, project){
+                if(err || project == null){
+                    res.status(401).send('Not authorized or project not found');
+                    return;
+                }
+                // todo rename this as it is not new
+                new_project =  {
+                    'owner': req.param('owner'),
+                    'group': req.param('group'),
+                    'size': req.param('size'),
+                    'expire': req.param('expire'),
+                    'description': req.param('description'),
+                    'access': req.param('access'),
+                    'orga': req.param('orga'),
+                    'path': req.param('path')
+                };
+                projects_db.update({'id': req.param('id')}, { '$set': new_project }, function(err){
+                    var fid = new Date().getTime();
+                    new_project.id =  req.param('id');
+                    filer.project_update_project(new_project, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                                return filer.project_add_user_to_project(new_project, owner, fid);
+                            })
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
 
-                      })
-                  .catch(error => { // reject()
-                      logger.error('Update Project Failed for: ' + new_project.id, error);
-                      res.status(500).send('Add Project Failed');
-                      return;
-                  });
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Update Project Failed for: ' + new_project.id, error);
+                            res.status(500).send('Add Project Failed');
+                            return;
+                        });
 
-              events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
-              res.send({'message': 'Project updated'});
-              return;
-          });
-      });
+                    events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
+                    res.send({'message': 'Project updated'});
+                    return;
+                 });
+            });
+        });
     });
 });
 
