@@ -2041,7 +2041,7 @@ router.post('/user/:id/project/:project', function(req, res){
                     return;
                 }
 
-                filer.project_add_user_to_project(newproject, user, fid)
+                filer.project_add_user_to_project({id: newproject}, user, fid)
                     .then(
                         created_file => {
                             logger.info("File Created: ", created_file);
