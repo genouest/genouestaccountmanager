@@ -136,13 +136,13 @@ router.post('/database/:id', function(req, res) {
         session_user.is_admin = false;
     }
 
-    if (req.param('owner')!=undefined && req.param('owner') != session_user.uid && ! session_user.is_admin){
+    if (req.param('owner')!=undefined && req.param('owner')!="" && req.param('owner') != session_user.uid && ! session_user.is_admin){
         res.status(401).send('Not authorized, cant declare a database for a different user');
         return;
     }
     var owner = session_user.uid;
     var create_db = true;
-    if(req.param('owner')){
+    if(req.param('owner')!=undefined && req.param('owner') != ""){
         owner = req.param('owner')
     }
     if(req.param('create') == false || (req.param('type') != undefined && req.param('type') != 'mysql')){
