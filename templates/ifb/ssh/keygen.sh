@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 sshDir="{{ user.home }}/.ssh"
 rm -f $sshDir/id_rsa*

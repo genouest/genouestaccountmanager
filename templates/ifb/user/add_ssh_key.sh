@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 if [ ! -e "{{ user.home }}/.ssh" ]; then
     mkdir -p "{{ user.home }}/.ssh"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 /usr/local/bin/num create-user --notify --firstname={{ user.firstname }} --lastname={{ user.lastname }} --email={{ user.email }} {% if user.password %}--password={{ user.password }}{% endif %}
 

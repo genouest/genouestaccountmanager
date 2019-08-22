@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 /usr/local/bin/num create-project {{ project.id }}
 
