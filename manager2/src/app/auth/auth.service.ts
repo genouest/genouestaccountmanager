@@ -134,9 +134,13 @@ export class AuthService {
   }
 
   autoLog() {
+    let key = localStorage.getItem('my-api-key')
+    if (!key) {
+      return
+    }
     let httpOptions = {
       headers: new HttpHeaders({
-        'x-api-key': localStorage.getItem('my-api-key')
+        'x-api-key': key
       }),
     };
     this.http.get(environment.apiUrl + '/auth', httpOptions).subscribe(
