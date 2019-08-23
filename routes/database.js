@@ -196,7 +196,7 @@ router.post('/database/:id', function(req, res) {
                     res.end();
                     return
                   }
-                  var password = Math.random().toString(36).substring(10);
+                  var password = Math.random().toString(36).slice(-10);
                   sql = "CREATE USER '"+req.param('id')+"'@'%' IDENTIFIED BY '"+password+"';\n";
                   connection.query(sql, function(err, results) {
                     if (err) {
