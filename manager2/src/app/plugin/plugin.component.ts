@@ -261,7 +261,7 @@ export class PluginItems {
 export class PluginComponent implements OnInit, OnChanges {
   @Input() pluginItem: string
   @Input() userId: string
-  @ViewChild(PluginDirective) appPlugin: PluginDirective;
+  @ViewChild(PluginDirective, { static: true }) appPlugin: PluginDirective;
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {

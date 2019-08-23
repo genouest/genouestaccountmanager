@@ -23,7 +23,7 @@ export class MessagesComponent implements OnInit {
   @ViewChildren(DataTableDirective)
   tables: QueryList<DataTableDirective>;
 
-  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  @ViewChild(DataTableDirective, { static: true }) dtElement: DataTableDirective;
 
   dtTrigger: Subject<any> = new Subject()
 
