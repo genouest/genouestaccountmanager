@@ -316,7 +316,7 @@ export class UserComponent implements OnInit {
     this.dbmsg_error='';
     this.databaseService.add(this.database).subscribe(
       resp => { this.dbmsg = resp['message']; this.db_list()},
-      err => { this.dbmsg_error = err.error; console.log('failed to add database')}
+      err => { this.dbmsg_error = err.error.message || err.error; console.log('failed to add database', err.error)}
     )  
   }
 
@@ -327,7 +327,7 @@ export class UserComponent implements OnInit {
       if(ws.name == dbName) {
         this.databaseService.remove(ws).subscribe(
           resp => { this.rm_dbmsg = resp['message']; this.db_list()},
-          err => { this.rm_dbmsg_error = err.error; console.log('failed to delete database')}
+          err => { this.rm_dbmsg_error = err.error.message || err.error; console.log('failed to delete database', err.error)}
         )
       }
     });
@@ -349,7 +349,7 @@ export class UserComponent implements OnInit {
         this.website = new Website('', '', '', this.user.uid);
         //this.web_list();
       },
-      err => { this.webmsg = err.error; console.log('failed to add web site')}
+      err => { this.webmsg = err.error.message || err.error; console.log('failed to add web site', err.error)}
     )
   }
   web_delete(siteName: string) {
@@ -357,7 +357,7 @@ export class UserComponent implements OnInit {
       if(ws.name == siteName) {
         this.websiteService.remove(ws).subscribe(
           resp => { this.rmwebmsg = ''; this.web_list()},
-          err  => { this.rmwebmsg = err.error; console.log('failed to delete web site', err)}
+          err  => { this.rmwebmsg = err.error.message || err.error; console.log('failed to delete web site', err.error)}
         )
       }
     });
@@ -371,7 +371,7 @@ export class UserComponent implements OnInit {
             this.add_group_msg = resp['message'];
             this.user.secondarygroups.push(sgroup);
           },
-          err => console.log('failed to add secondary group')
+          err => console.log('failed to add secondary group', err)
         )
         
       }
@@ -389,7 +389,7 @@ export class UserComponent implements OnInit {
         }
         this.user.secondarygroups = tmpgroups;
       },
-      err => console.log('failed to remove from secondary group')
+      err => console.log('failed to remove from secondary group', err)
     )
   }
 
@@ -399,7 +399,7 @@ export class UserComponent implements OnInit {
         this.msg = resp['message'];
         this.user.status = this.STATUS_EXPIRED;
       },
-      err => console.log('failed to expire user')
+      err => console.log('failed to expire user', err)
     )
   }
 
@@ -409,7 +409,7 @@ export class UserComponent implements OnInit {
         this.msg = resp['message'];
         this.user.expiration = resp['expiration']
       },
-      err => console.log('failed to extend user')
+      err => console.log('failed to extend user', err)
     )
   }
 
@@ -419,7 +419,7 @@ export class UserComponent implements OnInit {
         this.msg = resp['message'],
         this.user.status = this.STATUS_ACTIVE;
       },
-      err => console.log('failed to renew')
+      err => console.log('failed to renew', err)
     )
   }
   
@@ -433,14 +433,14 @@ export class UserComponent implements OnInit {
         this.user.apikey = resp['apikey'];
         this.authService.updateApiKey(this.user.apikey);
       },
-      err => console.log('failed to generate apikey')
+      err => console.log('failed to generate apikey', err)
       );
   }
 
   ssh_new_key(){
     this.userService.getNewSSHKey(this.user.uid).subscribe(
       resp => this.new_key_message = resp['msg'],
-      err => console.log('failed to get new ssh key')
+      err => console.log('failed to get new ssh key', err)
     )
   }
 
@@ -457,7 +457,7 @@ export class UserComponent implements OnInit {
     }
     this.userService.updatePassword(this.user.uid, this.password1).subscribe(
       resp => this.update_passwd = resp['message'],
-      err => console.log('failed to update password')
+      err => console.log('failed to update password', err)
     )
  
   }
@@ -486,7 +486,7 @@ export class UserComponent implements OnInit {
         this.ssh_message = 'SSH key updated';
       },
       err => {
-        console.log('failed to update ssh')
+        console.log('failed to update ssh', err)
       }
     )
   }
@@ -589,7 +589,7 @@ export class UserComponent implements OnInit {
         this._flashMessagesService.show('User deleted', { cssClass: 'alert-success', timeout: 5000 });
         this.router.navigate(['/admin/user']);
       },
-      err => console.log('failed to delete user')
+      err => console.log('failed to delete user', err)
     )
   }
 
