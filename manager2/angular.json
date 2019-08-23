@@ -83,6 +83,30 @@
                   "maximumError": "5mb"
                 }
               ]
+            },
+            "genouest": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.genouest.ts"
+                }
+              ],
+              "optimization": false,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": false,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                }
+              ]
             }
           }
         },
@@ -97,6 +121,9 @@
             },
             "local": {
               "browserTarget": "my-ui:build:local"
+            },
+            "genouest": {
+              "browserTarget": "my-ui:build:genouest"
             }
           }
         },
