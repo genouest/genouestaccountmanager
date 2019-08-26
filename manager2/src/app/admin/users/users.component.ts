@@ -51,10 +51,6 @@ export class UsersComponent implements OnInit {
     )
   }
 
-    get_ssh_key(id, name) {
-      return this.userService.getSshKey(id, name);
-  }
-
   date_convert(tsp) {
     var a = new Date(tsp);
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
