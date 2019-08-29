@@ -109,7 +109,7 @@ function record_group(group){
         if (group.dn.includes("ou=projects"))
         {
             var proj_owner = commands.admin;
-            if (group.memberUid[0]) { proj_owner = group.memberUid[0];}
+            if (group.memberUid !== undefined) { proj_owner = group.memberUid[0];}
             var go_project = {id: group.cn, owner: proj_owner};
             mongo_groups.push(go_project);
         }
