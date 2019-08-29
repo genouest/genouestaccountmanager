@@ -110,7 +110,13 @@ function record_group(group){
         {
             var proj_owner = commands.admin;
             if (group.memberUid !== undefined) { proj_owner = group.memberUid[0];}
-            var go_project = {id: group.cn, owner: proj_owner};
+            var go_project = {
+                id: group.cn,
+                owner: proj_owner,
+                expiration: new Date().getTime() + 1000*3600*24*365,
+                group: group.cn,
+                description: "imported from ldap"
+            };
             mongo_projects.push(go_project);
         }
     }
