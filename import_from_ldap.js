@@ -111,7 +111,7 @@ function record_group(group){
             var proj_owner = commands.admin;
             if (group.memberUid !== undefined) { proj_owner = group.memberUid[0];}
             var go_project = {id: group.cn, owner: proj_owner};
-            mongo_groups.push(go_project);
+            mongo_projects.push(go_project);
         }
     }
 
