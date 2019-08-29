@@ -89,7 +89,7 @@ function record_group(group){
     * entry: {"dn":"cn=symbiose,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["agouin","lbouri"],"objectClass":["top","posixGroup"],"gidNumber":"20857","cn":"symbiose"}
     * entry: {"dn":"cn=recomgen,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["mbahin","smottier","vwucher","clebeguec","mrimbaul","mbunel","scorrear","spaillar","bhedan"],"cn":"recomgen","gidNumber":"20885","objectClass":["posixGroup","top"]}
     */
-    if(! group.dn.startsWith("cn") || group.objectClass.indexOf("posixGroup") == -1) {return;}
+    if(! group.dn.startsWith("cn") || group.objectClass.indexOf("posixGroup") == -1 ||  group.ou.indexOf("user-groups") != -1) {return;}
     console.info("manage group: " + group.dn);
     ldap_groups[parseInt(group.gidNumber)] = group;
     if(group.memberUid !== undefined){
