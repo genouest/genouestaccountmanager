@@ -106,7 +106,7 @@ function record_group(group){
     if(commands.import){
         var go_group = {name: group.cn, gid: parseInt(group.gidNumber), owner: commands.admin};
         mongo_groups.push(go_group);
-        if (group.ou.indexOf("projects") != -1)
+        if (group.dn.includes("ou=projects"))
         {
             var proj_owner = commands.admin;
             if (group.memberUid[0]) { proj_owner = group.memberUid[0];}
