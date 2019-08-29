@@ -52,6 +52,7 @@ var options = {
 var ldap_groups = {};
 var ldap_users = [];
 var ldap_secondary_groups = {};
+var ldap_user_projects = {};
 var ldap_nb_users = 0;
 var ldap_managed_users = 0;
 var errors = [];
@@ -109,13 +110,22 @@ function record_group(group){
         if (group.dn.includes("ou=projects"))
         {
             var proj_owner = commands.admin;
-            if (group.memberUid !== undefined) { proj_owner = group.memberUid[0];}
+            if (group.memberUid !== undefined) {
+                proj_owner = group.memberUid[0];
+                for(var j=0;j<group.memberUid.length;j++){
+                    if(ldap_user_projects[group.memberUid[j]] === undefined){ ldap_user_projects[group.memberUid[j]]=[];}
+                    ldap_user_projects[group.memberUid[j]].push(group.cn);
+                }
+            }
             var go_project = {
                 id: group.cn,
                 owner: proj_owner,
                 expiration: new Date().getTime() + 1000*3600*24*365,
                 group: group.cn,
-                description: "imported from ldap"
+                description: "imported from ldap",
+                path: "",
+                orga: "",
+                access : "Group"
             };
             mongo_projects.push(go_project);
         }
@@ -186,6 +196,11 @@ function record_user(user){
         secondary_groups = [];
     }
 
+    var projects = ldap_user_projects[user.uid];
+    if(projects === undefined){
+        projects = [];
+    }
+
     console.warn("Home dir for ", user.uid, " is set to", user.homeDirectory);
 
     if(! user.homeDirectory || ! user.homeDirectory.startsWith(CONFIG.general.home)) {
@@ -205,6 +220,7 @@ function record_user(user){
         responsible: "unknown",
         group: (ldap_groups[gid] ? ldap_groups[gid].cn : ''), //todo: maybe use default group from config
         secondarygroups: secondary_groups,
+        projects: projects,
         home: user.homeDirectory,
         maingroup: CONFIG.general.default_main_group,
         why: "",
