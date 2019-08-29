@@ -35,6 +35,7 @@ if(commands.import && commands.admin===undefined){
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     groups_db = db.get('groups'),
+    projects_db = db.get('projects'),
     users_db = db.get('users');
 
 
@@ -58,6 +59,7 @@ var undeclared_home_groups = [];
 
 var mongo_users = [];
 var mongo_groups = [];
+var mongo_projects = [];
 
 var client = myldap.createClient({
   url: 'ldap://' +  CONFIG.ldap.host
@@ -101,6 +103,13 @@ function record_group(group){
     if(commands.import){
         var go_group = {name: group.cn, gid: parseInt(group.gidNumber), owner: commands.admin};
         mongo_groups.push(go_group);
+        if (group.ou.indexOf("projects") != -1)
+        {
+            var proj_owner = commands.admin;
+            if (group.memberUid[0]) { proj_owner = group.memberUid[0];}
+            var go_project = {id: group.cn, owner: proj_owner};
+            mongo_groups.push(go_project);
+        }
     }
 
 }
@@ -220,6 +229,8 @@ var mongo_imports = function(){
         if(! commands.import){
             resolve(true);
         }
+
+        /* GROUPS */
         Promise.all(mongo_groups.map(function(group_import){
             return groups_db.update({name: group_import.name}, group_import, {upsert: true});
         })).then(function(results_group){
@@ -229,19 +240,31 @@ var mongo_imports = function(){
                     break;
                 }
             }
-            Promise.all(mongo_users.map(function(user_import){
-                return users_db.update({uid: user_import.uid}, user_import, {upsert: true});
-            })).then(function(results_account){
-                for(var i=0;i<results_account.length;i++){
-                    if(results_account[i].ok!=1){
-                        console.error("during user import in db: ", results_account[i]);
+
+            /* PROJECTS */
+            Promise.all(mongo_projects.map(function(project_import){
+                return projects_db.update({id: project_import.id}, project_import, {upsert: true});
+            })).then(function(results_project){
+                for(var i=0;i<results_project.length;i++){
+                    if(results_project[i].ok!=1){
+                        console.error("during project import in db: ", results_project[i]);
                         break;
                     }
                 }
-                resolve(true);
-            });
 
-        });
+                /* USERS */
+                Promise.all(mongo_users.map(function(user_import){
+                    return users_db.update({uid: user_import.uid}, user_import, {upsert: true});
+                })).then(function(results_account){
+                    for(var i=0;i<results_account.length;i++){
+                        if(results_account[i].ok!=1){
+                            console.error("during user import in db: ", results_account[i]);
+                            break;
+                        }
+                    }
+                    resolve(true);
+                }); /* END USERS */
+            }); /* END PROJECTS */
+        }); /* END GROUPS */
     });
-
 };
