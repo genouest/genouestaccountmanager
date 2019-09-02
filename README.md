@@ -185,7 +185,7 @@ with sentry support:
 
     docker build --build-arg APIURL=https://MYACCOUNTMANAGERURL --build-arg SENTRY=https://XXXX@sentry.genouest.org/2 -t osallou/my
 
-Sentry is a service to catch bugs in app and record them in Sentry web app (optional). Sentry key must be set a docker build.
+Sentry is a service to catch bugs in app and record them in Sentry web app (optional). Sentry key must be set at docker build time.
 
 ### Cron task
 
