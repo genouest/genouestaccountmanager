@@ -251,7 +251,7 @@ export class UserComponent implements OnInit {
         }
     }
     user_projects.sort(this._compareId)
-    this.user_projects = user_projects;   
+    this.user_projects = user_projects;
   }
 
   loadUserInfo() {
@@ -263,7 +263,7 @@ export class UserComponent implements OnInit {
       this.projectService.list(true).subscribe(
         resp => this._loadProjects(resp),
         err => console.log('failed to get projects')
-      )      
+      )
     }
     this.web_list();
     this.db_list();
@@ -317,7 +317,7 @@ export class UserComponent implements OnInit {
     this.databaseService.add(this.database).subscribe(
       resp => { this.dbmsg = resp['message']; this.db_list()},
       err => { this.dbmsg_error = err.error; console.log('failed to add database')}
-    )  
+    )
   }
 
   db_delete(dbName: string) {
@@ -331,7 +331,7 @@ export class UserComponent implements OnInit {
         )
       }
     });
-  }    
+  }
 
   web_list() {
     this.websiteService.listOwner(this.user.uid).subscribe(
@@ -367,10 +367,16 @@ export class UserComponent implements OnInit {
         //window.open(downloadURL);
 
         var a = document.createElement("a");
-        a.href = downloadURL;
-        a.download = keyName;
-        a.click();        
-
+        if ( a.download != undefined ) {
+          document.body.appendChild(a);
+          a.href = downloadURL;
+          a.download = keyName;
+          a.click();
+          setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(downloadURL);
+          }, 100);
+        }
       },
       err => {
         console.log("failed to get ssh key", err)
@@ -411,7 +417,7 @@ export class UserComponent implements OnInit {
           },
           err => console.log('failed to add secondary group')
         )
-        
+
       }
   }
 
@@ -460,7 +466,7 @@ export class UserComponent implements OnInit {
       err => console.log('failed to renew')
     )
   }
-  
+
   switchTo(panel) {
     this.panel = panel
   }
@@ -497,7 +503,7 @@ export class UserComponent implements OnInit {
       resp => this.update_passwd = resp['message'],
       err => console.log('failed to update password')
     )
- 
+
   }
 
   change_group() {
