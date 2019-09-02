@@ -402,9 +402,9 @@
                     <button class="btn btn-default" (click)="ssh_new_key()">Generate new key</button>
                     <hr/>
                     <h4 style="font-weight: normal;">Download</h4>
-                    <a [href]="[get_ssh_key(user.uid, 'private')]" target="_blank"><button class="btn btn-default">private rsa key</button></a>
-                    <a [href]="[get_ssh_key(user.uid, 'putty')]" target="_blank"><button class="btn btn-default">putty private key</button></a>
-                    <a [href]="[get_ssh_key(user.uid, 'public')]" target="_blank"><button class="btn btn-default">public key</button></a>
+                    <a [routerLink]="['/ssh', {id: user.uid}, 'private']" target="_blank"><button class="btn btn-default">private rsa key</button></a>
+                    <a [routerLink]="['/ssh', {id: user.uid}, 'putty']" target="_blank"><button class="btn btn-default">putty private key</button></a>
+                    <a [routerLink]="['/ssh/', {id: user.uid}, 'public']" target="_blank"><button class="btn btn-default">public key</button></a>
                 </div>
             </div>
   </div>

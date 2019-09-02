@@ -251,7 +251,7 @@ export class UserComponent implements OnInit {
         }
     }
     user_projects.sort(this._compareId)
-    this.user_projects = user_projects;
+    this.user_projects = user_projects;   
   }
 
   loadUserInfo() {
@@ -263,7 +263,7 @@ export class UserComponent implements OnInit {
       this.projectService.list(true).subscribe(
         resp => this._loadProjects(resp),
         err => console.log('failed to get projects')
-      )
+      )      
     }
     this.web_list();
     this.db_list();
@@ -317,7 +317,7 @@ export class UserComponent implements OnInit {
     this.databaseService.add(this.database).subscribe(
       resp => { this.dbmsg = resp['message']; this.db_list()},
       err => { this.dbmsg_error = err.error; console.log('failed to add database')}
-    )
+    )  
   }
 
   db_delete(dbName: string) {
@@ -331,7 +331,7 @@ export class UserComponent implements OnInit {
         )
       }
     });
-  }
+  }    
 
   web_list() {
     this.websiteService.listOwner(this.user.uid).subscribe(
@@ -373,7 +373,7 @@ export class UserComponent implements OnInit {
           },
           err => console.log('failed to add secondary group')
         )
-
+        
       }
   }
 
@@ -422,7 +422,7 @@ export class UserComponent implements OnInit {
       err => console.log('failed to renew')
     )
   }
-
+  
   switchTo(panel) {
     this.panel = panel
   }
@@ -444,10 +444,6 @@ export class UserComponent implements OnInit {
     )
   }
 
-  get_ssh_key(id, name) {
-      return this.userService.getSshKey(id, name);
-  }
-
   update_password(){
     this.wrong_confirm_passwd = "";
     this.update_passwd = "";
@@ -463,7 +459,7 @@ export class UserComponent implements OnInit {
       resp => this.update_passwd = resp['message'],
       err => console.log('failed to update password')
     )
-
+ 
   }
 
   change_group() {
