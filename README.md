@@ -177,6 +177,16 @@ To start server
 
     node app.ps
 
+To build docker without sentry support
+
+    docker build --build-arg APIURL=https://MYACCOUNTMANAGERURL -t osallou/my
+
+with sentry support:
+
+    docker build --build-arg APIURL=https://MYACCOUNTMANAGERURL --build-arg SENTRY=https://XXXX@sentry.genouest.org/2 -t osallou/my
+
+Sentry is a service to catch bugs in app and record them in Sentry web app (optional). Sentry key must be set a docker build.
+
 ### Cron task
 
 Some commands will be generated in script_dir (config), and executed by the cron task (see below). This means that some commands will have a small delay (cron execution).
