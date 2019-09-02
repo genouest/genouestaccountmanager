@@ -1238,16 +1238,17 @@ router.get('/user/:id/confirm', function(req, res) {
 // Register
 router.post('/user/:id', function(req, res) {
     logger.info('New register request for '+req.param('id'));
-    if(req.param('ip').split('.').length != 4) {
-        res.send({'status': 1, 'msg': 'invalid ip address format'});
-        return;
-    }
+    /*
+      if(req.param('ip').split('.').length != 4) {
+      res.send({'status': 1, 'msg': 'invalid ip address format'});
+      return;
+      }*/
     if(req.param('group')=='' || req.param('group')==null || req.param('group')==undefined) {
         res.send({'status': 1, 'msg': 'Missing field: team'});
         return;
     }
     if (!req.param('group').match(/^[0-9a-z_]+$/)) {
-        res.send({'status': 1, 'msg': 'Group/Team name must be alphanumeric [0-9a-z_]'});
+        res.send({'status': 1, 'msg': 'Group/Team name must be alphanumeric and lowercase [0-9a-z_]'});
         res.end();
         return;
     }

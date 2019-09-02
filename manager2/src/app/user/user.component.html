@@ -246,11 +246,16 @@
             <div *ngIf="wrong_confirm_passwd" class="alert alert-danger">{{wrong_confirm_passwd}}</div>
             <form>
                 <div class="form-group row">
-                    <div class="col-sm-4">
+                            <div class="col-sm-8">
+                                <input [value]="user.uid" id="user_id" type="text" autocomplete="username" hidden readonly>
+                            </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-8">
                         <label for="password" class="col-form-label">New password</label>
                         <input autocomplete="new-password" placeholder="10 characters min" id="password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password1" class="form-control"/>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-8">
                         <label for="confirm_password" class="col-form-label">Confirm password</label>
                         <input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
                     </div>
@@ -402,9 +407,9 @@
                     <button class="btn btn-default" (click)="ssh_new_key()">Generate new key</button>
                     <hr/>
                     <h4 style="font-weight: normal;">Download</h4>
-                    <a [routerLink]="['/ssh', {id: user.uid}, 'private']" target="_blank"><button class="btn btn-default">private rsa key</button></a>
-                    <a [routerLink]="['/ssh', {id: user.uid}, 'putty']" target="_blank"><button class="btn btn-default">putty private key</button></a>
-                    <a [routerLink]="['/ssh/', {id: user.uid}, 'public']" target="_blank"><button class="btn btn-default">public key</button></a>
+                    <button (click)="get_key(user.uid, 'private')" class="btn btn-default">private rsa key</button>
+                    <button (click)="get_key(user.uid, 'putty')" class="btn btn-default">putty private key</button>
+                    <button (click)="get_key(user.uid, 'public')" class="btn btn-default">public key</button>
                 </div>
             </div>
   </div>

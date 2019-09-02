@@ -4,8 +4,9 @@
 
 export const environment = {
   production: false,
-  envName: 'local',
-  apiUrl: 'https://my.genouest.org'
+  envName: "local",
+  apiUrl: "https://my.genouest.org",
+  sentry: "https://70edf44e2ed24c58ad3aa3d89c5825b4@sentry.genouest.org/2",
 };
 
 /*

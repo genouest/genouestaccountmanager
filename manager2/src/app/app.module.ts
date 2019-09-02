@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, Injectable } from '@angular/core';
+import { NgModule, Injectable, ErrorHandler } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
@@ -44,6 +44,24 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
 import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
 import { FlashComponent } from './utils/flash/flash.component';
 
+import { environment } from '../environments/environment';
+import * as Sentry from "@sentry/browser";
+
+if (environment.sentry) {
+  Sentry.init({
+    dsn: environment.sentry
+  });
+}
+
+@Injectable()
+export class SentryErrorHandler implements ErrorHandler {
+  constructor() {}
+  handleError(error) {
+    if (!environment.sentry) { return }
+    const eventId = Sentry.captureException(error.originalError || error);
+    Sentry.showReportDialog({ eventId });
+  }
+}
 
 @NgModule({
   declarations: [
@@ -104,7 +122,8 @@ import { FlashComponent } from './utils/flash/flash.component';
   ],
   providers: [
     {provide: WindowWrapper, useFactory: getWindow, multi: true},
-    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
+    { provide: ErrorHandler, useClass: SentryErrorHandler }
   ],
   bootstrap: [AppComponent],
   entryComponents: [
