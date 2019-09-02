@@ -340,6 +340,44 @@ export class UserComponent implements OnInit {
     )
   }
 
+  get_key(user_id:string, key:string) {
+    //['/ssh', {id: user.uid}, 'private']
+    console.log("get key " + key + " for " + user_id)
+    this.userService.getSSHKey(user_id, key).subscribe(
+      resp => {
+        console.log("key = ", resp)
+        let keyName = "id_rsa.pub"
+        if(key == "private") {
+          keyName = "id_rsa"
+        } else if (key == "putty") {
+          keyName = "id_rsa.ppk"
+        }
+        let blob = new Blob([resp], {type: 'application/octet-stream'});
+
+        // IE doesn't allow using a blob object directly as link href
+        // instead it is necessary to use msSaveOrOpenBlob
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveOrOpenBlob(blob);
+          return;
+        }
+
+        // For other browsers:
+        // Create a link pointing to the ObjectURL containing the blob.
+        const downloadURL = URL.createObjectURL(blob);
+        //window.open(downloadURL);
+
+        var a = document.createElement("a");
+        a.href = downloadURL;
+        a.download = keyName;
+        a.click();        
+
+      },
+      err => {
+        console.log("failed to get ssh key", err)
+      }
+    )
+  }
+
   web_add() {
     this.website.owner = this.user.uid;
     this.websiteService.add(this.website).subscribe(
