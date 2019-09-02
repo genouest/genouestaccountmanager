@@ -53,6 +53,7 @@ var ldap_groups = {};
 var ldap_users = [];
 var ldap_secondary_groups = {};
 var ldap_user_projects = {};
+ldap_user_projects[commands.admin] = [];
 var ldap_nb_users = 0;
 var ldap_managed_users = 0;
 var errors = [];
@@ -116,6 +117,9 @@ function record_group(group){
                     if(ldap_user_projects[group.memberUid[j]] === undefined){ ldap_user_projects[group.memberUid[j]]=[];}
                     ldap_user_projects[group.memberUid[j]].push(group.cn);
                 }
+            }
+            else {
+                ldap_user_projects[commands.admin].push(group.cn);
             }
             var go_project = {
                 id: group.cn,
