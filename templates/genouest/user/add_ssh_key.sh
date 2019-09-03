@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Start add_ssh_key.sh in $0 ..."
+
 set -e
 
 if [ ! -e "{{ user.home }}/.ssh" ]; then
@@ -10,4 +12,5 @@ if [ ! -e "{{ user.home }}/.ssh" ]; then
 fi
 
 echo {{ user.ssh }} >> "{{ user.home }}/.ssh/authorized_keys"
-# add_ssh_key.sh
+
+echo "End add_ssh_key.sh in $0 ..."

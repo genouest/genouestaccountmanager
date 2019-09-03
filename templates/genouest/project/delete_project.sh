@@ -1,6 +1,9 @@
 #!/bin/bash
 
+echo "Start delete_project.sh in $0 ..."
+
 set -e
 
 echo "should do something or not with {{ project.id }}"
-# delete_project.sh
+
+echo "End delete_project.sh in $0 ..."

@@ -1,4 +1,4 @@
-# todo find a clean way to use user and group
+echo "Start add_extra_dirs.sh in $0 ..."
 
 {% for item in CONFIG.general.user_extra_dirs %}
 
@@ -11,4 +11,5 @@ then
 fi
 
 {% endfor %}
-# add_extra_dirs.sh
+
+echo "End add_extra_dirs.sh in $0 ..."

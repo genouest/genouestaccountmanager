@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Start keygen.sh in $0 ..."
+
 set -e
 
 sshDir="{{ user.home }}/.ssh"
@@ -19,4 +21,5 @@ chown -R {{ user.uidnumber }}:{{ user.gidnumber }} $sshDir
 chmod 600 $sshDir/id_rsa
 chmod 600 $sshDir/id_rsa.pub
 chmod 700 $sshDir
-# keygen.sh
+
+echo "End keygen.sh in $0 ..."

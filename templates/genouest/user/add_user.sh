@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Start add_user.sh in $0 ..."
+
 set -e
 
 ldapadd -h {{ CONFIG.ldap.host }} -cx -w {{ CONFIG.ldap.admin_password }} -D {{ CONFIG.ldap.admin_cn }},{{ CONFIG.ldap.admin_dn }} -f "{{ CONFIG.general.script_dir }}/{{ user.uid }}.{{ fid }}.ldif"
@@ -19,4 +21,5 @@ echo '  UserKnownHostsFile=/dev/null' >> "{{ user.home }}/.ssh/config"
 chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "{{ user.home }}"
 
 {% include "user/add_extra_dirs.sh" %}
-# add_user.sh
+
+echo "End add_user.sh in $0 ..."
