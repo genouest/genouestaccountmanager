@@ -42,7 +42,7 @@ router.get('/ssh/:id/putty', function(req, res) {
         if(user.maingroup!== undefined && user.maingroup!=""){
             maingroup = "/"+ user.maingroup;
         }
-        var sshDir = CONFIG.general.home + maingroup + "/" + user.group + '/' + user.uid + "/.ssh";
+        var sshDir = user.home + "/.ssh";
         res.download(sshDir + "/id_rsa.ppk");
     });
 });
@@ -75,7 +75,7 @@ router.get('/ssh/:id/private', function(req, res) {
         if(user.maingroup!== undefined && user.maingroup!==""){
             maingroup = "/"+ user.maingroup;
         }
-        var sshDir = CONFIG.general.home + maingroup + "/" + user.group + '/' + user.uid + "/.ssh";
+        var sshDir = user.home + "/.ssh";
         res.download(sshDir + "/id_rsa");
     });
 });
@@ -104,7 +104,7 @@ router.get('/ssh/:id/public', function(req, res) {
         if(user.maingroup!== undefined && user.maingroup!==""){
             maingroup = "/"+ user.maingroup;
         }
-        var sshDir = CONFIG.general.home + maingroup + "/" + user.group + '/' + user.uid + "/.ssh";
+        var sshDir = user.home + "/.ssh";
         res.download(sshDir + "/id_rsa.pub");
     });
 });
@@ -138,7 +138,7 @@ router.get('/ssh/:id', function(req, res) {
         if(user.maingroup!== undefined && user.maingroup!==""){
             maingroup = "/"+ user.maingroup;
         }
-        var homeDir = CONFIG.general.home + maingroup + "/" + user.group + '/' + user.uid;
+        var homeDir = user.home;
         var sshDir = homeDir + "/.ssh";
         script += "rm -f " + sshDir + "/id_rsa*\n";
         script += "touch " + sshDir + "/authorized_keys\n";

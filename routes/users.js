@@ -89,6 +89,23 @@ if (runningEnv === 'test'){
   });
 }
 
+function get_group_home (user) {
+    group_path = CONFIG.general.home+'/'+user.group;
+    if(user.maingroup!="" && user.maingroup!=null) {
+        group_path = CONFIG.general.home+'/'+user.maingroup+'/'+user.group;
+    }
+    return group_path.replace(/\/+/g, '/');
+}
+
+function get_user_home (user) {
+    // todo check  or not if user.uid exist
+    user_home = CONFIG.general.home+"/"+user.uid;
+    if(CONFIG.general.use_group_in_path) {
+        user_home = get_group_home(user)+"/"+user.uid;
+    }
+    return user_home.replace(/\/+/g, '/');
+}
+
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
         if(notif.mailSet()) {
@@ -129,6 +146,7 @@ var create_extra_group = function(group_name, owner_name){
 
     });
 }
+
 var create_extra_user = function(user_name, group, internal_user){
     return new Promise(function (resolve, reject){
         var password = Math.random().toString(36).slice(-10);
@@ -151,6 +169,7 @@ var create_extra_user = function(user_name, group, internal_user){
           group: group.name,
           secondarygroups: [],
           maingroup: "",
+          home: "",
           why: "",
           ip: "",
           regkey: Math.random().toString(36).slice(-10),
@@ -175,6 +194,7 @@ var create_extra_user = function(user_name, group, internal_user){
 
             user.uidnumber = minuid;
             user.gidnumber = group.gid;
+            user.home = get_user_home(user);
             var fid = new Date().getTime();
             goldap.add(user, fid, function(err) {
               if(!err){
@@ -187,24 +207,24 @@ var create_extra_user = function(user_name, group, internal_user){
                     script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
                     script += "fi\n"
                     script += "sleep 3\n";
-                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
-                    script += utils.addReadmes(CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid);
+                    script += "mkdir -p "+user.home+"/.ssh\n";
+                    script += utils.addReadmes(user.home);
                     /*
-                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
+                    script += "mkdir -p "+user.home+"/user_guides\n";
                     if (typeof CONFIG.general.readme == "object") {
                       CONFIG.general.readme.forEach(function(dict) {
-                        script += "ln -s " + dict.source_folder + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/" + dict.language + "\n";
+                        script += "ln -s " + dict.source_folder + " "+user.home+"/user_guides/" + dict.language + "\n";
                       });
                     } else {
-                      script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
+                      script += "ln -s " + CONFIG.general.readme + " "+user.home+"/user_guides/README\n";
                     };
                     */
-                    script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
-                    script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
-                    script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
-                    script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
-                    script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
-                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                    script += "touch "+user.home+"/.ssh/authorized_keys\n";
+                    script += "echo \"Host *\" > "+user.home+"/.ssh/config\n";
+                    script += "echo \"  StrictHostKeyChecking no\" >> "+user.home+"/.ssh/config\n";
+                    script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+user.home+"/.ssh/config\n";
+                    script += "chmod 700 "+user.home+"/.ssh\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
                     // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
                     //script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
                     script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
@@ -888,8 +908,9 @@ router.delete_user = function(user, action_owner_id){
                var script = "#!/bin/bash\n";
                //script += "set -e \n"
                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-               script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn +" \"uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\"\n";
-               script += "rm -rf "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                 script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn +" \"uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\"\n";
+               // todo: should never rm -rf from a variable
+               script += "rm -rf "+user.home+"\n";
                // script += "rm -rf /omaha-beach/"+user.uid+"\n";
                script += utils.deleteExtraDirs(user.uid, user.group);
 
@@ -1059,6 +1080,7 @@ router.get('/user/:id/activate', function(req, res) {
 
             user.uidnumber = minuid;
             user.gidnumber = data.gid;
+            user.home = get_user_home(user);
             var fid = new Date().getTime();
             goldap.add(user, fid, function(err) {
               if(!err){
@@ -1072,25 +1094,25 @@ router.get('/user/:id/activate', function(req, res) {
                     script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
                     script += "fi\n"
                     script += "sleep 3\n";
-                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
-                    script += utils.addReadmes(CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid);
+                    script += "mkdir -p "+user.home+"/.ssh\n";
+                    script += utils.addReadmes(user.home);
                     /*
-                    script += "mkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides\n";
+                    script += "mkdir -p "+user.home+"/user_guides\n";
                     if (typeof CONFIG.general.readme == "object") {
                       CONFIG.general.readme.forEach(function(dict) {
-                        script += "ln -s " + dict.source_folder + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/" + dict.language + "\n";
+                        script += "ln -s " + dict.source_folder + " "+user.home+"/user_guides/" + dict.language + "\n";
                       });
                     } else {
-                      script += "ln -s " + CONFIG.general.readme + " "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/user_guides/README\n";
+                      script += "ln -s " + CONFIG.general.readme + " "+user.home+"/user_guides/README\n";
                     };
                     */
-                    script += "touch "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/authorized_keys\n";
-                    script += "echo \"Host *\" > "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
-                    script += "echo \"  StrictHostKeyChecking no\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
-                    script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh/config\n";
-                    script += "chmod 700 "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"/.ssh\n";
+                    script += "touch "+user.home+"/.ssh/authorized_keys\n";
+                    script += "echo \"Host *\" > "+user.home+"/.ssh/config\n";
+                    script += "echo \"  StrictHostKeyChecking no\" >> "+user.home+"/.ssh/config\n";
+                    script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+user.home+"/.ssh/config\n";
+                    script += "chmod 700 "+user.home+"/.ssh\n";
                     // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+'/'+user.uid+"\n";
+                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
                     // script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
                     script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
@@ -1318,6 +1340,7 @@ router.post('/user/:id', function(req, res) {
         group: req.param('group'),
         secondarygroups: [],
         maingroup: default_main_group,
+        home: "",
         why: req.param('why'),
         ip: req.param('ip'),
         regkey: regkey,
@@ -1331,6 +1354,8 @@ router.post('/user/:id', function(req, res) {
         loginShell: '/bin/bash',
         history: [{action: 'register', date: new Date().getTime()}]
       }
+      // user[CONFIG.general.internal_flag] = false,
+      user.home = get_user_home(user);
 
       events_db.insert({'owner': req.param('id'), 'date': new Date().getTime(), 'action': 'user registration ' + req.param('id') , 'logs': []}, function(err){});
 
@@ -1904,11 +1929,13 @@ router.put('/user/:id', function(req, res) {
             user.oldgroup = user.group;
             user.oldgidnumber = user.gidnumber;
             user.oldmaingroup = user.maingroup;
+            user.oldhome = user.home;
             user.group = req.param('group');
             user.gidnumber = group.gid;
             user.ip = req.param('ip');
             user.is_genouest = req.param('is_genouest');
             user.maingroup = req.param('maingroup');
+            user.home = get_user_home(user);
             if(user.group == '' || user.group == null) {
               res.status(403).send('Some mandatory fields are empty');
               return;
@@ -1916,6 +1943,7 @@ router.put('/user/:id', function(req, res) {
           }
 
           if(user.status == STATUS_ACTIVE){
+
             users_db.update({_id: user._id}, user, function(err){
               if(session_user.is_admin) {
                 user.is_admin = true;
@@ -1929,14 +1957,14 @@ router.put('/user/:id', function(req, res) {
                   var script = "#!/bin/bash\n";
                   script += "set -e \n"
                   script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                  if(session_user.is_admin) {
+                  if(session_user.is_admin && CONFIG.general.use_group_in_path) {
                     if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                       // If group modification, change home location
-                      script += "if [ ! -e "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+" ]; then\n"
-                      script += "\tmkdir -p "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"\n";
+                        script += "if [ ! -e "+get_group_home(user)+" ]; then\n"
+                        script += "\tmkdir -p "+get_group_home(user)+"\n";
                       script += "fi\n";
-                      script += "mv "+CONFIG.general.home+"/"+user.oldmaingroup+"/"+user.oldgroup+"/"+user.uid+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/\n";
-                      script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+CONFIG.general.home+"/"+user.maingroup+"/"+user.group+"/"+user.uid+"\n";
+                      script += "mv "+user.oldhome+" "+get_group_home(user)+"/\n";
+                      script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
                       script += utils.moveExtraDirs(user.uid, user.oldgroup, user.group, user.uidnumber, user.gidnumber);
                       events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                     }
