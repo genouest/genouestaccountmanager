@@ -2,7 +2,7 @@ sudo: required
 
 language: node_js
 node_js:
-  - "v10.16.2"
+  - "node"
 
 services:
   - docker
@@ -16,5 +16,5 @@ script:
   - npm install -g mocha
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose up -d
   - cd $TRAVIS_BUILD_DIR && sleep 180 && docker ps && mocha -t 10000
-  - docker logs tests_my-app_1
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose down
+
