@@ -89,7 +89,7 @@ Insert users:
         "lastname" : "Sallou",
         "history" : [], # keep empty
         "ip" : "127.0.0.1", # optional IP address of user, in case you use IP for access to servers
-        "is_genouest" : true,
+        "is_internal" : true,
         "ssh" : "", # keep empty
         "why" : null # keep null
         })
