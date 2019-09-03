@@ -32,7 +32,7 @@ router.get('/ssh/:id/putty', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'});
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -40,6 +40,7 @@ router.get('/ssh/:id/putty', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
+
         var sshDir = user.home + "/.ssh";
         res.download(sshDir + "/id_rsa.ppk", "id_rsa.ppk", function (err) {
             if (err) {
@@ -61,7 +62,7 @@ router.get('/ssh/:id/private', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'});
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -73,6 +74,7 @@ router.get('/ssh/:id/private', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
+
         var sshDir = user.home + "/.ssh";
         res.download(sshDir + "/id_rsa", "id_rsa", function (err) {
             if (err) {
@@ -94,7 +96,7 @@ router.get('/ssh/:id/public', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'});
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -102,6 +104,7 @@ router.get('/ssh/:id/public', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
+
         var sshDir = user.home + "/.ssh";
         res.download(sshDir + "/id_rsa.pub", "id_rsa.ppk", function (err) {
             if (err) {
@@ -123,7 +126,7 @@ router.get('/ssh/:id', function(req, res) {
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exists'});
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }

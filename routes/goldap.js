@@ -146,6 +146,7 @@ module.exports = {
             });
         });
 
+
         var bind_options = {
             binddn: 'uid='+uid+'ou=people,'+CONFIG.ldap.dn,
             password: password

@@ -250,7 +250,7 @@ router.get('/auth', function(req, res) {
     });
   }
   else {
-    res.send({user: null, msg: 'User does not exists'});
+    res.send({user: null, msg: 'User does not exist'});
   }
 });
 

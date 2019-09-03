@@ -123,7 +123,7 @@ router.post('/project', function(req, res){
             }
             projects_db.findOne({'id': req.param('id')}, function(err, project){
                 if(err || project != null){
-                    res.status(403).send('Not authorized or project already exists');
+                    res.status(403).send('Not authorized or project already exist');
                     return;
                 }
                 new_project = {

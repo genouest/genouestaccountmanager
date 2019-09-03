@@ -111,6 +111,23 @@ function get_user_home (user) {
     return user_home.replace(/\/+/g, '/');
 }
 
+function get_group_home (user) {
+    group_path = CONFIG.general.home+'/'+user.group;
+    if(user.maingroup!="" && user.maingroup!=null) {
+        group_path = CONFIG.general.home+'/'+user.maingroup+'/'+user.group;
+    }
+    return group_path.replace(/\/+/g, '/');
+}
+
+function get_user_home (user) {
+    // todo check  or not if user.uid exist
+    user_home = CONFIG.general.home+"/"+user.uid;
+    if(CONFIG.general.use_group_in_path) {
+        user_home = get_group_home(user)+"/"+user.uid;
+    }
+    return user_home.replace(/\/+/g, '/');
+}
+
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
         if(notif.mailSet()) {
@@ -163,6 +180,7 @@ var create_extra_group = function(group_name, owner_name){
 
     });
 };
+
 
 var create_extra_user = function(user_name, group, internal_user){
     return new Promise(function (resolve, reject){
@@ -263,13 +281,13 @@ var create_extra_user = function(user_name, group, internal_user){
 router.create_admin = function(default_admin, default_admin_group){
     users_db.findOne({'uid': default_admin}).then(function(user){
         if(user){
-            logger.info('admin already exists, skipping');
+            logger.info('admin already exist, skipping');
         }
         else {
             logger.info('should create admin');
             groups_db.findOne({name: default_admin_group}).then(function(group){
                 if(group){
-                    logger.info('group already exists');
+                    logger.info('group already exist');
                     create_extra_user(default_admin, group, true).then(function(user){
                         logger.info('admin user created');
                     });
@@ -300,7 +318,7 @@ router.get('/user/:id/apikey', function(req, res){
         }
         users_db.findOne({uid: req.param('id')}, function(err, user){
             if(!user) {
-                res.send({msg: 'User does not exists'});
+                res.send({msg: 'User does not exist'});
                 res.end();
                 return;
             }
@@ -332,7 +350,7 @@ router.post('/user/:id/apikey', function(req, res){
 
         users_db.findOne({uid: req.param('id')}, function(err, user){
             if(!user) {
-                res.send({msg: 'User does not exists'});
+                res.send({msg: 'User does not exist'});
                 res.end();
                 return;
             }
@@ -363,7 +381,7 @@ router.put('/user/:id/subscribe', function(req, res){
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'});
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -392,7 +410,7 @@ router.put('/user/:id/unsubscribe', function(req, res){
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'});
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -417,7 +435,7 @@ router.get('/user/:id/subscribed', function(req, res){
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
-            res.send({msg: 'User does not exists'});
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -515,7 +533,7 @@ router.delete('/group/:id', function(req, res){
         }
         groups_db.findOne({name: req.param('id')}, function(err, group){
             if(err || !group) {
-                res.status(403).send('Group does not exists');
+                res.status(403).send('Group does not exist');
                 return;
             }
             users_db.find({'$or': [{'secondarygroups': req.param('id')}, {'group': req.param('id')}]}, function(err, users_in_group){
@@ -539,6 +557,7 @@ router.put('/group/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
+
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -551,13 +570,13 @@ router.put('/group/:id', function(req, res){
         var owner = req.param('owner');
         users_db.findOne({uid: owner}, function(err, user){
             if(!user || err) {
-                res.status(404).send('User does not exists');
+                res.status(404).send('User does not exist');
                 res.end();
                 return;
             }
             groups_db.findOne({name: req.param('id')}, function(err, group){
                 if(! group) {
-                    res.status(404).send('Group does not exists');
+                    res.status(404).send('Group does not exist');
                     return;
                 }
                 events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'group owner modification ' + group.name + ' to ' +owner, 'logs': []}, function(err){});
@@ -576,6 +595,7 @@ router.post('/group/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
+
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -588,12 +608,12 @@ router.post('/group/:id', function(req, res){
         var owner = req.param('owner');
         users_db.findOne({uid: owner}, function(err, user){
             if(!user || err) {
-                res.status(404).send('User does not exists');
+                res.status(404).send('User does not exist');
                 return;
             }
             groups_db.findOne({name: new RegExp("^" + req.param('id') + "$", 'i')}, function(err, group){
                 if(group) {
-                    res.status(403).send('Group already exists');
+                    res.status(403).send('Group already exist');
                     return;
                 }
                 //var mingid = 1000;
@@ -964,6 +984,7 @@ router.delete_user = function(user, action_owner_id){
                 });
             });
         }
+
     });
 };
 
@@ -1042,9 +1063,10 @@ router.get('/user/:id/activate', function(req, res) {
             return;
         }
 
+
         users_db.findOne({uid: req.param('id')}, function(err, user){
             if(!user) {
-                res.status(403).send('User does not exists');
+                res.status(403).send('User does not exist');
                 res.end();
                 return;
             }
@@ -1069,7 +1091,7 @@ router.get('/user/:id/activate', function(req, res) {
                         return;
                     }
                     if(!data) {
-                        res.status(403).send('Group '+user.group+' does not exists, please create it first');
+                        res.status(403).send('Group '+user.group+' does not exist, please create it first');
                         res.end();
                         return;
                     }
@@ -1282,11 +1304,10 @@ router.post('/user/:id', function(req, res) {
         return;
     }
 
-
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(user){
-            res.send({'status': 1, 'msg': 'User id already exists'});
-            //res.status(403).send('User id already exists');
+            res.send({'status': 1, 'msg': 'User id already exist'});
+            //res.status(403).send('User id already exist');
             return;
         }
 
@@ -1317,7 +1338,7 @@ router.post('/user/:id', function(req, res) {
             expiration: new Date().getTime() + 1000*3600*24*req.param('duration'),
             loginShell: '/bin/bash',
             history: [{action: 'register', date: new Date().getTime()}]
-        }
+        };
         // user[CONFIG.general.internal_flag] = false,
         user.home = get_user_home(user);
 
@@ -1451,7 +1472,7 @@ router.post('/user/:id/passwordreset', function(req, res){
         }
         users_db.findOne({uid: req.param('id')}, function(err, user){
             if(err || !user) {
-                res.status(404).send('User does not exists:'+req.param('id'));
+                res.status(404).send('User does not exist:'+req.param('id'));
                 res.end();
                 return;
             }
@@ -1491,7 +1512,7 @@ router.get('/user/:id/passwordreset', function(req, res){
     var key = Math.random().toString(36).substring(7);
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err || !user) {
-            res.status(404).send('User does not exists');
+            res.status(404).send('User does not exist');
             res.end();
             return;
         }
@@ -1540,7 +1561,7 @@ router.get('/user/:id/passwordreset', function(req, res){
 router.get('/user/:id/passwordreset/:key', function(req, res){
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err) {
-            res.status(404).send('User does not exists');
+            res.status(404).send('User does not exist');
             res.end();
             return;
         }
@@ -1787,6 +1808,7 @@ router.get('/user/:id/usage', function(req, res){
 
 // Update user info
 router.put('/user/:id', function(req, res) {
+
     /*
       uid: req.param('id'),
       firstname: req.param('firstname'),
@@ -1881,7 +1903,7 @@ router.put('/user/:id', function(req, res) {
                     return;
                 }
                 if(!group) {
-                    res.status(403).send('Group '+req.param('group')+' does not exists, please create it first');
+                    res.status(403).send('Group '+req.param('group')+' does not exist, please create it first');
                     return;
                 }
                 if(session_user.is_admin){
@@ -2020,7 +2042,7 @@ router.post('/user/:id/project/:project', function(req, res){
         var fid = new Date().getTime();
         users_db.findOne({uid: uid}, function(err, user){
             if(!user || err) {
-                res.status(404).send('User does not exists');
+                res.status(404).send('User does not exist');
                 res.end();
                 return;
             }
