@@ -184,7 +184,7 @@ describe('My', () => {
   });
 
   describe('admin activates test user', () => {
-      it('group does not exists', (done) => {
+      it('group does not exist', (done) => {
           //app.get('/group/:id', users)
           chai.request('http://localhost:3000')
               .get('/group')

@@ -8,10 +8,10 @@
             <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
             <form role="form" class="user-form form-inline">
               <div class="form-group">
-                <input placeholder="group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
+                <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
               </div>
               <div class="form-group">
-                <input placeholder="group owner id" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
+                <input placeholder="Owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
               </div>
               <div class="form-group">
                 <button type="button" class="btn btn-default" (click)="addGroup()">Create</button>
@@ -57,9 +57,9 @@
             <div class="alert alert-info" *ngIf="msg">{{msg}}</div>
             <form role="form" class="user-form form-horizontal form-register">
               <div class="form-group">
-                  <label for="group_id" class="col-sm-2 col-form-label">Group owner id</label>
+                  <label for="group_id" class="col-sm-2 col-form-label">Owner</label>
                   <div class="col-sm-3">
-                      <input placeholder="group owner id" id="group_id" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedGroup.owner" class="form-control"/>
+                      <input placeholder="Owner" id="group_id" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedGroup.owner" class="form-control"/>
                   </div>
                   <button type="button" class="btn btn-default" (click)="updateGroup()">Update</button>
               </div>

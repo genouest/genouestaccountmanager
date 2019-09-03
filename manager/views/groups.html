@@ -9,10 +9,10 @@
             <div class="alert alert-danger" ng-if="err_msg">{{err_msg}}</div>
             <form role="form" class="user-form form-inline">
               <div class="form-group">
-                <input placeholder="group name" type="text" ng-model="new_group" class="form-control"/>
+                <input placeholder="Group name" type="text" ng-model="new_group" class="form-control"/>
               </div>
               <div class="form-group">
-                <input placeholder="group owner id" type="text" ng-model="new_group_user_id" class="form-control"/>
+                <input placeholder="Owner" type="text" ng-model="new_group_user_id" class="form-control"/>
               </div>
               <div class="form-group">
                 <button type="button" class="btn btn-default" ng-click="add_group()">Create</button>
@@ -60,9 +60,9 @@
             <div class="alert alert-info" ng-if="msg">{{msg}}</div>
             <form role="form" class="user-form form-horizontal form-register">
               <div class="form-group">
-                  <label for="group_id" class="col-sm-2 col-form-label">Group owner id</label>
+                  <label for="group_id" class="col-sm-2 col-form-label">Owner</label>
                   <div class="col-sm-3">
-                      <input placeholder="group owner id" id="group_id" type="text" ng-model="selectedGroup.owner" class="form-control"></input>
+                      <input placeholder="Owner" id="group_id" type="text" ng-model="selectedGroup.owner" class="form-control"></input>
                   </div>
                   <button type="button" class="btn btn-default" ng-click="update_group()">Update</button>
               </div>
