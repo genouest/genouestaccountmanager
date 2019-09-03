@@ -177,7 +177,7 @@ router.post('/database/:id', function(req, res) {
 
     databases_db.findOne({name: db.name}, function(err, database){
       if(database) {
-        res.status(403).send({database: null, message: 'Database already exists, please use an other name'});
+        res.status(403).send({database: null, message: 'Database already exist, please use an other name'});
         res.end();
         return;
       }

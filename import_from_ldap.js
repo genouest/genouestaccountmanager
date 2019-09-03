@@ -35,6 +35,7 @@ if(commands.import && commands.admin===undefined){
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     groups_db = db.get('groups'),
+    projects_db = db.get('projects'),
     users_db = db.get('users');
 
 
@@ -51,6 +52,8 @@ var options = {
 var ldap_groups = {};
 var ldap_users = [];
 var ldap_secondary_groups = {};
+var ldap_user_projects = {};
+ldap_user_projects[commands.admin] = [];
 var ldap_nb_users = 0;
 var ldap_managed_users = 0;
 var errors = [];
@@ -58,6 +61,7 @@ var undeclared_home_groups = [];
 
 var mongo_users = [];
 var mongo_groups = [];
+var mongo_projects = [];
 
 var client = myldap.createClient({
   url: 'ldap://' +  CONFIG.ldap.host
@@ -84,12 +88,15 @@ client.search('ou=groups,' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, grou
 });
 
 function record_group(group){
+    console.debug(group);
+
     /*
     * entry: {"dn":"ou=Groups,dc=genouest,dc=org","controls":[],"objectClass":["top","organizationalUnit"],"ou":"Groups"}
     * entry: {"dn":"cn=symbiose,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["agouin","lbouri"],"objectClass":["top","posixGroup"],"gidNumber":"20857","cn":"symbiose"}
     * entry: {"dn":"cn=recomgen,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["mbahin","smottier","vwucher","clebeguec","mrimbaul","mbunel","scorrear","spaillar","bhedan"],"cn":"recomgen","gidNumber":"20885","objectClass":["posixGroup","top"]}
     */
     if(! group.dn.startsWith("cn") || group.objectClass.indexOf("posixGroup") == -1) {return;}
+    if (group.dn.includes("user-groups")){return;}
     console.info("manage group: " + group.dn);
     ldap_groups[parseInt(group.gidNumber)] = group;
     if(group.memberUid !== undefined){
@@ -101,6 +108,31 @@ function record_group(group){
     if(commands.import){
         var go_group = {name: group.cn, gid: parseInt(group.gidNumber), owner: commands.admin};
         mongo_groups.push(go_group);
+        if (group.dn.includes("ou=projects"))
+        {
+            var proj_owner = commands.admin;
+            if (group.memberUid !== undefined) {
+                proj_owner = group.memberUid[0];
+                for(var j=0;j<group.memberUid.length;j++){
+                    if(ldap_user_projects[group.memberUid[j]] === undefined){ ldap_user_projects[group.memberUid[j]]=[];}
+                    ldap_user_projects[group.memberUid[j]].push(group.cn);
+                }
+            }
+            else {
+                ldap_user_projects[commands.admin].push(group.cn);
+            }
+            var go_project = {
+                id: group.cn,
+                owner: proj_owner,
+                expiration: new Date().getTime() + 1000*3600*24*365,
+                group: group.cn,
+                description: "imported from ldap",
+                path: "",
+                orga: "",
+                access : "Group"
+            };
+            mongo_projects.push(go_project);
+        }
     }
 
 }
@@ -168,6 +200,11 @@ function record_user(user){
         secondary_groups = [];
     }
 
+    var projects = ldap_user_projects[user.uid];
+    if(projects === undefined){
+        projects = [];
+    }
+
     console.warn("Home dir for ", user.uid, " is set to", user.homeDirectory);
 
     if(! user.homeDirectory || ! user.homeDirectory.startsWith(CONFIG.general.home)) {
@@ -187,8 +224,9 @@ function record_user(user){
         responsible: "unknown",
         group: (ldap_groups[gid] ? ldap_groups[gid].cn : ''), //todo: maybe use default group from config
         secondarygroups: secondary_groups,
-        maingroup: CONFIG.general.default_main_group,
+        projects: projects,
         home: user.homeDirectory,
+        maingroup: CONFIG.general.default_main_group,
         why: "",
         ip: "",
         regkey: regkey,
@@ -220,6 +258,8 @@ var mongo_imports = function(){
         if(! commands.import){
             resolve(true);
         }
+
+        /* GROUPS */
         Promise.all(mongo_groups.map(function(group_import){
             return groups_db.update({name: group_import.name}, group_import, {upsert: true});
         })).then(function(results_group){
@@ -229,19 +269,31 @@ var mongo_imports = function(){
                     break;
                 }
             }
-            Promise.all(mongo_users.map(function(user_import){
-                return users_db.update({uid: user_import.uid}, user_import, {upsert: true});
-            })).then(function(results_account){
-                for(var i=0;i<results_account.length;i++){
-                    if(results_account[i].ok!=1){
-                        console.error("during user import in db: ", results_account[i]);
+
+            /* PROJECTS */
+            Promise.all(mongo_projects.map(function(project_import){
+                return projects_db.update({id: project_import.id}, project_import, {upsert: true});
+            })).then(function(results_project){
+                for(var i=0;i<results_project.length;i++){
+                    if(results_project[i].ok!=1){
+                        console.error("during project import in db: ", results_project[i]);
                         break;
                     }
                 }
-                resolve(true);
-            });
 
-        });
+                /* USERS */
+                Promise.all(mongo_users.map(function(user_import){
+                    return users_db.update({uid: user_import.uid}, user_import, {upsert: true});
+                })).then(function(results_account){
+                    for(var i=0;i<results_account.length;i++){
+                        if(results_account[i].ok!=1){
+                            console.error("during user import in db: ", results_account[i]);
+                            break;
+                        }
+                    }
+                    resolve(true);
+                }); /* END USERS */
+            }); /* END PROJECTS */
+        }); /* END GROUPS */
     });
-
 };

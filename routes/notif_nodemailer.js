@@ -1,5 +1,4 @@
 const CONFIG = require('config');
-const fs = require('fs');
 const monk = require('monk'),
       db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
       web_db = db.get('web'),
