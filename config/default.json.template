@@ -23,6 +23,7 @@
     "use_group_in_path": true,
     "main_groups": [""],
     "default_main_group": "",
+    "mailer" : "gomail",
     "quota": {
         "home": {
             "protocol": "http:",
@@ -74,6 +75,10 @@
     "host": "localhost",
     "user": "root",
     "password": "XXX"
+  },
+  "nodemailer": {
+     "origin": "",
+     "smtp": ""
   },
   "gomail": {
     "host": "",

@@ -25,6 +25,7 @@
     "home": "/home",
     "main_groups": ["", "my"],
     "default_main_group": "my",
+    "mailer" : "gomail",
     "quota": {
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
@@ -46,6 +47,10 @@
  "redis": {
     "host": "gomail-redis",
     "port": 6379
+ },
+ "nodemailer": {
+     "origin": "support@my.org",
+     "smtp": "smtp.my.org"
  },
  "gomail": {
    "host": "http://gomail-web:6643",
