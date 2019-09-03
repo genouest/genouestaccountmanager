@@ -106,6 +106,18 @@ Home directory will be build according to:
 Secondary groups can be added to a user. In this case, user will be added as a memberOf of this group.
 User is also set as memberOf for main group.
 
+## Logging
+
+By default all logging is done on standard output and error.
+
+You may want to have the access log (http log) to a specific file using environment variable:
+
+```
+MY_ACCESS_LOG=/var/log/my.access.log /usr/bin/node /opt/my/app.js
+```
+
+Please note that it will affect only express http log, for application log you will have to redirect the standard output to file.
+
 ## Running
 
     forever start -o out.log -e err.log app.js
@@ -164,6 +176,16 @@ Users will not be added to mailing list.
 To start server
 
     node app.ps
+
+To build docker without sentry support
+
+    docker build --build-arg APIURL=https://MYACCOUNTMANAGERURL -t osallou/my
+
+with sentry support:
+
+    docker build --build-arg APIURL=https://MYACCOUNTMANAGERURL --build-arg SENTRY=https://XXXX@sentry.genouest.org/2 -t osallou/my
+
+Sentry is a service to catch bugs in app and record them in Sentry web app (optional). Sentry key must be set at docker build time.
 
 ### Cron task
 

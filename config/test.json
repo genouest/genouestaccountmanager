@@ -21,6 +21,7 @@
     "cron_bin_script": "/opt/gomngr.sh",
     "admin_ip": [],
     "usage_directory": "/tmp",
+    "use_group_in_path": true,
     "home": "/home",
     "main_groups": ["", "my"],
     "default_main_group": "my",

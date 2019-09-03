@@ -209,16 +209,11 @@ module.exports = {
                           user_ldif += "ou: external\n";
                           user_ldif += "-\n";
                       }
+                  }
+                  if(user.home) {
                       user_ldif += "replace: homeDirectory\n";
-                      if(user.maingroup!="" & user.maingroup!=null) {
-                          user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.maingroup+'/'+user.group+'/'+user.uid+"\n";
-                      }
-                      else {
-                          user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.group+'/'+user.uid+"\n";
-                      }
+                      user_ldif += 'homeDirectory: '+user.home+"\n";
                       user_ldif += "-\n";
-                      //user_ldif += "replace: mail\n";
-                      //user_ldif += "mail: "+user.email+"\n";
                   }
                   if(user.firstname) {
                       user_ldif += "replace: givenName\n";
@@ -241,11 +236,11 @@ module.exports = {
                       user_ldif += "\ndn: cn="+user.oldgroup+",ou=groups,"+CONFIG.ldap.dn+"\n";
                       user_ldif += "changetype: modify\n";
                       user_ldif += "delete: memberUid\n";
-                      user_ldif += "memberUid: "+user.uid+"\n\n"
+                      user_ldif += "memberUid: "+user.uid+"\n\n";
                       user_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
                       user_ldif += "changetype: modify\n";
                       user_ldif += "add: memberUid\n";
-                      user_ldif += "memberUid: "+user.uid+"\n"
+                      user_ldif += "memberUid: "+user.uid+"\n";
                   }
 
                   fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
@@ -307,11 +302,12 @@ module.exports = {
     }
     user_ldif += "givenName: "+user.firstname+"\n";
     user_ldif += "mail: "+user.email+"\n";
-    if(user.maingroup!="" & user.maingroup!=null) {
-        user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.maingroup+'/'+user.group+'/'+user.uid+"\n";
+    if(user.home) {
+        user_ldif += 'homeDirectory: '+user.home+"\n";
     }
     else {
-        user_ldif += 'homeDirectory: '+CONFIG.general.home+'/'+user.group+'/'+user.uid+"\n";
+        logger.error("user does not have any home", user);
+        // todo, should we stop here ?
     }
     user_ldif += "loginShell: /bin/bash\n";
     user_ldif += "userpassword: "+user.password+"\n";

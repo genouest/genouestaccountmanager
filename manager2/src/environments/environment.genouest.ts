@@ -5,8 +5,8 @@
 export const environment = {
   production: false,
   envName: "local",
-  apiUrl: "http://localhost:3000",
-  sentry: "",
+  apiUrl: "https://my.genouest.org",
+  sentry: "https://70edf44e2ed24c58ad3aa3d89c5825b4@sentry.genouest.org/2",
 };
 
 /*

@@ -45,7 +45,7 @@
         </li>
         <li class="nav-item" (click)="switchTo(2)">
             <span class="nav-link">Details</span>
-          </li>        
+          </li>
         <li class="nav-item" (click)="switchTo(3)">
           <span class="nav-link">History</span>
         </li>
@@ -162,7 +162,7 @@
                           </div>
                           <div class="form-check row">
                             <input id="staff" name="staff" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_internal" type="checkbox" class="form-check-input">
-                              <label class="col-6 form-check-label" for="staff">                                  
+                              <label class="col-6 form-check-label" for="staff">
                                   Staff member
                               </label>
                           </div>
@@ -188,7 +188,7 @@
                               </div>
                           </div>
                           <div class="form-group">
-                              <label *ngIf="user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
+                              <label *ngIf="user.secondarygroups && user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
                               <div class="col-6">
                                   <div *ngFor="let secondarygroup of user.secondarygroups">
                                       <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="secondarygroup" class="form-control" readonly/>
@@ -233,7 +233,7 @@
             <h4>Home directory</h4>
         </div>
         <div class="card-body">
-            <span>/home<span *ngIf="user.maingroup">/{{user.maingroup}}</span>/{{user.group}}/{{user.uid}}</span>
+            <span>{{user.home}}</span>
         </div>
     </div>
 
@@ -246,11 +246,16 @@
             <div *ngIf="wrong_confirm_passwd" class="alert alert-danger">{{wrong_confirm_passwd}}</div>
             <form>
                 <div class="form-group row">
-                    <div class="col-sm-4">
+                            <div class="col-sm-8">
+                                <input [value]="user.uid" id="user_id" type="text" autocomplete="username" hidden readonly>
+                            </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-8">
                         <label for="password" class="col-form-label">New password</label>
                         <input autocomplete="new-password" placeholder="10 characters min" id="password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password1" class="form-control"/>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-8">
                         <label for="confirm_password" class="col-form-label">Confirm password</label>
                         <input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
                     </div>
@@ -345,7 +350,7 @@
                     <div class="form-group">
                         <button type="button" class="btn btn-default" (click)="db_add()">Create</button>
                     </div>
-                
+
                 <div class="table-responsive">
                     <table *ngIf="databases && databases.length > 0" class="table table-striped">
                         <thead>
@@ -361,8 +366,8 @@
                 </div>
         </div>
     </div>
-  </div> 
-  
+  </div>
+
   <div class="col-md-6 col-sm-12" *ngIf="panel == 1">
         <div class="card bg-light">
                 <div class="card-header">
@@ -402,9 +407,9 @@
                     <button class="btn btn-default" (click)="ssh_new_key()">Generate new key</button>
                     <hr/>
                     <h4 style="font-weight: normal;">Download</h4>
-                    <a [routerLink]="['/ssh', {id: user.uid}, 'private']" target="_blank"><button class="btn btn-default">private rsa key</button></a>
-                    <a [routerLink]="['/ssh', {id: user.uid}, 'putty']" target="_blank"><button class="btn btn-default">putty private key</button></a>
-                    <a [routerLink]="['/ssh/', {id: user.uid}, 'public']" target="_blank"><button class="btn btn-default">public key</button></a>
+                    <button (click)="get_key(user.uid, 'private')" class="btn btn-default">private rsa key</button>
+                    <button (click)="get_key(user.uid, 'putty')" class="btn btn-default">putty private key</button>
+                    <button (click)="get_key(user.uid, 'public')" class="btn btn-default">public key</button>
                 </div>
             </div>
   </div>
@@ -507,4 +512,3 @@
 
 </div>
 </div>
-

@@ -169,11 +169,14 @@ export class UserService {
       httpOptions)   
   }
 
+  getSSHKey(owner: string, key: string): Observable<string>{
+    return this.http.get(
+      environment.apiUrl + '/ssh/' + owner + '/' + key,
+      {responseType: 'text'})  
+  }
+
   getNewSSHKey(id: string) {
     let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
     };
     return this.http.get(
       environment.apiUrl + '/ssh/' + id,

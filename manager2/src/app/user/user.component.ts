@@ -251,7 +251,7 @@ export class UserComponent implements OnInit {
         }
     }
     user_projects.sort(this._compareId)
-    this.user_projects = user_projects;   
+    this.user_projects = user_projects;
   }
 
   loadUserInfo() {
@@ -263,7 +263,7 @@ export class UserComponent implements OnInit {
       this.projectService.list(true).subscribe(
         resp => this._loadProjects(resp),
         err => console.log('failed to get projects')
-      )      
+      )
     }
     this.web_list();
     this.db_list();
@@ -317,7 +317,7 @@ export class UserComponent implements OnInit {
     this.databaseService.add(this.database).subscribe(
       resp => { this.dbmsg = resp['message']; this.db_list()},
       err => { this.dbmsg_error = err.error; console.log('failed to add database')}
-    )  
+    )
   }
 
   db_delete(dbName: string) {
@@ -331,12 +331,56 @@ export class UserComponent implements OnInit {
         )
       }
     });
-  }    
+  }
 
   web_list() {
     this.websiteService.listOwner(this.user.uid).subscribe(
       resp => this.websites = resp,
       err => console.log('failed to get web sites')
+    )
+  }
+
+  get_key(user_id:string, key:string) {
+    //['/ssh', {id: user.uid}, 'private']
+    console.log("get key " + key + " for " + user_id)
+    this.userService.getSSHKey(user_id, key).subscribe(
+      resp => {
+        console.log("key = ", resp)
+        let keyName = "id_rsa.pub"
+        if(key == "private") {
+          keyName = "id_rsa"
+        } else if (key == "putty") {
+          keyName = "id_rsa.ppk"
+        }
+        let blob = new Blob([resp], {type: 'application/octet-stream'});
+
+        // IE doesn't allow using a blob object directly as link href
+        // instead it is necessary to use msSaveOrOpenBlob
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveOrOpenBlob(blob);
+          return;
+        }
+
+        // For other browsers:
+        // Create a link pointing to the ObjectURL containing the blob.
+        const downloadURL = URL.createObjectURL(blob);
+        //window.open(downloadURL);
+
+        var a = document.createElement("a");
+        if ( a.download != undefined ) {
+          document.body.appendChild(a);
+          a.href = downloadURL;
+          a.download = keyName;
+          a.click();
+          setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(downloadURL);
+          }, 100);
+        }
+      },
+      err => {
+        console.log("failed to get ssh key", err)
+      }
     )
   }
 
@@ -373,7 +417,7 @@ export class UserComponent implements OnInit {
           },
           err => console.log('failed to add secondary group')
         )
-        
+
       }
   }
 
@@ -422,7 +466,7 @@ export class UserComponent implements OnInit {
       err => console.log('failed to renew')
     )
   }
-  
+
   switchTo(panel) {
     this.panel = panel
   }
@@ -459,7 +503,7 @@ export class UserComponent implements OnInit {
       resp => this.update_passwd = resp['message'],
       err => console.log('failed to update password')
     )
- 
+
   }
 
   change_group() {
