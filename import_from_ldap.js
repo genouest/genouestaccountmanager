@@ -67,15 +67,23 @@ var client = myldap.createClient({
   url: 'ldap://' +  CONFIG.ldap.host
 });
 
+var cliopts = {
+  scope: 'sub',
+  paged: true,
+  sizeLimit: 1000
+};
 
 console.log("Search for groups");
-client.search('ou=groups,' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, groups) {
+client.search('ou=groups,' + CONFIG.ldap.dn, cliopts, function(err, groups) {
     groups.on('searchEntry', function(entry) {
       console.debug('entry: ' + JSON.stringify(entry.object));
       record_group(entry.object);
     });
     groups.on('searchReference', function(referral) {
       console.debug('referral: ' + referral.uris.join());
+    });
+    groups.on('page', function(result) {
+        console.log('page end');
     });
     groups.on('error', function(err) {
       console.error('error: ' + err.message);
@@ -139,28 +147,31 @@ function record_group(group){
 
 function search_users(){
     console.log("now search for users");
-    client.search('ou=people,' + CONFIG.ldap.dn, {'scope': 'sub'},function(err, users) {
-    users.on('searchEntry', function(entry) {
-      console.debug('entry: ' + JSON.stringify(entry.object));
-      ldap_nb_users += 1;
-      record_user(entry.object);
-    });
-    users.on('searchReference', function(referral) {
-      console.debug('referral: ' + referral.uris.join());
-    });
-    users.on('error', function(err) {
-      console.error('error: ' + err.message);
-    });
-    users.on('end', function(result) {
-        mongo_imports().then(function(res){
-            console.info('LDAP user status error: ' + result.status);
-            console.info("Users are put in active status for 1 year");
-            console.info("Number of imported users: ", ldap_managed_users);
-            console.info("[Errors] ", errors);
-            process.exit(0);
+    client.search('ou=people,' + CONFIG.ldap.dn, cliopts, function(err, users) {
+        users.on('searchEntry', function(entry) {
+            console.debug('entry: ' + JSON.stringify(entry.object));
+            ldap_nb_users += 1;
+            record_user(entry.object);
+        });
+        users.on('searchReference', function(referral) {
+            console.debug('referral: ' + referral.uris.join());
+        });
+        users.on('page', function(result) {
+        console.log('page end');
+        });
+        users.on('error', function(err) {
+            console.error('error: ' + err.message);
+        });
+        users.on('end', function(result) {
+            mongo_imports().then(function(res){
+                console.info('LDAP user status error: ' + result.status);
+                console.info("Users are put in active status for 1 year");
+                console.info("Number of imported users: ", ldap_managed_users);
+                console.info("[Errors] ", errors);
+                process.exit(0);
+            });
         });
     });
-});
 }
 
 function record_user(user){
