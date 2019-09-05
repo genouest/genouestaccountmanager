@@ -204,6 +204,11 @@ To manage user account expiration, add the following script to your cron:
 test_expiration check if user will expire *soon* and sends an email to the user so that he extends his account if needed.
 expiration deactivates accounts if their expiration date is reached.
 
+To build cron image:
+
+    cd tests
+    docker build -t osallou/mycron -f Dockerfile-cron .
+
 ## Mailing
 
 Users are subscribed to a mailing list based on their email address. The email address of account is *MANDATORY*.
@@ -241,3 +246,9 @@ The *admin* parameter of plugin definition specifies if plugin is linked to user
 With env variable *export gomngr_auth=fake*, one can disable authentication password verification (**FOR TESTING ONLY**)
 
 In *tests* directory, a docker-compose is available to setup whole infrastructure but needs adaptation if needed to use in production (volumes, database url, ...)
+
+## Deploying
+
+See and adapt docker-compose.yml file then:
+
+    docker-compose up -d
