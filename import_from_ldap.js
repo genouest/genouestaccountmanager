@@ -1,4 +1,5 @@
 var CONFIG = require('config');
+const process = require('process');
 var fs = require('fs');
 var http = require('http');
 var myldap = require('ldapjs');
@@ -8,15 +9,15 @@ const getUsage = require('command-line-usage');
 
 
 const optionDefinitions = [
-      { name: 'help', description: 'Display this usage guide.', alias: 'h', type: Boolean},
-      { name: 'test', alias: 't', type: Boolean, description: 'do not import in db, just test' },
-      { name: 'import', alias: 'i', type: Boolean, description: 'import in db' },
-      { name: 'admin', alias: 'a', type: String, description: 'admin user id'}
+    { name: 'help', description: 'Display this usage guide.', alias: 'h', type: Boolean},
+    { name: 'test', alias: 't', type: Boolean, description: 'do not import in db, just test' },
+    { name: 'import', alias: 'i', type: Boolean, description: 'import in db' },
+    { name: 'admin', alias: 'a', type: String, description: 'admin user id'}
 ];
 
 const sections = [
-  {header: 'Import LDAP in gomngr', content: 'Imports existing LDAP users and groups in gomngr db'},
-  {header: 'Options', optionList: optionDefinitions}
+    {header: 'Import LDAP in gomngr', content: 'Imports existing LDAP users and groups in gomngr db'},
+    {header: 'Options', optionList: optionDefinitions}
 ];
 
 const usage = getUsage(sections);
@@ -25,11 +26,11 @@ const commands = commandLineArgs(optionDefinitions);
 
 if(commands.h || (commands.test === undefined && commands.import === undefined)){
     console.info(usage);
-    return;
+    process.exit(0);
 }
 if(commands.import && commands.admin===undefined){
     console.error("missing admin option for import");
-    return;
+    process.exit(1);
 }
 
 var monk = require('monk'),
@@ -64,33 +65,38 @@ var mongo_groups = [];
 var mongo_projects = [];
 
 var client = myldap.createClient({
-  url: 'ldap://' +  CONFIG.ldap.host
+    url: 'ldap://' +  CONFIG.ldap.host
 });
 
 var cliopts = {
-  scope: 'sub',
-  paged: true,
-  sizeLimit: 1000
+    scope: 'sub'
+  /*  ,paged: true
+    ,sizeLimit: 1000 */
 };
+
+client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
+    console.error('error: ', err);
+    process.exit(1);
+});
 
 console.log("Search for groups");
 client.search('ou=groups,' + CONFIG.ldap.dn, cliopts, function(err, groups) {
     groups.on('searchEntry', function(entry) {
-      console.debug('entry: ' + JSON.stringify(entry.object));
-      record_group(entry.object);
+        console.debug('Group entry: ' + JSON.stringify(entry.object));
+        record_group(entry.object);
     });
     groups.on('searchReference', function(referral) {
-      console.debug('referral: ' + referral.uris.join());
+        console.debug('Group referral: ' + referral.uris.join());
     });
     groups.on('page', function(result) {
-        console.log('page end');
+        console.log('Group page end: ' + result.status);
     });
     groups.on('error', function(err) {
-      console.error('error: ' + err.message);
+        console.error('Group error: ', err);
     });
     groups.on('end', function(result) {
-      console.debug('LDAP group status error: ' + result.status);
-      search_users();
+        console.debug('LDAP group status: ' + result.status);
+        search_users();
     });
 
 });
@@ -99,12 +105,12 @@ function record_group(group){
     console.debug(group);
 
     /*
-    * entry: {"dn":"ou=Groups,dc=genouest,dc=org","controls":[],"objectClass":["top","organizationalUnit"],"ou":"Groups"}
-    * entry: {"dn":"cn=symbiose,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["agouin","lbouri"],"objectClass":["top","posixGroup"],"gidNumber":"20857","cn":"symbiose"}
-    * entry: {"dn":"cn=recomgen,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["mbahin","smottier","vwucher","clebeguec","mrimbaul","mbunel","scorrear","spaillar","bhedan"],"cn":"recomgen","gidNumber":"20885","objectClass":["posixGroup","top"]}
-    */
+     * entry: {"dn":"ou=Groups,dc=genouest,dc=org","controls":[],"objectClass":["top","organizationalUnit"],"ou":"Groups"}
+     * entry: {"dn":"cn=symbiose,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["agouin","lbouri"],"objectClass":["top","posixGroup"],"gidNumber":"20857","cn":"symbiose"}
+     * entry: {"dn":"cn=recomgen,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["mbahin","smottier","vwucher","clebeguec","mrimbaul","mbunel","scorrear","spaillar","bhedan"],"cn":"recomgen","gidNumber":"20885","objectClass":["posixGroup","top"]}
+     */
     if(! group.dn.startsWith("cn") || group.objectClass.indexOf("posixGroup") == -1) {return;}
-    if (group.dn.includes("user-groups")){return;}
+    // if (group.dn.includes("user-groups")){return;}
     console.info("manage group: " + group.dn);
     ldap_groups[parseInt(group.gidNumber)] = group;
     if(group.memberUid !== undefined){
@@ -149,22 +155,22 @@ function search_users(){
     console.log("now search for users");
     client.search('ou=people,' + CONFIG.ldap.dn, cliopts, function(err, users) {
         users.on('searchEntry', function(entry) {
-            console.debug('entry: ' + JSON.stringify(entry.object));
+            console.debug('User entry: ' + JSON.stringify(entry.object));
             ldap_nb_users += 1;
             record_user(entry.object);
         });
         users.on('searchReference', function(referral) {
-            console.debug('referral: ' + referral.uris.join());
+            console.debug('User referral: ' + referral.uris.join());
         });
         users.on('page', function(result) {
-        console.log('page end');
+            console.log('User page end: ' + result.statu);
         });
         users.on('error', function(err) {
-            console.error('error: ' + err.message);
+            console.error('User error: ', err);
         });
         users.on('end', function(result) {
             mongo_imports().then(function(res){
-                console.info('LDAP user status error: ' + result.status);
+                console.info('LDAP user status: ' + result.status);
                 console.info("Users are put in active status for 1 year");
                 console.info("Number of imported users: ", ldap_managed_users);
                 console.info("[Errors] ", errors);
