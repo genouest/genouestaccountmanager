@@ -1323,7 +1323,7 @@ router.post('/user/:id', function(req, res) {
     return;
   }
 
-  users_db.findOne({email: req.param('email')}, function(err, user_email){
+  users_db.findOne({email: req.param('email'), is_fake: false}, function(err, user_email){
       if(user_email){
           res.send({'status': 1, 'msg': 'User email already exists'});
           return;
