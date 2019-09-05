@@ -68,8 +68,8 @@ export class RegisterComponent implements OnInit {
     }
     if(this.firstname && this.lastname) {
         let tmpuserid = first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', '');
-        // remove non alpha numeric char as they are not allowed in backend (with the same regex)
-        this.userid = tmpuserid.replace(/^[0-9a-z]+$/,'');
+        // remove non alpha numeric char as they are not allowed in backend
+        this.userid = tmpuserid.replace(/[^0-9a-z]/gi,'');
     }
   }
 
