@@ -80,11 +80,12 @@ module.exports = {
     },
 
     sendUser: function(mailOptions, callback) {
+        let sbjtag = (CONFIG.nodemailer.prefix ? CONFIG.nodemailer.prefix : CONFIG.general.name);
 
         let info =  transporter.sendMail({
             from: mailOptions.origin,
             to: mailOptions.destinations.join(),
-            subject: mailOptions.subject,
+            subject: "[" + sbjtag + "] " + mailOptions.subject,
             html: mailOptions.html_message
         });
 
