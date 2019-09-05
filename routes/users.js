@@ -1329,7 +1329,7 @@ router.post('/user/:id', function(req, res) {
           return;
       }
 
-      users_db.findOne({uid: req.param('id')}, function(err, user){
+      users_db.findOne({uid: req.param('id'), is_fake: false}, function(err, user){
       if(user){
         res.send({'status': 1, 'msg': 'User id already exists'});
         //res.status(403).send('User id already exists');
