@@ -75,8 +75,11 @@ var cliopts = {
 };
 
 client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
-    console.error('error: ', err);
-    process.exit(1);
+    if (err)
+    {
+        console.error('error: ', err);
+        process.exit(1);
+    }
 });
 
 console.log("Search for groups");
