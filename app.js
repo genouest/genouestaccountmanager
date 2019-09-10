@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express');
+var expressStaticGzip = require('express-static-gzip');
 var cors = require('cors')
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -80,8 +81,8 @@ app.use(session({
   saveUninitialized: true,
   cookie: { maxAge: 3600*1000}
 }))
-app.use('/manager', express.static(path.join(__dirname, 'manager')));
-app.use('/manager2', express.static(path.join(__dirname, 'manager2/dist/my-ui')));
+// app.use('/manager', express.static(path.join(__dirname, 'manager')));
+app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 var monk = require('monk'),
