@@ -1323,8 +1323,13 @@ router.post('/user/:id', function(req, res) {
     return;
   }
 
+  users_db.findOne({email: req.param('email'), is_fake: false}, function(err, user_email){
+      if(user_email){
+          res.send({'status': 1, 'msg': 'User email already exists'});
+          return;
+      }
 
-  users_db.findOne({uid: req.param('id')}, function(err, user){
+      users_db.findOne({uid: req.param('id')}, function(err, user){
       if(user){
         res.send({'status': 1, 'msg': 'User id already exists'});
         //res.status(403).send('User id already exists');
@@ -1393,6 +1398,7 @@ router.post('/user/:id', function(req, res) {
         return;
       }
 
+  });
   });
 });
 

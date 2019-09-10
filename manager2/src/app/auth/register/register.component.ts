@@ -45,7 +45,7 @@ export class RegisterComponent implements OnInit {
         if (resp['max_account']) {
           this.msg = "Warning: we reached our user maximum capacity, your request may be rejected or you may be on waiting list"
         }
-      
+
       },
       err => console.log('failed to get config')
     )
@@ -67,7 +67,9 @@ export class RegisterComponent implements OnInit {
       return
     }
     if(this.firstname && this.lastname) {
-      this.userid = first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', '');
+        let tmpuserid = first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', '');
+        // remove non alpha numeric char as they are not allowed in backend
+        this.userid = tmpuserid.replace(/[^0-9a-z]/gi,'');
     }
   }
 
@@ -111,7 +113,7 @@ export class RegisterComponent implements OnInit {
       },
       err => console.log('failed to register')
     )
-    
+
 
   }
 
