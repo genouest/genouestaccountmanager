@@ -35,16 +35,6 @@ main_groups is an optional subpath selected by user, not present by default.
 
 All configuration is in config/default.json. One can use config/default.json.template as example.
 
-If server is using a prefix to access it (such as http://x.y.z/gomngr):
-
-update manager/scripts/resources.js:
-
-    var prefix = '/my_url_prefix';
-
-and manager/index.html:
-
-    <base href="/manager/" /> => <base href="/gomngr/manager/" />
-
 Optional double authentication for administrators with config parameter double_authentication_for_admin.
 It provides additional authentication via U2F devices or temporary email tokens.
 

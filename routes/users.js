@@ -1234,7 +1234,7 @@ router.get('/user/:id/confirm', function(req, res) {
           //if(user.status == STATUS_PENDING_APPROVAL) {
           if(user.status != STATUS_PENDING_EMAIL) {
             // Already pending or active
-            res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/pending');
+            res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
             res.end();
             return;
           }
@@ -1256,13 +1256,13 @@ router.get('/user/:id/confirm', function(req, res) {
               if(error){
                 logger.error(error);
               }
-              res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/pending');
+              res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
               res.end();
               return;
             });
           }
           else {
-            res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/pending');
+            res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
             res.end();
           }
         }
@@ -1629,7 +1629,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                   if(error){
                     logger.error(error);
                   }
-                  res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/passwordresetconfirm');
+                  res.redirect(GENERAL_CONFIG.url+'/manager2/passwordresetconfirm');
                   res.end();
                 });
               }
