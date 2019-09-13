@@ -111,6 +111,10 @@ function get_user_home (user) {
     return user_home.replace(/\/+/g, '/');
 }
 
+router.user_home = function (user) {
+  return get_user_home(user);
+}
+
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
         if(notif.mailSet()) {
