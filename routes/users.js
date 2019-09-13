@@ -1793,6 +1793,9 @@ router.put('/user/:id/ssh', function(req, res) {
           res.status(401).send('Not authorized');
           return;
         }
+        // Remove carriage returns if any
+        // Escape some special chars for security
+        user.ssh = user.ssh.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
         // Update SSH Key
         users_db.update({_id: user._id}, {'$set': {ssh: req.param('ssh')}}, function(err){
           user.ssh = escapeshellarg(req.param('ssh'));
@@ -1804,7 +1807,7 @@ router.put('/user/:id/ssh', function(req, res) {
           script += "  touch  ~"+user.uid+"/.ssh/authorized_keys\n";
           script += "  chown -R "+user.uidnumber+":"+user.gidnumber+" ~"+user.uid+"/.ssh/\n";
           script += "fi\n";
-          script += "echo "+user.ssh+" >> ~"+user.uid+"/.ssh/authorized_keys\n";
+          script += "echo \"" + user.ssh + "\" >> ~"+user.uid+"/.ssh/authorized_keys\n";
           var fid = new Date().getTime();
           var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
           fs.writeFile(script_file, script, function(err) {
