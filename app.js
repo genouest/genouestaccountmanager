@@ -1,6 +1,7 @@
 "use strict";
 
 var express = require('express');
+var expressStaticGzip = require('express-static-gzip');
 var cors = require('cors')
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -80,8 +81,8 @@ app.use(session({
   saveUninitialized: true,
   cookie: { maxAge: 3600*1000}
 }))
-app.use('/manager', express.static(path.join(__dirname, 'manager')));
-app.use('/manager2', express.static(path.join(__dirname, 'manager2/dist/my-ui')));
+// app.use('/manager', express.static(path.join(__dirname, 'manager')));
+app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 var monk = require('monk'),
@@ -295,6 +296,9 @@ app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);
 
+app.get('/robots.txt', function (request, response) {
+    response.sendFile(path.resolve(__dirname, 'robots.txt'));
+  });
 // Default route if no match (for spa handling)
 app.get('*', function (request, response) {
   response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));

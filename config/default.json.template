@@ -78,6 +78,7 @@
     "password": "XXX"
   },
   "nodemailer": {
+     "prefix": "",
      "origin": "",
      "smtp": ""
   },

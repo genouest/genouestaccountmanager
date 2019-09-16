@@ -159,7 +159,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                   loginShell: '/bin/bash',
                   history: []
               };
-              user.home = get_user_home(user);
+              user.home = fusers.user_home(user);
               users.push(user);
               minuid++;
             }
@@ -185,6 +185,7 @@ var create_tp_user_db = function (user) {
               user.lastname = uid
               user.email = CONFIG.tp.prefix + uid + "@fake." + CONFIG.tp.fake_mail_domain
               user.uidnumber = uid
+              user.home = fusers.user_home(user);
               users_db.insert(user).then(function(data){
                 user.password = Math.random().toString(36).substring(2);
                 resolve(user);

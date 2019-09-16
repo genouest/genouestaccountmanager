@@ -1,5 +1,14 @@
 FROM node:12.4.0-stretch
+COPY manager2 /root/genouestaccountmanager/manager2
+RUN npm install -g @angular/cli@7.0.3
+ARG APIURL
+ARG SENTRY
+RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
+RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
+RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules && rm -f dist/my-ui/*.gz &&  npm run compress || true
 
+
+FROM node:12.4.0-stretch
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
 COPY tests/gomngr.sh /opt/gomngr.sh
 
@@ -29,12 +38,14 @@ RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts
 RUN mkdir -p /opt/my/plugin-scripts
 
-COPY manager2 /root/genouestaccountmanager/manager2
-RUN npm install -g @angular/cli@7.0.3
-ARG APIURL
-ARG SENTRY
-RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
-RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
-RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules
+COPY --from=0 /root/genouestaccountmanager/manager2 /root/genouestaccountmanager/manager2
+
+#COPY manager2 /root/genouestaccountmanager/manager2
+#RUN npm install -g @angular/cli@7.0.3
+#ARG APIURL
+#ARG SENTRY
+#RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
+#RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
+#RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules
 
 ENTRYPOINT node app.js

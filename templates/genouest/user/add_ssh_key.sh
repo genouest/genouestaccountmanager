@@ -11,6 +11,6 @@ if [ ! -e "{{ user.home }}/.ssh" ]; then
     chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "{{ user.home }}/.ssh/"
 fi
 
-echo {{ user.ssh }} >> "{{ user.home }}/.ssh/authorized_keys"
+echo "{{ user.ssh }}" >> "{{ user.home }}/.ssh/authorized_keys"
 
 echo "End add_ssh_key.sh in $0 ..."

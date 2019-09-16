@@ -31,6 +31,7 @@ export class GomailPluginComponent extends BasePluginComponent implements OnInit
 @Component({
   template: `
   <div *ngIf="data">
+    <div *ngIf="loading">Loading...</div>
     <div class="alert alert-info">Using this button, you can set your home, omaha-beach and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
  = "blank" >data-access </a> for easy access</div>
 
@@ -97,8 +98,9 @@ export class PopulateHomePluginComponent extends BasePluginComponent implements 
 
 @Component({
   template: `
-  <div *ngIf="data" class="table-responsive">
-  <table class="table table-striped ng-scope">
+  <div class="table-responsive">
+  <div *ngIf="loading">Loading...</div>
+  <table *ngIf="data" class="table table-striped ng-scope">
   <tr><th>Namespace</th><th>Used</th><th>Max</th></tr>
   <tr *ngFor="let quota of data.quotas">
   <td>{{quota.name}}</td>
@@ -140,6 +142,7 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
 @Component({
   template: `
 <div *ngIf="data">
+  <div *ngIf="loading">Loading...</div>
   <div *ngIf="data.alert" class="alert alert-warning">
     <strong>Warning!</strong> {{data.alert}}
   </div>

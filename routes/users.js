@@ -128,6 +128,10 @@ function get_user_home (user) {
     return user_home.replace(/\/+/g, '/');
 }
 
+router.user_home = function (user) {
+  return get_user_home(user);
+}
+
 var send_notif = function(mailOptions, fid, errors) {
     return new Promise(function (resolve, reject){
         if(notif.mailSet()) {
@@ -1203,56 +1207,56 @@ router.get('/user/:id', function(req, res) {
 
 // Registration mail confirmation
 router.get('/user/:id/confirm', function(req, res) {
-    var uid = req.param('id');
-    var regkey = req.param('regkey');
-    users_db.findOne({uid: uid}, function(err, user) {
-        if(! user) {
-            res.status(401).send('Invalid user');
+  var uid = req.param('id');
+  var regkey = req.param('regkey');
+  users_db.findOne({uid: uid}, function(err, user) {
+    if(! user) {
+      res.status(401).send('Invalid user');
+      return;
+    }
+    else {
+        if(user.regkey == regkey) {
+          //if(user.status == STATUS_PENDING_APPROVAL) {
+          if(user.status != STATUS_PENDING_EMAIL) {
+            // Already pending or active
+            res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
+            res.end();
             return;
+          }
+          var account_event = {action: 'email_confirm', date: new Date().getTime()};
+          users_db.update({ _id: user._id},
+                          { $set: {status: STATUS_PENDING_APPROVAL},
+                            $push: {history: account_event}
+                          }, function(err) {});
+          var mailOptions = {
+            origin: MAIL_CONFIG.origin, // sender address
+            destinations: [GENERAL_CONFIG.accounts], // list of receivers
+            subject: GENERAL_CONFIG.name + ' account registration: '+uid, // Subject line
+            message: 'New account registration waiting for approval: '+uid, // plaintext body
+            html_message: 'New account registration waiting for approval: '+uid // html body
+          };
+          events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.param('id') , 'logs': []}, function(err){});
+          if(notif.mailSet()) {
+            notif.sendUser(mailOptions, function(error, response){
+              if(error){
+                logger.error(error);
+              }
+              res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
+              res.end();
+              return;
+            });
+          }
+          else {
+            res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
+            res.end();
+          }
         }
         else {
-            if(user.regkey == regkey) {
-                //if(user.status == STATUS_PENDING_APPROVAL) {
-                if(user.status != STATUS_PENDING_EMAIL) {
-                    // Already pending or active
-                    res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/pending');
-                    res.end();
-                    return;
-                }
-                var account_event = {action: 'email_confirm', date: new Date().getTime()};
-                users_db.update({ _id: user._id},
-                                { $set: {status: STATUS_PENDING_APPROVAL},
-                                  $push: {history: account_event}
-                                }, function(err) {});
-                var mailOptions = {
-                    origin: MAIL_CONFIG.origin, // sender address
-                    destinations: [GENERAL_CONFIG.accounts], // list of receivers
-                    subject: GENERAL_CONFIG.name + ' account registration: '+uid, // Subject line
-                    message: 'New account registration waiting for approval: '+uid, // plaintext body
-                    html_message: 'New account registration waiting for approval: '+uid // html body
-                };
-                events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.param('id') , 'logs': []}, function(err){});
-                if(notif.mailSet()) {
-                    notif.sendUser(mailOptions, function(error, response){
-                        if(error){
-                            logger.error(error);
-                        }
-                        res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/pending');
-                        res.end();
-                        return;
-                    });
-                }
-                else {
-                    res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/pending');
-                    res.end();
-                }
-            }
-            else {
-                res.status(401).send('Invalid registration key');
-                return;
-            }
+            res.status(401).send('Invalid registration key');
+            return;
         }
-    });
+    }
+  });
 });
 
 
@@ -1293,6 +1297,7 @@ router.post('/user/:id', function(req, res) {
         return;
     }
 
+
     if (req.param('id').length > 12) {
         res.send({'status': 1, 'msg': 'user id too long, must be < 12 characters'});
         res.end();
@@ -1303,13 +1308,18 @@ router.post('/user/:id', function(req, res) {
         res.send({'status': 1, 'msg': 'Missing field: Why do you need an account'});
         return;
     }
+    users_db.findOne({email: req.param('email'), is_fake: false}, function(err, user_email){
+      if(user_email){
+          res.send({'status': 1, 'msg': 'User email already exists'});
+          return;
+      }
 
-    users_db.findOne({uid: req.param('id')}, function(err, user){
-        if(user){
-            res.send({'status': 1, 'msg': 'User id already exist'});
-            //res.status(403).send('User id already exist');
-            return;
-        }
+      users_db.findOne({uid: req.param('id')}, function(err, user){
+          if(user){
+              res.send({'status': 1, 'msg': 'User id already exists'});
+              //res.status(403).send('User id already exists');
+              return;
+          }
 
         var regkey = Math.random().toString(36).substring(7);
         var default_main_group = GENERAL_CONFIG.default_main_group || "";
@@ -1373,6 +1383,9 @@ router.post('/user/:id', function(req, res) {
             return;
         }
     });
+
+  });
+
 });
 
 router.get('/user/:id/expire', function(req, res){

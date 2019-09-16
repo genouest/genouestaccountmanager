@@ -35,16 +35,6 @@ main_groups is an optional subpath selected by user, not present by default.
 
 All configuration is in config/default.json. One can use config/default.json.template as example.
 
-If server is using a prefix to access it (such as http://x.y.z/gomngr):
-
-update manager/scripts/resources.js:
-
-    var prefix = '/my_url_prefix';
-
-and manager/index.html:
-
-    <base href="/manager/" /> => <base href="/gomngr/manager/" />
-
 Optional double authentication for administrators with config parameter double_authentication_for_admin.
 It provides additional authentication via U2F devices or temporary email tokens.
 
@@ -204,6 +194,11 @@ To manage user account expiration, add the following script to your cron:
 test_expiration check if user will expire *soon* and sends an email to the user so that he extends his account if needed.
 expiration deactivates accounts if their expiration date is reached.
 
+To build cron image:
+
+    cd tests
+    docker build -t osallou/mycron -f Dockerfile-cron .
+
 ## Mailing
 
 Users are subscribed to a mailing list based on their email address. The email address of account is *MANDATORY*.
@@ -241,3 +236,9 @@ The *admin* parameter of plugin definition specifies if plugin is linked to user
 With env variable *export gomngr_auth=fake*, one can disable authentication password verification (**FOR TESTING ONLY**)
 
 In *tests* directory, a docker-compose is available to setup whole infrastructure but needs adaptation if needed to use in production (volumes, database url, ...)
+
+## Deploying
+
+See and adapt docker-compose.yml file then:
+
+    docker-compose up -d

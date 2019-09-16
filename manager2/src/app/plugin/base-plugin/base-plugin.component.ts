@@ -11,6 +11,7 @@ export class BasePluginComponent {
   @Input() userId: string;
   pluginName: string;
   data: any;
+  loading: boolean;
 
   @ViewChildren(DataTableDirective)
   tables: QueryList<DataTableDirective>;
@@ -44,10 +45,12 @@ export class BasePluginComponent {
 
   loadData(userId: string) {
     if (!userId) { return; }
+    this.loading = true;
     this.userId = userId;
     this.pluginService.get(this.pluginName, userId)
     .subscribe(
       resp => {
+        this.loading = false;
         this.data = resp;
         this.renderDataTables();
       },
