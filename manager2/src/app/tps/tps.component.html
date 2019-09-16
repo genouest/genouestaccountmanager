@@ -83,7 +83,7 @@
                         </tbody>
                     </table>
                 </div>
-                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-default" (click)="cancel_reservation()">Cancel</button>
+                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-secondary" (click)="cancel_reservation()">Cancel</button>
             </div>
         </div>
     </div>
@@ -116,7 +116,7 @@
                     <label for="about">About</label>
                     <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
                 </div>
-                <button class="btn btn-default" (click)="reserve()">Reserve</button>
+                <button class="btn btn-secondary" (click)="reserve()">Reserve</button>
             </div>
         </div>
     </div>
