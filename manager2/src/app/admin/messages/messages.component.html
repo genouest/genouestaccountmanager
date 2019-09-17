@@ -60,7 +60,7 @@
       Viewer
     </button>
 
-    <button type="button" class="btn btn-outline-primary" (click)="send()">Send</button>
+    <button type="button" class="btn btn-outline-secondary" (click)="send()">Send</button>
     <div class="row">
       <div *ngIf="msg" class="alert alert-success">{{msg}}</div>
       <div *ngIf="error_msg" class="alert alert-danger">{{error_msg}}</div>
@@ -77,7 +77,7 @@
         <p *ngIf="input_type == 'Markdown'" [innerHTML]="trustAsMarkdown(message)"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -103,7 +103,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
