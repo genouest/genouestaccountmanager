@@ -630,7 +630,7 @@ export class UserComponent implements OnInit {
   delete() {
     this.userService.delete(this.user.uid).subscribe(
       resp => {
-        this._flashMessagesService.show('User deleted', { cssClass: 'alert-success', timeout: 5000 });
+        this._flashMessagesService.show(resp['message'], { cssClass: 'alert-success', timeout: 5000 });
         this.router.navigate(['/admin/user']);
       },
       err => console.log('failed to delete user')
