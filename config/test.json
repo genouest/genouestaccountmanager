@@ -31,6 +31,11 @@
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
  },
+ "enable_ui": {
+     "databases": true,
+     "tps": true,
+     "websites": true,
+ }
  "usage": [
  ],
   "bills": {

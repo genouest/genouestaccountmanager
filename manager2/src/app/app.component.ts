@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from './auth/auth.service';
 import { Subscription, Observable } from 'rxjs';
+import { ConfigService } from './config.service'
 import { UserService } from './user/user.service';
 import { PluginService } from './plugin/plugin.service';
 
@@ -15,11 +16,16 @@ export class AppComponent {
   isLogged: boolean = false;
   usages: any = []
   plugins: any = []
+  config: any
 
   private loginSubscription: Subscription;
 
   ngOnInit() {
     this.plugins = [];
+    this.configService.config.subscribe(
+      resp => this.config = resp,
+      err => console.log('failed to get config')
+    )
   }
 
   ngAfterViewInit() {
@@ -58,12 +64,15 @@ export class AppComponent {
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private configService: ConfigService,
     private pluginService: PluginService
+
   ) {
     this.user = {
       is_admin: false
     }
     this.authService.autoLog();
+    this.config = {}
   }
 
 }
