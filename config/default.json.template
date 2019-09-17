@@ -44,6 +44,12 @@
     "plugin_script_dir": "/tmp/scripts",
     "user_extra_dirs": []
   },
+  "enable_ui": {
+     "messages": true,
+     "databases": true,
+     "tps": true,
+     "websites": true
+  },
   "rabbitmq": {
     "url": "amqp://localhost",
     "exchange": "gomngr"
