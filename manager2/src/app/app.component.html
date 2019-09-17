@@ -42,7 +42,7 @@
               <li><a class="dropdown-item" routerLink="/admin/user">Users</a></li>
               <li><a class="dropdown-item" routerLink="/admin/group">Groups</a></li>
               <li><a class="dropdown-item" routerLink="/admin/project">Projects</a></li>
-              <li><a class="dropdown-item" routerLink="/admin/message">Send message</a></li>
+              <li *ngIf="config.enable_ui.messages"><a class="dropdown-item" routerLink="/admin/message">Send message</a></li>
               <li *ngIf="config.enable_ui.databases" ><a class="dropdown-item" routerLink="/admin/database">Databases</a></li>
               <li *ngIf="config.enable_ui.websites" ><a class="dropdown-item" routerLink="/admin/web">Web sites</a></li>
               <li><a class="dropdown-item" routerLink="/admin/log">Logs</a></li>

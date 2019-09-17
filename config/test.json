@@ -31,11 +31,12 @@
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
  },
- "enable_ui": {
+  "enable_ui": {
+     "messages": true
      "databases": true,
      "tps": true,
-     "websites": true,
- }
+     "websites": true
+ },
  "usage": [
  ],
   "bills": {

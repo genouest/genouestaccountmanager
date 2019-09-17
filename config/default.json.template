@@ -45,10 +45,11 @@
     "user_extra_dirs": []
   },
   "enable_ui": {
+     "messages": true,
      "databases": true,
      "tps": true,
-     "websites": true,
-  }
+     "websites": true
+  },
   "rabbitmq": {
     "url": "amqp://localhost",
     "exchange": "gomngr"

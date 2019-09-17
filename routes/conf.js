@@ -23,6 +23,7 @@ router.get('/conf', function(req, res){
         terms_of_use = CONFIG.general.terms_of_use;
     }
     let enable_ui = {
+        "messages": true,
         "databases": true,
         "tps": true,
         "websites": true
