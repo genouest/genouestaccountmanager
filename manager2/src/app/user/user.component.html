@@ -318,7 +318,7 @@
         </div>
     </div>
 
-    <div class="card bg-light">
+    <div *ngIf="config.enable_ui.databases" class="card bg-light">
         <div class="card-header">
             <h4>Databases</h4>
         </div>
@@ -417,7 +417,7 @@
   <div class="col-12" *ngIf="panel == 2">
       <div class="row">
         <div class="col-md-6 col-sm-12" *ngIf="panel == 2">
-            <div class="card bg-light">
+            <div *ngIf="config.enable_ui.websites" class="card bg-light">
                     <div class="card-header">
                         <h4>Web sites</h4>
                     </div>

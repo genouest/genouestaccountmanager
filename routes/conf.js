@@ -21,6 +21,15 @@ router.get('/conf', function(req, res){
     if (CONFIG.general.terms_of_use) {
         terms_of_use = CONFIG.general.terms_of_use;
     }
+    let enable_ui = {
+        "messages": true,
+        "databases": true,
+        "tps": true,
+        "websites": true
+    };
+    if (CONFIG.enable_ui) {
+        enable_ui = CONFIG.enable_ui;
+    }
     // todo: factorize res.send
     let max_account = false;
     if (CONFIG.general.max_account && CONFIG.general.max_account > 0) {
@@ -35,7 +44,8 @@ router.get('/conf', function(req, res){
                 'support': CONFIG.general.support,
                 'main_list': MAIL_CONFIG.main_list,
                 'origin': MAIL_CONFIG.origin,
-                'max_account': max_account
+                'max_account': max_account,
+                'enable_ui': enable_ui
             });
             res.end();
         });
@@ -49,7 +59,8 @@ router.get('/conf', function(req, res){
             'support': CONFIG.general.support,
             'main_list': MAIL_CONFIG.main_list,
             'origin': MAIL_CONFIG.origin,
-            'max_account': false
+            'max_account': false,
+            'enable_ui': enable_ui
         });
         res.end();
     }
