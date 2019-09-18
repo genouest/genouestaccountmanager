@@ -3,6 +3,7 @@ import { UserService } from 'src/app/user/user.service';
 import { ConfigService } from 'src/app/config.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import * as latinize from 'latinize'
 
 @Component({
   selector: 'app-register',
@@ -67,7 +68,7 @@ export class RegisterComponent implements OnInit {
       return
     }
     if(this.firstname && this.lastname) {
-        let tmpuserid = first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', '');
+        let tmpuserid = latinize(first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', ''));
         // remove non alpha numeric char as they are not allowed in backend
         this.userid = tmpuserid.replace(/[^0-9a-z]/gi,'');
     }
