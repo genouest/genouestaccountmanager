@@ -41,7 +41,7 @@ export class ProjectsComponent implements OnInit {
     if(newproject){
       this.userService.addToProject(this.user.uid, newproject.id).subscribe(
         resp => {
-          this.add_to_project_grp_msg = resp['message'];
+          this.add_to_project_msg = resp['message'];
           this.userService.addGroup(this.user.uid, newproject.group).subscribe(
             resp => {
               this.add_to_project_grp_msg = resp['message'];
@@ -70,7 +70,7 @@ export class ProjectsComponent implements OnInit {
               tmpproject.push(this.user_projects[t]);
           }
       }
-      this.user_projects = tmpproject;        
+      this.user_projects = tmpproject;
       },
       err => {
         this.remove_from_project_error_msg = err.error;
