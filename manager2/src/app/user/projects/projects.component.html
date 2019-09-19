@@ -33,7 +33,7 @@
   <div class="col-sm-6">
       <label for="newproject" class="col-form-label">Projects</label>
       <select id="newproject" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newproject" class="form-control">
-        <option *ngFor="let project of projects" [value]="project">{{project}}</option>
+        <option *ngFor="let project of projects" [ngValue]="project">{{project.id}}</option>
       </select>
   </div>
 </div>
