@@ -62,9 +62,9 @@ module.exports = {
         }
         if (CONFIG.nodemailer.list) {
             transporter.sendMail({
-            from: CONFIG.nodemailer.origin,
-            to: CONFIG.nodemailer.list.cmd_address,
-            subject: CONFIG.nodemailer.list.cmd_add + ' ' + CONFIG.nodemailer.list.address + ' ' + email
+                from: CONFIG.nodemailer.origin,
+                to: CONFIG.nodemailer.list.cmd_address,
+                subject: CONFIG.nodemailer.list.cmd_add + ' ' + CONFIG.nodemailer.list.address + ' ' + email
             });
             logger.info("user added to " + CONFIG.nodemailer.list.address, email);
         }
