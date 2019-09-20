@@ -49,7 +49,6 @@ module.exports = {
                 return;
             });
         }
-        callback(false);
         return;
     },
 
