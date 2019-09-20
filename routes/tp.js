@@ -187,7 +187,7 @@ var create_tp_user_db = function (user) {
               user.uidnumber = uid
               user.home = fusers.user_home(user);
               users_db.insert(user).then(function(data){
-                user.password = Math.random().toString(36).substring(2);
+                user.password = Math.random().toString(36).slice(-10);
                 resolve(user);
               });
             })
@@ -474,6 +474,10 @@ router.delete('/tp/:id', function(req, res) {
       res.status(403).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exist'})
@@ -531,31 +535,4 @@ router.delete('/tp/:id', function(req, res) {
 
 module.exports = router;
 
-/*
-// TESTING
-var from_date = new Date();
-from_date.setDate(from_date.getDate() + 7);
-var to_date = new Date();
-to_date.setDate(to_date.getDate() + 14);
 
-tp_reservation("osallou", from_date, to_date, 4).then(function(reservation){
-    exec_tp_reservation(reservation._id).then(function(res){
-        logger.info(res);
-        process.exit(0);
-
-    });
-});
-*/
-/*
-users_db.find({'uid': 'tp0'}).then(function(users){
-    try {
-        return delete_tp_users(users, 'auto');
-    }
-    catch(exception){
-        logger.info("[ERROR]", exception);
-        return;
-    }
-}).then(function(){
-    process.exit(0);
-});
-*/

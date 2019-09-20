@@ -13,6 +13,8 @@ var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users'),
     events_db = db.get('events');
+
+var utils = require('./utils');
 /**
 app.get('/ssh/:id', ssh);
 app.get('/ssh/:id/public', ssh);
@@ -26,6 +28,10 @@ router.get('/ssh/:id/putty', function(req, res) {
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);
@@ -56,6 +62,10 @@ router.get('/ssh/:id/private', function(req, res) {
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);
@@ -90,6 +100,10 @@ router.get('/ssh/:id/public', function(req, res) {
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);
@@ -120,6 +134,10 @@ router.get('/ssh/:id', function(req, res) {
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);
