@@ -158,15 +158,15 @@ var create_extra_group = function(group_name, owner_name){
 
 var create_extra_user = function(user_name, group, internal_user){
     return new Promise(function (resolve, reject){
-        var password = Math.random().toString(36).slice(-10);
+        let password = Math.random().toString(36).slice(-10);
         if(process.env.MY_ADMIN_PASSWORD){
             password = process.env.MY_ADMIN_PASSWORD;
         }
         else {
-            logger.info('Generated admin password:' + user.password);
+            logger.info('Generated admin password:' + password);
         }
 
-        var user = {
+        let user = {
           status: STATUS_ACTIVE,
           uid: user_name,
           firstname: user_name,
@@ -218,24 +218,13 @@ var create_extra_user = function(user_name, group, internal_user){
                     script += "sleep 3\n";
                     script += "mkdir -p "+user.home+"/.ssh\n";
                     script += utils.addReadmes(user.home);
-                    /*
-                    script += "mkdir -p "+user.home+"/user_guides\n";
-                    if (typeof CONFIG.general.readme == "object") {
-                      CONFIG.general.readme.forEach(function(dict) {
-                        script += "ln -s " + dict.source_folder + " "+user.home+"/user_guides/" + dict.language + "\n";
-                      });
-                    } else {
-                      script += "ln -s " + CONFIG.general.readme + " "+user.home+"/user_guides/README\n";
-                    };
-                    */
+
                     script += "touch "+user.home+"/.ssh/authorized_keys\n";
                     script += "echo \"Host *\" > "+user.home+"/.ssh/config\n";
                     script += "echo \"  StrictHostKeyChecking no\" >> "+user.home+"/.ssh/config\n";
                     script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+user.home+"/.ssh/config\n";
                     script += "chmod 700 "+user.home+"/.ssh\n";
                     script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
-                    // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                    //script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
                     script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
                     fs.writeFile(script_file, script, function(err) {
@@ -306,6 +295,10 @@ router.get('/user/:id/apikey', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
+    }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
@@ -337,6 +330,10 @@ router.post('/user/:id/apikey', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
+    }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
@@ -359,15 +356,16 @@ router.post('/user/:id/apikey', function(req, res){
     });
 });
 
-/*
-app.put('/user/:id/subscribe', users);
-app.put('/user/:id/unsubscribe', users);
-*/
+
 router.put('/user/:id/subscribe', function(req, res){
   var sess = req.session;
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   // if not user nor admin
   if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
@@ -397,6 +395,10 @@ router.put('/user/:id/unsubscribe', function(req, res){
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   // if not user nor admin
   if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
@@ -428,6 +430,10 @@ router.get('/user/:id/subscribed', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
+    }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exist'})
@@ -451,6 +457,10 @@ router.get('/group/:id', function(req, res){
     if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
+    }
+    if(! utils.sanitizeAll([req.param('id')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -514,6 +524,10 @@ router.delete('/group/:id', function(req, res){
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
           res.status(404).send('User not found');
@@ -548,6 +562,10 @@ router.put('/group/:id', function(req, res){
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
@@ -586,6 +604,10 @@ router.post('/group/:id', function(req, res){
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
     if(err || user == null){
       res.status(404).send('User not found');
@@ -607,12 +629,8 @@ router.post('/group/:id', function(req, res){
             res.status(403).send('Group already exists');
             return;
           }
-          //var mingid = 1000;
+
           utils.getGroupAvailableId().then(function (mingid) {
-          //groups_db.find({}, { limit: 1 , sort: { gid: -1 }}, function(err, data){
-            //if(!err && data && data.length>0){
-            //  mingid = data[0].gid+1;
-            //}
             var fid = new Date().getTime();
             group = {name: req.param('id'), gid: mingid, owner: owner};
             groups_db.insert(group, function(err){
@@ -749,6 +767,10 @@ router.post('/user/:id/group/:group', function(req, res){
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id'), req.param('group')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
@@ -810,6 +832,10 @@ router.delete('/user/:id/group/:group', function(req, res){
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id'), req.param('group')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -992,6 +1018,10 @@ router.delete('/user/:id', function(req, res){
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
       res.status(401).send('Not authorized');
@@ -1049,6 +1079,10 @@ router.get('/user/:id/activate', function(req, res) {
     if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
+    }
+    if(! utils.sanitizeAll([req.param('id')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
     }
 
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
@@ -1189,6 +1223,10 @@ router.get('/user/:id', function(req, res) {
     res.status(401).send('Not authorized, need to login first');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
     users_db.findOne({uid: req.param('id')}, function(err, user){
@@ -1228,6 +1266,10 @@ router.get('/user/:id', function(req, res) {
 router.get('/user/:id/confirm', function(req, res) {
   var uid = req.param('id');
   var regkey = req.param('regkey');
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({uid: uid}, function(err, user) {
     if(! user) {
       res.status(401).send('Invalid user');
@@ -1283,6 +1325,10 @@ router.get('/user/:id/confirm', function(req, res) {
 // Register
 router.post('/user/:id', function(req, res) {
   logger.info('New register request for '+req.param('id'));
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   /*
   if(req.param('ip').split('.').length != 4) {
     res.send({'status': 1, 'msg': 'invalid ip address format'});
@@ -1412,6 +1458,10 @@ router.get('/user/:id/expire', function(req, res){
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     users_db.findOne({uid: req.param('id')}, function(err, user){
       if(err){
@@ -1498,6 +1548,10 @@ router.post('/user/:id/passwordreset', function(req, res){
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(session_user.uid != req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
          res.send({message: 'Not authorized'});
@@ -1541,6 +1595,10 @@ router.post('/user/:id/passwordreset', function(req, res){
 //app.get('/user/:id/passwordreset', users);
 router.get('/user/:id/passwordreset', function(req, res){
   var key = Math.random().toString(36).substring(7);
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({uid: req.param('id')}, function(err, user){
     if(err || !user) {
       res.status(404).send('User does not exist');
@@ -1591,6 +1649,10 @@ router.get('/user/:id/passwordreset', function(req, res){
 });
 
 router.get('/user/:id/passwordreset/:key', function(req, res){
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({uid: req.param('id')}, function(err, user){
     if(err) {
       res.status(404).send('User does not exist');
@@ -1657,6 +1719,10 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
 * Extend validity period if active
 */
 router.get('/user/:id/renew/:regkey', function(req, res){
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({uid: req.param('id')}, function(err, user){
     if(err){
       res.status(404).send('User not found');
@@ -1689,6 +1755,10 @@ router.get('/user/:id/renew', function(req, res){
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     users_db.findOne({uid: req.param('id')}, function(err, user){
@@ -1779,6 +1849,10 @@ router.put('/user/:id/ssh', function(req, res) {
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
       if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
@@ -1796,6 +1870,14 @@ router.put('/user/:id/ssh', function(req, res) {
         // Remove carriage returns if any
         // Escape some special chars for security
         user.ssh = user.ssh.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
+        if (utils.sanitizeSSHKey(user.ssh) === undefined) {
+          res.status(403).send("Invalid SSH Key");
+          return;
+        }
+        if (utils.sanitizePath(user.home) === undefined) {
+          res.status(403).send("Invalid home directory");
+          return;
+        }
         // Update SSH Key
         users_db.update({_id: user._id}, {'$set': {ssh: req.param('ssh')}}, function(err){
           user.ssh = escapeshellarg(req.param('ssh'));
@@ -1833,6 +1915,10 @@ router.get('/user/:id/usage', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
+    }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         usage=JSON.parse(JSON.stringify(CONFIG.usage));
         usages = [];
@@ -1865,6 +1951,10 @@ router.put('/user/:id', function(req, res) {
   history: [{action: 'register', date: new Date().getTime()}],
   is_fake: false
   */
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+  return;  
+  }
 
   var sess = req.session;
   /*
@@ -2054,6 +2144,10 @@ router.get('/project/:id/users', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
+    }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -2072,6 +2166,11 @@ router.post('/user/:id/project/:project', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id'), req.param('project')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
+    }
+    
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
@@ -2118,6 +2217,10 @@ router.delete('/user/:id/project/:project', function(req, res){
     if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
+    }
+    if(! utils.sanitizeAll([req.param('id'), req.param('project')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -2173,6 +2276,10 @@ router.get('/list/:list', function(req, res){
     if(! req.locals.logInfo.is_logged) {
       res.status(401).send('Not authorized');
       return;
+    }
+    if(! utils.sanitizeAll([req.param('list')])) {
+      res.status(403).send('Invalid parameters');
+      return;  
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){

@@ -5,6 +5,8 @@ var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
+var utils = require('./utils');
+
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     web_db = db.get('web'),
@@ -20,6 +22,11 @@ router.put('/web/:id/owner/:old/:new', function(req, res) {
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+
+  if(! utils.sanitizeAll([req.param('id'), req.param('old'), req.param('new')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -71,6 +78,10 @@ router.get('/web/owner/:owner', function(req, res) {
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('owner')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
@@ -92,6 +103,10 @@ router.post('/web/:id', function(req, res) {
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -124,6 +139,10 @@ router.delete('/web/:id', function(req, res) {
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
 
 

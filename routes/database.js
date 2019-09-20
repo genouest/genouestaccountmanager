@@ -16,6 +16,7 @@ const request = require('request');
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
 var notif = require('../routes/notif_'+MAILER+'.js');
+var utils = require('./utils.js');
 
 var connection;
 
@@ -57,6 +58,10 @@ router.put('/database/:id/owner/:old/:new', function(req, res) {
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id'), req.param('old'), req.param('new')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -109,6 +114,10 @@ router.get('/database/owner/:owner', function(req, res) {
     res.status(401).send('Not authorized');
     return;
   }
+  if(! utils.sanitizeAll([req.param('owner')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
+  }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
       session_user.is_admin = true;
@@ -129,6 +138,10 @@ router.post('/database/:id', function(req, res) {
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
@@ -158,7 +171,7 @@ router.post('/database/:id', function(req, res) {
     }
 
     var db_host = CONFIG.mysql.host;
-    if(req.param('host')!=undefined && req.param('host')){
+    if(req.param('host')!=undefined && req.param('host') && utils.sanitize(req.param('host'))){
         db_host = req.param('host');
     }
 
@@ -259,6 +272,11 @@ router.delete('/database/:id', function(req, res) {
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
     return;
+  }
+
+  if(! utils.sanitizeAll([req.param('id')])) {
+    res.status(403).send('Invalid parameters');
+    return;  
   }
 
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){

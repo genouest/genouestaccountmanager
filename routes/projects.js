@@ -18,6 +18,8 @@ var cookieParser = require('cookie-parser');
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif_'+MAILER+'.js');
 
+var utils = require('./utils');
+
 var get_ip = require('ipware')().get_ip;
 
 var monk = require('monk'),
@@ -74,6 +76,10 @@ router.get('/project/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -105,6 +111,10 @@ router.post('/project', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -152,6 +162,10 @@ router.delete('/project/:id', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+    }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
@@ -178,6 +192,10 @@ router.post('/project/:id', function(req, res){
       res.status(401).send('Not authorized');
       return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
@@ -218,6 +236,10 @@ router.post('/project/:id/request', function(req, res){
     if(! req.locals.logInfo.is_logged){
       res.status(401).send('Not authorized');
       return;
+    }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
       if(err || user == null){
@@ -280,6 +302,10 @@ router.put('/project/:id/request', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+    }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -333,6 +359,10 @@ router.get('/group/:id/projects', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
+    if(! utils.sanitizeAll([req.param('id')])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+      }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');

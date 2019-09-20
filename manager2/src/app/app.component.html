@@ -13,7 +13,7 @@
           <li *ngIf="isLogged && usages.length > 0" class="nav-item dropdown">
             <a href="" id="dropdownMenu0" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="oi oi-bar-chart"></i> Usage</a>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu0">
-                  <li *ngFor="let usage of usages"><a class="dropdown-item" href="{{usage.link}}" target="_blank">{{usage.name}}</a></li>
+                  <li *ngFor="let usage of usages"><a class="dropdown-item" href="{{usage.link}}" rel="noopener noreferrer" target="_blank">{{usage.name}}</a></li>
             </ul>
           </li>
 
