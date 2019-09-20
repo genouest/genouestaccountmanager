@@ -86,7 +86,13 @@
   "nodemailer": {
      "prefix": "",
      "origin": "",
-     "smtp": ""
+     "smtp": "",
+     "list": {
+         "address": "",
+         "cmd_add": "ADD",
+         "cmd_del": "DEL",
+         "cmd_address": ""
+     }
   },
   "gomail": {
     "host": "",

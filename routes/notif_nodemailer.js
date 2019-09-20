@@ -56,8 +56,20 @@ module.exports = {
     },
 
     add: function(email, callback) {
-        logger.warn("add: no mailing list configured", email);
+        if(email==undefined ||email==null || email=='' || ! mail_set) {
+            callback();
+            return;
+        }
+        if (CONFIG.nodemailer.list) {
+            transporter.sendMail({
+                from: CONFIG.nodemailer.origin,
+                to: CONFIG.nodemailer.list.cmd_address,
+                subject: CONFIG.nodemailer.list.cmd_add + ' ' + CONFIG.nodemailer.list.address + ' ' + email
+            });
+            logger.info("user added to " + CONFIG.nodemailer.list.address, email);
+        }
         callback();
+        events_db.insert({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []}, function(err){});
         return;
     },
 
@@ -68,13 +80,31 @@ module.exports = {
     },
 
     remove: function(email, callback) {
-        logger.warn("remove: no mailing list configured", email);
+        if(email==undefined ||email==null || email=='' || ! mail_set) {
+            callback();
+            return;
+        }
+        if (CONFIG.nodemailer.list) {
+            transporter.sendMail({
+                from: CONFIG.nodemailer.origin,
+                to: CONFIG.nodemailer.list.cmd_address,
+                subject: CONFIG.nodemailer.list.cmd_del + ' ' + CONFIG.nodemailer.list.address + ' ' + email
+            });
+            logger.warn("user deleted from " + CONFIG.nodemailer.list.address, email);
+        }
+        events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
         callback();
         return;
     },
 
     modify: function(oldemail, newemail, callback) {
-        logger.warn("remove: no mailing list configured", oldemail, newemail);
+        logger.debug("Update email " + oldemail + " ==> " + newemail);
+        if (newemail==undefined ||newemail==null || newemail=='' || ! mail_set ) {
+            callback();
+            return;
+        }
+        this.add(newemail, function(err){});
+        this.remove(oldemail, function(err){});
         callback();
         return;
     },
