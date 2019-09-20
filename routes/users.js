@@ -6,6 +6,7 @@ var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
 var markdown = require("markdown").markdown;
 var htmlToText = require('html-to-text');
+var validator = require("email-validator");
 
 var Promise = require('promise');
 const winston = require('winston');
@@ -1372,6 +1373,11 @@ router.post('/user/:id', function(req, res) {
     res.send({'status': 1, 'msg': 'Missing field: Why do you need an account'});
     return;
   }
+
+    if(!validator.validate(req.param('email'))) {
+        res.send({'status': 1, 'msg': 'Invalid email format'});
+        return;
+    }
 
   users_db.findOne({email: req.param('email'), is_fake: false}, function(err, user_email){
       if(user_email){
