@@ -57,7 +57,11 @@ exports.sanitizePath = function(rawValue) {
 }
 
 exports.sanitize = function sanitize(rawValue) {
-  sanitizeString(rawValue)
+  let value = sanitizeString(rawValue)
+  if (value == undefined) {
+    return false
+  }
+  return true
 }
 
 exports.sanitizeAll = function sanitizeAll(rawValues) {

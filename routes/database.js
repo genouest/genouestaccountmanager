@@ -139,7 +139,7 @@ router.post('/database/:id', function(req, res) {
     res.status(401).send('Not authorized');
     return;
   }
-  if(! utils.sanitizeAll([req.param('id'), req.param('owner'), req.param('type'), req.param('host')])) {
+  if(! utils.sanitizeAll([req.param('id')])) {
     res.status(403).send('Invalid parameters');
     return;  
   }
@@ -171,7 +171,7 @@ router.post('/database/:id', function(req, res) {
     }
 
     var db_host = CONFIG.mysql.host;
-    if(req.param('host')!=undefined && req.param('host')){
+    if(req.param('host')!=undefined && req.param('host') && utils.sanitize(req.param('host'))){
         db_host = req.param('host');
     }
 

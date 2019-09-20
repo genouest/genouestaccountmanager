@@ -1875,7 +1875,7 @@ router.put('/user/:id/ssh', function(req, res) {
           return;
         }
         if (utils.sanitizePath(user.home) === undefined) {
-          res.status(403).send("Invalid SSH Key");
+          res.status(403).send("Invalid home directory");
           return;
         }
         // Update SSH Key
