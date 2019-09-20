@@ -44,6 +44,7 @@ export class UserComponent implements OnInit {
   dtOptions: DataTables.Settings = {};
 
   user_projects: any[]
+  new_projects: any[]
   projects: any[]
   user: any
   session_user: any
@@ -132,6 +133,7 @@ export class UserComponent implements OnInit {
     };
     this.projects = []
     this.user_projects = []
+    this.new_projects = []
     this.session_user = this.authService.profile
     this.user = {}
     this.config = {}
@@ -236,6 +238,7 @@ export class UserComponent implements OnInit {
   _loadProjects(projects) {
     this.projects = projects;
     let user_projects = [];
+    let new_projects = [];
     for(let i=0; i<projects.length;i++){
         if(this.user.projects == null){ this.user.projects = []; }
         if (this.user.projects.indexOf(projects[i].id) >= 0){
@@ -248,10 +251,14 @@ export class UserComponent implements OnInit {
                 user_in_group = true;
             }
             user_projects.push({id: projects[i].id, owner: is_owner, group: projects[i].group, member: user_in_group});
+        } else {
+            new_projects.push({id: projects[i].id, owner: false, group: projects[i].group, member: false});
         }
     }
     user_projects.sort(this._compareId)
+    new_projects.sort(this._compareId)
     this.user_projects = user_projects;
+    this.new_projects = new_projects;
   }
 
   loadUserInfo() {

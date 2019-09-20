@@ -58,7 +58,13 @@
  },
  "nodemailer": {
      "origin": "support@my.org",
-     "smtp": "smtp.my.org"
+     "smtp": "smtp.my.org",
+     "list": {
+         "address": "list@my.org",
+         "cmd_add": "ADD",
+         "cmd_del": "DEL",
+         "cmd_address": "sympa@my.org"
+     }
  },
  "gomail": {
    "host": "http://gomail-web:6643",

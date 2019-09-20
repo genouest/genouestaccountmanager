@@ -1710,7 +1710,6 @@ router.get('/user/:id/renew', function(req, res){
                                     res.status(500).send('Renew User Failed');
                                     return;
                                 });
-
                             notif.add(user.email, function(){
                                 var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                                 var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
