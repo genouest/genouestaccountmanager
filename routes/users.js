@@ -582,7 +582,6 @@ router.delete('/group/:id', function(req, res){
 
 
 router.put('/group/:id', function(req, res){
-
   var sess = req.session;
   if(! req.locals.logInfo.is_logged) {
     res.status(401).send('Not authorized');
@@ -593,32 +592,29 @@ router.put('/group/:id', function(req, res){
     return;
   }
   users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-    if(err || user == null){
-      res.status(404).send('User not found');
-      return;
-
-        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-            res.status(401).send('Not authorized');
-            return;
+        if(err || user == null){
+          res.status(404).send('User not found');
+          return;
         }
-        var owner = req.param('owner');
-        users_db.findOne({uid: owner}, function(err, user){
-            if(!user || err) {
-                res.status(404).send('User does not exist');
+        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+          res.status(401).send('Not authorized');
+          return;
+        }
+        groups_db.findOne({name: req.param('id')}, function(err, group){
+          if(err || !group) {
+            res.status(403).send('Group does not exist');
+            return;
+          }
+          users_db.find({'$or': [{'secondarygroups': req.param('id')}, {'group': req.param('id')}]}, function(err, users_in_group){
+              if(users_in_group && users_in_group.length > 0){
+                  res.status(403).send('Group has some users, cannot delete it');
+                  return;
+              }
+              router.delete_group(group, user.uid).then(function(){
+                res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
                 res.end();
-                return;
-            }
-            groups_db.findOne({name: req.param('id')}, function(err, group){
-                if(! group) {
-                    res.status(404).send('Group does not exist');
-                    return;
-                }
-                events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'group owner modification ' + group.name + ' to ' +owner, 'logs': []}, function(err){});
-                groups_db.update({name: group.name}, {'$set':{'owner': owner}}, function(err, data){
-                    res.send(data);
-                    res.end();
-                });
-            });
+              });
+          });
         });
     });
 });
