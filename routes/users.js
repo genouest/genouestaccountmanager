@@ -1439,8 +1439,8 @@ router.get('/user/:id/expire', function(req, res){
               var script = "#!/bin/bash\n";
               script += "set -e \n"
               script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-              script += "if [ -e ~"+user.uid+"/.ssh/authorized_keys ]; then\n";
-              script += "  mv  ~"+user.uid+"/.ssh/authorized_keys ~"+user.uid+"/.ssh/authorized_keys.expired\n";
+              script += "if [ -e "+user.home+"/.ssh/authorized_keys ]; then\n";
+              script += "  mv  "+user.home+"/.ssh/authorized_keys "+user.home+"/.ssh/authorized_keys.expired\n";
               script += "fi\n";
 
               var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
@@ -1717,8 +1717,8 @@ router.get('/user/:id/renew', function(req, res){
               var script = "#!/bin/bash\n";
               script += "set -e \n"
               script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-              script += "if [ -e ~"+user.uid+"/.ssh/authorized_keys.expired ]; then\n";
-              script += "  mv  ~"+user.uid+"/.ssh/authorized_keys.expired ~"+user.uid+"/.ssh/authorized_keys\n";
+              script += "if [ -e "+user.home+"/.ssh/authorized_keys.expired ]; then\n";
+              script += "  mv  "+user.home+"/.ssh/authorized_keys.expired "+user.home+"/.ssh/authorized_keys\n";
               script += "fi\n";
               var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
               fs.writeFile(script_file, script, function(err) {
@@ -1801,13 +1801,13 @@ router.put('/user/:id/ssh', function(req, res) {
           user.ssh = escapeshellarg(req.param('ssh'));
           var script = "#!/bin/bash\n";
           script += "set -e \n";
-          script += "if [ ! -e ~"+user.uid+"/.ssh ]; then\n";
-          script += "  mkdir -p ~"+user.uid+"/.ssh\n";
-          script += "  chmod -R 700 ~"+user.uid+"/.ssh\n";
-          script += "  touch  ~"+user.uid+"/.ssh/authorized_keys\n";
-          script += "  chown -R "+user.uidnumber+":"+user.gidnumber+" ~"+user.uid+"/.ssh/\n";
+          script += "if [ ! -e "+user.home+"/.ssh ]; then\n";
+          script += "  mkdir -p "+user.home+"/.ssh\n";
+          script += "  chmod -R 700 "+user.home+"/.ssh\n";
+          script += "  touch  "+user.home+"/.ssh/authorized_keys\n";
+          script += "  chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"/.ssh/\n";
           script += "fi\n";
-          script += "echo \"" + user.ssh + "\" >> ~"+user.uid+"/.ssh/authorized_keys\n";
+          script += "echo \"" + user.ssh + "\" >> "+user.home+"/.ssh/authorized_keys\n";
           var fid = new Date().getTime();
           var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
           fs.writeFile(script_file, script, function(err) {
