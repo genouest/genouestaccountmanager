@@ -45,10 +45,8 @@ module.exports = {
                     callback(false);
                     return;
                 }
-                if (user.subscribed) {
-                    callback(true);
-                    return;
-                }
+                callback(user.subscribed);
+                return;
             });
         }
         callback(false);
