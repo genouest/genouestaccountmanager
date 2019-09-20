@@ -35,6 +35,42 @@ var userIds = []
 var groupIds = []
 var idsLoaded = false
 
+function sanitizeString(rawValue) {
+  if (typeof rawValue === 'string' && /^[0-9a-z-_]+$/i.test(rawValue)) {
+    return rawValue
+  }
+  return undefined
+}
+
+exports.sanitizeSSHKey = function(rawValue) {
+  if (typeof rawValue === 'string' && /^[0-9a-z-_\s]+$/i.test(rawValue)) {
+    return rawValue
+  }
+  return undefined 
+}
+
+exports.sanitizePath = function(rawValue) {
+  if (typeof rawValue === 'string' && /^[0-9a-z-_\s\/.]+$/i.test(rawValue)) {
+    return rawValue
+  }
+  return undefined
+}
+
+exports.sanitize = function sanitize(rawValue) {
+  sanitizeString(rawValue)
+}
+
+exports.sanitizeAll = function sanitizeAll(rawValues) {
+  for(let i=0;i<rawValues.length;i++) {
+    let value = sanitizeString(rawValues[i])
+    if (value === undefined) {
+      return false;
+    }
+  }
+  return true
+}
+  
+
 exports.addReadmes = function(userHome) {
   let cmd = "if [ ! -e " + userHome + "/user_guides ]; then\n";
   cmd += "    mkdir -p " + userHome + "/user_guides\n";
