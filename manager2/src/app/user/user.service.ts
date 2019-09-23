@@ -41,7 +41,7 @@ export class UserService {
         httpOptions
         );
 
-}  
+}
 
   u2fGet(userId: string) {
     let httpOptions = {
@@ -51,7 +51,7 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/u2f/register/' + userId,
-      httpOptions) 
+      httpOptions)
   }
 
   u2fSet(userId: string, data: any) {
@@ -63,7 +63,7 @@ export class UserService {
     return this.http.post(
       environment.apiUrl + '/u2f/register/' + userId,
       data,
-      httpOptions) 
+      httpOptions)
   }
 
   delete(userId: string) {
@@ -74,7 +74,7 @@ export class UserService {
     };
     return this.http.delete(
       environment.apiUrl + '/user/' + userId ,
-      httpOptions) 
+      httpOptions)
   }
 
   updateSSH(userId: string, ssh: string) {
@@ -86,7 +86,7 @@ export class UserService {
     return this.http.put(
       environment.apiUrl + '/user/' + userId + '/ssh',
       {ssh: ssh},
-      httpOptions)     
+      httpOptions)
   }
 
   update(userId: string, user) {
@@ -98,7 +98,7 @@ export class UserService {
     return this.http.put(
       environment.apiUrl + '/user/' + userId ,
       user,
-      httpOptions)      
+      httpOptions)
   }
 
   activate(userId: string) {
@@ -109,7 +109,7 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/user/' + userId + '/activate',
-      httpOptions)      
+      httpOptions)
   }
 
   expire(userId) {
@@ -120,7 +120,7 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/user/' + userId + '/expire',
-      httpOptions)      
+      httpOptions)
   }
 
   renew(userId) {
@@ -131,7 +131,7 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/user/' + userId + '/renew',
-      httpOptions)        
+      httpOptions)
   }
 
   addToProject(owner: string, projectId: string) {
@@ -139,11 +139,11 @@ export class UserService {
       //headers: new HttpHeaders({
       //  'x-api-key': localStorage.getItem('my-api-key')
       //}),
-    };    
+    };
     return this.http.post(
       environment.apiUrl + '/user/' + owner + '/project/' + projectId,
       {},
-      httpOptions) 
+      httpOptions)
   }
 
   addGroup(owner: string, groupName: string) {
@@ -151,11 +151,11 @@ export class UserService {
       //headers: new HttpHeaders({
        // 'x-api-key': localStorage.getItem('my-api-key')
       //}),
-    };    
+    };
     return this.http.post(
       environment.apiUrl + '/user/' + owner + '/group/' + groupName,
       {},
-      httpOptions)     
+      httpOptions)
   }
 
   deleteGroup(owner: string, groupName: string) {
@@ -163,16 +163,16 @@ export class UserService {
       //headers: new HttpHeaders({
       //  'x-api-key': localStorage.getItem('my-api-key')
       //}),
-    };    
+    };
     return this.http.delete(
       environment.apiUrl + '/user/' + owner + '/group/' + groupName,
-      httpOptions)   
+      httpOptions)
   }
 
   getSSHKey(owner: string, key: string): Observable<string>{
     return this.http.get(
       environment.apiUrl + '/ssh/' + owner + '/' + key,
-      {responseType: 'text'})  
+      {responseType: 'text'})
   }
 
   getNewSSHKey(id: string) {
@@ -180,7 +180,7 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/ssh/' + id,
-      httpOptions)  
+      httpOptions)
   }
 
   generateApiKey(id: string) {
@@ -192,7 +192,7 @@ export class UserService {
     return this.http.post(
       environment.apiUrl + '/user/' + id + '/apikey',
       {},
-      httpOptions)      
+      httpOptions)
   }
 
   updatePassword(id: string, password: string) {
@@ -204,7 +204,7 @@ export class UserService {
     return this.http.post(
       environment.apiUrl + '/user/' + id + '/passwordreset/',
       {'password': password},
-      httpOptions)    
+      httpOptions)
   }
 
   isSubscribed(id: string) {
@@ -225,7 +225,7 @@ export class UserService {
     return this.http.put(
       environment.apiUrl + '/user/' + id + '/subscribe/',
       {},
-      httpOptions)     
+      httpOptions)
   }
 
   unsubscribe(id: string) {
@@ -234,7 +234,7 @@ export class UserService {
     return this.http.put(
       environment.apiUrl + '/user/' + id + '/unsubscribe/',
       {},
-      httpOptions)     
+      httpOptions)
   }
 
   getUser(id: string) {
@@ -245,7 +245,7 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/user/' + id,
-      httpOptions)    
+      httpOptions)
   }
 
   list() {
@@ -256,7 +256,13 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/user',
-      httpOptions)    
+      httpOptions).pipe(map((response: any) => {
+          return response.map(item => {
+            return item;
+          }).sort(function (a,b) {
+              return a.uid.localeCompare(b.uid);
+          });
+        }));
   }
 
   removeFromProject(userId: string, projectId: string, force: boolean) {
@@ -268,7 +274,7 @@ export class UserService {
     };
     return this.http.delete(
       environment.apiUrl + '/user/' + userId + '/project/' + projectId,
-      httpOptions)  
+      httpOptions)
   }
 
   register(userId: string, userInfo) {
@@ -278,13 +284,13 @@ export class UserService {
     return this.http.post(
       environment.apiUrl + '/user/' + userId,
       userInfo,
-      httpOptions)    
+      httpOptions)
   }
 
   extend(userId, regKey) {
     return this.http.get(
       environment.apiUrl + '/user/' + userId + '/renew/' + regKey,
-    )    
+    )
 
   }
 }
