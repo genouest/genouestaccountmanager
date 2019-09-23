@@ -19,7 +19,7 @@ export class ProjectComponent implements OnInit {
   project: any
   groups: any[]
   users: any[]
-  all_user: any[]
+  all_user: any
   prj_err_msg: string
   prj_msg: string
   oldGroup: string
@@ -49,7 +49,6 @@ export class ProjectComponent implements OnInit {
       path: ''
     }
     this.users = [];
-    this.all_users = [];
     this.groups = [];
   }
 

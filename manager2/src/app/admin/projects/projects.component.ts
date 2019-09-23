@@ -38,7 +38,7 @@ export class ProjectsComponent implements OnInit {
 
   projects: any[]
   groups: any[]
-  all_users: any[]
+  all_users: any
   new_project: any
 
   constructor(
@@ -69,7 +69,6 @@ export class ProjectsComponent implements OnInit {
     this.remove_requests = [];
     this.projects = [];
     this.groups = [];
-    this.all_users = [];
     this.new_project = {
       id: '',
       owner: '',
