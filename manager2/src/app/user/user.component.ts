@@ -206,24 +206,8 @@ export class UserComponent implements OnInit {
     });
   }
 
-  _compareName(a,b) {
-    if (a.name < b.name)
-      return -1;
-    if (a.name > b.name)
-      return 1;
-    return 0;
-  }
-
-  _compareId(a,b) {
-    if (a.id < b.id)
-      return -1;
-    if (a.id > b.id)
-      return 1;
-    return 0;
-  }
 
   _loadGroups(groups) {
-    groups.sort(this._compareName)
     this.groups = groups;
     let found = false;
     for(let i=0;i<groups.length;i++){
@@ -255,8 +239,6 @@ export class UserComponent implements OnInit {
             new_projects.push({id: projects[i].id, owner: false, group: projects[i].group, member: false});
         }
     }
-    user_projects.sort(this._compareId)
-    new_projects.sort(this._compareId)
     this.user_projects = user_projects;
     this.new_projects = new_projects;
   }
