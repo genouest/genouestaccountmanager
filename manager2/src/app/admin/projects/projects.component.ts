@@ -38,7 +38,7 @@ export class ProjectsComponent implements OnInit {
 
   projects: any[]
   groups: any[]
-  all_user: any[]
+  all_users: any[]
   new_project: any
 
   constructor(
