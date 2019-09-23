@@ -82,7 +82,9 @@
           <div class="form-group row">
             <div class="col-sm-3">
               <label for="new_user_admin">New project member</label>
-              <input placeholder="User Genouest id" id="new_user_admin" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_user_admin" class="form-control"/>
+              <select id="new_user_admin" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_user_admin" class="form-control">
+                <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
+             </select>
             </div>
             <div class="col-sm-3">
               <label style="opacity: 0;">Add member</label>
@@ -118,4 +120,3 @@
         </div>
       </div>
     </div>
- 

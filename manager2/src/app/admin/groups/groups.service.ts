@@ -24,8 +24,10 @@ export class GroupsService {
         environment.apiUrl + '/group',
         httpOptions
         ).pipe(map((response: any) => {
-          return response.map(item => { 
+          return response.map(item => {
             return item;
+          }).sort(function (a,b) {
+              return a.name.localeCompare(b.name);
           });
         }));
   }
@@ -49,7 +51,7 @@ export class GroupsService {
       //headers: new HttpHeaders({
       //  'x-api-key': user.apikey
       //}),
-    };    
+    };
     return this.http.put(
       environment.apiUrl + '/group/' + group.name,
       group,
@@ -63,7 +65,7 @@ export class GroupsService {
       //headers: new HttpHeaders({
       //  'x-api-key': user.apikey
       //}),
-    };    
+    };
     return this.http.delete(
       environment.apiUrl + '/group/' + groupId,
       httpOptions
@@ -75,12 +77,12 @@ export class GroupsService {
       //headers: new HttpHeaders({
       //  'x-api-key': user.apikey
       //}),
-    };    
+    };
     return this.http.post(
       environment.apiUrl + '/group/' + group.name,
       group,
       httpOptions
       );
   }
-  
+
 }

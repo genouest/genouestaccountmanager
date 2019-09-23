@@ -30,8 +30,10 @@ export class ProjectsService {
         environment.apiUrl + '/project',
         httpOptions
         ).pipe(map((response: any) => {
-          return response.map(item => { 
+          return response.map(item => {
             return item;
+          }).sort(function (a,b) {
+              return a.id.localeCompare(b.id);
           });
         }));
   }
@@ -95,12 +97,12 @@ export class ProjectsService {
     return this.http.get(
         environment.apiUrl + '/project/' + projectId + '/users',
         httpOptions
-        );   
+        );
   }
 
   getProjectsInGroup(groupName: string): Observable<any> {
     let user = this.authService.profile;
-  
+
     let httpOptions = {
       //headers: new HttpHeaders({
       //  'x-api-key': user.apikey
@@ -109,7 +111,7 @@ export class ProjectsService {
     return this.http.get(
         environment.apiUrl + '/group/' + groupName + '/projects',
         httpOptions
-        );   
+        );
   }
 
   request(projectId: string, request: any): Observable<any> {
@@ -162,5 +164,3 @@ export class ProjectsService {
         );
   }
 }
-
-

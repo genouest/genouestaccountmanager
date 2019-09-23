@@ -38,13 +38,14 @@ export class ProjectsComponent implements OnInit {
 
   projects: any[]
   groups: any[]
+  all_user: any[]
   new_project: any
 
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectsService,
     private groupService: GroupsService,
-    private userservice: UserService
+    private userService: UserService
   ) { }
 
   ngOnDestroy(): void {
@@ -68,6 +69,7 @@ export class ProjectsComponent implements OnInit {
     this.remove_requests = [];
     this.projects = [];
     this.groups = [];
+    this.all_users = [];
     this.new_project = {
       id: '',
       owner: '',
@@ -90,6 +92,10 @@ export class ProjectsComponent implements OnInit {
       },
       err => console.log('failed to get groups')
     );
+    this.userService.list().subscribe(
+      resp => this.all_users = resp,
+      err => console.log('failed to get all users')
+    );
   }
 
   ngAfterViewInit(): void {
@@ -101,13 +107,13 @@ export class ProjectsComponent implements OnInit {
     this.request_mngt_msg = "";
     this.request_mngt_error_msg = "";
     this.request_grp_msg = "";
-    this.userservice.addToProject(user_id, project.id).subscribe(
+    this.userService.addToProject(user_id, project.id).subscribe(
       resp => {
         this.request_mngt_msg = resp['message'];
         this.projectService.removeRequest(project.id, {'request': 'add', 'user': user_id}).subscribe(
           resp => {
             this.project_list(true);
-            this.userservice.addGroup(user_id, project.group).subscribe(
+            this.userService.addGroup(user_id, project.group).subscribe(
               resp => this.request_grp_msg = resp['message'],
               err => this.request_mngt_error_msg = err.error
             )
@@ -124,7 +130,7 @@ export class ProjectsComponent implements OnInit {
     this.request_mngt_msg = "";
     this.request_mngt_error_msg = "";
     this.request_grp_msg = "";
-    this.userservice.removeFromProject(user_id, project.id, false).subscribe(
+    this.userService.removeFromProject(user_id, project.id, false).subscribe(
       resp => {
         this.request_mngt_msg = resp['message'];
         this.projectService.removeRequest(project.id, {'request': 'remove', 'user': user_id}).subscribe(
@@ -172,9 +178,9 @@ export class ProjectsComponent implements OnInit {
           resp => {
             this.add_project_msg = resp.message;
             this.project_list();
-            this.userservice.addToProject(this.new_project.owner, this.new_project.id).subscribe(
+            this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
               resp => {
-                this.userservice.addGroup(this.new_project.owner, this.new_project.group).subscribe(
+                this.userService.addGroup(this.new_project.owner, this.new_project.group).subscribe(
                   resp => {},
                   err => {
                     console.log('failed to add user to group');
@@ -194,7 +200,7 @@ export class ProjectsComponent implements OnInit {
             console.log('failed to add project', this.new_project);
             this.add_project_error_msg = err.error;
           }
-        );     
+        );
   }
 
   project_list(refresh_requests = false){
@@ -241,7 +247,7 @@ export class ProjectsComponent implements OnInit {
     if ($('#' + table).DataTable() !== undefined) {
       $('#' + table).DataTable().clear();
       $('#' + table).DataTable().destroy();
-    }  
+    }
     if (table == 'dtProjects') {
         this.dtTriggerProjects.next();
     } else if (table == 'dtAddRequests') {
