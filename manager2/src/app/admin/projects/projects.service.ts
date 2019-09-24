@@ -29,10 +29,8 @@ export class ProjectsService {
     return this.http.get(
         environment.apiUrl + '/project',
         httpOptions
-        ).pipe(map((response: any) => {
-          return response.map(item => {
-            return item;
-          }).sort(function (a,b) {
+        ).pipe(map((response: any[]) => {
+          return response.sort(function (a,b) {
               return a.id.localeCompare(b.id);
           });
         }));

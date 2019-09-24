@@ -23,10 +23,8 @@ export class GroupsService {
     return this.http.get(
         environment.apiUrl + '/group',
         httpOptions
-        ).pipe(map((response: any) => {
-          return response.map(item => {
-            return item;
-          }).sort(function (a,b) {
+        ).pipe(map((response: any[]) => {
+          return response.sort(function (a,b) {
               return a.name.localeCompare(b.name);
           });
         }));

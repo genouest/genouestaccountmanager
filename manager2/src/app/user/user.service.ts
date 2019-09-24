@@ -258,10 +258,8 @@ export class UserService {
     };
     return this.http.get(
       environment.apiUrl + '/user',
-      httpOptions).pipe(map((response: any) => {
-          return response.map(item => {
-            return item;
-          }).sort(function (a,b) {
+      httpOptions).pipe(map((response: any[]) => {
+          return response.sort(function (a,b) {
               return a.uid.localeCompare(b.uid);
           });
         }));
