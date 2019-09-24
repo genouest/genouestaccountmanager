@@ -148,12 +148,18 @@ module.exports = {
             sbjtag = "[" + sbjtag + "] ";
         }
 
-        let info =  transporter.sendMail({
+        let info =  {
             from: mailOptions.origin,
             to: mailOptions.destinations.join(),
             subject: sbjtag + mailOptions.subject,
             html: mailOptions.html_message
-        });
+        };
+
+        if (CONFIG.general.support) {
+            info.replyTo= CONFIG.general.support;
+        }
+
+        transporter.sendMail(info);
 
         logger.info("Message sent to " + mailOptions.destinations.join() + ":" + mailOptions.subject);
 
