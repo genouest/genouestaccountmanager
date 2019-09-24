@@ -1692,29 +1692,29 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                 message: msg,
                 html_message: msg_html
               };
-                        events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
+              events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                        if(notif.mailSet()) {
-                            notif.sendUser(mailOptions, function(error, response){
-                                if(error){
-                                    logger.error(error);
-                                }
-                                res.redirect(GENERAL_CONFIG.url+'/manager/index.html#/passwordresetconfirm');
-                                res.end();
-                            });
-                        }
-                        else {
-                            res.send({message: 'Could not send an email, please contact the support'});
-                        }
-                    });
-                }
-            });
+              if(notif.mailSet()) {
+                  notif.sendUser(mailOptions, function(error, response){
+                      if(error){
+                          logger.error(error);
+                      }
+                      res.redirect(GENERAL_CONFIG.url+'/manager2/passwordresetconfirm');
+                      res.end();
+                  });
+              }
+              else {
+                  res.send({message: 'Could not send an email, please contact the support'});
+              }
+          });
         }
-        else {
-            res.status(401).send('Invalid authorization key.');
-            return;
-        }
-    });
+      });
+    }
+    else {
+        res.status(401).send('Invalid authorization key.');
+        return;
+    }
+  });
 });
 
 /**
