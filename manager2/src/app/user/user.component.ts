@@ -263,6 +263,9 @@ export class UserComponent implements OnInit {
       },
       err => console.log('failed to get events')
     );
+    this.user.secondarygroups.sort(function (a,b) {
+       return a.localeCompare(b);
+    });
   }
 
   subscribe() {
