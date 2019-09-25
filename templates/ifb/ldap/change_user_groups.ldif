@@ -6,7 +6,7 @@ memberUid: {{ user.uid }}
 
 {% endfor %}
 {% for group in group_remove %}
-dn: cn={{ group_remove[gd] }},ou=groups,{{ CONFIG.ldap.dn }}
+dn: cn={{ group }},ou=groups,{{ CONFIG.ldap.dn }}
 changetype: modify
 delete: memberUid
 memberUid: {{ user.uid }}
