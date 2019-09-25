@@ -117,14 +117,15 @@ function record_group(group){
     console.info("manage group: " + group.dn);
     ldap_groups[parseInt(group.gidNumber)] = group;
     if(group.memberUid !== undefined){
-        for(var i=0;i<group.memberUid.length;i++){
-            if(ldap_secondary_groups[group.memberUid[i]] === undefined){ ldap_secondary_groups[group.memberUid[i]]=[];}
-            ldap_secondary_groups[group.memberUid[i]].push(group.cn);
+        // only add secondary group if it is not a project groups
+        if (!group.dn.includes("ou=projects")) {
+            for(var i=0;i<group.memberUid.length;i++){
+                if(ldap_secondary_groups[group.memberUid[i]] === undefined){ ldap_secondary_groups[group.memberUid[i]]=[];}
+                ldap_secondary_groups[group.memberUid[i]].push(group.cn);
+            }
         }
     }
     if(commands.import){
-        var go_group = {name: group.cn, gid: parseInt(group.gidNumber), owner: commands.admin};
-        mongo_groups.push(go_group);
         if (group.dn.includes("ou=projects"))
         {
             var proj_owner = commands.admin;
@@ -149,6 +150,11 @@ function record_group(group){
                 access : "Group"
             };
             mongo_projects.push(go_project);
+        }
+        else  // only add group if it is not a project groups
+        {
+            var go_group = {name: group.cn, gid: parseInt(group.gidNumber), owner: commands.admin};
+            mongo_groups.push(go_group);
         }
     }
 
