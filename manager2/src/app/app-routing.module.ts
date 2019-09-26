@@ -27,142 +27,142 @@ import { PendingAccountComponent } from './callback/pending-account/pending-acco
 import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
 
 const routes: Routes = [
-  {
-    path: 'user/:id',
-    component: UserComponent,
-    canActivate: [
-      AuthGuard
-    ]
-  },
-  {
-    path: 'tps',
-    component: TpsComponent,
-    canActivate: [
-      AuthGuard
-    ]
-  },
-  {
-    path: 'project',
-    component: ProjectComponent,
-    canActivate: [
-      AuthGuard
-    ]
-  },
-  {
-    path: 'admin/user',
-    component: AdminUserComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  },
-  {
-    path: 'admin/group',
-    component: AdminGroupComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  },
-  {
-    path: 'admin/project',
-    component: AdminProjectsComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  },
-  {
-    path: 'admin/project/:id',
-    component: AdminProjectComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  }, 
-  {
-    path: 'admin/message',
-    component: AdminMessageComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  }, 
-  {
-    path: 'admin/database',
-    component: AdminDatabaseComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  }, 
-  {
-    path: 'admin/web',
-    component: AdminWebsiteComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  },
-  {
-    path: 'admin/log',
-    component: AdminLogComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  },
-  {
-    path: 'admin/plugin/:id',
-    component: AdminpluginComponent,
-    canActivate: [
-      AdminAuthGuard
-    ]
-  },   
-  {
-    path: 'login',
-    component: LoginComponent
-  },
-  {
-    path: 'register',
-    component: RegisterComponent
-  },  
-  {
-    path: 'logout',
-    component: LogoutComponent
-  },
-  {
-    path: 'pending',
-    component: PendingApprovalInfoComponent
-  },
-  {
-    path: 'registered',
-    component: RegisteredInfoComponent
-  }, 
-  {
-    path: 'passwordresetconfirm',
-    component: PwdResetConfirmInfoComponent
-  }, 
-  {
-    path: 'user/:id/renew/:regkey',
-    component: RenewInfoComponent
-  }, 
-  {
-    path: 'registered',
-    component: RegisteredComponent
-  },
-  {
-    path: 'passwordresetconfirm',
-    component: PasswordResetConfirmComponent
-  },
-  {
-    path: 'pending',
-    component: PendingAccountComponent
-  },  
-  {
-    path: '',
-    component: HomeComponent
-  }
+{
+path: 'user/:id',
+component: UserComponent,
+canActivate: [
+AuthGuard
+]
+},
+{
+path: 'tps',
+component: TpsComponent,
+canActivate: [
+AuthGuard
+]
+},
+{
+path: 'project',
+component: ProjectComponent,
+canActivate: [
+AuthGuard
+]
+},
+{
+path: 'admin/user',
+component: AdminUserComponent,
+canActivate: [
+AdminAuthGuard
+]
+},
+{
+path: 'admin/group',
+component: AdminGroupComponent,
+canActivate: [
+AdminAuthGuard
+]
+},
+{
+path: 'admin/project',
+component: AdminProjectsComponent,
+canActivate: [
+AdminAuthGuard
+]
+},
+{
+path: 'admin/project/:id',
+component: AdminProjectComponent,
+canActivate: [
+AdminAuthGuard
+]
+}, 
+{
+path: 'admin/message',
+component: AdminMessageComponent,
+canActivate: [
+AdminAuthGuard
+]
+}, 
+{
+path: 'admin/database',
+component: AdminDatabaseComponent,
+canActivate: [
+AdminAuthGuard
+]
+}, 
+{
+path: 'admin/web',
+component: AdminWebsiteComponent,
+canActivate: [
+AdminAuthGuard
+]
+},
+{
+path: 'admin/log',
+component: AdminLogComponent,
+canActivate: [
+AdminAuthGuard
+]
+},
+{
+path: 'admin/plugin/:id',
+component: AdminpluginComponent,
+canActivate: [
+AdminAuthGuard
+]
+},   
+{
+path: 'login',
+component: LoginComponent
+},
+{
+path: 'register',
+component: RegisterComponent
+},  
+{
+path: 'logout',
+component: LogoutComponent
+},
+{
+path: 'pending',
+component: PendingApprovalInfoComponent
+},
+{
+path: 'registered',
+component: RegisteredInfoComponent
+}, 
+{
+path: 'passwordresetconfirm',
+component: PwdResetConfirmInfoComponent
+}, 
+{
+path: 'user/:id/renew/:regkey',
+component: RenewInfoComponent
+}, 
+{
+path: 'registered',
+component: RegisteredComponent
+},
+{
+path: 'passwordresetconfirm',
+component: PasswordResetConfirmComponent
+},
+{
+path: 'pending',
+component: PendingAccountComponent
+},  
+{
+path: '',
+component: HomeComponent
+}
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(
-    routes,
-    { enableTracing: false } // <-- debugging purposes only
-    )],
-  exports: [RouterModule],
-  providers: [AuthGuard]
+imports: [RouterModule.forRoot(
+routes,
+{ enableTracing: false } // <-- debugging purposes only
+)],
+exports: [RouterModule],
+providers: [AuthGuard]
 })
 export class AppRoutingModule {}

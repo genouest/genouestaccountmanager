@@ -3,17 +3,17 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  envName: "local",
-  apiUrl: "https://my.genouest.org",
-  sentry: "https://70edf44e2ed24c58ad3aa3d89c5825b4@sentry.genouest.org/2",
+production: false,
+envName: "local",
+apiUrl: "https://my.genouest.org",
+sentry: "https://70edf44e2ed24c58ad3aa3d89c5825b4@sentry.genouest.org/2",
 };
 
 /*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
+* For easier debugging in development mode, you can import the following file
+* to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
+*
+* This import should be commented out in production mode because it will have a negative impact
+* on performance if an error is thrown.
+*/
 // import 'zone.js/dist/zone-error';  // Included with Angular CLI.

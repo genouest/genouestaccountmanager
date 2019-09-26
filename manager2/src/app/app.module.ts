@@ -48,93 +48,93 @@ import { environment } from '../environments/environment';
 import * as Sentry from "@sentry/browser";
 
 if (environment.sentry) {
-  Sentry.init({
-    dsn: environment.sentry
-  });
+Sentry.init({
+dsn: environment.sentry
+});
 }
 
 @Injectable()
 export class SentryErrorHandler implements ErrorHandler {
-  constructor() {}
-  handleError(error) {
-    if (!environment.sentry) { return }
-    const eventId = Sentry.captureException(error.originalError || error);
-    Sentry.showReportDialog({ eventId });
-  }
+constructor() {}
+handleError(error) {
+if (!environment.sentry) { return }
+const eventId = Sentry.captureException(error.originalError || error);
+Sentry.showReportDialog({ eventId });
+}
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    UserComponent,
-    LoginComponent,
-    LogoutComponent,
-    HomeComponent,
-    MyDeleteConfirmComponent,
-    TpsComponent,
-    ProjectComponent,
-    UsersComponent,
-    GroupsComponent,
-    AdminProjectsComponent,
-    AdminProjectComponent,
-    UserProjectsComponent,
-    MessagesComponent,
-    DatabasesComponent,
-    WebsitesComponent,
-    LogsComponent,
-    RegisterComponent,
-    InfoComponent,
-    RegisteredInfoComponent,
-    PendingApprovalInfoComponent,
-    RenewInfoComponent,
-    PwdResetConfirmInfoComponent,
-    PluginComponent,
-    TestPluginComponent,
-    GalaxyPluginComponent,
-    DataAccessPluginComponent,
-    PopulateHomePluginComponent,
-    GenostackPluginComponent,
-    QuotasPluginComponent,
-    GomailPluginComponent,
-    PluginDirective,
-    MyStatusFilterPipe,
-    RegisteredComponent,
-    PasswordResetConfirmComponent,
-    UserExtendComponent,
-    PendingAccountComponent,
-    BasePluginComponent,
-    AdminpluginComponent,
-    AdminQuotaExamplePluginComponent,
-    FlashComponent
-  ],
-  imports: [
-    BrowserModule,
-    NgbModule,
-    HttpClientModule,
-    AppRoutingModule,
-    FormsModule,
-    DataTablesModule,
-    BrowserAnimationsModule,
-    CalendarModule.forRoot({
-      provide: DateAdapter,
-      useFactory: adapterFactory
-    })
-  ],
-  providers: [
-    {provide: WindowWrapper, useFactory: getWindow, multi: true},
-    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
-    { provide: ErrorHandler, useClass: SentryErrorHandler }
-  ],
-  bootstrap: [AppComponent],
-  entryComponents: [
-    TestPluginComponent,
-    GalaxyPluginComponent,
-    DataAccessPluginComponent,
-    PopulateHomePluginComponent,
-    GenostackPluginComponent,
-    QuotasPluginComponent,
-    GomailPluginComponent,
-    AdminQuotaExamplePluginComponent
-  ]
+declarations: [
+AppComponent,
+UserComponent,
+LoginComponent,
+LogoutComponent,
+HomeComponent,
+MyDeleteConfirmComponent,
+TpsComponent,
+ProjectComponent,
+UsersComponent,
+GroupsComponent,
+AdminProjectsComponent,
+AdminProjectComponent,
+UserProjectsComponent,
+MessagesComponent,
+DatabasesComponent,
+WebsitesComponent,
+LogsComponent,
+RegisterComponent,
+InfoComponent,
+RegisteredInfoComponent,
+PendingApprovalInfoComponent,
+RenewInfoComponent,
+PwdResetConfirmInfoComponent,
+PluginComponent,
+TestPluginComponent,
+GalaxyPluginComponent,
+DataAccessPluginComponent,
+PopulateHomePluginComponent,
+GenostackPluginComponent,
+QuotasPluginComponent,
+GomailPluginComponent,
+PluginDirective,
+MyStatusFilterPipe,
+RegisteredComponent,
+PasswordResetConfirmComponent,
+UserExtendComponent,
+PendingAccountComponent,
+BasePluginComponent,
+AdminpluginComponent,
+AdminQuotaExamplePluginComponent,
+FlashComponent
+],
+imports: [
+BrowserModule,
+NgbModule,
+HttpClientModule,
+AppRoutingModule,
+FormsModule,
+DataTablesModule,
+BrowserAnimationsModule,
+CalendarModule.forRoot({
+provide: DateAdapter,
+useFactory: adapterFactory
+})
+],
+providers: [
+{provide: WindowWrapper, useFactory: getWindow, multi: true},
+{provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
+{ provide: ErrorHandler, useClass: SentryErrorHandler }
+],
+bootstrap: [AppComponent],
+entryComponents: [
+TestPluginComponent,
+GalaxyPluginComponent,
+DataAccessPluginComponent,
+PopulateHomePluginComponent,
+GenostackPluginComponent,
+QuotasPluginComponent,
+GomailPluginComponent,
+AdminQuotaExamplePluginComponent
+]
 })
 export class AppModule { }
