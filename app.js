@@ -20,8 +20,8 @@ var winston = require('winston');
 var jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
-  label: 'gomngr',
-  level: log_level
+    label: 'gomngr',
+    level: log_level
 });
 const wlogger = winston.loggers.add('gomngr', {
     transports: [myconsole]
@@ -76,10 +76,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({
-  secret: CONFIG.general.secret,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: 3600*1000}
+    secret: CONFIG.general.secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 3600*1000}
 }))
 // app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
@@ -298,10 +298,10 @@ app.get('/logout', auth);
 
 app.get('/robots.txt', function (request, response) {
     response.sendFile(path.resolve(__dirname, 'robots.txt'));
-  });
+});
 // Default route if no match (for spa handling)
 app.get('*', function (request, response) {
-  response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
+    response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
 });
 
 
@@ -326,15 +326,15 @@ if (app.get('env') === 'development' || process.env.DEBUG) {
     });
 }
 else {
-// production error handler
-// no stacktraces leaked to user
-  app.use(function(err, req, res, next) {
-      res.status(err.status || 500);
-      res.render('error', {
-          message: err.message,
-          error: {}
-      });
-  });
+    // production error handler
+    // no stacktraces leaked to user
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: {}
+        });
+    });
 }
 
 module.exports = app;
@@ -343,9 +343,9 @@ module.exports = app;
 utils.loadAvailableIds().then(function (alreadyLoaded) {
 
     if (!module.parent) {
-    http.createServer(app).listen(app.get('port'), function(){
-        wlogger.info('Server listening on port ' + app.get('port'));
-    });
+        http.createServer(app).listen(app.get('port'), function(){
+            wlogger.info('Server listening on port ' + app.get('port'));
+        });
     }
 
 })

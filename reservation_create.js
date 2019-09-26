@@ -13,8 +13,8 @@ var monk = require('monk'),
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
-      timestamp: true,
-      level: 'info'
+    timestamp: true,
+    level: 'info'
 });
 winston.loggers.add('gomngr', {
     transports: [myconsole]
@@ -22,12 +22,12 @@ winston.loggers.add('gomngr', {
 const logger = winston.loggers.get('gomngr');
 
 /*
-function processArray(arr, fn) {
-    return arr.reduce(
-        (p, v) => p.then((a) => fn(v).then(r => a.concat([r]))),
-        Promise.resolve([])
-    );
-}*/
+  function processArray(arr, fn) {
+  return arr.reduce(
+  (p, v) => p.then((a) => fn(v).then(r => a.concat([r]))),
+  Promise.resolve([])
+  );
+  }*/
 
 function processArray(arr, fn) {
     return arr.reduce(function (p, v) {
@@ -41,13 +41,13 @@ function processArray(arr, fn) {
 
 var processReservation = function(reservation){
     return new Promise(function (resolve, reject){
-            logger.info("create user for reservation ", reservation);
-            tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
-                logger.debug("set reservation as done", res);
-                reservation_db.update({'_id': res._id},{'$set': {'created': true}}).then(function(){
-                    resolve(res);
-                })
-            });
+        logger.info("create user for reservation ", reservation);
+        tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
+            logger.debug("set reservation as done", res);
+            reservation_db.update({'_id': res._id},{'$set': {'created': true}}).then(function(){
+                resolve(res);
+            })
+        });
     });
 }
 
