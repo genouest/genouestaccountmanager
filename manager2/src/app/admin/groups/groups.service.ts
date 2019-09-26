@@ -6,81 +6,81 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable({
-providedIn: 'root'
+    providedIn: 'root'
 })
 export class GroupsService {
 
-constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(private http: HttpClient, private authService: AuthService) { }
 
 
-list(): Observable<any[]> {
-let user = this.authService.profile;
-let httpOptions = {
-//headers: new HttpHeaders({
-//  'x-api-key': user.apikey
-//}),
-};
-return this.http.get(
-environment.apiUrl + '/group',
-httpOptions
-).pipe(map((response: any) => {
-return response.map(item => { 
-return item;
-});
-}));
-}
+    list(): Observable<any[]> {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/group',
+            httpOptions
+        ).pipe(map((response: any) => {
+            return response.map(item => {
+                return item;
+            });
+        }));
+    }
 
-get(groupId): Observable<any> {
-let user = this.authService.profile;
-let httpOptions = {
-//headers: new HttpHeaders({
-//  'x-api-key': user.apikey
-//}),
-};
-return this.http.get(
-environment.apiUrl + '/group/' + groupId,
-httpOptions
-);
-}
+    get(groupId): Observable<any> {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/group/' + groupId,
+            httpOptions
+        );
+    }
 
-update(group) {
-let user = this.authService.profile;
-let httpOptions = {
-//headers: new HttpHeaders({
-//  'x-api-key': user.apikey
-//}),
-};    
-return this.http.put(
-environment.apiUrl + '/group/' + group.name,
-group,
-httpOptions
-);
-}
+    update(group) {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.put(
+            environment.apiUrl + '/group/' + group.name,
+            group,
+            httpOptions
+        );
+    }
 
-delete(groupId) {
-let user = this.authService.profile;
-let httpOptions = {
-//headers: new HttpHeaders({
-//  'x-api-key': user.apikey
-//}),
-};    
-return this.http.delete(
-environment.apiUrl + '/group/' + groupId,
-httpOptions
-);  }
+    delete(groupId) {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.delete(
+            environment.apiUrl + '/group/' + groupId,
+            httpOptions
+        );  }
 
-add(group) {
-let user = this.authService.profile;
-let httpOptions = {
-//headers: new HttpHeaders({
-//  'x-api-key': user.apikey
-//}),
-};    
-return this.http.post(
-environment.apiUrl + '/group/' + group.name,
-group,
-httpOptions
-);
-}
+    add(group) {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/group/' + group.name,
+            group,
+            httpOptions
+        );
+    }
 
 }
