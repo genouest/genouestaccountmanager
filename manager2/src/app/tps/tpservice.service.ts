@@ -5,42 +5,42 @@ import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class TpserviceService {
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(private http: HttpClient, private authService: AuthService) { }
 
-  list(): Observable<any> {
-    let user = this.authService.profile;
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': user.apikey
-      //}),
-    };
+    list(): Observable<any> {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
 
-    return this.http.get(environment.apiUrl + '/tp', httpOptions)
-  }
+        return this.http.get(environment.apiUrl + '/tp', httpOptions)
+    }
 
-  reserve(reservation): Observable<any> {
-    let user = this.authService.profile;
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': user.apikey
-      //}),
-    };
+    reserve(reservation): Observable<any> {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
 
-    return this.http.post(environment.apiUrl + '/tp', reservation, httpOptions)   
-  }
+        return this.http.post(environment.apiUrl + '/tp', reservation, httpOptions)
+    }
 
-  cancel(reservationId): Observable<any> {
-    let user = this.authService.profile;
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': user.apikey
-      //}),
-    };
+    cancel(reservationId): Observable<any> {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
 
-    return this.http.delete(environment.apiUrl + '/tp/' + reservationId, httpOptions)   
-  }
+        return this.http.delete(environment.apiUrl + '/tp/' + reservationId, httpOptions)
+    }
 }

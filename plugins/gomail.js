@@ -27,12 +27,12 @@ var get_user_info = function(userId, adminId){
 
 var set_user_info = function(userId, data, adminId){
     return new Promise(function (resolve, reject){
-      notif.create(data.newlist, function() {
-        notif.getLists(function(listOfLists) {
-            resolve({'lists': listOfLists, 'newlist': ''});
-            return;
+        notif.create(data.newlist, function() {
+            notif.getLists(function(listOfLists) {
+                resolve({'lists': listOfLists, 'newlist': ''});
+                return;
+            });
         });
-      });
     });
 };
 
@@ -58,9 +58,9 @@ module.exports = {
         return set_user_info(userId, data, adminId);
     },
     remove: function(userId, data, adminId){
-      return new Promise(function (resolve, reject){
-        console.log('nothing to do');
-        resolve();
-      });
+        return new Promise(function (resolve, reject){
+            console.log('nothing to do');
+            resolve();
+        });
     }
 }

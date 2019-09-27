@@ -61,7 +61,7 @@ module.exports = {
                 events_db.insert({'owner': adminId, 'date': new Date().getTime(), 'action': 'change ' + data.selected.id + ' quota', 'logs': []}, function(err){ return;});
                 resolve(data);
             })
- 
+            
         });
     }
 }

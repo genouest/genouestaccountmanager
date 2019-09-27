@@ -11,8 +11,8 @@ var monk = require('monk'),
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
-      timestamp: true,
-      level: 'info'
+    timestamp: true,
+    level: 'info'
 });
 winston.loggers.add('gomngr', {
     transports: [myconsole]

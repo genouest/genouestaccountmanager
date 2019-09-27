@@ -38,7 +38,7 @@ var set_user_info = function(userId, data, adminId){
 };
 
 var remove_user_from_galaxy = function(userId, data, adminId) {
-   return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
         if(data.email === undefined || data.email == "") {
             console.log("[Galaxy] no email defined, skipping " + userId + "...");
             resolve(true);
@@ -57,11 +57,11 @@ var remove_user_from_galaxy = function(userId, data, adminId) {
             }
             fs.chmodSync(script_file,0755);
             events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [data.uid+"."+fid+".galaxy"]}, function(err){});
-                    resolve(true)
-            });
+            resolve(true)
+        });
 
 
-   });
+    });
 
 };
 
