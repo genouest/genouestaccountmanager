@@ -19,6 +19,7 @@ export class ProjectComponent implements OnInit {
     project: any
     groups: any[]
     users: any[]
+    all_users: any[]
     prj_err_msg: string
     prj_msg: string
     oldGroup: string
@@ -49,6 +50,7 @@ export class ProjectComponent implements OnInit {
         }
         this.users = [];
         this.groups = [];
+        this.all_users = [];
     }
 
     ngOnDestroy(): void {
@@ -76,7 +78,11 @@ export class ProjectComponent implements OnInit {
         this.groupService.list().subscribe(
             resp => this.groups = resp,
             err => console.log('failed to get groups')
-        )
+        );
+        this.userService.list().subscribe(
+            resp => this.all_users = resp,
+            err => console.log('failed to get all users')
+        );
     }
 
     show_project_users(projectId) {

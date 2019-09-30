@@ -1,5 +1,3 @@
-
-
   <div *ngIf="notification" class="alert alert-success">{{notification}}</div>
   <div class="card bg-light">
     <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
@@ -119,7 +117,9 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" tooltip> </span>
             </label>
-            <input placeholder="project owner" type="text" id="project_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.owner" class="form-control"/>
+             <select id="project_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.owner" class="form-control">
+                <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
+             </select>
           </div>
           <div class="col-sm-2">
             <label>Group&nbsp;
