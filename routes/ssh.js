@@ -4,6 +4,8 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var Promise = require('promise');
 var fs = require('fs');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
 
 var CONFIG = require('config');
 
@@ -28,15 +30,16 @@ router.get('/ssh/:id/putty', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
+            logger.error(err);
             res.status(500).send(err);
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exist'})
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -44,12 +47,12 @@ router.get('/ssh/:id/putty', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var maingroup = "";
-        if(user.maingroup!== undefined && user.maingroup!=""){
-            maingroup = "/"+ user.maingroup;
-        }
         var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa.ppk");
+        res.download(sshDir + "/id_rsa.ppk", "id_rsa.ppk", function (err) {
+            if (err) {
+                logger.error(err);
+            }
+        });
     });
 });
 
@@ -61,15 +64,16 @@ router.get('/ssh/:id/private', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
+            logger.error(err);
             res.status(500).send(err);
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exist'})
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -81,12 +85,12 @@ router.get('/ssh/:id/private', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var maingroup = "";
-        if(user.maingroup!== undefined && user.maingroup!==""){
-            maingroup = "/"+ user.maingroup;
-        }
         var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa");
+        res.download(sshDir + "/id_rsa", "id_rsa", function (err) {
+            if (err) {
+                logger.error(err);
+            }
+        });
     });
 });
 
@@ -98,15 +102,16 @@ router.get('/ssh/:id/public', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
+            logger.error(err);
             res.status(500).send(err);
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exist'})
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -114,12 +119,12 @@ router.get('/ssh/:id/public', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var maingroup = "";
-        if(user.maingroup!== undefined && user.maingroup!==""){
-            maingroup = "/"+ user.maingroup;
-        }
         var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa.pub");
+        res.download(sshDir + "/id_rsa.pub", "id_rsa.pub", function (err) {
+            if (err) {
+                logger.error(err);
+            }
+        });
     });
 });
 
@@ -131,15 +136,16 @@ router.get('/ssh/:id', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
+            logger.error(err);
             res.status(500).send(err);
             return;
         }
         if(!user) {
-            res.send({msg: 'User does not exist'})
+            res.send({msg: 'User does not exist'});
             res.end();
             return;
         }
@@ -152,10 +158,6 @@ router.get('/ssh/:id', function(req, res) {
         var script = "#!/bin/bash\n";
         script += "set -e \n";
         var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-        var maingroup = "";
-        if(user.maingroup!== undefined && user.maingroup!==""){
-            maingroup = "/"+ user.maingroup;
-        }
         var homeDir = user.home;
         var sshDir = homeDir + "/.ssh";
         script += "rm -f " + sshDir + "/id_rsa*\n";
