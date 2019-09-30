@@ -25,6 +25,7 @@
     "main_groups": [""],
     "default_main_group": "",
     "mailer" : "gomail",
+    "templates": "genouest",
     "quota": {
         "home": {
             "protocol": "http:",
