@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
-var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
 
 const winston = require('winston');
