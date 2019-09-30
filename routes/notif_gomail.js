@@ -85,7 +85,7 @@ module.exports = {
                 callback([]);
                 return;
             }
-//Return all lists if no tag set
+            //Return all lists if no tag set
             var listOfLists = [];
             for ( var i = 0; i < body["lists"].length; i++){
                 var name_list = body["lists"][i];
