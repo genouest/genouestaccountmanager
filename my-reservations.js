@@ -1,6 +1,6 @@
 /*
-* CLI to manage reservations
-*/
+ * CLI to manage reservations
+ */
 const program = require('commander')
 
 var CONFIG = require('config')
@@ -11,11 +11,11 @@ var users_db = db.get('users')
 
 var winston = require('winston')
 const myconsole = new (winston.transports.Console)({
-  timestamp: true,
-  level: 'info'
+    timestamp: true,
+    level: 'info'
 })
 winston.loggers.add('gomngr', {
-  transports: [myconsole]
+    transports: [myconsole]
 })
 
 const logger = winston.loggers.get('gomngr')
@@ -23,29 +23,29 @@ const logger = winston.loggers.get('gomngr')
 var tps = require('./routes/tp.js')
 
 if (!console.table){
-  require('console.table')
+    require('console.table')
 }
 
 function processArray(arr, fn) {
-  return arr.reduce(function (p, v) {
-    return p.then(function (a) {
-      return fn(v).then(function (r) {
-        return a.concat([r]);
-      });
-    });
-  }, Promise.resolve([]));
+    return arr.reduce(function (p, v) {
+        return p.then(function (a) {
+            return fn(v).then(function (r) {
+                return a.concat([r]);
+            });
+        });
+    }, Promise.resolve([]));
 }
 
 var processReservation = function(reservation){
-  return new Promise(function (resolve, reject){
-    logger.info("create user for reservation ", reservation);
-    tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
-      logger.debug("set reservation as done", res);
-      reservation_db.update({'_id': res._id},{'$set': {'created': true}}).then(function(){
-        resolve(res);
-      })
+    return new Promise(function (resolve, reject){
+        logger.info("create user for reservation ", reservation);
+        tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
+            logger.debug("set reservation as done", res);
+            reservation_db.update({'_id': res._id},{'$set': {'created': true}}).then(function(){
+                resolve(res);
+            })
+        });
     });
-  });
 }
 
 function createReservations(rid) {
@@ -53,28 +53,28 @@ function createReservations(rid) {
     var create_before = now;
     create_before.setDate(create_before.getDate() + 5);
     if (rid !== null) {
-      filter = {
-        '_id': rid,
-        'created': false,
-        'over': false
+        filter = {
+            '_id': rid,
+            'created': false,
+            'over': false
         }
     } else {
-      logger.info("Check coming reservations");
-      filter = {
-        'from': {'$lte': create_before.getTime()},
-        'created': false,
-        'over': false
-      }
+        logger.info("Check coming reservations");
+        filter = {
+            'from': {'$lte': create_before.getTime()},
+            'created': false,
+            'over': false
+        }
     }
     reservation_db.find(filter).then(function(reservations){
-      if(reservations === undefined || reservations.length == 0){
-        logger.info("No pending reservation");
-        process.exit(0);
-      }
-      processArray(reservations, processReservation).then(function(res){
-        process.exit(0);
-      });
-    });    
+        if(reservations === undefined || reservations.length == 0){
+            logger.info("No pending reservation");
+            process.exit(0);
+        }
+        processArray(reservations, processReservation).then(function(res){
+            process.exit(0);
+        });
+    });
 }
 
 function removeReservations(rid) {
@@ -94,7 +94,7 @@ function removeReservations(rid) {
             'to': {'$lte': ended_after.getTime()},
             'created': true,
             'over': false
-    
+
         }
     }
     logger.info("[INFO] Check for ending reservations");
@@ -119,48 +119,48 @@ function removeReservations(rid) {
                 });
             });
         }));
-});
+    });
 }
 
 program
-  .command('list') // sub-command name
-  .description('List reservations') // command description
-  .option('-i, --id [value]', 'identifier', null)
-  .action(function (args) {
-    filter = {}
-    if (args.id) {
-        filter['_id'] = args.id
-    }
-    reservation_db.find(filter).then(function(reservations){
-      displayRes = []
-      for(let i=0;i<reservations.length;i++){
-        let res = reservations[i]
-        let opened = res.created;
-        if (res.over) {
-          opened = false;
+    .command('list') // sub-command name
+    .description('List reservations') // command description
+    .option('-i, --id [value]', 'identifier', null)
+    .action(function (args) {
+        filter = {}
+        if (args.id) {
+            filter['_id'] = args.id
         }
-        displayRes.push({'id': res._id, 'from': new Date(res.from), 'to': new Date(res.to), 'owner': res.owner, 'group': res.group ? res.group.name : '', 'opened': opened})
-      }
-      console.table(displayRes)
-      process.exit(0)
+        reservation_db.find(filter).then(function(reservations){
+            displayRes = []
+            for(let i=0;i<reservations.length;i++){
+                let res = reservations[i]
+                let opened = res.created;
+                if (res.over) {
+                    opened = false;
+                }
+                displayRes.push({'id': res._id, 'from': new Date(res.from), 'to': new Date(res.to), 'owner': res.owner, 'group': res.group ? res.group.name : '', 'opened': opened})
+            }
+            console.table(displayRes)
+            process.exit(0)
+        })
     })
-  })
 
 program
-  .command('remove') // sub-command name
-  .description('Close and delete reservations if their end time is reached') // command description
-  .option('-i, --id [value]', 'identifier of reservation to close (whatever end time)', null)
-  .action(function (args) {
-    removeReservations(args.id)
-  })
+    .command('remove') // sub-command name
+    .description('Close and delete reservations if their end time is reached') // command description
+    .option('-i, --id [value]', 'identifier of reservation to close (whatever end time)', null)
+    .action(function (args) {
+        removeReservations(args.id)
+    })
 
-  program
-  .command('create') // sub-command name
-  .description('Start reservation and create accounts if starting in less than 5 days') // command description
-  .option('-i, --id [value]', 'identifier of reservation to create (whatever start time)', null)
-  .action(function (args) {
-    createReservations(args.id)
-  })  
+program
+    .command('create') // sub-command name
+    .description('Start reservation and create accounts if starting in less than 5 days') // command description
+    .option('-i, --id [value]', 'identifier of reservation to create (whatever start time)', null)
+    .action(function (args) {
+        createReservations(args.id)
+    })
 
 // allow commander to parse `process.argv`
 program.parse(process.argv);

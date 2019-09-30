@@ -6,121 +6,121 @@ import { GroupsService} from 'src/app/admin/groups/groups.service';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'app-project',
-  templateUrl: './project.component.html',
-  styleUrls: ['./project.component.css']
+    selector: 'app-project',
+    templateUrl: './project.component.html',
+    styleUrls: ['./project.component.css']
 })
 export class ProjectComponent implements OnInit {
 
-  projects: any
-  users: any
-  groups: any
-  selectedProject: any
-  session_user: any
-  new_user: any
-  remove_user: any
+    projects: any
+    users: any
+    groups: any
+    selectedProject: any
+    session_user: any
+    new_user: any
+    remove_user: any
 
-  manager_visible: boolean
+    manager_visible: boolean
 
 
-  request_err_msg: string
-  request_msg: string
+    request_err_msg: string
+    request_msg: string
 
-  oldGroup: string
+    oldGroup: string
 
-  dtTrigger: Subject<any> = new Subject()
-  dtTriggerUser: Subject<any> = new Subject()
+    dtTrigger: Subject<any> = new Subject()
+    dtTriggerUser: Subject<any> = new Subject()
 
-  msg: string
-  rm_prj_err_msg: string
-  rm_prj_msg_ok: string
+    msg: string
+    rm_prj_err_msg: string
+    rm_prj_msg_ok: string
 
-  constructor(
-    private authService: AuthService,
-    private projectsService: ProjectsService,
-    private userService: UserService,
-    private groupService: GroupsService
+    constructor(
+        private authService: AuthService,
+        private projectsService: ProjectsService,
+        private userService: UserService,
+        private groupService: GroupsService
     ) { }
 
-  ngOnDestroy(): void {
-     this.dtTrigger.unsubscribe();
-     this.dtTriggerUser.unsubscribe();
+    ngOnDestroy(): void {
+        this.dtTrigger.unsubscribe();
+        this.dtTriggerUser.unsubscribe();
     }
 
-  ngOnInit() {
-    
-    this.groups = [];
-    this.manager_visible = true;
-    this.session_user = this.authService.userProfile;
-    this.users = [];
-    this.projectsService.list(false).subscribe(
-      resp => {
-        for(var i=0;i<resp.length;i++){
-          resp[i].expire = new Date(resp[i].expire);
-      }
-        this.projects = resp;
-        this.dtTrigger.next();
-      },
-      err => console.log('failed to get projects')
-    )
-  }
+    ngOnInit() {
 
-  show_project_users(project) {
-    this.msg = '';
-    this.rm_prj_err_msg = '';
-    this.rm_prj_msg_ok = '';
-    let project_name = project.id;
-    this.projectsService.getUsers(project_name).subscribe(
-      resp => {
-        this.users = resp;
-        this.selectedProject = project;
-        this.oldGroup = project.group;
-        for(let i = 0; i < resp.length;i++){
-          if(resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0){
-              this.users[i].access=true;
-          }
-      }
-      },
-      err => console.log('failed to get project users')
-    )
-  }
+        this.groups = [];
+        this.manager_visible = true;
+        this.session_user = this.authService.userProfile;
+        this.users = [];
+        this.projectsService.list(false).subscribe(
+            resp => {
+                for(var i=0;i<resp.length;i++){
+                    resp[i].expire = new Date(resp[i].expire);
+                }
+                this.projects = resp;
+                this.dtTrigger.next();
+            },
+            err => console.log('failed to get projects')
+        )
+    }
 
-  request_user(project, user_id, request_type) {
-    this.request_msg = '';
-    this.request_err_msg = '';
-    if (! user_id ) {
-      this.request_err_msg = 'Genouest id is required';
-      return;
-    };
-    if (request_type === "add"){
-      for(var i = 0; i < this.users.length; i++){
-        if(this.users[i].uid === user_id){
-          this.request_err_msg = 'User is already in project';
-          return;
+    show_project_users(project) {
+        this.msg = '';
+        this.rm_prj_err_msg = '';
+        this.rm_prj_msg_ok = '';
+        let project_name = project.id;
+        this.projectsService.getUsers(project_name).subscribe(
+            resp => {
+                this.users = resp;
+                this.selectedProject = project;
+                this.oldGroup = project.group;
+                for(let i = 0; i < resp.length;i++){
+                    if(resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0){
+                        this.users[i].access=true;
+                    }
+                }
+            },
+            err => console.log('failed to get project users')
+        )
+    }
+
+    request_user(project, user_id, request_type) {
+        this.request_msg = '';
+        this.request_err_msg = '';
+        if (! user_id ) {
+            this.request_err_msg = 'Genouest id is required';
+            return;
+        };
+        if (request_type === "add"){
+            for(var i = 0; i < this.users.length; i++){
+                if(this.users[i].uid === user_id){
+                    this.request_err_msg = 'User is already in project';
+                    return;
+                }
+            }
         }
-      }
+        if (request_type === "remove" && this.selectedProject.owner === user_id){
+            this.request_err_msg = 'You cannot remove the project owner';
+            return;
+        }
+        this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
+            resp => this.request_msg = resp['message'],
+            err => this.request_err_msg = err.error
+        )
+
+
     }
-    if (request_type === "remove" && this.selectedProject.owner === user_id){
-      this.request_err_msg = 'You cannot remove the project owner';
-      return;
+
+    date_convert = function timeConverter(tsp){
+        var a = new Date(tsp);
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var year = a.getFullYear();
+        var month = months[a.getMonth()];
+        var date = a.getDate();
+        var time = date + ', ' + month + ' ' + year;
+        return time;
     }
-    this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
-      resp => this.request_msg = resp['message'],
-      err => this.request_err_msg = err.error
-    )
-
-
-  }
-
-  date_convert = function timeConverter(tsp){
-    var a = new Date(tsp);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var year = a.getFullYear();
-    var month = months[a.getMonth()];
-    var date = a.getDate();
-    var time = date + ', ' + month + ' ' + year;
-    return time;
-  }
 
 
 }

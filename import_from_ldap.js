@@ -70,8 +70,8 @@ var client = myldap.createClient({
 
 var cliopts = {
     scope: 'sub'
-  /*  ,paged: true
-    ,sizeLimit: 1000 */
+    /*  ,paged: true
+        ,sizeLimit: 1000 */
 };
 
 client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {

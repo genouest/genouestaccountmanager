@@ -5,286 +5,286 @@ import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class UserService {
 
-  config: any
+    config: any
 
-  constructor(private http: HttpClient, private authService: AuthService) {
-  }
+    constructor(private http: HttpClient, private authService: AuthService) {
+    }
 
-  getUserLogs(userId: string) {
-      let user = this.authService.profile;
-      let httpOptions = {
-        //headers: new HttpHeaders({
-        //  'x-api-key': user.apikey
-        //})
-      };
-      return this.http.get(
-          environment.apiUrl + '/log/user/' + userId,
-          httpOptions
-          );
-
-  }
-
-  getUsages() {
-    let user = this.authService.profile;
-
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': user.apikey
-      //})
-    };
-    return this.http.get(
-        environment.apiUrl + '/user/' + user.uid + '/usage',
-        httpOptions
+    getUserLogs(userId: string) {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //})
+        };
+        return this.http.get(
+            environment.apiUrl + '/log/user/' + userId,
+            httpOptions
         );
 
-}  
+    }
 
-  u2fGet(userId: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.get(
-      environment.apiUrl + '/u2f/register/' + userId,
-      httpOptions) 
-  }
+    getUsages() {
+        let user = this.authService.profile;
 
-  u2fSet(userId: string, data: any) {
-    let httpOptions = {
-     // headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.post(
-      environment.apiUrl + '/u2f/register/' + userId,
-      data,
-      httpOptions) 
-  }
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //})
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + user.uid + '/usage',
+            httpOptions
+        );
 
-  delete(userId: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.delete(
-      environment.apiUrl + '/user/' + userId ,
-      httpOptions) 
-  }
+    }
 
-  updateSSH(userId: string, ssh: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.put(
-      environment.apiUrl + '/user/' + userId + '/ssh',
-      {ssh: ssh},
-      httpOptions)     
-  }
+    u2fGet(userId: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/u2f/register/' + userId,
+            httpOptions)
+    }
 
-  update(userId: string, user) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.put(
-      environment.apiUrl + '/user/' + userId ,
-      user,
-      httpOptions)      
-  }
+    u2fSet(userId: string, data: any) {
+        let httpOptions = {
+            // headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/u2f/register/' + userId,
+            data,
+            httpOptions)
+    }
 
-  activate(userId: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.get(
-      environment.apiUrl + '/user/' + userId + '/activate',
-      httpOptions)      
-  }
+    delete(userId: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.delete(
+            environment.apiUrl + '/user/' + userId ,
+            httpOptions)
+    }
 
-  expire(userId) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.get(
-      environment.apiUrl + '/user/' + userId + '/expire',
-      httpOptions)      
-  }
+    updateSSH(userId: string, ssh: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.put(
+            environment.apiUrl + '/user/' + userId + '/ssh',
+            {ssh: ssh},
+            httpOptions)
+    }
 
-  renew(userId) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.get(
-      environment.apiUrl + '/user/' + userId + '/renew',
-      httpOptions)        
-  }
+    update(userId: string, user) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.put(
+            environment.apiUrl + '/user/' + userId ,
+            user,
+            httpOptions)
+    }
 
-  addToProject(owner: string, projectId: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };    
-    return this.http.post(
-      environment.apiUrl + '/user/' + owner + '/project/' + projectId,
-      {},
-      httpOptions) 
-  }
+    activate(userId: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + userId + '/activate',
+            httpOptions)
+    }
 
-  addGroup(owner: string, groupName: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-       // 'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };    
-    return this.http.post(
-      environment.apiUrl + '/user/' + owner + '/group/' + groupName,
-      {},
-      httpOptions)     
-  }
+    expire(userId) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + userId + '/expire',
+            httpOptions)
+    }
 
-  deleteGroup(owner: string, groupName: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };    
-    return this.http.delete(
-      environment.apiUrl + '/user/' + owner + '/group/' + groupName,
-      httpOptions)   
-  }
+    renew(userId) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + userId + '/renew',
+            httpOptions)
+    }
 
-  getSSHKey(owner: string, key: string): Observable<string>{
-    return this.http.get(
-      environment.apiUrl + '/ssh/' + owner + '/' + key,
-      {responseType: 'text'})  
-  }
+    addToProject(owner: string, projectId: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/user/' + owner + '/project/' + projectId,
+            {},
+            httpOptions)
+    }
 
-  getNewSSHKey(id: string) {
-    let httpOptions = {
-    };
-    return this.http.get(
-      environment.apiUrl + '/ssh/' + id,
-      httpOptions)  
-  }
+    addGroup(owner: string, groupName: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            // 'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/user/' + owner + '/group/' + groupName,
+            {},
+            httpOptions)
+    }
 
-  generateApiKey(id: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.post(
-      environment.apiUrl + '/user/' + id + '/apikey',
-      {},
-      httpOptions)      
-  }
+    deleteGroup(owner: string, groupName: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.delete(
+            environment.apiUrl + '/user/' + owner + '/group/' + groupName,
+            httpOptions)
+    }
 
-  updatePassword(id: string, password: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.post(
-      environment.apiUrl + '/user/' + id + '/passwordreset/',
-      {'password': password},
-      httpOptions)    
-  }
+    getSSHKey(owner: string, key: string): Observable<string>{
+        return this.http.get(
+            environment.apiUrl + '/ssh/' + owner + '/' + key,
+            {responseType: 'text'})
+    }
 
-  isSubscribed(id: string) {
-    let user = this.authService.profile;
-    let httpOptions = {
-     // headers: new HttpHeaders({
-      //  'x-api-key': user.apikey
-      //}),
-    };
-    return this.http.get(
-        environment.apiUrl + '/user/' + id + '/subscribed',
-        httpOptions)
-  }
+    getNewSSHKey(id: string) {
+        let httpOptions = {
+        };
+        return this.http.get(
+            environment.apiUrl + '/ssh/' + id,
+            httpOptions)
+    }
 
-  subscribe(id: string) {
-    let httpOptions = {
-    };
-    return this.http.put(
-      environment.apiUrl + '/user/' + id + '/subscribe/',
-      {},
-      httpOptions)     
-  }
+    generateApiKey(id: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/user/' + id + '/apikey',
+            {},
+            httpOptions)
+    }
 
-  unsubscribe(id: string) {
-    let httpOptions = {
-    };
-    return this.http.put(
-      environment.apiUrl + '/user/' + id + '/unsubscribe/',
-      {},
-      httpOptions)     
-  }
+    updatePassword(id: string, password: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/user/' + id + '/passwordreset/',
+            {'password': password},
+            httpOptions)
+    }
 
-  getUser(id: string) {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.get(
-      environment.apiUrl + '/user/' + id,
-      httpOptions)    
-  }
+    isSubscribed(id: string) {
+        let user = this.authService.profile;
+        let httpOptions = {
+            // headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + id + '/subscribed',
+            httpOptions)
+    }
 
-  list() {
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': localStorage.getItem('my-api-key')
-      //}),
-    };
-    return this.http.get(
-      environment.apiUrl + '/user',
-      httpOptions)    
-  }
+    subscribe(id: string) {
+        let httpOptions = {
+        };
+        return this.http.put(
+            environment.apiUrl + '/user/' + id + '/subscribe/',
+            {},
+            httpOptions)
+    }
 
-  removeFromProject(userId: string, projectId: string, force: boolean) {
-    let user = this.authService.profile;
-    let httpOptions = {
-      //headers: new HttpHeaders({
-      //  'x-api-key': user.apikey
-      //}),
-    };
-    return this.http.delete(
-      environment.apiUrl + '/user/' + userId + '/project/' + projectId,
-      httpOptions)  
-  }
+    unsubscribe(id: string) {
+        let httpOptions = {
+        };
+        return this.http.put(
+            environment.apiUrl + '/user/' + id + '/unsubscribe/',
+            {},
+            httpOptions)
+    }
 
-  register(userId: string, userInfo) {
-    let user = this.authService.profile;
-    let httpOptions = {
-    };
-    return this.http.post(
-      environment.apiUrl + '/user/' + userId,
-      userInfo,
-      httpOptions)    
-  }
+    getUser(id: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + id,
+            httpOptions)
+    }
 
-  extend(userId, regKey) {
-    return this.http.get(
-      environment.apiUrl + '/user/' + userId + '/renew/' + regKey,
-    )    
+    list() {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user',
+            httpOptions)
+    }
 
-  }
+    removeFromProject(userId: string, projectId: string, force: boolean) {
+        let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.delete(
+            environment.apiUrl + '/user/' + userId + '/project/' + projectId,
+            httpOptions)
+    }
+
+    register(userId: string, userInfo) {
+        let user = this.authService.profile;
+        let httpOptions = {
+        };
+        return this.http.post(
+            environment.apiUrl + '/user/' + userId,
+            userInfo,
+            httpOptions)
+    }
+
+    extend(userId, regKey) {
+        return this.http.get(
+            environment.apiUrl + '/user/' + userId + '/renew/' + regKey,
+        )
+
+    }
 }

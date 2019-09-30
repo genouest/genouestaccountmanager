@@ -1,4 +1,3 @@
-
 var CONFIG = require('config');
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
@@ -57,10 +56,10 @@ module.exports = {
         console.log('activation of user ' + user);
         return activate_user(user, data);
         /*
-        users_db.findOne({'uid': user}, function(err, data){
-            console.log(data);
-            return data;
-        });
+          users_db.findOne({'uid': user}, function(err, data){
+          console.log(data);
+          return data;
+          });
         */
         //return {'msg': 'nothing to do'};
     },

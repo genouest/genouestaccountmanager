@@ -16,22 +16,22 @@ var monk = require('monk'),
 
 var utils = require('./utils');
 /**
-app.get('/ssh/:id', ssh);
-app.get('/ssh/:id/public', ssh);
-app.get('/ssh/:id/putty', ssh);
-app.get('/ssh/:id/private', ssh);
+   app.get('/ssh/:id', ssh);
+   app.get('/ssh/:id/public', ssh);
+   app.get('/ssh/:id/putty', ssh);
+   app.get('/ssh/:id/private', ssh);
 */
 
 router.get('/ssh/:id/putty', function(req, res) {
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
-      }
+        return;
+    }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);
@@ -59,13 +59,13 @@ router.get('/ssh/:id/putty', function(req, res) {
 router.get('/ssh/:id/private', function(req, res) {
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
-      }
+        return;
+    }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);
@@ -97,13 +97,13 @@ router.get('/ssh/:id/private', function(req, res) {
 router.get('/ssh/:id/public', function(req, res) {
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
-      }
+        return;
+    }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);
@@ -131,13 +131,13 @@ router.get('/ssh/:id/public', function(req, res) {
 router.get('/ssh/:id', function(req, res) {
     var sess = req.session;
     if(!req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
-      }
+        return;
+    }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
             res.status(500).send(err);

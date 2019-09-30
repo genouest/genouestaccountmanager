@@ -127,51 +127,51 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
         // TODO get account ids
         var minuid = 1000;
         //users_db.find({}, { limit: 1 , sort: { uidnumber: -1 }}).then(function(data){
-            //if(data && data.length>0){
-            //  minuid = data[0].uidnumber+1;
-            //}
-            var users = [];
-            for(var i=0;i<quantity;i++){
-                logger.debug("create user ", CONFIG.tp.prefix + minuid);
-                var user = {
-                  status: STATUS_PENDING_APPROVAL,
-                  uid: CONFIG.tp.prefix + minuid,
-                  firstname: CONFIG.tp.prefix,
-                  lastname: minuid,
-                  email: CONFIG.tp.prefix + minuid + "@fake." + CONFIG.tp.fake_mail_domain,
-                  address: '',
-                  lab: '',
-                  responsible: owner,
-                  group: userGroup.name,
-                  secondarygroups: [],
-                  maingroup: CONFIG.general.default_main_group,
-                  home: "",
-                  why: 'TP/Training',
-                  ip: '',
-                  regkey: '',
-                  is_internal: false,
-                  is_tp: true,
-                  is_fake: true,
-                  uidnumber: minuid,
-                  gidnumber: userGroup.gid,
-                  duration: duration,
-                  expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
-                  loginShell: '/bin/bash',
-                  history: []
-              };
-              user.home = fusers.user_home(user);
-              users.push(user);
-              minuid++;
-            }
-            Promise.all(users.map(function(user){
-                logger.debug("map users to create_tp_user_db ", user);
-                return create_tp_user_db(user);
-            })).then(function(results){
-                logger.debug("now activate users");
-                return activate_tp_users(owner, results);
-            }).then(function(activated_users){
-                resolve(activated_users);
-            });
+        //if(data && data.length>0){
+        //  minuid = data[0].uidnumber+1;
+        //}
+        var users = [];
+        for(var i=0;i<quantity;i++){
+            logger.debug("create user ", CONFIG.tp.prefix + minuid);
+            var user = {
+                status: STATUS_PENDING_APPROVAL,
+                uid: CONFIG.tp.prefix + minuid,
+                firstname: CONFIG.tp.prefix,
+                lastname: minuid,
+                email: CONFIG.tp.prefix + minuid + "@fake." + CONFIG.tp.fake_mail_domain,
+                address: '',
+                lab: '',
+                responsible: owner,
+                group: userGroup.name,
+                secondarygroups: [],
+                maingroup: CONFIG.general.default_main_group,
+                home: "",
+                why: 'TP/Training',
+                ip: '',
+                regkey: '',
+                is_internal: false,
+                is_tp: true,
+                is_fake: true,
+                uidnumber: minuid,
+                gidnumber: userGroup.gid,
+                duration: duration,
+                expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
+                loginShell: '/bin/bash',
+                history: []
+            };
+            user.home = fusers.user_home(user);
+            users.push(user);
+            minuid++;
+        }
+        Promise.all(users.map(function(user){
+            logger.debug("map users to create_tp_user_db ", user);
+            return create_tp_user_db(user);
+        })).then(function(results){
+            logger.debug("now activate users");
+            return activate_tp_users(owner, results);
+        }).then(function(activated_users){
+            resolve(activated_users);
+        });
         //});
     });
 };
@@ -181,15 +181,15 @@ var create_tp_user_db = function (user) {
         logger.debug("create_tp_user_db", user.uid);
         try {
             utils.getUserAvailableId().then(function (uid) {
-              user.uid = CONFIG.tp.prefix + uid
-              user.lastname = uid
-              user.email = CONFIG.tp.prefix + uid + "@fake." + CONFIG.tp.fake_mail_domain
-              user.uidnumber = uid
-              user.home = fusers.user_home(user);
-              users_db.insert(user).then(function(data){
-                user.password = Math.random().toString(36).slice(-10);
-                resolve(user);
-              });
+                user.uid = CONFIG.tp.prefix + uid
+                user.lastname = uid
+                user.email = CONFIG.tp.prefix + uid + "@fake." + CONFIG.tp.fake_mail_domain
+                user.uidnumber = uid
+                user.home = fusers.user_home(user);
+                users_db.insert(user).then(function(data){
+                    user.password = Math.random().toString(36).slice(-10);
+                    resolve(user);
+                });
             })
         }
         catch(exception){
@@ -307,12 +307,12 @@ router.exec_tp_reservation = function(reservation_id){
                         reservation.accounts.push(activated_users[i].uid);
                     }
                     try{
-                    send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(function(){
-                        reservation_db.update({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}}).then(function(err){
-                            logger.debug("reservation ", reservation);
-                            resolve(reservation);
+                        send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(function(){
+                            reservation_db.update({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}}).then(function(err){
+                                logger.debug("reservation ", reservation);
+                                resolve(reservation);
+                            });
                         });
-                    });
                     }
                     catch(exception){
                         logger.error(exception);
@@ -364,7 +364,7 @@ var insert_ldap_user = function(user, fid){
                 reject (user);
                 return;
             }
-            });
+        });
     });
 };
 
@@ -414,8 +414,8 @@ var activate_tp_user = function(user, adminId){
 router.get('/tp', function(req, res) {
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
@@ -443,8 +443,8 @@ router.post('/tp', function(req, res) {
 
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(401).send('Not authorized');
-      return;
+        res.status(401).send('Not authorized');
+        return;
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
@@ -459,9 +459,9 @@ router.post('/tp', function(req, res) {
             return;
         }
         tp_reservation(user.uid, req.param('from'), req.param('to'), req.param('quantity'), req.param('about')).then(function(reservation){
-                res.send({'reservation': reservation, 'msg': 'Reservation done'});
-                res.end();
-                return;
+            res.send({'reservation': reservation, 'msg': 'Reservation done'});
+            res.end();
+            return;
         });
 
     });
@@ -471,13 +471,13 @@ router.post('/tp', function(req, res) {
 router.delete('/tp/:id', function(req, res) {
     var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
-      res.status(403).send('Not authorized');
-      return;
+        res.status(403).send('Not authorized');
+        return;
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
-      }
+        return;
+    }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exist'})
@@ -494,7 +494,7 @@ router.delete('/tp/:id', function(req, res) {
         // add filter
         var filter = {};
         if(is_admin) {
-          filter = {_id: req.param('id')};
+            filter = {_id: req.param('id')};
         }
         else{
             filter = {_id: req.param('id'), owner: user.uid};
@@ -534,5 +534,3 @@ router.delete('/tp/:id', function(req, res) {
 
 
 module.exports = router;
-
-

@@ -11,7 +11,7 @@ var Promise = require('promise');
 var remove_user = function(userId, data, adminId){
     return new Promise(function (resolve, reject){
 
-            users_db.findOne({'uid': userId}, function(err, user){
+        users_db.findOne({'uid': userId}, function(err, user){
             if(err){
                 console.trace("Error finding user")
                 resolve();
@@ -26,7 +26,7 @@ var remove_user = function(userId, data, adminId){
 var activate_user = function(userId, data, adminId){
     return new Promise(function (resolve, reject){
 
-            users_db.findOne({'uid': userId}, function(err, user){
+        users_db.findOne({'uid': userId}, function(err, user){
             if(err){
                 console.trace("Error finding user")
                 resolve();
@@ -88,10 +88,10 @@ module.exports = {
         console.log('Plugin test for activation of user : ' + userId);
         return activate_user(userId, data, adminId);
         /*
-        users_db.findOne({'uid': user}, function(err, data){
-            console.log(data);
-            return data;
-        });
+          users_db.findOne({'uid': user}, function(err, data){
+          console.log(data);
+          return data;
+          });
         */
         //return {'msg': 'nothing to do'};
     },
