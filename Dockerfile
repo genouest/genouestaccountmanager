@@ -25,6 +25,7 @@ COPY config/test.json /root/genouestaccountmanager/config
 COPY plugins /root/genouestaccountmanager/plugins
 COPY public /root/genouestaccountmanager/public
 COPY routes /root/genouestaccountmanager/routes
+COPY templates /root/genouestaccountmanager/templates
 COPY views /root/genouestaccountmanager/views
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
