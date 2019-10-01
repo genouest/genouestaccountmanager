@@ -27,7 +27,7 @@ export class AppComponent {
             resp => this.config = resp,
             err => console.log('failed to get config')
         )
-        this.titleService.setTitle(this.config.name + ' ' + title);
+        this.titleService.setTitle(this.config.name + ' ' + this.title);
     }
 
     ngAfterViewInit() {
