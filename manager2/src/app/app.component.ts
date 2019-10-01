@@ -78,7 +78,7 @@ export class AppComponent {
             is_admin: false
         }
         this.authService.autoLog();
-        this.config = {}
+        this.config = {"name": "My"};
     }
 
 }
