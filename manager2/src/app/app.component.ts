@@ -24,10 +24,13 @@ export class AppComponent {
     ngOnInit() {
         this.plugins = [];
         this.configService.config.subscribe(
-            resp => this.config = resp,
+            resp => {
+                this.config = resp;
+                this.titleService.setTitle(this.config.name + ' ' + this.title);
+            },
             err => console.log('failed to get config')
         )
-        this.titleService.setTitle(this.config.name + ' ' + this.title);
+
     }
 
     ngAfterViewInit() {
