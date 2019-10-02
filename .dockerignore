@@ -1,3 +1,4 @@
 node_modules
 manager2/node_modules
 manager2/dist
+tests/home_dir

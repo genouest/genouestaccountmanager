@@ -1744,8 +1744,9 @@ router.get('/user/:id/renew/:regkey', function(req, res){
             var expiration = new Date().getTime() + 1000*3600*24*user.duration;
             users_db.update({uid: user.uid},{'$set': {expiration: expiration, history: user.history}}, function(err){
                 events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.param('id') , 'logs': []}, function(err){});
-
-                res.send({message: 'Account validity period extended', expiration: expiration});
+                res.redirect(GENERAL_CONFIG.url+'/manager2/user/' + user.uid + '/renew/' + regkey);
+                res.end();
+                // res.send({message: 'Account validity period extended', expiration: expiration});
                 return;
             });
         }
