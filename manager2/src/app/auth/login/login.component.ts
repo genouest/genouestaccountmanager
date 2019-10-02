@@ -90,32 +90,45 @@ export class LoginComponent implements OnInit {
         )
     }
 
-    login() {
-        this.authService.login(this.userId,this.password).then(
-            userData => {
-                if(userData['double_auth']) {
-                    this.userData = userData;
-                    console.log('double authentication needed');
-                    this.double_auth = true;
-                    this._manageU2F(userData);
-                    //this.authService.handleLoginCallback(userData);
-                    //this.router.navigate(['/user/' + userData['uid']]);
-                } else {
-                    this.router.navigate(['/user/' + userData['uid']]);
-                }
-            }
-        ).catch( err => {this.msg = err.error;});
-        this.password = "";
-    }
-
-    password_reset_request() {
+    _check_userId() {
         this.msgstatus = 0;
         this.msg = "";
         if(this.userId == null || this.userId == "") {
             this.msgstatus = 1;
-            this.msg = "Please enter your used id!";
+            this.msg = "Please enter your user id!";
+            return false;
         }
-        else {
+        if (this.userId.match(/[^0-9a-z]/gi))
+        {
+            this.msgstatus = 1;
+            this.msg = "Please enter a valid user id!";
+            return false;
+        }
+        return true;
+    }
+
+    login() {
+        if (this._check_userId()) {
+            this.authService.login(this.userId,this.password).then(
+                userData => {
+                    if(userData['double_auth']) {
+                        this.userData = userData;
+                        console.log('double authentication needed');
+                        this.double_auth = true;
+                        this._manageU2F(userData);
+                        //this.authService.handleLoginCallback(userData);
+                        //this.router.navigate(['/user/' + userData['uid']]);
+                    } else {
+                        this.router.navigate(['/user/' + userData['uid']]);
+                    }
+                }
+            ).catch( err => {this.msg = err.error;});
+        }
+        this.password = "";
+    }
+
+    password_reset_request() {
+        if (this._check_userId()) {
             this.authService.passwordResetRequest(this.userId).subscribe(
                 resp => this.msg = resp['message'],
                 err => {
