@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { AuthService } from './auth/auth.service';
 import { Subscription, Observable } from 'rxjs';
 import { ConfigService } from './config.service'
@@ -11,7 +12,7 @@ import { PluginService } from './plugin/plugin.service';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-    title = 'My account manager';
+    title = 'Account Manager';
     user = null;
     isLogged: boolean = false;
     usages: any = []
@@ -23,9 +24,13 @@ export class AppComponent {
     ngOnInit() {
         this.plugins = [];
         this.configService.config.subscribe(
-            resp => this.config = resp,
+            resp => {
+                this.config = resp;
+                this.titleService.setTitle(this.config.name + ' ' + this.title);
+            },
             err => console.log('failed to get config')
         )
+
     }
 
     ngAfterViewInit() {
@@ -62,6 +67,7 @@ export class AppComponent {
     }
 
     constructor(
+        private titleService: Title,
         private authService: AuthService,
         private userService: UserService,
         private configService: ConfigService,
@@ -72,7 +78,7 @@ export class AppComponent {
             is_admin: false
         }
         this.authService.autoLog();
-        this.config = {}
+        this.config = {"name": "My"};
     }
 
 }
