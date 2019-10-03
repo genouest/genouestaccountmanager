@@ -50,6 +50,16 @@
 <div *ngIf="selectedGroup">
     <div class="card bg-light">
         <div class="card-header">
+            <h3>Group tags</h3>
+        </div>
+        <div class="card-body">
+            <app-tag [user]="selectedGroup.name" kind="group"></app-tag>
+        </div>
+    </div>
+
+  
+    <div class="card bg-light">
+        <div class="card-header">
             <h3>Users in group {{selectedGroup.name}}</h3>
         </div>
         <div class="card-body">

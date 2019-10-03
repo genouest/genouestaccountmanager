@@ -42,6 +42,7 @@ var plugin = require('./routes/plugin');
 var tp = require('./routes/tp');
 var conf = require('./routes/conf');
 var utils = require('./routes/utils.js');
+var tags = require('./routes/tags.js');
 
 var CONFIG = require('config');
 
@@ -295,6 +296,9 @@ app.post('/u2f/auth/:id', auth);
 app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);
+
+app.get('/tags', tags);
+app.post('/tags/:kind/:id', tags)
 
 app.get('/robots.txt', function (request, response) {
     response.sendFile(path.resolve(__dirname, 'robots.txt'));

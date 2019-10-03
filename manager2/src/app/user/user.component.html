@@ -209,6 +209,15 @@
 
   <div class="col-sm-6"*ngIf="panel == 0">
 
+    <div class="card bg-light">
+        <div class="card-header">
+            <h4>Tags</h4>
+        </div>
+        <div class="card-body">
+            <app-tag [user]="user.name" kind="user"></app-tag>
+        </div>
+    </div>
+
     <div class="card bg-light" *ngIf="user.u2f">
         <div class="card-header">
             <h4>Authentication</h4>
