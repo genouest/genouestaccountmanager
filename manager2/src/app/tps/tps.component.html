@@ -117,6 +117,8 @@
                     <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
                 </div>
                 <button class="btn btn-outline-secondary" (click)="reserve()">Reserve</button>
+                <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
+                <div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
             </div>
         </div>
     </div>
