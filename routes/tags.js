@@ -58,15 +58,9 @@ router.post('/tags/:kind/:id', function(req, res) {
             return;
         }
 
-        if(req.params.kind == 'group' && !session_user.is_admin) {
+        if(!session_user.is_admin) {
             res.status(403).send('Admin only');
             return;  
-        }
-        if(req.params.kind == 'user') {
-            if (!session_user.is_admin && session_user.uid != req.params.id) {
-                res.status(403).send('Admin only');
-                return;               
-            }
         }
 
         tags.forEach(tag => {

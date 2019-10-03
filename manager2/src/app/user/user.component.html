@@ -209,7 +209,7 @@
 
   <div class="col-sm-6"*ngIf="panel == 0">
 
-    <div class="card bg-light">
+    <div class="card bg-light" *ngIf="session_user.is_admin">
         <div class="card-header">
             <h4>Tags</h4>
         </div>
