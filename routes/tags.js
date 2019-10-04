@@ -11,10 +11,7 @@ var monk = require('monk'),
     users_db = db.get('users');
 
 
-/**
- * Change owner
- */
-router.get('tags', function(req, res) {
+router.get('/tags', function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;

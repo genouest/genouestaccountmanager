@@ -54,7 +54,7 @@ if(MY_ADMIN_USER !== null){
 }
 
 var app = express();
-app.use(cors())
+app.use(cors());
 
 if (process.env.MY_ACCESS_LOG) {
     var fs = require('fs');
@@ -298,7 +298,7 @@ app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);
 
 app.get('/tags', tags);
-app.post('/tags/:kind/:id', tags)
+app.post('/tags/:kind/:id', tags);
 
 app.get('/robots.txt', function (request, response) {
     response.sendFile(path.resolve(__dirname, 'robots.txt'));

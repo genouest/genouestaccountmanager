@@ -22,6 +22,15 @@ export class TagComponent implements OnInit {
     }
 
     @Input()
+    set tag(taglist: string[]) {
+      console.log('receive taglist', taglist)
+      if(taglist){
+        this.tags = taglist;
+        console.log('update list', this.tags)
+      }
+    }
+
+    @Input()
     set kind(kind: string) {
       this.kindTag = kind;
     }
@@ -34,8 +43,8 @@ export class TagComponent implements OnInit {
 
     ngOnInit() {
         this.msg = "";
-        this.tags = [];
-        this.tagList = ['type:internal', 'type:external'];
+        // this.tags = [];
+        this.tagList = [];
         this.newTag = '';
         this.tagService.get().subscribe(
           resp => {
