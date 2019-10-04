@@ -27,6 +27,8 @@ export class TagComponent implements OnInit {
       if(taglist){
         this.tags = taglist;
         console.log('update list', this.tags)
+      } else {
+        this.tags = [];
       }
     }
 
