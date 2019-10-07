@@ -558,6 +558,10 @@ export class UserComponent implements OnInit {
     }
 
     register_u2f() {
+        if (this.window['u2f'] === undefined) {
+            this.u2f = "U2F authentication not supported by this browser";
+            return;
+        }
         this.userService.u2fGet(this.user.uid).subscribe(
             resp => {
                 let registrationRequest = resp['registrationRequest'];
