@@ -24,7 +24,7 @@ var now = new Date();
 var ended_after = now;
 ended_after = new Date(ended_after.getFullYear(), ended_after.getMonth(), ended_after.getDate() - CONFIG.tp.extra_expiration);
 
-logger.info("[INFO] Check coming reservations");
+logger.info("[INFO] Check expiring reservations");
 reservation_db.find({
     'to': {'$lte': ended_after.getTime()},
     'created': true,
@@ -32,7 +32,7 @@ reservation_db.find({
 
 }).then(function(reservations){
     if(reservations === undefined || reservations.length == 0){
-        console.log("[INFO] No pending reservation");
+        console.log("[INFO] No expired reservation");
         process.exit(0);
     }
     Promise.all(reservations.map(function(reservation){
