@@ -407,7 +407,7 @@ describe('My', () => {
                 }
                 else {
 
-                    if(nb_timer>5){
+                    if(nb_timer>10){
                         clearInterval(timer);
                         assert(false);
                         done();
