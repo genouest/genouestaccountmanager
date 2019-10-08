@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
 var express = require('express');
 var expressStaticGzip = require('express-static-gzip');
-var cors = require('cors')
+var cors = require('cors');
 var path = require('path');
-var favicon = require('serve-favicon');
+// var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -81,7 +81,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 3600*1000}
-}))
+}));
 // app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -321,6 +321,7 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development' || process.env.DEBUG) {
+    // eslint-disable-next-line no-unused-vars
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
@@ -332,6 +333,7 @@ if (app.get('env') === 'development' || process.env.DEBUG) {
 else {
     // production error handler
     // no stacktraces leaked to user
+    // eslint-disable-next-line no-unused-vars
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {
@@ -344,7 +346,8 @@ else {
 module.exports = app;
 
 // Setup list of available user/group ids
-utils.loadAvailableIds().then(function (alreadyLoaded) {
+// eslint-disable-next-line no-unused-vars
+utils.loadAvailableIds().then(function (_alreadyLoaded) {
 
     if (!module.parent) {
         http.createServer(app).listen(app.get('port'), function(){
@@ -352,4 +355,4 @@ utils.loadAvailableIds().then(function (alreadyLoaded) {
         });
     }
 
-})
+});
