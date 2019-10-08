@@ -2,7 +2,6 @@
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
-var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
 var markdown = require("markdown").markdown;
 var htmlToText = require('html-to-text');
@@ -11,6 +10,7 @@ var validator = require("email-validator");
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const filer = require('../routes/file.js');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
@@ -140,16 +140,17 @@ var create_extra_group = function(group_name, owner_name){
             group = {name: group_name, gid: mingid, owner: owner_name};
             groups_db.insert(group, function(err){
                 goldap.add_group(group, fid, function(err){
-                    var script = "#!/bin/bash\n";
-                    script += "set -e \n"
-                    script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-                    var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-                    fs.writeFile(script_file, script, function(err) {
-                        fs.chmodSync(script_file, 0o755);
-                        group.fid = fid;
-                        resolve(group);
-                        return;
-                    });
+                    filer.user_create_extra_group(group, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                                resolve(group);  // todo: find if needed
+                                return;
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Create Group Failed for: ' + group.name, error);
+                            return;
+                        });
                 });
             });
         });
@@ -210,26 +211,17 @@ var create_extra_user = function(user_name, group, internal_user){
                 if(!err){
                     delete user.password;
                     users_db.insert(user, function(err){
-                        var script = "#!/bin/bash\n";
-                        script += "set -e \n"
-                        script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                        script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
-                        script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
-                        script += "fi\n"
-                        script += "sleep 3\n";
-                        script += "mkdir -p "+user.home+"/.ssh\n";
-                        script += utils.addReadmes(user.home);
+                        // todo: do something if err
+                        filer.user_create_extra_user(user, fid)
+                            .then(
+                                created_file => {
+                                    logger.info("File Created: ", created_file);
+                                })
+                            .catch(error => { // reject()
+                                logger.error('Create User Failed for: ' + user.uid, error);
+                                return;
+                            });
 
-                        script += "touch "+user.home+"/.ssh/authorized_keys\n";
-                        script += "echo \"Host *\" > "+user.home+"/.ssh/config\n";
-                        script += "echo \"  StrictHostKeyChecking no\" >> "+user.home+"/.ssh/config\n";
-                        script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+user.home+"/.ssh/config\n";
-                        script += "chmod 700 "+user.home+"/.ssh\n";
-                        script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
-                        script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
-                        var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                        fs.writeFile(script_file, script, function(err) {
-                            fs.chmodSync(script_file,0o755);
                             var plugin_call = function(plugin_info, userId, data, adminId){
                                 return new Promise(function (resolve, reject){
                                     plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
@@ -247,7 +239,7 @@ var create_extra_user = function(user_name, group, internal_user){
                                 resolve(user);
                                 return;
                             });
-                        });
+
                     });
 
                 }
@@ -298,7 +290,7 @@ router.get('/user/:id/apikey', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -333,7 +325,7 @@ router.post('/user/:id/apikey', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -366,7 +358,7 @@ router.put('/user/:id/subscribe', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     // if not user nor admin
     if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
@@ -399,7 +391,7 @@ router.put('/user/:id/unsubscribe', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     // if not user nor admin
     if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
@@ -433,7 +425,7 @@ router.get('/user/:id/subscribed', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(!user) {
@@ -461,7 +453,7 @@ router.get('/group/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -484,18 +476,22 @@ router.delete_group = function(group, admin_user_id){
         groups_db.remove({'name': group.name}, function(err){
             var fid = new Date().getTime();
             goldap.delete_group(group, fid, function(err){
-                var script = "#!/bin/bash\n";
-                script += "set -e \n"
-                script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-                var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
+                filer.user_delete_group(group, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Delete Group Failed for: ' + group.name, error);
+                        return;
+                    });
+
                     group.fid = fid;
                     events_db.insert({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"]}, function(err){});
                     utils.freeGroupId(group.gid).then(function(){
                         resolve(true);
                     })
-                });
+
             });
         });
     });
@@ -527,7 +523,7 @@ router.delete('/group/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -566,7 +562,7 @@ router.put('/group/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -607,7 +603,7 @@ router.post('/group/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -636,20 +632,23 @@ router.post('/group/:id', function(req, res){
                     group = {name: req.param('id'), gid: mingid, owner: owner};
                     groups_db.insert(group, function(err){
                         goldap.add_group(group, fid, function(err){
+                            filer.user_add_group(group, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Add Group Failed for: ' + group.name, error);
+                                    res.status(500).send('Add Group Failed');
+                                    return;
+                                });
 
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n"
-                            script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+group.name+"."+fid+".ldif\n";
-                            var script_file = CONFIG.general.script_dir+'/'+group.name+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
                                 events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name+"."+fid+".update"]}, function(err){});
 
-                                fs.chmodSync(script_file,0o755);
                                 group.fid = fid;
                                 res.send(group);
                                 res.end();
                                 return;
-                            });
                         });
                     });
                 });
@@ -770,7 +769,7 @@ router.post('/user/:id/group/:group', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id'), req.param('group')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -800,15 +799,6 @@ router.post('/user/:id/group/:group', function(req, res){
             var fid = new Date().getTime();
             // Now add group
             goldap.change_user_groups(user, [secgroup], [], fid, function() {
-                // remove from ldap
-                // delete home
-                var script = "#!/bin/bash\n";
-                script += "set -e \n"
-                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
 
                     users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
                         if(err){
@@ -816,12 +806,24 @@ router.post('/user/:id/group/:group', function(req, res){
                             res.end();
                             return;
                         }
+
+                        filer.user_change_group(user, fid)
+                            .then(
+                                created_file => {
+                                    logger.info("File Created: ", created_file);
+                                })
+                            .catch(error => { // reject()
+                                logger.error('Group Change Failed for: ' + user.uid, error);
+                                res.status(500).send('Change Group Failed');
+                                return;
+                            });
+
                         events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
                         res.send({message: 'User added to group', fid: fid});
                         res.end();
                         return;
                     });
-                });
+
             });
         });
     });
@@ -836,7 +838,7 @@ router.delete('/user/:id/group/:group', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id'), req.param('group')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -870,15 +872,6 @@ router.delete('/user/:id/group/:group', function(req, res){
             var fid = new Date().getTime();
             // Now add group
             goldap.change_user_groups(user, [], [secgroup], fid, function() {
-                // remove from ldap
-                // delete home
-                var script = "#!/bin/bash\n";
-                script += "set -e \n"
-                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
 
                     users_db.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}}, function(err){
                         if(err){
@@ -886,6 +879,18 @@ router.delete('/user/:id/group/:group', function(req, res){
                             res.end();
                             return;
                         }
+
+                    filer.user_change_group(user, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Group Change Failed for: ' + user.uid, error);
+                            res.status(500).send('Change Group Failed');
+                            return;
+                        });
+
                         events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from secondary  group ' + req.param('group') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
                         users_db.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}, function(err, users_in_group){
                             if(users_in_group && users_in_group.length > 0){
@@ -908,7 +913,6 @@ router.delete('/user/:id/group/:group', function(req, res){
                             });
                         });
                     });
-                });
             });
         });
     });
@@ -939,25 +943,22 @@ router.delete_user = function(user, action_owner_id){
             var allgroups = user.secondarygroups;
             allgroups.push(user.group);
             goldap.change_user_groups(user, [], allgroups, fid, function() {
-                // remove from ldap
-                // delete home
-                var script = "#!/bin/bash\n";
-                //script += "set -e \n"
-                script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                script += "ldapdelete -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn +" \"uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\"\n";
-                // todo: should never rm -rf from a variable
-                script += "rm -rf "+user.home+"\n";
-                // script += "rm -rf /omaha-beach/"+user.uid+"\n";
-                script += utils.deleteExtraDirs(user.uid, user.group);
-
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file,0o755);
                     users_db.remove({_id: user._id}, function(err){
                         if(err){
                             resolve(false);
                             return;
                         }
+
+                        filer.user_delete_user(user, fid)
+                            .then(
+                                created_file => {
+                                    logger.info("File Created: ", created_file);
+                                })
+                            .catch(error => { // reject()
+                                logger.error('Delete User Failed for: ' + user.uid, error);
+                                return;
+                            });
+
                         router.clear_user_groups(user, action_owner_id);
                         var msg_activ ="User " + user.uid + " has been deleted by " + action_owner_id;
                         var msg_activ_html = msg_activ;
@@ -1007,7 +1008,6 @@ router.delete_user = function(user, action_owner_id){
                             });
 
                     });
-                });
             });
         }
     });
@@ -1021,7 +1021,7 @@ router.delete('/user/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -1083,7 +1083,7 @@ router.get('/user/:id/activate', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
 
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
@@ -1129,39 +1129,19 @@ router.get('/user/:id/activate', function(req, res) {
                     goldap.add(user, fid, function(err) {
                         if(!err){
                             users_db.update({uid: req.param('id')},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(err){
-                                //groups_db.update({'name': user.group}, {'$set': { 'gid': user.gidnumber}}, {upsert:true}, function(err){
 
-                                var script = "#!/bin/bash\n";
-                                script += "set -e \n"
-                                script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                                script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
-                                script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
-                                script += "fi\n"
-                                script += "sleep 3\n";
-                                script += "mkdir -p "+user.home+"/.ssh\n";
-                                script += utils.addReadmes(user.home);
-                                /*
-                                  script += "mkdir -p "+user.home+"/user_guides\n";
-                                  if (typeof CONFIG.general.readme == "object") {
-                                  CONFIG.general.readme.forEach(function(dict) {
-                                  script += "ln -s " + dict.source_folder + " "+user.home+"/user_guides/" + dict.language + "\n";
-                                  });
-                                  } else {
-                                  script += "ln -s " + CONFIG.general.readme + " "+user.home+"/user_guides/README\n";
-                                  };
-                                */
-                                script += "touch "+user.home+"/.ssh/authorized_keys\n";
-                                script += "echo \"Host *\" > "+user.home+"/.ssh/config\n";
-                                script += "echo \"  StrictHostKeyChecking no\" >> "+user.home+"/.ssh/config\n";
-                                script += "echo \"   UserKnownHostsFile=/dev/null\" >> "+user.home+"/.ssh/config\n";
-                                script += "chmod 700 "+user.home+"/.ssh\n";
-                                // script += "mkdir -p /omaha-beach/"+user.uid+"\n";
-                                script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
-                                // script += "chown -R "+user.uidnumber+":"+user.gidnumber+" /omaha-beach/"+user.uid+"\n";
-                                script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
-                                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                                fs.writeFile(script_file, script, function(err) {
-                                    fs.chmodSync(script_file,0o755);
+                                filer.user_add_user(user, fid)
+                                    .then(
+                                        created_file => {
+                                            logger.info("File Created: ", created_file);
+                                        })
+                                    .catch(error => { // reject()
+                                        logger.error('Add User Failed for: ' + user.uid, error);
+                                        res.status(500).send('Add User Failed');
+                                        return;
+                                    });
+
+
                                     notif.add(user.email, function(){
                                         var msg_activ = CONFIG.message.activation.join("\n").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                                         var msg_activ_html = CONFIG.message.activation_html.join("").replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1195,8 +1175,6 @@ router.get('/user/:id/activate', function(req, res) {
 
 
                                     });
-                                });
-                                //});
                             });
 
                         }
@@ -1226,7 +1204,7 @@ router.get('/user/:id', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
@@ -1269,7 +1247,7 @@ router.get('/user/:id/confirm', function(req, res) {
     var regkey = req.param('regkey');
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: uid}, function(err, user) {
         if(! user) {
@@ -1328,7 +1306,7 @@ router.post('/user/:id', function(req, res) {
     logger.info('New register request for '+req.param('id'));
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     /*
       if(req.param('ip').split('.').length != 4) {
@@ -1466,7 +1444,7 @@ router.get('/user/:id/expire', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         users_db.findOne({uid: req.param('id')}, function(err, user){
@@ -1492,18 +1470,21 @@ router.get('/user/:id/expire', function(req, res){
                     else {
                         user.history.push({'action': 'expire', date: new Date().getTime()});
                         users_db.update({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}}, function(err){
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n"
-                            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                            script += "if [ -e "+user.home+"/.ssh/authorized_keys ]; then\n";
-                            script += "  mv  "+user.home+"/.ssh/authorized_keys "+user.home+"/.ssh/authorized_keys.expired\n";
-                            script += "fi\n";
 
-                            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
+                            filer.user_expire_user(user, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Expire User Failed for: ' + user.uid, error);
+                                    res.status(500).send('Expire User Failed');
+                                    return;
+                                });
+
                                 events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                                fs.chmodSync(script_file,0o755);
+
                                 // Now remove from mailing list
                                 try {
                                     notif.remove(user.email, function(err){
@@ -1531,7 +1512,6 @@ router.get('/user/:id/expire', function(req, res){
                                     res.end();
                                     return;
                                 }
-                            });
 
                             return;
                         });
@@ -1556,7 +1536,7 @@ router.post('/user/:id/passwordreset', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(session_user.uid != req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
@@ -1583,15 +1563,20 @@ router.post('/user/:id/passwordreset', function(req, res){
                     return;
                 }
                 else {
-                    var script = "#!/bin/bash\n";
-                    script += "set -e \n"
-                    script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                    var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                    fs.writeFile(script_file, script, function(err) {
-                        fs.chmodSync(script_file,0o755);
+
+                    filer.user_reset_password(user, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Reset Password Failed for: ' + user.uid, error);
+                            res.status(500).send('Reset Password Failed');
+                            return;
+                        });
+
                         res.send({message:'Password updated'});
                         return;
-                    });
                 }
             });
 
@@ -1603,7 +1588,7 @@ router.get('/user/:id/passwordreset', function(req, res){
     var key = Math.random().toString(36).substring(7);
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err || !user) {
@@ -1657,7 +1642,7 @@ router.get('/user/:id/passwordreset', function(req, res){
 router.get('/user/:id/passwordreset/:key', function(req, res){
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err) {
@@ -1678,12 +1663,18 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                 else {
                     user.history.push({'action': 'password reset', date: new Date().getTime()});
                     users_db.update({uid: user.uid},{'$set': {history: user.history}}, function(err){
-                        var script = "#!/bin/bash\n";
-                        script += "set -e \n"
-                        script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                        var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                        fs.writeFile(script_file, script, function(err) {
-                            fs.chmodSync(script_file,0o755);
+                        // Todo: find if we need another template (or not)
+                        filer.user_reset_password(user, fid)
+                            .then(
+                                created_file => {
+                                    logger.info("File Created: ", created_file);
+                                })
+                            .catch(error => { // reject()
+                                logger.error('Reset Password Failed for: ' + user.uid, error);
+                                res.status(500).send('Reset Password Failed');
+                                return;
+                            });
+
                             // Now send email
                             var msg = CONFIG.message.password_reset.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"\n"+CONFIG.message.footer.join("\n");
                             var msg_html = CONFIG.message.password_reset_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1708,7 +1699,6 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                             else {
                                 res.send({message: 'Could not send an email, please contact the support'})
                             }
-                        });
                     });
                 }
             });
@@ -1727,7 +1717,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
 router.get('/user/:id/renew/:regkey', function(req, res){
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
         if(err){
@@ -1765,7 +1755,7 @@ router.get('/user/:id/renew', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         users_db.findOne({uid: req.param('id')}, function(err, user){
@@ -1791,16 +1781,18 @@ router.get('/user/:id/renew', function(req, res){
                     else {
                         user.history.push({'action': 'reactivate', date: new Date().getTime()});
                         users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}}, function(err){
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n"
-                            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                            script += "if [ -e "+user.home+"/.ssh/authorized_keys.expired ]; then\n";
-                            script += "  mv  "+user.home+"/.ssh/authorized_keys.expired "+user.home+"/.ssh/authorized_keys\n";
-                            script += "fi\n";
-                            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
+                            filer.user_renew_user(user, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Renew User Failed for: ' + user.uid, error);
+                                    res.status(500).send('Renew User Failed');
+                                    return;
+                                });
+
                                 events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-                                fs.chmodSync(script_file,0o755);
                                 notif.add(user.email, function(){
                                     var msg_activ = CONFIG.message.reactivation.join("\n").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"\n"+CONFIG.message.footer.join("\n");
                                     var msg_activ_html = CONFIG.message.reactivation_html.join("").replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip)+"<br/>"+CONFIG.message.footer.join("<br/>");
@@ -1831,7 +1823,6 @@ router.get('/user/:id/renew', function(req, res){
                                         return;
                                     });
                                 });
-                            });
 
                             return;
                         });
@@ -1858,7 +1849,7 @@ router.put('/user/:id/ssh', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
@@ -1887,28 +1878,27 @@ router.put('/user/:id/ssh', function(req, res) {
             }
             // Update SSH Key
             users_db.update({_id: user._id}, {'$set': {ssh: req.param('ssh')}}, function(err){
-                user.ssh = escapeshellarg(req.param('ssh'));
-                var script = "#!/bin/bash\n";
-                script += "set -e \n";
-                script += "if [ ! -e "+user.home+"/.ssh ]; then\n";
-                script += "  mkdir -p "+user.home+"/.ssh\n";
-                script += "  chmod -R 700 "+user.home+"/.ssh\n";
-                script += "  touch  "+user.home+"/.ssh/authorized_keys\n";
-                script += "  chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"/.ssh/\n";
-                script += "fi\n";
-                script += "echo \"" + user.ssh + "\" >> "+user.home+"/.ssh/authorized_keys\n";
                 var fid = new Date().getTime();
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
+                user.ssh = escapeshellarg(req.param('ssh'));
+                filer.user_add_ssh_key(user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+
+                    })
+                    .catch(error => { // reject()
+                        logger.error('Add Ssh Key Failed for: ' + user.uid, error);
+                        res.status(500).send('Ssh Key Failed');
+                        return;
+                    });
+
                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
 
-                    fs.chmodSync(script_file,0o755);
                     user.fid = fid;
                     user.ssh = req.param('ssh');
                     res.send(user);
                     res.end();
                     return;
-                });
 
             });
         });
@@ -1924,7 +1914,7 @@ router.get('/user/:id/usage', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         usage=JSON.parse(JSON.stringify(CONFIG.usage));
@@ -1960,7 +1950,7 @@ router.put('/user/:id', function(req, res) {
     */
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
 
     var sess = req.session;
@@ -2069,23 +2059,25 @@ router.put('/user/:id', function(req, res) {
                                 res.status(403).send('Group '+user.group+' does not exist, please create it first');
                                 return;
                             }
-                            var script = "#!/bin/bash\n";
-                            script += "set -e \n"
-                            script += "ldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
+
+                            filer.user_modify_user(user, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info("File Created: ", created_file);
+
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('Modify User Failed for: ' + user.uid, error);
+                                    return;
+                                });
+
                             if(session_user.is_admin && CONFIG.general.use_group_in_path) {
                                 if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                                     // If group modification, change home location
-                                    script += "if [ ! -e "+get_group_home(user)+" ]; then\n"
-                                    script += "\tmkdir -p "+get_group_home(user)+"\n";
-                                    script += "fi\n";
-                                    script += "mv "+user.oldhome+" "+get_group_home(user)+"/\n";
-                                    script += "chown -R "+user.uidnumber+":"+user.gidnumber+" "+user.home+"\n";
-                                    script += utils.moveExtraDirs(user.uid, user.oldgroup, user.group, user.uidnumber, user.gidnumber);
                                     events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []}, function(err){});
                                 }
                             }
-                            var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                            fs.writeFile(script_file, script, function(err) {
+
                                 events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
                                 users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
                                     if(users_in_group && users_in_group.length == 0){
@@ -2097,7 +2089,6 @@ router.put('/user/:id', function(req, res) {
                                     }
                                 });
 
-                                fs.chmodSync(script_file,0o755);
                                 user.fid = fid;
                                 if(user.oldemail!=user.email && !user.is_fake) {
                                     notif.modify(user.oldemail, user.email, function() {
@@ -2114,7 +2105,6 @@ router.put('/user/:id', function(req, res) {
                                 } else {
                                     res.send(user);
                                 }
-                            });
                         });
                     });
                 }
@@ -2153,7 +2143,7 @@ router.get('/project/:id/users', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -2175,9 +2165,9 @@ router.post('/user/:id/project/:project', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id'), req.param('project')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
-    
+
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
@@ -2210,6 +2200,19 @@ router.post('/user/:id/project/:project', function(req, res){
                     res.end();
                     return;
                 }
+
+                filer.project_add_user_to_project({id: newproject}, user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Add User to Project Failed for: ' + new_project.id, error);
+                        res.status(500).send('Add Project Failed');
+                        return;
+                    });
+
                 events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to project ' + newproject , 'logs': []}, function(err){});
                 res.send({message: 'User added to project', fid: fid});
                 res.end();
@@ -2227,7 +2230,7 @@ router.delete('/user/:id/project/:project', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id'), req.param('project')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
@@ -2268,6 +2271,20 @@ router.delete('/user/:id/project/:project', function(req, res){
                         res.end();
                         return;
                     }
+
+                    filer.project_remove_user_from_project(project, user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Add User to Project Failed for: ' + new_project.id, error);
+                        res.status(500).send('Add Project Failed');
+                        return;
+                    });
+
+
                     events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from project ' + oldproject , 'logs': []}, function(err){});
                     res.send({message: 'User removed from project', fid: fid});
                     res.end();
@@ -2286,7 +2303,7 @@ router.get('/list/:list', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('list')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
         if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){

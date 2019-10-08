@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcryptjs');
-var fs = require('fs');
 var escapeshellarg = require('escapeshellarg');
 
 const winston = require('winston');
@@ -18,6 +17,7 @@ var cookieParser = require('cookie-parser');
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif_'+MAILER+'.js');
 
+const filer = require('../routes/file.js');
 var utils = require('./utils');
 
 var get_ip = require('ipware')().get_ip;
@@ -78,7 +78,7 @@ router.get('/project/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -113,7 +113,7 @@ router.post('/project', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
@@ -147,6 +147,17 @@ router.post('/project', function(req, res){
                     'access': req.param('access')
                 }
                 projects_db.insert(new_project, function(err){
+                    var fid = new Date().getTime();
+                    filer.project_add_project(new_project, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);                            })
+                        .catch(error => { // reject()
+                            logger.error('Add Project Failed for: ' + new_project.id, error);
+                            res.status(500).send('Add Project Failed');
+                            return;
+                        });
+
                     events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.param('id') , 'logs': []}, function(err){});
                     res.send({'message': 'Project created'});
                     return;
@@ -164,7 +175,7 @@ router.delete('/project/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
@@ -177,6 +188,18 @@ router.delete('/project/:id', function(req, res){
             return;
         }
         projects_db.remove({'id': req.param('id')}, function(err){
+            var fid = new Date().getTime();
+            filer.project_delete_project({'id': req.param('id')}, fid)
+                .then(
+                    created_file => {
+                        logger.info("File Created: ", created_file);
+                    })
+                .catch(error => { // reject()
+                    logger.error('Delete Project Failed for: ' + req.param('id'), error);
+                    res.status(500).send('Delete Project Failed');
+                    return;
+                });
+
             events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.param('id') , 'logs': []}, function(err){});
 
             res.send({'message': 'Project deleted'});
@@ -194,7 +217,7 @@ router.post('/project/:id', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
@@ -222,6 +245,19 @@ router.post('/project/:id', function(req, res){
                 'path': req.param('path')
             }}
             projects_db.update({'id': req.param('id')}, new_project, function(err){
+                var fid = new Date().getTime();
+                new_project.id =  req.param('id');
+                filer.project_update_project(new_project, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Update Project Failed for: ' + new_project.id, error);
+                        res.status(500).send('Add Project Failed');
+                        return;
+                    });
+
                 events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
                 res.send({'message': 'Project updated'});
                 return;
@@ -239,7 +275,7 @@ router.post('/project/:id/request', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -304,7 +340,7 @@ router.put('/project/:id/request', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
@@ -361,7 +397,7 @@ router.get('/group/:id/projects', function(req, res){
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){

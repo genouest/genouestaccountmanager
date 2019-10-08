@@ -1,7 +1,6 @@
 var express = require('express')
 var router = express.Router()
 // var bcrypt = require('bcryptjs')
-var fs = require('fs')
 // var escapeshellarg = require('escapeshellarg')
 
 var Promise = require('promise')
@@ -38,6 +37,7 @@ var fdbs = require('../routes/database.js')
 var fwebs = require('../routes/web.js')
 var fusers = require('../routes/users.js')
 
+const filer = require('../routes/file.js');
 var utils = require('../routes/utils.js')
 
 // var get_ip = require('ipware')().get_ip;
@@ -66,16 +66,19 @@ var createExtraGroup = function (ownerName) {
             var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName }
             groups_db.insert(group, function(err) {
                 goldap.add_group(group, fid, function(err) {
-                    var script = "#!/bin/bash\n";
-                    script += "set -e \n"
-                    script += "ldapadd -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
-                    var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update";
-                    fs.writeFile(script_file, script, function(err) {
-                        fs.chmodSync(script_file,0o755)
+                    filer.user_add_group(group, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Add Group Failed for: ' + group.name, error);
+                        });
+
                         group.fid = fid
                         resolve(group)
                         return
-                    })
+
                 })
             })
         })
@@ -97,12 +100,16 @@ var deleteExtraGroup = function (group) {
             groups_db.remove({ 'name': group.name }, function () {
                 var fid = new Date().getTime()
                 goldap.delete_group(group, fid, function () {
-                    var script = "#!/bin/bash\n";
-                    script += "set -e \n"
-                    script += "ldapdelete -h " + CONFIG.ldap.host + " -cx -w " + CONFIG.ldap.admin_password + " -D " + CONFIG.ldap.admin_cn + "," + CONFIG.ldap.admin_dn + " -f " + CONFIG.general.script_dir + "/" + group.name + "." + fid + ".ldif\n";
-                    var script_file = CONFIG.general.script_dir + '/' + group.name + "." + fid + ".update"
-                    fs.writeFile(script_file, script, function(err) {
-                        fs.chmodSync(script_file,0o755);
+                    filer.user_delete_group(group, fid)
+                        .then(
+                            created_file => {
+                                logger.info("File Created: ", created_file);
+                            })
+                        .catch(error => { // reject()
+                            logger.error('Delete Group Failed for: ' + group.name, error);
+                            return;
+                        });
+
                         group.fid = fid;
                         utils.freeGroupId(group.gid).then(function(){
                             events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name+"."+fid+".update"] }, function(err){});
@@ -110,7 +117,6 @@ var deleteExtraGroup = function (group) {
                             return
                         })
 
-                    })
                 })
             })
         })
@@ -346,58 +352,15 @@ var tp_reservation = function(userId, from_date, to_date, quantity, about){
 var insert_ldap_user = function(user, fid){
     return new Promise(function (resolve, reject){
         logger.debug("prepare ldap scripts");
-        try{
-            var user_ldif = "";
-            var group_ldif = "";
-            user_ldif += "dn: uid="+user.uid+",ou=people,"+CONFIG.ldap.dn+"\n";
-            user_ldif += "cn: "+user.firstname+" "+user.lastname+"\n";
-            user_ldif += "sn: "+user.lastname+"\n";
-            user_ldif += "ou: tp\n";
-
-            user_ldif += "givenName: "+user.firstname+"\n";
-            user_ldif += "mail: " + user.email + "\n";
-
-            if(user.home) {
-                user_ldif += 'homeDirectory: '+user.home+"\n";
+        goldap.add(user, fid, function(err) {
+            if(err) {
+                logger.error(err);
+                reject(user);
             }
-            else {
-                logger.error("user does not have any home", user);
-                // todo, should we stop here ?
-            }
-
-            user_ldif += "loginShell: "+user.loginShell+"\n";
-            user_ldif += "userpassword: "+user.password+"\n";
-            user_ldif += "uidNumber: "+user.uidnumber+"\n";
-            user_ldif += "gidNumber: "+user.gidnumber+"\n";
-            user_ldif += "objectClass: top\n";
-            user_ldif += "objectClass: posixAccount\n";
-            user_ldif += "objectClass: inetOrgPerson\n\n";
-
-            group_ldif += "dn: cn="+user.group+",ou=groups,"+CONFIG.ldap.dn+"\n";
-            group_ldif += "changetype: modify\n";
-            group_ldif += "add: memberUid\n";
-            group_ldif += "memberUid: "+user.uid+"\n";
-        }
-        catch(exception){logger.error(exception);}
-        logger.debug("switch to ACTIVE");
-        users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE}}).then(function(data){
-            logger.debug("write exec script");
-            fs.writeFile(CONFIG.general.script_dir+'/'+user.uid+"."+fid+".ldif", user_ldif, function(err) {
-                if(err) {
-                    logger.error(err);
-                    reject(user);
-                }
-                if(group_ldif != "") {
-                    fs.writeFile(CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif", group_ldif, function(err) {
-                        resolve(user);
-                    });
-                }
-                else {
-                    resolve(user);
-                }
-            });
+            logger.debug("switch to ACTIVE");
+            users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE}}).then(function(data){});
+            resolve(user);
         });
-
     });
 };
 
@@ -412,39 +375,19 @@ var activate_tp_user = function(user, adminId){
             logger.debug("activate", user.uid);
             var fid = new Date().getTime();
             insert_ldap_user(user, fid).then(function(user){
-                var script = "#!/bin/bash\n";
-                script += "set -e \n"
-                script += "ldapadd -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+"/"+user.uid+"."+fid+".ldif\n";
-                script += "if [ -e "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif"+" ]; then\n"
-                script += "\tldapmodify -h "+CONFIG.ldap.host+" -cx -w "+CONFIG.ldap.admin_password+" -D "+CONFIG.ldap.admin_cn+","+CONFIG.ldap.admin_dn+" -f "+CONFIG.general.script_dir+'/group_'+user.group+"_"+user.uid+"."+fid+".ldif\n";
-                script += "fi\n"
-                script += "sleep 3\n";
 
-                var homeDir = user.home;
-                script += "mkdir -p " + homeDir + "/.ssh\n";
-                script += utils.addReadmes(homeDir);
-                /*
-                  script += "mkdir -p " + homeDir + "/user_guides\n";
-                  if (typeof CONFIG.general.readme == "object") {
-                  CONFIG.general.readme.forEach(function(dict) {
-                  script += "ln -s " + dict.source_folder + " " + homeDir  +"/user_guides/" + dict.language + "\n";
-                  });
-                  } else {
-                  script += "ln -s " + CONFIG.general.readme + " " + homeDir + "/user_guides/README\n";
-                  };
-                */
-                script += "touch " + homeDir + "/.ssh/authorized_keys\n";
-                script += "echo \"Host *\" > " + homeDir + "/.ssh/config\n";
-                script += "echo \"  StrictHostKeyChecking no\" >> " + homeDir + "/.ssh/config\n";
-                script += "echo \"   UserKnownHostsFile=/dev/null\" >> " + homeDir + "/.ssh/config\n";
-                script += "chmod 700 " + homeDir + "/.ssh\n";
-                // script += "mkdir -p /omaha-beach/" + user.uid + "\n";
-                script += "chown -R " + user.uidnumber+":"+user.gidnumber + " " + user.home + "\n";
-                // script += "chown -R " + user.uidnumber+":"+user.gidnumber + " /omaha-beach/" + user.uid+"\n";
-                script += utils.addExtraDirs(user.uid, user.group, user.uidnumber, user.gidnumber);
-                var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-                fs.writeFile(script_file, script, function(err) {
-                    fs.chmodSync(script_file, 0o755);
+                filer.user_add_user(user, fid)
+                    .then(
+                        created_file => {
+                            logger.info("File Created: ", created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Add User Failed for: ' + user.uid, error);
+
+
+                        return;
+                    });
+
                     var plugin_call = function(plugin_info, userId, data, adminId){
                         return new Promise(function (resolve, reject){
                             plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
@@ -458,7 +401,6 @@ var activate_tp_user = function(user, adminId){
                     })).then(function(results){
                         resolve(user);
                     });
-                });
             });
         });
     });
@@ -529,7 +471,7 @@ router.delete('/tp/:id', function(req, res) {
     }
     if(! utils.sanitizeAll([req.param('id')])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
         if(!user) {
@@ -587,5 +529,3 @@ router.delete('/tp/:id', function(req, res) {
 
 
 module.exports = router;
-
-

@@ -3,10 +3,10 @@ var router = express.Router();
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var Promise = require('promise');
-var fs = require('fs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
+const filer = require('../routes/file.js');
 var CONFIG = require('config');
 
 var monk = require('monk'),
@@ -155,36 +155,21 @@ router.get('/ssh/:id', function(req, res) {
         }
 
         var fid = new Date().getTime();
-        var script = "#!/bin/bash\n";
-        script += "set -e \n";
-        var script_file = CONFIG.general.script_dir+'/'+user.uid+"."+fid+".update";
-        var homeDir = user.home;
-        var sshDir = homeDir + "/.ssh";
-        script += "rm -f " + sshDir + "/id_rsa*\n";
-        script += "touch " + sshDir + "/authorized_keys\n";
-        script += "chmod 644 " + sshDir + "/authorized_keys\n";
-        // script += "mv " + sshDir + "/authorized_keys " + sshDir + "/authorized_keys." + fid +"\n";
-        if(user.email){
-            script += "ssh-keygen -t rsa -b 4096 -C \"" + user.email + "\"";
-        }
-        else {
-            script += "ssh-keygen -t rsa -b 4096 ";
-        }
-        script += " -f " + sshDir + "/id_rsa -N \"\"\n";
-        script += "puttygen " + sshDir + "/id_rsa -o " + sshDir + "/id_rsa.ppk\n";
-        script += "cat " + sshDir + "/id_rsa.pub >> " + sshDir + "/authorized_keys\n";
-        script += "chown " + user.uid + ":" + user.group + " " + sshDir + "/*\n";
-        script += "chmod 600 " + sshDir + "/id_rsa\n";
-        script += "chmod 600 " + sshDir + "/id_rsa.pub\n";
-        script += "chmod 700 " + sshDir + "\n";
 
-        fs.writeFile(script_file, script, function(err) {
-            fs.chmodSync(script_file,0o755);
+        filer.ssh_keygen(user, fid)
+            .then(
+                created_file => {
+                    logger.info("File Created: ", created_file);                })
+            .catch(error => { // reject()
+                logger.error('Create User Failed for: ' + user.uid, error);
+                res.status(500).send('Ssh Keygen Failed');
+                return;
+            });
+
             events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
             res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
             res.end();
             return;
-        });
     });
 });
 
