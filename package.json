@@ -23,6 +23,7 @@
     "express": "^4.16.4",
     "express-session": "^1.9.2",
     "express-static-gzip": "^2.0.5",
+    "hjs": "0.0.6",
     "html-to-text": "^4.0.0",
     "ipware": "0.0.3",
     "jsonwebtoken": "^8.4.0",
