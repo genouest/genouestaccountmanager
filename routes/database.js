@@ -11,7 +11,7 @@ var monk = require('monk'),
 var mysql = require('mysql');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const request = require('request');
+// const request = require('request');
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
@@ -54,7 +54,6 @@ handleDisconnect();
  * Change owner
  */
 router.put('/database/:id/owner/:old/:new', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -74,7 +73,9 @@ router.put('/database/:id/owner/:old/:new', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
+        // eslint-disable-next-line no-unused-vars
         databases_db.update({name: req.param('id')},{'$set': {owner: req.param('new')}}, function(err){
+            // eslint-disable-next-line no-unused-vars
             events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id') + ' changed from ' + req.param('old') + ' to ' + req.param('new'), 'logs': []}, function(err){});
             res.send({message: 'Owner changed from '+req.param('old')+' to '+req.param('new')});
             res.end();
@@ -85,7 +86,6 @@ router.put('/database/:id/owner/:old/:new', function(req, res) {
 
 
 router.get('/database', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -99,7 +99,7 @@ router.get('/database', function(req, res) {
         }
         var filter = {};
         if(!session_user.is_admin) {
-            filter = {owner: session_user.uid}
+            filter = {owner: session_user.uid};
         }
         databases_db.find(filter, function(err, databases){
             res.send(databases);
@@ -109,7 +109,6 @@ router.get('/database', function(req, res) {
 });
 
 router.get('/database/owner/:owner', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -125,7 +124,7 @@ router.get('/database/owner/:owner', function(req, res) {
         else {
             session_user.is_admin = false;
         }
-        var filter = {owner: req.param('owner')}
+        var filter = {owner: req.param('owner')};
         databases_db.find(filter, function(err, databases){
             res.send(databases);
             return;
@@ -134,7 +133,6 @@ router.get('/database/owner/:owner', function(req, res) {
 });
 
 router.post('/database/:id', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -152,21 +150,21 @@ router.post('/database/:id', function(req, res) {
             session_user.is_admin = false;
         }
 
-        if (req.param('owner')!=undefined && req.param('owner')!="" && req.param('owner') != session_user.uid && ! session_user.is_admin){
+        if (req.param('owner')!=undefined && req.param('owner')!='' && req.param('owner') != session_user.uid && ! session_user.is_admin){
             res.status(401).send('Not authorized, cant declare a database for a different user');
             return;
         }
         var owner = session_user.uid;
         var create_db = true;
-        if(req.param('owner')!=undefined && req.param('owner') != ""){
-            owner = req.param('owner')
+        if(req.param('owner')!=undefined && req.param('owner') != ''){
+            owner = req.param('owner');
         }
         if(req.param('create') == false || (req.param('type') != undefined && req.param('type') != 'mysql')){
             create_db = false;
         }
 
         var db_type = 'mysql';
-        if(req.param('type') != undefined && req.param('type')) {
+        if(req.param('type') != undefined && req.param('type')){
             db_type = req.param('type');
         }
 
@@ -175,12 +173,12 @@ router.post('/database/:id', function(req, res) {
             db_host = req.param('host');
         }
 
-        db = {
+        let db = {
             owner: owner,
             name: req.param('id'),
             type: db_type,
             host: db_host
-        }
+        };
 
         if (create_db && !req.param('id').match(/^[0-9a-z_]+$/)) {
             res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
@@ -195,45 +193,51 @@ router.post('/database/:id', function(req, res) {
                 return;
             }
             else {
+                // eslint-disable-next-line no-unused-vars
                 databases_db.insert(db, function(err){
                     if(! create_db){
-                        events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' declared by ' +  session_user.uid, 'logs': []}, function(err){});
+                        events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' declared by ' +  session_user.uid, 'logs': []}, function(){});
 
                         res.send({message:'Database declared'});
                         return;
 
                     }
                     else {
-                        var sql = "CREATE DATABASE "+req.param('id')+";\n";
+                        var sql = 'CREATE DATABASE ' + req.param('id') + ';\n';
+                        // eslint-disable-next-line no-unused-vars
                         connection.query(sql, function(err, results) {
                             if (err) {
-                                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.param('id') , 'logs': []}, function(err){});
+                                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.param('id') , 'logs': []}, function(){});
                                 res.send({message: 'Creation error: '+err});
                                 res.end();
-                                return
+                                return;
                             }
                             var password = Math.random().toString(36).slice(-10);
-                            sql = "CREATE USER '"+req.param('id')+"'@'%' IDENTIFIED BY '"+password+"';\n";
+                            sql = `CREATE USER '${req.param('id')}'@'%' IDENTIFIED BY '${password}';\n`;
+                            // sql = "CREATE USER '"+req.param('id')+"'@'%' IDENTIFIED BY '"+password+"';\n";
+                            // eslint-disable-next-line no-unused-vars
                             connection.query(sql, function(err, results) {
                                 if (err) {
                                     res.send({message: 'Failed to create user'});
                                     res.end();
-                                    return
+                                    return;
                                 }
-                                sql = "GRANT ALL PRIVILEGES ON "+req.param('id')+".* TO '"+req.param('id')+"'@'%'\n";
+                                //sql = "GRANT ALL PRIVILEGES ON "+req.param('id')+".* TO '"+req.param('id')+"'@'%'\n";
+                                sql = `GRANT ALL PRIVILEGES ON ${req.param('id')}.* TO '${req.param('id')}'@'%'\n`;
+                                // eslint-disable-next-line no-unused-vars
                                 connection.query(sql, function(err, results) {
                                     if (err) {
                                         res.send({message: 'Failed to grant access to user'});
                                         res.end();
-                                        return
+                                        return;
                                     }
                                     // Now send message
-                                    var msg = "Database created:\n";
-                                    msg += " Host: " + CONFIG.mysql.host + "\n";
-                                    msg += " Database: " + req.param('id') + "\n";
-                                    msg += " User: " + req.param('id') + "\n";
-                                    msg += " Password: " + password + "\n";
-                                    msg += " Owner: " + owner + "\n";
+                                    var msg = 'Database created:\n';
+                                    msg += ' Host: ' + CONFIG.mysql.host + '\n';
+                                    msg += ' Database: ' + req.param('id') + '\n';
+                                    msg += ' User: ' + req.param('id') + '\n';
+                                    msg += ' Password: ' + password + '\n';
+                                    msg += ' Owner: ' + owner + '\n';
                                     var mailOptions = {
                                         origin: MAIL_CONFIG.origin, // sender address
                                         destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
@@ -241,9 +245,10 @@ router.post('/database/:id', function(req, res) {
                                         message: msg, // plaintext body
                                         html_message: msg // html body
                                     };
-                                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' created by ' +  session_user.uid, 'logs': []}, function(err){});
+                                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' created by ' +  session_user.uid, 'logs': []}, function(){});
 
                                     if(notif.mailSet()) {
+                                        // eslint-disable-next-line no-unused-vars
                                         notif.sendUser(mailOptions, function(error, response){
                                             if(error){
                                                 logger.error(error);
@@ -268,7 +273,6 @@ router.post('/database/:id', function(req, res) {
 });
 
 router.delete('/database/:id', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -287,7 +291,7 @@ router.delete('/database/:id', function(req, res) {
         else {
             session_user.is_admin = false;
         }
-        var filter = {name: req.param('id')};
+        let filter = {name: req.param('id')};
         if(!session_user.is_admin) {
             filter['owner'] = session_user.uid;
         }
@@ -295,20 +299,25 @@ router.delete('/database/:id', function(req, res) {
 
         databases_db.findOne({name: req.param('id')}, function(err, database){
             if(! database || (database.type!==undefined && database.type != 'mysql')) {
+                // eslint-disable-next-line no-unused-vars
                 databases_db.remove(filter, function(err){
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' deleted by ' +  session_user.uid, 'logs': []}, function(err){});
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' deleted by ' +  session_user.uid, 'logs': []}, function(){});
                     res.send({message: ''});
                     res.end();
                     return;
                 });
             }
             else {
+                // eslint-disable-next-line no-unused-vars
                 databases_db.remove(filter, function(err){
-                    var sql = "DROP USER '"+req.param('id')+"'@'%';\n";
+                    //var sql = "DROP USER '"+req.param('id')+"'@'%';\n";
+                    let sql = `DROP USER '${req.param('id')}'@'%';\n`;
+                    // eslint-disable-next-line no-unused-vars
                     connection.query(sql, function(err, results) {
-                        sql = "DROP DATABASE "+req.param('id')+";\n";
+                        let sql = `DROP DATABASE ${req.param('id')};\n`;
+                        // eslint-disable-next-line no-unused-vars
                         connection.query(sql, function(err, results) {
-                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' deleted by ' +  session_user.uid, 'logs': []}, function(err){});
+                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.param('id')+ ' deleted by ' +  session_user.uid, 'logs': []}, function(){});
                             res.send({message:'Database removed'});
                             res.end();
                             return;
@@ -322,9 +331,10 @@ router.delete('/database/:id', function(req, res) {
 
 
 router.delete_dbs = function(user){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         databases_db.find({'owner': user.uid}).then(function(databases){
-            logger.debug("delete_dbs");
+            logger.debug('delete_dbs');
             if(!databases){
                 resolve(true);
                 return;
@@ -341,9 +351,10 @@ router.delete_dbs = function(user){
 
 
 var delete_db = function(user, db_id){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
-        logger.debug("delete_db", db_id);
-        var filter = {name: db_id};
+        logger.debug('delete_db', db_id);
+        let filter = {name: db_id};
         if(!user.is_admin) {
             filter['owner'] = user.uid;
         }
@@ -364,9 +375,12 @@ var delete_db = function(user, db_id){
             }
             else {
                 databases_db.remove(filter).then(function(){
-                    var sql = "DROP USER '"+db_id+"'@'%';\n";
+                    //var sql = "DROP USER '"+db_id+"'@'%';\n";
+                    let sql = `DROP USER '${db_id}'@'%';\n`;
+                    // eslint-disable-next-line no-unused-vars
                     connection.query(sql, function(err, results) {
-                        sql = "DROP DATABASE "+db_id+";\n";
+                        let sql = `DROP DATABASE ${db_id};\n`;
+                        // eslint-disable-next-line no-unused-vars
                         connection.query(sql, function(err, results) {
                             events_db.insert(
                                 {

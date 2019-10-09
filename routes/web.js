@@ -18,7 +18,6 @@ var monk = require('monk'),
  * Change owner
  */
 router.put('/web/:id/owner/:old/:new', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -39,7 +38,9 @@ router.put('/web/:id/owner/:old/:new', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
+        // eslint-disable-next-line no-unused-vars
         web_db.update({name: req.param('id')},{'$set': {owner: req.param('new')}}, function(err){
+            // eslint-disable-next-line no-unused-vars
             events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.param('id') + ' owner to ' + req.param('new')  , 'logs': []}, function(err){});
             res.send({message: 'Owner changed from '+req.param('old')+' to '+req.param('new')});
             res.end();
@@ -49,7 +50,6 @@ router.put('/web/:id/owner/:old/:new', function(req, res) {
 });
 
 router.get('/web', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -63,7 +63,7 @@ router.get('/web', function(req, res) {
         }
         var filter = {};
         if(!session_user.is_admin) {
-            filter = {owner: session_user.uid}
+            filter = {owner: session_user.uid};
         }
         web_db.find(filter, function(err, databases){
             res.send(databases);
@@ -73,7 +73,6 @@ router.get('/web', function(req, res) {
 });
 
 router.get('/web/owner/:owner', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -89,7 +88,7 @@ router.get('/web/owner/:owner', function(req, res) {
         else {
             session_user.is_admin = false;
         }
-        var filter = {owner: req.param('owner')}
+        var filter = {owner: req.param('owner')};
         web_db.find(filter, function(err, databases){
             res.send(databases);
             return;
@@ -99,7 +98,6 @@ router.get('/web/owner/:owner', function(req, res) {
 
 
 router.post('/web/:id', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -120,13 +118,15 @@ router.post('/web/:id', function(req, res) {
         if(req.param('owner') !== undefined && session_user.is_admin) {
             owner = req.param('owner');
         }
-        web = {
+        let web = {
             owner: owner,
             name: req.param('id'),
             url: req.param('url'),
             description: req.param('description')
-        }
+        };
+        // eslint-disable-next-line no-unused-vars
         web_db.insert(web, function(err){
+            // eslint-disable-next-line no-unused-vars
             events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'register new web site ' + req.param('id') , 'logs': []}, function(err){});
 
             res.send({web: web, message: 'New website added'});
@@ -135,7 +135,6 @@ router.post('/web/:id', function(req, res) {
 });
 
 router.delete('/web/:id', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -157,7 +156,9 @@ router.delete('/web/:id', function(req, res) {
         if(!session_user.is_admin) {
             filter['owner'] = session_user.uid;
         }
+        // eslint-disable-next-line no-unused-vars
         web_db.remove(filter, function(err){
+            // eslint-disable-next-line no-unused-vars
             events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.param('id') , 'logs': []}, function(err){});
             res.send({message: 'Website deleted'});
         });
@@ -166,13 +167,14 @@ router.delete('/web/:id', function(req, res) {
 
 
 router.delete_webs = function(user){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         web_db.find({'owner': user.uid}).then(function(webs){
             if(!webs){
                 resolve(true);
                 return;
             }
-            logger.debug("delete_webs");
+            logger.debug('delete_webs');
             Promise.all(webs.map(function(web){
                 return delete_web(user, web._id);
             })).then(function(res){
@@ -184,6 +186,7 @@ router.delete_webs = function(user){
 };
 
 var delete_web = function(user, web_id){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         var filter = {_id: web_id};
         if(!user.is_admin) {

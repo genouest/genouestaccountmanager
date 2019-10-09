@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 var Promise = require('promise');
 
 var CONFIG = require('config');
@@ -24,7 +25,7 @@ var now = new Date();
 var ended_after = now;
 ended_after = new Date(ended_after.getFullYear(), ended_after.getMonth(), ended_after.getDate() - CONFIG.tp.extra_expiration);
 
-logger.info("[INFO] Check expiring reservations");
+logger.info('[INFO] Check expiring reservations');
 reservation_db.find({
     'to': {'$lte': ended_after.getTime()},
     'created': true,
@@ -32,20 +33,20 @@ reservation_db.find({
 
 }).then(function(reservations){
     if(reservations === undefined || reservations.length == 0){
-        console.log("[INFO] No expired reservation");
+        console.log('[INFO] No expired reservation');
         process.exit(0);
     }
     Promise.all(reservations.map(function(reservation){
-        console.log("[INFO] Delete accounts for reservation", reservation);
-        console.log("[INFO] Reservation expired at ", new Date(reservation.to));
+        console.log('[INFO] Delete accounts for reservation', reservation);
+        console.log('[INFO] Reservation expired at ', new Date(reservation.to));
         Promise.all(reservation.accounts.map(function(user){
             return users_db.findOne({'uid': user});
         })).then(function(users){
             return tps.delete_tp_users(users, reservation.group, 'auto');
         }).then(function(){
-            console.log("[INFO] close reservation", reservations);
+            console.log('[INFO] close reservation', reservations);
             Promise.all(reservations.map(function(reservation){
-                return reservation_db.update({'_id': reservation._id},{'$set': {'over': true}})
+                return reservation_db.update({'_id': reservation._id},{'$set': {'over': true}});
             })).then(function(){
                 process.exit(0);
             });

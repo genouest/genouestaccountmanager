@@ -1,20 +1,20 @@
 var express = require('express');
 var router = express.Router();
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
+// var cookieParser = require('cookie-parser');
+// var session = require('express-session');
 
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
-const winston = require('winston');
-const logger = winston.loggers.get('gomngr');
+// const winston = require('winston');
+// const logger = winston.loggers.get('gomngr');
 
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
-    groups_db = db.get('groups'),
-    databases_db = db.get('databases'),
-    web_db = db.get('web'),
-    users_db = db.get('users'),
-    events_db = db.get('events');
+var monk = require('monk');
+var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db);
+// var groups_db = db.get('groups');
+// var databases_db = db.get('databases');
+// var web_db = db.get('web');
+var users_db = db.get('users');
+// var events_db = db.get('events');
 
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
@@ -27,7 +27,7 @@ for(var i=0;i<plugins.length;i++){
     if(plugins[i].display_name === undefined) { plugins[i]['display_name'] = plugins[i].name; }
     if(plugins[i].admin_only === undefined) { plugins[i]['admin_only'] = false; }
     if(plugins[i].admin === undefined) { plugins[i]['admin'] = false; }
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name, 'display_name': plugins[i]['display_name'], 'admin_only': plugins[i]['admin_only'], 'admin': plugins[i]['admin']})
+    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name, 'display_name': plugins[i]['display_name'], 'admin_only': plugins[i]['admin_only'], 'admin': plugins[i]['admin']});
 }
 /**
    Plugins must provide functions:
@@ -48,15 +48,15 @@ for(var i=0;i<plugins.length;i++){
 */
 
 router.get('/plugin', function(req, res) {
-    var plugin_list = []
+    var plugin_list = [];
     for(var i=0;i<plugins_info.length;i++){
         if(plugins_modules[plugins_info[i].name].template === undefined) {
             plugin_list.push(plugins_info[i]);
-            continue
+            continue;
         }
         var template = plugins_modules[plugins_info[i].name].template();
-        if(template !==null && template !== ""){
-            plugin_list.push(plugins_info[i])
+        if(template !==null && template !== ''){
+            plugin_list.push(plugins_info[i]);
         }
     }
     res.send(plugin_list);
@@ -70,7 +70,6 @@ router.get('/plugin/:id', function(req, res) {
 });
 
 router.get('/plugin/:id/:user', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -95,7 +94,6 @@ router.get('/plugin/:id/:user', function(req, res) {
 });
 
 router.post('/plugin/:id/:user', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;

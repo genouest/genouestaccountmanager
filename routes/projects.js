@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var bcrypt = require('bcryptjs');
-var escapeshellarg = require('escapeshellarg');
+// var bcrypt = require('bcryptjs');
+// var escapeshellarg = require('escapeshellarg');
 
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
@@ -9,18 +9,18 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
+// const MAILER = CONFIG.general.mailer;
+// const MAIL_CONFIG = CONFIG[MAILER];
 
-var cookieParser = require('cookie-parser');
+// var cookieParser = require('cookie-parser');
 
-var goldap = require('../routes/goldap.js');
-var notif = require('../routes/notif_'+MAILER+'.js');
+// var goldap = require('../routes/goldap.js');
+// var notif = require('../routes/notif_'+MAILER+'.js');
 
 const filer = require('../routes/file.js');
 var utils = require('./utils');
 
-var get_ip = require('ipware')().get_ip;
+// var get_ip = require('ipware')().get_ip;
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
@@ -29,7 +29,6 @@ var monk = require('monk'),
     events_db = db.get('events');
 
 router.get('/project', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -48,9 +47,9 @@ router.get('/project', function(req, res){
                     res.send(projects);
                     return;
                 });
-            };
+            }
         } else {
-            if (req.param('all') === "true"){
+            if (req.param('all') === 'true'){
                 projects_db.find({}, function(err, projects){
                     res.send(projects);
                     return;
@@ -64,14 +63,13 @@ router.get('/project', function(req, res){
                         res.send(projects);
                         return;
                     });
-                };
-            };
-        };
+                }
+            }
+        }
     });
 });
 
 router.get('/project/:id', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -91,22 +89,21 @@ router.get('/project/:id', function(req, res){
         }
         projects_db.findOne({'id': req.param('id')}, function(err, project){
             if(err){
-                logger.error(err)
-                res.status(500).send("Error retrieving project");
+                logger.error(err);
+                res.status(500).send('Error retrieving project');
                 return;
             }
             if (! project){
-                res.status(404).send("Project " + req.param('id') + " not found");
+                res.status(404).send('Project ' + req.param('id') + ' not found');
                 return;
             }
             res.send(project);
             return;
         });
     });
-})
+});
 
 router.post('/project', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -115,7 +112,6 @@ router.post('/project', function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -135,7 +131,7 @@ router.post('/project', function(req, res){
                     res.status(403).send('Not authorized or project already exists');
                     return;
                 }
-                new_project = {
+                let new_project = {
                     'id': req.param('id'),
                     'owner': req.param('owner'),
                     'group': req.param('group'),
@@ -145,19 +141,21 @@ router.post('/project', function(req, res){
                     'path': req.param('path'),
                     'orga': req.param('orga'),
                     'access': req.param('access')
-                }
+                };
+                // eslint-disable-next-line no-unused-vars
                 projects_db.insert(new_project, function(err){
                     var fid = new Date().getTime();
                     filer.project_add_project(new_project, fid)
                         .then(
                             created_file => {
-                                logger.info("File Created: ", created_file);                            })
+                                logger.info('File Created: ', created_file);                            })
                         .catch(error => { // reject()
                             logger.error('Add Project Failed for: ' + new_project.id, error);
                             res.status(500).send('Add Project Failed');
                             return;
                         });
 
+                    // eslint-disable-next-line no-unused-vars
                     events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.param('id') , 'logs': []}, function(err){});
                     res.send({'message': 'Project created'});
                     return;
@@ -168,7 +166,6 @@ router.post('/project', function(req, res){
 });
 
 router.delete('/project/:id', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -177,7 +174,6 @@ router.delete('/project/:id', function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -187,12 +183,13 @@ router.delete('/project/:id', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
+        // eslint-disable-next-line no-unused-vars
         projects_db.remove({'id': req.param('id')}, function(err){
             var fid = new Date().getTime();
             filer.project_delete_project({'id': req.param('id')}, fid)
                 .then(
                     created_file => {
-                        logger.info("File Created: ", created_file);
+                        logger.info('File Created: ', created_file);
                     })
                 .catch(error => { // reject()
                     logger.error('Delete Project Failed for: ' + req.param('id'), error);
@@ -200,6 +197,7 @@ router.delete('/project/:id', function(req, res){
                     return;
                 });
 
+            // eslint-disable-next-line no-unused-vars
             events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.param('id') , 'logs': []}, function(err){});
 
             res.send({'message': 'Project deleted'});
@@ -210,7 +208,6 @@ router.delete('/project/:id', function(req, res){
 });
 
 router.post('/project/:id', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -219,7 +216,6 @@ router.post('/project/:id', function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    //{'id': project.id},{'size': project.size, 'expire': new Date(project.expire).getTime, 'owner': project.owner, 'group': project.group}
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
         if(err || user == null){
             res.status(404).send('User not found');
@@ -234,7 +230,7 @@ router.post('/project/:id', function(req, res){
                 res.status(401).send('Not authorized or project not found');
                 return;
             }
-            new_project = { '$set': {
+            let new_project = { '$set': {
                 'owner': req.param('owner'),
                 'group': req.param('group'),
                 'size': req.param('size'),
@@ -243,14 +239,15 @@ router.post('/project/:id', function(req, res){
                 'access': req.param('access'),
                 'orga': req.param('orga'),
                 'path': req.param('path')
-            }}
+            }};
+            // eslint-disable-next-line no-unused-vars
             projects_db.update({'id': req.param('id')}, new_project, function(err){
                 var fid = new Date().getTime();
                 new_project.id =  req.param('id');
                 filer.project_update_project(new_project, fid)
                     .then(
                         created_file => {
-                            logger.info("File Created: ", created_file);
+                            logger.info('File Created: ', created_file);
                         })
                     .catch(error => { // reject()
                         logger.error('Update Project Failed for: ' + new_project.id, error);
@@ -258,6 +255,7 @@ router.post('/project/:id', function(req, res){
                         return;
                     });
 
+                // eslint-disable-next-line no-unused-vars
                 events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
                 res.send({'message': 'Project updated'});
                 return;
@@ -268,7 +266,6 @@ router.post('/project/:id', function(req, res){
 });
 
 router.post('/project/:id/request', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged){
         res.status(401).send('Not authorized');
         return;
@@ -289,7 +286,7 @@ router.post('/project/:id/request', function(req, res){
             }
             //Add to request list
             if(! user.uid === project.owner ){
-                res.status(401).send('User ' + user.uid + " is not project manager for project " + project.id);
+                res.status(401).send('User ' + user.uid + ' is not project manager for project ' + project.id);
                 return;
             }
             users_db.findOne({'uid': req.param('user')}, function(err, newuser){
@@ -317,11 +314,13 @@ router.post('/project/:id/request', function(req, res){
                 } else if (req.param('request') === 'remove') {
                     project.remove_requests.push(req.param('user'));
                 }
-                new_project = { '$set': {
+                let new_project = { '$set': {
                     'add_requests': project.add_requests,
                     'remove_requests': project.remove_requests
-                }}
+                }};
+                // eslint-disable-next-line no-unused-vars
                 projects_db.update({'id': req.param('id')}, new_project, function(err){
+                    // eslint-disable-next-line no-unused-vars
                     events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.param('request') + ' for user ' + req.param('uid') + ' in project ' + project.id , 'logs': []}, function(err){});
                     res.send({'message': 'Request sent'});
                     return;
@@ -333,7 +332,6 @@ router.post('/project/:id/request', function(req, res){
 
 //Admin only, remove request
 router.put('/project/:id/request', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged){
         res.status(401).send('Not authorized');
         return;
@@ -361,25 +359,26 @@ router.put('/project/:id/request', function(req, res){
                 return;
             }
             var temp_requests = [];
-            if(req.param('request') === "add" ){
+            if(req.param('request') === 'add' ){
                 for(var i=0;i<project.add_requests.length;i++){
                     if( project.add_requests[i] !== req.param('user') ){
                         temp_requests.push(project.add_requests[i]);
                     }
                 }
                 project.add_requests = temp_requests;
-            } else if (req.param('request') === "remove" ){
-                for(var i=0;i<project.remove_requests.length;i++){
+            } else if (req.param('request') === 'remove' ){
+                for(let i=0;i<project.remove_requests.length;i++){
                     if( project.remove_requests[i] !== req.param('user')){
                         temp_requests.push(project.remove_requests[i]);
                     }
                 }
                 project.remove_requests = temp_requests;
-            };
-            new_project = { '$set': {
+            }
+            let new_project = { '$set': {
                 'add_requests': project.add_requests,
                 'remove_requests': project.remove_requests
-            }}
+            }};
+            // eslint-disable-next-line no-unused-vars
             projects_db.update({'id': req.param('id')}, new_project, function(err){
                 res.send({'message': 'Request removed'});
                 return;
@@ -390,7 +389,6 @@ router.put('/project/:id/request', function(req, res){
 
 //Return all projects using this group
 router.get('/group/:id/projects', function(req, res){
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged){
         res.status(401).send('Not authorized');
         return;

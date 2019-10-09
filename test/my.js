@@ -1,12 +1,12 @@
 process.env.NODE_ENV = 'test';
 
-let CONFIG = require('config');
+//let CONFIG = require('config');
 //Require the dev-dependencies
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 //let server = require('../app');
-let should = chai.should();
-let expect = chai.expect;
+//let should = chai.should();
+//let expect = chai.expect;
 let assert = chai.assert;
 
 let fs = require('fs');
@@ -156,8 +156,8 @@ describe('My', () => {
                     'duration': 365
                 })
                 .end((err, res) => {
-                    assert(res.body.status == 0)
-		    done();
+                    assert(res.body.status == 0);
+                    done();
                 });
         });
     });
@@ -216,7 +216,7 @@ describe('My', () => {
                             for(var i=0;i<res.body.length;i++){
                                 if(res.body[i].name == test_group_id){
                                     group_exists = true;
-                                    break
+                                    break;
                                 }
                             }
                             assert(group_exists);
@@ -240,7 +240,7 @@ describe('My', () => {
                             for(var i=0;i<res.body.length;i++){
                                 if(res.body[i].name == test_group_id2){
                                     group_exists = true;
-                                    break
+                                    break;
                                 }
                             }
                             assert(group_exists);
@@ -264,7 +264,7 @@ describe('My', () => {
                             for(var i=0;i<res.body.length;i++){
                                 if(res.body[i].name == test_group_id2){
                                     group_exists = true;
-                                    break
+                                    break;
                                 }
                             }
                             assert(group_exists);
@@ -325,9 +325,9 @@ describe('My', () => {
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             res.should.have.status(200);
-			    user_info = res.body;
+                            user_info = res.body;
                             assert(res.body.status == 'Active');
-			    done();
+                            done();
                         });
                 });
         });
@@ -414,7 +414,7 @@ describe('My', () => {
                     }
                     nb_timer += 1;
                 }
-            }
+            };
             var timer = setInterval(check_home, 1000);
 
         });
@@ -429,7 +429,7 @@ describe('My', () => {
                 url: 'http://localhost/webtest',
                 description: 'some web site',
                 owner: 'user1'
-            }
+            };
             chai.request('http://localhost:3000')
                 .post('/web/' + test_web_id)
                 .set('X-Api-Key', token_id)
@@ -454,11 +454,12 @@ describe('My', () => {
                 });
         });
         it('Admin change owner web site', (done) => {
+            /*
             let website = {
                 name: test_web_id,
                 url: 'http://localhost/webtest',
                 description: 'some web site'
-            }
+            }*/
             chai.request('http://localhost:3000')
                 .put('/web/' + test_web_id + '/owner/user1/user2')
                 .set('X-Api-Key', token_id)
@@ -518,7 +519,7 @@ describe('My', () => {
                 'access': 'Group',
                 'orga': 'test',
                 'path': '/test'
-            }
+            };
             chai.request('http://localhost:3000')
                 .post('/project')
                 .set('X-Api-Key', token_id)
@@ -588,7 +589,7 @@ describe('My', () => {
             let db = {
                 name: test_db_id,
                 type: 'mysql'
-            }
+            };
             chai.request('http://localhost:3000')
                 .post('/database/' + test_db_id)
                 .set('X-Api-Key', user_token_id)
@@ -647,7 +648,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     res.should.have.status(200);
-	            chai.request('http://localhost:3000')
+                    chai.request('http://localhost:3000')
                         .get('/user/' + test_user_id2)
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
@@ -663,17 +664,17 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     let g3_was_deleted = true;
-	            let admin_was_not_deleted = false;
+                    let admin_was_not_deleted = false;
                     for(var i=0;i<res.body.length;i++){
                         if(res.body[i].name == test_group_id3){
                             g3_was_deleted = false;
                         }
-	                if(res.body[i].name == 'admin'){
-	                    admin_was_not_deleted = true;
+                        if(res.body[i].name == 'admin'){
+                            admin_was_not_deleted = true;
                         }
                     }
                     assert(g3_was_deleted);
-	            assert(admin_was_not_deleted);
+                    assert(admin_was_not_deleted);
                     done();
                 });
         });

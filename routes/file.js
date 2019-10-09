@@ -62,11 +62,11 @@ function create_file (name, data) {
                         return;
                     }
 
-                    fs.writeFileSync(filepath + "/" + filename, content);
+                    fs.writeFileSync(filepath + '/' + filename, content);
                     if (tpl.filename_mode) {
-                        fs.chmodSync(filepath + "/" + filename, tpl.filename_mode);
+                        fs.chmodSync(filepath + '/' + filename, tpl.filename_mode);
                     }
-                    resolve (filepath + "/" + filename);
+                    resolve (filepath + '/' + filename);
                     return;
                 });
             });
@@ -79,9 +79,11 @@ function create_file (name, data) {
 /* Todo: add method for project template (create project and add user to project) */
 module.exports = {
 
+    /*
     set_suffix: function (suffix) {
         filename_suffix = suffix;
     },
+    */
 
     /* template for Test */
     create_ssh_config: function (user) {

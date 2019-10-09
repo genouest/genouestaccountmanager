@@ -1,17 +1,18 @@
 var CONFIG = require('config');
 //var LDAP = require('ldap-client');
-var http = require('http')
+// var http = require('http')
 var myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
 
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    groups_db = db.get('groups'),
-    users_db = db.get('users'),
-    events_db = db.get('events');
+var monk = require('monk');
+var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
+var groups_db = db.get('groups');
+// var users_db = db.get('users'),
+// var events_db = db.get('events');
 
+/*
 var options = {
     uri: 'ldap://'+CONFIG.ldap.host, // string
     //version: 3, // integer, default is 3,
@@ -21,9 +22,9 @@ var options = {
     //reconnect: true, // boolean, default is true,
     //backoffmax: 32 // seconds, default is 32, reconnect timeout
 };
+*/
 
-
-function  get_user_dn(user) {
+function get_user_dn(user) {
     return new Promise( function (resolve, reject) {
         // todo: factorize with bind exported function
         // todo: find if it is a good idea, as uid may not be unique ... but dn are ... Or maybe for uid unicity on ldap import ...
@@ -51,7 +52,7 @@ function  get_user_dn(user) {
 
         client.search('ou=people,' + CONFIG.ldap.dn, opts, function(err, res) {
             if(err) {
-                logger.error('Could not find ' + uid, err);
+                logger.error('Could not find ' + user.uid, err);
                 reject(err);
                 return;
             }
@@ -65,6 +66,7 @@ function  get_user_dn(user) {
                 reject(err);
                 return;
             });
+            // eslint-disable-next-line no-unused-vars
             res.on('end', function(result) {
                 if (user_dn_list.length > 1) {
                     logger.warn('more than one entry have been found', user_dn_list);
@@ -90,7 +92,7 @@ module.exports = {
                 })
             .then(
                 created_file => {
-                    logger.info("File Created: ", created_file);
+                    logger.info('File Created: ', created_file);
                     callback();
                 })
             .catch(error => { // reject()
@@ -100,11 +102,13 @@ module.exports = {
     },
 
     bind: function(uid, password, callback) {
-        var body = JSON.stringify({
+        /*
+        let body = JSON.stringify({
             id: uid, password: password
         });
+        */
 
-        var client = myldap.createClient({
+        let client = myldap.createClient({
             url: 'ldap://' +  CONFIG.ldap.host
         });
         client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
@@ -131,12 +135,14 @@ module.exports = {
                         callback(err);
                     });
                 });
+                // eslint-disable-next-line no-unused-vars
                 res.on('searchReference', function(referral) {
                 });
                 res.on('error', function(err) {
                     logger.error('error ', err);
                     callback(err);
                 });
+                // eslint-disable-next-line no-unused-vars
                 res.on('end', function(result) {
                     if(! foundMatch){
                         callback('no user found');
@@ -144,19 +150,21 @@ module.exports = {
                 });
             });
         });
-
-        var bind_options = {
+        /*
+        let bind_options = {
             binddn: 'uid='+uid+'ou=people,'+CONFIG.ldap.dn,
             password: password
         }
+        */
 
-        var fb_options = {
+        /*
+        let fb_options = {
             base: CONFIG.ldap.dn,
             filter: '(uid='+uid+')',
             scope: 'sub',
             attrs: '',
             password: password
-        }
+        }*/
 
     },
 
@@ -189,7 +197,7 @@ module.exports = {
                 })
             .then(
                 created_file => {
-                    logger.info("File Created: ", created_file);
+                    logger.info('File Created: ', created_file);
                     callback();
                 })
             .catch(error => { // reject()
@@ -202,7 +210,7 @@ module.exports = {
         filer.ldap_add_group(group, fid)
             .then(
                 created_file => {
-                    logger.info("File Created: ", created_file);
+                    logger.info('File Created: ', created_file);
                     callback();
                 })
             .catch(error => { // reject()
@@ -215,7 +223,7 @@ module.exports = {
         filer.ldap_delete_group(group, fid)
             .then(
                 created_file => {
-                    logger.info("File Created: ", created_file);
+                    logger.info('File Created: ', created_file);
                     callback();
                 })
             .catch(error => { // reject()
@@ -233,12 +241,12 @@ module.exports = {
             filer.ldap_add_user(user, group, fid)
                 .then(
                     created_file => {
-                        logger.info("File Created: ", created_file);
+                        logger.info('File Created: ', created_file);
                         return filer.ldap_add_user_to_group(user, fid);
                     })
                 .then(
                     created_file => {
-                        logger.info("File Created: ", created_file);
+                        logger.info('File Created: ', created_file);
                         callback();
                     })
                 .catch(error => { // reject()
@@ -258,7 +266,7 @@ module.exports = {
         filer.ldap_change_user_groups(user, group_add, group_remove, fid)
             .then(
                 created_file => {
-                    logger.info("File Created: ", created_file);
+                    logger.info('File Created: ', created_file);
                     callback();
                 })
             .catch(error => { // reject()

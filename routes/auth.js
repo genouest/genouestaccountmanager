@@ -1,10 +1,10 @@
 /*jslint es6 */
 var express = require('express');
 var router = express.Router();
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
+// var cookieParser = require('cookie-parser');
+// var session = require('express-session');
 var goldap = require('../routes/goldap.js');
-var Promise = require('promise');
+// var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
@@ -20,6 +20,7 @@ const MAIL_CONFIG = CONFIG[MAILER];
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
+// eslint-disable-next-line no-unused-vars
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
@@ -29,6 +30,7 @@ var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
     users_db = db.get('users');
 
+/*
 var ldap_manager = {
     auth: function(uid, password) {
         if(CONFIG.ldap.host == 'fake') {
@@ -37,6 +39,7 @@ var ldap_manager = {
         return false;
     }
 }
+*/
 
 var attemps = {};
 
@@ -60,8 +63,8 @@ router.get('/mail/auth/:id', function(req, res) {
         if(err) {
             return res.status(404).send('User not found');
         }
-        var msg_token = "You requested a temporary token to login to application. This token will be valid for 10 minutes only.\n";
-        msg_token = "Token: -- " + password + " -- \n";
+        var msg_token = 'You requested a temporary token to login to application. This token will be valid for 10 minutes only.\n';
+        msg_token = 'Token: -- ' + password + ' -- \n';
         var mailOptions = {
             origin: MAIL_CONFIG.origin, // sender address
             destinations: [user.email], // list of receivers
@@ -77,8 +80,9 @@ router.get('/mail/auth/:id', function(req, res) {
             {expiresIn: '2 days'}
         );
 
+        // eslint-disable-next-line no-unused-vars
         notif.sendUser(mailOptions, function(err, response) {
-            if(err){return res.send({'status': false});};
+            if(err){return res.send({'status': false});}
             return res.send({'status': true, token: usertoken});
         });
     });
@@ -99,7 +103,7 @@ router.post('/mail/auth/:id', function(req, res) {
             {expiresIn: '2 days'}
         );
         var sess = req.session;
-        var now = new Date().getTime()
+        var now = new Date().getTime();
         if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.param('token') != req.locals.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
             return res.status(403).send('Invalid or expired token');
         }
@@ -114,7 +118,7 @@ router.post('/mail/auth/:id', function(req, res) {
         }
         res.send({'user': user, 'token': usertoken});
         res.end();
-        return
+        return;
     });
 });
 
@@ -125,7 +129,7 @@ router.get('/u2f/auth/:id', function(req, res) {
     }
     req.session.u2f = null;
     users_db.findOne({uid: req.param('id')}, function(err, user){
-        if(err) {
+        if(err){
             res.status(404).send('User not found');
             return;
         }
@@ -142,7 +146,7 @@ router.post('/u2f/auth/:id', function(req, res) {
         return res.status(401).send('You need to login first');
     }
     users_db.findOne({uid: req.param('id')}, function(err, user){
-        if(err) {
+        if(err){
             res.status(404).send('User not found');
             return;
         }
@@ -175,11 +179,10 @@ router.post('/u2f/auth/:id', function(req, res) {
 
 router.get('/u2f/register/:id', function(req, res) {
     users_db.findOne({uid: req.param('id')}, function(err, user){
-        if(err) {
+        if(err){
             res.status(404).send('User not found');
             return;
         }
-        var sess = req.session;
         if(!req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
             return res.status(401).send('You need to login first');
         }
@@ -193,7 +196,6 @@ router.get('/u2f/register/:id', function(req, res) {
 
 router.post('/u2f/register/:id', function(req, res) {
     users_db.findOne({uid: req.param('id')}, function(err, user){
-        var sess = req.session;
         if(err || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
             return res.status(401).send('You need to login first');
         }
@@ -201,7 +203,8 @@ router.post('/u2f/register/:id', function(req, res) {
         const registrationResponse = req.param('registrationResponse');
         const result = u2f.checkRegistration(registrationRequest, registrationResponse);
         if (result.successful) {
-            users_db.update({uid: req.param('id')},{"$set": {"u2f.keyHandler": result.keyHandle, "u2f.publicKey": result.publicKey}}, function(err, user){
+            // eslint-disable-next-line no-unused-vars
+            users_db.update({uid: req.param('id')},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}}, function(err, user){
                 return res.send({'publicKey': result.publicKey});
             });
 
@@ -213,7 +216,6 @@ router.post('/u2f/register/:id', function(req, res) {
 });
 
 router.get('/auth', function(req, res) {
-    var sess = req.session;
     if(req.locals.logInfo.id) {
         //if(req.cookies.gomngr !== undefined) {
         // Authenticated
@@ -255,9 +257,9 @@ router.get('/auth', function(req, res) {
 });
 
 router.post('/auth/:id', function(req, res) {
-    var apikey = req.headers['x-my-apikey'] || "";
-    if(apikey === ""){
-        if(req.param('password') === undefined || req.param('password') === null || req.param('password') == "") {
+    var apikey = req.headers['x-my-apikey'] || '';
+    if(apikey === ''){
+        if(req.param('password') === undefined || req.param('password') === null || req.param('password') == '') {
             res.status(401).send('Missing password');
             return;
         }
@@ -274,7 +276,7 @@ router.post('/auth/:id', function(req, res) {
             {expiresIn: '2 days'}
         );
         var sess = req.session;
-        if (apikey !== "" && apikey === user.apikey) {
+        if (apikey !== '' && apikey === user.apikey) {
             user.is_admin = false;
             if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
                 user.is_admin = true;
@@ -345,7 +347,7 @@ router.post('/auth/:id', function(req, res) {
                     }
                     attemps[user.uid]['attemps'] += 1;
                     attemps[user.uid]['last'] = new Date();
-                    res.send({user: null, msg: "Login error, remains "+(3-attemps[user.uid]['attemps'])+" attemps."});
+                    res.send({user: null, msg: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
                     res.end();
                     return;
                 }
@@ -354,6 +356,7 @@ router.post('/auth/:id', function(req, res) {
                     if (!user.apikey) {
                         var apikey = Math.random().toString(36).slice(-10);
                         user.apikey = apikey;
+                        // eslint-disable-next-line no-unused-vars
                         users_db.update({uid: user.uid}, {'$set':{'apikey': apikey}}, function(err, data){
                             res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
                             res.end();

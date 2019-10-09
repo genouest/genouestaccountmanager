@@ -1,13 +1,13 @@
 var express = require('express');
 var router = express.Router();
-var bcrypt = require('bcryptjs');
-var escapeshellarg = require('escapeshellarg');
-var markdown = require("markdown").markdown;
-var htmlToText = require('html-to-text');
+// var bcrypt = require('bcryptjs');
+// var escapeshellarg = require('escapeshellarg');
+// var markdown = require("markdown").markdown;
+// var htmlToText = require('html-to-text');
 
-var Promise = require('promise');
-const winston = require('winston');
-const logger = winston.loggers.get('gomngr');
+// var Promise = require('promise');
+// const winston = require('winston');
+// const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var MAIL_CONFIG = CONFIG.gomail;
 
@@ -22,10 +22,10 @@ router.get('/conf', function(req, res){
         terms_of_use = CONFIG.general.terms_of_use;
     }
     let enable_ui = {
-        "messages": true,
-        "databases": true,
-        "tps": true,
-        "websites": true
+        'messages': true,
+        'databases': true,
+        'tps': true,
+        'websites': true
     };
     if (CONFIG.enable_ui) {
         enable_ui = CONFIG.enable_ui;

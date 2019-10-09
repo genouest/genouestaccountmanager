@@ -1,13 +1,13 @@
 const CONFIG = require('config');
-const monk = require('monk'),
-      db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-      web_db = db.get('web'),
-      users_db = db.get('users'),
-      events_db = db.get('events');
+const monk = require('monk');
+var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
+// var web_db = db.get('web'),
+var users_db = db.get('users');
+var events_db = db.get('events');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const request = require('request');
-const nodemailer = require("nodemailer");
+// const request = require('request');
+const nodemailer = require('nodemailer');
 
 var mail_set = false;
 // mailset should be a isnull on transporter (or not)
@@ -20,12 +20,13 @@ if(CONFIG.nodemailer){
         secure: false, // upgrade later with STARTTLS
     });
 
+    // eslint-disable-next-line no-unused-vars
     transporter.verify(function(error, success) {
         if (error) {
-            console.log(error);
+            logger.error(error);
         } else {
             mail_set =true;
-            console.log("Smtp Server is ready to take our messages");
+            logger.info('Smtp Server is ready to take our messages');
         }
     });
 }
@@ -52,13 +53,13 @@ module.exports = {
     },
 
     getMembers: function(list, callback) {
-        logger.warn("getMembers: no mailing list configured", list);
+        logger.warn('getMembers: no mailing list configured', list);
         callback(false);
         return;
     },
 
     getLists: function(callback){
-        logger.warn("getLists: no mailing list configured");
+        logger.warn('getLists: no mailing list configured');
         callback([]);
         return;
     },
@@ -80,10 +81,12 @@ module.exports = {
                     to: CONFIG.nodemailer.list.cmd_address,
                     subject: CONFIG.nodemailer.list.cmd_add + ' ' + CONFIG.nodemailer.list.address + ' ' + email
                 });
-                logger.info("user added to " + CONFIG.nodemailer.list.address, email);
+                logger.info('user added to ' + CONFIG.nodemailer.list.address, email);
 
+                // eslint-disable-next-line no-unused-vars
                 events_db.insert({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []}, function(err){});
 
+                // eslint-disable-next-line no-unused-vars
                 users_db.update({email: email}, {'$set':{'subscribed': true}}, function(err, data){});
 
             });
@@ -93,7 +96,7 @@ module.exports = {
     },
 
     create: function(name, callback) {
-        logger.warn("create: no mailing list configured", name);
+        logger.warn('create: no mailing list configured', name);
         callback();
         return;
     },
@@ -116,10 +119,11 @@ module.exports = {
                     to: CONFIG.nodemailer.list.cmd_address,
                     subject: CONFIG.nodemailer.list.cmd_del + ' ' + CONFIG.nodemailer.list.address + ' ' + email
                 });
-                logger.warn("user deleted from " + CONFIG.nodemailer.list.address, email);
-
+                logger.warn('user deleted from ' + CONFIG.nodemailer.list.address, email);
+                // eslint-disable-next-line no-unused-vars
                 events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
 
+                // eslint-disable-next-line no-unused-vars
                 users_db.update({email: email}, {'$set':{'subscribed': false}}, function(err, data){});
 
             });
@@ -129,13 +133,13 @@ module.exports = {
     },
 
     modify: function(oldemail, newemail, callback) {
-        logger.debug("Update email " + oldemail + " ==> " + newemail);
+        logger.debug('Update email ' + oldemail + ' ==> ' + newemail);
         if (newemail==undefined ||newemail==null || newemail=='' || ! mail_set ) {
             callback();
             return;
         }
-        this.add(newemail, function(err){});
-        this.remove(oldemail, function(err){});
+        this.add(newemail, function(){});
+        this.remove(oldemail, function(){});
         callback();
         return;
     },
@@ -144,7 +148,7 @@ module.exports = {
         let sbjtag = (CONFIG.nodemailer.prefix ? CONFIG.nodemailer.prefix : CONFIG.general.name);
 
         if (sbjtag.length > 0) {
-            sbjtag = "[" + sbjtag + "] ";
+            sbjtag = '[' + sbjtag + '] ';
         }
 
         let info =  {
@@ -160,15 +164,15 @@ module.exports = {
 
         transporter.sendMail(info);
 
-        logger.info("Message sent to " + mailOptions.destinations.join() + ":" + mailOptions.subject);
+        logger.info('Message sent to ' + mailOptions.destinations.join() + ':' + mailOptions.subject);
 
-        callback("" , true);
+        callback('', true);
         return;
     },
 
     sendList: function(mailing_list, mailOptions, callback) {
-        logger.warn("sendList: no mailing list configured", mailing_list, mailOptions);
-        callback("no mailing list configured", true);
+        logger.warn('sendList: no mailing list configured', mailing_list, mailOptions);
+        callback('no mailing list configured', true);
         return;
     }
 };

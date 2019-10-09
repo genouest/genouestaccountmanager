@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
-var Promise = require('promise');
+// var cookieParser = require('cookie-parser');
+// var session = require('express-session');
+// var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
@@ -23,7 +23,6 @@ var utils = require('./utils');
 */
 
 router.get('/ssh/:id/putty', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -47,8 +46,8 @@ router.get('/ssh/:id/putty', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa.ppk", "id_rsa.ppk", function (err) {
+        var sshDir = user.home + '/.ssh';
+        res.download(sshDir + '/id_rsa.ppk', 'id_rsa.ppk', function (err) {
             if (err) {
                 logger.error(err);
             }
@@ -57,7 +56,6 @@ router.get('/ssh/:id/putty', function(req, res) {
 });
 
 router.get('/ssh/:id/private', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -85,8 +83,8 @@ router.get('/ssh/:id/private', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa", "id_rsa", function (err) {
+        var sshDir = user.home + '/.ssh';
+        res.download(sshDir + '/id_rsa', 'id_rsa', function (err) {
             if (err) {
                 logger.error(err);
             }
@@ -95,7 +93,6 @@ router.get('/ssh/:id/private', function(req, res) {
 });
 
 router.get('/ssh/:id/public', function(req, res) {
-    var sess = req.session;
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -119,8 +116,8 @@ router.get('/ssh/:id/public', function(req, res) {
             res.status(401).send('Not authorized');
             return;
         }
-        var sshDir = user.home + "/.ssh";
-        res.download(sshDir + "/id_rsa.pub", "id_rsa.pub", function (err) {
+        var sshDir = user.home + '/.ssh';
+        res.download(sshDir + '/id_rsa.pub', 'id_rsa.pub', function (err) {
             if (err) {
                 logger.error(err);
             }
@@ -129,7 +126,6 @@ router.get('/ssh/:id/public', function(req, res) {
 });
 
 router.get('/ssh/:id', function(req, res) {
-    var sess = req.session;
     if(!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -159,17 +155,18 @@ router.get('/ssh/:id', function(req, res) {
         filer.ssh_keygen(user, fid)
             .then(
                 created_file => {
-                    logger.info("File Created: ", created_file);                })
+                    logger.info('File Created: ', created_file);                })
             .catch(error => { // reject()
                 logger.error('Create User Failed for: ' + user.uid, error);
                 res.status(500).send('Ssh Keygen Failed');
                 return;
             });
 
-            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid+"."+fid+".update"]}, function(err){});
-            res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
-            res.end();
-            return;
+        // eslint-disable-next-line no-unused-vars
+        events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']}, function(err){});
+        res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
+        res.end();
+        return;
     });
 });
 
