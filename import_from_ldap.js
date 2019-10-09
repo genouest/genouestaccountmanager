@@ -141,37 +141,38 @@ function record_group(group){
 
 
     if(commands.import){
-        // do not import if there is no member
+        group_owner: ""; // todo: find if we should set myadmin as owner
+
         if (memberArray.length > 0) {
-            if (group.dn.includes("ou=projects"))
-            {
-                var go_project = {
-                    id: group.cn,
-                    owner: memberArray[0],
-                    expiration: new Date().getTime() + 1000*3600*24*365,
-                    group: group.cn,
-                    description: "imported from ldap",
-                    path: "",
-                    orga: "",
-                    access : "Group"
-                };
-                mongo_projects.push(go_project);
-            }
-            else
-            {
-                var go_group = {
-                    name: group.cn,
-                    gid: parseInt(group.gidNumber),
-                    owner: memberArray[0]
-                };
-                mongo_groups.push(go_group);
-            }
-        } else {
+            group_owner = memberArray[0];
+        }
+        else {
             console.warn("[SKIP] Group :" + group.cn + " Does not have any member");
         }
-
+        if (group.dn.includes("ou=projects"))
+        {
+            var go_project = {
+                id: group.cn,
+                owner: group_owner,
+                expiration: new Date().getTime() + 1000*3600*24*365,
+                group: group.cn,
+                description: "imported from ldap",
+                path: "",
+                orga: "",
+                access : "Group"
+            };
+            mongo_projects.push(go_project);
+        }
+        else
+        {
+            var go_group = {
+                name: group.cn,
+                gid: parseInt(group.gidNumber),
+                owner: group_owner
+            };
+            mongo_groups.push(go_group);
+        }
     }
-
 }
 
 function search_users(){
