@@ -105,8 +105,6 @@ client.search('ou=groups,' + CONFIG.ldap.dn, cliopts, function(err, groups) {
 });
 
 function record_group(group){
-    console.debug(group);
-
     /*
      * entry: {"dn":"ou=Groups,dc=genouest,dc=org","controls":[],"objectClass":["top","organizationalUnit"],"ou":"Groups"}
      * entry: {"dn":"cn=symbiose,ou=Groups,dc=genouest,dc=org","controls":[],"memberUid":["agouin","lbouri"],"objectClass":["top","posixGroup"],"gidNumber":"20857","cn":"symbiose"}
@@ -116,46 +114,62 @@ function record_group(group){
     // if (group.dn.includes("user-groups")){return;}
     console.info("manage group: " + group.dn);
     ldap_groups[parseInt(group.gidNumber)] = group;
-    if(group.memberUid !== undefined){
-        // only add secondary group if it is not a project groups
-        if (!group.dn.includes("ou=projects")) {
-            for(var i=0;i<group.memberUid.length;i++){
-                if(ldap_secondary_groups[group.memberUid[i]] === undefined){ ldap_secondary_groups[group.memberUid[i]]=[];}
-                ldap_secondary_groups[group.memberUid[i]].push(group.cn);
-            }
+
+    var memberArray = [];
+    if(group.memberUid !== undefined)
+    {
+        if (Array.isArray(group.memberUid))
+        {
+            memberArray = group.memberUid;
+        } else { // should be a string with the unique member
+            memberArray = [group.memberUid];
         }
     }
+
+    if (group.dn.includes("ou=projects"))
+    {
+        for(var j=0;j<memberArray.length;j++){
+            if(ldap_user_projects[memberArray[j]] === undefined){ ldap_user_projects[memberArray[j]]=[];}
+            ldap_user_projects[memberArray[j]].push(group.cn);
+        }
+    } else { // if (!group.dn.includes("ou=projects")) {
+        for(var i=0;i<memberArray.length;i++){
+            if(ldap_secondary_groups[memberArray[i]] === undefined){ ldap_secondary_groups[memberArray[i]]=[];}
+            ldap_secondary_groups[memberArray[i]].push(group.cn);
+        }
+    }
+
+
     if(commands.import){
-        if (group.dn.includes("ou=projects"))
-        {
-            var proj_owner = commands.admin;
-            if (group.memberUid !== undefined) {
-                proj_owner = group.memberUid[0];
-                for(var j=0;j<group.memberUid.length;j++){
-                    if(ldap_user_projects[group.memberUid[j]] === undefined){ ldap_user_projects[group.memberUid[j]]=[];}
-                    ldap_user_projects[group.memberUid[j]].push(group.cn);
-                }
+        // do not import if there is no member
+        if (memberArray.length > 0) {
+            if (group.dn.includes("ou=projects"))
+            {
+                var go_project = {
+                    id: group.cn,
+                    owner: memberArray[0],
+                    expiration: new Date().getTime() + 1000*3600*24*365,
+                    group: group.cn,
+                    description: "imported from ldap",
+                    path: "",
+                    orga: "",
+                    access : "Group"
+                };
+                mongo_projects.push(go_project);
             }
-            else {
-                ldap_user_projects[commands.admin].push(group.cn);
+            else
+            {
+                var go_group = {
+                    name: group.cn,
+                    gid: parseInt(group.gidNumber),
+                    owner: memberArray[0]
+                };
+                mongo_groups.push(go_group);
             }
-            var go_project = {
-                id: group.cn,
-                owner: proj_owner,
-                expiration: new Date().getTime() + 1000*3600*24*365,
-                group: group.cn,
-                description: "imported from ldap",
-                path: "",
-                orga: "",
-                access : "Group"
-            };
-            mongo_projects.push(go_project);
+        } else {
+            console.warn("[SKIP] Group :" + group.cn + " Does not have any member");
         }
-        else  // only add group if it is not a project groups
-        {
-            var go_group = {name: group.cn, gid: parseInt(group.gidNumber), owner: commands.admin};
-            mongo_groups.push(go_group);
-        }
+
     }
 
 }
@@ -231,7 +245,7 @@ function record_user(user){
         projects = [];
     }
 
-    console.warn("Home dir for ", user.uid, " is set to", user.homeDirectory);
+   // console.warn("Home dir for ", user.uid, " is set to", user.homeDirectory);
 
     if(! user.homeDirectory || ! user.homeDirectory.startsWith(CONFIG.general.home)) {
         errors.push(user.uid + " home base dir != " + CONFIG.general.home);
