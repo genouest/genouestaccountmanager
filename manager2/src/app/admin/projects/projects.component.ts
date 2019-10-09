@@ -99,7 +99,7 @@ export class ProjectsComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
-        this.dtTriggerProjects.next();
+        //this.dtTriggerProjects.next();
     }
 
     validate_add_request(project, user_id) {
@@ -266,21 +266,4 @@ export class ProjectsComponent implements OnInit {
         var time = date + ', ' + month + ' ' + year;
         return time;
     }
-
-
-
-    /*
-      renderDataTables(): void {
-      this.tables.forEach(table => {
-      if (table.dtTrigger) {
-      table.dtInstance.then((dt: DataTables.Api) => {
-      dt.clear();
-      dt.destroy();
-      table.dtTrigger.next();
-
-      });
-      }
-      });
-      }*/
-
 }
