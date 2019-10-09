@@ -141,7 +141,7 @@ function record_group(group){
 
 
     if(commands.import){
-        group_owner: ""; // todo: find if we should set myadmin as owner
+        var group_owner = ""; // todo: find if we should set myadmin as owner
 
         if (memberArray.length > 0) {
             group_owner = memberArray[0];
