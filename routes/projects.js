@@ -108,7 +108,7 @@ router.post('/project', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! utils.sanitizeAll([req.body.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
