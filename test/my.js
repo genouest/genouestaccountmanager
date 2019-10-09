@@ -5,7 +5,7 @@ process.env.NODE_ENV = 'test';
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 //let server = require('../app');
-chai.should();
+let should = chai.should();
 //let expect = chai.expect;
 let assert = chai.assert;
 
@@ -406,7 +406,6 @@ describe('My', () => {
                     done();
                 }
                 else {
-
                     if(nb_timer>10){
                         clearInterval(timer);
                         assert(false);
