@@ -49,7 +49,7 @@ router.get('/project', function(req, res){
                 });
             }
         } else {
-            if (req.param('all') === 'true'){
+            if (req.query.all === 'true'){
                 projects_db.find({}, function(err, projects){
                     res.send(projects);
                     return;
@@ -74,7 +74,7 @@ router.get('/project/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -87,14 +87,14 @@ router.get('/project/:id', function(req, res){
             res.status(401).send('Admin only');
             return;
         }
-        projects_db.findOne({'id': req.param('id')}, function(err, project){
+        projects_db.findOne({'id': req.params.id}, function(err, project){
             if(err){
                 logger.error(err);
                 res.status(500).send('Error retrieving project');
                 return;
             }
             if (! project){
-                res.status(404).send('Project ' + req.param('id') + ' not found');
+                res.status(404).send('Project ' + req.params.id + ' not found');
                 return;
             }
             res.send(project);
@@ -108,7 +108,7 @@ router.post('/project', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.body.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -121,26 +121,26 @@ router.post('/project', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        users_db.findOne({'uid': req.param('owner')}, function(err, owner){
+        users_db.findOne({'uid': req.body.owner}, function(err, owner){
             if(err || owner == null){
                 res.status(404).send('User not found');
                 return;
             }
-            projects_db.findOne({'id': req.param('id')}, function(err, project){
+            projects_db.findOne({'id': req.body.id}, function(err, project){
                 if(err || project != null){
                     res.status(403).send('Not authorized or project already exists');
                     return;
                 }
                 let new_project = {
-                    'id': req.param('id'),
-                    'owner': req.param('owner'),
-                    'group': req.param('group'),
-                    'size': req.param('size'),
-                    'expire': req.param('expire'),
-                    'description': req.param('description'),
-                    'path': req.param('path'),
-                    'orga': req.param('orga'),
-                    'access': req.param('access')
+                    'id': req.body.id,
+                    'owner': req.body.owner,
+                    'group': req.body.group,
+                    'size': req.body.size,
+                    'expire': req.bodyexpire,
+                    'description': req.body.description,
+                    'path': req.body.path,
+                    'orga': req.body.orga,
+                    'access': req.body.access
                 };
                 // eslint-disable-next-line no-unused-vars
                 projects_db.insert(new_project, function(err){
@@ -156,7 +156,7 @@ router.post('/project', function(req, res){
                         });
 
                     // eslint-disable-next-line no-unused-vars
-                    events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.param('id') , 'logs': []}, function(err){});
+                    events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []}, function(err){});
                     res.send({'message': 'Project created'});
                     return;
                 });
@@ -170,7 +170,7 @@ router.delete('/project/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -184,21 +184,21 @@ router.delete('/project/:id', function(req, res){
             return;
         }
         // eslint-disable-next-line no-unused-vars
-        projects_db.remove({'id': req.param('id')}, function(err){
+        projects_db.remove({'id': req.params.id}, function(err){
             var fid = new Date().getTime();
-            filer.project_delete_project({'id': req.param('id')}, fid)
+            filer.project_delete_project({'id': req.params.id}, fid)
                 .then(
                     created_file => {
                         logger.info('File Created: ', created_file);
                     })
                 .catch(error => { // reject()
-                    logger.error('Delete Project Failed for: ' + req.param('id'), error);
+                    logger.error('Delete Project Failed for: ' + req.params.id, error);
                     res.status(500).send('Delete Project Failed');
                     return;
                 });
 
             // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.param('id') , 'logs': []}, function(err){});
+            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.params.id , 'logs': []}, function(err){});
 
             res.send({'message': 'Project deleted'});
             return;
@@ -212,7 +212,7 @@ router.post('/project/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -225,25 +225,25 @@ router.post('/project/:id', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        projects_db.findOne({'id': req.param('id')}, function(err, project){
+        projects_db.findOne({'id': req.params.id}, function(err, project){
             if(err || project == null){
                 res.status(401).send('Not authorized or project not found');
                 return;
             }
             let new_project = { '$set': {
-                'owner': req.param('owner'),
-                'group': req.param('group'),
-                'size': req.param('size'),
-                'expire': req.param('expire'),
-                'description': req.param('description'),
-                'access': req.param('access'),
-                'orga': req.param('orga'),
-                'path': req.param('path')
+                'owner': req.body.owner,
+                'group': req.body.group,
+                'size': req.body.size,
+                'expire': req.body.expire,
+                'description': req.body.description,
+                'access': req.body.access,
+                'orga': req.body.orga,
+                'path': req.body.path
             }};
             // eslint-disable-next-line no-unused-vars
-            projects_db.update({'id': req.param('id')}, new_project, function(err){
+            projects_db.update({'id': req.params.id}, new_project, function(err){
                 var fid = new Date().getTime();
-                new_project.id =  req.param('id');
+                new_project.id =  req.params.id;
                 filer.project_update_project(new_project, fid)
                     .then(
                         created_file => {
@@ -256,7 +256,7 @@ router.post('/project/:id', function(req, res){
                     });
 
                 // eslint-disable-next-line no-unused-vars
-                events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.param('id') , 'logs': []}, function(err){});
+                events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.params.id , 'logs': []}, function(err){});
                 res.send({'message': 'Project updated'});
                 return;
             });
@@ -270,7 +270,7 @@ router.post('/project/:id/request', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -279,9 +279,9 @@ router.post('/project/:id/request', function(req, res){
             res.status(404).send('User not found');
             return;
         }
-        projects_db.findOne({'id': req.param('id')}, function(err, project){
+        projects_db.findOne({'id': req.params.id}, function(err, project){
             if(err || project == null){
-                res.status(404).send('Project ' + req.param('id') + ' not found');
+                res.status(404).send('Project ' + req.params.id + ' not found');
                 return;
             }
             //Add to request list
@@ -289,13 +289,13 @@ router.post('/project/:id/request', function(req, res){
                 res.status(401).send('User ' + user.uid + ' is not project manager for project ' + project.id);
                 return;
             }
-            users_db.findOne({'uid': req.param('user')}, function(err, newuser){
+            users_db.findOne({'uid': req.body.user}, function(err, newuser){
                 if(err || newuser == null){
-                    res.status(404).send('User ' + req.param('user') + ' not found');
+                    res.status(404).send('User ' + req.body.user + ' not found');
                     return;
                 }
-                if(newuser.projects && newuser.projects.indexOf(project.id) >= 0 && req.param('request') === 'add'){
-                    res.status(403).send('User ' + req.param('user') + ' is already in project : cannot add');
+                if(newuser.projects && newuser.projects.indexOf(project.id) >= 0 && req.body.request === 'add'){
+                    res.status(403).send('User ' + req.body.user + ' is already in project : cannot add');
                     return;
                 }
                 //Backward compatibility
@@ -305,23 +305,23 @@ router.post('/project/:id/request', function(req, res){
                 if (! project.remove_requests){
                     project.remove_requests = [];
                 }
-                if ( project.add_requests.indexOf(req.param('user')) >= 0 || project.remove_requests.indexOf(req.param('user')) >= 0){
-                    res.status(403).send('User ' + req.param('user') + 'is already in a request : aborting');
+                if ( project.add_requests.indexOf(req.body.user) >= 0 || project.remove_requests.indexOf(req.body.user) >= 0){
+                    res.status(403).send('User ' + req.body.user + 'is already in a request : aborting');
                     return;
                 }
-                if (req.param('request') === 'add'){
-                    project.add_requests.push(req.param('user'));
-                } else if (req.param('request') === 'remove') {
-                    project.remove_requests.push(req.param('user'));
+                if (req.body.request === 'add'){
+                    project.add_requests.push(req.body.user);
+                } else if (req.body.request === 'remove') {
+                    project.remove_requests.push(req.body.user);
                 }
                 let new_project = { '$set': {
                     'add_requests': project.add_requests,
                     'remove_requests': project.remove_requests
                 }};
                 // eslint-disable-next-line no-unused-vars
-                projects_db.update({'id': req.param('id')}, new_project, function(err){
+                projects_db.update({'id': req.params.id}, new_project, function(err){
                     // eslint-disable-next-line no-unused-vars
-                    events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.param('request') + ' for user ' + req.param('uid') + ' in project ' + project.id , 'logs': []}, function(err){});
+                    events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.body.request + ' for user ' + req.body.uid + ' in project ' + project.id , 'logs': []}, function(err){});
                     res.send({'message': 'Request sent'});
                     return;
                 });
@@ -336,7 +336,7 @@ router.put('/project/:id/request', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -349,26 +349,26 @@ router.put('/project/:id/request', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        projects_db.findOne({'id': req.param('id')}, function(err, project){
+        projects_db.findOne({'id': req.params.id}, function(err, project){
             if(err || project == null){
                 res.status(401).send('Not authorized or project not found');
                 return;
             }
-            if (! req.param('user') || ! req.param('request')){
+            if (! req.body.user || ! req.body.request){
                 res.status(403).send('User and request type are needed');
                 return;
             }
             var temp_requests = [];
-            if(req.param('request') === 'add' ){
+            if(req.body.request === 'add' ){
                 for(var i=0;i<project.add_requests.length;i++){
-                    if( project.add_requests[i] !== req.param('user') ){
+                    if( project.add_requests[i] !== req.body.user ){
                         temp_requests.push(project.add_requests[i]);
                     }
                 }
                 project.add_requests = temp_requests;
-            } else if (req.param('request') === 'remove' ){
+            } else if (req.body.request === 'remove' ){
                 for(let i=0;i<project.remove_requests.length;i++){
-                    if( project.remove_requests[i] !== req.param('user')){
+                    if( project.remove_requests[i] !== req.body.user){
                         temp_requests.push(project.remove_requests[i]);
                     }
                 }
@@ -379,7 +379,7 @@ router.put('/project/:id/request', function(req, res){
                 'remove_requests': project.remove_requests
             }};
             // eslint-disable-next-line no-unused-vars
-            projects_db.update({'id': req.param('id')}, new_project, function(err){
+            projects_db.update({'id': req.params.id}, new_project, function(err){
                 res.send({'message': 'Request removed'});
                 return;
             });
@@ -393,7 +393,7 @@ router.get('/group/:id/projects', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -406,7 +406,7 @@ router.get('/group/:id/projects', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        projects_db.find({'group': req.param('id')}, function(err, projects_with_group){
+        projects_db.find({'group': req.params.id}, function(err, projects_with_group){
             res.send(projects_with_group);
             res.end();
             return;

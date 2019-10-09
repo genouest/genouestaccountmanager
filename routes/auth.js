@@ -59,7 +59,7 @@ router.get('/mail/auth/:id', function(req, res) {
         return res.status(403).send('No mail provider set : cannot send mail');
     }
     var password = Math.random().toString(36).slice(-10);
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err) {
             return res.status(404).send('User not found');
         }
@@ -93,7 +93,7 @@ router.post('/mail/auth/:id', function(req, res) {
     if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err) {
             return res.status(404).send('User not found');
         }
@@ -104,7 +104,7 @@ router.post('/mail/auth/:id', function(req, res) {
         );
         var sess = req.session;
         var now = new Date().getTime();
-        if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.param('token') != req.locals.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
+        if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.body.token != req.locals.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
             return res.status(403).send('Invalid or expired token');
         }
         sess.gomngr = sess.mail_token['user'];
@@ -128,7 +128,7 @@ router.get('/u2f/auth/:id', function(req, res) {
         return res.status(401).send('You need to login first');
     }
     req.session.u2f = null;
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             res.status(404).send('User not found');
             return;
@@ -145,7 +145,7 @@ router.post('/u2f/auth/:id', function(req, res) {
     if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             res.status(404).send('User not found');
             return;
@@ -154,7 +154,7 @@ router.post('/u2f/auth/:id', function(req, res) {
             res.status(401).send('U2F not challenged or invalid user');
         }
         var publicKey = user.u2f.publicKey;
-        const result = u2f.checkSignature(req.param('authRequest'), req.param('authResponse'), publicKey);
+        const result = u2f.checkSignature(req.body.authRequest, req.body.authResponse, publicKey);
         if (result.successful) {
             // Success!
             // User is authenticated.
@@ -178,7 +178,7 @@ router.post('/u2f/auth/:id', function(req, res) {
 });
 
 router.get('/u2f/register/:id', function(req, res) {
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             res.status(404).send('User not found');
             return;
@@ -195,16 +195,16 @@ router.get('/u2f/register/:id', function(req, res) {
 });
 
 router.post('/u2f/register/:id', function(req, res) {
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
             return res.status(401).send('You need to login first');
         }
-        const registrationRequest = req.param('registrationRequest');
-        const registrationResponse = req.param('registrationResponse');
+        const registrationRequest = req.body.registrationRequest;
+        const registrationResponse = req.bodyregistrationResponse;
         const result = u2f.checkRegistration(registrationRequest, registrationResponse);
         if (result.successful) {
             // eslint-disable-next-line no-unused-vars
-            users_db.update({uid: req.param('id')},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}}, function(err, user){
+            users_db.update({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}}, function(err, user){
                 return res.send({'publicKey': result.publicKey});
             });
 
@@ -259,12 +259,12 @@ router.get('/auth', function(req, res) {
 router.post('/auth/:id', function(req, res) {
     var apikey = req.headers['x-my-apikey'] || '';
     if(apikey === ''){
-        if(req.param('password') === undefined || req.param('password') === null || req.param('password') == '') {
+        if(req.body.password === undefined || req.body.password === null || req.body.password == '') {
             res.status(401).send('Missing password');
             return;
         }
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err) { logger.error(err); }
         if(! user) {
             res.status(404).send('User not found');
@@ -336,7 +336,7 @@ router.post('/auth/:id', function(req, res) {
             return;
         }
         else {
-            goldap.bind(user.uid, req.param('password'), function(err, token) {
+            goldap.bind(user.uid, req.body.password, function(err, token) {
                 user['token'] = token;
                 if(attemps[user.uid] == undefined) {
                     attemps[user.uid] = { attemps: 0};

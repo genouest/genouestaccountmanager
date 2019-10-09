@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 var fs = require('fs');
 var CONFIG = require('config');
 var monk = require('monk'),
@@ -7,66 +8,74 @@ var monk = require('monk'),
 var Promise = require('promise');
 
 var activate_user = function(userId, data, adminId){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
-            console.log('[Slurm] : Creating slurm cron file.. ' + userId );
-            var fid = new Date().getTime();
-            var script = "#!/bin/bash\n";
-            script += "set -e\n";
-            script += `sacctmgr -i add account ${userId} Cluster=genouest Description="none" Organization="none"\n`;
-            script += `sacctmgr -i create user name=${userId} DefaultAccount=${userId}\n`;
-            var script_file = CONFIG.general.script_dir+'/'+userId+"."+fid+".slurm.update";
-            fs.writeFile(script_file, script, function(err) {
-		        if(err){
-                    console.trace("[slurm] : Could not write script in path " + script_file);
-                    resolve();
-                    return;
-                }
-                fs.chmodSync(script_file,0755);
-                events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [userId+"."+fid+".slurm.update"]}, function(err){});
-                console.log('[slurm] : done');
-        	    resolve();
-            });
+        console.log('[Slurm] : Creating slurm cron file.. ' + userId );
+        var fid = new Date().getTime();
+        var script = '#!/bin/bash\n';
+        script += 'set -e\n';
+        script += `sacctmgr -i add account ${userId} Cluster=genouest Description="none" Organization="none"\n`;
+        script += `sacctmgr -i create user name=${userId} DefaultAccount=${userId}\n`;
+        var script_file = CONFIG.general.script_dir+'/'+userId+'.'+fid+'.slurm.update';
+        fs.writeFile(script_file, script, function(err) {
+            if(err){
+                console.trace('[slurm] : Could not write script in path ' + script_file);
+                resolve();
+                return;
+            }
+            fs.chmodSync(script_file,0o755);
+            events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']}, function(){});
+            console.log('[slurm] : done');
+            resolve();
+        });
  
     });
 };
 var deactivate_user = function(userId, data, adminId){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('[Slurm] : Creating slurm cron file.. ' + userId );
         var fid = new Date().getTime();
-        var script = "#!/bin/bash\n";
-        script += "set -e\n";
+        var script = '#!/bin/bash\n';
+        script += 'set -e\n';
         script += `sacctmgr -i delete user ${userId} account=${userId}\n`;
         script += `sacctmgr -i delete account ${userId} \n`;
-        var script_file = CONFIG.general.script_dir+'/'+userId+"."+fid+".slurm.update";
+        var script_file = CONFIG.general.script_dir+'/'+userId+'.'+fid+'.slurm.update';
         fs.writeFile(script_file, script, function(err) {
             if(err){
-                console.trace("[slurm] : Could not write script in path " + script_file);
+                console.trace('[slurm] : Could not write script in path ' + script_file);
                 resolve();
                 return;
             }
-            fs.chmodSync(script_file,0755);
-            events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [userId+"."+fid+".slurm.update"]}, function(err){});
+            fs.chmodSync(script_file,0o755);
+            events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']}, function(){});
             console.log('[slurm] : done');
             resolve();
         });
     });
 };
 
+// eslint-disable-next-line no-unused-vars
 var get_user_info = function(userId, adminId){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('Nothing to do');
         resolve();
     });
 };
 
+// eslint-disable-next-line no-unused-vars
 var set_user_info = function(userId, data, adminId){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('Nothing to do');
         resolve();
     });
 };
 
+// eslint-disable-next-line no-unused-vars
 var delete_user = function(userId, user, adminId){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('Nothing to do');
         resolve();
@@ -84,7 +93,7 @@ module.exports = {
         return deactivate_user(userId, user, adminId);
     },
     template: function(){
-        var response = "<div class=\"alert alert-info\">Plugin Slurm is active<br><br>Account is created on user activation.</div>";
+        var response = '<div class="alert alert-info">Plugin Slurm is active<br><br>Account is created on user activation.</div>';
         return response;
     },
     get_data: function(userId, adminId){
@@ -94,8 +103,8 @@ module.exports = {
         return set_user_info(userId, data, adminId);
     },
     remove: function(userId, user, adminId){
-        console.log('Plugin slurm for deletion of user : ' + userId)
+        console.log('Plugin slurm for deletion of user : ' + userId);
         return delete_user(userId, user, adminId);
     }
-}
+};
 

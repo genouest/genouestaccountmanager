@@ -23,7 +23,7 @@ router.put('/web/:id/owner/:old/:new', function(req, res) {
         return;
     }
 
-    if(! utils.sanitizeAll([req.param('id'), req.param('old'), req.param('new')])) {
+    if(! utils.sanitizeAll([req.params.id, req.params.old, req.params.new])) {
         res.status(403).send('Invalid parameters');
         return;  
     }
@@ -39,10 +39,10 @@ router.put('/web/:id/owner/:old/:new', function(req, res) {
             return;
         }
         // eslint-disable-next-line no-unused-vars
-        web_db.update({name: req.param('id')},{'$set': {owner: req.param('new')}}, function(err){
+        web_db.update({name: req.params.id},{'$set': {owner: req.params.new}}, function(err){
             // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.param('id') + ' owner to ' + req.param('new')  , 'logs': []}, function(err){});
-            res.send({message: 'Owner changed from '+req.param('old')+' to '+req.param('new')});
+            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.params.id + ' owner to ' + req.params.new  , 'logs': []}, function(err){});
+            res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
             res.end();
             return;
         });
@@ -77,7 +77,7 @@ router.get('/web/owner/:owner', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('owner')])) {
+    if(! utils.sanitizeAll([req.params.owner])) {
         res.status(403).send('Invalid parameters');
         return;  
     }
@@ -88,7 +88,7 @@ router.get('/web/owner/:owner', function(req, res) {
         else {
             session_user.is_admin = false;
         }
-        var filter = {owner: req.param('owner')};
+        var filter = {owner: req.params.owner};
         web_db.find(filter, function(err, databases){
             res.send(databases);
             return;
@@ -102,7 +102,7 @@ router.post('/web/:id', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;  
     }
@@ -115,19 +115,19 @@ router.post('/web/:id', function(req, res) {
         }
 
         var owner = session_user.uid;
-        if(req.param('owner') !== undefined && session_user.is_admin) {
-            owner = req.param('owner');
+        if(req.body.owner !== undefined && session_user.is_admin) {
+            owner = req.body.owner;
         }
         let web = {
             owner: owner,
-            name: req.param('id'),
-            url: req.param('url'),
-            description: req.param('description')
+            name: req.params.id,
+            url: req.body.url,
+            description: req.body.description
         };
         // eslint-disable-next-line no-unused-vars
         web_db.insert(web, function(err){
             // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'register new web site ' + req.param('id') , 'logs': []}, function(err){});
+            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'register new web site ' + req.params.id , 'logs': []}, function(err){});
 
             res.send({web: web, message: 'New website added'});
         });
@@ -139,7 +139,7 @@ router.delete('/web/:id', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;  
     }
@@ -152,14 +152,14 @@ router.delete('/web/:id', function(req, res) {
         else {
             session_user.is_admin = false;
         }
-        var filter = {name: req.param('id')};
+        var filter = {name: req.params.id};
         if(!session_user.is_admin) {
             filter['owner'] = session_user.uid;
         }
         // eslint-disable-next-line no-unused-vars
         web_db.remove(filter, function(err){
             // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.param('id') , 'logs': []}, function(err){});
+            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.params.id , 'logs': []}, function(err){});
             res.send({message: 'Website deleted'});
         });
     });

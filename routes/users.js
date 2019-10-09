@@ -286,16 +286,16 @@ router.get('/user/:id/apikey', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        if(session_user.uid !== req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;
         }
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(!user) {
                 res.send({msg: 'User does not exist'});
                 res.end();
@@ -320,17 +320,17 @@ router.post('/user/:id/apikey', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(session_user.uid !== req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        if(session_user.uid !== req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
             res.status(401).send('Not authorized');
             return;
         }
 
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(!user) {
                 res.send({msg: 'User does not exist'});
                 res.end();
@@ -339,7 +339,7 @@ router.post('/user/:id/apikey', function(req, res){
 
             var apikey = Math.random().toString(36).slice(-10);
             // eslint-disable-next-line no-unused-vars
-            users_db.update({uid: req.param('id')}, {'$set':{'apikey': apikey}}, function(err, data){
+            users_db.update({uid: req.params.id}, {'$set':{'apikey': apikey}}, function(err, data){
                 res.send({'apikey': apikey});
                 res.end();
             });
@@ -353,16 +353,16 @@ router.put('/user/:id/subscribe', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    if (req.locals.logInfo.id !== req.params.id && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exist'});
             res.end();
@@ -385,16 +385,16 @@ router.put('/user/:id/unsubscribe', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.param('id') && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    if (req.locals.logInfo.id !== req.params.id && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exist'});
             res.end();
@@ -418,11 +418,11 @@ router.get('/user/:id/subscribed', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(!user) {
             res.send({msg: 'User does not exist'});
             res.end();
@@ -445,7 +445,7 @@ router.get('/group/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -458,7 +458,7 @@ router.get('/group/:id', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        users_db.find({'$or': [{'secondarygroups': req.param('id')}, {'group': req.param('id')}]}, function(err, users_in_group){
+        users_db.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}, function(err, users_in_group){
             res.send(users_in_group);
             res.end();
         });
@@ -517,7 +517,7 @@ router.delete('/group/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -530,18 +530,18 @@ router.delete('/group/:id', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        groups_db.findOne({name: req.param('id')}, function(err, group){
+        groups_db.findOne({name: req.params.id}, function(err, group){
             if(err || !group) {
                 res.status(403).send('Group does not exist');
                 return;
             }
-            users_db.find({'$or': [{'secondarygroups': req.param('id')}, {'group': req.param('id')}]}, function(err, users_in_group){
+            users_db.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}, function(err, users_in_group){
                 if(users_in_group && users_in_group.length > 0){
                     res.status(403).send('Group has some users, cannot delete it');
                     return;
                 }
                 router.delete_group(group, user.uid).then(function(){
-                    res.send({'msg': 'group ' + req.param('id')+ ' deleted'});
+                    res.send({'msg': 'group ' + req.params.id + ' deleted'});
                     res.end();
                 });
             });
@@ -555,7 +555,7 @@ router.put('/group/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -568,14 +568,14 @@ router.put('/group/:id', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        var owner = req.param('owner');
+        var owner = req.body.owner;
         users_db.findOne({uid: owner}, function(err, user){
             if(!user || err) {
                 res.status(404).send('User does not exist');
                 res.end();
                 return;
             }
-            groups_db.findOne({name: req.param('id')}, function(err, group){
+            groups_db.findOne({name: req.params.id}, function(err, group){
                 if(! group) {
                     res.status(404).send('Group does not exist');
                     return;
@@ -595,7 +595,7 @@ router.post('/group/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -608,14 +608,14 @@ router.post('/group/:id', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        var owner = req.param('owner');
+        var owner = req.body.owner;
         users_db.findOne({uid: owner}, function(err, user){
             if(!user || err) {
                 res.status(404).send('Owner user does not exist');
                 res.end();
                 return;
             }
-            groups_db.findOne({name: new RegExp('^' + req.param('id') + '$', 'i')}, function(err, group){
+            groups_db.findOne({name: new RegExp('^' + req.params.id + '$', 'i')}, function(err, group){
                 if(group) {
                     res.status(403).send('Group already exists');
                     return;
@@ -623,7 +623,7 @@ router.post('/group/:id', function(req, res){
 
                 utils.getGroupAvailableId().then(function (mingid) {
                     var fid = new Date().getTime();
-                    group = {name: req.param('id'), gid: mingid, owner: owner};
+                    group = {name: req.params.id, gid: mingid, owner: owner};
                     // eslint-disable-next-line no-unused-vars
                     groups_db.insert(group, function(err){
                         // eslint-disable-next-line no-unused-vars
@@ -639,7 +639,7 @@ router.post('/group/:id', function(req, res){
                                     return;
                                 });
 
-                            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.param('id') , 'logs': [group.name + '.' + fid + '.update']}, function(){});
+                            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']}, function(){});
 
                             group.fid = fid;
                             res.send(group);
@@ -705,24 +705,24 @@ router.post('/message', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        let message = req.param('message');
-        let html_message = req.param('message');
+        let message = req.body.message;
+        let html_message = req.body.message;
 
-        if(req.param('input') === 'Markdown'){
-            html_message = markdown.toHTML(req.param('message'));
+        if(req.body.input === 'Markdown'){
+            html_message = markdown.toHTML(req.body.message);
             message =  htmlToText.fromString(html_message);
-        } else if (req.param('input') === 'HTML'){
+        } else if (req.body.input === 'HTML'){
             message =  htmlToText.fromString(html_message);
         }
         let mailOptions = {
             //origin: MAIL_CONFIG.origin,
-            origin: req.param('from'),
-            subject: req.param('subject'),
+            origin: req.body.from,
+            subject: req.body.subject,
             message: message,
             html_message: html_message
         };
         // eslint-disable-next-line no-unused-vars
-        notif.sendList(req.param('list'), mailOptions, function(err, response) {
+        notif.sendList(req.body.list, mailOptions, function(err, response) {
             res.send('');
             return;
         });
@@ -759,7 +759,7 @@ router.post('/user/:id/group/:group', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id'), req.param('group')])) {
+    if(! utils.sanitizeAll([req.params.id, req.params.group])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -768,8 +768,8 @@ router.post('/user/:id/group/:group', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        var uid = req.param('id');
-        var secgroup = req.param('group');
+        var uid = req.params.id;
+        var secgroup = req.params.group;
         users_db.findOne({uid: uid}, function(err, user){
             if(err || user == null){
                 res.status(404).send('User not found');
@@ -809,7 +809,7 @@ router.post('/user/:id/group/:group', function(req, res){
                             return;
                         });
 
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to secondary  group ' + req.param('group') , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
                     res.send({message: 'User added to group', fid: fid});
                     res.end();
                     return;
@@ -826,7 +826,7 @@ router.delete('/user/:id/group/:group', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id'), req.param('group')])) {
+    if(! utils.sanitizeAll([req.params.id, req.params.group])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -835,8 +835,8 @@ router.delete('/user/:id/group/:group', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        var uid = req.param('id');
-        var secgroup = req.param('group');
+        let uid = req.params.id;
+        let secgroup = req.params.group;
         users_db.findOne({uid: uid}, function(err, user){
             if(secgroup == user.group) {
                 res.send({message: 'Group is user main\'s group: '+user.group});
@@ -880,7 +880,7 @@ router.delete('/user/:id/group/:group', function(req, res){
                             return;
                         });
 
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from secondary  group ' + req.param('group') , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
                     users_db.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}, function(err, users_in_group){
                         if(users_in_group && users_in_group.length > 0){
                             res.send({message: 'User removed from group', fid: fid});
@@ -1007,7 +1007,7 @@ router.delete('/user/:id', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -1017,10 +1017,10 @@ router.delete('/user/:id', function(req, res){
             return;
         }
 
-        var uid = req.param('id');
+        var uid = req.params.id;
         users_db.findOne({uid: uid}, function(err, user){
             if(err) {
-                res.send({message: 'User not found '+req.param('id')});
+                res.send({message: 'User not found ' + uid});
                 res.end();
                 return;
             }
@@ -1067,7 +1067,7 @@ router.get('/user/:id/activate', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -1082,7 +1082,7 @@ router.get('/user/:id/activate', function(req, res) {
             return;
         }
 
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(!user) {
                 res.status(403).send('User does not exist');
                 res.end();
@@ -1114,7 +1114,7 @@ router.get('/user/:id/activate', function(req, res) {
                     var fid = new Date().getTime();
                     goldap.add(user, fid, function(err) {
                         if(!err){
-                            users_db.update({uid: req.param('id')},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(){
+                            users_db.update({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} }, function(){
 
                                 filer.user_add_user(user, fid)
                                     .then(
@@ -1138,7 +1138,7 @@ router.get('/user/:id/activate', function(req, res) {
                                         message: msg_activ, // plaintext body
                                         html_message: msg_activ_html // html body
                                     };
-                                    events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.param('id') , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
+                                    events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
 
                                     let plugin_call = function(plugin_info, userId, data, adminId){
                                         // eslint-disable-next-line no-unused-vars
@@ -1179,13 +1179,13 @@ router.get('/user/:id', function(req, res) {
         res.status(401).send('Not authorized, need to login first');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
 
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(err){
                 res.status(404).send('User not found ' + err);
                 return;
@@ -1220,9 +1220,9 @@ router.get('/user/:id', function(req, res) {
 
 // Registration mail confirmation
 router.get('/user/:id/confirm', function(req, res) {
-    var uid = req.param('id');
-    var regkey = req.param('regkey');
-    if(! utils.sanitizeAll([req.param('id')])) {
+    var uid = req.params.id;
+    var regkey = req.query.regkey;
+    if(! utils.sanitizeAll([uid])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -1254,7 +1254,7 @@ router.get('/user/:id/confirm', function(req, res) {
                     message: 'New account registration waiting for approval: '+uid, // plaintext body
                     html_message: 'New account registration waiting for approval: '+uid // html body
                 };
-                events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.param('id') , 'logs': []}, function(){});
+                events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []}, function(){});
                 if(notif.mailSet()) {
                     // eslint-disable-next-line no-unused-vars
                     notif.sendUser(mailOptions, function(error, response){
@@ -1283,67 +1283,67 @@ router.get('/user/:id/confirm', function(req, res) {
 
 // Register
 router.post('/user/:id', function(req, res) {
-    logger.info('New register request for '+req.param('id'));
-    if(! utils.sanitizeAll([req.param('id')])) {
+    logger.info('New register request for '+req.params.id);
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     /*
-      if(req.param('ip').split('.').length != 4) {
+      if(req.body.ip.split('.').length != 4) {
       res.send({'status': 1, 'msg': 'invalid ip address format'});
       return;
       }*/
-    if(req.param('group')=='' || req.param('group')==null || req.param('group')==undefined) {
+    if(req.body.group=='' || req.body.group==null || req.body.group==undefined) {
         res.send({'status': 1, 'msg': 'Missing field: team'});
         return;
     }
-    if (!req.param('group').match(/^[0-9a-z_]+$/)) {
+    if (!req.body.group.match(/^[0-9a-z_]+$/)) {
         res.send({'status': 1, 'msg': 'Group/Team name must be alphanumeric and lowercase [0-9a-z_]'});
         res.end();
         return;
     }
 
-    if(req.param('lab')=='' || req.param('lab')==null || req.param('lab')==undefined) {
+    if(req.body.lab=='' || req.body.lab==null || req.body.lab==undefined) {
         res.send({'status': 1, 'msg': 'Missing field: lab'});
         return;
     }
-    if(req.param('address')=='' || req.param('address')==null || req.param('address')==undefined) {
+    if(req.body.address=='' || req.body.address==null || req.body.address==undefined) {
         res.send({'status': 1, 'msg': 'Missing field: address'});
         return;
     }
 
-    if(req.param('responsible')=='' || req.param('responsible')==null || req.param('responsible')==undefined) {
+    if(req.body.responsible=='' || req.body.responsible==null || req.body.responsible==undefined) {
         res.send({'status': 1, 'msg': 'Missing field: Responsible/Manager'});
         return;
     }
-    if(!req.param('id').match(/^[0-9a-z]+$/)){
+    if(!req.params.id.match(/^[0-9a-z]+$/)){
         res.send({'status': 1, 'msg': 'invalid data identifier, numeric and lowercase letters only'});
         return;
     }
 
-    if (req.param('id').length > 12) {
+    if (req.params.id.length > 12) {
         res.send({'status': 1, 'msg': 'user id too long, must be < 12 characters'});
         res.end();
         return;
     }
 
-    if(req.param('why')=='' || req.param('why')==null || req.param('why')==undefined) {
+    if(req.body.why=='' || req.body.why==null || req.body.why==undefined) {
         res.send({'status': 1, 'msg': 'Missing field: Why do you need an account'});
         return;
     }
 
-    if(!validator.validate(req.param('email'))) {
+    if(!validator.validate(req.body.email)) {
         res.send({'status': 1, 'msg': 'Invalid email format'});
         return;
     }
 
-    users_db.findOne({email: req.param('email'), is_fake: false}, function(err, user_email){
+    users_db.findOne({email: req.body.email, is_fake: false}, function(err, user_email){
         if(user_email){
             res.send({'status': 1, 'msg': 'User email already exists'});
             return;
         }
 
-        users_db.findOne({uid: req.param('id')}, function(err, userexists){
+        users_db.findOne({uid: req.params.id}, function(err, userexists){
             if(userexists){
                 res.send({'status': 1, 'msg': 'User id already exists'});
                 return;
@@ -1353,36 +1353,36 @@ router.post('/user/:id', function(req, res) {
             let default_main_group = GENERAL_CONFIG.default_main_group || '';
             let user = {
                 status: STATUS_PENDING_EMAIL,
-                uid: req.param('id'),
-                firstname: req.param('firstname'),
-                lastname: req.param('lastname'),
-                email: req.param('email'),
-                address: req.param('address'),
-                lab: req.param('lab'),
-                responsible: req.param('responsible'),
-                group: req.param('group'),
+                uid: req.params.id,
+                firstname: req.body.firstname,
+                lastname: req.body.lastname,
+                email: req.body.email,
+                address: req.body.address,
+                lab: req.body.lab,
+                responsible: req.body.responsible,
+                group: req.body.group,
                 secondarygroups: [],
                 maingroup: default_main_group,
                 home: '',
-                why: req.param('why'),
-                ip: req.param('ip'),
+                why: req.body.why,
+                ip: req.body.ip,
                 regkey: regkey,
                 is_internal: false,
                 is_fake: false,
                 uidnumber: -1,
                 gidnumber: -1,
                 cloud: false,
-                duration: req.param('duration'),
-                expiration: new Date().getTime() + 1000*3600*24*req.param('duration'),
+                duration: req.body.duration,
+                expiration: new Date().getTime() + 1000*3600*24*req.body.duration,
                 loginShell: '/bin/bash',
                 history: [{action: 'register', date: new Date().getTime()}]
             };
             // user[CONFIG.general.internal_flag] = false,
             user.home = get_user_home(user);
 
-            events_db.insert({'owner': req.param('id'), 'date': new Date().getTime(), 'action': 'user registration ' + req.param('id') , 'logs': []}, function(){});
+            events_db.insert({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []}, function(){});
 
-            let uid = req.param('id');
+            let uid = req.params.id;
             users_db.insert(user);
             let link = GENERAL_CONFIG.url +
                 encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
@@ -1421,12 +1421,12 @@ router.get('/user/:id/expire', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(err){
                 res.status(404).send('User not found');
                 return;
@@ -1461,7 +1461,7 @@ router.get('/user/:id/expire', function(req, res){
                                     res.status(500).send('Expire User Failed');
                                     return;
                                 });
-                            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.param('id') , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
+                            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
 
                             // Now remove from mailing list
                             try {
@@ -1511,18 +1511,18 @@ router.post('/user/:id/passwordreset', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(session_user.uid != req.param('id') && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
+        if(session_user.uid != req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
             res.send({message: 'Not authorized'});
             return;
         }
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(err || !user) {
-                res.status(404).send('User does not exist:'+req.param('id'));
+                res.status(404).send('User does not exist:'+req.params.id);
                 res.end();
                 return;
             }
@@ -1531,8 +1531,8 @@ router.post('/user/:id/passwordreset', function(req, res){
                 res.end();
                 return;
             }
-            user.password=req.param('password');
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.param('id') + ' password update request', 'logs': []}, function(){});
+            user.password=req.body.password;
+            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []}, function(){});
             var fid = new Date().getTime();
             goldap.reset_password(user, fid, function(err) {
                 if(err){
@@ -1563,11 +1563,11 @@ router.post('/user/:id/passwordreset', function(req, res){
 //app.get('/user/:id/passwordreset', users);
 router.get('/user/:id/passwordreset', function(req, res){
     var key = Math.random().toString(36).substring(7);
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err || !user) {
             res.status(404).send('User does not exist');
             res.end();
@@ -1578,7 +1578,7 @@ router.get('/user/:id/passwordreset', function(req, res){
             res.end();
             return;
         }
-        users_db.update({uid: req.param('id')},{'$set': {regkey: key}}, function(err){
+        users_db.update({uid: req.params.id},{'$set': {regkey: key}}, function(err){
             if(err) {
                 res.status(404).send('User cannot be updated');
                 res.end();
@@ -1587,7 +1587,7 @@ router.get('/user/:id/passwordreset', function(req, res){
             user.password='';
             // Now send email
             let link = CONFIG.general.url +
-                encodeURI('/user/'+req.param('id')+'/passwordreset/'+key);
+                encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
             let html_link = `<a href="${link}">${link}</a>`;
             let msg = CONFIG.message.password_reset_request.join('\n').replace('#UID#', user.uid) + '\n' + link + '\n' + CONFIG.message.footer.join('\n');
             let html_msg = CONFIG.message.password_reset_request_html.join('').replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer.join('<br/>');
@@ -1598,7 +1598,7 @@ router.get('/user/:id/passwordreset', function(req, res){
                 message: msg,
                 html_message: html_msg
             };
-            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.param('id') + ' password reset request', 'logs': []}, function(){});
+            events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []}, function(){});
 
             if(notif.mailSet()) {
                 // eslint-disable-next-line no-unused-vars
@@ -1618,17 +1618,17 @@ router.get('/user/:id/passwordreset', function(req, res){
 });
 
 router.get('/user/:id/passwordreset/:key', function(req, res){
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err) {
             res.status(404).send('User does not exist');
             res.end();
             return;
         }
-        if(req.param('key') == user.regkey) {
+        if(req.params.key == user.regkey) {
             // reset the password
             var new_password = Math.random().toString(36).slice(-10);
             user.password = new_password;
@@ -1663,7 +1663,7 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
                             message: msg,
                             html_message: msg_html
                         };
-                        events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.param('id') + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']}, function(){});
+                        events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']}, function(){});
 
                         if(notif.mailSet()) {
                             // eslint-disable-next-line no-unused-vars
@@ -1694,11 +1694,11 @@ router.get('/user/:id/passwordreset/:key', function(req, res){
  * Extend validity period if active
  */
 router.get('/user/:id/renew/:regkey', function(req, res){
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             res.status(404).send('User not found');
             return;
@@ -1707,13 +1707,13 @@ router.get('/user/:id/renew/:regkey', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        var regkey = req.param('regkey');
+        var regkey = req.params.regkey;
         if(user.regkey == regkey) {
             user.history.push({'action': 'extend validity period', date: new Date().getTime()});
             var expiration = new Date().getTime() + 1000*3600*24*user.duration;
             // eslint-disable-next-line no-unused-vars
             users_db.update({uid: user.uid},{'$set': {expiration: expiration, history: user.history}}, function(err){
-                events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.param('id') , 'logs': []}, function(){});
+                events_db.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []}, function(){});
                 res.redirect(GENERAL_CONFIG.url+'/manager2/user/' + user.uid + '/renew/' + regkey);
                 res.end();
                 // res.send({message: 'Account validity period extended', expiration: expiration});
@@ -1732,12 +1732,12 @@ router.get('/user/:id/renew', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
     users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(err){
                 res.status(404).send('User not found');
                 return;
@@ -1772,7 +1772,7 @@ router.get('/user/:id/renew', function(req, res){
                                     return;
                                 });
 
-                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.param('id') , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
+                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
                             notif.add(user.email, function(){
                                 let msg_activ = CONFIG.message.reactivation.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
                                 let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer.join('<br/>');
@@ -1826,7 +1826,7 @@ router.put('/user/:id/ssh', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -1838,7 +1838,7 @@ router.put('/user/:id/ssh', function(req, res) {
             session_user.is_admin = false;
         }
 
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             // If not admin nor logged user
             if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
                 res.status(401).send('Not authorized');
@@ -1857,9 +1857,9 @@ router.put('/user/:id/ssh', function(req, res) {
             }
             // Update SSH Key
             // eslint-disable-next-line no-unused-vars
-            users_db.update({_id: user._id}, {'$set': {ssh: req.param('ssh')}}, function(err){
+            users_db.update({_id: user._id}, {'$set': {ssh: req.body.ssh}}, function(err){
                 var fid = new Date().getTime();
-                user.ssh = escapeshellarg(req.param('ssh'));
+                user.ssh = escapeshellarg(req.body.ssh);
                 filer.user_add_ssh_key(user, fid)
                     .then(
                         created_file => {
@@ -1872,10 +1872,10 @@ router.put('/user/:id/ssh', function(req, res) {
                         return;
                     });
 
-                events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.param('id') , 'logs': [ user.uid + '.' + fid + '.update']}, function(){});
+                events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.params.id , 'logs': [ user.uid + '.' + fid + '.update']}, function(){});
 
                 user.fid = fid;
-                user.ssh = req.param('ssh');
+                // user.ssh = req.body.ssh;
                 res.send(user);
                 res.end();
                 return;
@@ -1891,7 +1891,7 @@ router.get('/user/:id/usage', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -1900,7 +1900,7 @@ router.get('/user/:id/usage', function(req, res){
         let usage = JSON.parse(JSON.stringify(CONFIG.usage));
         let usages = [];
         for(var i=0;i<usage.length;i++){
-            usage[i]['link'] = usage[i]['link'].replace('#USER#', req.param('id'));
+            usage[i]['link'] = usage[i]['link'].replace('#USER#', req.params.id);
             usages.push(usage[i]);
         }
         res.send({'usages': usages});
@@ -1911,24 +1911,8 @@ router.get('/user/:id/usage', function(req, res){
 
 // Update user info
 router.put('/user/:id', function(req, res) {
-    /*
-      uid: req.param('id'),
-      firstname: req.param('firstname'),
-      lastname: req.param('lastname'),
-      email: req.param('email'),
-      address: req.param('address'),
-      lab: req.param('lab'),
-      responsible: req.param('responsible'),
-      group: req.param('group'),
-      ip: req.param('ip'),
-      regkey: regkey,
-      is_internal: false,
-      expiration: new Date().getTime() + 1000*3600*24*req.param('duration'),
-      loginShell: '/bin/bash',
-      history: [{action: 'register', date: new Date().getTime()}],
-      is_fake: false
-    */
-    if(! utils.sanitizeAll([req.param('id')])) {
+
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -1945,7 +1929,7 @@ router.put('/user/:id', function(req, res) {
             session_user.is_admin = false;
         }
 
-        users_db.findOne({uid: req.param('id')}, function(err, user){
+        users_db.findOne({uid: req.params.id}, function(err, user){
             if(err){
                 res.status(401).send('Not authorized');
                 return;
@@ -1956,19 +1940,19 @@ router.put('/user/:id', function(req, res) {
                 return;
             }
 
-            user.firstname = req.param('firstname');
-            user.lastname = req.param('lastname');
+            user.firstname = req.body.firstname;
+            user.lastname = req.body.lastname;
             user.oldemail = user.email;
-            user.email = req.param('email');
+            user.email = req.body.email;
             if(user.is_fake === undefined) {
                 user.is_fake = false;
             }
             let userWasFake = user.is_fake;
 
             if(session_user.is_admin){
-                user.is_fake = req.param('is_fake');
-                if(req.param('is_trainer') !== undefined ){
-                    user.is_trainer = req.param('is_trainer');
+                user.is_fake = req.body.is_fake;
+                if(req.body.is_trainer !== undefined ){
+                    user.is_trainer = req.body.is_trainer;
                 }
             }
 
@@ -1978,42 +1962,36 @@ router.put('/user/:id', function(req, res) {
                     return;
                 }
             }
-            user.loginShell = req.param('loginShell').trim();
-            user.address = req.param('address');
-            user.lab = req.param('lab');
-            user.responsible = req.param('responsible');
-            user.why = req.param('why');
-            user.duration = req.param('duration');
-
-            /*
-            let is_admin = false;
-            if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
-                is_admin = true;
-            }*/
+            user.loginShell = req.body.loginShell.trim();
+            user.address = req.body.address;
+            user.lab = req.body.lab;
+            user.responsible = req.body.responsible;
+            user.why = req.body.why;
+            user.duration = req.body.duration;
 
             user.history.push({'action': 'update info', date: new Date().getTime()});
 
             // Get group gid
             //groups_db.findOne({'name': user.group}, function(err, group){
-            groups_db.findOne({'name': req.param('group')}, function(err, group){
+            groups_db.findOne({'name': req.body.group}, function(err, group){
                 if(err || group == null || group == undefined) {
-                    res.status(403).send('Group '+req.param('group')+' does not exist, please create it first');
+                    res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
                     return;
                 }
                 if(session_user.is_admin){
                     if(user.secondarygroups.indexOf(group.name) != -1) {
-                        res.status(403).send('Group '+req.param('group')+' is already a secondary group, please remove user from secondary group first!');
+                        res.status(403).send('Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!');
                         return;
                     }
                     user.oldgroup = user.group;
                     user.oldgidnumber = user.gidnumber;
                     user.oldmaingroup = user.maingroup;
                     user.oldhome = user.home;
-                    user.group = req.param('group');
+                    user.group = req.body.group;
                     user.gidnumber = group.gid;
-                    user.ip = req.param('ip');
-                    user.is_internal = req.param('is_internal');
-                    user.maingroup = req.param('maingroup');
+                    user.ip = req.body.ip;
+                    user.is_internal = req.body.is_internal;
+                    user.maingroup = req.body.maingroup;
                     user.home = get_user_home(user);
                     if(user.group == '' || user.group == null) {
                         res.status(403).send('Some mandatory fields are empty');
@@ -2053,7 +2031,7 @@ router.put('/user/:id', function(req, res) {
                                 }
                             }
 
-                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.param('id') , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
+                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']}, function(){});
                             users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
                                 if(users_in_group && users_in_group.length == 0){
                                     groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
@@ -2086,7 +2064,7 @@ router.put('/user/:id', function(req, res) {
                 else {
                     // eslint-disable-next-line no-unused-vars
                     users_db.update({_id: user._id}, user, function(err){
-                        events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.param('id') , 'logs': []}, function(){});
+                        events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []}, function(){});
                         users_db.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}, function(err, users_in_group){
                             if(users_in_group && users_in_group.length == 0){
                                 groups_db.findOne({name: user.oldgroup}, function(err, oldgroup){
@@ -2114,7 +2092,7 @@ router.get('/project/:id/users', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -2123,7 +2101,7 @@ router.get('/project/:id/users', function(req, res){
             res.status(404).send('User not found');
             return;
         }
-        users_db.find({'projects': req.param('id')}, function(err, users_in_project){
+        users_db.find({'projects': req.params.id}, function(err, users_in_project){
             res.send(users_in_project);
             res.end();
         });
@@ -2135,7 +2113,7 @@ router.post('/user/:id/project/:project', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id'), req.param('project')])) {
+    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -2146,8 +2124,8 @@ router.post('/user/:id/project/:project', function(req, res){
             res.end();
             return;
         }
-        let newproject = req.param('project');
-        let uid = req.param('id');
+        let newproject = req.params.project;
+        let uid = req.params.id;
         var fid = new Date().getTime();
         users_db.findOne({uid: uid}, function(err, user){
             if(!user || err) {
@@ -2185,7 +2163,7 @@ router.post('/user/:id/project/:project', function(req, res){
                         return;
                     });
 
-                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.param('id') + ' to project ' + newproject , 'logs': []}, function(){});
+                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []}, function(){});
                 res.send({message: 'User added to project', fid: fid});
                 res.end();
                 return;
@@ -2199,7 +2177,7 @@ router.delete('/user/:id/project/:project', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id'), req.param('project')])) {
+    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -2209,8 +2187,8 @@ router.delete('/user/:id/project/:project', function(req, res){
             res.end();
             return;
         }
-        let oldproject = req.param('project');
-        let uid = req.param('id');
+        let oldproject = req.params.project;
+        let uid = req.params.id;
         var fid = new Date().getTime();
         users_db.findOne({uid: uid}, function(err, user){
             if(! user) {
@@ -2225,7 +2203,7 @@ router.delete('/user/:id/project/:project', function(req, res){
                     res.end();
                     return;
                 }
-                if( project && uid === project.owner && ! req.param('force')){
+                if( project && uid === project.owner && ! req.query.force){
                     res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
                     res.end();
                     return;
@@ -2256,7 +2234,7 @@ router.delete('/user/:id/project/:project', function(req, res){
                         });
 
 
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.param('id') + ' from project ' + oldproject , 'logs': []}, function(){});
+                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []}, function(){});
                     res.send({message: 'User removed from project', fid: fid});
                     res.end();
                     return;
@@ -2271,7 +2249,7 @@ router.get('/list/:list', function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('list')])) {
+    if(! utils.sanitizeAll([req.params.list])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -2280,7 +2258,7 @@ router.get('/list/:list', function(req, res){
             res.status(401).send('Not authorized');
             return;
         }
-        var list_name = req.param('list');
+        var list_name = req.params.list;
         notif.getMembers(list_name, function(members) {
             res.send(members);
             return;

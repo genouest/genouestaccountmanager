@@ -27,11 +27,11 @@ router.get('/ssh/:id/putty', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             logger.error(err);
             res.status(500).send(err);
@@ -60,11 +60,11 @@ router.get('/ssh/:id/private', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             logger.error(err);
             res.status(500).send(err);
@@ -97,11 +97,11 @@ router.get('/ssh/:id/public', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             logger.error(err);
             res.status(500).send(err);
@@ -130,11 +130,11 @@ router.get('/ssh/:id', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.param('id')}, function(err, user){
+    users_db.findOne({uid: req.params.id}, function(err, user){
         if(err){
             logger.error(err);
             res.status(500).send(err);

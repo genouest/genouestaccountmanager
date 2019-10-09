@@ -1,14 +1,18 @@
+/* eslint-disable no-console */
 /**
  * Test expiration date of user, if lower than 2 month, send an email to user
  */
+// eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
+// eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
+// eslint-disable-next-line no-unused-vars
 var STATUS_EXPIRED = 'Expired';
 
 
 var CONFIG = require('config');
-var goldap = require('./routes/goldap.js');
+// var goldap = require('./routes/goldap.js');
 
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
@@ -34,20 +38,20 @@ function timeConverter(tsp){
 
 // Find users expiring in less then 2 month
 users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}, function(err, users){
-    var mail_sent = 0;
+    let mail_sent = 0;
     if (! notif.mailSet()){
-        console.log("Error: mail is not set");
-        process.exit(code=1);
+        console.log('Error: mail is not set');
+        process.exit(1);
     }
-    for(var i=0;i<users.length;i++){
+    for(let i=0;i<users.length;i++){
         (function(index){
             var user = users[index];
             console.log('User will expire: '+user.uid);
             var link = CONFIG.general.url +
                 encodeURI('/user/'+user.uid+'/renew/'+user.regkey);
                 // encodeURI('/manager2/user/'+user.uid+'/renew/'+user.regkey);
-            var msg_activ = CONFIG.message.expiration.join("\n").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"\n"+CONFIG.message.footer.join("\n");
-            var msg_activ_html = CONFIG.message.expiration_html.join("").replace('#LINK#', link).replace("#EXPIRE#", timeConverter(user.expiration))+"<br/>"+CONFIG.message.footer.join("<br/>");
+            var msg_activ = CONFIG.message.expiration.join('\n').replace('#LINK#', link).replace('#EXPIRE#', timeConverter(user.expiration)) + '\n' + CONFIG.message.footer.join('\n');
+            var msg_activ_html = CONFIG.message.expiration_html.join('').replace('#LINK#', link).replace('#EXPIRE#', timeConverter(user.expiration)) + '<br/>' + CONFIG.message.footer.join('<br/>');
             var mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address
                 destinations: [user.email], // list of receivers
@@ -55,19 +59,20 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
                 message: msg_activ, // plaintext body
                 html_message: msg_activ_html // html body
             };
+            // eslint-disable-next-line no-unused-vars
             notif.sendUser(mailOptions, function(error, response){
                 if(error){
                     console.log(error);
                 }
                 mail_sent++;
                 if(mail_sent == users.length) {
-                    process.exit(code=0);
+                    process.exit(0);
                 }
             });
         }(i));
     }
     if(mail_sent == users.length) {
-        process.exit(code=0);
+        process.exit(0);
     }
 
 });

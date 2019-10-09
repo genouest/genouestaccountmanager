@@ -431,11 +431,11 @@ router.get('/tp', function(req, res) {
 });
 
 router.post('/tp', function(req, res) {
-    if(req.param('quantity')<=0){
+    if(req.body.quantity<=0){
         res.status(403).send('Quantity must be >= 1');
         return;
     }
-    if(req.param('about')=== undefined || req.param('about') == ''){
+    if(req.body.about === undefined || req.body.about == ''){
         res.status(403).send('Tell us why you need some tp accounts');
         return;
     }
@@ -456,7 +456,7 @@ router.post('/tp', function(req, res) {
             res.status(403).send('Not authorized');
             return;
         }
-        tp_reservation(user.uid, req.param('from'), req.param('to'), req.param('quantity'), req.param('about')).then(function(reservation){
+        tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about).then(function(reservation){
             res.send({'reservation': reservation, 'msg': 'Reservation done'});
             res.end();
             return;
@@ -471,7 +471,7 @@ router.delete('/tp/:id', function(req, res) {
         res.status(403).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.param('id')])) {
+    if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -491,10 +491,10 @@ router.delete('/tp/:id', function(req, res) {
         // add filter
         let filter = {};
         if(is_admin) {
-            filter = {_id: req.param('id')};
+            filter = {_id: req.params.id};
         }
         else{
-            filter = {_id: req.param('id'), owner: user.uid};
+            filter = {_id: req.params.id, owner: user.uid};
         }
 
         reservation_db.findOne(filter, function(err, reservation) {
@@ -517,7 +517,7 @@ router.delete('/tp/:id', function(req, res) {
                 return;
             }
 
-            reservation_db.update({'_id': req.param('id')},{'$set': {'over': true}}).then(function(){
+            reservation_db.update({'_id': req.params.id},{'$set': {'over': true}}).then(function(){
                 res.send({'msg': 'Reservation cancelled'});
                 res.end();
                 return;

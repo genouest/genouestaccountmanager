@@ -64,9 +64,8 @@ router.get('/plugin', function(req, res) {
 
 
 router.get('/plugin/:id', function(req, res) {
-    var template = plugins_modules[req.param('id')].template();
+    var template = plugins_modules[req.params.id].template();
     res.send(template);
-    // res.send("<div>hello {{user.uid}}</div><div><input ng-model=\"plugin_data.test.my\"></input> <button ng-click=\"plugin_update('" + req.param('id')+ "')\" class=\"button\">Update</button></div>");
 });
 
 router.get('/plugin/:id/:user', function(req, res) {
@@ -85,12 +84,10 @@ router.get('/plugin/:id/:user', function(req, res) {
         else {
             user.is_admin = true;
         }
-        plugins_modules[req.param('id')].get_data(req.param('user'), user.uid).then(function(result){
+        plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
             res.send(result);
         });
     });
-
-    //res.send(plugins_modules[req.param('id')].get_data(req.param('user')));
 });
 
 router.post('/plugin/:id/:user', function(req, res) {
@@ -109,7 +106,7 @@ router.post('/plugin/:id/:user', function(req, res) {
         else {
             user.is_admin = true;
         }
-        plugins_modules[req.param('id')].set_data(req.param('user'), req.body, user.uid).then(function(result){
+        plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
             res.send(result);
         }, function(err){
             res.status(400).send(err);

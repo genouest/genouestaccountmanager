@@ -45,8 +45,8 @@ export class GroupsComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
-        this.dtTriggerGroups.next();
-        this.dtTriggerUsers.next();
+        // this.dtTriggerGroups.next();
+        // this.dtTriggerUsers.next();
     }
 
     renderDataTables(table): void {
