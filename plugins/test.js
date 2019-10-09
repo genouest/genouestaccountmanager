@@ -15,7 +15,7 @@ var remove_user = function(userId, data, adminId){
         // eslint-disable-next-line no-unused-vars
         users_db.findOne({'uid': userId}, function(err, user){
             if(err){
-                console.trace('Error finding user')
+                console.trace('Error finding user');
                 resolve();
                 return;
             }
