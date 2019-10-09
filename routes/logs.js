@@ -46,7 +46,7 @@ router.get('/log/user/:id', function(req, res){
             res.status(404).send('User not found');
             return;
         }
-        events_db.find({'owner': req.param('id')}, function(err, events){
+        events_db.find({'owner': req.params.id}, function(err, events){
             res.send(events);
             res.end();
         });
@@ -54,7 +54,7 @@ router.get('/log/user/:id', function(req, res){
 });
 
 router.get('/log/status/:id/:status', function(req, res){
-    events_db.update({'logs': req.param('id')}, {'$set':{'status': parseInt(req.param('status'))}}, function(){});
+    events_db.update({'logs': req.params.id}, {'$set':{'status': parseInt(req.params.status)}}, function(){});
     res.end();
 });
 
@@ -73,7 +73,7 @@ router.get('/log/:id', function(req, res){
             return;
         }
 
-        let file = req.param('id')+'.log';
+        let file = req.params.id + '.log';
         let log_file = GENERAL_CONFIG.script_dir + '/' + file;
         fs.readFile(log_file, 'utf8', function (err,data) {
             if (err) {

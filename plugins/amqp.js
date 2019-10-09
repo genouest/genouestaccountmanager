@@ -1,9 +1,12 @@
+/* eslint-disable no-console */
 var CONFIG = require('config');
 var Promise = require('promise');
 var amqp = require('amqplib');
 
 
+// eslint-disable-next-line no-unused-vars
 var sendMsg = function(action, userId, data, adminId){
+    // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         let conn = null;
         amqp.connect(CONFIG.rabbitmq.url).then(function(_conn) {
@@ -12,14 +15,14 @@ var sendMsg = function(action, userId, data, adminId){
         }).then(ch => {
             return ch.assertExchange(CONFIG.rabbitmq.exchange, 'direct').then(() => {
                 console.log('publish msg');
-                ch.publish(CONFIG.rabbitmq.exchange, action, Buffer.from(JSON.stringify(data)))
-                return ch.close()
-            })
+                ch.publish(CONFIG.rabbitmq.exchange, action, Buffer.from(JSON.stringify(data)));
+                return ch.close();
+            });
         })
             .then(() => {
-                conn.close()
-                resolve(true)
-            })
+                conn.close();
+                resolve(true);
+            });
 
     });
 };
@@ -28,6 +31,7 @@ module.exports = {
 
     activate: function (userId, data, adminId){
         if(! CONFIG.rabbitmq || ! CONFIG.rabbitmq.url) {
+            // eslint-disable-next-line no-unused-vars
             return new Promise(function (resolve, reject){
                 console.log('Plugin amqp, nothing to do');
                 resolve(true);
@@ -38,6 +42,7 @@ module.exports = {
     },
     deactivate: function (userId, data, adminId){
         if(! CONFIG.rabbitmq || ! CONFIG.rabbitmq.url) {
+            // eslint-disable-next-line no-unused-vars
             return new Promise(function (resolve, reject){
                 console.log('Plugin amqp, nothing to do');
                 resolve(true);
@@ -46,7 +51,9 @@ module.exports = {
         console.log('Plugin amqp for deactivation of user : ' + userId);
         return sendMsg('deactivate', userId, data, adminId);
     },
+    // eslint-disable-next-line no-unused-vars
     get_data: function (userId, adminId){
+        // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
             console.log('Plugin amqp, nothing to do');
             resolve(true);
@@ -54,6 +61,7 @@ module.exports = {
     },
     set_data: function (userId, data, adminId){
         if(! CONFIG.rabbitmq || ! CONFIG.rabbitmq.url) {
+            // eslint-disable-next-line no-unused-vars
             return new Promise(function (resolve, reject){
                 console.log('Plugin amqp, nothing to do');
                 resolve(true);
@@ -63,6 +71,7 @@ module.exports = {
     },
     remove: function (userId, data, adminId){
         if(! CONFIG.rabbitmq || ! CONFIG.rabbitmq.url) {
+            // eslint-disable-next-line no-unused-vars
             return new Promise(function (resolve, reject){
                 console.log('Plugin amqp, nothing to do');
                 resolve(true);
@@ -71,5 +80,5 @@ module.exports = {
         console.log('Plugin amqp for removal of user : ' + userId);
         return sendMsg('remove', userId, data, adminId);
     }
-}
+};
 

@@ -31,12 +31,12 @@ router.get('/quota/:user/:id', function(req, res) {
 
     */
     var quotas = [];
-    var serie = GENERAL_CONFIG.quota[req.param('id')]['series'].replace('#USER#', req.param('user'));
+    var serie = GENERAL_CONFIG.quota[req.params.id]['series'].replace('#USER#', req.params.user);
     var options = {
-        protocol: GENERAL_CONFIG.quota[req.param('id')]['protocol'],
-        port: GENERAL_CONFIG.quota[req.param('id')]['port'],
-        host: GENERAL_CONFIG.quota[req.param('id')]['hostname'],
-        path: '/query?db=' + GENERAL_CONFIG.quota[req.param('id')]['db'] + '&q=SELECT%20last(%22value%22)%20FROM%20/' + serie + '/'
+        protocol: GENERAL_CONFIG.quota[req.params.id]['protocol'],
+        port: GENERAL_CONFIG.quota[req.params.id]['port'],
+        host: GENERAL_CONFIG.quota[req.params.id]['hostname'],
+        path: '/query?db=' + GENERAL_CONFIG.quota[req.params.id]['db'] + '&q=SELECT%20last(%22value%22)%20FROM%20/' + serie + '/'
     };
     http.get(options
         , function(response){
@@ -63,7 +63,7 @@ router.get('/quota/:user/:id', function(req, res) {
                 if(quotas.length==1){
                     quotas.push(0);
                 }
-                res.send({'name': req.param('id'), 'value': quotas[0], 'max': quotas[1]});
+                res.send({'name': req.params.id, 'value': quotas[0], 'max': quotas[1]});
                 res.end();
             });
         });
