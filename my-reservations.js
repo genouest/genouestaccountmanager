@@ -41,7 +41,7 @@ var processReservation = function(reservation){
         logger.info("create user for reservation ", reservation);
         tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug("set reservation as done", res);
-            reservation_db.update({'_id': res._id},{'$set': {'created': true}}).then(function(){
+            reservation_db.updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
             })
         });
@@ -113,7 +113,7 @@ function removeReservations(rid) {
             }).then(function(){
                 console.log("[INFO] close reservation", reservations);
                 Promise.all(reservations.map(function(reservation){
-                    return reservation_db.update({'_id': reservation._id},{'$set': {'over': true}})
+                    return reservation_db.updateOne({'_id': reservation._id},{'$set': {'over': true}})
                 })).then(function(){
                     process.exit(0);
                 });

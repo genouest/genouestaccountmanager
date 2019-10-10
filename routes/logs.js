@@ -69,7 +69,7 @@ router.get('/log/user/:id', async function(req, res){
 });
 
 router.get('/log/status/:id/:status', async function(req, res){
-    await mongo_events.update({'logs': req.params.id}, {'$set':{'status': parseInt(req.params.status)}});
+    await mongo_events.updateOne({'logs': req.params.id}, {'$set':{'status': parseInt(req.params.status)}});
     res.end();
 });
 

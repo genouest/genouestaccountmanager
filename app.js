@@ -52,6 +52,7 @@ const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
 
 if(MY_ADMIN_USER !== null){
     users.init().then(() => {
+        console.log('create admin user', MY_ADMIN_USER);
         users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
     }).catch(err => {
         console.log('init failed', err);

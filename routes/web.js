@@ -7,17 +7,40 @@ const logger = winston.loggers.get('gomngr');
 
 var utils = require('./utils');
 
+/*
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     web_db = db.get('web'),
     users_db = db.get('users'),
     events_db = db.get('events');
+*/
 
+const MongoClient = require('mongodb').MongoClient;
+var mongodb = null;
+var mongo_users = null;
+var mongo_webs = null;
+var mongo_events = null;
+var mongo_connect = async function() {
+    let url = CONFIG.mongo.url;
+    let client = null;
+    if(!url) {
+        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
+    } else {
+        client = new MongoClient(CONFIG.mongo.url);
+    }
+    await client.connect();
+    mongodb = client.db(CONFIG.general.db);
+    mongo_users = mongodb.collection('users');
+    mongo_webs = mongodb.collection('web');
+    mongo_events = mongodb.collection('events');
+
+};
+mongo_connect();
 
 /**
  * Change owner
  */
-router.put('/web/:id/owner/:old/:new', function(req, res) {
+router.put('/web/:id/owner/:old/:new', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -27,52 +50,52 @@ router.put('/web/:id/owner/:old/:new', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-        if(!session_user.is_admin) {
-            res.status(401).send('Not authorized');
-            return;
-        }
-        // eslint-disable-next-line no-unused-vars
-        web_db.update({name: req.params.id},{'$set': {owner: req.params.new}}, function(err){
-            // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.params.id + ' owner to ' + req.params.new  , 'logs': []}, function(err){});
-            res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
-            res.end();
-            return;
-        });
-    });
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!session_user) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    if(!session_user.is_admin) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    await mongo_webs.updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.params.id + ' owner to ' + req.params.new  , 'logs': []});
+    res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
+    res.end();
 });
 
-router.get('/web', function(req, res) {
+router.get('/web', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-        var filter = {};
-        if(!session_user.is_admin) {
-            filter = {owner: session_user.uid};
-        }
-        web_db.find(filter, function(err, databases){
-            res.send(databases);
-            return;
-        });
-    });
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!session_user) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    var filter = {};
+    if(!session_user.is_admin) {
+        filter = {owner: session_user.uid};
+    }
+    let webs = await mongo_webs.find(filter);
+    res.send(webs);
 });
 
-router.get('/web/owner/:owner', function(req, res) {
+router.get('/web/owner/:owner', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -81,23 +104,25 @@ router.get('/web/owner/:owner', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-        var filter = {owner: req.params.owner};
-        web_db.find(filter, function(err, databases){
-            res.send(databases);
-            return;
-        });
-    });
+
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!session_user) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    var filter = {owner: req.params.owner};
+    let webs = await mongo_webs.find(filter);
+    res.send(webs);
 });
 
 
-router.post('/web/:id', function(req, res) {
+router.post('/web/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -106,35 +131,35 @@ router.post('/web/:id', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!session_user) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
 
-        var owner = session_user.uid;
-        if(req.body.owner !== undefined && session_user.is_admin) {
-            owner = req.body.owner;
-        }
-        let web = {
-            owner: owner,
-            name: req.params.id,
-            url: req.body.url,
-            description: req.body.description
-        };
-        // eslint-disable-next-line no-unused-vars
-        web_db.insert(web, function(err){
-            // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'register new web site ' + req.params.id , 'logs': []}, function(err){});
+    var owner = session_user.uid;
+    if(req.body.owner !== undefined && session_user.is_admin) {
+        owner = req.body.owner;
+    }
+    let web = {
+        owner: owner,
+        name: req.params.id,
+        url: req.body.url,
+        description: req.body.description
+    };
+    await mongo_webs.insertOne(web);
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'register new web site ' + req.params.id , 'logs': []});
 
-            res.send({web: web, message: 'New website added'});
-        });
-    });
+    res.send({web: web, message: 'New website added'});
 });
 
-router.delete('/web/:id', function(req, res) {
+router.delete('/web/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -144,42 +169,41 @@ router.delete('/web/:id', function(req, res) {
         return;  
     }
 
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!session_user) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    var filter = {name: req.params.id};
+    if(!session_user.is_admin) {
+        filter['owner'] = session_user.uid;
+    }
+    await mongo_webs.remove(filter);
 
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-        var filter = {name: req.params.id};
-        if(!session_user.is_admin) {
-            filter['owner'] = session_user.uid;
-        }
-        // eslint-disable-next-line no-unused-vars
-        web_db.remove(filter, function(err){
-            // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.params.id , 'logs': []}, function(err){});
-            res.send({message: 'Website deleted'});
-        });
-    });
+    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.params.id , 'logs': []});
+    res.send({message: 'Website deleted'});
 });
 
 
 router.delete_webs = function(user){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        web_db.find({'owner': user.uid}).then(function(webs){
-            if(!webs){
-                resolve(true);
-                return;
-            }
-            logger.debug('delete_webs');
-            Promise.all(webs.map(function(web){
-                return delete_web(user, web._id);
-            })).then(function(res){
-                resolve(res);
-            });
+    return new Promise(async function (resolve, reject){
+        let webs = await mongo_webs.find({'owner': user.uid});
+        if(!webs){
+            resolve(true);
+            return;
+        }
+        logger.debug('delete_webs');
+        Promise.all(webs.map(function(web){
+            return delete_web(user, web._id);
+        })).then(function(res){
+            resolve(res);
         });
     });
 
@@ -187,23 +211,21 @@ router.delete_webs = function(user){
 
 var delete_web = function(user, web_id){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
+    return new Promise(async function (resolve, reject){
         var filter = {_id: web_id};
         if(!user.is_admin) {
             filter['owner'] = user.uid;
         }
-        web_db.remove(filter).then(function(){
-            events_db.insert(
-                {
-                    'owner': user.uid,
-                    'date': new Date().getTime(),
-                    'action': 'remove web site ' + web_id ,
-                    'logs': []
-                }
-            ).then(function(){
-                resolve(true);
-            });
-        });
+        await mongo_webs.remove(filter);
+        await mongo_events.insert(
+            {
+                'owner': user.uid,
+                'date': new Date().getTime(),
+                'action': 'remove web site ' + web_id ,
+                'logs': []
+            }
+        );
+        resolve(true);
     });
 };
 

@@ -90,12 +90,12 @@ users_db.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: 
                 }
                 user.history.push({'action': 'expire', date: new Date().getTime()});
                 // eslint-disable-next-line no-unused-vars
-                users_db.update({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}}, function(err){
+                users_db.updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}}, function(err){
                     var script = '#!/bin/bash\n';
                     script += 'set -e \n';
                     script += 'ldapmodify -cx -w ' + CONFIG.ldap.admin_password + ' -D ' + CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn + ' -f ' + CONFIG.general.script_dir + '/' + user.uid + '.' + fid + '.ldif\n';
                     var script_file = CONFIG.general.script_dir+'/'+user.uid+' '+fid+'.update';
-                    events_db.insert({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []}, function(){ return;});
+                    events_db.insertOne({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []}, function(){ return;});
 
                     var plugin_call = function(plugin_info, user){
                         // eslint-disable-next-line no-unused-vars

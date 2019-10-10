@@ -47,7 +47,6 @@ var mongo_projects = null;
 var mongo_events = null;
 
 var mongo_connect = async function() {
-    logger.info('setup mongodb connection');
     let url = CONFIG.mongo.url;
     let client = null;
     if(!url) {
@@ -56,7 +55,6 @@ var mongo_connect = async function() {
         client = new MongoClient(CONFIG.mongo.url);
     }
     await client.connect();
-    logger.info('connected to mongodb');
     mongodb = client.db(CONFIG.general.db);
     mongo_users = mongodb.collection('users');
     mongo_groups = mongodb.collection('groups');
@@ -67,9 +65,9 @@ var mongo_connect = async function() {
 };
 
 router.init = function() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            mongo_connect();
+            await mongo_connect();
             resolve();
         } catch(err){
             logger.debug('Failed to init db', err);
@@ -180,7 +178,7 @@ var create_extra_group = function(group_name, owner_name){
             var fid = new Date().getTime();
             let group = {name: group_name, gid: mingid, owner: owner_name};
             try {
-                await mongo_groups.insert(group);
+                await mongo_groups.insertOne(group);
                 await goldap.add_group(group, fid);
             }
             catch(e) {
@@ -253,7 +251,7 @@ var create_extra_user = function(user_name, group, internal_user){
 
             delete user.password;
             // eslint-disable-next-line no-unused-vars
-            await mongo_users.insert(user);
+            await mongo_users.insertOne(user);
             try {
                 let created_file = await filer.user_create_extra_user(user, fid);
                 logger.info('File Created: ', created_file);
@@ -377,7 +375,7 @@ router.post('/user/:id/apikey', async function(req, res){
     }
 
     var apikey = Math.random().toString(36).slice(-10);
-    await mongo_users.update({uid: req.params.id}, {'$set':{'apikey': apikey}});
+    await mongo_users.updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
     res.send({'apikey': apikey});
     res.end();
 });
@@ -513,7 +511,7 @@ router.delete_group = function(group, admin_user_id){
         }
 
         group.fid = fid;
-        await mongo_events.insert({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
+        await mongo_events.insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
         utils.freeGroupId(group.gid).then(function(){
             resolve(true);
         });
@@ -601,13 +599,13 @@ router.put('/group/:id', async function(req, res){
         res.status(404).send('Group does not exist');
         return;
     }
-    await mongo_events.insert({
+    await mongo_events.insertOne({
         'owner': user.uid,
         'date': new Date().getTime(),
         'action': 'group owner modification ' + group.name + ' to ' +owner,
         'logs': []});
 
-    let data = await mongo_groups.update({name: group.name}, {'$set':{'owner': owner}});
+    let data = await mongo_groups.updateOne({name: group.name}, {'$set':{'owner': owner}});
     res.send(data);
     res.end();
 });
@@ -647,7 +645,7 @@ router.post('/group/:id', async function(req, res){
 
     let fid = new Date().getTime();
     group = {name: req.params.id, gid: mingid, owner: owner};
-    await mongo_groups.insert(group);
+    await mongo_groups.insertOne(group);
     await goldap.add_group(group, fid);
 
     try {
@@ -659,7 +657,7 @@ router.post('/group/:id', async function(req, res){
         return;            
     }
 
-    await mongo_events.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']});
+    await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']});
 
     group.fid = fid;
     res.send(group);
@@ -801,7 +799,7 @@ router.post('/user/:id/group/:group', async function(req, res){
     // Now add group
     await goldap.change_user_groups(user, [secgroup], [], fid);
     try {
-        await mongo_users.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+        await mongo_users.updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
     } catch(err) {
         res.send({message: 'Could not update user'});
         res.end();
@@ -817,7 +815,7 @@ router.post('/user/:id/group/:group', async function(req, res){
         return;           
     }
 
-    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
     res.send({message: 'User added to group', fid: fid});
     res.end();
     return;
@@ -868,7 +866,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
     // Now add group
     await goldap.change_user_groups(user, [], [secgroup], fid);
     try {
-        await mongo_users.update({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+        await mongo_users.updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
     } catch(err) {
         res.send({message: 'Could not update user'});
         res.end();
@@ -884,7 +882,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
         return;         
     }
 
-    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
     let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]});
     if(users_in_group && users_in_group.length > 0){
         res.send({message: 'User removed from group', fid: fid});
@@ -910,7 +908,7 @@ router.delete_user = function(user, action_owner_id){
     return new Promise(async function (resolve, reject){
         if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
             await mongo_users.remove({_id: user._id});
-            await mongo_events.insert({
+            await mongo_events.insertOne({
                 'owner': action_owner_id,
                 'date': new Date().getTime(),
                 'action': 'delete user ' + user.uid ,
@@ -952,7 +950,7 @@ router.delete_user = function(user, action_owner_id){
                 message: msg_activ, // plaintext body
                 html_message: msg_activ_html // html body
             };
-            await mongo_events.insert({
+            await mongo_events.insertOne({
                 'owner': action_owner_id,
                 'date': new Date().getTime(),
                 'action': 'delete user ' + user.uid ,
@@ -1097,7 +1095,7 @@ router.get('/user/:id/activate', async function(req, res) {
         res.end();
         return;
     }
-    await mongo_users.update({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await mongo_users.updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     try {
         let created_file = await filer.user_add_user(user, fid);
@@ -1118,7 +1116,7 @@ router.get('/user/:id/activate', async function(req, res) {
             message: msg_activ, // plaintext body
             html_message: msg_activ_html // html body
         };
-        await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
         let plugin_call = function(plugin_info, userId, data, adminId){
             // eslint-disable-next-line no-unused-vars
@@ -1206,7 +1204,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 return;
             }
             var account_event = {action: 'email_confirm', date: new Date().getTime()};
-            await mongo_users.update(
+            await mongo_users.updateOne(
                 { _id: user._id},
                 {
                     $set: {status: STATUS_PENDING_APPROVAL},
@@ -1220,7 +1218,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 message: 'New account registration waiting for approval: '+uid, // plaintext body
                 html_message: 'New account registration waiting for approval: '+uid // html body
             };
-            await mongo_events.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
+            await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
             if(notif.mailSet()) {
                 // eslint-disable-next-line no-unused-vars
                 notif.sendUser(mailOptions, function(error, response){
@@ -1344,10 +1342,10 @@ router.post('/user/:id', async function(req, res) {
     // user[CONFIG.general.internal_flag] = false,
     user.home = get_user_home(user);
 
-    await mongo_events.insert({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
+    await mongo_events.insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
 
     let uid = req.params.id;
-    await mongo_users.insert(user);
+    await mongo_users.insertOne(user);
     let link = GENERAL_CONFIG.url +
         encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     let msg_activ = CONFIG.message.emailconfirmation.join('\n').replace('#LINK#', link).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
@@ -1416,7 +1414,7 @@ router.get('/user/:id/expire', async function(req, res){
         }
         user.history.push({'action': 'expire', date: new Date().getTime()});
         // eslint-disable-next-line no-unused-vars
-        await mongo_users.update({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
+        await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
 
         try {
             let created_file = await filer.user_expire_user(user, fid);
@@ -1427,7 +1425,7 @@ router.get('/user/:id/expire', async function(req, res){
             return;
         }
 
-        await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
         // Now remove from mailing list
         try {
@@ -1496,7 +1494,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
         return;
     }
     user.password=req.body.password;
-    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
     var fid = new Date().getTime();
     try {
         await goldap.reset_password(user, fid);
@@ -1540,7 +1538,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     }
 
     try {
-        await mongo_users.update({uid: req.params.id},{'$set': {regkey: key}});
+        await mongo_users.updateOne({uid: req.params.id},{'$set': {regkey: key}});
     } catch(err) {
         res.status(404).send('User cannot be updated');
         res.end();
@@ -1561,7 +1559,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
         message: msg,
         html_message: html_msg
     };
-    await mongo_events.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
+    await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
 
     if(notif.mailSet()) {
         // eslint-disable-next-line no-unused-vars
@@ -1601,7 +1599,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             return;
         }
         user.history.push({'action': 'password reset', date: new Date().getTime()});
-        await mongo_users.update({uid: user.uid},{'$set': {history: user.history}});
+        await mongo_users.updateOne({uid: user.uid},{'$set': {history: user.history}});
         // Todo: find if we need another template (or not)
         try {
             let created_file = await filer.user_reset_password(user, fid);
@@ -1622,7 +1620,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             message: msg,
             html_message: msg_html
         };
-        await mongo_events.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
+        await mongo_events.insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
 
         if(notif.mailSet()) {
             // eslint-disable-next-line no-unused-vars
@@ -1666,8 +1664,8 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
         var expiration = new Date().getTime() + 1000*3600*24*user.duration;
-        await mongo_users.update({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
-        await mongo_events.insert({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
+        await mongo_users.updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
+        await mongo_events.insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         res.redirect(GENERAL_CONFIG.url+'/manager2/user/' + user.uid + '/renew/' + regkey);
         res.end();
         return;
@@ -1711,7 +1709,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;                    
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await mongo_users.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}});
+        await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}});
 
         try {
             let created_file = await filer.user_renew_user(user, fid);
@@ -1722,7 +1720,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         } 
 
-        await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
         notif.add(user.email, function(){
             let msg_activ = CONFIG.message.reactivation.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
             let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer.join('<br/>');
@@ -1800,7 +1798,7 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
     // Update SSH Key
-    await mongo_users.update({_id: user._id}, {'$set': {ssh: req.body.ssh}});
+    await mongo_users.updateOne({_id: user._id}, {'$set': {ssh: req.body.ssh}});
     var fid = new Date().getTime();
     user.ssh = escapeshellarg(req.body.ssh);
     try {
@@ -1812,7 +1810,7 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
 
-    await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.params.id , 'logs': [ user.uid + '.' + fid + '.update']});
+    await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.params.id , 'logs': [ user.uid + '.' + fid + '.update']});
 
     user.fid = fid;
     res.send(user);
@@ -1935,7 +1933,7 @@ router.put('/user/:id', async function(req, res) {
     }
 
     if(user.status == STATUS_ACTIVE){
-        await mongo_users.update({_id: user._id}, user);
+        await mongo_users.updateOne({_id: user._id}, user);
         if(session_user.is_admin) {
             user.is_admin = true;
         }
@@ -1958,11 +1956,11 @@ router.put('/user/:id', async function(req, res) {
         if(session_user.is_admin && CONFIG.general.use_group_in_path) {
             if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                 // If group modification, change home location
-                await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []});
+                await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []});
             }
         }
 
-        await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
         let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]});
         if(users_in_group && users_in_group.length == 0){
             let oldgroup = await mongo_groups.findOne({name: user.oldgroup});
@@ -1990,8 +1988,8 @@ router.put('/user/:id', async function(req, res) {
     }
     else {
         // eslint-disable-next-line no-unused-vars
-        await mongo_users.update({_id: user._id}, user);
-        await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
+        await mongo_users.updateOne({_id: user._id}, user);
+        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
         let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]});
         if(users_in_group && users_in_group.length == 0){
             let oldgroup = await mongo_groups.findOne({name: user.oldgroup});
@@ -2060,7 +2058,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     }
     user.projects.push(newproject);
     try {
-        await mongo_users.update({_id: user._id}, {'$set': { projects: user.projects}});
+        await mongo_users.updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
         res.status(403).send('Could not update user');
         res.end();
@@ -2076,7 +2074,7 @@ router.post('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
     res.send({message: 'User added to project', fid: fid});
     res.end();
 });
@@ -2126,7 +2124,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         }
     }
     try {
-        await mongo_users.update({_id: user._id}, {'$set': { projects: tempprojects}});
+        await mongo_users.updateOne({_id: user._id}, {'$set': { projects: tempprojects}});
     } catch(err) {
         res.status(403).send('Could not update user');
         res.end();
@@ -2141,7 +2139,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
     res.send({message: 'User removed from project', fid: fid});
     res.end();
 });

@@ -207,7 +207,7 @@ router.post('/u2f/register/:id', async function(req, res) {
     const registrationResponse = req.bodyregistrationResponse;
     const result = u2f.checkRegistration(registrationRequest, registrationResponse);
     if (result.successful) {
-        await mongo_users.update({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
+        await mongo_users.updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
         return res.send({'publicKey': result.publicKey});
     }
     else{
@@ -341,7 +341,7 @@ router.post('/auth/:id', async function(req, res) {
             if (!user.apikey) {
                 let apikey = Math.random().toString(36).slice(-10);
                 user.apikey = apikey;
-                await mongo_users.update({uid: user.uid}, {'$set':{'apikey': apikey}});
+                await mongo_users.updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
                 res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
                 res.end();
                 return;

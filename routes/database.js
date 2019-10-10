@@ -17,7 +17,6 @@ var mongo_databases = null;
 var mongo_events = null;
 
 var mongo_connect = async function() {
-    logger.info('setup mongodb connection');
     let url = CONFIG.mongo.url;
     let client = null;
     if(!url) {
@@ -26,7 +25,6 @@ var mongo_connect = async function() {
         client = new MongoClient(CONFIG.mongo.url);
     }
     await client.connect();
-    logger.info('connected to mongodb');
     mongodb = client.db(CONFIG.general.db);
     mongo_users = mongodb.collection('users');
     mongo_events = mongodb.collection('events');
@@ -99,8 +97,8 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    await mongo_databases.update({name: req.params.id},{'$set': {owner: req.params.new}});
-    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new, 'logs': []});
+    await mongo_databases.updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
+    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new, 'logs': []});
     res.send({message: 'Owner changed from '+req.params.old+' to '+req.params.new});
     res.end();
     return;
@@ -218,9 +216,9 @@ router.post('/database/:id', async function(req, res) {
         return;
     }
     else {
-        await mongo_databases.insert(db);
+        await mongo_databases.insertOne(db);
         if(! create_db){
-            await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []});
+            await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []});
             res.send({message:'Database declared'});
             return;
         }
@@ -229,7 +227,7 @@ router.post('/database/:id', async function(req, res) {
             // eslint-disable-next-line no-unused-vars
             connection.query(sql, async function(err, results) {
                 if (err) {
-                    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []});
+                    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []});
                     res.send({message: 'Creation error: '+err});
                     res.end();
                     return;
@@ -265,7 +263,7 @@ router.post('/database/:id', async function(req, res) {
                             message: msg, // plaintext body
                             html_message: msg // html body
                         };
-                        await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
+                        await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
 
                         if(notif.mailSet()) {
                             // eslint-disable-next-line no-unused-vars
@@ -316,7 +314,7 @@ router.delete('/database/:id', async function(req, res) {
     let database = await mongo_databases.findOne({name: req.params.id});
     if(! database || (database.type!==undefined && database.type != 'mysql')) {
         await mongo_databases.remove(filter);
-        await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
+        await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
         res.send({message: ''});
         res.end();
         return;
@@ -329,7 +327,7 @@ router.delete('/database/:id', async function(req, res) {
             let sql = `DROP DATABASE ${req.params.id};\n`;
             // eslint-disable-next-line no-unused-vars
             connection.query(sql, async function(err, results) {
-                await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
+                await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
                 res.send({message:'Database removed'});
                 res.end();
                 return;
@@ -368,7 +366,7 @@ var delete_db = function(user, db_id){
         let database = await mongo_databases.findOne({name: db_id});
         if(! database || (database.type!==undefined && database.type != 'mysql')) {
             await mongo_databases.remove(filter);
-            await mongo_events.insert(
+            await mongo_events.insertOne(
                 {
                     'owner': user.uid,
                     'date': new Date().getTime(),
@@ -385,7 +383,7 @@ var delete_db = function(user, db_id){
                 let sql = `DROP DATABASE ${db_id};\n`;
                 // eslint-disable-next-line no-unused-vars
                 connection.query(sql, async function(err, results) {
-                    await mongo_events.insert(
+                    await mongo_events.insertOne(
                         {
                             'owner': user.uid,
                             'date': new Date().getTime(),

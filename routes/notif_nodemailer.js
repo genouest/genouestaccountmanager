@@ -105,11 +105,8 @@ module.exports = {
             });
             logger.info('user added to ' + CONFIG.nodemailer.list.address, email);
 
-            // eslint-disable-next-line no-unused-vars
-            await mongo_events.insert({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
-
-            // eslint-disable-next-line no-unused-vars
-            await mongo_users.update({email: email}, {'$set':{'subscribed': true}});
+            await mongo_events.insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
+            await mongo_users.updateOne({email: email}, {'$set':{'subscribed': true}});
         }
         callback();
         return;
@@ -140,8 +137,8 @@ module.exports = {
                 subject: CONFIG.nodemailer.list.cmd_del + ' ' + CONFIG.nodemailer.list.address + ' ' + email
             });
             logger.warn('user deleted from ' + CONFIG.nodemailer.list.address, email);
-            await mongo_events.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
-            await mongo_users.update({email: email}, {'$set':{'subscribed': false}});
+            await mongo_events.insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
+            await mongo_users.updateOne({email: email}, {'$set':{'subscribed': false}});
         }
         callback();
         return;

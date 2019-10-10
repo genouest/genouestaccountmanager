@@ -42,12 +42,39 @@ var utils = require('../routes/utils.js');
 
 // var get_ip = require('ipware')().get_ip;
 
+/*
 var monk = require('monk');
 var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
 var users_db = db.get('users');
 var groups_db = db.get('groups');
 var reservation_db = db.get('reservations');
 var events_db = db.get('events');
+*/
+
+const MongoClient = require('mongodb').MongoClient;
+var mongodb = null;
+var mongo_users = null;
+var mongo_groups = null;
+var mongo_events = null;
+var mongo_reservations = null;
+
+
+var mongo_connect = async function() {
+    let url = CONFIG.mongo.url;
+    let client = null;
+    if(!url) {
+        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
+    } else {
+        client = new MongoClient(CONFIG.mongo.url);
+    }
+    await client.connect();
+    mongodb = client.db(CONFIG.general.db);
+    mongo_users = mongodb.collection('users');
+    mongo_groups = mongodb.collection('groups');
+    mongo_events = mongodb.collection('events');
+    mongo_reservations = mongodb.collection('reservations');
+};
+mongo_connect();
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -58,65 +85,52 @@ var STATUS_EXPIRED = 'Expired';
 
 var createExtraGroup = function (ownerName) {
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
         // var mingid = 1000
-        utils.getGroupAvailableId().then(function (mingid) {
-            var fid = new Date().getTime();
-            var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
-            // eslint-disable-next-line no-unused-vars
-            groups_db.insert(group, async function(err_insert) {
-                // eslint-disable-next-line no-unused-vars
-                await goldap.add_group(group, fid);
-                filer.user_add_group(group, fid)
-                    .then(
-                        created_file => {
-                            logger.info('File Created: ', created_file);
-                        })
-                    .catch(error => { // reject()
-                        logger.error('Add Group Failed for: ' + group.name, error);
-                    });
-                group.fid = fid;
-                resolve(group);
-                return;
-            });
-        });
+        let mingid = await utils.getGroupAvailableId();
+        let fid = new Date().getTime();
+        let group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
+        await mongo_groups.insertOne(group);
+
+        await goldap.add_group(group, fid);
+        try {
+            let created_file = await filer.user_add_group(group, fid);
+            logger.debug('Created file', created_file);
+        } catch(error) {
+            logger.error('Add Group Failed for: ' + group.name, error);
+        }
+        group.fid = fid;
+        resolve(group);
     });
 };
 
 
 var deleteExtraGroup = function (group) {
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
         if (group === undefined || group === null) {
             resolve();
             return;
         }
-        groups_db.findOne({'name': group.name}, function(err, group_to_remove){
-            if(err || group_to_remove == null) {
-                resolve();
-                return;
-            }
-            groups_db.remove({ 'name': group.name }, async function () {
-                let fid = new Date().getTime();
-                await goldap.delete_group(group, fid);
-                filer.user_delete_group(group, fid)
-                    .then(
-                        created_file => {
-                            logger.info('File Created: ', created_file);
-                        })
-                    .catch(error => { // reject()
-                        logger.error('Delete Group Failed for: ' + group.name, error);
-                        return;
-                    });
+        let group_to_remove = await mongo_groups.findOne({'name': group.name});
+        if(!group_to_remove) {
+            resolve();
+            return;
+        }
+        await mongo_groups.removeOne({ 'name': group.name });
+        let fid = new Date().getTime();
+        await goldap.delete_group(group, fid);
+        try {
+            let created_file = await  filer.user_delete_group(group, fid);
+            logger.debug('Created file', created_file);
+        } catch(error) {
+            logger.error('Delete Group Failed for: ' + group.name, error);
+        }
 
-                group.fid = fid;
-                utils.freeGroupId(group.gid).then(function(){
-                    events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] }, function(){});
-                    resolve();
-                    return;
-                });
-            });
-        });
+        group.fid = fid;
+        await utils.freeGroupId(group.gid);
+        await mongo_events.insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
+        resolve();
     });
 };
 
@@ -172,21 +186,18 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
 };
 
 var create_tp_user_db = function (user) {
-    return new Promise(function (resolve, reject){
+    return new Promise(async function (resolve, reject){
         logger.debug('create_tp_user_db', user.uid);
         try {
-            utils.getUserAvailableId().then(function (uid) {
-                user.uid = CONFIG.tp.prefix + uid;
-                user.lastname = uid;
-                user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
-                user.uidnumber = uid;
-                user.home = fusers.user_home(user);
-                // eslint-disable-next-line no-unused-vars
-                users_db.insert(user).then(function(data){
-                    user.password = Math.random().toString(36).slice(-10);
-                    resolve(user);
-                });
-            });
+            let uid = await utils.getUserAvailableId();
+            user.uid = CONFIG.tp.prefix + uid;
+            user.lastname = uid;
+            user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
+            user.uidnumber = uid;
+            user.home = fusers.user_home(user);
+            await mongo_users.insertOne(user);
+            user.password = Math.random().toString(36).slice(-10);
+            resolve(user);
         }
         catch(exception){
             logger.error(exception);
@@ -197,7 +208,7 @@ var create_tp_user_db = function (user) {
 
 var send_user_passwords = function(owner, from_date, to_date, users){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
+    return new Promise(async function (resolve, reject){
         logger.debug('send_user_passwords');
         let from = new Date(from_date);
         let to = new Date(to_date);
@@ -226,21 +237,20 @@ var send_user_passwords = function(owner, from_date, to_date, users){
         msg_html += '<hr>';
         msg_html += '<p>In case of issue, you can contact us at ' + CONFIG.general.support + '</p>';
 
-        users_db.findOne({'uid': owner}).then(function(user_owner){
-            if( notif.mailSet()){
-                let mailOptions = {
-                    origin: MAIL_CONFIG.origin, // sender address
-                    destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
-                    subject: '[TP accounts reservation] ' + owner,
-                    message: msg,
-                    html_message: msg_html
-                };
-                // eslint-disable-next-line no-unused-vars
-                notif.sendUser(mailOptions, function(err, response) {
-                    resolve(users);
-                });
-            }
-        });
+        let user_owner = await mongo_users.findOne({'uid': owner});
+        if( notif.mailSet()){
+            let mailOptions = {
+                origin: MAIL_CONFIG.origin, // sender address
+                destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
+                subject: '[TP accounts reservation] ' + owner,
+                message: msg,
+                html_message: msg_html
+            };
+            // eslint-disable-next-line no-unused-vars
+            notif.sendUser(mailOptions, function(err, response) {
+                resolve(users);
+            });
+        }
     });
 };
 
@@ -298,31 +308,28 @@ router.delete_tp_users = function(users, group, admin_id){
 
 router.exec_tp_reservation = function(reservation_id){
     // Create users for reservation
-    return new Promise(function (resolve, reject){
-        reservation_db.findOne({'_id': reservation_id}).then(function(reservation){
-            logger.debug('create a reservation group', reservation._id);
-            createExtraGroup(reservation.owner).then(function(newGroup){
-                logger.debug('create reservation accounts', reservation._id);
-                create_tp_users_db(reservation.owner, reservation.quantity,Math.ceil((reservation.to-reservation.from)/(1000*3600*24)), reservation.to, newGroup).then(function(activated_users){
-                    for(let i=0;i<activated_users.length;i++){
-                        logger.debug('activated user ', activated_users[i].uid);
-                        reservation.accounts.push(activated_users[i].uid);
-                    }
-                    try{
-                        send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(function(){
-                            // eslint-disable-next-line no-unused-vars
-                            reservation_db.update({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}}).then(function(err){
-                                logger.debug('reservation ', reservation);
-                                resolve(reservation);
-                            });
-                        });
-                    }
-                    catch(exception){
-                        logger.error(exception);
-                        reject(exception);
-                    }
-
-                });
+    return new Promise(async function (resolve, reject){
+        let reservation = await mongo_reservations.findOne({'_id': reservation_id});
+        logger.debug('create a reservation group', reservation._id);
+        createExtraGroup(reservation.owner).then(function(newGroup){
+            logger.debug('create reservation accounts', reservation._id);
+            create_tp_users_db(reservation.owner, reservation.quantity,Math.ceil((reservation.to-reservation.from)/(1000*3600*24)), reservation.to, newGroup).then(function(activated_users){
+                for(let i=0;i<activated_users.length;i++){
+                    logger.debug('activated user ', activated_users[i].uid);
+                    reservation.accounts.push(activated_users[i].uid);
+                }
+                try{
+                    send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(async function(){
+                        // eslint-disable-next-line no-unused-vars
+                        await mongo_reservations.updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
+                        logger.debug('reservation ', reservation);
+                        resolve(reservation);
+                    });
+                }
+                catch(exception){
+                    logger.error(exception);
+                    reject(exception);
+                }
             });
         });
     });
@@ -331,7 +338,7 @@ router.exec_tp_reservation = function(reservation_id){
 var tp_reservation = function(userId, from_date, to_date, quantity, about){
     // Create a reservation
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
+    return new Promise(async function (resolve, reject){
 
         let reservation = {
             'owner': userId,
@@ -344,10 +351,9 @@ var tp_reservation = function(userId, from_date, to_date, quantity, about){
             'over': false
         };
 
-        reservation_db.insert(reservation).then(function(reservation){
-            logger.debug('reservation ', reservation);
-            resolve(reservation);
-        });
+        await mongo_reservations.insertOne(reservation);
+        logger.debug('reservation ', reservation);
+        resolve(reservation);
     });
 };
 
@@ -357,8 +363,7 @@ var insert_ldap_user = function(user, fid){
         try {
             await goldap.add(user, fid);
             logger.debug('switch to ACTIVE');
-            // eslint-disable-next-line no-unused-vars
-            users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE}}).then(function(data){});
+            await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
             resolve(user);
         } catch(err) {
             logger.error(err);
@@ -369,67 +374,59 @@ var insert_ldap_user = function(user, fid){
 };
 
 var activate_tp_user = function(user, adminId){
-    return new Promise(function (resolve, reject){
-        users_db.findOne({'uid': user.uid}, function(err, db_user){
-            if(err || !db_user) {
-                logger.error('failure:',err,db_user);
-                reject(user);
-                return;
-            }
-            logger.debug('activate', user.uid);
-            let fid = new Date().getTime();
-            insert_ldap_user(user, fid).then(function(user){
+    return new Promise(async function (resolve, reject){
+        let db_user = await mongo_users.findOne({'uid': user.uid});
+        if(!db_user) {
+            logger.error('failure:',user.uid);
+            reject(user);
+            return;
+        }
+        logger.debug('activate', user.uid);
+        let fid = new Date().getTime();
+        let ldap_user = await insert_ldap_user(user, fid);
+        try {
+            let created_file = await  filer.user_add_user(ldap_user, fid);
+            logger.debug('Created file', created_file);
+        } catch(error) {
+            logger.error('Add User Failed for: ' + user.uid, error);
 
-                filer.user_add_user(user, fid)
-                    .then(
-                        created_file => {
-                            logger.info('File Created: ', created_file);
-                        })
-                    .catch(error => { // reject()
-                        logger.error('Add User Failed for: ' + user.uid, error);
+        }
 
 
-                        return;
-                    });
-
-                let plugin_call = function(plugin_info, userId, data, adminId){
-                    // eslint-disable-next-line no-unused-vars
-                    return new Promise(function (resolve, reject){
-                        plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                            resolve(true);
-                        });
-                    });
-                };
-                Promise.all(plugins_info.map(function(plugin_info){
-                    return plugin_call(plugin_info, user.uid, user, adminId);
-                // eslint-disable-next-line no-unused-vars
-                })).then(function(results){
-                    resolve(user);
+        let plugin_call = function(plugin_info, userId, data, adminId){
+            // eslint-disable-next-line no-unused-vars
+            return new Promise(function (resolve, reject){
+                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                    resolve(true);
                 });
             });
+        };
+        Promise.all(plugins_info.map(function(plugin_info){
+            return plugin_call(plugin_info, user.uid, ldap_user, adminId);
+        // eslint-disable-next-line no-unused-vars
+        })).then(function(results){
+            resolve(ldap_user);
         });
     });
 };
 
-router.get('/tp', function(req, res) {
+router.get('/tp', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
-        if(!user) {
-            res.send({msg: 'User does not exist'});
-            res.end();
-            return;
-        }
-        reservation_db.find({}, function(err, reservations){
-            res.send(reservations);
-            res.end();
-        });
-    });
+    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
+    let reservations = await mongo_reservations.find({});
+    res.send(reservations);
+    res.end();
 });
 
-router.post('/tp', function(req, res) {
+router.post('/tp', async function(req, res) {
     if(req.body.quantity<=0){
         res.status(403).send('Quantity must be >= 1');
         return;
@@ -443,29 +440,26 @@ router.post('/tp', function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
-        if(!user) {
-            res.send({msg: 'User does not exist'});
-            res.end();
-            return;
-        }
+    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
 
-        let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
-        if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-            res.status(403).send('Not authorized');
-            return;
-        }
-        tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about).then(function(reservation){
-            res.send({'reservation': reservation, 'msg': 'Reservation done'});
-            res.end();
-            return;
-        });
-
+    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+        res.status(403).send('Not authorized');
+        return;
+    }
+    tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about).then(function(reservation){
+        res.send({'reservation': reservation, 'msg': 'Reservation done'});
+        res.end();
+        return;
     });
-
 });
 
-router.delete('/tp/:id', function(req, res) {
+router.delete('/tp/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(403).send('Not authorized');
         return;
@@ -474,57 +468,49 @@ router.delete('/tp/:id', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({'_id': req.locals.logInfo.id}, function(err, user){
-        if(!user) {
-            res.send({msg: 'User does not exist'});
-            res.end();
-            return;
-        }
+    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
 
-        let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
-        if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-            res.status(403).send('Not authorized');
-            return;
-        }
+    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+        res.status(403).send('Not authorized');
+        return;
+    }
 
-        // add filter
-        let filter = {};
-        if(is_admin) {
-            filter = {_id: req.params.id};
-        }
-        else{
-            filter = {_id: req.params.id, owner: user.uid};
-        }
+    // add filter
+    let filter = {};
+    if(is_admin) {
+        filter = {_id: req.params.id};
+    }
+    else{
+        filter = {_id: req.params.id, owner: user.uid};
+    }
+    let reservation = await mongo_reservations.findOne(filter);
+    if(!reservation){
+        res.status(403).send({'msg': 'Not allowed to delete this reservation'});
+        res.end();
+        return;
+    }
 
-        reservation_db.findOne(filter, function(err, reservation) {
+    if(reservation.over){
+        res.status(403).send({'msg': 'Reservation is already closed'});
+        res.end();
+        return;
+    }
 
-            if(err){
-                res.status(403).send({'msg': 'Not allowed to delete this reservation'});
-                res.end();
-                return;
-            }
-
-            if(reservation.over){
-                res.status(403).send({'msg': 'Reservation is already closed'});
-                res.end();
-                return;
-            }
-
-            if(reservation.created){
-                res.status(403).send({'msg': 'Reservation accounts already created, reservation will be closed after closing date'});
-                res.end();
-                return;
-            }
-
-            reservation_db.update({'_id': req.params.id},{'$set': {'over': true}}).then(function(){
-                res.send({'msg': 'Reservation cancelled'});
-                res.end();
-                return;
-            });
-        });
-
-    });
-
+    if(reservation.created){
+        res.status(403).send({'msg': 'Reservation accounts already created, reservation will be closed after closing date'});
+        res.end();
+        return;
+    }
+    await mongo_reservations.updateOne({'_id': req.params.id},{'$set': {'over': true}});
+    res.send({'msg': 'Reservation cancelled'});
+    res.end();
+    return;
 });
 
 
