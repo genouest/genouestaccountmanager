@@ -67,7 +67,15 @@ var mongo_connect = async function() {
 };
 
 router.init = function() {
-    mongo_connect();
+    return new Promise((resolve, reject) => {
+        try {
+            mongo_connect();
+            resolve();
+        } catch(err){
+            logger.debug('Failed to init db', err);
+            reject(err);
+        }
+    });
 };
 
 /*
@@ -178,18 +186,14 @@ var create_extra_group = function(group_name, owner_name){
             catch(e) {
                 logger.error(e);
             }
-            filer.user_create_extra_group(group, fid)
-                .then(
-                    created_file => {
-                        logger.info('File Created: ', created_file);
-                        resolve(group);  // todo: find if needed
-                        return;
-                    })
-                .catch(error => { // reject()
-                    logger.error('Create Group Failed for: ' + group.name, error);
-                    reject(error);
-                    return;
-                });
+            try {
+                let created_file = await filer.user_create_extra_group(group, fid);
+                logger.info('File Created: ', created_file);
+            } catch(error){
+                logger.error('Create Group Failed for: ' + group.name, error);
+                reject(error);
+                return;
+            }
         });
 
     });
@@ -2000,7 +2004,7 @@ router.put('/user/:id', async function(req, res) {
     }
 });
 
-router.get('/project/:id/users', function(req, res){
+router.get('/project/:id/users', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -2009,19 +2013,17 @@ router.get('/project/:id/users', function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-        if(err || user == null){
-            res.status(404).send('User not found');
-            return;
-        }
-        users_db.find({'projects': req.params.id}, function(err, users_in_project){
-            res.send(users_in_project);
-            res.end();
-        });
-    });
+    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+    let users_in_project = await mongo_users.find({'projects': req.params.id});
+    res.send(users_in_project);
+    res.end();
 });
 
-router.post('/user/:id/project/:project', function(req, res){
+router.post('/user/:id/project/:project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -2031,61 +2033,55 @@ router.post('/user/:id/project/:project', function(req, res){
         return;
     }
 
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-            res.status(401).send('Not authorized');
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        res.end();
+        return;
+    }
+    let newproject = req.params.project;
+    let uid = req.params.id;
+    var fid = new Date().getTime();
+    let user = await mongo_users.findOne({uid: uid});
+    if(!user) {
+        res.status(404).send('User does not exist');
+        res.end();
+        return;
+    }
+    if (!user.projects){
+        user.projects = [];
+    }
+    for(var g=0; g < user.projects.length; g++){
+        if(newproject == user.projects[g]) {
+            res.send({message:'User is already in project : nothing was done.'});
             res.end();
             return;
         }
-        let newproject = req.params.project;
-        let uid = req.params.id;
-        var fid = new Date().getTime();
-        users_db.findOne({uid: uid}, function(err, user){
-            if(!user || err) {
-                res.status(404).send('User does not exist');
-                res.end();
-                return;
-            }
-            if (!user.projects){
-                user.projects = [];
-            }
-            for(var g=0; g < user.projects.length; g++){
-                if(newproject == user.projects[g]) {
-                    res.send({message:'User is already in project : nothing was done.'});
-                    res.end();
-                    return;
-                }
-            }
-            user.projects.push(newproject);
-            users_db.update({_id: user._id}, {'$set': { projects: user.projects}}, function(err){
-                if(err){
-                    res.status(403).send('Could not update user');
-                    res.end();
-                    return;
-                }
+    }
+    user.projects.push(newproject);
+    try {
+        await mongo_users.update({_id: user._id}, {'$set': { projects: user.projects}});
+    } catch(err) {
+        res.status(403).send('Could not update user');
+        res.end();
+        return;
+    }
 
-                filer.project_add_user_to_project({id: newproject}, user, fid)
-                    .then(
-                        created_file => {
-                            logger.info('File Created: ', created_file);
+    try {
+        let created_file = await filer.project_add_user_to_project({id: newproject}, user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Add User to Project Failed for: ' + newproject, error);
+        res.status(500).send('Add Project Failed');
+        return;
+    }
 
-                        })
-                    .catch(error => { // reject()
-                        logger.error('Add User to Project Failed for: ' + newproject, error);
-                        res.status(500).send('Add Project Failed');
-                        return;
-                    });
-
-                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []}, function(){});
-                res.send({message: 'User added to project', fid: fid});
-                res.end();
-                return;
-            });
-        });
-    });
+    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
+    res.send({message: 'User added to project', fid: fid});
+    res.end();
 });
 
-router.delete('/user/:id/project/:project', function(req, res){
+router.delete('/user/:id/project/:project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -2094,70 +2090,63 @@ router.delete('/user/:id/project/:project', function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-            res.status(401).send('Not authorized');
-            res.end();
-            return;
+
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+
+    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        res.end();
+        return;
+    }
+    let oldproject = req.params.project;
+    let uid = req.params.id;
+    var fid = new Date().getTime();
+    let user = await mongo_users.findOne({uid: uid});
+    if(! user) {
+        res.status(404).send('User ' + uid + ' not found');
+        res.end();
+        return;
+    }
+    let project = await mongo_projects.findOne({id:oldproject});
+    if(!project){
+        logger.info('project not found', oldproject);
+        res.status(500).send('Error, project not found');
+        res.end();
+        return;
+    }
+    if( project && uid === project.owner && ! req.query.force){
+        res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
+        res.end();
+        return;
+    }
+    let tempprojects = [];
+    for(var g=0; g < user.projects.length; g++){
+        if(oldproject != user.projects[g]) {
+            tempprojects.push(user.projects[g]);
         }
-        let oldproject = req.params.project;
-        let uid = req.params.id;
-        var fid = new Date().getTime();
-        users_db.findOne({uid: uid}, function(err, user){
-            if(! user) {
-                res.status(404).send('User ' + uid + ' not found');
-                res.end();
-                return;
-            }
-            projects_db.findOne({id:oldproject}, function(err, project){
-                if(err){
-                    logger.info(err);
-                    res.status(500).send('Error, project not found');
-                    res.end();
-                    return;
-                }
-                if( project && uid === project.owner && ! req.query.force){
-                    res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
-                    res.end();
-                    return;
-                }
-                let tempprojects = [];
-                for(var g=0; g < user.projects.length; g++){
-                    if(oldproject != user.projects[g]) {
-                        tempprojects.push(user.projects[g]);
-                    }
-                }
-                users_db.update({_id: user._id}, {'$set': { projects: tempprojects}}, function(err){
-                    if(err){
-                        res.status(403).send('Could not update user');
-                        res.end();
-                        return;
-                    }
+    }
+    try {
+        await mongo_users.update({_id: user._id}, {'$set': { projects: tempprojects}});
+    } catch(err) {
+        res.status(403).send('Could not update user');
+        res.end();
+        return;
+    }
+    try {
+        let created_file = await filer.project_remove_user_from_project(project, user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Remove User from Project Failed for: ' + oldproject, error);
+        res.status(500).send('Remove from Project Failed');
+        return;
+    }
 
-                    filer.project_remove_user_from_project(project, user, fid)
-                        .then(
-                            created_file => {
-                                logger.info('File Created: ', created_file);
-
-                            })
-                        .catch(error => { // reject()
-                            logger.error('Remove User from Project Failed for: ' + oldproject, error);
-                            res.status(500).send('Remove from Project Failed');
-                            return;
-                        });
-
-
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []}, function(){});
-                    res.send({message: 'User removed from project', fid: fid});
-                    res.end();
-                    return;
-                });
-            });
-        });
-    });
+    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
+    res.send({message: 'User removed from project', fid: fid});
+    res.end();
 });
 
-router.get('/list/:list', function(req, res){
+router.get('/list/:list', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -2166,34 +2155,34 @@ router.get('/list/:list', function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-            res.status(401).send('Not authorized');
-            return;
-        }
-        var list_name = req.params.list;
-        notif.getMembers(list_name, function(members) {
-            res.send(members);
-            return;
-        });
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+
+    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let list_name = req.params.list;
+    notif.getMembers(list_name, function(members) {
+        res.send(members);
+        return;
     });
 });
 
 
-router.get('/lists', function(req, res){
+router.get('/lists', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-            res.status(401).send('Not authorized');
-            return;
-        }
-        notif.getLists(function(listOfLists) {
-            res.send(listOfLists);
-            return;
-        });
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+
+    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    notif.getLists(function(listOfLists) {
+        res.send(listOfLists);
+        return;
     });
 });
 

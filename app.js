@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 'use strict';
 
 var express = require('express');
@@ -52,6 +53,9 @@ const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
 if(MY_ADMIN_USER !== null){
     users.init().then(() => {
         users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+    }).catch(err => {
+        console.log('init failed', err);
+        process.exit(1);
     });
 }
 

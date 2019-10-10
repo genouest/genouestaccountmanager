@@ -2,11 +2,37 @@ var express = require('express');
 var router = express.Router();
 var CONFIG = require('config');
 var Promise = require('promise');
+
+/*
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     databases_db = db.get('databases'),
     users_db = db.get('users'),
     events_db = db.get('events');
+*/
+const MongoClient = require('mongodb').MongoClient;
+var mongodb = null;
+var mongo_users = null;
+var mongo_databases = null;
+var mongo_events = null;
+
+var mongo_connect = async function() {
+    logger.info('setup mongodb connection');
+    let url = CONFIG.mongo.url;
+    let client = null;
+    if(!url) {
+        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
+    } else {
+        client = new MongoClient(CONFIG.mongo.url);
+    }
+    await client.connect();
+    logger.info('connected to mongodb');
+    mongodb = client.db(CONFIG.general.db);
+    mongo_users = mongodb.collection('users');
+    mongo_events = mongodb.collection('events');
+    mongo_databases = mongodb.collection('databases');
+};
+mongo_connect();
 
 var mysql = require('mysql');
 const winston = require('winston');
@@ -53,7 +79,7 @@ handleDisconnect();
 /**
  * Change owner
  */
-router.put('/database/:id/owner/:old/:new', function(req, res) {
+router.put('/database/:id/owner/:old/:new', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -62,53 +88,49 @@ router.put('/database/:id/owner/:old/:new', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-        if(!session_user.is_admin) {
-            res.status(401).send('Not authorized');
-            return;
-        }
-        // eslint-disable-next-line no-unused-vars
-        databases_db.update({name: req.params.id},{'$set': {owner: req.params.new}}, function(err){
-            // eslint-disable-next-line no-unused-vars
-            events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new, 'logs': []}, function(err){});
-            res.send({message: 'Owner changed from '+req.params.old+' to '+req.params.new});
-            res.end();
-            return;
-        });
-    });
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    if(!session_user.is_admin) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    await mongo_databases.update({name: req.params.id},{'$set': {owner: req.params.new}});
+    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new, 'logs': []});
+    res.send({message: 'Owner changed from '+req.params.old+' to '+req.params.new});
+    res.end();
+    return;
 });
 
 
-router.get('/database', function(req, res) {
+router.get('/database', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-        var filter = {};
-        if(!session_user.is_admin) {
-            filter = {owner: session_user.uid};
-        }
-        databases_db.find(filter, function(err, databases){
-            res.send(databases);
-            return;
-        });
-    });
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    var filter = {};
+    if(!session_user.is_admin) {
+        filter = {owner: session_user.uid};
+    }
+    let databases = await mongo_databases.find(filter);
+    res.send(databases);
+    return;
+
 });
 
-router.get('/database/owner/:owner', function(req, res) {
+router.get('/database/owner/:owner', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -117,22 +139,21 @@ router.get('/database/owner/:owner', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-        var filter = {owner: req.params.owner};
-        databases_db.find(filter, function(err, databases){
-            res.send(databases);
-            return;
-        });
-    });
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    var filter = {owner: req.params.owner};
+    let databases = await mongo_databases.find(filter);
+    res.send(databases);
+    return;
 });
 
-router.post('/database/:id', function(req, res) {
+router.post('/database/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -141,259 +162,241 @@ router.post('/database/:id', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
-        }
-        else {
-            session_user.is_admin = false;
-        }
-
-        if (req.body.owner!=undefined && req.body.owner!='' && req.body.owner != session_user.uid && ! session_user.is_admin){
-            res.status(401).send('Not authorized, cant declare a database for a different user');
-            return;
-        }
-        var owner = session_user.uid;
-        var create_db = true;
-        if(req.body.owner!=undefined && req.body.owner != ''){
-            owner = req.body.owner;
-        }
-        if(req.body.create == false || (req.body.type != undefined && req.body.type != 'mysql')){
-            create_db = false;
-        }
-
-        var db_type = 'mysql';
-        if(req.body.type != undefined && req.body.type){
-            db_type = req.body.type;
-        }
-
-        var db_host = CONFIG.mysql.host;
-        if(req.body.host!=undefined && req.body.host && utils.sanitize(req.body.host)){
-            db_host = req.body.host;
-        }
-
-        let db = {
-            owner: owner,
-            name: req.params.id,
-            type: db_type,
-            host: db_host
-        };
-
-        if (create_db && !req.params.id.match(/^[0-9a-z_]+$/)) {
-            res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
-            res.end();
-            return;
-        }
-
-        databases_db.findOne({name: db.name}, function(err, database){
-            if(database) {
-                res.status(403).send({database: null, message: 'Database already exists, please use an other name'});
-                res.end();
-                return;
-            }
-            else {
-                // eslint-disable-next-line no-unused-vars
-                databases_db.insert(db, function(err){
-                    if(! create_db){
-                        events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []}, function(){});
-
-                        res.send({message:'Database declared'});
-                        return;
-
-                    }
-                    else {
-                        var sql = 'CREATE DATABASE ' + req.params.id + ';\n';
-                        // eslint-disable-next-line no-unused-vars
-                        connection.query(sql, function(err, results) {
-                            if (err) {
-                                events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []}, function(){});
-                                res.send({message: 'Creation error: '+err});
-                                res.end();
-                                return;
-                            }
-                            var password = Math.random().toString(36).slice(-10);
-                            sql = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
-                            // eslint-disable-next-line no-unused-vars
-                            connection.query(sql, function(err, results) {
-                                if (err) {
-                                    res.send({message: 'Failed to create user'});
-                                    res.end();
-                                    return;
-                                }
-                                sql = `GRANT ALL PRIVILEGES ON ${req.params.id}.* TO '${req.params.id}'@'%'\n`;
-                                // eslint-disable-next-line no-unused-vars
-                                connection.query(sql, function(err, results) {
-                                    if (err) {
-                                        res.send({message: 'Failed to grant access to user'});
-                                        res.end();
-                                        return;
-                                    }
-                                    // Now send message
-                                    var msg = 'Database created:\n';
-                                    msg += ' Host: ' + CONFIG.mysql.host + '\n';
-                                    msg += ' Database: ' + req.params.id + '\n';
-                                    msg += ' User: ' + req.params.id + '\n';
-                                    msg += ' Password: ' + password + '\n';
-                                    msg += ' Owner: ' + owner + '\n';
-                                    var mailOptions = {
-                                        origin: MAIL_CONFIG.origin, // sender address
-                                        destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
-                                        subject: 'Database creation', // Subject line
-                                        message: msg, // plaintext body
-                                        html_message: msg // html body
-                                    };
-                                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []}, function(){});
-
-                                    if(notif.mailSet()) {
-                                        // eslint-disable-next-line no-unused-vars
-                                        notif.sendUser(mailOptions, function(error, response){
-                                            if(error){
-                                                logger.error(error);
-                                            }
-                                            res.send({message:'Database created, credentials will be sent by mail'});
-                                            res.end();
-                                            return;
-                                        });
-                                    }
-                                });
-                            });
-
-                        }); // end connection.query
-                    }
-
-
-
-                });
-            }
-        });
-    });
-});
-
-router.delete('/database/:id', function(req, res) {
-    if(! req.locals.logInfo.is_logged) {
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if (!session_user) {
         res.status(401).send('Not authorized');
+        return;        
+    }
+
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+
+    if (req.body.owner!=undefined && req.body.owner!='' && req.body.owner != session_user.uid && ! session_user.is_admin){
+        res.status(401).send('Not authorized, cant declare a database for a different user');
+        return;
+    }
+    var owner = session_user.uid;
+    var create_db = true;
+    if(req.body.owner!=undefined && req.body.owner != ''){
+        owner = req.body.owner;
+    }
+    if(req.body.create == false || (req.body.type != undefined && req.body.type != 'mysql')){
+        create_db = false;
+    }
+
+    var db_type = 'mysql';
+    if(req.body.type != undefined && req.body.type){
+        db_type = req.body.type;
+    }
+
+    var db_host = CONFIG.mysql.host;
+    if(req.body.host!=undefined && req.body.host && utils.sanitize(req.body.host)){
+        db_host = req.body.host;
+    }
+
+    let db = {
+        owner: owner,
+        name: req.params.id,
+        type: db_type,
+        host: db_host
+    };
+
+    if (create_db && !req.params.id.match(/^[0-9a-z_]+$/)) {
+        res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
+        res.end();
         return;
     }
 
-    if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
-        return;  
+    let database = await mongo_databases.findOne({name: db.name});
+    if(database) {
+        res.status(403).send({database: null, message: 'Database already exists, please use an other name'});
+        res.end();
+        return;
     }
-
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, session_user){
-
-        if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-            session_user.is_admin = true;
+    else {
+        await mongo_databases.insert(db);
+        if(! create_db){
+            await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []});
+            res.send({message:'Database declared'});
+            return;
         }
         else {
-            session_user.is_admin = false;
-        }
-        let filter = {name: req.params.id};
-        if(!session_user.is_admin) {
-            filter['owner'] = session_user.uid;
-        }
-
-
-        databases_db.findOne({name: req.params.id}, function(err, database){
-            if(! database || (database.type!==undefined && database.type != 'mysql')) {
-                // eslint-disable-next-line no-unused-vars
-                databases_db.remove(filter, function(err){
-                    events_db.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []}, function(){});
-                    res.send({message: ''});
+            var sql = 'CREATE DATABASE ' + req.params.id + ';\n';
+            // eslint-disable-next-line no-unused-vars
+            connection.query(sql, async function(err, results) {
+                if (err) {
+                    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []});
+                    res.send({message: 'Creation error: '+err});
                     res.end();
                     return;
-                });
-            }
-            else {
+                }
+                let password = Math.random().toString(36).slice(-10);
+                sql = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
                 // eslint-disable-next-line no-unused-vars
-                databases_db.remove(filter, function(err){
-                    let sql = `DROP USER '${req.params.id}'@'%';\n`;
+                connection.query(sql, function(err, results) {
+                    if (err) {
+                        res.send({message: 'Failed to create user'});
+                        res.end();
+                        return;
+                    }
+                    sql = `GRANT ALL PRIVILEGES ON ${req.params.id}.* TO '${req.params.id}'@'%'\n`;
                     // eslint-disable-next-line no-unused-vars
-                    connection.query(sql, function(err, results) {
-                        let sql = `DROP DATABASE ${req.params.id};\n`;
-                        // eslint-disable-next-line no-unused-vars
-                        connection.query(sql, function(err, results) {
-                            events_db.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []}, function(){});
-                            res.send({message:'Database removed'});
+                    connection.query(sql, async function(err, results) {
+                        if (err) {
+                            res.send({message: 'Failed to grant access to user'});
                             res.end();
                             return;
-                        });
+                        }
+                        // Now send message
+                        var msg = 'Database created:\n';
+                        msg += ' Host: ' + CONFIG.mysql.host + '\n';
+                        msg += ' Database: ' + req.params.id + '\n';
+                        msg += ' User: ' + req.params.id + '\n';
+                        msg += ' Password: ' + password + '\n';
+                        msg += ' Owner: ' + owner + '\n';
+                        var mailOptions = {
+                            origin: MAIL_CONFIG.origin, // sender address
+                            destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
+                            subject: 'Database creation', // Subject line
+                            message: msg, // plaintext body
+                            html_message: msg // html body
+                        };
+                        await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
+
+                        if(notif.mailSet()) {
+                            // eslint-disable-next-line no-unused-vars
+                            notif.sendUser(mailOptions, function(error, response){
+                                if(error){
+                                    logger.error(error);
+                                }
+                                res.send({message:'Database created, credentials will be sent by mail'});
+                                res.end();
+                                return;
+                            });
+                        }
                     });
                 });
-            }
+
+            }); // end connection.query
+        }  
+    }
+
+});
+
+router.delete('/database/:id', async function(req, res) {
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+
+    if(! utils.sanitizeAll([req.params.id])) {
+        res.status(403).send('Invalid parameters');
+        return;  
+    }
+    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    if(!session_user){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
+        session_user.is_admin = true;
+    }
+    else {
+        session_user.is_admin = false;
+    }
+    let filter = {name: req.params.id};
+    if(!session_user.is_admin) {
+        filter['owner'] = session_user.uid;
+    }
+
+    let database = await mongo_databases.findOne({name: req.params.id});
+    if(! database || (database.type!==undefined && database.type != 'mysql')) {
+        await mongo_databases.remove(filter);
+        await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
+        res.send({message: ''});
+        res.end();
+        return;
+    }
+    else {
+        await mongo_databases.remove(filter);
+        let sql = `DROP USER '${req.params.id}'@'%';\n`;
+        // eslint-disable-next-line no-unused-vars
+        connection.query(sql, function(err, results) {
+            let sql = `DROP DATABASE ${req.params.id};\n`;
+            // eslint-disable-next-line no-unused-vars
+            connection.query(sql, async function(err, results) {
+                await mongo_events.insert({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
+                res.send({message:'Database removed'});
+                res.end();
+                return;
+            });
         });
-    });
+    }
 });
 
 
 router.delete_dbs = function(user){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        databases_db.find({'owner': user.uid}).then(function(databases){
-            logger.debug('delete_dbs');
-            if(!databases){
-                resolve(true);
-                return;
-            }
-            Promise.all(databases.map(function(database){
-                return delete_db(user, database.name);
-            })).then(function(res){
-                resolve(res);
-            });
+    return new Promise(async function (resolve, reject){
+        let databases = await mongo_databases.find({'owner': user.uid});
+        logger.debug('delete_dbs');
+        if(!databases){
+            resolve(true);
+            return;
+        }
+        Promise.all(databases.map(function(database){
+            return delete_db(user, database.name);
+        })).then(function(res){
+            resolve(res);
         });
     });
-
 };
 
 
 var delete_db = function(user, db_id){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
+    return new Promise(async function (resolve, reject){
         logger.debug('delete_db', db_id);
         let filter = {name: db_id};
         if(!user.is_admin) {
             filter['owner'] = user.uid;
         }
-        databases_db.findOne({name: db_id}).then(function(database){
-            if(! database || (database.type!==undefined && database.type != 'mysql')) {
-                databases_db.remove(filter).then(function(){
-                    events_db.insert(
+        let database = await mongo_databases.findOne({name: db_id});
+        if(! database || (database.type!==undefined && database.type != 'mysql')) {
+            await mongo_databases.remove(filter);
+            await mongo_events.insert(
+                {
+                    'owner': user.uid,
+                    'date': new Date().getTime(),
+                    'action': 'database ' + db_id+ ' deleted by ' +  user.uid, 'logs': []
+                }
+            );
+            resolve(true);
+        }
+        else {
+            await mongo_databases.remove(filter);
+            let sql = `DROP USER '${db_id}'@'%';\n`;
+            // eslint-disable-next-line no-unused-vars
+            connection.query(sql, function(err, results) {
+                let sql = `DROP DATABASE ${db_id};\n`;
+                // eslint-disable-next-line no-unused-vars
+                connection.query(sql, async function(err, results) {
+                    await mongo_events.insert(
                         {
                             'owner': user.uid,
                             'date': new Date().getTime(),
-                            'action': 'database ' + db_id+ ' deleted by ' +  user.uid, 'logs': []
+                            'action': 'database ' + db_id + ' deleted by ' + user.uid, 'logs': []
                         }
-                    ).then(function(){
-                        resolve(true);
-                    });
-
+                    );
+                    resolve(true);
                 });
-            }
-            else {
-                databases_db.remove(filter).then(function(){
-                    //var sql = "DROP USER '"+db_id+"'@'%';\n";
-                    let sql = `DROP USER '${db_id}'@'%';\n`;
-                    // eslint-disable-next-line no-unused-vars
-                    connection.query(sql, function(err, results) {
-                        let sql = `DROP DATABASE ${db_id};\n`;
-                        // eslint-disable-next-line no-unused-vars
-                        connection.query(sql, function(err, results) {
-                            events_db.insert(
-                                {
-                                    'owner': user.uid,
-                                    'date': new Date().getTime(),
-                                    'action': 'database ' + db_id + ' deleted by ' + user.uid, 'logs': []
-                                }
-                            ).then(function(){
-                                resolve(true);
-                            });
-
-                        });
-                    });
-                });
-            }
-        });
+            });
+        
+        }
     });
 };
 
