@@ -173,33 +173,32 @@ var send_notif = function(mailOptions, fid, errors) {
 
 var create_extra_group = function(group_name, owner_name){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        utils.getGroupAvailableId().then(async function (mingid) {
-            var fid = new Date().getTime();
-            let group = {name: group_name, gid: mingid, owner: owner_name};
-            try {
-                await mongo_groups.insertOne(group);
-                await goldap.add_group(group, fid);
-            }
-            catch(e) {
-                logger.error(e);
-            }
-            try {
-                let created_file = await filer.user_create_extra_group(group, fid);
-                logger.info('File Created: ', created_file);
-            } catch(error){
-                logger.error('Create Group Failed for: ' + group.name, error);
-                reject(error);
-                return;
-            }
-        });
-
+    return new Promise(async function (resolve, reject){
+        let mingid = await utils.getGroupAvailableId();
+        let fid = new Date().getTime();
+        let group = {name: group_name, gid: mingid, owner: owner_name};
+        try {
+            await mongo_groups.insertOne(group);
+            await goldap.add_group(group, fid);
+        }
+        catch(e) {
+            logger.error(e);
+        }
+        try {
+            let created_file = await filer.user_create_extra_group(group, fid);
+            logger.info('File Created: ', created_file);
+        } catch(error){
+            logger.error('Create Group Failed for: ' + group.name, error);
+            reject(error);
+            return;
+        }
+        resolve(group);
     });
 };
 
 var create_extra_user = function(user_name, group, internal_user){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
+    return new Promise(async function (resolve, reject){
         let password = Math.random().toString(36).slice(-10);
         if(process.env.MY_ADMIN_PASSWORD){
             password = process.env.MY_ADMIN_PASSWORD;
@@ -235,49 +234,47 @@ var create_extra_user = function(user_name, group, internal_user){
             history: [],
             password: password
         };
+        let minuid = await utils.getUserAvailableId();
+        user.uidnumber = minuid;
+        user.gidnumber = group.gid;
+        user.home = get_user_home(user);
+        var fid = new Date().getTime();
+        try {
+            await goldap.add(user, fid);
+        } catch(err) {
+            logger.error('Failed to create extra user', user, err);
+            reject(err);
+        }
+        logger.debug('user added to ldap');
 
-        utils.getUserAvailableId().then(async function (minuid) {
+        delete user.password;
+        // eslint-disable-next-line no-unused-vars
+        await mongo_users.insertOne(user);
+        try {
+            let created_file = await filer.user_create_extra_user(user, fid);
+            logger.info('File Created: ', created_file);
+        } catch(error){
+            logger.error('Create User Failed for: ' + user.uid, error);
+            reject(error);
+        }
 
-            user.uidnumber = minuid;
-            user.gidnumber = group.gid;
-            user.home = get_user_home(user);
-            var fid = new Date().getTime();
-            try {
-                await goldap.add(user, fid);
-            } catch(err) {
-                logger.error('Failed to create extra user', user, err);
-                resolve(null);
-            }
-
-            delete user.password;
+        let plugin_call = function(plugin_info, userId, data, adminId){
             // eslint-disable-next-line no-unused-vars
-            await mongo_users.insertOne(user);
-            try {
-                let created_file = await filer.user_create_extra_user(user, fid);
-                logger.info('File Created: ', created_file);
-            } catch(error){
-                logger.error('Create User Failed for: ' + user.uid, error);
-                reject(error);
-            }
-
-            let plugin_call = function(plugin_info, userId, data, adminId){
-                // eslint-disable-next-line no-unused-vars
-                return new Promise(function (resolve, reject){
-                    plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                        resolve(true);
-                    });
+            return new Promise(function (resolve, reject){
+                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                    resolve(true);
                 });
-            };
-
-            Promise.all(plugins_info.map(function(plugin_info){
-                return plugin_call(plugin_info, user.uid, user, 'auto');
-            // eslint-disable-next-line no-unused-vars
-            })).then(function(results){
-                resolve(user);
-            }, function(err){
-                logger.error('failed to create extra user', user, err);
-                resolve(user);
             });
+        };
+
+        Promise.all(plugins_info.map(function(plugin_info){
+            return plugin_call(plugin_info, user.uid, user, 'auto');
+        // eslint-disable-next-line no-unused-vars
+        })).then(function(results){
+            resolve(user);
+        }, function(err){
+            logger.error('failed to create extra user', user, err);
+            resolve(user);
         });
     });
 };
@@ -298,11 +295,12 @@ router.create_admin = async function(default_admin, default_admin_group){
             });
         }
         else {
+            logger.info('need to create admin group');
             create_extra_group(default_admin_group, default_admin).then(function(group){
-                logger.info('admin group created');
+                logger.info('admin group created', group);
                 // eslint-disable-next-line no-unused-vars
                 create_extra_user(default_admin, group, true).then(function(user){
-                    logger.info('admin user created');
+                    logger.info('admin user created', user);
                 });
             });
         }    
