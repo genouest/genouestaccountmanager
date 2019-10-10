@@ -91,7 +91,7 @@ router.get('/web', async function(req, res) {
     if(!session_user.is_admin) {
         filter = {owner: session_user.uid};
     }
-    let webs = await mongo_webs.find(filter);
+    let webs = await mongo_webs.find(filter).toArray();
     res.send(webs);
 });
 
@@ -117,7 +117,7 @@ router.get('/web/owner/:owner', async function(req, res) {
         session_user.is_admin = false;
     }
     var filter = {owner: req.params.owner};
-    let webs = await mongo_webs.find(filter);
+    let webs = await mongo_webs.find(filter).toArray();
     res.send(webs);
 });
 
@@ -194,7 +194,7 @@ router.delete('/web/:id', async function(req, res) {
 router.delete_webs = function(user){
     // eslint-disable-next-line no-unused-vars
     return new Promise(async function (resolve, reject){
-        let webs = await mongo_webs.find({'owner': user.uid});
+        let webs = await mongo_webs.find({'owner': user.uid}).toArray();
         if(!webs){
             resolve(true);
             return;

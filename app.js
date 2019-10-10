@@ -50,15 +50,6 @@ var CONFIG = require('config');
 const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
 const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
 
-if(MY_ADMIN_USER !== null){
-    users.init().then(() => {
-        console.log('create admin user', MY_ADMIN_USER);
-        users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
-    }).catch(err => {
-        console.log('init failed', err);
-        process.exit(1);
-    });
-}
 
 var app = express();
 app.use(cors());
@@ -93,12 +84,32 @@ app.use(session({
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+/*
 var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users');
+*/
+const MongoClient = require('mongodb').MongoClient;
+var mongodb = null;
+var mongo_users = null;
+var ObjectID = require('mongodb').ObjectID;
 
 
-app.all('*', function(req, res, next){
+var mongo_connect = async function() {
+    let url = CONFIG.mongo.url;
+    let client = null;
+    if(!url) {
+        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
+    } else {
+        client = new MongoClient(CONFIG.mongo.url);
+    }
+    await client.connect();
+    mongodb = client.db(CONFIG.general.db);
+    mongo_users = mongodb.collection('users');
+};
+mongo_connect();
+
+app.all('*', async function(req, res, next){
 
     var logInfo = {
         is_logged: false,
@@ -142,16 +153,15 @@ app.all('*', function(req, res, next){
                 logInfo.u2f = jwtToken.u2f;
             }
             if(jwtToken.user) {
-                users_db.findOne({'_id': jwtToken.user}, function(err, session_user){
-                    if(err){
-                        return res.status(401).send('Invalid token').end();
-                    }
-                    req.session.gomngr = session_user._id;
-                    logInfo.id = session_user._id;
-                    logInfo.session_user = session_user;
-                    req.locals.logInfo = logInfo;
-                    next();
-                });
+                let session_user = await mongo_users.findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
+                if(!session_user){
+                    return res.status(401).send('Invalid token').end();
+                }
+                req.session.gomngr = session_user._id;
+                logInfo.id = session_user._id;
+                logInfo.session_user = session_user;
+                req.locals.logInfo = logInfo;
+                next();
             } else {
                 req.locals.logInfo = logInfo;
                 next();
@@ -168,21 +178,20 @@ app.all('*', function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            users_db.findOne({'apikey': token}, function(err, session_user){
-                if(err){
-                    return res.status(401).send('Invalid token').end();
-                }
-                req.session.gomngr = session_user._id;
-                req.session.is_logged = true;
-                logInfo.id = session_user._id;
-                logInfo.is_logged = true;
-                if(req.session.u2f){
-                    logInfo.u2f = req.session.u2f;
-                }
-                logInfo.session_user = session_user;
-                req.locals.logInfo = logInfo;
-                next();
-            });
+            let session_user = await mongo_users.findOne({'apikey': token});
+            if(!session_user){
+                return res.status(401).send('Invalid token').end();
+            }
+            req.session.gomngr = session_user._id;
+            req.session.is_logged = true;
+            logInfo.id = session_user._id;
+            logInfo.is_logged = true;
+            if(req.session.u2f){
+                logInfo.u2f = req.session.u2f;
+            }
+            logInfo.session_user = session_user;
+            req.locals.logInfo = logInfo;
+            next();
         }
         catch(error){
             wlogger.error('Invalid token', error);
@@ -202,13 +211,12 @@ app.all('*', function(req, res, next){
             logInfo.u2f =req.session.u2f;
         }
         if(req.session.gomngr) {
-            users_db.findOne({'_id': req.session.gomngr}, function(err, session_user){
-                if(session_user){
-                    logInfo.session_user = session_user;
-                }
-                req.locals.logInfo = logInfo;
-                next();
-            });
+            let session_user = await mongo_users.findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
+            if(session_user){
+                logInfo.session_user = session_user;
+            }
+            req.locals.logInfo = logInfo;
+            next();
         } else {
             req.locals.logInfo = logInfo;
             next();
@@ -352,14 +360,45 @@ else {
 
 module.exports = app;
 
+
+users.init().then(() => {
+    return utils.init();
+}).then(() => {
+    if(MY_ADMIN_USER !== null){
+        users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+    }
+    // eslint-disable-next-line no-unused-vars
+    utils.loadAvailableIds().then(function (_alreadyLoaded) {
+        if (!module.parent) {
+            http.createServer(app).listen(app.get('port'), function(){
+                wlogger.info('Server listening on port ' + app.get('port'));
+            });
+        }
+    });
+});
+
+/*
+if(MY_ADMIN_USER !== null){
+    users.init().then(() => {
+        return utils.init();
+    }).then(()=>{
+        console.log('create admin user', MY_ADMIN_USER);
+        users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+    }).catch(err => {
+        console.log('init failed', err);
+        process.exit(1);
+    });
+}
+*/
+
+
 // Setup list of available user/group ids
 // eslint-disable-next-line no-unused-vars
+/*
 utils.loadAvailableIds().then(function (_alreadyLoaded) {
-
     if (!module.parent) {
         http.createServer(app).listen(app.get('port'), function(){
             wlogger.info('Server listening on port ' + app.get('port'));
         });
     }
-
-});
+});*/

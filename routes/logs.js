@@ -48,7 +48,7 @@ router.get('/log', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let events = await mongo_events.find({}, {limit: 200, sort: {date: -1}});
+    let events = await mongo_events.find({}, {limit: 200, sort: {date: -1}}).toArray();
     res.send(events);
     res.end();
 });
@@ -63,7 +63,7 @@ router.get('/log/user/:id', async function(req, res){
         res.status(404).send('User not found');
         return;
     }
-    let events = await mongo_events.find({'owner': req.params.id});
+    let events = await mongo_events.find({'owner': req.params.id}).toArray();
     res.send(events);
     res.end();
 });

@@ -29,6 +29,19 @@ var mongo_connect = async function() {
 };
 mongo_connect();
 
+exports.init = function() {
+    return new Promise((resolve, reject) => {
+        try {
+            mongo_connect().then(() => {
+                resolve();
+            });
+        } catch(err){
+            logger.debug('Failed to init db', err);
+            reject(err);
+        }
+    });
+};
+
 var redis = require('redis');
 var redis_client = null;
 
@@ -233,7 +246,7 @@ function _loadAvailableIds () {
         }
 
         logger.info('Loading available ids....');
-        let users = await mongo_users.find();
+        let users = await mongo_users.find().toArray();
         logger.info('Check existing users');
         let usedIds = [];
         let maxUsedId = CONFIG.general.minuid;
@@ -260,7 +273,7 @@ function _loadAvailableIds () {
         } else {
             redis_client.set('my:ids:user', maxUsedId);
         }
-        let groups = await mongo_groups.find();
+        let groups = await mongo_groups.find().toArray();
         logger.info('Check existing groups');
         let usedGIds = [];
         let maxUsedGId = CONFIG.general.mingid;
@@ -312,7 +325,7 @@ function _getUsersMaxId(minID) {
     // eslint-disable-next-line no-unused-vars
     return new Promise(async function (resolve, reject) {
         let minUserID = minID;
-        let data = await mongo_users.find({}, {limit: 1 , sort: {uidnumber: -1}});
+        let data = await mongo_users.find({}, {limit: 1 , sort: {uidnumber: -1}}).toArray();
         if (!data)  {
             resolve(minUserID);
             return;
@@ -328,7 +341,7 @@ function _getGroupsMaxId(minID) {
     // eslint-disable-next-line no-unused-vars
     return new Promise(async function (resolve, reject) {
         let minGroupID = minID;
-        let data = await mongo_groups.find({}, {limit: 1 , sort: {gid: -1}});
+        let data = await mongo_groups.find({}, {limit: 1 , sort: {gid: -1}}).toArray();
         if (!data)  {
             resolve(minGroupID);
             return;

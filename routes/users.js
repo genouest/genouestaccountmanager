@@ -490,7 +490,7 @@ router.get('/group/:id', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]});
+    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
     res.send(users_in_group);
     res.end();
 });
@@ -525,7 +525,7 @@ router.clear_user_groups = async function(user, admin_user_id){
     for(let i=0;i < allgroups.length;i++){
         let group = await mongo_groups.findOne({name: allgroups[i]});
         if(group){
-            let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]});
+            let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]}).toArray();
             if(users_in_group && users_in_group.length == 0){
                 router.delete_group(group, admin_user_id);
             }
@@ -557,7 +557,7 @@ router.delete('/group/:id', async function(req, res){
         res.status(403).send('Group does not exist');
         return;
     }
-    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]});
+    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
     if(users_in_group && users_in_group.length > 0){
         res.status(403).send('Group has some users, cannot delete it');
         return;
@@ -688,7 +688,7 @@ router.get('/group', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let groups = await mongo_groups.find();
+    let groups = await mongo_groups.find().toArray();
     res.send(groups);
     return;
 });
@@ -751,7 +751,7 @@ router.get('/user', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let users = await mongo_users.find({});
+    let users = await mongo_users.find({}).toArray();
     res.json(users);
 });
 
@@ -883,7 +883,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
     }
 
     await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
-    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]});
+    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}).toArray();
     if(users_in_group && users_in_group.length > 0){
         res.send({message: 'User removed from group', fid: fid});
         res.end();
@@ -1024,13 +1024,13 @@ router.delete('/user/:id', async function(req, res){
     else {
         // Must check if user has databases and sites
         // Do not remove in this case, owners must be changed before
-        let databases = await mongo_databases.find({owner: uid});
+        let databases = await mongo_databases.find({owner: uid}).toArray();
         if(databases && databases.length>0) {
             res.send({message: 'User owns some databases, please change owner first!'});
             res.end();
             return;
         }
-        let websites = await mongo_web.find({owner: uid});
+        let websites = await mongo_web.find({owner: uid}).toArray();
         if(websites && websites.length>0) {
             res.send({message: 'User owns some web sites, please change owner first!'});
             res.end();
@@ -1961,7 +1961,7 @@ router.put('/user/:id', async function(req, res) {
         }
 
         await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-        let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]});
+        let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
         if(users_in_group && users_in_group.length == 0){
             let oldgroup = await mongo_groups.findOne({name: user.oldgroup});
             if(oldgroup){
@@ -1990,7 +1990,7 @@ router.put('/user/:id', async function(req, res) {
         // eslint-disable-next-line no-unused-vars
         await mongo_users.updateOne({_id: user._id}, user);
         await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
-        let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]});
+        let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
         if(users_in_group && users_in_group.length == 0){
             let oldgroup = await mongo_groups.findOne({name: user.oldgroup});
             if(oldgroup){
@@ -2016,7 +2016,7 @@ router.get('/project/:id/users', async function(req, res){
         res.status(404).send('User not found');
         return;
     }
-    let users_in_project = await mongo_users.find({'projects': req.params.id});
+    let users_in_project = await mongo_users.find({'projects': req.params.id}).toArray();
     res.send(users_in_project);
     res.end();
 });

@@ -122,7 +122,7 @@ router.get('/database', async function(req, res) {
     if(!session_user.is_admin) {
         filter = {owner: session_user.uid};
     }
-    let databases = await mongo_databases.find(filter);
+    let databases = await mongo_databases.find(filter).toArray();
     res.send(databases);
     return;
 
@@ -146,7 +146,7 @@ router.get('/database/owner/:owner', async function(req, res) {
         session_user.is_admin = false;
     }
     var filter = {owner: req.params.owner};
-    let databases = await mongo_databases.find(filter);
+    let databases = await mongo_databases.find(filter).toArray();
     res.send(databases);
     return;
 });
@@ -340,7 +340,7 @@ router.delete('/database/:id', async function(req, res) {
 router.delete_dbs = function(user){
     // eslint-disable-next-line no-unused-vars
     return new Promise(async function (resolve, reject){
-        let databases = await mongo_databases.find({'owner': user.uid});
+        let databases = await mongo_databases.find({'owner': user.uid}).toArray();
         logger.debug('delete_dbs');
         if(!databases){
             resolve(true);

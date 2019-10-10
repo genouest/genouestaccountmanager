@@ -68,13 +68,13 @@ router.get('/project', async function(req, res){
             res.send([]);
             return;
         } else {
-            let projects = await mongo_projects.find({id: {$in : user.projects}});
+            let projects = await mongo_projects.find({id: {$in : user.projects}}).toArray();
             res.send(projects);
             return;
         }
     } else {
         if (req.query.all === 'true'){
-            let projects = await mongo_projects.find({});
+            let projects = await mongo_projects.find({}).toArray();
             res.send(projects);
             return;
         } else {
@@ -82,7 +82,7 @@ router.get('/project', async function(req, res){
                 res.send([]);
                 return;
             } else {
-                let projects = await mongo_projects.find({id: {$in : user.projects}});
+                let projects = await mongo_projects.find({id: {$in : user.projects}}).toArray();
                 res.send(projects);
                 return;
             }
@@ -388,7 +388,7 @@ router.get('/group/:id/projects', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let projects_with_group = await mongo_projects.find({'group': req.params.id});
+    let projects_with_group = await mongo_projects.find({'group': req.params.id}).toArray();
     res.send(projects_with_group);
     res.end();
 });

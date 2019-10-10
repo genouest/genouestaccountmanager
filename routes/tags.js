@@ -40,7 +40,7 @@ router.get('/tags', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let tags = await mongo_tags.find({});
+    let tags = await mongo_tags.find({}).toArray();
     let tagList = [];
     if (!tags) {
         return {'tags': tagList};

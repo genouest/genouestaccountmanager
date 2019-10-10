@@ -145,6 +145,10 @@ module.exports = {
                         var user_dn = entry.object['dn'];
                         foundMatch = true;
                         client.bind(user_dn, password, function(err) {
+                            if(err) {
+                                reject(err);
+                                return;
+                            }
                             resolve(err);
                         });
                     });
