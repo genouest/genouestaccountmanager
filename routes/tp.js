@@ -64,21 +64,20 @@ var createExtraGroup = function (ownerName) {
             var fid = new Date().getTime();
             var group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
             // eslint-disable-next-line no-unused-vars
-            groups_db.insert(group, function(err_insert) {
+            groups_db.insert(group, async function(err_insert) {
                 // eslint-disable-next-line no-unused-vars
-                goldap.add_group(group, fid, function(err_add_group) {
-                    filer.user_add_group(group, fid)
-                        .then(
-                            created_file => {
-                                logger.info('File Created: ', created_file);
-                            })
-                        .catch(error => { // reject()
-                            logger.error('Add Group Failed for: ' + group.name, error);
-                        });
-                    group.fid = fid;
-                    resolve(group);
-                    return;
-                });
+                await goldap.add_group(group, fid);
+                filer.user_add_group(group, fid)
+                    .then(
+                        created_file => {
+                            logger.info('File Created: ', created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Add Group Failed for: ' + group.name, error);
+                    });
+                group.fid = fid;
+                resolve(group);
+                return;
             });
         });
     });
@@ -97,25 +96,24 @@ var deleteExtraGroup = function (group) {
                 resolve();
                 return;
             }
-            groups_db.remove({ 'name': group.name }, function () {
+            groups_db.remove({ 'name': group.name }, async function () {
                 let fid = new Date().getTime();
-                goldap.delete_group(group, fid, function () {
-                    filer.user_delete_group(group, fid)
-                        .then(
-                            created_file => {
-                                logger.info('File Created: ', created_file);
-                            })
-                        .catch(error => { // reject()
-                            logger.error('Delete Group Failed for: ' + group.name, error);
-                            return;
-                        });
-
-                    group.fid = fid;
-                    utils.freeGroupId(group.gid).then(function(){
-                        events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] }, function(){});
-                        resolve();
+                await goldap.delete_group(group, fid);
+                filer.user_delete_group(group, fid)
+                    .then(
+                        created_file => {
+                            logger.info('File Created: ', created_file);
+                        })
+                    .catch(error => { // reject()
+                        logger.error('Delete Group Failed for: ' + group.name, error);
                         return;
                     });
+
+                group.fid = fid;
+                utils.freeGroupId(group.gid).then(function(){
+                    events_db.insert({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] }, function(){});
+                    resolve();
+                    return;
                 });
             });
         });
@@ -354,18 +352,19 @@ var tp_reservation = function(userId, from_date, to_date, quantity, about){
 };
 
 var insert_ldap_user = function(user, fid){
-    return new Promise(function (resolve, reject){
+    return new Promise(async function (resolve, reject){
         logger.debug('prepare ldap scripts');
-        goldap.add(user, fid, function(err) {
-            if(err) {
-                logger.error(err);
-                reject(user);
-            }
+        try {
+            await goldap.add(user, fid);
             logger.debug('switch to ACTIVE');
             // eslint-disable-next-line no-unused-vars
             users_db.update({uid: user.uid},{'$set': {status: STATUS_ACTIVE}}).then(function(data){});
             resolve(user);
-        });
+        } catch(err) {
+            logger.error(err);
+            reject(user);
+            return; 
+        }
     });
 };
 
