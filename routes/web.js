@@ -209,24 +209,25 @@ router.delete_webs = function(user){
 
 };
 
-var delete_web = function(user, web_id){
+var delete_web = async function(user, web_id){
     // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        var filter = {_id: web_id};
-        if(!user.is_admin) {
-            filter['owner'] = user.uid;
+    //return new Promise(async function (resolve, reject){
+    var filter = {_id: web_id};
+    if(!user.is_admin) {
+        filter['owner'] = user.uid;
+    }
+    await mongo_webs.remove(filter);
+    await mongo_events.insert(
+        {
+            'owner': user.uid,
+            'date': new Date().getTime(),
+            'action': 'remove web site ' + web_id ,
+            'logs': []
         }
-        await mongo_webs.remove(filter);
-        await mongo_events.insert(
-            {
-                'owner': user.uid,
-                'date': new Date().getTime(),
-                'action': 'remove web site ' + web_id ,
-                'logs': []
-            }
-        );
-        resolve(true);
-    });
+    );
+    return true;
+    //resolve(true);
+    //});
 };
 
 module.exports = router;

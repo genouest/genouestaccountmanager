@@ -508,7 +508,7 @@ router.delete_group = function(group, admin_user_id){
             return;            
         }
 
-        group.fid = fid;
+        // group.fid = fid;
         await mongo_events.insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
         utils.freeGroupId(group.gid).then(function(){
             resolve(true);
