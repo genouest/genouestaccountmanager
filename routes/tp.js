@@ -310,7 +310,7 @@ router.delete_tp_users = function(users, group, admin_id){
 router.exec_tp_reservation = function(reservation_id){
     // Create users for reservation
     return new Promise(async function (resolve, reject){
-        let reservation = await mongo_reservations.findOne({'_id': ObjectID.createFromHexString(reservation_id)});
+        let reservation = await mongo_reservations.findOne({'_id': reservation_id});
         logger.debug('create a reservation group', reservation._id);
         createExtraGroup(reservation.owner).then(function(newGroup){
             logger.debug('create reservation accounts', reservation._id);
@@ -322,7 +322,7 @@ router.exec_tp_reservation = function(reservation_id){
                 try{
                     send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(async function(){
                         // eslint-disable-next-line no-unused-vars
-                        await mongo_reservations.updateOne({'_id': ObjectID.createFromHexString(reservation_id)}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
+                        await mongo_reservations.updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
                         logger.debug('reservation ', reservation);
                         resolve(reservation);
                     });
@@ -416,7 +416,7 @@ router.get('/tp', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({'_id': ObjectID.createFromHexString(req.locals.logInfo.id)});
+    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -441,7 +441,7 @@ router.post('/tp', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({'_id': ObjectID.createFromHexString(req.locals.logInfo.id)});
+    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -469,7 +469,7 @@ router.delete('/tp/:id', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({'_id': ObjectID.createFromHexString(req.locals.logInfo.id)});
+    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();

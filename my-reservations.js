@@ -65,7 +65,7 @@ var processReservation = function(reservation){
         logger.info('create user for reservation ', reservation);
         tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug('set reservation as done', res);
-            mongo_reservations.updateOne({'_id': ObjectID.createFromHexString(res._id)},{'$set': {'created': true}}).then(function(){
+            mongo_reservations.updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
             });
         });
