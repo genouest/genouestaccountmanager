@@ -162,7 +162,7 @@ router.delete('/project/:id', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    await utils.mongo_projects().remove({'id': req.params.id});
+    await utils.mongo_projects().deleteOne({'id': req.params.id});
     let fid = new Date().getTime();
     try {
         let created_file = await filer.project_delete_project({'id': req.params.id}, fid);

@@ -432,7 +432,7 @@ router.get('/group/:id', async function(req, res){
 });
 
 router.delete_group = async function(group, admin_user_id){
-    await utils.mongo_groups().remove({'name': group.name});
+    await utils.mongo_groups().deleteOne({'name': group.name});
     let fid = new Date().getTime();
     await goldap.delete_group(group, fid);
     try {
@@ -834,7 +834,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
 
 router.delete_user = async function(user, action_owner_id){
     if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
-        await utils.mongo_users().remove({_id: user._id});
+        await utils.mongo_users().deleteOne({_id: user._id});
         await utils.mongo_events().insertOne({
             'owner': action_owner_id,
             'date': new Date().getTime(),
@@ -852,7 +852,7 @@ router.delete_user = async function(user, action_owner_id){
         allgroups.push(user.group);
         await goldap.change_user_groups(user, [], allgroups, fid);
         try {
-            await utils.mongo_users().remove({_id: user._id});
+            await utils.mongo_users().deleteOne({_id: user._id});
         } catch(err) {
             return false;
         }

@@ -155,9 +155,9 @@ router.delete('/web/:id', async function(req, res) {
     if(!session_user.is_admin) {
         filter['owner'] = session_user.uid;
     }
-    await utils.mongo_web().remove(filter);
+    await utils.mongo_web().deleteOne(filter);
 
-    await utils.mongo_events().insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.params.id , 'logs': []});
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.params.id , 'logs': []});
     res.send({message: 'Website deleted'});
 });
 
@@ -179,8 +179,8 @@ var delete_web = async function(user, web_id){
     if(!user.is_admin) {
         filter['owner'] = user.uid;
     }
-    await utils.mongo_web().remove(filter);
-    await utils.mongo_events().insert(
+    await utils.mongo_web().deleteOne(filter);
+    await utils.mongo_events().insertOne(
         {
             'owner': user.uid,
             'date': new Date().getTime(),

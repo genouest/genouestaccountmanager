@@ -284,14 +284,14 @@ router.delete('/database/:id', async function(req, res) {
 
     let database = await utils.mongo_databases().findOne({name: req.params.id});
     if(! database || (database.type!==undefined && database.type != 'mysql')) {
-        await utils.mongo_databases().remove(filter);
+        await utils.mongo_databases().deleteOne(filter);
         await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
         res.send({message: ''});
         res.end();
         return;
     }
     else {
-        await utils.mongo_databases().remove(filter);
+        await utils.mongo_databases().deleteOne(filter);
         let sql = `DROP USER '${req.params.id}'@'%';\n`;
         // eslint-disable-next-line no-unused-vars
         connection.query(sql, function(err, results) {
@@ -329,7 +329,7 @@ var delete_db = async function(user, db_id){
     }
     let database = await utils.mongo_databases().findOne({name: db_id});
     if(! database || (database.type!==undefined && database.type != 'mysql')) {
-        await utils.mongo_databases().remove(filter);
+        await utils.mongo_databases().deleteOne(filter);
         await utils.mongo_events().insertOne(
             {
                 'owner': user.uid,
@@ -340,7 +340,7 @@ var delete_db = async function(user, db_id){
         return true;
     }
     else {
-        await utils.mongo_databases().remove(filter);
+        await utils.mongo_databases().deleteOne(filter);
         const querydb = (sql) => {
             // eslint-disable-next-line no-unused-vars
             return new Promise((resolve, reject) => {
