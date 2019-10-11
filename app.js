@@ -90,11 +90,12 @@ var monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users');
 */
+
+var ObjectID = require('mongodb').ObjectID;
+/*
 const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;
 var mongo_users = null;
-var ObjectID = require('mongodb').ObjectID;
-
 
 var mongo_connect = async function() {
     let url = CONFIG.mongo.url;
@@ -109,6 +110,9 @@ var mongo_connect = async function() {
     mongo_users = mongodb.collection('users');
 };
 mongo_connect();
+*/
+
+
 
 app.all('*', async function(req, res, next){
 
@@ -154,7 +158,7 @@ app.all('*', async function(req, res, next){
                 logInfo.u2f = jwtToken.u2f;
             }
             if(jwtToken.user) {
-                let session_user = await mongo_users.findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
+                let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
                 if(!session_user){
                     return res.status(401).send('Invalid token').end();
                 }
@@ -179,7 +183,7 @@ app.all('*', async function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            let session_user = await mongo_users.findOne({'apikey': token});
+            let session_user = await utils.mongo_users().findOne({'apikey': token});
             if(!session_user){
                 return res.status(401).send('Invalid token').end();
             }
@@ -212,7 +216,7 @@ app.all('*', async function(req, res, next){
             logInfo.u2f =req.session.u2f;
         }
         if(req.session.gomngr) {
-            let session_user = await mongo_users.findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
+            let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
             if(session_user){
                 logInfo.session_user = session_user;
             }
@@ -362,9 +366,7 @@ else {
 module.exports = app;
 
 
-users.init().then(() => {
-    return utils.init();
-}).then(() => {
+utils.init_db().then(() => {
     if(MY_ADMIN_USER !== null){
         users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
     }

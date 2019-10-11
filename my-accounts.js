@@ -4,30 +4,9 @@
  */
 const program = require('commander');
 
-var CONFIG = require('config');
+//var CONFIG = require('config');
 
-/*
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
-var users_db = db.get('users');
-*/
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-};
+var utils = require('./routes/utils');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -53,7 +32,7 @@ program
     .arguments('<uid>')
     .action(function (uid) {
         let filter = {'$or': [{email: uid}, {uid: uid}]};
-        mongo_users.findOne(filter).then(function(user){
+        utils.mongo_users().findOne(filter).then(function(user){
             console.table(user);
             process.exit(0);
         });
@@ -68,7 +47,7 @@ program
         if (args.filter !== 'All'){
             filter = {'status': args.status};
         }
-        let users = await mongo_users.find(filter).toArray();
+        let users = await utils.mongo_users().find(filter).toArray();
         let displayRes = [];
         for(let i=0;i<users.length;i++){
             let res = users[i];
@@ -115,7 +94,7 @@ program
         });
     });
 
-mongo_connect().then(() => {
+utils.init_db().then(() => {
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });

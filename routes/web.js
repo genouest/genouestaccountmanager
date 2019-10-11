@@ -7,35 +7,6 @@ const logger = winston.loggers.get('gomngr');
 
 var utils = require('./utils');
 
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    web_db = db.get('web'),
-    users_db = db.get('users'),
-    events_db = db.get('events');
-*/
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-var mongo_webs = null;
-var mongo_events = null;
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    mongo_webs = mongodb.collection('web');
-    mongo_events = mongodb.collection('events');
-
-};
-mongo_connect();
 
 /**
  * Change owner
@@ -50,7 +21,7 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
         res.status(401).send('Not authorized');
         return;
@@ -65,8 +36,8 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    await mongo_webs.updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
-    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.params.id + ' owner to ' + req.params.new  , 'logs': []});
+    await utils.mongo_web().updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.params.id + ' owner to ' + req.params.new  , 'logs': []});
     res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
     res.end();
 });
@@ -76,7 +47,7 @@ router.get('/web', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
         res.status(401).send('Not authorized');
         return;
@@ -91,7 +62,7 @@ router.get('/web', async function(req, res) {
     if(!session_user.is_admin) {
         filter = {owner: session_user.uid};
     }
-    let webs = await mongo_webs.find(filter).toArray();
+    let webs = await utils.mongo_web().find(filter).toArray();
     res.send(webs);
 });
 
@@ -105,7 +76,7 @@ router.get('/web/owner/:owner', async function(req, res) {
         return;  
     }
 
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
         res.status(401).send('Not authorized');
         return;
@@ -117,7 +88,7 @@ router.get('/web/owner/:owner', async function(req, res) {
         session_user.is_admin = false;
     }
     var filter = {owner: req.params.owner};
-    let webs = await mongo_webs.find(filter).toArray();
+    let webs = await utils.mongo_web().find(filter).toArray();
     res.send(webs);
 });
 
@@ -131,7 +102,7 @@ router.post('/web/:id', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;  
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
         res.status(401).send('Not authorized');
         return;
@@ -153,8 +124,8 @@ router.post('/web/:id', async function(req, res) {
         url: req.body.url,
         description: req.body.description
     };
-    await mongo_webs.insertOne(web);
-    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'register new web site ' + req.params.id , 'logs': []});
+    await utils.mongo_web().insertOne(web);
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'register new web site ' + req.params.id , 'logs': []});
 
     res.send({web: web, message: 'New website added'});
 });
@@ -169,7 +140,7 @@ router.delete('/web/:id', async function(req, res) {
         return;  
     }
 
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
         res.status(401).send('Not authorized');
         return;
@@ -184,15 +155,15 @@ router.delete('/web/:id', async function(req, res) {
     if(!session_user.is_admin) {
         filter['owner'] = session_user.uid;
     }
-    await mongo_webs.remove(filter);
+    await utils.mongo_web().remove(filter);
 
-    await mongo_events.insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.params.id , 'logs': []});
+    await utils.mongo_events().insert({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove web site ' + req.params.id , 'logs': []});
     res.send({message: 'Website deleted'});
 });
 
 
 router.delete_webs = async function(user){
-    let webs = await mongo_webs.find({'owner': user.uid}).toArray();
+    let webs = await utils.mongo_web().find({'owner': user.uid}).toArray();
     if(!webs){
         return true;
     }
@@ -208,8 +179,8 @@ var delete_web = async function(user, web_id){
     if(!user.is_admin) {
         filter['owner'] = user.uid;
     }
-    await mongo_webs.remove(filter);
-    await mongo_events.insert(
+    await utils.mongo_web().remove(filter);
+    await utils.mongo_events().insert(
         {
             'owner': user.uid,
             'date': new Date().getTime(),

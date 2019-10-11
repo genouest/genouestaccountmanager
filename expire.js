@@ -16,32 +16,7 @@ var fs = require('fs');
 
 var Promise = require('promise');
 
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users'),
-    events_db = db.get('events');
-*/
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-var mongo_events = null;
-
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    mongo_events = mongodb.collection('events');
-};
-
+var utils = require('./routes/utils');
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
@@ -77,8 +52,8 @@ function timeConverter(tsp){
 }
 */
 
-mongo_connect().then(async () => {
-    let users = await mongo_users.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}).toArray();
+utils.init_db().then(async () => {
+    let users = await utils.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}).toArray();
     // Find users expiring
     var mail_sent = 0;
     if (! notif.mailSet()){
@@ -114,12 +89,12 @@ mongo_connect().then(async () => {
                 
             }
             user.history.push({'action': 'expire', date: new Date().getTime()});
-            await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
+            await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
             let script = '#!/bin/bash\n';
             script += 'set -e \n';
             script += 'ldapmodify -cx -w ' + CONFIG.ldap.admin_password + ' -D ' + CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn + ' -f ' + CONFIG.general.script_dir + '/' + user.uid + '.' + fid + '.ldif\n';
             let script_file = CONFIG.general.script_dir+'/'+user.uid+' '+fid+'.update';
-            await mongo_events.insertOne({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []});
+            await utils.mongo_events().insertOne({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []});
 
             let plugin_call = function(plugin_info, user){
                 // eslint-disable-next-line no-unused-vars

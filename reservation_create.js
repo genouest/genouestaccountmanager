@@ -1,34 +1,10 @@
 var Promise = require('promise');
 
-var CONFIG = require('config');
+//var CONFIG = require('config');
 
 var tps = require('./routes/tp.js');
 
-//var utils = require('./routes/utils.js');
-
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    // users_db = db.get('users'),
-    reservation_db = db.get('reservations');
-*/
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_reservations = null;
-// var ObjectID = require('mongodb').ObjectID;
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_reservations = mongodb.collection('reservations');
-};
+var utils = require('./routes/utils');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -64,7 +40,7 @@ var processReservation = function(reservation){
         logger.info('create user for reservation ', reservation);
         tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug('set reservation as done', res);
-            mongo_reservations.updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
+            utils.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
             });
         });
@@ -77,8 +53,8 @@ var create_before = now;
 create_before.setDate(create_before.getDate() + 5);
 
 logger.info('Check coming reservations');
-mongo_connect().then(()=> {
-    mongo_reservations.find({
+utils.init_db().then(()=> {
+    utils.mongo_reservations().find({
         'from': {'$lte': create_before.getTime()},
         'created': false,
         'over': false

@@ -1,31 +1,6 @@
 const CONFIG = require('config');
-/*
-const monk = require('monk');
-var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
-// var web_db = db.get('web'),
-var users_db = db.get('users');
-var events_db = db.get('events');
-*/
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-var mongo_events = null;
 
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    mongo_events = mongodb.collection('events');
-};
-mongo_connect();
-
+var utils= require('./utils');
 
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
@@ -62,7 +37,7 @@ module.exports = {
 
     subscribed: async function(email, callback) {
         if (CONFIG.nodemailer.list) {
-            let user = await mongo_users.findOne({email: email});
+            let user = await utils.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
                 callback(false);
@@ -92,7 +67,7 @@ module.exports = {
                 callback();
                 return;
             }
-            let user = await mongo_users.findOne({email: email});
+            let user = await utils.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
                 callback();
@@ -105,8 +80,8 @@ module.exports = {
             });
             logger.info('user added to ' + CONFIG.nodemailer.list.address, email);
 
-            await mongo_events.insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
-            await mongo_users.updateOne({email: email}, {'$set':{'subscribed': true}});
+            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
+            await utils.mongo_users().updateOne({email: email}, {'$set':{'subscribed': true}});
         }
         callback();
         return;
@@ -125,7 +100,7 @@ module.exports = {
                 callback();
                 return;
             }
-            let user = await mongo_users.findOne({email: email});
+            let user = await utils.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
                 callback();
@@ -137,8 +112,8 @@ module.exports = {
                 subject: CONFIG.nodemailer.list.cmd_del + ' ' + CONFIG.nodemailer.list.address + ' ' + email
             });
             logger.warn('user deleted from ' + CONFIG.nodemailer.list.address, email);
-            await mongo_events.insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
-            await mongo_users.updateOne({email: email}, {'$set':{'subscribed': false}});
+            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
+            await utils.mongo_users().updateOne({email: email}, {'$set':{'subscribed': false}});
         }
         callback();
         return;

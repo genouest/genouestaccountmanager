@@ -5,33 +5,10 @@ var router = express.Router();
 
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
+
+var utils = require('./utils');
 // const winston = require('winston');
 // const logger = winston.loggers.get('gomngr');
-
-/*
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db);
-var users_db = db.get('users');
-*/
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-};
-mongo_connect();
-
 
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
@@ -90,7 +67,7 @@ router.get('/plugin/:id/:user', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -112,7 +89,7 @@ router.post('/plugin/:id/:user', async function(req, res) {
         return;
     }
 
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send('User not found');
         return;

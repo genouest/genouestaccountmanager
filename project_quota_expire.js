@@ -6,29 +6,7 @@
 
 var CONFIG = require('config');
 
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    projects_db = db.get('projects');
-*/
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_projects = null;
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_projects = mongodb.collection('projects');
-
-};
+var utils = require('./routes/utils');
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
@@ -50,9 +28,9 @@ function timeConverter(tsp){
 }
 */
 
-mongo_connect().then(async () => {
+utils.init_db().then(async () => {
 
-    let projects = await mongo_projects.find({}).toArray();
+    let projects = await utils.mongo_projects().find({}).toArray();
     // Find project expiring in less then 2 month
     let mail_sent = 0;
     let notifs = [];

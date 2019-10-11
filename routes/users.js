@@ -29,62 +29,9 @@ if(plugins === undefined){
 var plugins_modules = {};
 var plugins_info = [];
 
-// var cookieParser = require('cookie-parser');
-
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif_'+MAILER+'.js');
 var utils = require('../routes/utils.js');
-
-// var get_ip = require('ipware')().get_ip;
-
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-var mongo_groups = null;
-var mongo_databases = null;
-var mongo_web = null;
-var mongo_projects = null;
-var mongo_events = null;
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    mongo_groups = mongodb.collection('groups');
-    mongo_events = mongodb.collection('events');
-    mongo_databases = mongodb.collection('databases');
-    mongo_projects = mongodb.collection('projects');
-    mongo_web = mongodb.collection('web');
-};
-
-router.init = async function() {
-    try {
-        await mongo_connect();
-        return null;
-    } catch(err){
-        logger.debug('Failed to init db', err);
-        return err;
-    }
-};
-
-/*
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + GENERAL_CONFIG.db);
-var groups_db = db.get('groups');
-var databases_db = db.get('databases');
-var web_db = db.get('web');
-var users_db = db.get('users');
-var projects_db = db.get('projects');
-var events_db = db.get('events');
-*/
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -174,7 +121,7 @@ var create_extra_group = async function(group_name, owner_name){
     let fid = new Date().getTime();
     let group = {name: group_name, gid: mingid, owner: owner_name};
     try {
-        await mongo_groups.insertOne(group);
+        await utils.mongo_groups().insertOne(group);
         await goldap.add_group(group, fid);
     }
     catch(e) {
@@ -242,7 +189,7 @@ var create_extra_user = async function(user_name, group, internal_user){
 
     delete user.password;
     // eslint-disable-next-line no-unused-vars
-    await mongo_users.insertOne(user);
+    await utils.mongo_users().insertOne(user);
     try {
         let created_file = await filer.user_create_extra_user(user, fid);
         logger.info('File Created: ', created_file);
@@ -271,13 +218,13 @@ var create_extra_user = async function(user_name, group, internal_user){
 };
 
 router.create_admin = async function(default_admin, default_admin_group){
-    let user = await mongo_users.findOne({'uid': default_admin});
+    let user = await utils.mongo_users().findOne({'uid': default_admin});
     if(user){
         logger.info('admin already exists, skipping');
     }
     else {
         logger.info('should create admin');
-        let group = await mongo_groups.findOne({name: default_admin_group});
+        let group = await utils.mongo_groups().findOne({name: default_admin_group});
         if(group){
             logger.info('group already exists');
             // eslint-disable-next-line no-unused-vars
@@ -310,7 +257,7 @@ router.get('/user/:id/apikey', async function(req, res){
 
     let session_user = null;
     try {
-        session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     } catch(e) {
         logger.error(e);
         res.status(404).send('not found');
@@ -323,7 +270,7 @@ router.get('/user/:id/apikey', async function(req, res){
         return;
     }
 
-    let user= await mongo_users.findOne({uid: req.params.id});
+    let user= await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -350,13 +297,13 @@ router.post('/user/:id/apikey', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(session_user.uid !== req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');
         return;
     }
 
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -364,7 +311,7 @@ router.post('/user/:id/apikey', async function(req, res){
     }
 
     var apikey = Math.random().toString(36).slice(-10);
-    await mongo_users.updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
+    await utils.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
     res.send({'apikey': apikey});
     res.end();
 });
@@ -384,7 +331,7 @@ router.put('/user/:id/subscribe', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -416,7 +363,7 @@ router.put('/user/:id/unsubscribe', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -444,7 +391,7 @@ router.get('/user/:id/subscribed', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -470,7 +417,7 @@ router.get('/group/:id', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -479,13 +426,13 @@ router.get('/group/:id', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
+    let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
     res.send(users_in_group);
     res.end();
 });
 
 router.delete_group = async function(group, admin_user_id){
-    await mongo_groups.remove({'name': group.name});
+    await utils.mongo_groups().remove({'name': group.name});
     let fid = new Date().getTime();
     await goldap.delete_group(group, fid);
     try {
@@ -496,7 +443,7 @@ router.delete_group = async function(group, admin_user_id){
         return false;            
     }
 
-    await mongo_events.insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
+    await utils.mongo_events().insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
     await utils.freeGroupId(group.gid);
     return true;
 };
@@ -505,9 +452,9 @@ router.clear_user_groups = async function(user, admin_user_id){
     let allgroups = user.secondarygroups;
     allgroups.push(user.group);
     for(let i=0;i < allgroups.length;i++){
-        let group = await mongo_groups.findOne({name: allgroups[i]});
+        let group = await utils.mongo_groups().findOne({name: allgroups[i]});
         if(group){
-            let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]}).toArray();
+            let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]}).toArray();
             if(users_in_group && users_in_group.length == 0){
                 router.delete_group(group, admin_user_id);
             }
@@ -525,7 +472,7 @@ router.delete('/group/:id', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -534,12 +481,12 @@ router.delete('/group/:id', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let group = await mongo_groups.findOne({name: req.params.id});
+    let group = await utils.mongo_groups().findOne({name: req.params.id});
     if(!group) {
         res.status(403).send('Group does not exist');
         return;
     }
-    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
+    let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
     if(users_in_group && users_in_group.length > 0){
         res.status(403).send('Group has some users, cannot delete it');
         return;
@@ -560,7 +507,7 @@ router.put('/group/:id', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user == null){
         res.status(404).send('User not found');
         return;
@@ -570,24 +517,24 @@ router.put('/group/:id', async function(req, res){
         return;
     }
     var owner = req.body.owner;
-    let user = await mongo_users.findOne({uid: owner});
+    let user = await utils.mongo_users().findOne({uid: owner});
     if(!user) {
         res.status(404).send('User does not exist');
         res.end();
         return;
     }
-    let group = await mongo_groups.findOne({name: req.params.id});
+    let group = await utils.mongo_groups().findOne({name: req.params.id});
     if(! group) {
         res.status(404).send('Group does not exist');
         return;
     }
-    await mongo_events.insertOne({
+    await utils.mongo_events().insertOne({
         'owner': user.uid,
         'date': new Date().getTime(),
         'action': 'group owner modification ' + group.name + ' to ' +owner,
         'logs': []});
 
-    let data = await mongo_groups.updateOne({name: group.name}, {'$set':{'owner': owner}});
+    let data = await utils.mongo_groups().updateOne({name: group.name}, {'$set':{'owner': owner}});
     res.send(data);
     res.end();
 });
@@ -601,7 +548,7 @@ router.post('/group/:id', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(session_user == null){
         res.status(404).send('User not found');
         return;
@@ -611,13 +558,13 @@ router.post('/group/:id', async function(req, res){
         return;
     }
     let owner = req.body.owner;
-    let user = await mongo_users.findOne({uid: owner});
+    let user = await utils.mongo_users().findOne({uid: owner});
     if(!user) {
         res.status(404).send('Owner user does not exist');
         res.end();
         return;
     }
-    let group = await mongo_groups.findOne({name: new RegExp('^' + req.params.id + '$', 'i')});
+    let group = await utils.mongo_groups().findOne({name: new RegExp('^' + req.params.id + '$', 'i')});
     if(group) {
         res.status(403).send('Group already exists');
         return;
@@ -627,7 +574,7 @@ router.post('/group/:id', async function(req, res){
 
     let fid = new Date().getTime();
     group = {name: req.params.id, gid: mingid, owner: owner};
-    await mongo_groups.insertOne(group);
+    await utils.mongo_groups().insertOne(group);
     await goldap.add_group(group, fid);
 
     try {
@@ -639,7 +586,7 @@ router.post('/group/:id', async function(req, res){
         return;            
     }
 
-    await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']});
+    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']});
 
     group.fid = fid;
     res.send(group);
@@ -661,7 +608,7 @@ router.get('/group', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -670,7 +617,7 @@ router.get('/group', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let groups = await mongo_groups.find().toArray();
+    let groups = await utils.mongo_groups().find().toArray();
     res.send(groups);
     return;
 });
@@ -685,7 +632,7 @@ router.post('/message', async function(req, res){
         res.status(403).send('Mail provider is not set');
         return;
     }
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!user){
         res.status(404).send('User not found');
@@ -724,7 +671,7 @@ router.get('/user', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -733,7 +680,7 @@ router.get('/user', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let users = await mongo_users.find({}).toArray();
+    let users = await utils.mongo_users().find({}).toArray();
     res.json(users);
 });
 
@@ -748,7 +695,7 @@ router.post('/user/:id/group/:group', async function(req, res){
         return;
     }
 
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user){
         res.status(401).send('User not found');
         return;
@@ -759,7 +706,7 @@ router.post('/user/:id/group/:group', async function(req, res){
     }
     let uid = req.params.id;
     let secgroup = req.params.group;
-    let user = await mongo_users.findOne({uid: uid});
+    let user = await utils.mongo_users().findOne({uid: uid});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -781,7 +728,7 @@ router.post('/user/:id/group/:group', async function(req, res){
     // Now add group
     await goldap.change_user_groups(user, [secgroup], [], fid);
     try {
-        await mongo_users.updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
     } catch(err) {
         res.send({message: 'Could not update user'});
         res.end();
@@ -797,7 +744,7 @@ router.post('/user/:id/group/:group', async function(req, res){
         return;           
     }
 
-    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
     res.send({message: 'User added to group', fid: fid});
     res.end();
     return;
@@ -815,14 +762,14 @@ router.delete('/user/:id/group/:group', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(! session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');
         return;
     }
     let uid = req.params.id;
     let secgroup = req.params.group;
-    let user = await mongo_users.findOne({uid: uid});
+    let user = await utils.mongo_users().findOne({uid: uid});
     if(secgroup == user.group) {
         res.send({message: 'Group is user main\'s group: '+user.group});
         res.end();
@@ -848,7 +795,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
     // Now add group
     await goldap.change_user_groups(user, [], [secgroup], fid);
     try {
-        await mongo_users.updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
     } catch(err) {
         res.send({message: 'Could not update user'});
         res.end();
@@ -864,15 +811,15 @@ router.delete('/user/:id/group/:group', async function(req, res){
         return;         
     }
 
-    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
-    let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}).toArray();
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
+    let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}).toArray();
     if(users_in_group && users_in_group.length > 0){
         res.send({message: 'User removed from group', fid: fid});
         res.end();
         return;
     }
     // If group is empty, delete it
-    let group = await mongo_groups.findOne({name: secgroup});
+    let group = await utils.mongo_groups().findOne({name: secgroup});
     if(!group) {
         res.send({message: 'User removed from group', fid: fid});
         res.end();
@@ -887,8 +834,8 @@ router.delete('/user/:id/group/:group', async function(req, res){
 
 router.delete_user = async function(user, action_owner_id){
     if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
-        await mongo_users.remove({_id: user._id});
-        await mongo_events.insertOne({
+        await utils.mongo_users().remove({_id: user._id});
+        await utils.mongo_events().insertOne({
             'owner': action_owner_id,
             'date': new Date().getTime(),
             'action': 'delete user ' + user.uid ,
@@ -905,7 +852,7 @@ router.delete_user = async function(user, action_owner_id){
         allgroups.push(user.group);
         await goldap.change_user_groups(user, [], allgroups, fid);
         try {
-            await mongo_users.remove({_id: user._id});
+            await utils.mongo_users().remove({_id: user._id});
         } catch(err) {
             return false;
         }
@@ -928,7 +875,7 @@ router.delete_user = async function(user, action_owner_id){
             message: msg_activ, // plaintext body
             html_message: msg_activ_html // html body
         };
-        await mongo_events.insertOne({
+        await utils.mongo_events().insertOne({
             'owner': action_owner_id,
             'date': new Date().getTime(),
             'action': 'delete user ' + user.uid ,
@@ -968,7 +915,7 @@ router.delete('/user/:id', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');
         return;
@@ -976,7 +923,7 @@ router.delete('/user/:id', async function(req, res){
 
     var uid = req.params.id;
 
-    let user = await mongo_users.findOne({uid: uid});
+    let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
         res.send({message: 'User not found ' + uid});
         res.end();
@@ -993,13 +940,13 @@ router.delete('/user/:id', async function(req, res){
     else {
         // Must check if user has databases and sites
         // Do not remove in this case, owners must be changed before
-        let databases = await mongo_databases.find({owner: uid}).toArray();
+        let databases = await utils.mongo_databases().find({owner: uid}).toArray();
         if(databases && databases.length>0) {
             res.send({message: 'User owns some databases, please change owner first!'});
             res.end();
             return;
         }
-        let websites = await mongo_web.find({owner: uid}).toArray();
+        let websites = await utils.mongo_web().find({owner: uid}).toArray();
         if(websites && websites.length>0) {
             res.send({message: 'User owns some web sites, please change owner first!'});
             res.end();
@@ -1023,7 +970,7 @@ router.get('/user/:id/activate', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user){
         res.status(404).send('User not found');
         return;
@@ -1032,7 +979,7 @@ router.get('/user/:id/activate', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(403).send('User does not exist');
         res.end();
@@ -1046,7 +993,7 @@ router.get('/user/:id/activate', async function(req, res) {
     user.password = Math.random().toString(36).slice(-10);
     let minuid = await utils.getUserAvailableId();
 
-    let data = await mongo_groups.findOne({'name': user.group});
+    let data = await utils.mongo_groups().findOne({'name': user.group});
     if(!data) {
         res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
         res.end();
@@ -1064,7 +1011,7 @@ router.get('/user/:id/activate', async function(req, res) {
         res.end();
         return;
     }
-    await mongo_users.updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     try {
         let created_file = await filer.user_add_user(user, fid);
@@ -1085,7 +1032,7 @@ router.get('/user/:id/activate', async function(req, res) {
             message: msg_activ, // plaintext body
             html_message: msg_activ_html // html body
         };
-        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
         let plugin_call = function(plugin_info, userId, data, adminId){
             // eslint-disable-next-line no-unused-vars
@@ -1120,8 +1067,8 @@ router.get('/user/:id', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -1158,7 +1105,7 @@ router.get('/user/:id/confirm', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({uid: uid});
+    let user = await utils.mongo_users().findOne({uid: uid});
     if(! user) {
         res.status(401).send('Invalid user');
         return;
@@ -1173,7 +1120,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 return;
             }
             var account_event = {action: 'email_confirm', date: new Date().getTime()};
-            await mongo_users.updateOne(
+            await utils.mongo_users().updateOne(
                 { _id: user._id},
                 {
                     $set: {status: STATUS_PENDING_APPROVAL},
@@ -1187,7 +1134,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 message: 'New account registration waiting for approval: '+uid, // plaintext body
                 html_message: 'New account registration waiting for approval: '+uid // html body
             };
-            await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
+            await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
             if(notif.mailSet()) {
                 try {
                     await notif.sendUser(mailOptions);
@@ -1263,12 +1210,12 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    let user_email = await mongo_users.findOne({email: req.body.email, is_fake: false});
+    let user_email = await utils.mongo_users().findOne({email: req.body.email, is_fake: false});
     if(user_email){
         res.send({'status': 1, 'msg': 'User email already exists'});
         return;
     }
-    let userexists = await mongo_users.findOne({uid: req.params.id});
+    let userexists = await utils.mongo_users().findOne({uid: req.params.id});
     if(userexists){
         res.send({'status': 1, 'msg': 'User id already exists'});
         return;
@@ -1305,10 +1252,10 @@ router.post('/user/:id', async function(req, res) {
     // user[CONFIG.general.internal_flag] = false,
     user.home = get_user_home(user);
 
-    await mongo_events.insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
+    await utils.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
 
     let uid = req.params.id;
-    await mongo_users.insertOne(user);
+    await utils.mongo_users().insertOne(user);
     let link = GENERAL_CONFIG.url +
         encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     let msg_activ = CONFIG.message.emailconfirmation.join('\n').replace('#LINK#', link).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
@@ -1342,12 +1289,12 @@ router.get('/user/:id/expire', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user){
         res.status(404).send('User not found');
         return;        
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if (!user){
         res.status(404).send('User not found');
         return;        
@@ -1373,7 +1320,7 @@ router.get('/user/:id/expire', async function(req, res){
         }
         user.history.push({'action': 'expire', date: new Date().getTime()});
         // eslint-disable-next-line no-unused-vars
-        await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
+        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
 
         try {
             let created_file = await filer.user_expire_user(user, fid);
@@ -1384,7 +1331,7 @@ router.get('/user/:id/expire', async function(req, res){
             return;
         }
 
-        await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
         // Now remove from mailing list
         try {
@@ -1436,12 +1383,12 @@ router.post('/user/:id/passwordreset', async function(req, res){
         return;
     }
 
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user || session_user.uid != req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
         res.send({message: 'Not authorized'});
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(404).send('User does not exist:'+req.params.id);
         res.end();
@@ -1453,7 +1400,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
         return;
     }
     user.password=req.body.password;
-    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
     var fid = new Date().getTime();
     try {
         await goldap.reset_password(user, fid);
@@ -1484,7 +1431,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
         return;
     }
 
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(404).send('User does not exist');
         res.end();
@@ -1497,7 +1444,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     }
 
     try {
-        await mongo_users.updateOne({uid: req.params.id},{'$set': {regkey: key}});
+        await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: key}});
     } catch(err) {
         res.status(404).send('User cannot be updated');
         res.end();
@@ -1518,7 +1465,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
         message: msg,
         html_message: html_msg
     };
-    await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
+    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
 
     if(notif.mailSet()) {
         try {
@@ -1539,7 +1486,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         return;
     }
 
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(404).send('User does not exist');
         res.end();
@@ -1557,7 +1504,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             return;
         }
         user.history.push({'action': 'password reset', date: new Date().getTime()});
-        await mongo_users.updateOne({uid: user.uid},{'$set': {history: user.history}});
+        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {history: user.history}});
         // Todo: find if we need another template (or not)
         try {
             let created_file = await filer.user_reset_password(user, fid);
@@ -1578,7 +1525,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             message: msg,
             html_message: msg_html
         };
-        await mongo_events.insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
+        await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
 
         if(notif.mailSet()) {
             try {
@@ -1608,7 +1555,7 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -1621,8 +1568,8 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
         var expiration = new Date().getTime() + 1000*3600*24*user.duration;
-        await mongo_users.updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
-        await mongo_events.insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
+        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
+        await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         if(req.accepts('json')) {
             res.send({msg: 'validity period extended'});
             res.end();
@@ -1649,8 +1596,8 @@ router.get('/user/:id/renew', async function(req, res){
         return;
     }
 
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -1672,7 +1619,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;                    
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}});
+        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}});
 
         try {
             let created_file = await filer.user_renew_user(user, fid);
@@ -1683,7 +1630,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         } 
 
-        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
         notif.add(user.email, function(){
             let msg_activ = CONFIG.message.reactivation.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
             let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer.join('<br/>');
@@ -1736,14 +1683,14 @@ router.put('/user/:id/ssh', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
         session_user.is_admin = true;
     }
     else {
         session_user.is_admin = false;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     // If not admin nor logged user
     if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
         res.status(401).send('Not authorized');
@@ -1761,7 +1708,7 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
     // Update SSH Key
-    await mongo_users.updateOne({_id: user._id}, {'$set': {ssh: req.body.ssh}});
+    await utils.mongo_users().updateOne({_id: user._id}, {'$set': {ssh: req.body.ssh}});
     var fid = new Date().getTime();
     user.ssh = escapeshellarg(req.body.ssh);
     try {
@@ -1773,7 +1720,7 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
 
-    await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.params.id , 'logs': [ user.uid + '.' + fid + '.update']});
+    await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.params.id , 'logs': [ user.uid + '.' + fid + '.update']});
 
     user.fid = fid;
     res.send(user);
@@ -1814,7 +1761,7 @@ router.put('/user/:id', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user) {
         res.status(401).send('Not authorized');
         return;
@@ -1825,7 +1772,7 @@ router.put('/user/:id', async function(req, res) {
     else {
         session_user.is_admin = false;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
 
     if(!user){
         res.status(401).send('Not authorized');
@@ -1867,7 +1814,7 @@ router.put('/user/:id', async function(req, res) {
     user.duration = req.body.duration;
 
     user.history.push({'action': 'update info', date: new Date().getTime()});
-    let group = await mongo_groups.findOne({'name': req.body.group});
+    let group = await utils.mongo_groups().findOne({'name': req.body.group});
  
 
     if(!group) {
@@ -1898,7 +1845,7 @@ router.put('/user/:id', async function(req, res) {
     }
 
     if(user.status == STATUS_ACTIVE){
-        await mongo_users.updateOne({_id: user._id}, user);
+        await utils.mongo_users().updateOne({_id: user._id}, user);
         if(session_user.is_admin) {
             user.is_admin = true;
         }
@@ -1921,14 +1868,14 @@ router.put('/user/:id', async function(req, res) {
         if(session_user.is_admin && CONFIG.general.use_group_in_path) {
             if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                 // If group modification, change home location
-                await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []});
+                await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []});
             }
         }
 
-        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-        let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
+        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
         if(users_in_group && users_in_group.length == 0){
-            let oldgroup = await mongo_groups.findOne({name: user.oldgroup});
+            let oldgroup = await utils.mongo_groups().findOne({name: user.oldgroup});
             if(oldgroup){
                 router.delete_group(oldgroup, session_user.uid);
             }
@@ -1952,11 +1899,11 @@ router.put('/user/:id', async function(req, res) {
         }
     }
     else {
-        await mongo_users.updateOne({_id: user._id}, user);
-        await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
-        let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
+        await utils.mongo_users().updateOne({_id: user._id}, user);
+        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
+        let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
         if(users_in_group && users_in_group.length == 0){
-            let oldgroup = await mongo_groups.findOne({name: user.oldgroup});
+            let oldgroup = await utils.mongo_groups().findOne({name: user.oldgroup});
             if(oldgroup){
                 await router.delete_group(oldgroup, session_user.uid);
             }
@@ -1975,12 +1922,12 @@ router.get('/project/:id/users', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send('User not found');
         return;
     }
-    let users_in_project = await mongo_users.find({'projects': req.params.id}).toArray();
+    let users_in_project = await utils.mongo_users().find({'projects': req.params.id}).toArray();
     res.send(users_in_project);
     res.end();
 });
@@ -1995,7 +1942,7 @@ router.post('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');
         res.end();
@@ -2004,7 +1951,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     let newproject = req.params.project;
     let uid = req.params.id;
     var fid = new Date().getTime();
-    let user = await mongo_users.findOne({uid: uid});
+    let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
         res.status(404).send('User does not exist');
         res.end();
@@ -2022,7 +1969,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     }
     user.projects.push(newproject);
     try {
-        await mongo_users.updateOne({_id: user._id}, {'$set': { projects: user.projects}});
+        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
         res.status(403).send('Could not update user');
         res.end();
@@ -2038,7 +1985,7 @@ router.post('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
     res.send({message: 'User added to project', fid: fid});
     res.end();
 });
@@ -2053,7 +2000,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');
@@ -2063,13 +2010,13 @@ router.delete('/user/:id/project/:project', async function(req, res){
     let oldproject = req.params.project;
     let uid = req.params.id;
     var fid = new Date().getTime();
-    let user = await mongo_users.findOne({uid: uid});
+    let user = await utils.mongo_users().findOne({uid: uid});
     if(! user) {
         res.status(404).send('User ' + uid + ' not found');
         res.end();
         return;
     }
-    let project = await mongo_projects.findOne({id:oldproject});
+    let project = await utils.mongo_projects().findOne({id:oldproject});
     if(!project){
         logger.info('project not found', oldproject);
         res.status(500).send('Error, project not found');
@@ -2088,7 +2035,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         }
     }
     try {
-        await mongo_users.updateOne({_id: user._id}, {'$set': { projects: tempprojects}});
+        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: tempprojects}});
     } catch(err) {
         res.status(403).send('Could not update user');
         res.end();
@@ -2103,7 +2050,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
     res.send({message: 'User removed from project', fid: fid});
     res.end();
 });
@@ -2117,7 +2064,7 @@ router.get('/list/:list', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');
@@ -2136,7 +2083,7 @@ router.get('/lists', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    let session_user = await mongo_users.findOne({_id: req.locals.logInfo.id});
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');

@@ -9,35 +9,9 @@ const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
 var CONFIG = require('config');
 
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users'),
-    events_db = db.get('events');
-*/
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-var mongo_events = null;
-
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    mongo_events = mongodb.collection('events');
-};
-mongo_connect();
-
 var utils = require('./utils');
+
+
 /**
    app.get('/ssh/:id', ssh);
    app.get('/ssh/:id/public', ssh);
@@ -54,7 +28,7 @@ router.get('/ssh/:id/putty', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -81,7 +55,7 @@ router.get('/ssh/:id/private', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -112,7 +86,7 @@ router.get('/ssh/:id/public', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
 
     if(!user) {
         res.send({msg: 'User does not exist'});
@@ -140,7 +114,7 @@ router.get('/ssh/:id', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
 
     if(!user) {
         res.send({msg: 'User does not exist'});
@@ -163,7 +137,7 @@ router.get('/ssh/:id', async function(req, res) {
         return;  
     }
 
-    await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']});
+    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']});
     res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
     res.end();
 });

@@ -12,30 +12,8 @@ var STATUS_EXPIRED = 'Expired';
 
 
 var CONFIG = require('config');
-// var goldap = require('./routes/goldap.js');
 
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users');
-*/
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-};
+var utils = require('./routes/utils');
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
@@ -55,8 +33,8 @@ function timeConverter(tsp){
     return time;
 }
 
-mongo_connect().then(async ()=>{
-    let users = await mongo_users.find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
+utils.init_db().then(async ()=>{
+    let users = await utils.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
     // Find users expiring in less then 2 month
     let mail_sent = 0;
     if (! notif.mailSet()){

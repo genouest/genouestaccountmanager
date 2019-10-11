@@ -5,32 +5,10 @@
 const program = require('commander');
 
 var CONFIG = require('config');
-/*
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
-var reservation_db = db.get('reservations');
-var users_db = db.get('users');
-*/
 
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-var mongo_reservations = null;
 var ObjectID = require('mongodb').ObjectID;
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    mongo_reservations = mongodb.collection('reservations');
 
-};
+var utils = require('./routes/utils');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -65,7 +43,7 @@ var processReservation = function(reservation){
         logger.info('create user for reservation ', reservation);
         tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug('set reservation as done', res);
-            mongo_reservations.updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
+            utils.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
             });
         });
@@ -91,7 +69,7 @@ function createReservations(rid) {
             'over': false
         };
     }
-    mongo_reservations.find(filter).toArray().then(function(reservations){
+    utils.mongo_reservations().find(filter).toArray().then(function(reservations){
         if(reservations === undefined || reservations.length == 0){
             logger.info('No pending reservation');
             process.exit(0);
@@ -123,7 +101,7 @@ function removeReservations(rid) {
         };
     }
     logger.info('[INFO] Check for ending reservations');
-    mongo_reservations.find(filter).toArray().then(function(reservations){
+    utils.mongo_reservations().find(filter).toArray().then(function(reservations){
         if(reservations === undefined || reservations.length == 0){
             console.log('[INFO] No pending reservation');
             process.exit(0);
@@ -132,13 +110,13 @@ function removeReservations(rid) {
             console.log('[INFO] Delete accounts for reservation', reservation);
             console.log('[INFO] Reservation expired at ', new Date(reservation.to));
             Promise.all(reservation.accounts.map(function(user){
-                return mongo_users.findOne({'uid': user});
+                return utils.mongo_users().findOne({'uid': user});
             })).then(function(users){
                 return tps.delete_tp_users(users, reservation.group, 'auto');
             }).then(function(){
                 console.log('[INFO] close reservation', reservations);
                 Promise.all(reservations.map(function(reservation){
-                    return mongo_reservations.updateOne({'_id': reservation._id},{'$set': {'over': true}});
+                    return utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
                 })).then(function(){
                     process.exit(0);
                 });
@@ -156,7 +134,7 @@ program
         if (args.id) {
             filter['_id'] = ObjectID.createFromHexString(args.id);
         }
-        mongo_reservations.find(filter).toArray().then(function(reservations){
+        utils.mongo_reservations().find(filter).toArray().then(function(reservations){
             let displayRes = [];
             for(let i=0;i<reservations.length;i++){
                 let res = reservations[i];
@@ -187,7 +165,7 @@ program
         createReservations(args.id);
     });
 
-mongo_connect().then(() => {
+utils.init_db().then(() => {
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });

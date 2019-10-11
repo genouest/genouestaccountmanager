@@ -27,29 +27,8 @@ var STATUS_EXPIRED = 'Expired';
 
 
 var notif = require('../routes/notif_'+MAILER+'.js');
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db),
-    users_db = db.get('users');
-*/
 
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-//var mongo_groups = null;
-(async function(){
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    //mongo_groups = mongodb.collection('groups');
-})();
+var utils = require('./utils');
 
 var attemps = {};
 
@@ -69,7 +48,7 @@ router.get('/mail/auth/:id', async function(req, res) {
         return res.status(403).send('No mail provider set : cannot send mail');
     }
     var password = Math.random().toString(36).slice(-10);
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         return res.status(404).send('User not found');
     }
@@ -105,7 +84,7 @@ router.post('/mail/auth/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         return res.status(404).send('User not found');
     }
@@ -139,7 +118,7 @@ router.get('/u2f/auth/:id', async function(req, res) {
         return res.status(401).send('You need to login first');
     }
     req.session.u2f = null;
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -155,7 +134,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged){
         return res.status(401).send('You need to login first');
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -186,7 +165,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
 });
 
 router.get('/u2f/register/:id', async function(req, res) {
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send('User not found');
         return;
@@ -202,7 +181,7 @@ router.get('/u2f/register/:id', async function(req, res) {
 });
 
 router.post('/u2f/register/:id', async function(req, res) {
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
         return res.status(401).send('You need to login first');
     }
@@ -210,7 +189,7 @@ router.post('/u2f/register/:id', async function(req, res) {
     const registrationResponse = req.bodyregistrationResponse;
     const result = u2f.checkRegistration(registrationRequest, registrationResponse);
     if (result.successful) {
-        await mongo_users.updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
+        await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
         return res.send({'publicKey': result.publicKey});
     }
     else{
@@ -220,7 +199,7 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 router.get('/auth', async function(req, res) {
     if(req.locals.logInfo.id) {
-        let user = await mongo_users.findOne({uid: req.params.id});
+        let user = await utils.mongo_users().findOne({uid: req.params.id});
         var token = jwt.sign(
             { user: user._id, isLogged: true },
             CONFIG.general.secret,
@@ -263,7 +242,7 @@ router.post('/auth/:id', async function(req, res) {
             return;
         }
     }
-    let user = await mongo_users.findOne({uid: req.params.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(! user) {
         res.status(404).send('User not found');
         return;
@@ -343,7 +322,7 @@ router.post('/auth/:id', async function(req, res) {
             if (!user.apikey) {
                 let apikey = Math.random().toString(36).slice(-10);
                 user.apikey = apikey;
-                await mongo_users.updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
+                await utils.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
                 res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
                 res.end();
                 return;

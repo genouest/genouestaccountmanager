@@ -6,27 +6,7 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
 
-//var monk = require('monk');
-//var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
-//var groups_db = db.get('groups');
-// var users_db = db.get('users'),
-// var events_db = db.get('events');
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_groups = null;
-(async function(){
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_groups = mongodb.collection('groups');
-})();
+var utils= require('./utils');
 
 /*
 var options = {
@@ -230,7 +210,7 @@ module.exports = {
     add: async function(user, fid) {
         let group = null;
         try {
-            group = await mongo_groups.findOne({'name': user.group});
+            group = await utils.mongo_groups().findOne({'name': user.group});
         } catch(e) {
             logger.error(e);
             throw e;

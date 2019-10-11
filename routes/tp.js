@@ -40,42 +40,7 @@ var fusers = require('../routes/users.js');
 const filer = require('../routes/file.js');
 var utils = require('../routes/utils.js');
 
-// var get_ip = require('ipware')().get_ip;
-
-/*
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
-var users_db = db.get('users');
-var groups_db = db.get('groups');
-var reservation_db = db.get('reservations');
-var events_db = db.get('events');
-*/
-
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-var mongo_groups = null;
-var mongo_events = null;
-var mongo_reservations = null;
 var ObjectID = require('mongodb').ObjectID;
-
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-    mongo_groups = mongodb.collection('groups');
-    mongo_events = mongodb.collection('events');
-    mongo_reservations = mongodb.collection('reservations');
-};
-mongo_connect();
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -88,7 +53,7 @@ var createExtraGroup = async function (ownerName) {
     let mingid = await utils.getGroupAvailableId();
     let fid = new Date().getTime();
     let group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
-    await mongo_groups.insertOne(group);
+    await utils.mongo_groups().insertOne(group);
 
     await goldap.add_group(group, fid);
     try {
@@ -106,11 +71,11 @@ var deleteExtraGroup = async function (group) {
     if (group === undefined || group === null) {
         return false;
     }
-    let group_to_remove = await mongo_groups.findOne({'name': group.name});
+    let group_to_remove = await utils.mongo_groups().findOne({'name': group.name});
     if(!group_to_remove) {
         return false;
     }
-    await mongo_groups.removeOne({ 'name': group.name });
+    await utils.mongo_groups().removeOne({ 'name': group.name });
     let fid = new Date().getTime();
     await goldap.delete_group(group, fid);
     try {
@@ -121,7 +86,7 @@ var deleteExtraGroup = async function (group) {
     }
 
     await utils.freeGroupId(group.gid);
-    await mongo_events.insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
+    await utils.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
     return true;
 };
 
@@ -186,7 +151,7 @@ var create_tp_user_db = async function (tp_user) {
         user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
         user.uidnumber = uid;
         user.home = fusers.user_home(user);
-        await mongo_users.insertOne(user);
+        await utils.mongo_users().insertOne(user);
         user.password = Math.random().toString(36).slice(-10);
         return user;
     }
@@ -225,7 +190,7 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
     msg_html += '<hr>';
     msg_html += '<p>In case of issue, you can contact us at ' + CONFIG.general.support + '</p>';
 
-    let user_owner = await mongo_users.findOne({'uid': owner});
+    let user_owner = await utils.mongo_users().findOne({'uid': owner});
     if( notif.mailSet()){
         let mailOptions = {
             origin: MAIL_CONFIG.origin, // sender address
@@ -293,7 +258,7 @@ router.delete_tp_users = function(users, group, admin_id){
 
 router.exec_tp_reservation = async function(reservation_id){
     // Create users for reservation
-    let reservation = await mongo_reservations.findOne({'_id': reservation_id});
+    let reservation = await utils.mongo_reservations().findOne({'_id': reservation_id});
     logger.debug('create a reservation group', reservation._id);
     let newGroup = await createExtraGroup(reservation.owner);
     logger.debug('create reservation accounts', reservation._id);
@@ -309,8 +274,9 @@ router.exec_tp_reservation = async function(reservation_id){
     }
     try{
         await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users);
-        await mongo_reservations.updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
+        await utils.mongo_reservations().updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
         logger.debug('reservation ', reservation);
+        await utils.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'create reservation for ' + reservation.owner , 'logs': [] });
         return reservation;
     }
     catch(exception){
@@ -332,7 +298,7 @@ var tp_reservation = async function(userId, from_date, to_date, quantity, about)
         'over': false
     };
 
-    await mongo_reservations.insertOne(reservation);
+    await utils.mongo_reservations().insertOne(reservation);
     logger.debug('reservation ', reservation);
     return reservation;
 };
@@ -342,7 +308,7 @@ var insert_ldap_user = async function(user, fid){
     try {
         await goldap.add(user, fid);
         logger.debug('switch to ACTIVE');
-        await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
+        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
         return user;
     } catch(err) {
         logger.error(err);
@@ -351,7 +317,7 @@ var insert_ldap_user = async function(user, fid){
 };
 
 var activate_tp_user = async function(user, adminId){
-    let db_user = await mongo_users.findOne({'uid': user.uid});
+    let db_user = await utils.mongo_users().findOne({'uid': user.uid});
     if(!db_user) {
         logger.error('failure:',user.uid);
         throw `user activation failed ${user.uid}`;
@@ -387,13 +353,13 @@ router.get('/tp', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
         return;
     }
-    let reservations = await mongo_reservations.find({}).toArray();
+    let reservations = await utils.mongo_reservations().find({}).toArray();
     res.send(reservations);
     res.end();
 });
@@ -412,7 +378,7 @@ router.post('/tp', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -440,7 +406,7 @@ router.delete('/tp/:id', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    let user = await mongo_users.findOne({'_id': req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.send({msg: 'User does not exist'});
         res.end();
@@ -461,7 +427,7 @@ router.delete('/tp/:id', async function(req, res) {
     else{
         filter = {_id: req.params.id, owner: user.uid};
     }
-    let reservation = await mongo_reservations.findOne(filter);
+    let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({'msg': 'Not allowed to delete this reservation'});
         res.end();
@@ -479,7 +445,7 @@ router.delete('/tp/:id', async function(req, res) {
         res.end();
         return;
     }
-    await mongo_reservations.updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
+    await utils.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
     res.send({'msg': 'Reservation cancelled'});
     res.end();
     return;
