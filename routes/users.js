@@ -1570,7 +1570,8 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         var expiration = new Date().getTime() + 1000*3600*24*user.duration;
         await utils.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
-        if(req.accepts('json')) {
+        let accept = req.accepts(['json', 'html']);
+        if(accept == 'json') {
             res.send({msg: 'validity period extended'});
             res.end();
             return;
