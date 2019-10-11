@@ -23,10 +23,8 @@ export class TagComponent implements OnInit {
 
     @Input()
     set tag(taglist: string[]) {
-      console.log('receive taglist', taglist)
       if(taglist){
         this.tags = taglist;
-        console.log('update list', this.tags)
       } else {
         this.tags = [];
       }

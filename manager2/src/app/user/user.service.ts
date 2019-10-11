@@ -288,8 +288,14 @@ export class UserService {
     }
 
     extend(userId, regKey) {
+        console.log(environment.apiUrl + '/user/' + userId + '/renew/' + regKey)
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Accept': 'application/json'
+            })
+        }
         return this.http.get(
-            environment.apiUrl + '/user/' + userId + '/renew/' + regKey,
+            environment.apiUrl + '/user/' + userId + '/renew/' + regKey, httpOptions
         )
 
     }

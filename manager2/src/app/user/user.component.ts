@@ -463,7 +463,7 @@ export class UserComponent implements OnInit {
                 this.msg = resp['message'];
                 this.user.expiration = resp['expiration']
             },
-            err => console.log('failed to extend user')
+            err => console.log('failed to extend user', err)
         )
     }
 
