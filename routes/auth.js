@@ -1,3 +1,4 @@
+/* eslint-disable require-atomic-updates */
 /*jslint es6 */
 var express = require('express');
 var router = express.Router();
@@ -5,8 +6,8 @@ var router = express.Router();
 // var session = require('express-session');
 var goldap = require('../routes/goldap.js');
 // var Promise = require('promise');
-// const winston = require('winston');
-// const logger = winston.loggers.get('gomngr');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
 
 const u2f = require('u2f');
 var jwt = require('jsonwebtoken');
@@ -89,14 +90,16 @@ router.get('/mail/auth/:id', async function(req, res) {
         {expiresIn: '2 days'}
     );
 
-    // eslint-disable-next-line no-unused-vars
-    notif.sendUser(mailOptions, function(err, response) {
-        if(err){return res.send({'status': false});}
-        return res.send({'status': true, token: usertoken});
-    });
-
-
+    try {
+        await notif.sendUser(mailOptions);
+    } catch(err) {
+        logger.error('failed to send notif', err);
+        return res.send({'status': false});
+    }
+    res.send({'status': true, token: usertoken});
 });
+
+
 router.post('/mail/auth/:id', async function(req, res) {
     // Check email token
     if(!req.locals.logInfo.is_logged){
@@ -253,7 +256,7 @@ router.get('/auth', async function(req, res) {
 });
 
 router.post('/auth/:id', async function(req, res) {
-    var apikey = req.headers['x-my-apikey'] || '';
+    let apikey = req.headers['x-my-apikey'] || '';
     if(apikey === ''){
         if(req.body.password === undefined || req.body.password === null || req.body.password == '') {
             res.status(401).send('Missing password');
@@ -265,12 +268,12 @@ router.post('/auth/:id', async function(req, res) {
         res.status(404).send('User not found');
         return;
     }
-    var usertoken = jwt.sign(
+    let usertoken = jwt.sign(
         { user: user._id, isLogged: true, u2f: user._id },
         CONFIG.general.secret,
         {expiresIn: '2 days'}
     );
-    var sess = req.session;
+    let sess = req.session;
     if (apikey !== '' && apikey === user.apikey) {
         user.is_admin = false;
         if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
@@ -294,9 +297,8 @@ router.post('/auth/:id', async function(req, res) {
         }
     }
     // Check bind with ldap
-
     sess.is_logged = true;
-    var need_double_auth = false;
+    let need_double_auth = false;
 
     if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
         user.is_admin = true;
@@ -320,7 +322,7 @@ router.post('/auth/:id', async function(req, res) {
         );
     }
 
-    var ip = req.headers['x-forwarded-for'] ||
+    let ip = req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
         req.connection.socket.remoteAddress;

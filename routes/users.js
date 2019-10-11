@@ -1,3 +1,4 @@
+/* eslint-disable require-atomic-updates */
 /*jslint es6 */
 var express = require('express');
 var router = express.Router();
@@ -64,16 +65,14 @@ var mongo_connect = async function() {
     mongo_web = mongodb.collection('web');
 };
 
-router.init = function() {
-    return new Promise(async (resolve, reject) => {
-        try {
-            await mongo_connect();
-            resolve();
-        } catch(err){
-            logger.debug('Failed to init db', err);
-            reject(err);
-        }
-    });
+router.init = async function() {
+    try {
+        await mongo_connect();
+        return null;
+    } catch(err){
+        logger.debug('Failed to init db', err);
+        return err;
+    }
 };
 
 /*
@@ -157,126 +156,118 @@ router.user_home = function (user) {
     return get_user_home(user);
 };
 
-var send_notif = function(mailOptions, fid, errors) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        if(notif.mailSet()) {
-            // eslint-disable-next-line no-unused-vars
-            notif.sendUser(mailOptions, function(err, response) {
-                resolve(errors);
-            });
-        } else {
-            resolve(errors);
-        }
-    });
-};
-
-var create_extra_group = function(group_name, owner_name){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        let mingid = await utils.getGroupAvailableId();
-        let fid = new Date().getTime();
-        let group = {name: group_name, gid: mingid, owner: owner_name};
+var send_notif = async function(mailOptions, fid, errors) {
+    if(notif.mailSet()) {
         try {
-            await mongo_groups.insertOne(group);
-            await goldap.add_group(group, fid);
-        }
-        catch(e) {
-            logger.error(e);
-        }
-        try {
-            let created_file = await filer.user_create_extra_group(group, fid);
-            logger.info('File Created: ', created_file);
-        } catch(error){
-            logger.error('Create Group Failed for: ' + group.name, error);
-            reject(error);
-            return;
-        }
-        resolve(group);
-    });
-};
-
-var create_extra_user = function(user_name, group, internal_user){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        let password = Math.random().toString(36).slice(-10);
-        if(process.env.MY_ADMIN_PASSWORD){
-            password = process.env.MY_ADMIN_PASSWORD;
-        }
-        else {
-            logger.info('Generated admin password:' + password);
-        }
-
-        let user = {
-            status: STATUS_ACTIVE,
-            uid: user_name,
-            firstname: user_name,
-            lastname: user_name,
-            email: process.env.MY_ADMIN_EMAIL || CONFIG.general.support,
-            address: '',
-            lab: '',
-            responsible: '',
-            group: group.name,
-            secondarygroups: [],
-            maingroup: '',
-            home: '',
-            why: '',
-            ip: '',
-            regkey: Math.random().toString(36).slice(-10),
-            is_internal: internal_user,
-            is_fake: false,
-            uidnumber: -1,
-            gidnumber: -1,
-            cloud: false,
-            duration: 3,
-            expiration: new Date().getTime() + 1000*3600*24*3,
-            loginShell: '/bin/bash',
-            history: [],
-            password: password
-        };
-        let minuid = await utils.getUserAvailableId();
-        user.uidnumber = minuid;
-        user.gidnumber = group.gid;
-        user.home = get_user_home(user);
-        var fid = new Date().getTime();
-        try {
-            await goldap.add(user, fid);
+            await notif.sendUser(mailOptions);
         } catch(err) {
-            logger.error('Failed to create extra user', user, err);
-            reject(err);
+            logger.error('send_notif error', err);
         }
-        logger.debug('user added to ldap');
+        return errors;
+    } else {
+        return errors;
+    }
+};
 
-        delete user.password;
+var create_extra_group = async function(group_name, owner_name){
+    let mingid = await utils.getGroupAvailableId();
+    let fid = new Date().getTime();
+    let group = {name: group_name, gid: mingid, owner: owner_name};
+    try {
+        await mongo_groups.insertOne(group);
+        await goldap.add_group(group, fid);
+    }
+    catch(e) {
+        logger.error(e);
+    }
+    try {
+        let created_file = await filer.user_create_extra_group(group, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Create Group Failed for: ' + group.name, error);
+        throw 'group creation failed';
+    }
+    return group;
+
+};
+
+var create_extra_user = async function(user_name, group, internal_user){
+    let password = Math.random().toString(36).slice(-10);
+    if(process.env.MY_ADMIN_PASSWORD){
+        password = process.env.MY_ADMIN_PASSWORD;
+    }
+    else {
+        logger.info('Generated admin password:' + password);
+    }
+
+    let user = {
+        status: STATUS_ACTIVE,
+        uid: user_name,
+        firstname: user_name,
+        lastname: user_name,
+        email: process.env.MY_ADMIN_EMAIL || CONFIG.general.support,
+        address: '',
+        lab: '',
+        responsible: '',
+        group: group.name,
+        secondarygroups: [],
+        maingroup: '',
+        home: '',
+        why: '',
+        ip: '',
+        regkey: Math.random().toString(36).slice(-10),
+        is_internal: internal_user,
+        is_fake: false,
+        uidnumber: -1,
+        gidnumber: -1,
+        cloud: false,
+        duration: 3,
+        expiration: new Date().getTime() + 1000*3600*24*3,
+        loginShell: '/bin/bash',
+        history: [],
+        password: password
+    };
+    let minuid = await utils.getUserAvailableId();
+    user.uidnumber = minuid;
+    user.gidnumber = group.gid;
+    user.home = get_user_home(user);
+    var fid = new Date().getTime();
+    try {
+        await goldap.add(user, fid);
+    } catch(err) {
+        logger.error('Failed to create extra user', user, err);
+        throw err;
+    }
+    logger.debug('user added to ldap');
+
+    delete user.password;
+    // eslint-disable-next-line no-unused-vars
+    await mongo_users.insertOne(user);
+    try {
+        let created_file = await filer.user_create_extra_user(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Create User Failed for: ' + user.uid, error);
+        throw error;
+    }
+
+    let plugin_call = function(plugin_info, userId, data, adminId){
         // eslint-disable-next-line no-unused-vars
-        await mongo_users.insertOne(user);
-        try {
-            let created_file = await filer.user_create_extra_user(user, fid);
-            logger.info('File Created: ', created_file);
-        } catch(error){
-            logger.error('Create User Failed for: ' + user.uid, error);
-            reject(error);
-        }
-
-        let plugin_call = function(plugin_info, userId, data, adminId){
-            // eslint-disable-next-line no-unused-vars
-            return new Promise(function (resolve, reject){
-                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
+        return new Promise(function (resolve, reject){
+            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                resolve(true);
             });
-        };
-
-        Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, 'auto');
-        // eslint-disable-next-line no-unused-vars
-        })).then(function(results){
-            resolve(user);
-        }, function(err){
-            logger.error('failed to create extra user', user, err);
-            resolve(user);
         });
-    });
+    };
+
+    try {
+        await Promise.all(plugins_info.map(function(plugin_info){
+            return plugin_call(plugin_info, user.uid, user, 'auto');
+        }));
+    } catch(err) {
+        logger.error('failed to create extra user', user, err);
+    } 
+    return user;
 };
 
 router.create_admin = async function(default_admin, default_admin_group){
@@ -493,28 +484,21 @@ router.get('/group/:id', async function(req, res){
     res.end();
 });
 
-router.delete_group = function(group, admin_user_id){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        // eslint-disable-next-line no-unused-vars
-        await mongo_groups.remove({'name': group.name});
-        let fid = new Date().getTime();
-        await goldap.delete_group(group, fid);
-        try {
-            let created_file = await filer.user_delete_group(group, fid);
-            logger.info('File Created: ', created_file);
-        } catch(error){
-            logger.error('Delete Group Failed for: ' + group.name, error);
-            return;            
-        }
+router.delete_group = async function(group, admin_user_id){
+    await mongo_groups.remove({'name': group.name});
+    let fid = new Date().getTime();
+    await goldap.delete_group(group, fid);
+    try {
+        let created_file = await filer.user_delete_group(group, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Delete Group Failed for: ' + group.name, error);
+        return false;            
+    }
 
-        // group.fid = fid;
-        await mongo_events.insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
-        utils.freeGroupId(group.gid).then(function(){
-            resolve(true);
-        });
-
-    });
+    await mongo_events.insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
+    await utils.freeGroupId(group.gid);
+    return true;
 };
 
 router.clear_user_groups = async function(user, admin_user_id){
@@ -901,91 +885,78 @@ router.delete('/user/:id/group/:group', async function(req, res){
     });
 });
 
-router.delete_user = function(user, action_owner_id){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
+router.delete_user = async function(user, action_owner_id){
+    if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
+        await mongo_users.remove({_id: user._id});
+        await mongo_events.insertOne({
+            'owner': action_owner_id,
+            'date': new Date().getTime(),
+            'action': 'delete user ' + user.uid ,
+            'logs': []
+        });
+        await utils.freeUserId(user.uidnumber);
+        router.clear_user_groups(user, action_owner_id);
+        return true;
+    }
+    else {
+        let fid = new Date().getTime();
+        // Remove user from groups
+        let allgroups = user.secondarygroups;
+        allgroups.push(user.group);
+        await goldap.change_user_groups(user, [], allgroups, fid);
+        try {
             await mongo_users.remove({_id: user._id});
-            await mongo_events.insertOne({
-                'owner': action_owner_id,
-                'date': new Date().getTime(),
-                'action': 'delete user ' + user.uid ,
-                'logs': []
-            });
-            utils.freeUserId(user.uidnumber).then(function(){
-                router.clear_user_groups(user, action_owner_id);
-                resolve(true);
-            });
+        } catch(err) {
+            return false;
         }
-        else {
-            var fid = new Date().getTime();
-            // Remove user from groups
-            var allgroups = user.secondarygroups;
-            allgroups.push(user.group);
-            await goldap.change_user_groups(user, [], allgroups, fid);
-            try {
-                await mongo_users.remove({_id: user._id});
-            } catch(err) {
-                resolve(false);
-                return;
-            }
 
-            try {
-                let created_file = await filer.user_delete_user(user, fid);
-                logger.info('File Created: ', created_file);
-            } catch(error){
-                logger.error('Delete User Failed for: ' + user.uid, error);
-                return;      
-            }
-
-            router.clear_user_groups(user, action_owner_id);
-            let msg_activ ='User ' + user.uid + ' has been deleted by ' + action_owner_id;
-            let msg_activ_html = msg_activ;
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations:  [GENERAL_CONFIG.accounts], // list of receivers
-                subject: GENERAL_CONFIG.name + ' account deletion: ' +user.uid, // Subject line
-                message: msg_activ, // plaintext body
-                html_message: msg_activ_html // html body
-            };
-            await mongo_events.insertOne({
-                'owner': action_owner_id,
-                'date': new Date().getTime(),
-                'action': 'delete user ' + user.uid ,
-                'logs': [user.uid + '.' + fid + '.update']
-            });
-               
-            // Call remove method of plugins if defined
-            let plugin_call = function(plugin_info, userId, user, adminId){
-                // eslint-disable-next-line no-unused-vars
-                return new Promise(function (resolve, reject){
-                    if(plugins_modules[plugin_info.name].remove === undefined) {
-                        resolve(true);
-                    }
-                    plugins_modules[plugin_info.name].remove(userId, user, adminId).then(function(){
-                        resolve(true);
-                    });
-                });
-            };
-            Promise.all(plugins_info.map(function(plugin_info){
-                return plugin_call(plugin_info, user.uid, user, action_owner_id);
-            }))             
-                .then(function(){
-                    return utils.freeUserId(user.uidnumber);
-                })
-                .then(function(){
-                    if(notif.mailSet()) {
-                        // eslint-disable-next-line no-unused-vars
-                        notif.sendUser(mailOptions, function(error, response){
-                            resolve(true);
-                        });
-                    }
-                    else {
-                        resolve(true);
-                    }
-                });
+        try {
+            let created_file = await filer.user_delete_user(user, fid);
+            logger.info('File Created: ', created_file);
+        } catch(error){
+            logger.error('Delete User Failed for: ' + user.uid, error);
+            return false;      
         }
-    });
+
+        router.clear_user_groups(user, action_owner_id);
+        let msg_activ ='User ' + user.uid + ' has been deleted by ' + action_owner_id;
+        let msg_activ_html = msg_activ;
+        let mailOptions = {
+            origin: MAIL_CONFIG.origin, // sender address
+            destinations:  [GENERAL_CONFIG.accounts], // list of receivers
+            subject: GENERAL_CONFIG.name + ' account deletion: ' +user.uid, // Subject line
+            message: msg_activ, // plaintext body
+            html_message: msg_activ_html // html body
+        };
+        await mongo_events.insertOne({
+            'owner': action_owner_id,
+            'date': new Date().getTime(),
+            'action': 'delete user ' + user.uid ,
+            'logs': [user.uid + '.' + fid + '.update']
+        });
+            
+        // Call remove method of plugins if defined
+        let plugin_call = function(plugin_info, userId, user, adminId){
+            // eslint-disable-next-line no-unused-vars
+            return new Promise(function (resolve, reject){
+                if(plugins_modules[plugin_info.name].remove === undefined) {
+                    resolve(true);
+                }
+                plugins_modules[plugin_info.name].remove(userId, user, adminId).then(function(){
+                    resolve(true);
+                });
+            });
+        };
+        await Promise.all(plugins_info.map(function(plugin_info){
+            return plugin_call(plugin_info, user.uid, user, action_owner_id);
+        }));
+        await utils.freeUserId(user.uidnumber);
+        if(notif.mailSet()) {
+            // eslint-disable-next-line no-unused-vars
+            await notif.sendUser(mailOptions);
+        }
+        return true;
+    }
 };
 
 router.delete('/user/:id', async function(req, res){
@@ -1077,7 +1048,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     let data = await mongo_groups.findOne({'name': user.group});
     if(!data) {
-        res.status(403).send('Group '+user.group+' does not exist, please create it first');
+        res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
         res.end();
         return;
     }
@@ -1218,20 +1189,14 @@ router.get('/user/:id/confirm', async function(req, res) {
             };
             await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
             if(notif.mailSet()) {
-                // eslint-disable-next-line no-unused-vars
-                notif.sendUser(mailOptions, function(error, response){
-                    if(error){
-                        logger.error(error);
-                    }
-                    res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
-                    res.end();
-                    return;
-                });
+                try {
+                    await notif.sendUser(mailOptions);
+                } catch(err) {
+                    logger.error('notif failed', err);
+                }
             }
-            else {
-                res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
-                res.end();
-            }
+            res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
+            res.end();
         }
         else {
             res.status(401).send('Invalid registration key');
@@ -1356,21 +1321,15 @@ router.post('/user/:id', async function(req, res) {
         html_message: msg_activ_html
     };
     if(notif.mailSet()) {
-        // eslint-disable-next-line no-unused-vars
-        notif.sendUser(mailOptions, function(error, response){
-            if(error){
-                logger.error(error);
-            }
-            res.send({'status': 0, 'msg': 'A confirmation email has been sent, please check your mailbox to validate your account creation. Once validated, the platform team will analyse your request and validate it.'});
-            res.end();
-            return;
-        });
+        try {
+            await notif.sendUser(mailOptions);
+        } catch(error) {
+            logger.error(error);
+        }
     }
-    else {
-        res.send({'status': 0, 'msg': 'Could not send an email, please contact the support.'});
-        res.end();
-        return;
-    }
+    res.send({'status': 0, 'msg': 'Could not send an email, please contact the support.'});
+    res.end();
+    return;
  
 });
 
@@ -1395,9 +1354,11 @@ router.get('/user/:id/expire', async function(req, res){
     }
 
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
+        // eslint-disable-next-line require-atomic-updates
         session_user.is_admin = true;
     }
     else {
+        // eslint-disable-next-line require-atomic-updates
         session_user.is_admin = false;
     }
     if(session_user.is_admin){
@@ -1560,13 +1521,12 @@ router.get('/user/:id/passwordreset', async function(req, res){
     await mongo_events.insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
 
     if(notif.mailSet()) {
-        // eslint-disable-next-line no-unused-vars
-        notif.sendUser(mailOptions, function(error, response){
-            if(error){
-                logger.error(error);
-            }
-            res.send({message: 'Password reset requested, check your inbox for instructions to reset your password.'});
-        });
+        try {
+            await notif.sendUser(mailOptions);
+        } catch(error) {
+            logger.error(error);
+        }
+        res.send({message: 'Password reset requested, check your inbox for instructions to reset your password.'});
     }
     else {
         res.send({message: 'Could not send an email, please contact the support'});
@@ -1621,14 +1581,13 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         await mongo_events.insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
 
         if(notif.mailSet()) {
-            // eslint-disable-next-line no-unused-vars
-            notif.sendUser(mailOptions, function(error, response){
-                if(error){
-                    logger.error(error);
-                }
-                res.redirect(GENERAL_CONFIG.url+'/manager2/passwordresetconfirm');
-                res.end();
-            });
+            try {
+                await notif.sendUser(mailOptions);
+            } catch(error) {
+                logger.error(error);
+            }
+            res.redirect(GENERAL_CONFIG.url+'/manager2/passwordresetconfirm');
+            res.end();
         }
         else {
             res.send({message: 'Could not send an email, please contact the support'});
@@ -1664,6 +1623,11 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         var expiration = new Date().getTime() + 1000*3600*24*user.duration;
         await mongo_users.updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
         await mongo_events.insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
+        if(req.accepts('json')) {
+            res.send({msg: 'validity period extended'});
+            res.end();
+            return;
+        }
         res.redirect(GENERAL_CONFIG.url+'/manager2/user/' + user.uid + '/renew/' + regkey);
         res.end();
         return;
@@ -1674,6 +1638,7 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     }
 });
 
+// reactivate user
 router.get('/user/:id/renew', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
@@ -1903,6 +1868,7 @@ router.put('/user/:id', async function(req, res) {
 
     user.history.push({'action': 'update info', date: new Date().getTime()});
     let group = await mongo_groups.findOne({'name': req.body.group});
+ 
 
     if(!group) {
         res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
@@ -1914,6 +1880,7 @@ router.put('/user/:id', async function(req, res) {
             res.status(403).send('Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!');
             return;
         }
+
         user.oldgroup = user.group;
         user.oldgidnumber = user.gidnumber;
         user.oldmaingroup = user.maingroup;
@@ -1985,7 +1952,6 @@ router.put('/user/:id', async function(req, res) {
         }
     }
     else {
-        // eslint-disable-next-line no-unused-vars
         await mongo_users.updateOne({_id: user._id}, user);
         await mongo_events.insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
         let users_in_group = await mongo_users.find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();

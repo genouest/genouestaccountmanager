@@ -143,7 +143,7 @@ module.exports = {
                 callback();
                 return;
             }
-            await mongo_events.insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
+            await mongo_events.insertOne({'date': new Date().getTime(), 'action': 'add ' + email + ' to mailing list' , 'logs': []});
             callback();
         });
     },
@@ -256,26 +256,28 @@ module.exports = {
         });
     },
 
-    sendUser: function(mailOptions, callback) {
-        const options = {
-            uri: '/mail',
-            body: mailOptions
-        };
+    sendUser: function(mailOptions) {
+        return new Promise((resolve, reject) => {
+            const options = {
+                uri: '/mail',
+                body: mailOptions
+            };
+            logger.debug('send message', mailOptions);
 
-        // eslint-disable-next-line no-unused-vars
-        baseRequest.post(options, function(err, res, body) {
-            if(err){
-                logger.error('Failed to send mail : ' + err);
-                callback('Failed to send mail : ' + err, false);
-                return;
-            }
-            if(res.statusCode !== 200){
-                logger.error('Failed to send mail : error code ' + res.statusCode);
-                callback('Failed to send mail : error code ' + res.statusCode, false);
-                return;
-            }
-
-            callback('', false);
+            // eslint-disable-next-line no-unused-vars
+            baseRequest.post(options, function(err, res, body) {
+                if(err){
+                    logger.error('Failed to send mail : ' + err);
+                    reject('Failed to send mail : ' + err);
+                    return;
+                }
+                if(res.statusCode !== 200){
+                    logger.error('Failed to send mail : error code ' + res.statusCode);
+                    reject('Failed to send mail : error code ' + res.statusCode);
+                    return;
+                }
+                resolve();
+            });
         });
 
     },

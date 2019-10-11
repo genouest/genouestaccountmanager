@@ -84,55 +84,45 @@ var STATUS_ACTIVE = 'Active';
 // eslint-disable-next-line no-unused-vars
 var STATUS_EXPIRED = 'Expired';
 
-var createExtraGroup = function (ownerName) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject) {
-        // var mingid = 1000
-        let mingid = await utils.getGroupAvailableId();
-        let fid = new Date().getTime();
-        let group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
-        await mongo_groups.insertOne(group);
+var createExtraGroup = async function (ownerName) {
+    let mingid = await utils.getGroupAvailableId();
+    let fid = new Date().getTime();
+    let group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
+    await mongo_groups.insertOne(group);
 
-        await goldap.add_group(group, fid);
-        try {
-            let created_file = await filer.user_add_group(group, fid);
-            logger.debug('Created file', created_file);
-        } catch(error) {
-            logger.error('Add Group Failed for: ' + group.name, error);
-        }
-        group.fid = fid;
-        resolve(group);
-    });
+    await goldap.add_group(group, fid);
+    try {
+        let created_file = await filer.user_add_group(group, fid);
+        logger.debug('Created file', created_file);
+    } catch(error) {
+        logger.error('Add Group Failed for: ' + group.name, error);
+    }
+    group.fid = fid;
+    return group;
 };
 
 
-var deleteExtraGroup = function (group) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject) {
-        if (group === undefined || group === null) {
-            resolve();
-            return;
-        }
-        let group_to_remove = await mongo_groups.findOne({'name': group.name});
-        if(!group_to_remove) {
-            resolve();
-            return;
-        }
-        await mongo_groups.removeOne({ 'name': group.name });
-        let fid = new Date().getTime();
-        await goldap.delete_group(group, fid);
-        try {
-            let created_file = await  filer.user_delete_group(group, fid);
-            logger.debug('Created file', created_file);
-        } catch(error) {
-            logger.error('Delete Group Failed for: ' + group.name, error);
-        }
+var deleteExtraGroup = async function (group) {
+    if (group === undefined || group === null) {
+        return false;
+    }
+    let group_to_remove = await mongo_groups.findOne({'name': group.name});
+    if(!group_to_remove) {
+        return false;
+    }
+    await mongo_groups.removeOne({ 'name': group.name });
+    let fid = new Date().getTime();
+    await goldap.delete_group(group, fid);
+    try {
+        let created_file = await  filer.user_delete_group(group, fid);
+        logger.debug('Created file', created_file);
+    } catch(error) {
+        logger.error('Delete Group Failed for: ' + group.name, error);
+    }
 
-        group.fid = fid;
-        await utils.freeGroupId(group.gid);
-        await mongo_events.insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
-        resolve();
-    });
+    await utils.freeGroupId(group.gid);
+    await mongo_events.insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
+    return true;
 };
 
 var create_tp_users_db = function (owner, quantity, duration, end_date, userGroup) {
@@ -186,73 +176,67 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
     });
 };
 
-var create_tp_user_db = function (user) {
-    return new Promise(async function (resolve, reject){
-        logger.debug('create_tp_user_db', user.uid);
-        try {
-            let uid = await utils.getUserAvailableId();
-            user.uid = CONFIG.tp.prefix + uid;
-            user.lastname = uid;
-            user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
-            user.uidnumber = uid;
-            user.home = fusers.user_home(user);
-            await mongo_users.insertOne(user);
-            user.password = Math.random().toString(36).slice(-10);
-            resolve(user);
-        }
-        catch(exception){
-            logger.error(exception);
-            reject(exception);
-        }
-    });
+var create_tp_user_db = async function (tp_user) {
+    let user = {...tp_user};
+    logger.debug('create_tp_user_db', user.uid);
+    try {
+        let uid = await utils.getUserAvailableId();
+        user.uid = CONFIG.tp.prefix + uid;
+        user.lastname = uid;
+        user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
+        user.uidnumber = uid;
+        user.home = fusers.user_home(user);
+        await mongo_users.insertOne(user);
+        user.password = Math.random().toString(36).slice(-10);
+        return user;
+    }
+    catch(exception){
+        logger.error(exception);
+        throw exception;
+    }
 };
 
-var send_user_passwords = function(owner, from_date, to_date, users){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        logger.debug('send_user_passwords');
-        let from = new Date(from_date);
-        let to = new Date(to_date);
-        let msg = 'TP account credentials from ' + from.toDateString() + ' to ' + to.toDateString() + '\n\n';
-        let msg_html = '<h2>Date</h2>';
-        msg_html += '<table border="0" cellpadding="0" cellspacing="15" align="left"><thead><tr><th align="left" valign="top">Start date</th><th align="left" valign="top">End date</th></tr></thead>';
-        msg_html += '<tbody><tr><td align="left" valign="top">" + from.toDateString()+ "</td><td align="left" valign="top">" + to.toDateString()+ "</td></tr></tbody></table>';
-        msg_html += '<p>Accounts will remain available for <b>" + CONFIG.tp.extra_expiration + " extra days </b>for data access</p>';
-        msg_html += '<hr>';
-        msg_html += '<h2>Credentials</h2>';
-        msg_html += '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
+var send_user_passwords = async function(owner, from_date, to_date, users){
+    logger.debug('send_user_passwords');
+    let from = new Date(from_date);
+    let to = new Date(to_date);
+    let msg = 'TP account credentials from ' + from.toDateString() + ' to ' + to.toDateString() + '\n\n';
+    let msg_html = '<h2>Date</h2>';
+    msg_html += '<table border="0" cellpadding="0" cellspacing="15" align="left"><thead><tr><th align="left" valign="top">Start date</th><th align="left" valign="top">End date</th></tr></thead>';
+    msg_html += '<tbody><tr><td align="left" valign="top">" + from.toDateString()+ "</td><td align="left" valign="top">" + to.toDateString()+ "</td></tr></tbody></table>';
+    msg_html += '<p>Accounts will remain available for <b>" + CONFIG.tp.extra_expiration + " extra days </b>for data access</p>';
+    msg_html += '<hr>';
+    msg_html += '<h2>Credentials</h2>';
+    msg_html += '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
 
-        for(let i=0;i<users.length;i++){
-            msg += users[i].uid + ' / ' + users[i].password + ', fake email: ' + users[i].email + '\n';
-            msg_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>';
-        }
-        msg_html += '</tbody></table>';
-        msg += 'New TP group: ' + users[0].group + '\n';
-        msg_html += '<hr><p>Users are in the group <strong>' + users[0].group + '</strong></p>';
-        msg += 'Users can create an SSH key at ' + CONFIG.general.url + ' in SSH Keys section\n';
-        msg_html += '<hr>';
-        msg_html += '<h2>Access</h2>';
-        msg_html += '<p>Users can create an SSH key at ' + CONFIG.general.url + ' in SSH Keys section</p>';
-        msg += 'Accounts will remain available for ' + CONFIG.tp.extra_expiration + ' extra days for data access.\n\n';
-        msg += 'In case of issue, you can contact us at ' + CONFIG.general.support + '\n\n';
-        msg_html += '<hr>';
-        msg_html += '<p>In case of issue, you can contact us at ' + CONFIG.general.support + '</p>';
+    for(let i=0;i<users.length;i++){
+        msg += users[i].uid + ' / ' + users[i].password + ', fake email: ' + users[i].email + '\n';
+        msg_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>';
+    }
+    msg_html += '</tbody></table>';
+    msg += 'New TP group: ' + users[0].group + '\n';
+    msg_html += '<hr><p>Users are in the group <strong>' + users[0].group + '</strong></p>';
+    msg += 'Users can create an SSH key at ' + CONFIG.general.url + ' in SSH Keys section\n';
+    msg_html += '<hr>';
+    msg_html += '<h2>Access</h2>';
+    msg_html += '<p>Users can create an SSH key at ' + CONFIG.general.url + ' in SSH Keys section</p>';
+    msg += 'Accounts will remain available for ' + CONFIG.tp.extra_expiration + ' extra days for data access.\n\n';
+    msg += 'In case of issue, you can contact us at ' + CONFIG.general.support + '\n\n';
+    msg_html += '<hr>';
+    msg_html += '<p>In case of issue, you can contact us at ' + CONFIG.general.support + '</p>';
 
-        let user_owner = await mongo_users.findOne({'uid': owner});
-        if( notif.mailSet()){
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
-                subject: '[TP accounts reservation] ' + owner,
-                message: msg,
-                html_message: msg_html
-            };
-            // eslint-disable-next-line no-unused-vars
-            notif.sendUser(mailOptions, function(err, response) {
-                resolve(users);
-            });
-        }
-    });
+    let user_owner = await mongo_users.findOne({'uid': owner});
+    if( notif.mailSet()){
+        let mailOptions = {
+            origin: MAIL_CONFIG.origin, // sender address
+            destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
+            subject: '[TP accounts reservation] ' + owner,
+            message: msg,
+            html_message: msg_html
+        };
+        await notif.sendUser(mailOptions);
+    }
+    return users;
 };
 
 var activate_tp_users = function(owner, users){
@@ -307,108 +291,95 @@ router.delete_tp_users = function(users, group, admin_id){
 
 };
 
-router.exec_tp_reservation = function(reservation_id){
+router.exec_tp_reservation = async function(reservation_id){
     // Create users for reservation
-    return new Promise(async function (resolve, reject){
-        let reservation = await mongo_reservations.findOne({'_id': reservation_id});
-        logger.debug('create a reservation group', reservation._id);
-        createExtraGroup(reservation.owner).then(function(newGroup){
-            logger.debug('create reservation accounts', reservation._id);
-            create_tp_users_db(reservation.owner, reservation.quantity,Math.ceil((reservation.to-reservation.from)/(1000*3600*24)), reservation.to, newGroup).then(function(activated_users){
-                for(let i=0;i<activated_users.length;i++){
-                    logger.debug('activated user ', activated_users[i].uid);
-                    reservation.accounts.push(activated_users[i].uid);
-                }
-                try{
-                    send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users).then(async function(){
-                        // eslint-disable-next-line no-unused-vars
-                        await mongo_reservations.updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
-                        logger.debug('reservation ', reservation);
-                        resolve(reservation);
-                    });
-                }
-                catch(exception){
-                    logger.error(exception);
-                    reject(exception);
-                }
-            });
-        });
-    });
-};
-
-var tp_reservation = function(userId, from_date, to_date, quantity, about){
-    // Create a reservation
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-
-        let reservation = {
-            'owner': userId,
-            'from': from_date,
-            'to': to_date,
-            'quantity': quantity,
-            'accounts': [],
-            'about': about,
-            'created': false,
-            'over': false
-        };
-
-        await mongo_reservations.insertOne(reservation);
+    let reservation = await mongo_reservations.findOne({'_id': reservation_id});
+    logger.debug('create a reservation group', reservation._id);
+    let newGroup = await createExtraGroup(reservation.owner);
+    logger.debug('create reservation accounts', reservation._id);
+    let activated_users = await create_tp_users_db(
+        reservation.owner,
+        reservation.quantity,
+        Math.ceil((reservation.to-reservation.from)/(1000*3600*24)),
+        reservation.to, newGroup
+    );
+    for(let i=0;i<activated_users.length;i++){
+        logger.debug('activated user ', activated_users[i].uid);
+        reservation.accounts.push(activated_users[i].uid);
+    }
+    try{
+        await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users);
+        await mongo_reservations.updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
         logger.debug('reservation ', reservation);
-        resolve(reservation);
-    });
+        return reservation;
+    }
+    catch(exception){
+        logger.error(exception);
+        throw exception;
+    }
 };
 
-var insert_ldap_user = function(user, fid){
-    return new Promise(async function (resolve, reject){
-        logger.debug('prepare ldap scripts');
-        try {
-            await goldap.add(user, fid);
-            logger.debug('switch to ACTIVE');
-            await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
-            resolve(user);
-        } catch(err) {
-            logger.error(err);
-            reject(user);
-            return; 
-        }
-    });
+var tp_reservation = async function(userId, from_date, to_date, quantity, about){
+    // Create a reservation
+    let reservation = {
+        'owner': userId,
+        'from': from_date,
+        'to': to_date,
+        'quantity': quantity,
+        'accounts': [],
+        'about': about,
+        'created': false,
+        'over': false
+    };
+
+    await mongo_reservations.insertOne(reservation);
+    logger.debug('reservation ', reservation);
+    return reservation;
 };
 
-var activate_tp_user = function(user, adminId){
-    return new Promise(async function (resolve, reject){
-        let db_user = await mongo_users.findOne({'uid': user.uid});
-        if(!db_user) {
-            logger.error('failure:',user.uid);
-            reject(user);
-            return;
-        }
-        logger.debug('activate', user.uid);
-        let fid = new Date().getTime();
-        let ldap_user = await insert_ldap_user(user, fid);
-        try {
-            let created_file = await  filer.user_add_user(ldap_user, fid);
-            logger.debug('Created file', created_file);
-        } catch(error) {
-            logger.error('Add User Failed for: ' + user.uid, error);
+var insert_ldap_user = async function(user, fid){
+    logger.debug('prepare ldap scripts');
+    try {
+        await goldap.add(user, fid);
+        logger.debug('switch to ACTIVE');
+        await mongo_users.updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
+        return user;
+    } catch(err) {
+        logger.error(err);
+        throw user;
+    }
+};
 
-        }
+var activate_tp_user = async function(user, adminId){
+    let db_user = await mongo_users.findOne({'uid': user.uid});
+    if(!db_user) {
+        logger.error('failure:',user.uid);
+        throw `user activation failed ${user.uid}`;
+    }
+    logger.debug('activate', user.uid);
+    let fid = new Date().getTime();
+    let ldap_user = await insert_ldap_user(user, fid);
+    try {
+        let created_file = await filer.user_add_user(ldap_user, fid);
+        logger.debug('Created file', created_file);
+    } catch(error) {
+        logger.error('Add User Failed for: ' + user.uid, error);
+    }
 
 
-        let plugin_call = function(plugin_info, userId, data, adminId){
-            // eslint-disable-next-line no-unused-vars
-            return new Promise(function (resolve, reject){
-                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
-            });
-        };
-        Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, ldap_user, adminId);
+    let plugin_call = function(plugin_info, userId, data, adminId){
         // eslint-disable-next-line no-unused-vars
-        })).then(function(results){
-            resolve(ldap_user);
+        return new Promise(function (resolve, reject){
+            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                resolve(true);
+            });
         });
-    });
+    };
+    await Promise.all(plugins_info.map(function(plugin_info){
+        return plugin_call(plugin_info, user.uid, ldap_user, adminId);
+    }));
+    return ldap_user;
+
 };
 
 router.get('/tp', async function(req, res) {

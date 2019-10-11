@@ -15,6 +15,8 @@ const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;
 var mongo_reservations = null;
 var mongo_users = null;
+var mongo_events = null;
+
 // var ObjectID = require('mongodb').ObjectID;
 
 var mongo_connect = async function() {
@@ -29,6 +31,7 @@ var mongo_connect = async function() {
     mongodb = client.db(CONFIG.general.db);
     mongo_reservations = mongodb.collection('reservations');
     mongo_users = mongodb.collection('users');
+    mongo_events = mongodb.collection('events');
 };
 
 var winston = require('winston');
@@ -68,6 +71,7 @@ mongo_connect().then(()=>{
             }).then(function(){
                 console.log('[INFO] close reservation', reservations);
                 Promise.all(reservations.map(function(reservation){
+                    mongo_events.insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
                     return mongo_reservations.updateOne({'_id': reservation._id},{'$set': {'over': true}});
                 })).then(function(){
                     process.exit(0);

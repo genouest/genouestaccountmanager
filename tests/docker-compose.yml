@@ -51,7 +51,7 @@ services:
             - GOMAIL_MAIL_PORT=1025
             - GOMAIL_MAIL_ORIGIN=support@my.org
             - GOMAIL_SECRET=test
-        command: python3 gomail/executor.py
+        command: bash -c "sleep 10 && python3 gomail/executor.py"
 
     openldap:
         image: dinkel/openldap

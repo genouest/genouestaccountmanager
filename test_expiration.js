@@ -64,7 +64,7 @@ mongo_connect().then(async ()=>{
         process.exit(1);
     }
     for(let i=0;i<users.length;i++){
-        (function(index){
+        (async function(index){
             var user = users[index];
             console.log('User will expire: '+user.uid);
             var link = CONFIG.general.url +
@@ -79,16 +79,15 @@ mongo_connect().then(async ()=>{
                 message: msg_activ, // plaintext body
                 html_message: msg_activ_html // html body
             };
-            // eslint-disable-next-line no-unused-vars
-            notif.sendUser(mailOptions, function(error, response){
-                if(error){
-                    console.log(error);
-                }
-                mail_sent++;
-                if(mail_sent == users.length) {
-                    process.exit(0);
-                }
-            });
+            try {
+                await notif.sendUser(mailOptions);
+            } catch(error) {
+                console.log(error);
+            }
+            mail_sent++;
+            if(mail_sent == users.length) {
+                process.exit(0);
+            }
         }(i));
     }
     if(mail_sent == users.length) {

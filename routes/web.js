@@ -191,27 +191,19 @@ router.delete('/web/:id', async function(req, res) {
 });
 
 
-router.delete_webs = function(user){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        let webs = await mongo_webs.find({'owner': user.uid}).toArray();
-        if(!webs){
-            resolve(true);
-            return;
-        }
-        logger.debug('delete_webs');
-        Promise.all(webs.map(function(web){
-            return delete_web(user, web._id);
-        })).then(function(res){
-            resolve(res);
-        });
-    });
-
+router.delete_webs = async function(user){
+    let webs = await mongo_webs.find({'owner': user.uid}).toArray();
+    if(!webs){
+        return true;
+    }
+    logger.debug('delete_webs');
+    let res = await Promise.all(webs.map(function(web){
+        return delete_web(user, web._id);
+    }));
+    return res;
 };
 
 var delete_web = async function(user, web_id){
-    // eslint-disable-next-line no-unused-vars
-    //return new Promise(async function (resolve, reject){
     var filter = {_id: web_id};
     if(!user.is_admin) {
         filter['owner'] = user.uid;
@@ -226,8 +218,6 @@ var delete_web = async function(user, web_id){
         }
     );
     return true;
-    //resolve(true);
-    //});
 };
 
 module.exports = router;

@@ -217,69 +217,68 @@ router.post('/database/:id', async function(req, res) {
     }
     else {
         await mongo_databases.insertOne(db);
-        if(! create_db){
+        if(!create_db){
             await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []});
             res.send({message:'Database declared'});
             return;
         }
         else {
-            var sql = 'CREATE DATABASE ' + req.params.id + ';\n';
+            let createdb = 'CREATE DATABASE ' + req.params.id + ';\n';
+            try {
+                await connection.query(createdb);
+            } catch(err) {
+                logger.error('sql error', err);
+                await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []});
+                res.send({message: 'Creation error: '+err});
+                res.end();
+                return;  
+            }
+            let password = Math.random().toString(36).slice(-10);
+            let createuser = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
             // eslint-disable-next-line no-unused-vars
-            connection.query(sql, async function(err, results) {
-                if (err) {
-                    await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []});
-                    res.send({message: 'Creation error: '+err});
-                    res.end();
-                    return;
+            try {
+                await connection.query(createuser);
+            } catch(err) {
+                logger.error('sql error', err);
+                res.send({message: 'Failed to create user'});
+                res.end();
+                return;
+            }
+            let grant = `GRANT ALL PRIVILEGES ON ${req.params.id}.* TO '${req.params.id}'@'%'\n`;
+            try {
+                await connection.query(grant);
+            } catch(err) {
+                logger.error('sql error', err);
+                res.send({message: 'Failed to grant access to user'});
+                res.end();
+                return;
+            }
+            // Now send message
+            let msg = 'Database created:\n';
+            msg += ' Host: ' + CONFIG.mysql.host + '\n';
+            msg += ' Database: ' + req.params.id + '\n';
+            msg += ' User: ' + req.params.id + '\n';
+            msg += ' Password: ' + password + '\n';
+            msg += ' Owner: ' + owner + '\n';
+            var mailOptions = {
+                origin: MAIL_CONFIG.origin, // sender address
+                destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
+                subject: 'Database creation', // Subject line
+                message: msg, // plaintext body
+                html_message: msg // html body
+            };
+            await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
+
+            if(notif.mailSet()) {
+                try {
+                    await notif.sendUser(mailOptions);
+                } catch(error) {
+                    logger.error(error);
                 }
-                let password = Math.random().toString(36).slice(-10);
-                sql = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
-                // eslint-disable-next-line no-unused-vars
-                connection.query(sql, function(err, results) {
-                    if (err) {
-                        res.send({message: 'Failed to create user'});
-                        res.end();
-                        return;
-                    }
-                    sql = `GRANT ALL PRIVILEGES ON ${req.params.id}.* TO '${req.params.id}'@'%'\n`;
-                    // eslint-disable-next-line no-unused-vars
-                    connection.query(sql, async function(err, results) {
-                        if (err) {
-                            res.send({message: 'Failed to grant access to user'});
-                            res.end();
-                            return;
-                        }
-                        // Now send message
-                        var msg = 'Database created:\n';
-                        msg += ' Host: ' + CONFIG.mysql.host + '\n';
-                        msg += ' Database: ' + req.params.id + '\n';
-                        msg += ' User: ' + req.params.id + '\n';
-                        msg += ' Password: ' + password + '\n';
-                        msg += ' Owner: ' + owner + '\n';
-                        var mailOptions = {
-                            origin: MAIL_CONFIG.origin, // sender address
-                            destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
-                            subject: 'Database creation', // Subject line
-                            message: msg, // plaintext body
-                            html_message: msg // html body
-                        };
-                        await mongo_events.insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
 
-                        if(notif.mailSet()) {
-                            // eslint-disable-next-line no-unused-vars
-                            notif.sendUser(mailOptions, function(error, response){
-                                if(error){
-                                    logger.error(error);
-                                }
-                                res.send({message:'Database created, credentials will be sent by mail'});
-                                res.end();
-                                return;
-                            });
-                        }
-                    });
-                });
-
-            }); // end connection.query
+            }
+            res.send({message:'Database created, credentials will be sent by mail'});
+            res.end();
         }  
     }
 
@@ -337,65 +336,65 @@ router.delete('/database/:id', async function(req, res) {
 });
 
 
-router.delete_dbs = function(user){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        let databases = await mongo_databases.find({'owner': user.uid}).toArray();
-        logger.debug('delete_dbs');
-        if(!databases){
-            resolve(true);
-            return;
-        }
-        Promise.all(databases.map(function(database){
-            return delete_db(user, database.name);
-        })).then(function(res){
-            resolve(res);
-        });
-    });
+router.delete_dbs = async function(user){
+    let databases = await mongo_databases.find({'owner': user.uid}).toArray();
+    logger.debug('delete_dbs');
+    if(!databases){
+        return true;
+    }
+    let res = await Promise.all(databases.map(function(database){
+        return delete_db(user, database.name);
+    }));
+    return res;
 };
 
 
-var delete_db = function(user, db_id){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(async function (resolve, reject){
-        logger.debug('delete_db', db_id);
-        let filter = {name: db_id};
-        if(!user.is_admin) {
-            filter['owner'] = user.uid;
-        }
-        let database = await mongo_databases.findOne({name: db_id});
-        if(! database || (database.type!==undefined && database.type != 'mysql')) {
-            await mongo_databases.remove(filter);
-            await mongo_events.insertOne(
-                {
-                    'owner': user.uid,
-                    'date': new Date().getTime(),
-                    'action': 'database ' + db_id+ ' deleted by ' +  user.uid, 'logs': []
-                }
-            );
-            resolve(true);
-        }
-        else {
-            await mongo_databases.remove(filter);
-            let sql = `DROP USER '${db_id}'@'%';\n`;
+var delete_db = async function(user, db_id){
+    logger.debug('delete_db', db_id);
+    let filter = {name: db_id};
+    if(!user.is_admin) {
+        filter['owner'] = user.uid;
+    }
+    let database = await mongo_databases.findOne({name: db_id});
+    if(! database || (database.type!==undefined && database.type != 'mysql')) {
+        await mongo_databases.remove(filter);
+        await mongo_events.insertOne(
+            {
+                'owner': user.uid,
+                'date': new Date().getTime(),
+                'action': 'database ' + db_id+ ' deleted by ' +  user.uid, 'logs': []
+            }
+        );
+        return true;
+    }
+    else {
+        await mongo_databases.remove(filter);
+        const querydb = (sql) => {
             // eslint-disable-next-line no-unused-vars
-            connection.query(sql, function(err, results) {
-                let sql = `DROP DATABASE ${db_id};\n`;
+            return new Promise((resolve, reject) => {
                 // eslint-disable-next-line no-unused-vars
-                connection.query(sql, async function(err, results) {
-                    await mongo_events.insertOne(
-                        {
-                            'owner': user.uid,
-                            'date': new Date().getTime(),
-                            'action': 'database ' + db_id + ' deleted by ' + user.uid, 'logs': []
-                        }
-                    );
+                connection.query(sql, function(err, results) {
+                    if(err) {
+                        logger.error('failed to exec sql', sql, err);
+                        resolve(false);
+                    }
                     resolve(true);
                 });
             });
-        
-        }
-    });
+        };
+        let dropuser = `DROP USER '${db_id}'@'%';\n`;
+        await querydb(dropuser);
+        let dropdb = `DROP DATABASE ${db_id};\n`;
+        await querydb(dropdb);
+        await mongo_events.insertOne(
+            {
+                'owner': user.uid,
+                'date': new Date().getTime(),
+                'action': 'database ' + db_id + ' deleted by ' + user.uid, 'logs': []
+            }
+        );
+        return true;
+    }
 };
 
 module.exports = router;

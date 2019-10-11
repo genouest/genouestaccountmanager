@@ -76,15 +76,15 @@ mongo_connect().then(async () => {
         };
         if( notif.mailSet()) {
             // eslint-disable-next-line no-unused-vars
-            notif.sendUser(mailOptions, function(error, response){
-                if(error){
-                    console.log(error);
-                }
-                mail_sent++;
-                if(mail_sent == notifs.length) {
-                    process.exit(0);
-                }
-            });
+            try {
+                await notif.sendUser(mailOptions);
+            } catch(error) {
+                console.log(error);
+            }
+            mail_sent++;
+            if(mail_sent == notifs.length) {
+                process.exit(0);
+            }
         }
         else {
             console.log(notif);

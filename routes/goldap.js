@@ -227,33 +227,25 @@ module.exports = {
         });
     },
 
-    add: function(user, fid) {
-        return new Promise(async function(resolve, reject){
-            let group = null;
-            try {
-                group = await mongo_groups.findOne({'name': user.group});
-            } catch(e) {
-                logger.error(e);
-                reject(e);
-            }
-               
-            filer.ldap_add_user(user, group, fid)
-                .then(
-                    created_file => {
-                        logger.info('File Created: ', created_file);
-                        return filer.ldap_add_user_to_group(user, fid);
-                    })
-                .then(
-                    created_file => {
-                        logger.info('File Created: ', created_file);
-                        resolve();
-                    })
-                .catch(error => { // reject()
-                    logger.error('Add User Failed for: ' + user.uid, error);
-                    reject(error);
-                });
-   
-        });
+    add: async function(user, fid) {
+        let group = null;
+        try {
+            group = await mongo_groups.findOne({'name': user.group});
+        } catch(e) {
+            logger.error(e);
+            throw e;
+        }
+        
+        try {
+            let created_file = await filer.ldap_add_user(user, group, fid);
+            logger.debug('File created', created_file);
+            created_file = await filer.ldap_add_user_to_group(user, fid);
+            logger.debug('File created', created_file);
+        } catch(error) {
+            logger.error('Add User Failed for: ' + user.uid, error);
+            throw error;
+        }
+        return true;
     },
 
     change_user_groups: function(user, group_add, group_remove, fid) {

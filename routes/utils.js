@@ -29,17 +29,20 @@ var mongo_connect = async function() {
 };
 mongo_connect();
 
-exports.init = function() {
-    return new Promise((resolve, reject) => {
-        try {
-            mongo_connect().then(() => {
-                resolve();
-            });
-        } catch(err){
-            logger.debug('Failed to init db', err);
-            reject(err);
-        }
-    });
+exports.init = async function() {
+    //return new Promise((resolve, reject) => {
+    try {
+        await mongo_connect();
+        return null;
+        //mongo_connect().then(() => {
+        //    resolve();
+        //});
+    } catch(err){
+        logger.debug('Failed to init db', err);
+        //reject(err);
+        return err;
+    }
+    //});
 };
 
 var redis = require('redis');
@@ -221,11 +224,7 @@ exports.loadAvailableIds = function (strategy) {
 };
 
 async function _loadAvailableIds () {
-    // eslint-disable-next-line no-unused-vars
-    //return new Promise(async function (resolve, reject) {
     if (idsLoaded) {
-        //resolve(false);
-        //return;
         return false;
     }
 
@@ -242,9 +241,7 @@ async function _loadAvailableIds () {
 
     if (redis_client === null) {
         idsLoaded = true;
-        //resolve(false);
         return false;
-        //return;
     }
 
     logger.info('Loading available ids....');
@@ -304,10 +301,9 @@ async function _loadAvailableIds () {
     }
     logger.info('Available ids loaded, application is ready');
     redis_client.set('my:ids:set', 'done');
+    // eslint-disable-next-line require-atomic-updates
     idsLoaded = true;
-    //resolve(true);
     return true;
-//});
 }
 
 exports.getUserAvailableId = function () {
@@ -325,39 +321,27 @@ exports.getGroupAvailableId = function () {
 };
 
 async function _getUsersMaxId(minID) {
-    // eslint-disable-next-line no-unused-vars
-    //return new Promise(async function (resolve, reject) {
     let minUserID = minID;
     let data = await mongo_users.find({}, {limit: 1 , sort: {uidnumber: -1}}).toArray();
     if (!data)  {
-        //resolve(minUserID);
-        //return;
         return minUserID;
     }
     if (data && data.length > 0){
         minUserID = data[0].uidnumber + 1;
     }
-    //resolve(minUserID);
     return minUserID;
-    //});
 }
 
 async function _getGroupsMaxId(minID) {
-    // eslint-disable-next-line no-unused-vars
-    //return new Promise(async function (resolve, reject) {
     let minGroupID = minID;
     let data = await mongo_groups.find({}, {limit: 1 , sort: {gid: -1}}).toArray();
     if (!data)  {
-        //resolve(minGroupID);
-        //return;
         return minGroupID;
     }
     if (data && data.length > 0){
         minGroupID = data[0].gid + 1;
     }
-    //resolve(minGroupID);
     return minGroupID;
-    //});
 }
 
 function _getAvailableId (objType) {
