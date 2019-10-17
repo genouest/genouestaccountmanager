@@ -1609,9 +1609,9 @@ router.get('/user/:id/renew', async function(req, res){
         session_user.is_admin = false;
     }
     if(session_user.is_admin){
-        var new_password = Math.random().toString(36).slice(-10);
+        let new_password = Math.random().toString(36).slice(-10);
         user.password = new_password;
-        var fid = new Date().getTime();
+        let fid = new Date().getTime();
         try {
             await goldap.reset_password(user, fid);
         } catch(err) {
@@ -1635,14 +1635,14 @@ router.get('/user/:id/renew', async function(req, res){
             let msg_activ = CONFIG.message.reactivation.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
             let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer.join('<br/>');
 
-            var mailOptions = {
+            let mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address
                 destinations: [user.email], // list of receivers
                 subject: GENERAL_CONFIG.name + ' account reactivation', // Subject line
                 message: msg_activ, // plaintext body
                 html_message: msg_activ_html // html body
             };
-            var plugin_call = function(plugin_info, userId, data, adminId){
+            let plugin_call = function(plugin_info, userId, data, adminId){
                 // eslint-disable-next-line no-unused-vars
                 return new Promise(function (resolve, reject){
                     plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
@@ -1709,7 +1709,7 @@ router.put('/user/:id/ssh', async function(req, res) {
     }
     // Update SSH Key
     await utils.mongo_users().updateOne({_id: user._id}, {'$set': {ssh: req.body.ssh}});
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     user.ssh = escapeshellarg(req.body.ssh);
     try {
         let created_file = await filer.user_add_ssh_key(user, fid);
@@ -1845,11 +1845,11 @@ router.put('/user/:id', async function(req, res) {
     }
 
     if(user.status == STATUS_ACTIVE){
-        await utils.mongo_users().updateOne({_id: user._id}, user);
+        await utils.mongo_users().replaceOne({_id: user._id}, user);
         if(session_user.is_admin) {
             user.is_admin = true;
         }
-        var fid = new Date().getTime();
+        let fid = new Date().getTime();
         try {
             await goldap.modify(user, fid);
         } catch(err) {
@@ -1899,7 +1899,7 @@ router.put('/user/:id', async function(req, res) {
         }
     }
     else {
-        await utils.mongo_users().updateOne({_id: user._id}, user);
+        await utils.mongo_users().replaceOne({_id: user._id}, user);
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
         let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
         if(users_in_group && users_in_group.length == 0){
