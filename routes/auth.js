@@ -199,16 +199,17 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 router.get('/auth', async function(req, res) {
     if(req.locals.logInfo.id) {
-        let user = await utils.mongo_users().findOne({uid: req.params.id});
+        let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        if(!user) {
+            res.send({user: null, msg: 'user not found'});
+        }
         var token = jwt.sign(
             { user: user._id, isLogged: true },
             CONFIG.general.secret,
             {expiresIn: '2 days'}
         );
         if(user.u2f) {user.u2f.keyHankdle = null;}
-        if(!user) {
-            res.send({user: null, msg: 'user not found'});
-        }
+        
         if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
             user.is_admin = true;
         }
