@@ -570,6 +570,18 @@ describe('My', () => {
                 });
         });
 
+        it('User automatic auth', (done) => {
+            // Need to wait for cron to run
+            chai.request('http://localhost:3000')
+                .get('/auth')
+                .set('X-Api-Key', user_token_id)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    assert(res.body.user !== null);
+                    done();
+                });
+        });
+
         it('User can edit details', (done) => {
             // Need to wait for cron to run
             chai.request('http://localhost:3000')
