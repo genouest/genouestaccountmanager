@@ -28,7 +28,7 @@ export class BasePluginComponent {
     }
 
     renderDataTables(): void {
-        console.log('tables', this.tables);
+        // console.log('tables', this.tables);
         this.dtTrigger.next();
         this.tables.forEach(table => {
             console.log('dttrigger?', table.dtTrigger)
