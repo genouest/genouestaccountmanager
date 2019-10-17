@@ -45,6 +45,7 @@ var tp = require('./routes/tp');
 var conf = require('./routes/conf');
 var utils = require('./routes/utils.js');
 var tags = require('./routes/tags.js');
+var ObjectID = require('mongodb').ObjectID;
 
 var CONFIG = require('config');
 
@@ -84,35 +85,6 @@ app.use(session({
 // app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
-
-/*
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users');
-*/
-
-var ObjectID = require('mongodb').ObjectID;
-/*
-const MongoClient = require('mongodb').MongoClient;
-var mongodb = null;
-var mongo_users = null;
-
-var mongo_connect = async function() {
-    let url = CONFIG.mongo.url;
-    let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
-    } else {
-        client = new MongoClient(CONFIG.mongo.url);
-    }
-    await client.connect();
-    mongodb = client.db(CONFIG.general.db);
-    mongo_users = mongodb.collection('users');
-};
-mongo_connect();
-*/
-
-
 
 app.all('*', async function(req, res, next){
 
@@ -322,6 +294,12 @@ app.post('/tags/:kind/:id', tags);
 
 app.get('/robots.txt', function (request, response) {
     response.sendFile(path.resolve(__dirname, 'robots.txt'));
+});
+app.get('/manager', function(request, response){
+    response.redirect('/manager2');
+});
+app.get('/manager/*', function(request, response){
+    response.redirect('/manager2');
 });
 // Default route if no match (for spa handling)
 app.get('*', function (request, response) {

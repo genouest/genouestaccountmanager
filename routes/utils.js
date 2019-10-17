@@ -3,13 +3,6 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 
-/*
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
-var groupsDb = db.get('groups');
-var usersDb = db.get('users');
-*/
-
 const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;
 var mongo_users = null;
