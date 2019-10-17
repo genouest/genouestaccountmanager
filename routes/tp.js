@@ -495,9 +495,59 @@ router.delete('/tp/:id', async function(req, res) {
     return;
 });
 
+router.put('/tp/:id/reserve/stop', async function(req, res) {
+    if(! req.locals.logInfo.is_logged) {
+        res.status(403).send('Not authorized');
+        return;
+    }
+    if(! utils.sanitizeAll([req.params.id])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
 
+    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+        res.status(403).send('Not authorized');
+        return;
+    }
 
-router.put('/tp/:id/reservenow', async function(req, res) {
+    let reservation_id = ObjectID.createFromHexString(req.params.id);
+
+    // add filter
+    let filter = {};
+    if(is_admin) {
+        filter = {_id: reservation_id};
+    }
+    else{
+        filter = {_id: reservation_id, owner: user.uid};
+    }
+    let reservation = await utils.mongo_reservations().findOne(filter);
+    if(!reservation){
+        res.status(403).send({'msg': 'Not allowed to delete this reservation'});
+        res.end();
+        return;
+    }
+
+    let users = await reservation.accounts.map(function(user){
+        return utils.mongo_users().findOne({'uid': user});
+    });
+    if (users) {
+        await router.delete_tp_users(users, reservation.group, 'auto');
+    }
+    logger.info('Close reservation', req.params.id);
+    await utils.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
+    await utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
+    res.send({message: 'Reservation closed'});
+    res.end();
+});
+
+router.put('/tp/:id/reserve/now', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(403).send('Not authorized');
         return;

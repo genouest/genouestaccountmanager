@@ -727,7 +727,7 @@ describe('My', () => {
                 assert(resa.created == false);
                 // Reserve now /tp/:id/reservenow
                 let resnow = await chai.request('http://localhost:3000')
-                    .put('/tp/' + resa._id + '/reservenow')
+                    .put('/tp/' + resa._id + '/reserve/now')
                     .set('X-Api-Key', token_id)
                     .send({
                         'from': today.getTime(),
