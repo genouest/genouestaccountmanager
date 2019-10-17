@@ -86,9 +86,39 @@ app.use(session({
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.all('*', async function(req, res, next){
+const runningEnv = process.env.NODE_ENV || 'prod';
+const { spawn } = require('child_process');
+const if_dev_execute_scripts = function(){
+    return new Promise(function (resolve, reject){
+        if (runningEnv !== 'test'){
+            resolve();
+            return;
+        }
+        wlogger.info('In *test* environment, check for scripts to execute');
+        let cron_bin_script = CONFIG.general.cron_bin_script || null;
+        if(cron_bin_script === null){
+            wlogger.error('cron script not defined');
+            reject({'err': 'cron script not defined'});
+            return;
+        }
+        var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+        procScript.on('exit', function (code, signal) {
+            wlogger.info(cron_bin_script + ' process exited with ' +
+                        `code ${code} and signal ${signal}`);
+            resolve();
+        });
+    });
+};
 
-    var logInfo = {
+app.all('*', async function(req, res, next){
+    if (runningEnv === 'test'){
+        res.on('finish', function() {
+            wlogger.debug('*test* env, on finish execute cron script');
+            if_dev_execute_scripts().then(function(){});
+        });
+    }
+
+    let logInfo = {
         is_logged: false,
         mail_token: null,
         id: null,
@@ -99,11 +129,11 @@ app.all('*', async function(req, res, next){
         req.locals = {};
     }
 
-    var token = req.headers['x-api-key'] || null;
-    var jwtToken = null;
-    var authorization = req.headers['authorization'] || null;
+    let token = req.headers['x-api-key'] || null;
+    let jwtToken = null;
+    let authorization = req.headers['authorization'] || null;
     if (authorization) {
-        var elts = authorization.split(' ');
+        let elts = authorization.split(' ');
         try {
             jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
         } catch(err) {
@@ -278,6 +308,8 @@ app.post('/plugin/:id/:user/deactivate', plugin);
 app.get('/tp', tp);
 app.post('/tp', tp);
 app.delete('/tp/:id', tp);
+app.get('/tp/:id', tp);
+app.put('/tp/:id/reservenow', tp);
 
 app.get('/auth', auth);
 app.post('/auth/:id', auth);
@@ -314,8 +346,6 @@ app.use(function(req, res, next) {
     next(err);
 });
 
-// error handlers
-
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development' || process.env.DEBUG) {
@@ -344,18 +374,23 @@ else {
 module.exports = app;
 
 
-utils.init_db().then(() => {
+utils.init_db().then(async () => {
     if(MY_ADMIN_USER !== null){
-        users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+        wlogger.info('Create admin user');
+        await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+        if (runningEnv == 'test'){
+            wlogger.info('Execute cron script');
+            await if_dev_execute_scripts();
+        }
     }
     // eslint-disable-next-line no-unused-vars
-    utils.loadAvailableIds().then(function (_alreadyLoaded) {
-        if (!module.parent) {
-            http.createServer(app).listen(app.get('port'), function(){
-                wlogger.info('Server listening on port ' + app.get('port'));
-            });
-        }
-    });
+    await utils.loadAvailableIds();
+    if (!module.parent) {
+        http.createServer(app).listen(app.get('port'), function(){
+            wlogger.info('Server listening on port ' + app.get('port'));
+        });
+    }
+
 });
 
 /*

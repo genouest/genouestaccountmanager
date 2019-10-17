@@ -92,16 +92,16 @@ services:
             - gomail-web
         command: node app.js
 
-    my-cron:
-        image: osallou/mycron
-        build:
-            context: .
-            dockerfile: Dockerfile-cron
-        depends_on:
-            - my-app
-        environment:
-            - NODE_ENV=test
-            - GOMNGRURL=http://my:3000
-        volumes:
-            - ./home_dir:/home
-            - ./cron:/opt/my/scripts
+    #my-cron:
+    #    image: osallou/mycron
+    #    build:
+    #        context: .
+    #        dockerfile: Dockerfile-cron
+    #    depends_on:
+    #        - my-app
+    #    environment:
+    #        - NODE_ENV=test
+    #        - GOMNGRURL=http://my:3000
+    #    volumes:
+    #        - ./home_dir:/home
+    #        - ./cron:/opt/my/scripts

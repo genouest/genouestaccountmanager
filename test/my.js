@@ -37,20 +37,6 @@ describe('My', () => {
             });
     });
 
-    /*
-      describe('/GET route', () => {
-      it('it should GET redirected', (done) => {
-      chai.request('http://localhost:3000')
-      .get('/')
-      .end((err, res) => {
-      res.should.have.status(200);
-      assert(res.redirects.length == 1);
-      done();
-      });
-      });
-      });
-    */
-
     describe('/POST Login', () => {
         it('login should work', (done) => {
             chai.request('http://localhost:3000')
@@ -713,6 +699,52 @@ describe('My', () => {
                     assert(admin_was_not_deleted);
                     done();
                 });
+        });
+
+    });
+
+    describe('Test tp reservation', () => {
+        it('create a reservation', (done) => {
+            const create_and_force = async () => {
+                let today = new Date();
+                let res = await chai.request('http://localhost:3000')
+                    .post('/tp')
+                    .set('X-Api-Key', token_id)
+                    .send({
+                        'from': today.getTime(),
+                        'to': today.getTime() + 30,
+                        'quantity': 2,
+                        'about': 'test resa'
+                    });
+                res.should.have.status(200);
+                let new_resa = res.body.reservation;
+                assert(new_resa.created == false);
+                let res2 = await chai.request('http://localhost:3000')
+                    .get('/tp/' + new_resa._id)
+                    .set('X-Api-Key', token_id);
+                let resa = res2.body.reservation;
+                res2.should.have.status(200);
+                assert(resa.created == false);
+                // Reserve now /tp/:id/reservenow
+                let resnow = await chai.request('http://localhost:3000')
+                    .put('/tp/' + resa._id + '/reservenow')
+                    .set('X-Api-Key', token_id)
+                    .send({
+                        'from': today.getTime(),
+                        'to': today.getTime() + 30,
+                        'quantity': 2,
+                        'about': 'test resa'
+                    });
+                resnow.should.have.status(200);
+                res2 = await chai.request('http://localhost:3000')
+                    .get('/tp/' + new_resa._id)
+                    .set('X-Api-Key', token_id);
+                resa = res2.body.reservation;
+                assert(resa.created == true);
+            };
+            create_and_force().then(() => {
+                done();
+            });          
         });
 
     });

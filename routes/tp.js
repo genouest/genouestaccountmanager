@@ -397,6 +397,48 @@ router.post('/tp', async function(req, res) {
     });
 });
 
+router.get('/tp/:id', async function(req, res) {
+    if(! req.locals.logInfo.is_logged) {
+        res.status(403).send('Not authorized');
+        return;
+    }
+    if(! utils.sanitizeAll([req.params.id])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
+
+    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+        res.status(403).send('Not authorized');
+        return;
+    }
+
+    let reservation_id = ObjectID.createFromHexString(req.params.id);
+
+    // add filter
+    let filter = {};
+    if(is_admin) {
+        filter = {_id: reservation_id};
+    }
+    else{
+        filter = {_id: reservation_id, owner: user.uid};
+    }
+    let reservation = await utils.mongo_reservations().findOne(filter);
+    if(!reservation){
+        res.status(403).send({'msg': 'Not allowed to get this reservation'});
+        res.end();
+        return;
+    }
+    res.send({'reservation': reservation});
+    res.end();
+});
+
 router.delete('/tp/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(403).send('Not authorized');
@@ -419,13 +461,15 @@ router.delete('/tp/:id', async function(req, res) {
         return;
     }
 
+    let reservation_id = ObjectID.createFromHexString(req.params.id);
+
     // add filter
     let filter = {};
     if(is_admin) {
-        filter = {_id: req.params.id};
+        filter = {_id: reservation_id};
     }
     else{
-        filter = {_id: req.params.id, owner: user.uid};
+        filter = {_id: reservation_id, owner: user.uid};
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
@@ -452,5 +496,52 @@ router.delete('/tp/:id', async function(req, res) {
 });
 
 
+
+router.put('/tp/:id/reservenow', async function(req, res) {
+    if(! req.locals.logInfo.is_logged) {
+        res.status(403).send('Not authorized');
+        return;
+    }
+    if(! utils.sanitizeAll([req.params.id])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
+
+    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+        res.status(403).send('Not authorized');
+        return;
+    }
+
+    let reservation_id = ObjectID.createFromHexString(req.params.id);
+
+    // add filter
+    let filter = {};
+    if(is_admin) {
+        filter = {_id: reservation_id};
+    }
+    else{
+        filter = {_id: reservation_id, owner: user.uid};
+    }
+    let reservation = await utils.mongo_reservations().findOne(filter);
+    if(!reservation){
+        res.status(403).send({'msg': 'Not allowed to reserve now this reservation'});
+        res.end();
+        return;
+    }
+
+    let newresa = await router.exec_tp_reservation(reservation._id, 'auto');
+    logger.debug('set reservation as done', newresa);
+    await utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'created': true}});
+    newresa.created = true;
+    res.send({'reservation': newresa});
+    res.end();
+});
 
 module.exports = router;

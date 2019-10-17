@@ -38,7 +38,7 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
-const runningEnv = process.env.NODE_ENV || 'prod';
+//const runningEnv = process.env.NODE_ENV || 'prod';
 
 for(let i = 0; i< plugins.length; i++){
     if(plugins[i]['admin']) {
@@ -50,6 +50,8 @@ for(let i = 0; i< plugins.length; i++){
 
 // util function to execute scripts immediatly, for test purpose only
 // on dev/prod, scripts should be executed by cron only
+
+/*
 if (runningEnv === 'test'){
     const { spawn } = require('child_process');
     var if_dev_execute_scripts = function(){
@@ -81,6 +83,7 @@ if (runningEnv === 'test'){
         next();
     });
 }
+*/
 
 function get_group_home (user) {
     let group_path = CONFIG.general.home+'/'+user.group;
@@ -228,19 +231,15 @@ router.create_admin = async function(default_admin, default_admin_group){
         if(group){
             logger.info('group already exists');
             // eslint-disable-next-line no-unused-vars
-            create_extra_user(default_admin, group, true).then(function(user){
-                logger.info('admin user created');
-            });
+            await create_extra_user(default_admin, group, true);
+            logger.info('admin user created');
         }
         else {
             logger.info('need to create admin group');
-            create_extra_group(default_admin_group, default_admin).then(function(group){
-                logger.info('admin group created', group);
-                // eslint-disable-next-line no-unused-vars
-                create_extra_user(default_admin, group, true).then(function(user){
-                    logger.info('admin user created', user);
-                });
-            });
+            let group = await create_extra_group(default_admin_group, default_admin);
+            logger.info('admin group created', group);
+            let user = await create_extra_user(default_admin, group, true);
+            logger.info('admin user created', user);
         }    
     }
 };
