@@ -1563,15 +1563,15 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    var regkey = req.params.regkey;
+    let regkey = req.params.regkey;
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
-        var expiration = new Date().getTime() + 1000*3600*24*user.duration;
+        let expiration = new Date().getTime() + 1000*3600*24*user.duration;
         await utils.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
         if(accept == 'json') {
-            res.send({msg: 'validity period extended'});
+            res.send({msg: 'validity period extended', 'expiration': expiration});
             res.end();
             return;
         }
