@@ -1806,7 +1806,9 @@ router.put('/user/:id', async function(req, res) {
             return;
         }
     }
-    user.loginShell = req.body.loginShell.trim();
+    if (req.body.loginShell) {
+        user.loginShell = req.body.loginShell.trim();
+    }
     user.address = req.body.address;
     user.lab = req.body.lab;
     user.responsible = req.body.responsible;

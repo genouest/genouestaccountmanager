@@ -570,6 +570,37 @@ describe('My', () => {
                 });
         });
 
+        it('User can edit details', (done) => {
+            // Need to wait for cron to run
+            chai.request('http://localhost:3000')
+                .put('/user/' + test_user_id)
+                .set('X-Api-Key', user_token_id)
+                .send({
+                    'firstname': 'ftest',
+                    'lastname': 'ltest',
+                    'email': test_user_id + '@my.org',
+                    'address': 'test address',
+                    'lab': 'new',
+                    'responsible': 'test manager',
+                    'group': test_group_id,
+                    'why': 'because',
+                    'ip': '127.0.0.1',
+                    'duration': 365,
+                    'loginShell': '/bin/bash'
+                })
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    chai.request('http://localhost:3000')
+                        .get('/user/' + test_user_id)
+                        .set('X-Api-Key', user_token_id)
+                        .end((err, res) => {
+                            res.should.have.status(200);
+                            assert(res.body.lab == 'new');
+                            done();
+                        });
+                });
+        });
+
         it('User declare database', (done) => {
             let db = {
                 name: test_db_id,
