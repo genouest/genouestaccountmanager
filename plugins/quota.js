@@ -1,12 +1,5 @@
 /* eslint-disable no-console */
 var CONFIG = require('config');
-//var monk = require('monk'),
-//db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-// databases_db = db.get('databases'),
-//users_db = db.get('users'),
-//events_db = db.get('events');
-
-// var path = require('path');
 var http = require('http');
 var GENERAL_CONFIG = CONFIG.general;
 
