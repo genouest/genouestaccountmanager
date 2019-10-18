@@ -29,6 +29,8 @@ const wlogger = winston.loggers.add('gomngr', {
     transports: [myconsole]
 });
 
+const promMid = require('express-prometheus-middleware');
+
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -85,6 +87,12 @@ app.use(session({
 // app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(promMid({
+    metricsPath: '/metrics',
+    collectDefaultMetrics: true,
+    requestDurationBuckets: [0.1, 0.5, 1, 1.5],
+}));
 
 const runningEnv = process.env.NODE_ENV || 'prod';
 const { spawn } = require('child_process');

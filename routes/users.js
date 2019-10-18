@@ -1784,17 +1784,27 @@ router.put('/user/:id', async function(req, res) {
         return;
     }
 
-    user.firstname = req.body.firstname;
-    user.lastname = req.body.lastname;
-    user.oldemail = user.email;
-    user.email = req.body.email;
+    if(req.body.firstname) {
+        user.firstname = req.body.firstname;
+    }
+    if(req.body.lastname) {
+        user.lastname = req.body.lastname;
+    }
+    if(req.body.email) {
+        user.oldemail = user.email;
+        user.email = req.body.email;
+    } else {
+        user.oldemail = user.email;
+    }
     if(user.is_fake === undefined) {
         user.is_fake = false;
     }
     let userWasFake = user.is_fake;
 
     if(session_user.is_admin){
-        user.is_fake = req.body.is_fake;
+        if (req.body.is_fake !== undefined) {
+            user.is_fake = req.body.is_fake;
+        }
         if(req.body.is_trainer !== undefined ){
             user.is_trainer = req.body.is_trainer;
         }
@@ -1809,22 +1819,32 @@ router.put('/user/:id', async function(req, res) {
     if (req.body.loginShell) {
         user.loginShell = req.body.loginShell.trim();
     }
-    user.address = req.body.address;
-    user.lab = req.body.lab;
-    user.responsible = req.body.responsible;
-    user.why = req.body.why;
-    user.duration = req.body.duration;
-
-    user.history.push({'action': 'update info', date: new Date().getTime()});
-    let group = await utils.mongo_groups().findOne({'name': req.body.group});
- 
-
-    if(!group) {
-        res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
-        return;
+    if(req.body.address) {
+        user.address = req.body.address;
+    }
+    if(req.body.lab) {
+        user.lab = req.body.lab;
+    }
+    if(req.body.responsible) {
+        user.responsible = req.body.responsible;
+    }
+    if(req.body.why) {
+        user.why = req.body.why;
+    }
+    if(req.body.duration) {
+        user.duration = req.body.duration;
     }
 
+    user.history.push({'action': 'update info', date: new Date().getTime()});
+
+
     if(session_user.is_admin){
+        let group = await utils.mongo_groups().findOne({'name': req.body.group});
+        if(!group) {
+            res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
+            return;
+        }
+
         if(user.secondarygroups.indexOf(group.name) != -1) {
             res.status(403).send('Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!');
             return;
@@ -1837,13 +1857,22 @@ router.put('/user/:id', async function(req, res) {
         user.group = req.body.group;
         user.gidnumber = group.gid;
         user.ip = req.body.ip;
-        user.is_internal = req.body.is_internal;
-        user.maingroup = req.body.maingroup;
+        if (req.body.is_internal !== undefined) {
+            user.is_internal = req.body.is_internal;
+        }
+        if (req.body.maingroup) {
+            user.maingroup = req.body.maingroup;
+        }
         user.home = get_user_home(user);
         if(user.group == '' || user.group == null) {
             res.status(403).send('Some mandatory fields are empty');
             return;
         }
+    } else {
+        user.oldgroup = user.group;
+        user.oldgidnumber = user.gidnumber;
+        user.oldmaingroup = user.maingroup;
+        user.oldhome = user.home;
     }
 
     if(user.status == STATUS_ACTIVE){

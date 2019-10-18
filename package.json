@@ -22,6 +22,7 @@
     "escapeshellarg": "^0.1.0",
     "eslint": "^6.5.1",
     "express": "^4.16.4",
+    "express-prometheus-middleware": "^0.6.2",
     "express-session": "^1.9.2",
     "express-static-gzip": "^2.0.5",
     "hjs": "0.0.6",
