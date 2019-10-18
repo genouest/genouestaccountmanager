@@ -90,7 +90,7 @@ services:
             - openldap
             - mysql
             - gomail-web
-        command: node app.js
+        entrypoint: node app.js
 
     #my-cron:
     #    image: osallou/mycron
