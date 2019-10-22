@@ -52,8 +52,8 @@ router.get('/mail/auth/:id', async function(req, res) {
     if(!user) {
         return res.status(404).send('User not found');
     }
-    var msg_token = 'You requested a temporary token to login to application. This token will be valid for 10 minutes only.\n';
-    msg_token = 'Token: -- ' + password + ' -- \n';
+    var msg_token = 'You requested a temporary token to login to application. This token will be valid for 10 minutes only.\t\r\n';
+    msg_token += '  Token: -- ' + password + ' -- \n';
     var mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers

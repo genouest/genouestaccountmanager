@@ -56,7 +56,7 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
     }
     if(! utils.sanitizeAll([req.params.id, req.params.old, req.params.new])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -107,7 +107,7 @@ router.get('/database/owner/:owner', async function(req, res) {
     }
     if(! utils.sanitizeAll([req.params.owner])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
@@ -130,7 +130,7 @@ router.post('/database/:id', async function(req, res) {
     }
     if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user) {
@@ -226,12 +226,11 @@ router.post('/database/:id', async function(req, res) {
                 return;
             }
             // Now send message
-            let msg = 'Database created:\n';
-            msg += ' Host: ' + CONFIG.mysql.host + '\n';
-            msg += ' Database: ' + req.params.id + '\n';
-            msg += ' User: ' + req.params.id + '\n';
-            msg += ' Password: ' + password + '\n';
-            msg += ' Owner: ' + owner + '\n';
+            let msg = 'The MySQL database you requested (' + req.params.id + ', owned by ' + owner + ') was created. You can connect to it using the following credentials:\t\r\n\t\r\n';
+            msg += '  Host: ' + CONFIG.mysql.host + '\t\r\n';
+            msg += '  Database: ' + req.params.id + '\t\r\n';
+            msg += '  User: ' + req.params.id + '\t\r\n';
+            msg += '  Password: ' + password + '\t\r\n';
             var mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address
                 destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
@@ -264,7 +263,7 @@ router.delete('/database/:id', async function(req, res) {
 
     if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
-        return;  
+        return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user){
