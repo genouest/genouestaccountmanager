@@ -1,15 +1,10 @@
 var Promise = require('promise');
 
-var CONFIG = require('config');
+//var CONFIG = require('config');
 
 var tps = require('./routes/tp.js');
 
-//var utils = require('./routes/utils.js');
-
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    // users_db = db.get('users'),
-    reservation_db = db.get('reservations');
+var utils = require('./routes/utils');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -45,7 +40,7 @@ var processReservation = function(reservation){
         logger.info('create user for reservation ', reservation);
         tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug('set reservation as done', res);
-            reservation_db.update({'_id': res._id},{'$set': {'created': true}}).then(function(){
+            utils.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
             });
         });
@@ -58,20 +53,21 @@ var create_before = now;
 create_before.setDate(create_before.getDate() + 5);
 
 logger.info('Check coming reservations');
-reservation_db.find({
-    'from': {'$lte': create_before.getTime()},
-    'created': false,
-    'over': false
+utils.init_db().then(()=> {
+    utils.mongo_reservations().find({
+        'from': {'$lte': create_before.getTime()},
+        'created': false,
+        'over': false
 
-}).then(function(reservations){
-    if(reservations === undefined || reservations.length == 0){
-        logger.info('No pending reservation');
-        process.exit(0);
-    }
+    }).toArray().then(function(reservations){
+        if(reservations === undefined || reservations.length == 0){
+            logger.info('No pending reservation');
+            process.exit(0);
+        }
 
-    // eslint-disable-next-line no-unused-vars
-    processArray(reservations, processReservation).then(function(res){
-        process.exit(0);
+        // eslint-disable-next-line no-unused-vars
+        processArray(reservations, processReservation).then(function(res){
+            process.exit(0);
+        });
     });
-
 });

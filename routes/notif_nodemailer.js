@@ -1,9 +1,7 @@
 const CONFIG = require('config');
-const monk = require('monk');
-var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
-// var web_db = db.get('web'),
-var users_db = db.get('users');
-var events_db = db.get('events');
+
+var utils= require('./utils');
+
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 // const request = require('request');
@@ -37,17 +35,16 @@ module.exports = {
         return mail_set;
     },
 
-    subscribed: function(email, callback) {
+    subscribed: async function(email, callback) {
         if (CONFIG.nodemailer.list) {
-            users_db.findOne({email: email}, function(err, user){
-                if(!user) {
-                    logger.error('User does not exist', email);
-                    callback(false);
-                    return;
-                }
-                callback(user.subscribed);
+            let user = await utils.mongo_users().findOne({email: email});
+            if(!user) {
+                logger.error('User does not exist', email);
+                callback(false);
                 return;
-            });
+            }
+            callback(user.subscribed);
+            return;
         }
         return;
     },
@@ -64,32 +61,27 @@ module.exports = {
         return;
     },
 
-    add: function(email, callback) {
+    add: async function(email, callback) {
         if (CONFIG.nodemailer.list) {
             if(email==undefined ||email==null || email=='' || ! mail_set) {
                 callback();
                 return;
             }
-            users_db.findOne({email: email}, function(err, user){
-                if(!user) {
-                    logger.error('User does not exist', email);
-                    callback();
-                    return;
-                }
-                transporter.sendMail({
-                    from: CONFIG.nodemailer.origin,
-                    to: CONFIG.nodemailer.list.cmd_address,
-                    subject: CONFIG.nodemailer.list.cmd_add + ' ' + CONFIG.nodemailer.list.address + ' ' + email
-                });
-                logger.info('user added to ' + CONFIG.nodemailer.list.address, email);
-
-                // eslint-disable-next-line no-unused-vars
-                events_db.insert({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []}, function(err){});
-
-                // eslint-disable-next-line no-unused-vars
-                users_db.update({email: email}, {'$set':{'subscribed': true}}, function(err, data){});
-
+            let user = await utils.mongo_users().findOne({email: email});
+            if(!user) {
+                logger.error('User does not exist', email);
+                callback();
+                return;
+            }
+            transporter.sendMail({
+                from: CONFIG.nodemailer.origin,
+                to: CONFIG.nodemailer.list.cmd_address,
+                subject: CONFIG.nodemailer.list.cmd_add + ' ' + CONFIG.nodemailer.list.address + ' ' + email
             });
+            logger.info('user added to ' + CONFIG.nodemailer.list.address, email);
+
+            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
+            await utils.mongo_users().updateOne({email: email}, {'$set':{'subscribed': true}});
         }
         callback();
         return;
@@ -102,31 +94,26 @@ module.exports = {
     },
 
     // todo: should be factorized with add, as there is only small difference
-    remove: function(email, callback) {
+    remove: async function(email, callback) {
         if (CONFIG.nodemailer.list) {
             if(email==undefined ||email==null || email=='' || ! mail_set) {
                 callback();
                 return;
             }
-            users_db.findOne({email: email}, function(err, user){
-                if(!user) {
-                    logger.error('User does not exist', email);
-                    callback();
-                    return;
-                }
-                transporter.sendMail({
-                    from: CONFIG.nodemailer.origin,
-                    to: CONFIG.nodemailer.list.cmd_address,
-                    subject: CONFIG.nodemailer.list.cmd_del + ' ' + CONFIG.nodemailer.list.address + ' ' + email
-                });
-                logger.warn('user deleted from ' + CONFIG.nodemailer.list.address, email);
-                // eslint-disable-next-line no-unused-vars
-                events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
-
-                // eslint-disable-next-line no-unused-vars
-                users_db.update({email: email}, {'$set':{'subscribed': false}}, function(err, data){});
-
+            let user = await utils.mongo_users().findOne({email: email});
+            if(!user) {
+                logger.error('User does not exist', email);
+                callback();
+                return;
+            }
+            transporter.sendMail({
+                from: CONFIG.nodemailer.origin,
+                to: CONFIG.nodemailer.list.cmd_address,
+                subject: CONFIG.nodemailer.list.cmd_del + ' ' + CONFIG.nodemailer.list.address + ' ' + email
             });
+            logger.warn('user deleted from ' + CONFIG.nodemailer.list.address, email);
+            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
+            await utils.mongo_users().updateOne({email: email}, {'$set':{'subscribed': false}});
         }
         callback();
         return;
@@ -144,30 +131,32 @@ module.exports = {
         return;
     },
 
-    sendUser: function(mailOptions, callback) {
-        let sbjtag = (CONFIG.nodemailer.prefix ? CONFIG.nodemailer.prefix : CONFIG.general.name);
+    sendUser: function(mailOptions) {
+        // eslint-disable-next-line no-unused-vars
+        return new Promise((resolve, reject) => {
+            let sbjtag = (CONFIG.nodemailer.prefix ? CONFIG.nodemailer.prefix : CONFIG.general.name);
 
-        if (sbjtag.length > 0) {
-            sbjtag = '[' + sbjtag + '] ';
-        }
+            if (sbjtag.length > 0) {
+                sbjtag = '[' + sbjtag + '] ';
+            }
 
-        let info =  {
-            from: mailOptions.origin,
-            to: mailOptions.destinations.join(),
-            subject: sbjtag + mailOptions.subject,
-            html: mailOptions.html_message
-        };
+            let info =  {
+                from: mailOptions.origin,
+                to: mailOptions.destinations.join(),
+                subject: sbjtag + mailOptions.subject,
+                html: mailOptions.html_message
+            };
 
-        if (CONFIG.general.support) {
-            info.replyTo= CONFIG.general.support;
-        }
+            if (CONFIG.general.support) {
+                info.replyTo= CONFIG.general.support;
+            }
 
-        transporter.sendMail(info);
+            transporter.sendMail(info);
 
-        logger.info('Message sent to ' + mailOptions.destinations.join() + ':' + mailOptions.subject);
+            logger.info('Message sent to ' + mailOptions.destinations.join() + ':' + mailOptions.subject);
 
-        callback('', true);
-        return;
+            resolve('');
+        });
     },
 
     sendList: function(mailing_list, mailOptions, callback) {

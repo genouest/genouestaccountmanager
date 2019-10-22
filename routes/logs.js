@@ -7,86 +7,76 @@ var fs = require('fs');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db);
-// var groups_db = db.get('groups');
-// var databases_db = db.get('databases');
-// var web_db = db.get('web');
-var users_db = db.get('users');
-var events_db = db.get('events');
+var utils = require('./utils');
 
-router.get('/log', function(req, res){
+router.get('/log', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-        if(err || user == null){
-            res.status(404).send('User not found');
-            return;
-        }
-        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-            res.status(401).send('Not authorized');
-            return;
-        }
-        events_db.find({}, {limit: 200, sort: {date: -1}}, function(err, events){
-            res.send(events);
-            res.end();
-        });
-    });
-});
-
-router.get('/log/user/:id', function(req, res){
-    if(! req.locals.logInfo.is_logged) {
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-        if(err || user == null){
-            res.status(404).send('User not found');
-            return;
-        }
-        events_db.find({'owner': req.params.id}, function(err, events){
-            res.send(events);
-            res.end();
-        });
-    });
-});
-
-router.get('/log/status/:id/:status', function(req, res){
-    events_db.update({'logs': req.params.id}, {'$set':{'status': parseInt(req.params.status)}}, function(){});
+    let events = await utils.mongo_events().find({}, {limit: 200, sort: {date: -1}}).toArray();
+    res.send(events);
     res.end();
 });
 
-router.get('/log/:id', function(req, res){
+router.get('/log/user/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-        if(err || user == null){
-            res.status(404).send('User not found');
-            return;
-        }
-        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-            res.status(401).send('Not authorized');
-            return;
-        }
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+    let events = await utils.mongo_events().find({'owner': req.params.id}).toArray();
+    res.send(events);
+    res.end();
+});
 
-        let file = req.params.id + '.log';
-        let log_file = GENERAL_CONFIG.script_dir + '/' + file;
-        fs.readFile(log_file, 'utf8', function (err,data) {
-            if (err) {
-                res.status(500).send(err);
-                res.end();
-                return;
-            }
-            res.send({log: data});
+router.get('/log/status/:id/:status', async function(req, res){
+    await utils.mongo_events().updateOne({'logs': req.params.id}, {'$set':{'status': parseInt(req.params.status)}});
+    res.end();
+});
+
+router.get('/log/:id', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+        res.status(401).send('Not authorized');
+        return;
+    }
+
+    let file = req.params.id + '.log';
+    let log_file = GENERAL_CONFIG.script_dir + '/' + file;
+    fs.readFile(log_file, 'utf8', function (err,data) {
+        if (err) {
+            res.status(500).send(err);
             res.end();
             return;
-        });
-
+        }
+        res.send({log: data});
+        res.end();
+        return;
     });
+
 });
 
 module.exports = router;

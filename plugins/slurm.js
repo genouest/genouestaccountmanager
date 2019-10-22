@@ -1,58 +1,74 @@
 /* eslint-disable no-console */
 var fs = require('fs');
 var CONFIG = require('config');
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    events_db = db.get('events');
 
 var Promise = require('promise');
+var utils = require('../routes/utils');
 
-var activate_user = function(userId, data, adminId){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        console.log('[Slurm] : Creating slurm cron file.. ' + userId );
-        var fid = new Date().getTime();
-        var script = '#!/bin/bash\n';
-        script += 'set -e\n';
-        script += `sacctmgr -i add account ${userId} Cluster=genouest Description="none" Organization="none"\n`;
-        script += `sacctmgr -i create user name=${userId} DefaultAccount=${userId}\n`;
-        var script_file = CONFIG.general.script_dir+'/'+userId+'.'+fid+'.slurm.update';
-        fs.writeFile(script_file, script, function(err) {
-            if(err){
-                console.trace('[slurm] : Could not write script in path ' + script_file);
+var activate_user = async function(userId, data, adminId){
+    console.log('[Slurm] : Creating slurm cron file.. ' + userId );
+    var fid = new Date().getTime();
+    var script = '#!/bin/bash\n';
+    script += 'set -e\n';
+    script += `sacctmgr -i add account ${userId} Cluster=genouest Description="none" Organization="none"\n`;
+    script += `sacctmgr -i create user name=${userId} DefaultAccount=${userId}\n`;
+    var script_file = CONFIG.general.script_dir+'/'+userId+'.'+fid+'.slurm.update';
+    const create_script = function() {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(script_file, script, function(err) {
+                if(err){
+                    console.trace('[slurm] : Could not write script in path ' + script_file);
+                    reject();
+                    return;
+                } else {
+                    fs.chmodSync(script_file,0o755);
+                }
                 resolve();
                 return;
-            }
-            fs.chmodSync(script_file,0o755);
-            events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']}, function(){});
-            console.log('[slurm] : done');
-            resolve();
+            });
         });
- 
-    });
+    };
+    try {
+        await create_script();
+        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']});
+        console.log('[slurm] : done');
+    } catch (err) {
+        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [], 'status': 1}); 
+        console.log('[slurm]: failed');
+    }
+    return true;
 };
-var deactivate_user = function(userId, data, adminId){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        console.log('[Slurm] : Creating slurm cron file.. ' + userId );
-        var fid = new Date().getTime();
-        var script = '#!/bin/bash\n';
-        script += 'set -e\n';
-        script += `sacctmgr -i delete user ${userId} account=${userId}\n`;
-        script += `sacctmgr -i delete account ${userId} \n`;
-        var script_file = CONFIG.general.script_dir+'/'+userId+'.'+fid+'.slurm.update';
-        fs.writeFile(script_file, script, function(err) {
-            if(err){
-                console.trace('[slurm] : Could not write script in path ' + script_file);
+var deactivate_user = async function(userId, data, adminId){
+
+    console.log('[Slurm] : Creating slurm cron file.. ' + userId );
+    var fid = new Date().getTime();
+    var script = '#!/bin/bash\n';
+    script += 'set -e\n';
+    script += `sacctmgr -i delete user ${userId} account=${userId}\n`;
+    script += `sacctmgr -i delete account ${userId} \n`;
+    var script_file = CONFIG.general.script_dir+'/'+userId+'.'+fid+'.slurm.update';
+    const create_script = function() {
+        return new Promise((resolve, reject) => {
+            fs.writeFile(script_file, script, function(err) {
+                if(err){
+                    console.trace('[slurm] : Could not write script in path ' + script_file);
+                    reject();
+                    return;
+                }
+                fs.chmodSync(script_file,0o755);
                 resolve();
                 return;
-            }
-            fs.chmodSync(script_file,0o755);
-            events_db.insert({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']}, function(){});
-            console.log('[slurm] : done');
-            resolve();
+            });
         });
-    });
+    };
+    try {
+        await create_script();
+        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']}, function(){});
+        console.log('[slurm] : done');
+    } catch(err) {
+        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [], 'status': 1});
+        console.log('[slurm] : failed');
+    }
 };
 
 // eslint-disable-next-line no-unused-vars

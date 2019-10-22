@@ -51,7 +51,7 @@ services:
             - GOMAIL_MAIL_PORT=1025
             - GOMAIL_MAIL_ORIGIN=support@my.org
             - GOMAIL_SECRET=test
-        command: python3 gomail/executor.py
+        command: bash -c "sleep 10 && python3 gomail/executor.py"
 
     openldap:
         image: dinkel/openldap
@@ -90,18 +90,18 @@ services:
             - openldap
             - mysql
             - gomail-web
-        command: node app.js
+        entrypoint: node app.js
 
-    my-cron:
-        image: osallou/mycron
-        build:
-            context: .
-            dockerfile: Dockerfile-cron
-        depends_on:
-            - my-app
-        environment:
-            - NODE_ENV=test
-            - GOMNGRURL=http://my:3000
-        volumes:
-            - ./home_dir:/home
-            - ./cron:/opt/my/scripts
+    #my-cron:
+    #    image: osallou/mycron
+    #    build:
+    #        context: .
+    #        dockerfile: Dockerfile-cron
+    #    depends_on:
+    #        - my-app
+    #    environment:
+    #        - NODE_ENV=test
+    #        - GOMNGRURL=http://my:3000
+    #    volumes:
+    #        - ./home_dir:/home
+    #        - ./cron:/opt/my/scripts

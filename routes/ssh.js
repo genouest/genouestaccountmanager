@@ -9,12 +9,9 @@ const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
 var CONFIG = require('config');
 
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users'),
-    events_db = db.get('events');
-
 var utils = require('./utils');
+
+
 /**
    app.get('/ssh/:id', ssh);
    app.get('/ssh/:id/public', ssh);
@@ -22,7 +19,7 @@ var utils = require('./utils');
    app.get('/ssh/:id/private', ssh);
 */
 
-router.get('/ssh/:id/putty', function(req, res) {
+router.get('/ssh/:id/putty', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -31,31 +28,25 @@ router.get('/ssh/:id/putty', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.params.id}, function(err, user){
-        if(err){
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
+    if(user._id.str != req.locals.logInfo.id.str){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    var sshDir = user.home + '/.ssh';
+    res.download(sshDir + '/id_rsa.ppk', 'id_rsa.ppk', function (err) {
+        if (err) {
             logger.error(err);
-            res.status(500).send(err);
-            return;
         }
-        if(!user) {
-            res.send({msg: 'User does not exist'});
-            res.end();
-            return;
-        }
-        if(user._id.str != req.locals.logInfo.id.str){
-            res.status(401).send('Not authorized');
-            return;
-        }
-        var sshDir = user.home + '/.ssh';
-        res.download(sshDir + '/id_rsa.ppk', 'id_rsa.ppk', function (err) {
-            if (err) {
-                logger.error(err);
-            }
-        });
     });
 });
 
-router.get('/ssh/:id/private', function(req, res) {
+router.get('/ssh/:id/private', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -64,35 +55,29 @@ router.get('/ssh/:id/private', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.params.id}, function(err, user){
-        if(err){
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
+    if(CONFIG.general.admin.indexOf(user.uid) >= 0){
+        res.status(401).send('[admin user] not authorized to download private key');
+        return;
+    }
+    if(user._id.str != req.locals.logInfo.id.str){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    var sshDir = user.home + '/.ssh';
+    res.download(sshDir + '/id_rsa', 'id_rsa', function (err) {
+        if (err) {
             logger.error(err);
-            res.status(500).send(err);
-            return;
         }
-        if(!user) {
-            res.send({msg: 'User does not exist'});
-            res.end();
-            return;
-        }
-        if(CONFIG.general.admin.indexOf(user.uid) >= 0){
-            res.status(401).send('[admin user] not authorized to download private key');
-            return;
-        }
-        if(user._id.str != req.locals.logInfo.id.str){
-            res.status(401).send('Not authorized');
-            return;
-        }
-        var sshDir = user.home + '/.ssh';
-        res.download(sshDir + '/id_rsa', 'id_rsa', function (err) {
-            if (err) {
-                logger.error(err);
-            }
-        });
     });
 });
 
-router.get('/ssh/:id/public', function(req, res) {
+router.get('/ssh/:id/public', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -101,31 +86,26 @@ router.get('/ssh/:id/public', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.params.id}, function(err, user){
-        if(err){
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
+
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
+    if(user._id.str != req.locals.logInfo.id.str){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    var sshDir = user.home + '/.ssh';
+    res.download(sshDir + '/id_rsa.pub', 'id_rsa.pub', function (err) {
+        if (err) {
             logger.error(err);
-            res.status(500).send(err);
-            return;
         }
-        if(!user) {
-            res.send({msg: 'User does not exist'});
-            res.end();
-            return;
-        }
-        if(user._id.str != req.locals.logInfo.id.str){
-            res.status(401).send('Not authorized');
-            return;
-        }
-        var sshDir = user.home + '/.ssh';
-        res.download(sshDir + '/id_rsa.pub', 'id_rsa.pub', function (err) {
-            if (err) {
-                logger.error(err);
-            }
-        });
     });
 });
 
-router.get('/ssh/:id', function(req, res) {
+router.get('/ssh/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
@@ -134,40 +114,32 @@ router.get('/ssh/:id', function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    users_db.findOne({uid: req.params.id}, function(err, user){
-        if(err){
-            logger.error(err);
-            res.status(500).send(err);
-            return;
-        }
-        if(!user) {
-            res.send({msg: 'User does not exist'});
-            res.end();
-            return;
-        }
-        if(user._id.str != req.locals.logInfo.id.str){
-            res.status(401).send('Not authorized');
-            return;
-        }
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
 
-        var fid = new Date().getTime();
-
-        filer.ssh_keygen(user, fid)
-            .then(
-                created_file => {
-                    logger.info('File Created: ', created_file);                })
-            .catch(error => { // reject()
-                logger.error('Create User Failed for: ' + user.uid, error);
-                res.status(500).send('Ssh Keygen Failed');
-                return;
-            });
-
-        // eslint-disable-next-line no-unused-vars
-        events_db.insert({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']}, function(err){});
-        res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
         res.end();
         return;
-    });
+    }
+    if(user._id.str != req.locals.logInfo.id.str){
+        res.status(401).send('Not authorized');
+        return;
+    }
+
+    var fid = new Date().getTime();
+
+    try {
+        let created_file = filer.ssh_keygen(user, fid);
+        logger.debug('Created file', created_file);
+    } catch(error) {
+        logger.error('Create User Failed for: ' + user.uid, error);
+        res.status(500).send('Ssh Keygen Failed');
+        return;  
+    }
+
+    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']});
+    res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
+    res.end();
 });
 
 module.exports = router;

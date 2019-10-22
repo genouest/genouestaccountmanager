@@ -3,10 +3,62 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
-var groupsDb = db.get('groups');
-var usersDb = db.get('users');
+const MongoClient = require('mongodb').MongoClient;
+var mongodb = null;
+var mongo_users = null;
+var mongo_groups = null;
+var mongo_events = null;
+var mongo_reservations = null;
+var mongo_databases = null;
+var mongo_web = null;
+var mongo_projects = null;
+var mongo_tags = null;
+
+var mongo_connect = async function() {
+    let url = CONFIG.mongo.url;
+    let client = null;
+    if(!url) {
+        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
+    } else {
+        client = new MongoClient(CONFIG.mongo.url);
+    }
+    await client.connect();
+    mongodb = client.db(CONFIG.general.db);
+    mongo_users = mongodb.collection('users');
+    mongo_groups = mongodb.collection('groups');
+    mongo_events = mongodb.collection('events');
+    mongo_reservations = mongodb.collection('reservations');
+    mongo_databases = mongodb.collection('databases');
+    mongo_web = mongodb.collection('web');
+    mongo_projects = mongodb.collection('projects');
+    mongo_tags = mongodb.collection('tags');
+};
+// mongo_connect();
+
+exports.init_db = async function() {
+    logger.info('initialize db connection');
+    try {
+        if(mongodb != null) {
+            return null;
+        }
+        await mongo_connect();
+        logger.info('connected');
+        return null;
+    } catch(err){
+        logger.debug('Failed to init db', err);
+        return err;
+    }
+};
+exports.mongodb = mongodb;
+exports.mongo_users = function() {return mongo_users;};
+exports.mongo_groups = function() {return mongo_groups;};
+exports.mongo_events = function() {return mongo_events;};
+exports.mongo_reservations = function() {return mongo_reservations;};
+exports.mongo_databases = function() {return mongo_databases;};
+exports.mongo_web = function() {return mongo_web;};
+exports.mongo_projects = function() {return mongo_projects;};
+exports.mongo_tags = function() {return mongo_tags;};
+
 
 var redis = require('redis');
 var redis_client = null;
@@ -186,94 +238,87 @@ exports.loadAvailableIds = function (strategy) {
     });
 };
 
-function _loadAvailableIds () {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
-        if (idsLoaded) {
-            resolve(false);
-            return;
-        }
+async function _loadAvailableIds () {
+    if (idsLoaded) {
+        return false;
+    }
 
-        if (CONFIG.general.minuid === undefined) {
-            logger.warn('Min and max user ids not defined in config, using some defaults (10000/40000)');
-            CONFIG.general.minuid = 10000;
-            CONFIG.general.maxuid = 40000;
-        }
-        if (CONFIG.general.mingid === undefined) {
-            logger.warn('Min and max group ids not defined in config, using some defaults (10000/40000)');
-            CONFIG.general.mingid = 10000;
-            CONFIG.general.maxgid = 40000;
-        }
+    if (CONFIG.general.minuid === undefined) {
+        logger.warn('Min and max user ids not defined in config, using some defaults (10000/40000)');
+        CONFIG.general.minuid = 10000;
+        CONFIG.general.maxuid = 40000;
+    }
+    if (CONFIG.general.mingid === undefined) {
+        logger.warn('Min and max group ids not defined in config, using some defaults (10000/40000)');
+        CONFIG.general.mingid = 10000;
+        CONFIG.general.maxgid = 40000;
+    }
 
-        if (redis_client === null) {
-            idsLoaded = true;
-            resolve(false);
-            return;
-        }
+    if (redis_client === null) {
+        idsLoaded = true;
+        return false;
+    }
 
-        logger.info('Loading available ids....');
-        usersDb.find().then(function (users) {
-            logger.info('Check existing users');
-            let usedIds = [];
-            let maxUsedId = CONFIG.general.minuid;
-            for (let i = 0; i < users.length; i++) {
-                let user = users[i];
-                if (user.uidnumber !== undefined && user.uidnumber > 0) {
-                    usedIds.push(user['uidnumber']);
-                    if (user['uidnumber'] > maxUsedId) {
-                        maxUsedId = user['uidnumber'];
-                    }
-                }
+    logger.info('Loading available ids....');
+    let users = await mongo_users.find().toArray();
+    logger.info('Check existing users');
+    let usedIds = [];
+    let maxUsedId = CONFIG.general.minuid;
+    for (let i = 0; i < users.length; i++) {
+        let user = users[i];
+        if (user.uidnumber !== undefined && user.uidnumber > 0) {
+            usedIds.push(user['uidnumber']);
+            if (user['uidnumber'] > maxUsedId) {
+                maxUsedId = user['uidnumber'];
             }
+        }
+    }
 
-            if (ID_STRATEGY === ID_STRATEGY_POOL) {
-                for (let j = CONFIG.general.minuid; j < CONFIG.general.maxuid; j++) {
-                    if (usedIds.indexOf(j) === -1) {
-                        if (redis_client !== null) {
-                            redis_client.rpush('my:ids:user', j);
-                        } else {
-                            userIds.push(j);
-                        }
-                    }
-                }
-            } else {
-                redis_client.set('my:ids:user', maxUsedId);
-            }
-
-            groupsDb.find().then(function (groups) {
-                logger.info('Check existing groups');
-                let usedIds = [];
-                let maxUsedId = CONFIG.general.mingid;
-                for (let i = 0; i < groups.length; i++) {
-                    let group = groups[i];
-                    if (group.gid !== undefined && group.gid > 0) {
-                        usedIds.push(group['gid']);
-                        if (group.gid > maxUsedId) {
-                            maxUsedId = group.gid;
-                        }
-                    }
-                }
-
-                if (ID_STRATEGY === ID_STRATEGY_POOL) {
-                    for (let j = CONFIG.general.mingid; j < CONFIG.general.maxgid; j++) {
-                        if (usedIds.indexOf(j) === -1) {
-                            if (redis_client !== null) {
-                                redis_client.rpush('my:ids:group', j);
-                            } else {
-                                groupIds.push(j);
-                            }
-                        }
-                    }
+    if (ID_STRATEGY === ID_STRATEGY_POOL) {
+        for (let j = CONFIG.general.minuid; j < CONFIG.general.maxuid; j++) {
+            if (usedIds.indexOf(j) === -1) {
+                if (redis_client !== null) {
+                    redis_client.rpush('my:ids:user', j);
                 } else {
-                    redis_client.set('my:ids:group', maxUsedId);
+                    userIds.push(j);
                 }
-                logger.info('Available ids loaded, application is ready');
-                redis_client.set('my:ids:set', 'done');
-                idsLoaded = true;
-                resolve(true);
-            });
-        });
-    });
+            }
+        }
+    } else {
+        redis_client.set('my:ids:user', maxUsedId);
+    }
+    let groups = await mongo_groups.find().toArray();
+    logger.info('Check existing groups');
+    let usedGIds = [];
+    let maxUsedGId = CONFIG.general.mingid;
+    for (let i = 0; i < groups.length; i++) {
+        let group = groups[i];
+        if (group.gid !== undefined && group.gid > 0) {
+            usedGIds.push(group['gid']);
+            if (group.gid > maxUsedGId) {
+                maxUsedGId = group.gid;
+            }
+        }
+    }
+
+    if (ID_STRATEGY === ID_STRATEGY_POOL) {
+        for (let j = CONFIG.general.mingid; j < CONFIG.general.maxgid; j++) {
+            if (usedGIds.indexOf(j) === -1) {
+                if (redis_client !== null) {
+                    redis_client.rpush('my:ids:group', j);
+                } else {
+                    groupIds.push(j);
+                }
+            }
+        }
+    } else {
+        redis_client.set('my:ids:group', maxUsedGId);
+    }
+    logger.info('Available ids loaded, application is ready');
+    redis_client.set('my:ids:set', 'done');
+    // eslint-disable-next-line require-atomic-updates
+    idsLoaded = true;
+    return true;
 }
 
 exports.getUserAvailableId = function () {
@@ -290,38 +335,28 @@ exports.getGroupAvailableId = function () {
     return _getAvailableId(1);
 };
 
-function _getUsersMaxId(minID) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
-        let minUserID = minID;
-        usersDb.find({}, {limit: 1 , sort: {uidnumber: -1}}, (err, data) => {
-            if (err)  {
-                resolve(minUserID);
-                return;
-            }
-            if (data && data.length > 0){
-                minUserID = data[0].uidnumber + 1;
-            }
-            resolve(minUserID);
-        });
-    });
+async function _getUsersMaxId(minID) {
+    let minUserID = minID;
+    let data = await mongo_users.find({}, {limit: 1 , sort: {uidnumber: -1}}).toArray();
+    if (!data)  {
+        return minUserID;
+    }
+    if (data && data.length > 0){
+        minUserID = data[0].uidnumber + 1;
+    }
+    return minUserID;
 }
 
-function _getGroupsMaxId(minID) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
-        let minGroupID = minID;
-        groupsDb.find({}, {limit: 1 , sort: {gid: -1}}, (err , data) => {
-            if (err)  {
-                resolve(minGroupID);
-                return;
-            }
-            if (data && data.length > 0){
-                minGroupID = data[0].gid + 1;
-            }
-            resolve(minGroupID);
-        });
-    });
+async function _getGroupsMaxId(minID) {
+    let minGroupID = minID;
+    let data = await mongo_groups.find({}, {limit: 1 , sort: {gid: -1}}).toArray();
+    if (!data)  {
+        return minGroupID;
+    }
+    if (data && data.length > 0){
+        minGroupID = data[0].gid + 1;
+    }
+    return minGroupID;
 }
 
 function _getAvailableId (objType) {

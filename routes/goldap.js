@@ -6,11 +6,7 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
 
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
-var groups_db = db.get('groups');
-// var users_db = db.get('users'),
-// var events_db = db.get('events');
+var utils= require('./utils');
 
 /*
 var options = {
@@ -84,194 +80,166 @@ function get_user_dn(user) {
 
 module.exports = {
 
-    reset_password: function(user, fid, callback){
-        get_user_dn(user)
-            .then(
-                user_dn => { // resolve()
-                    return filer.ldap_reset_password(user, user_dn, fid);
-                })
-            .then(
-                created_file => {
-                    logger.info('File Created: ', created_file);
-                    callback();
-                })
-            .catch(error => { // reject()
-                logger.error('Password not updated for: '+ user.uid, error);
-                callback(error);
-            });
-    },
-
-    bind: function(uid, password, callback) {
-        /*
-        let body = JSON.stringify({
-            id: uid, password: password
-        });
-        */
-
-        let client = myldap.createClient({
-            url: 'ldap://' +  CONFIG.ldap.host
-        });
-        client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
-            if(err) {
-                logger.error('Failed to bind as admin to ldap', err);
-                callback(err);
-            }
-            var opts = {
-                filter: '(uid=' + uid + ')',
-                scope: 'sub',
-                attributes: ['dn']
-            };
-
-            client.search('ou=people,' + CONFIG.ldap.dn, opts, function(err, res) {
-                if(err) {
-                    logger.error('Could not find ' + uid, err);
-                    callback(err);
-                }
-                let foundMatch = false;
-                res.on('searchEntry', function(entry) {
-                    var user_dn = entry.object['dn'];
-                    foundMatch = true;
-                    client.bind(user_dn, password, function(err) {
-                        callback(err);
-                    });
-                });
-                // eslint-disable-next-line no-unused-vars
-                res.on('searchReference', function(referral) {
-                });
-                res.on('error', function(err) {
-                    logger.error('error ', err);
-                    callback(err);
-                });
-                // eslint-disable-next-line no-unused-vars
-                res.on('end', function(result) {
-                    if(! foundMatch){
-                        callback('no user found');
-                    }
-                });
-            });
-        });
-        /*
-        let bind_options = {
-            binddn: 'uid='+uid+'ou=people,'+CONFIG.ldap.dn,
-            password: password
-        }
-        */
-
-        /*
-        let fb_options = {
-            base: CONFIG.ldap.dn,
-            filter: '(uid='+uid+')',
-            scope: 'sub',
-            attrs: '',
-            password: password
-        }*/
-
-    },
-
-
-    modify: function(user, fid, callback) {
-        /* Modify contact info
-           dn: cn=Modify Me,dc=example,dc=com
-           changetype: modify
-           replace: mail
-           mail: modme@example.com
-           -
-           add: title
-           title: Grand Poobah
-           -
-           add: jpegPhoto
-           jpegPhoto:< file:///tmp/modme.jpeg
-           -
-           delete: description
-        */
-        if(! user.is_fake && (user.firstname == '' || user.lastname == '')) {
-            logger.debug('firstname or lastname empty');
-            callback();
-            return;
-        }
-
-        get_user_dn(user)
-            .then(
-                user_dn => { // resolve()
-                    return filer.ldap_modify_user(user, user_dn, fid);
-                })
-            .then(
-                created_file => {
-                    logger.info('File Created: ', created_file);
-                    callback();
-                })
-            .catch(error => { // reject()
-                logger.error('Modify Failed for: ' + user.uid, error);
-                callback(error);
-            });
-    },
-
-    add_group: function(group, fid, callback) {
-        filer.ldap_add_group(group, fid)
-            .then(
-                created_file => {
-                    logger.info('File Created: ', created_file);
-                    callback();
-                })
-            .catch(error => { // reject()
-                logger.error('Add Group Failed for: ' + group.name, error);
-                callback(error);
-            });
-    },
-
-    delete_group: function(group, fid, callback) {
-        filer.ldap_delete_group(group, fid)
-            .then(
-                created_file => {
-                    logger.info('File Created: ', created_file);
-                    callback();
-                })
-            .catch(error => { // reject()
-                logger.error('Delete Group Failed for: ' + group.name, error);
-                callback(error);
-            });
-    },
-
-    add: function(user, fid, callback) {
-        groups_db.findOne({'name': user.group}, function(err, group){
-            if(err) {
-                logger.error(err);
-                callback(err);
-            }
-            filer.ldap_add_user(user, group, fid)
+    reset_password: function(user, fid){
+        return new Promise(function(resolve, reject){
+            get_user_dn(user)
                 .then(
-                    created_file => {
-                        logger.info('File Created: ', created_file);
-                        return filer.ldap_add_user_to_group(user, fid);
+                    user_dn => { // resolve()
+                        return filer.ldap_reset_password(user, user_dn, fid);
                     })
                 .then(
                     created_file => {
                         logger.info('File Created: ', created_file);
-                        callback();
+                        resolve();
                     })
                 .catch(error => { // reject()
-                    logger.error('Add User Failed for: ' + user.uid, error);
-                    callback(error);
+                    logger.error('Password not updated for: '+ user.uid, error);
+                    reject(error);
                 });
         });
     },
 
-    change_user_groups: function(user, group_add, group_remove, fid, callback) {
-        /*
-          dn: cn=XXX,ou=groups,dc=genouest,dc=org
-          changetype: modify
-          delete: memberUid / add: memberUid
-          memberUid: YYY
-        */
-        filer.ldap_change_user_groups(user, group_add, group_remove, fid)
-            .then(
-                created_file => {
-                    logger.info('File Created: ', created_file);
-                    callback();
-                })
-            .catch(error => { // reject()
-                logger.error('User Group Change Failed for: ' + user.uid, error);
-                callback(error);
+    bind: function(uid, password) {
+        return new Promise(function(resolve, reject){
+            let client = myldap.createClient({
+                url: 'ldap://' +  CONFIG.ldap.host
             });
+            client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
+                if(err) {
+                    logger.error('Failed to bind as admin to ldap', err);
+                    reject(err);
+                }
+                var opts = {
+                    filter: '(uid=' + uid + ')',
+                    scope: 'sub',
+                    attributes: ['dn']
+                };
+
+                client.search('ou=people,' + CONFIG.ldap.dn, opts, function(err, res) {
+                    if(err) {
+                        logger.error('Could not find ' + uid, err);
+                        reject(err);
+                    }
+                    let foundMatch = false;
+                    res.on('searchEntry', function(entry) {
+                        var user_dn = entry.object['dn'];
+                        foundMatch = true;
+                        client.bind(user_dn, password, function(err) {
+                            if(err) {
+                                reject(err);
+                                return;
+                            }
+                            resolve(err);
+                        });
+                    });
+                    // eslint-disable-next-line no-unused-vars
+                    res.on('searchReference', function(referral) {
+                    });
+                    res.on('error', function(err) {
+                        logger.error('error ', err);
+                        reject(err);
+                    });
+                    // eslint-disable-next-line no-unused-vars
+                    res.on('end', function(result) {
+                        if(! foundMatch){
+                            reject('no user found');
+                        }
+                    });
+                });
+            });
+        });
+
+    },
+
+
+    modify: function(user, fid) {
+        return new Promise(function(resolve, reject){
+            if(! user.is_fake && (user.firstname == '' || user.lastname == '')) {
+                logger.debug('firstname or lastname empty');
+                reject();
+                return;
+            }
+
+            get_user_dn(user)
+                .then(
+                    user_dn => { // resolve()
+                        return filer.ldap_modify_user(user, user_dn, fid);
+                    })
+                .then(
+                    created_file => {
+                        logger.info('File Created: ', created_file);
+                        resolve();
+                    })
+                .catch(error => { // reject()
+                    logger.error('Modify Failed for: ' + user.uid, error);
+                    reject(error);
+                });
+        });
+    },
+
+    add_group: function(group, fid) {
+        return new Promise(function(resolve, reject){
+            filer.ldap_add_group(group, fid)
+                .then(
+                    created_file => {
+                        logger.info('File Created: ', created_file);
+                        resolve();
+                    })
+                .catch(error => { // reject()
+                    logger.error('Add Group Failed for: ' + group.name, error);
+                    reject(error);
+                });
+        });
+    },
+
+    delete_group: function(group, fid) {
+        return new Promise(function(resolve, reject){
+            filer.ldap_delete_group(group, fid)
+                .then(
+                    created_file => {
+                        logger.info('File Created: ', created_file);
+                        resolve();
+                    })
+                .catch(error => { // reject()
+                    logger.error('Delete Group Failed for: ' + group.name, error);
+                    reject(error);
+                });
+        });
+    },
+
+    add: async function(user, fid) {
+        let group = null;
+        try {
+            group = await utils.mongo_groups().findOne({'name': user.group});
+        } catch(e) {
+            logger.error(e);
+            throw e;
+        }
+        
+        try {
+            let created_file = await filer.ldap_add_user(user, group, fid);
+            logger.debug('File created', created_file);
+            created_file = await filer.ldap_add_user_to_group(user, fid);
+            logger.debug('File created', created_file);
+        } catch(error) {
+            logger.error('Add User Failed for: ' + user.uid, error);
+            throw error;
+        }
+        return true;
+    },
+
+    change_user_groups: function(user, group_add, group_remove, fid) {
+        return new Promise(function(resolve, reject){
+            filer.ldap_change_user_groups(user, group_add, group_remove, fid)
+                .then(
+                    created_file => {
+                        logger.info('File Created: ', created_file);
+                        resolve();
+                    })
+                .catch(error => { // reject()
+                    logger.error('User Group Change Failed for: ' + user.uid, error);
+                    reject(error);
+                });
+        });
     },
 };

@@ -5,16 +5,10 @@ var router = express.Router();
 
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
+
+var utils = require('./utils');
 // const winston = require('winston');
 // const logger = winston.loggers.get('gomngr');
-
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+GENERAL_CONFIG.db);
-// var groups_db = db.get('groups');
-// var databases_db = db.get('databases');
-// var web_db = db.get('web');
-var users_db = db.get('users');
-// var events_db = db.get('events');
 
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
@@ -68,52 +62,49 @@ router.get('/plugin/:id', function(req, res) {
     res.send(template);
 });
 
-router.get('/plugin/:id/:user', function(req, res) {
+router.get('/plugin/:id/:user', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-        if(err || user == null){
-            res.status(404).send('User not found');
-            return;
-        }
-        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-            user.is_admin = false;
-        }
-        else {
-            user.is_admin = true;
-        }
-        plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
-            res.send(result);
-        });
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+        user.is_admin = false;
+    }
+    else {
+        user.is_admin = true;
+    }
+    plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
+        res.send(result);
     });
 });
 
-router.post('/plugin/:id/:user', function(req, res) {
+router.post('/plugin/:id/:user', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    users_db.findOne({_id: req.locals.logInfo.id}, function(err, user){
-        if(err || user == null){
-            res.status(404).send('User not found');
-            return;
-        }
-        if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-            user.is_admin = false;
-        }
-        else {
-            user.is_admin = true;
-        }
-        plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
-            res.send(result);
-        }, function(err){
-            res.status(400).send(err);
-        });
+
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+        user.is_admin = false;
+    }
+    else {
+        user.is_admin = true;
+    }
+    plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
+        res.send(result);
+    }, function(err){
+        res.status(400).send(err);
     });
-
-
 });
 
 module.exports = router;

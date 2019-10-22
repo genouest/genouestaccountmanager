@@ -1,13 +1,10 @@
 var CONFIG = require('config');
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    // web_db = db.get('web'),
-    // users_db = db.get('users'),
-    events_db = db.get('events');
+
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const request = require('request');
 
+var utils = require('./utils');
 
 var mail_set = false;
 
@@ -117,17 +114,15 @@ module.exports = {
         };
 
         // eslint-disable-next-line no-unused-vars
-        baseRequest.put(options, function(err, res, body) {
+        baseRequest.put(options, async function(err, res, body) {
             if(err || res.statusCode !== 200){
-                // eslint-disable-next-line no-unused-vars
-                events_db.insert({'date': new Date().getTime(), 'action': 'subscription error ' + email + ' to mailing list' , 'logs': []}, function(err){});
+                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error ' + email + ' to mailing list' , 'logs': []});
                 logger.error('Failed to add ' + email + ' to mailing list');
                 logger.error(res);
                 callback();
                 return;
             }
-            // eslint-disable-next-line no-unused-vars
-            events_db.insert({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []}, function(err){});
+            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + ' to mailing list' , 'logs': []});
             callback();
         });
     },
@@ -143,14 +138,13 @@ module.exports = {
         };
 
         // eslint-disable-next-line no-unused-vars
-        baseRequest.post(options, function(err, res, body) {
+        baseRequest.post(options, async function(err, res, body) {
             if(err || res.statusCode !== 200){
                 logger.error('Failed to create list ' + name);
                 callback();
                 return;
             }
-            // eslint-disable-next-line no-unused-vars
-            events_db.insert({'date': new Date().getTime(), 'action': 'create list ' + name , 'logs': []}, function(err){});
+            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'create list ' + name , 'logs': []});
             callback();
         });
     },
@@ -171,16 +165,14 @@ module.exports = {
         };
 
         // eslint-disable-next-line no-unused-vars
-        baseRequest.delete(options, function(err, res, body) {
+        baseRequest.delete(options, async function(err, res, body) {
             if(err || res.statusCode !== 200){
-                // eslint-disable-next-line no-unused-vars
-                events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + email + 'in mailing list' , 'logs': []}, function(err){});
+                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + email + 'in mailing list' , 'logs': []});
                 logger.error('Failed to remove ' + email + ' from mailing list');
                 callback();
                 return;
             }
-            // eslint-disable-next-line no-unused-vars
-            events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []}, function(err){});
+            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
             callback();
         });
 
@@ -208,66 +200,63 @@ module.exports = {
         };
 
         // eslint-disable-next-line no-unused-vars
-        baseRequest.put(options, function(err, res, body) {
+        baseRequest.put(options, async function(err, res, body) {
             if(err){
-                // eslint-disable-next-line no-unused-vars
-                events_db.insert({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
+                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []});
                 logger.error('Failed to add ' + newemail + ' to mailing list : ' + err );
                 callback();
                 return;
             }
             if(res.statusCode !== 200){
-                // eslint-disable-next-line no-unused-vars
-                events_db.insert({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
+                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []});
                 logger.error('Failed to add ' + newemail + ' to mailing list : error code ' + res.statusCode);
                 callback();
                 return;
             }
             options.body = {'email': [oldemail], 'skip':'true'};
             // eslint-disable-next-line no-unused-vars
-            baseRequest.delete(options, function(err, res, body) {
+            baseRequest.delete(options, async function(err, res, body) {
                 if(err){
-                    // eslint-disable-next-line no-unused-vars
-                    events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []}, function(err){});
+                    await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []});
                     logger.error('Failed to unsubscribe ' + oldemail + ': ' + err);
                     callback();
                     return;
                 }
                 if(res.statusCode !== 200){
-                    // eslint-disable-next-line no-unused-vars
-                    events_db.insert({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []}, function(err){});
+                    await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []});
                     logger.error('Failed to unsubscribe ' + oldemail + ': error code ' + res.statusCode);
                     callback();
                     return;
                 }
-                // eslint-disable-next-line no-unused-vars
-                events_db.insert({'date': new Date().getTime(), 'action': 'update ' + newemail + 'in mailing list' , 'logs': []}, function(err){});
+                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'update ' + newemail + 'in mailing list' , 'logs': []});
                 logger.info(oldemail+' unsubscribed');
                 callback();
             });
         });
     },
 
-    sendUser: function(mailOptions, callback) {
-        const options = {
-            uri: '/mail',
-            body: mailOptions
-        };
+    sendUser: function(mailOptions) {
+        return new Promise((resolve, reject) => {
+            const options = {
+                uri: '/mail',
+                body: mailOptions
+            };
+            logger.debug('send message', mailOptions);
 
-        // eslint-disable-next-line no-unused-vars
-        baseRequest.post(options, function(err, res, body) {
-            if(err){
-                logger.error('Failed to send mail : ' + err);
-                callback('Failed to send mail : ' + err, false);
-                return;
-            }
-            if(res.statusCode !== 200){
-                logger.error('Failed to send mail : error code ' + res.statusCode);
-                callback('Failed to send mail : error code ' + res.statusCode, false);
-                return;
-            }
-
-            callback('', false);
+            // eslint-disable-next-line no-unused-vars
+            baseRequest.post(options, function(err, res, body) {
+                if(err){
+                    logger.error('Failed to send mail : ' + err);
+                    reject('Failed to send mail : ' + err);
+                    return;
+                }
+                if(res.statusCode !== 200){
+                    logger.error('Failed to send mail : error code ' + res.statusCode);
+                    reject('Failed to send mail : error code ' + res.statusCode);
+                    return;
+                }
+                resolve();
+            });
         });
 
     },

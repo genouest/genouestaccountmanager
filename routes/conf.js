@@ -1,11 +1,5 @@
 var express = require('express');
 var router = express.Router();
-// var bcrypt = require('bcryptjs');
-// var escapeshellarg = require('escapeshellarg');
-// var markdown = require("markdown").markdown;
-// var htmlToText = require('html-to-text');
-
-// var Promise = require('promise');
 // const winston = require('winston');
 // const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');

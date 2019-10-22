@@ -1,3 +1,5 @@
+/* eslint-disable require-atomic-updates */
+/* eslint-disable no-console */
 'use strict';
 
 var express = require('express');
@@ -27,6 +29,8 @@ const wlogger = winston.loggers.add('gomngr', {
     transports: [myconsole]
 });
 
+const promMid = require('express-prometheus-middleware');
+
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -43,15 +47,13 @@ var tp = require('./routes/tp');
 var conf = require('./routes/conf');
 var utils = require('./routes/utils.js');
 var tags = require('./routes/tags.js');
+var ObjectID = require('mongodb').ObjectID;
 
 var CONFIG = require('config');
 
 const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
 const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
 
-if(MY_ADMIN_USER !== null){
-    users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
-}
 
 var app = express();
 app.use(cors());
@@ -86,14 +88,45 @@ app.use(session({
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-var monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users');
+app.use(promMid({
+    metricsPath: '/metrics',
+    collectDefaultMetrics: true,
+    requestDurationBuckets: [0.1, 0.5, 1, 1.5],
+}));
 
+const runningEnv = process.env.NODE_ENV || 'prod';
+const { spawn } = require('child_process');
+const if_dev_execute_scripts = function(){
+    return new Promise(function (resolve, reject){
+        if (runningEnv !== 'test'){
+            resolve();
+            return;
+        }
+        wlogger.info('In *test* environment, check for scripts to execute');
+        let cron_bin_script = CONFIG.general.cron_bin_script || null;
+        if(cron_bin_script === null){
+            wlogger.error('cron script not defined');
+            reject({'err': 'cron script not defined'});
+            return;
+        }
+        var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+        procScript.on('exit', function (code, signal) {
+            wlogger.info(cron_bin_script + ' process exited with ' +
+                        `code ${code} and signal ${signal}`);
+            resolve();
+        });
+    });
+};
 
-app.all('*', function(req, res, next){
+app.all('*', async function(req, res, next){
+    if (runningEnv === 'test'){
+        res.on('finish', function() {
+            wlogger.debug('*test* env, on finish execute cron script');
+            if_dev_execute_scripts().then(function(){});
+        });
+    }
 
-    var logInfo = {
+    let logInfo = {
         is_logged: false,
         mail_token: null,
         id: null,
@@ -104,11 +137,11 @@ app.all('*', function(req, res, next){
         req.locals = {};
     }
 
-    var token = req.headers['x-api-key'] || null;
-    var jwtToken = null;
-    var authorization = req.headers['authorization'] || null;
+    let token = req.headers['x-api-key'] || null;
+    let jwtToken = null;
+    let authorization = req.headers['authorization'] || null;
     if (authorization) {
-        var elts = authorization.split(' ');
+        let elts = authorization.split(' ');
         try {
             jwtToken = jwt.verify(elts[elts.length - 1], CONFIG.general.secret);
         } catch(err) {
@@ -135,16 +168,15 @@ app.all('*', function(req, res, next){
                 logInfo.u2f = jwtToken.u2f;
             }
             if(jwtToken.user) {
-                users_db.findOne({'_id': jwtToken.user}, function(err, session_user){
-                    if(err){
-                        return res.status(401).send('Invalid token').end();
-                    }
-                    req.session.gomngr = session_user._id;
-                    logInfo.id = session_user._id;
-                    logInfo.session_user = session_user;
-                    req.locals.logInfo = logInfo;
-                    next();
-                });
+                let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
+                if(!session_user){
+                    return res.status(401).send('Invalid token').end();
+                }
+                req.session.gomngr = session_user._id;
+                logInfo.id = session_user._id;
+                logInfo.session_user = session_user;
+                req.locals.logInfo = logInfo;
+                next();
             } else {
                 req.locals.logInfo = logInfo;
                 next();
@@ -161,21 +193,20 @@ app.all('*', function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            users_db.findOne({'apikey': token}, function(err, session_user){
-                if(err){
-                    return res.status(401).send('Invalid token').end();
-                }
-                req.session.gomngr = session_user._id;
-                req.session.is_logged = true;
-                logInfo.id = session_user._id;
-                logInfo.is_logged = true;
-                if(req.session.u2f){
-                    logInfo.u2f = req.session.u2f;
-                }
-                logInfo.session_user = session_user;
-                req.locals.logInfo = logInfo;
-                next();
-            });
+            let session_user = await utils.mongo_users().findOne({'apikey': token});
+            if(!session_user){
+                return res.status(401).send('Invalid token').end();
+            }
+            req.session.gomngr = session_user._id;
+            req.session.is_logged = true;
+            logInfo.id = session_user._id;
+            logInfo.is_logged = true;
+            if(req.session.u2f){
+                logInfo.u2f = req.session.u2f;
+            }
+            logInfo.session_user = session_user;
+            req.locals.logInfo = logInfo;
+            next();
         }
         catch(error){
             wlogger.error('Invalid token', error);
@@ -195,13 +226,12 @@ app.all('*', function(req, res, next){
             logInfo.u2f =req.session.u2f;
         }
         if(req.session.gomngr) {
-            users_db.findOne({'_id': req.session.gomngr}, function(err, session_user){
-                if(session_user){
-                    logInfo.session_user = session_user;
-                }
-                req.locals.logInfo = logInfo;
-                next();
-            });
+            let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
+            if(session_user){
+                logInfo.session_user = session_user;
+            }
+            req.locals.logInfo = logInfo;
+            next();
         } else {
             req.locals.logInfo = logInfo;
             next();
@@ -286,6 +316,9 @@ app.post('/plugin/:id/:user/deactivate', plugin);
 app.get('/tp', tp);
 app.post('/tp', tp);
 app.delete('/tp/:id', tp);
+app.get('/tp/:id', tp);
+app.put('/tp/:id/reserve/now', tp);
+app.put('/tp/:id/reserve/stop', tp);
 
 app.get('/auth', auth);
 app.post('/auth/:id', auth);
@@ -303,6 +336,12 @@ app.post('/tags/:kind/:id', tags);
 app.get('/robots.txt', function (request, response) {
     response.sendFile(path.resolve(__dirname, 'robots.txt'));
 });
+app.get('/manager', function(request, response){
+    response.redirect('/manager2');
+});
+app.get('/manager/*', function(request, response){
+    response.redirect('/manager2');
+});
 // Default route if no match (for spa handling)
 app.get('*', function (request, response) {
     response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
@@ -315,8 +354,6 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-
-// error handlers
 
 // development error handler
 // will print stacktrace
@@ -345,10 +382,18 @@ else {
 
 module.exports = app;
 
-// Setup list of available user/group ids
-// eslint-disable-next-line no-unused-vars
-utils.loadAvailableIds().then(function (_alreadyLoaded) {
 
+utils.init_db().then(async () => {
+    if(MY_ADMIN_USER !== null){
+        wlogger.info('Create admin user');
+        await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+        if (runningEnv == 'test'){
+            wlogger.info('Execute cron script');
+            await if_dev_execute_scripts();
+        }
+    }
+    // eslint-disable-next-line no-unused-vars
+    await utils.loadAvailableIds();
     if (!module.parent) {
         http.createServer(app).listen(app.get('port'), function(){
             wlogger.info('Server listening on port ' + app.get('port'));
@@ -356,3 +401,29 @@ utils.loadAvailableIds().then(function (_alreadyLoaded) {
     }
 
 });
+
+/*
+if(MY_ADMIN_USER !== null){
+    users.init().then(() => {
+        return utils.init();
+    }).then(()=>{
+        console.log('create admin user', MY_ADMIN_USER);
+        users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+    }).catch(err => {
+        console.log('init failed', err);
+        process.exit(1);
+    });
+}
+*/
+
+
+// Setup list of available user/group ids
+// eslint-disable-next-line no-unused-vars
+/*
+utils.loadAvailableIds().then(function (_alreadyLoaded) {
+    if (!module.parent) {
+        http.createServer(app).listen(app.get('port'), function(){
+            wlogger.info('Server listening on port ' + app.get('port'));
+        });
+    }
+});*/

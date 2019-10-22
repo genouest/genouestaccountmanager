@@ -1,6 +1,4 @@
 /* eslint-disable no-console */
-//var fs = require('fs');
-//var CONFIG = require('config');
 var notif = require('../routes/notif_gomail.js');
 var Promise = require('promise');
 
