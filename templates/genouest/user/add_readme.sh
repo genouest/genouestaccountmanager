@@ -1,1 +1,0 @@
-../../default/user/add_readme.sh

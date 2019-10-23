@@ -1,1 +1,0 @@
-../../default/project/delete_project.sh

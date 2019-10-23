@@ -1,1 +1,0 @@
-../../default/user/reset_password.sh

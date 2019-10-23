@@ -1,1 +1,0 @@
-../../default/user/delete_extra_dirs.sh

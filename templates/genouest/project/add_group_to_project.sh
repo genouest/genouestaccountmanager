@@ -1,1 +1,0 @@
-../../default/project/add_group_to_project.sh

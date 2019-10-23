@@ -1,1 +1,0 @@
-../../default/user/create_extra_group.sh

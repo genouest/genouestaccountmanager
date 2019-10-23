@@ -1,1 +1,0 @@
-../../default/user/move_extra_dirs.sh

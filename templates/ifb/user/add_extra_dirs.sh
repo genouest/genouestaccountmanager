@@ -1,1 +1,0 @@
-../../default/user/add_extra_dirs.sh

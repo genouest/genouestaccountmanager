@@ -1,1 +1,0 @@
-../../default/project/remove_user_from_project.sh

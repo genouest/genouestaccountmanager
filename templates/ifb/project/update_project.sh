@@ -1,1 +1,0 @@
-../../default/project/update_project.sh

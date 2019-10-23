@@ -1,1 +1,0 @@
-../../default/user/change_group.sh

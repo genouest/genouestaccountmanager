@@ -1,1 +1,0 @@
-../../default/user/delete_group.sh

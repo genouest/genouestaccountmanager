@@ -1,1 +1,0 @@
-../../default/project/add_project.sh
