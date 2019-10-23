@@ -32,9 +32,6 @@ export class AuthService {
                             reject({'error': resp.body['msg']});
                             return;
                         }
-                        //if(resp.body['token']) {
-                        //  resp.body['user']['token'] = resp.body['token'];
-                        //}
 
                         if(resp.body['double_auth']) {
                             resp.body['user']['double_auth'] = resp.body['double_auth']
@@ -108,14 +105,9 @@ export class AuthService {
     private _setSession(profile) {
         // Save authentication data and update login status subject
         this.userProfile = profile;
-        localStorage.setItem('my-user', JSON.stringify(profile))
-        /*
-          if(profile.token !== '') {
-          this.accessToken = profile.token;
-          this.authenticated = true;
-          this.$authStatus.next(true);
-          localStorage.setItem('my-api-key', profile.token);
-          }*/
+        if(localStorage !== null) {
+            localStorage.setItem('my-user', JSON.stringify(profile));
+        }
     }
 
     logout() {
@@ -123,18 +115,21 @@ export class AuthService {
         this.userProfile = null;
         this.authenticated = false;
         this.$authStatus.next(false);
-        localStorage.removeItem('my-api-key');
-        localStorage.removeItem('my-user')
+        if (localStorage !== null) {
+            localStorage.removeItem('my-api-key');
+            localStorage.removeItem('my-user');
+        }
     }
 
     updateApiKey(token) {
         this.userProfile.apikey = token;
-        // localStorage.setItem('my-api-key', token);
-
     }
 
     autoLog() {
-        let key = localStorage.getItem('my-api-key')
+        let key = null;
+        if (localStorage !== null) {
+            key = localStorage.getItem('my-api-key');
+        }
         if (!key) {
             return
         }
@@ -145,9 +140,6 @@ export class AuthService {
         };
         this.http.get(environment.apiUrl + '/auth', httpOptions).subscribe(
             resp =>{
-                //if(resp['token']) {
-                //  resp['user']['token'] = resp['token'];
-                //}
                 if(resp['user']) {
                     this._setSession(resp['user']);
                     this.authenticated = true;
@@ -160,14 +152,14 @@ export class AuthService {
     }
 
     get profile(): any {
-        if(! this.userProfile && localStorage.getItem('my-user')) {
+        if(! this.userProfile && localStorage !== null && localStorage.getItem('my-user')) {
             return JSON.parse(localStorage.getItem('my-user'))
         }
         return this.userProfile
     }
 
     get isLoggedIn(): boolean {
-        if(!this.authenticated && localStorage.getItem('my-api-key')) {
+        if(!this.authenticated && localStorage !== null && localStorage.getItem('my-api-key')) {
             return true
         }
         return this.authenticated
@@ -190,8 +182,12 @@ export class AuthInterceptor implements HttpInterceptor {
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let authReq = req;
-        if(! this.auth.accessToken && localStorage.getItem('my-api-key')) {
-            this.auth.accessToken = localStorage.getItem('my-api-key');
+        try {
+            if(! this.auth.accessToken && localStorage.getItem('my-api-key')) {
+                this.auth.accessToken = localStorage.getItem('my-api-key');
+            }
+        } catch(err) {
+            console.debug('cannot access localstorage', err);
         }
         if(this.auth.accessToken) {
             authReq = req.clone({
@@ -202,7 +198,11 @@ export class AuthInterceptor implements HttpInterceptor {
             tap(event => {
                 if(event['body'] && event['body']['token']) {
                     this.auth.accessToken = event['body']['token'];
-                    localStorage.setItem('my-api-key', event['body']['token']);
+                    try {
+                        localStorage.setItem('my-api-key', event['body']['token']);
+                    } catch(err) {
+                        console.debug('cannot save in localstorage', err);
+                    }
 
                 }
             }, error => {
