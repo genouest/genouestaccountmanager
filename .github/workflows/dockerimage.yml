@@ -1,0 +1,19 @@
+name: Docker Image CI
+
+on: [push]
+
+jobs:
+
+  build:
+ 
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: |
+        docker build . --file Dockerfile --tag docker.pkg.github.com/genouest/genouestaccountmanager/my:$GITHUB_SHA
+        docker build cron --file cron/Dockerfile-cron --tag docker.pkg.github.com/genouest/genouestaccountmanager/mycron:$GITHUB_SHA
+        docker login docker.pkg.github.com -u ${{ secrets.GHR_USER }} -p ${{ secrets.GHR_TOKEN }}
+        docker push docker.pkg.github.com/genouest/genouestaccountmanager/my:$GITHUB_SHA
+        docker push docker.pkg.github.com/genouest/genouestaccountmanager/mycron:$GITHUB_SHA
