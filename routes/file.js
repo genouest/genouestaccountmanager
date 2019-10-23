@@ -4,17 +4,21 @@ const logger = winston.loggers.get('gomngr');
 const CONFIG = require('config');
 const fs = require('fs');
 const templates_dir = 'templates/' + CONFIG.general.templates;
+const templates_dir_default = 'templates/default';
 
 // Todo: move utils function which manage file content here
 // var utils = require('../routes/utils.js');
 
 // Todo: Manage mail template with nunjuck
 
-nunjucks.configure(templates_dir, {
-    autoescape: true,
-    trimBlocks: true,
-    lstripBlocks: true
-});
+nunjucks.configure(
+    [templates_dir, templates_dir_default],
+    {
+        autoescape: true,
+        trimBlocks: true,
+        lstripBlocks: true
+    }
+);
 
 
 const tplconf = require('../' + templates_dir + '/templates.json');
