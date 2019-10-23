@@ -3,7 +3,7 @@
 var express = require('express');
 var router = express.Router();
 // var bcrypt = require('bcryptjs');
-var escapeshellarg = require('escapeshellarg');
+// var escapeshellarg = require('escapeshellarg');
 var markdown = require('markdown').markdown;
 var htmlToText = require('html-to-text');
 var validator = require('email-validator');
@@ -1696,9 +1696,10 @@ router.put('/user/:id/ssh', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
+    let key = req.body.ssh;
     // Remove carriage returns if any
     // Escape some special chars for security
-    user.ssh = user.ssh.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
+    user.ssh = key.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
     if (utils.sanitizeSSHKey(user.ssh) === undefined) {
         res.status(403).send('Invalid SSH Key');
         return;
@@ -1708,9 +1709,9 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
     // Update SSH Key
-    await utils.mongo_users().updateOne({_id: user._id}, {'$set': {ssh: req.body.ssh}});
+    await utils.mongo_users().updateOne({_id: user._id}, {'$set': {ssh: key}});
     let fid = new Date().getTime();
-    user.ssh = escapeshellarg(req.body.ssh);
+    // user.ssh = escapeshellarg(req.body.ssh);
     try {
         let created_file = await filer.user_add_ssh_key(user, fid);
         logger.info('File Created: ', created_file);
