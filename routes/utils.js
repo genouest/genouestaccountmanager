@@ -95,7 +95,7 @@ function sanitizeString(rawValue) {
 }
 
 exports.sanitizeSSHKey = function(rawValue) {
-    if (typeof rawValue === 'string' && /^[0-9a-z-_\s]+$/i.test(rawValue)) {
+    if (typeof rawValue === 'string' && /^ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3} ([^@]+@[^@]+)/.test(rawValue)) {
         return rawValue;
     }
     return undefined;

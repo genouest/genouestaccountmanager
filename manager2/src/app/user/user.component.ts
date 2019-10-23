@@ -540,6 +540,7 @@ export class UserComponent implements OnInit {
                 this.ssh_message = 'SSH key updated';
             },
             err => {
+                this.ssh_message = 'Failed to set key: ' + err;
                 console.log('failed to update ssh')
             }
         )
