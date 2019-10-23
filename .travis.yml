@@ -10,6 +10,7 @@ services:
 before_install:
   - mkdir -p manager2/dist
   - docker build -t osallou/my .
+  - cd cron && docker build -f Dockerfile-cron -t osallou/mycron .
   - npm install
   - npm install eslint
 

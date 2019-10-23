@@ -196,7 +196,7 @@ expiration deactivates accounts if their expiration date is reached.
 
 To build cron image:
 
-    cd tests
+    cd cron
     docker build -t osallou/mycron -f Dockerfile-cron .
 
 ## Mailing
