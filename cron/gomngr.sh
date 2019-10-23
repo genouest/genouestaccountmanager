@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -e /root/.env ]; then
+    . /root/.env
+fi
+
 MYDIR=""
 if [ -z $GOMNGRSCRIPTDIR ]; then
     MYDIR=$1
@@ -40,7 +44,7 @@ while read p; do
   filename=$(basename $p)
   if [ $EXITCODE -ne 0 ]; then
     if [ "a$SENTRY_DSN" != "a" ]; then
-      sentry-cli send-event -m "$p execution failure" --logfile $p.log
+      /usr/local/bin/sentry-cli send-event -m "$p execution failure" --logfile $p.log
     fi
   fi
   curl -v "$MYURL/log/status/$filename/$EXITCODE"

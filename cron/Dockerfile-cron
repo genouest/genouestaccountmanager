@@ -7,4 +7,4 @@ COPY crontab /etc/cron.d/my-cron
 RUN chmod 0644 /etc/cron.d/my-cron
 RUN touch /var/log/cron.log
 
-ENTRYPOINT cron && tail -f /var/log/cron.log
+ENTRYPOINT echo "export SENTRY_DSN=$SENTRY_DSN" > /root/.env && cron && tail -f /var/log/cron.log
