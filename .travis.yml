@@ -11,12 +11,12 @@ before_install:
   - mkdir -p manager2/dist
   - npm install
   - npm install -g eslint
-  - docker build -t osallou/my .
-  - cd cron && docker build -f Dockerfile-cron -t osallou/mycron .
 
 script:
   - eslint routes
   - npm install -g mocha
+  - docker build -t osallou/my .
+  - cd $TRAVIS_BUILD_DIR/cron && docker build -f Dockerfile-cron -t osallou/mycron .
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose up -d
   - cd $TRAVIS_BUILD_DIR && sleep 180 && docker ps && mocha -t 20000
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose down
