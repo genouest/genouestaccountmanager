@@ -1,6 +1,1 @@
-dn: cn={{ user.group }},ou=groups,{{ CONFIG.ldap.dn }}
-changetype: modify
-add: memberUid
-memberUid: {{ user.uid }}
-
-# add_user_to_group.ldif
+../../default/ldap/add_user_to_group.ldif
