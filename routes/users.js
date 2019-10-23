@@ -216,7 +216,7 @@ var create_extra_user = async function(user_name, group, internal_user){
         }));
     } catch(err) {
         logger.error('failed to create extra user', user, err);
-    } 
+    }
     return user;
 };
 
@@ -240,7 +240,7 @@ router.create_admin = async function(default_admin, default_admin_group){
             logger.info('admin group created', group);
             let user = await create_extra_user(default_admin, group, true);
             logger.info('admin user created', user);
-        }    
+        }
     }
 };
 
@@ -439,7 +439,7 @@ router.delete_group = async function(group, admin_user_id){
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Delete Group Failed for: ' + group.name, error);
-        return false;            
+        return false;
     }
 
     await utils.mongo_events().insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
@@ -582,7 +582,7 @@ router.post('/group/:id', async function(req, res){
     } catch(error){
         logger.error('Add Group Failed for: ' + group.name, error);
         res.status(500).send('Add Group Failed');
-        return;            
+        return;
     }
 
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']});
@@ -731,7 +731,7 @@ router.post('/user/:id/group/:group', async function(req, res){
     } catch(err) {
         res.send({message: 'Could not update user'});
         res.end();
-        return;        
+        return;
     }
 
     try {
@@ -740,7 +740,7 @@ router.post('/user/:id/group/:group', async function(req, res){
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
         res.status(500).send('Change Group Failed');
-        return;           
+        return;
     }
 
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
@@ -749,7 +749,7 @@ router.post('/user/:id/group/:group', async function(req, res){
     return;
 
 
- 
+
 });
 
 router.delete('/user/:id/group/:group', async function(req, res){
@@ -798,7 +798,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
     } catch(err) {
         res.send({message: 'Could not update user'});
         res.end();
-        return;        
+        return;
     }
 
     try {
@@ -807,7 +807,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
         res.status(500).send('Change Group Failed');
-        return;         
+        return;
     }
 
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
@@ -861,7 +861,7 @@ router.delete_user = async function(user, action_owner_id){
             logger.info('File Created: ', created_file);
         } catch(error){
             logger.error('Delete User Failed for: ' + user.uid, error);
-            return false;      
+            return false;
         }
 
         router.clear_user_groups(user, action_owner_id);
@@ -880,7 +880,7 @@ router.delete_user = async function(user, action_owner_id){
             'action': 'delete user ' + user.uid ,
             'logs': [user.uid + '.' + fid + '.update']
         });
-            
+
         // Call remove method of plugins if defined
         let plugin_call = function(plugin_info, userId, user, adminId){
             // eslint-disable-next-line no-unused-vars
@@ -1018,7 +1018,7 @@ router.get('/user/:id/activate', async function(req, res) {
     } catch(error){
         logger.error('Add User Failed for: ' + user.uid, error);
         res.status(500).send('Add User Failed');
-        return; 
+        return;
     }
 
     notif.add(user.email, async function(){
@@ -1276,7 +1276,7 @@ router.post('/user/:id', async function(req, res) {
     res.send({'status': 0, 'msg': 'Could not send an email, please contact the support.'});
     res.end();
     return;
- 
+
 });
 
 router.get('/user/:id/expire', async function(req, res){
@@ -1291,12 +1291,12 @@ router.get('/user/:id/expire', async function(req, res){
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user){
         res.status(404).send('User not found');
-        return;        
+        return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if (!user){
         res.status(404).send('User not found');
-        return;        
+        return;
     }
 
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
@@ -1363,7 +1363,7 @@ router.get('/user/:id/expire', async function(req, res){
             return;
         }
         return;
-            
+
     }
     else {
         res.status(401).send('Not authorized');
@@ -1447,7 +1447,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     } catch(err) {
         res.status(404).send('User cannot be updated');
         res.end();
-        return;  
+        return;
     }
 
     user.password='';
@@ -1504,6 +1504,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         }
         user.history.push({'action': 'password reset', date: new Date().getTime()});
         await utils.mongo_users().updateOne({uid: user.uid},{'$set': {history: user.history}});
+
         // Todo: find if we need another template (or not)
         try {
             let created_file = await filer.user_reset_password(user, fid);
@@ -1513,6 +1514,10 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             res.status(500).send('Reset Password Failed');
             return;
         }
+
+        // disable previous link sent
+        var new_key = Math.random().toString(36).substring(7);
+        await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
 
         // Now send email
         let msg = CONFIG.message.password_reset.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password) + '\n' + CONFIG.message.footer.join('\n');
@@ -1616,7 +1621,7 @@ router.get('/user/:id/renew', async function(req, res){
             await goldap.reset_password(user, fid);
         } catch(err) {
             res.send({message: 'Error during operation'});
-            return;                    
+            return;
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
         await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}});
@@ -1628,7 +1633,7 @@ router.get('/user/:id/renew', async function(req, res){
             logger.error('Renew User Failed for: ' + user.uid, error);
             res.status(500).send('Renew User Failed');
             return;
-        } 
+        }
 
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
         notif.add(user.email, function(){
@@ -1886,9 +1891,9 @@ router.put('/user/:id', async function(req, res) {
             await goldap.modify(user, fid);
         } catch(err) {
             res.status(403).send('Group '+user.group+' does not exist, please create it first');
-            return;                            
+            return;
         }
-        
+
         try {
             let created_file = await filer.user_modify_user(user, fid);
             logger.info('File Created: ', created_file);
