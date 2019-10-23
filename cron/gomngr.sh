@@ -38,6 +38,11 @@ while read p; do
   $p &> $p.log
   EXITCODE=$?
   filename=$(basename $p)
+  if [ $EXITCODE -ne 0 ]; then
+    if [ "a$SENTRY_DSN" != "a" ]; then
+      sentry-cli send-event -m "$p execution failure" --logfile $p.log
+    fi
+  fi
   curl -v "$MYURL/log/status/$filename/$EXITCODE"
   mv $p $p.done
 done </tmp/gomngr.list

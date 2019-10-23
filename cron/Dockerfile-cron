@@ -1,6 +1,7 @@
 FROM osallou/my
 
 RUN apt-get update && apt-get install -y curl ldap-utils openssh-client putty-tools cron
+RUN curl -sL https://sentry.io/get-cli/ | bash
 COPY gomngr.sh /opt/gomngr.sh
 COPY crontab /etc/cron.d/my-cron
 RUN chmod 0644 /etc/cron.d/my-cron

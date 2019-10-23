@@ -102,6 +102,7 @@ services:
     #    environment:
     #        - NODE_ENV=test
     #        - GOMNGRURL=http://my:3000
+    #        - SENTRY_DSN=
     #    volumes:
     #        - ./home_dir:/home
     #        - ./cron:/opt/my/scripts

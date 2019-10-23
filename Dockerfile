@@ -10,7 +10,7 @@ RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-h
 
 FROM node:12-buster
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
-COPY tests/gomngr.sh /opt/gomngr.sh
+COPY cron/gomngr.sh /opt/gomngr.sh
 
 RUN mkdir -p /root/genouestaccountmanager
 WORKDIR /root/genouestaccountmanager
