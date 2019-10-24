@@ -21,7 +21,7 @@ Web interface and user life cycle are linked to optional plugins. It is easy to 
 
 ## Config
 
-All configuration is in config/default.json. One can use config/default.json.template as example.
+All configuration is in config/default.json. One can use [config/default.json.template](config/default.json.template) as example.
 
 Optional double authentication for administrators with config parameter double_authentication_for_admin.
 It provides additional authentication via U2F devices or temporary email tokens.
