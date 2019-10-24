@@ -1516,7 +1516,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         }
 
         // disable previous link sent
-        var new_key = Math.random().toString(36).substring(7);
+        let new_key = Math.random().toString(36).substring(7);
         await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
 
         // Now send email
