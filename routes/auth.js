@@ -272,7 +272,7 @@ router.post('/auth/:id', async function(req, res) {
         return;
     }
     if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
-        var diffTime = (new Date()).getTime() - attemps[user.uid]['last'].getTime();
+        let diffTime = (new Date()).getTime() - attemps[user.uid]['last'].getTime();
         if(diffTime < 1000 * bansec) {
             res.status(401).send('You have reached the maximum of login attemps, your account access is blocked for ' + Math.floor((1000 * bansec - diffTime)/ 60000) + ' minutes');
             return;
