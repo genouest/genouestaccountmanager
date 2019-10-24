@@ -26,6 +26,7 @@
     "default_main_group": "",
     "mailer" : "gomail",
     "templates": "genouest",
+    "bansec": 3600,
     "quota": {
         "home": {
             "protocol": "http:",

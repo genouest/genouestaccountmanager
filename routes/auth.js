@@ -32,6 +32,12 @@ var utils = require('./utils');
 
 var attemps = {};
 
+let bansec = 3600;
+
+if(CONFIG.general.bansec) {
+    bansec = CONFIG.general.bansec;
+}
+
 router.get('/logout', function(req, res) {
     req.session.destroy();
     res.send({});
@@ -209,7 +215,7 @@ router.get('/auth', async function(req, res) {
             {expiresIn: '2 days'}
         );
         if(user.u2f) {user.u2f.keyHankdle = null;}
-        
+
         if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
             user.is_admin = true;
         }
@@ -266,10 +272,9 @@ router.post('/auth/:id', async function(req, res) {
         return;
     }
     if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
-        var checkDate = new Date();
-        checkDate.setHours(checkDate.getHours() - 1);
-        if(attemps[user.uid]['last'] > checkDate) {
-            res.status(401).send('You have reached the maximum of login attemps, your account access is blocked for one hour');
+        let diffTime = (new Date()).getTime() - attemps[user.uid]['last'].getTime();
+        if(diffTime < 1000 * bansec) {
+            res.status(401).send('You have reached the maximum of login attemps, your account access is blocked for ' + Math.floor((1000 * bansec - diffTime)/ 60000) + ' minutes');
             return;
         }
         else {
@@ -342,7 +347,7 @@ router.post('/auth/:id', async function(req, res) {
             attemps[user.uid]['last'] = new Date();
             res.send({user: null, msg: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
             res.end();
-            return;  
+            return;
         }
     }
 });
