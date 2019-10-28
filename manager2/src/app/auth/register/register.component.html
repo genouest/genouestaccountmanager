@@ -6,7 +6,7 @@
         </div>
         <form class="form-register form-group">
             <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-            <i>Personal informations</i>
+            <i>Personal information</i>
             <hr>
             <div class="form-group row">
                 <div class="col-md-4">
@@ -18,19 +18,19 @@
                     <input autocomplete="family-name" (ngModelChange)="update_userid($event, 1)" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="lastname" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-4">
-                    <label for="email">User id</label>
+                    <label for="email">Username</label>
                     <input autocomplete="username" [ngModelOptions]="{standalone: true}" [(ngModel)]="userid" type="text" id="userid" class="form-control" required maxlength="12"/>
 
                 </div>
             </div>
             <div class="form-group">
-                <label for="email">Professional email</label>
+                <label for="email">Professional academic email</label>
                 <input autocomplete="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="email" type="email" id="email" class="form-control" required autofocus>
                 <small id="emailHelp" class="form-text text-muted">Please provide a professional email address (please avoid gmail, yahoo, etc.).</small>
             </div>
             <br>
             <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-            <i>Laboratory informations</i>
+            <i>Laboratory information</i>
             <hr>
             <div class="form-group row">
                 <div class="col-md-6">
@@ -57,14 +57,14 @@
             </div>
             <br>
             <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
-            <i>Other informations</i>
+            <i>Other information</i>
             <hr>
             <div class="form-group">
                 <label for="why">Why do you need an account</label>
                 <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="why" id="why" class="form-control" required></textarea>
                 <small id="responsibleHelp" class="form-text text-muted">
-                    Please specify the scientific purpose of the usage and if you want to join a specific scientific group already present on our systems.
-                    You can also specify which kind of resources you would like to use (cluster, Galaxy, cloud) and the estimated amount of storage needed.
+                    Please specify the scientific purpose of the usage and if you want to join a specific scientific group or project already present on our systems.
+                    You can also specify which kind of resources you would like to use and the estimated amount of storage needed.
                 </small>
             </div>
             <div class="form-group">
