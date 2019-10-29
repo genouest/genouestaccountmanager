@@ -1193,8 +1193,12 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    if (req.params.id.length > 12) {
-        res.send({'status': 1, 'msg': 'user id too long, must be < 12 characters'});
+    let usermaxlen = 12;
+    if (CONFIG.general.username_max_length) {
+        usermaxlen = CONFIG.general.username_max_length;
+    }
+    if (req.params.id.length > usermaxlen) {
+        res.send({'status': 1, 'msg': 'user id too long, must be < ' + usermaxlen + ' characters'});
         res.end();
         return;
     }

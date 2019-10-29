@@ -26,6 +26,7 @@
     "default_main_group": "",
     "mailer" : "gomail",
     "templates": "genouest",
+    "username_max_length": 24,
     "bansec": 3600,
     "quota": {
         "home": {
