@@ -19,7 +19,11 @@ router.get('/conf', function(req, res){
         'messages': true,
         'databases': true,
         'tps': true,
-        'websites': true
+        'websites': true,
+        'u2f_key': true,
+        'ip': true,
+        'newsletters': true,
+        'main_group': CONFIG.general.use_group_in_path // as if it is true, so main group is in path, so we should show it by default
     };
     if (CONFIG.enable_ui) {
         enable_ui = CONFIG.enable_ui;

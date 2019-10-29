@@ -2,7 +2,7 @@
   <div class="row">
       <div class="col-sm-6">
           <h2><b>{{user.uid}}</b>
-          <div *ngIf="subscribed"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
+          <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
            -
            <small>Expires: {{dateConvert(user.expiration)}}</small></h2>
@@ -99,7 +99,7 @@
                           </div>
                       </div>
                       <div class="form-group row">
-                          <label for="responsible" class="col-4 col-form-label">Responsible</label>
+                          <label for="responsible" class="col-4 col-form-label">Manager</label>
                           <div class="col-6">
                               <input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
                           </div>
@@ -120,7 +120,7 @@
                                   </select>
                               </div>
                           </div>
-                          <div class="form-group row">
+                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.main_group">
                               <label for="mgroup" class="col-4 col-form-label">Main group directory</label>
                               <div class="col-6">
                                   <select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.maingroup" class="form-control">
@@ -136,7 +136,7 @@
                                   </div>
                               </div>
                           </div>
-                          <div class="form-group row">
+                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.ip">
                               <label for="ip" class="col-4 col-form-label">IP address</label>
                               <div class="col-6">
                                   <input type="text" id="ip" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ip" class="form-control"/>
@@ -218,7 +218,7 @@
         </div>
     </div>
 
-    <div class="card bg-light" *ngIf="user.u2f">
+    <div class="card bg-light" *ngIf="user.u2f && config.enable_ui && config.enable_ui.u2f_key">
         <div class="card-header">
             <h4>Authentication</h4>
         </div>
