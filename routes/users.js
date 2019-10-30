@@ -1231,6 +1231,9 @@ router.post('/user/:id', async function(req, res) {
     case 'username':
         group = req.params.id;
         break;
+    case 'empty':
+        group = '';
+        break;
     case 'main':
         group = default_main_group;
         break;
