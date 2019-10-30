@@ -1859,6 +1859,9 @@ router.put('/user/:id', async function(req, res) {
     if(req.body.duration) {
         user.duration = req.body.duration;
     }
+    if(req.body.team) {
+        user.team = req.body.team;
+    }
 
     user.history.push({'action': 'update info', date: new Date().getTime()});
 
