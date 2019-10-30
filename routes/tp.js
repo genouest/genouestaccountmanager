@@ -168,8 +168,8 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
     let msg = 'TP account credentials from ' + from.toDateString() + ' to ' + to.toDateString() + '\n\n';
     let msg_html = '<h2>Date</h2>';
     msg_html += '<table border="0" cellpadding="0" cellspacing="15" align="left"><thead><tr><th align="left" valign="top">Start date</th><th align="left" valign="top">End date</th></tr></thead>';
-    msg_html += '<tbody><tr><td align="left" valign="top">" + from.toDateString()+ "</td><td align="left" valign="top">" + to.toDateString()+ "</td></tr></tbody></table>';
-    msg_html += '<p>Accounts will remain available for <b>" + CONFIG.tp.extra_expiration + " extra days </b>for data access</p>';
+    msg_html += '<tbody><tr><td align="left" valign="top">' + from.toDateString()+ '</td><td align="left" valign="top">' + to.toDateString()+ '</td></tr></tbody></table>';
+    msg_html += '<p>Accounts will remain available for <b>' + CONFIG.tp.extra_expiration + ' extra days </b>for data access</p>';
     msg_html += '<hr>';
     msg_html += '<h2>Credentials</h2>';
     msg_html += '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
