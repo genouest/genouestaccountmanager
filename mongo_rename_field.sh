@@ -3,11 +3,22 @@
 
 
 # add a new field with same value
+# is_genouest => is_internal
+#mongo gomngr --quiet --eval 'db.users.find().snapshot().forEach(
+#  function (elm) {
+#    db.users.update (
+#             { _id: elm._id },
+#             { $set: {is_internal: elm.is_genouest}}
+#    );
+#  }
+#)';
+
+# group => team
 mongo gomngr --quiet --eval 'db.users.find().snapshot().forEach(
   function (elm) {
     db.users.update (
              { _id: elm._id },
-             { $set: {is_internal: elm.is_genouest}}
+             { $set: {team: elm.group}}
     );
   }
 )';
