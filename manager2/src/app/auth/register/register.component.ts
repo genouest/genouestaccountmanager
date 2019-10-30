@@ -25,7 +25,7 @@ export class RegisterComponent implements OnInit {
     address: string
     lab: string
     responsible: string
-    group: string
+    team: string
     email: string
     ip: string
     why: string
@@ -98,7 +98,7 @@ export class RegisterComponent implements OnInit {
             address: this.address,
             lab: this.lab,
             responsible: this.responsible,
-            group: this.group,
+            team: this.team,
             email: this.email,
             ip: this.ip,
             duration: this.duration,

@@ -104,6 +104,12 @@
                               <input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
                           </div>
                       </div>
+                      <div class="form-group row">
+                          <label for="team" class="col-4 col-form-label">Team</label>
+                          <div class="col-6">
+                              <input type="text" id="team" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.team" class="form-control"/>
+                          </div>
+                      </div>
                       <div *ngIf="session_user.is_admin">
                           <div class="form-group row">
                               <label for="key" class="col-4 col-form-label">Key</label>
