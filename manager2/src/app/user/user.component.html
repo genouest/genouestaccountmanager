@@ -218,6 +218,22 @@
         </div>
     </div>
 
+    <div class="card bg-light" *ngIf="session_user.is_admin && config.enable_ui && config.enable_ui.log">
+        <div class="card-header">
+            <h4>Note</h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger" role="alert" *ngIf="err_note">{{err_note}}</div>
+            <div class="form-group">
+                <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="note">
+                </textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-outline-secondary" (click)="add_note()">Add note</button>
+            </div>
+        </div>
+    </div>
+
     <div class="card bg-light" *ngIf="user.u2f && config.enable_ui && config.enable_ui.u2f_key">
         <div class="card-header">
             <h4>Authentication</h4>

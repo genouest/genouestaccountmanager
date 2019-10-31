@@ -55,6 +55,8 @@ export class UserComponent implements OnInit {
     quotas: any = []
     u2f: any
     timeoutId: any
+    note: string
+    err_note: string
 
     STATUS_PENDING_EMAIL = 'Waiting for email approval'
     STATUS_PENDING_APPROVAL = 'Waiting for admin approval'
@@ -145,6 +147,8 @@ export class UserComponent implements OnInit {
         this.plugin_data = {}
         this.subscribed = false
         this.groups = []
+        this.note = ''
+        this.err_note = ''
 
     }
 
@@ -259,6 +263,19 @@ export class UserComponent implements OnInit {
         new_projects.sort(this._compareId)
         this.user_projects = user_projects;
         this.new_projects = new_projects;
+    }
+
+    add_note() {
+        let head_note = `[note by ${this.session_user.uid}]`;
+        this.userService.add_note(this.user.uid, head_note + this.note).subscribe(
+            resp => {
+                this.note = '';
+                this.err_note = '';
+            },
+            err => {
+                this.err_note = 'failed to add note';
+            }
+        );
     }
 
     loadUserInfo() {

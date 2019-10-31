@@ -246,6 +246,7 @@ app.get('/ip', users);
 app.get('/log/status/:id/:status', logs);
 app.get('/log/:id', logs);
 app.get('/log/user/:id', logs);
+app.post('/log/user/:id', logs);
 app.get('/log', logs);
 app.post('/message', users);
 app.get('/group', users);

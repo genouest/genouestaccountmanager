@@ -36,7 +36,11 @@
       "messages": true,
      "databases": true,
      "tps": true,
-     "websites": true
+     "websites": true,
+     "u2f_key": true,
+     "ip": true,
+     "newsletters": true,
+     "log": true
  },
  "usage": [
  ],

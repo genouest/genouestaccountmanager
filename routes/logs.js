@@ -43,6 +43,37 @@ router.get('/log/user/:id', async function(req, res){
     res.end();
 });
 
+router.post('/log/user/:id', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    if(!session_user){
+        res.status(404).send('Session user not found');
+        return;
+    }
+    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        return;
+    }
+
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+    let event = {
+        'owner': user.uid, 'date': new Date().getTime(), 'action': req.body.log ,
+        'logs': []
+    };
+    await utils.mongo_events().insertOne(event);
+    res.send({'msg': 'event created'});
+    res.end();
+});
+
+
 router.get('/log/status/:id/:status', async function(req, res){
     await utils.mongo_events().updateOne({'logs': req.params.id}, {'$set':{'status': parseInt(req.params.status)}});
     res.end();
