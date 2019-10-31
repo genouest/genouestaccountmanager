@@ -102,6 +102,7 @@ function get_user_home (user) {
     return user_home.replace(/\/+/g, '/');
 }
 
+
 router.user_home = function (user) {
     return get_user_home(user);
 };
@@ -119,7 +120,7 @@ var send_notif = async function(mailOptions, fid, errors) {
     }
 };
 
-var create_extra_group = async function(group_name, owner_name){
+var create_group = async function(group_name, owner_name){
     let mingid = await utils.getGroupAvailableId();
     let fid = new Date().getTime();
     let group = {name: group_name, gid: mingid, owner: owner_name};
@@ -129,14 +130,19 @@ var create_extra_group = async function(group_name, owner_name){
     }
     catch(e) {
         logger.error(e);
+        throw 'group creation failed';
     }
     try {
-        let created_file = await filer.user_create_extra_group(group, fid);
+        let created_file = await filer.user_add_group(group, fid);
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Create Group Failed for: ' + group.name, error);
         throw 'group creation failed';
     }
+
+    await utils.mongo_events().insertOne({'owner': owner_name, 'date': new Date().getTime(), 'action': 'create group ' + group_name , 'logs': [group_name + '.' + fid + '.update']});
+
+
     return group;
 
 };
@@ -236,7 +242,7 @@ router.create_admin = async function(default_admin, default_admin_group){
         }
         else {
             logger.info('need to create admin group');
-            let group = await create_extra_group(default_admin_group, default_admin);
+            let group = await create_group(default_admin_group, default_admin);
             logger.info('admin group created', group);
             let user = await create_extra_user(default_admin, group, true);
             logger.info('admin user created', user);
@@ -569,25 +575,14 @@ router.post('/group/:id', async function(req, res){
         return;
     }
 
-    let mingid = await utils.getGroupAvailableId();
-
-    let fid = new Date().getTime();
-    group = {name: req.params.id, gid: mingid, owner: owner};
-    await utils.mongo_groups().insertOne(group);
-    await goldap.add_group(group, fid);
-
     try {
-        let created_file = await filer.user_add_group(group, fid);
-        logger.info('File Created: ', created_file);
+        group = await create_group(req.params.id , owner);
     } catch(error){
-        logger.error('Add Group Failed for: ' + group.name, error);
+        logger.error('Add Group Failed for: ' + req.params.id, error);
         res.status(500).send('Add Group Failed');
         return;
     }
 
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']});
-
-    group.fid = fid;
     res.send(group);
     res.end();
     return;
@@ -994,9 +989,22 @@ router.get('/user/:id/activate', async function(req, res) {
 
     let data = await utils.mongo_groups().findOne({'name': user.group});
     if(!data) {
-        res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
-        res.end();
-        return;
+        if (CONFIG.general.auto_add_group) {
+            try {
+                await create_group(user.group, user.uid);
+            } catch(error){
+                logger.error('Add Group Failed for: ' + user.group, error);
+                res.status(500).send('Add Group Failed');
+                return;
+            }
+
+            data = await utils.mongo_groups().findOne({'name': user.group});
+        } else {
+
+            res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
+            res.end();
+            return;
+        }
     }
 
     user.uidnumber = minuid;
