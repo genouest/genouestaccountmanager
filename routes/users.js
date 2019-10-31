@@ -999,7 +999,7 @@ router.get('/user/:id/activate', async function(req, res) {
             let gfid = new Date().getTime();
             let group = {name: user.group, gid: mingid, owner: user.uid};
             await utils.mongo_groups().insertOne(group);
-            await goldap.add_group(group, fid);
+            await goldap.add_group(group, gfid);
 
             try {
                 let created_file = await filer.user_add_group(group, gfid);
