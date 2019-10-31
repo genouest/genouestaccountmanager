@@ -130,6 +130,7 @@ var create_group = async function(group_name, owner_name){
     }
     catch(e) {
         logger.error(e);
+        throw 'group creation failed';
     }
     try {
         let created_file = await filer.user_add_group(group, fid);
@@ -139,7 +140,7 @@ var create_group = async function(group_name, owner_name){
         throw 'group creation failed';
     }
 
-    await utils.mongo_events().insertOne({'owner': owner, 'date': new Date().getTime(), 'action': 'create group ' + req.params.id , 'logs': [group.name + '.' + fid + '.update']});
+    await utils.mongo_events().insertOne({'owner': owner_name, 'date': new Date().getTime(), 'action': 'create group ' + group_name , 'logs': [group_name + '.' + fid + '.update']});
 
 
     return group;
