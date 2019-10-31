@@ -34,12 +34,6 @@
       "filepath": "{{ CONFIG.general.script_dir }}",
       "template_file": "ldap/change_user_groups.ldif"
     },
-    "user_create_extra_group": {
-      "filename": "{{ group.name }}.{{ fid }}.update",
-      "filepath": "{{ CONFIG.general.script_dir }}",
-      "template_file": "user/create_extra_group.sh",
-      "filename_mode": "755"
-    },
     "user_create_extra_user": {
       "filename": "{{ user.uid }}.{{ fid }}.update",
       "filepath": "{{ CONFIG.general.script_dir }}",

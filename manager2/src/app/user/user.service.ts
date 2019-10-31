@@ -297,6 +297,19 @@ export class UserService {
         return this.http.get(
             environment.apiUrl + '/user/' + userId + '/renew/' + regKey, httpOptions
         )
+    }
 
+    add_note(userId, note) {
+        //console.log(environment.apiUrl + '/user/' + userId + '/renew/' + regKey)
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Accept': 'application/json'
+            })
+        }
+        return this.http.post(
+            environment.apiUrl + '/log/user/' + userId,
+            {'log': note},
+            httpOptions
+        )
     }
 }

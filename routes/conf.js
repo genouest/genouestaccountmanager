@@ -23,11 +23,13 @@ router.get('/conf', function(req, res){
         'u2f_key': true,
         'ip': true,
         'newsletters': true,
-        'main_group': CONFIG.general.use_group_in_path // as if it is true, so main group is in path, so we should show it by default
+        'log': true
     };
     if (CONFIG.enable_ui) {
         enable_ui = CONFIG.enable_ui;
     }
+    enable_ui.main_group = CONFIG.general.use_group_in_path;
+
     // todo: factorize res.send
     let max_account = false;
     if (CONFIG.general.max_account && CONFIG.general.max_account > 0) {

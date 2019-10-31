@@ -12,5 +12,3 @@ delete: memberUid
 memberUid: {{ user.uid }}
 
 {% endfor %}
-
-# change_user_groups.ldif

@@ -29,6 +29,7 @@
     "username_max_length": 24,
     "bansec": 3600,
     "registration_group": "team",
+    "auto_add_group": false,
     "quota": {
         "home": {
             "protocol": "http:",
@@ -49,10 +50,14 @@
     "user_extra_dirs": []
   },
   "enable_ui": {
-     "messages": true,
-     "databases": true,
-     "tps": true,
-     "websites": true
+    "messages": true,
+    "databases": true,
+    "tps": true,
+    "websites": true,
+    "u2f_key": true,
+    "ip": true,
+    "newsletters": true,
+    "log": true
   },
   "rabbitmq": {
     "url": "amqp://localhost",

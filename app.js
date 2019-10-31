@@ -246,6 +246,7 @@ app.get('/ip', users);
 app.get('/log/status/:id/:status', logs);
 app.get('/log/:id', logs);
 app.get('/log/user/:id', logs);
+app.post('/log/user/:id', logs);
 app.get('/log', logs);
 app.post('/message', users);
 app.get('/group', users);
@@ -384,6 +385,9 @@ module.exports = app;
 
 
 utils.init_db().then(async () => {
+    // eslint-disable-next-line no-unused-vars
+    await utils.loadAvailableIds();
+
     if(MY_ADMIN_USER !== null){
         wlogger.info('Create admin user');
         await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
@@ -392,8 +396,7 @@ utils.init_db().then(async () => {
             await if_dev_execute_scripts();
         }
     }
-    // eslint-disable-next-line no-unused-vars
-    await utils.loadAvailableIds();
+
     if (!module.parent) {
         http.createServer(app).listen(app.get('port'), function(){
             wlogger.info('Server listening on port ' + app.get('port'));

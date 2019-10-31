@@ -124,11 +124,6 @@ module.exports = {
     },
 
     /* method for users.js */
-    // Todo: should find a clean way to give the path from ldap_add_group (same for all user method which need ldif path
-    user_create_extra_group: function (group, fid) {
-        return create_file('user_create_extra_group', { group: group, fid: fid });
-    },
-
     user_create_extra_user: function (user, fid) {
         return create_file('user_create_extra_user', { user: user, fid: fid });
     },
