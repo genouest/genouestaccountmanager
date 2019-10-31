@@ -1173,12 +1173,12 @@ router.post('/user/:id', async function(req, res) {
       res.send({'status': 1, 'msg': 'invalid ip address format'});
       return;
       }*/
-    if(req.body.group=='' || req.body.group==null || req.body.group==undefined) {
+    if(req.body.team=='' || req.body.team==null || req.body.team==undefined) {
         res.send({'status': 1, 'msg': 'Missing field: team'});
         return;
     }
-    if (!req.body.group.match(/^[0-9a-z_]+$/)) {
-        res.send({'status': 1, 'msg': 'Group/Team name must be alphanumeric and lowercase [0-9a-z_]'});
+    if (!req.body.team.match(/^[0-9a-z_]+$/)) {
+        res.send({'status': 1, 'msg': 'Team name must be alphanumeric and lowercase [0-9a-z_]'});
         res.end();
         return;
     }
@@ -1234,6 +1234,20 @@ router.post('/user/:id', async function(req, res) {
 
     let regkey = Math.random().toString(36).substring(7);
     let default_main_group = GENERAL_CONFIG.default_main_group || '';
+    let group = '';
+    switch (CONFIG.general.registration_group) {
+    case 'username':
+        group = req.params.id;
+        break;
+    case 'main':
+        group = default_main_group;
+        break;
+    case 'team': // use the team by default for retro-compatibility
+    default:
+        group = req.body.team;
+        break;
+    }
+
     let user = {
         status: STATUS_PENDING_EMAIL,
         uid: req.params.id,
@@ -1243,7 +1257,8 @@ router.post('/user/:id', async function(req, res) {
         address: req.body.address,
         lab: req.body.lab,
         responsible: req.body.responsible,
-        group: req.body.group,
+        team: req.body.team,
+        group: group,
         secondarygroups: [],
         maingroup: default_main_group,
         home: '',
@@ -1851,6 +1866,9 @@ router.put('/user/:id', async function(req, res) {
     }
     if(req.body.duration) {
         user.duration = req.body.duration;
+    }
+    if(req.body.team) {
+        user.team = req.body.team;
     }
 
     user.history.push({'action': 'update info', date: new Date().getTime()});

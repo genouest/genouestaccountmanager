@@ -86,7 +86,7 @@ describe('My', () => {
                     'address': 'test address',
                     'lab': 'test',
                     'responsible': 'test manager',
-                    'group': test_group_id,
+                    'team': test_group_id,
                     'why': 'because',
                     'ip': '127.0.0.1',
                     'duration': 365
@@ -136,7 +136,7 @@ describe('My', () => {
                     'address': 'test address',
                     'lab': 'test',
                     'responsible': 'test manager',
-                    'group': test_group_id2,
+                    'team': test_group_id2,
                     'why': 'because',
                     'ip': '127.0.0.1',
                     'duration': 365
@@ -787,7 +787,7 @@ describe('My', () => {
             };
             create_and_force().then(() => {
                 done();
-            });          
+            });
         });
 
     });

@@ -28,6 +28,7 @@
     "templates": "genouest",
     "username_max_length": 24,
     "bansec": 3600,
+    "registration_group": "team",
     "auto_add_group": false,
     "quota": {
         "home": {
