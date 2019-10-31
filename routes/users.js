@@ -1227,7 +1227,7 @@ router.post('/user/:id', async function(req, res) {
     let regkey = Math.random().toString(36).substring(7);
     let default_main_group = GENERAL_CONFIG.default_main_group || '';
     let group = '';
-    switch (CONFIG.registration_group) {
+    switch (CONFIG.general.registration_group) {
     case 'username':
         group = req.params.id;
         break;
