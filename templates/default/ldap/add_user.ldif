@@ -22,12 +22,3 @@ gidNumber: {{ user.gidnumber }}
 objectClass: top
 objectClass: posixAccount
 objectClass: inetOrgPerson
-
-{% if not group %}
-dn: cn={{ user.group }},ou=groups,{{ CONFIG.ldap.dn }}
-objectClass: top
-objectClass: posixGroup
-gidNumber: {{ user.gidnumber }}
-cn: {{ user.group }}
-description: group for {{ user.group }}
-{% endif %}

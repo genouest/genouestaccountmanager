@@ -994,9 +994,29 @@ router.get('/user/:id/activate', async function(req, res) {
 
     let data = await utils.mongo_groups().findOne({'name': user.group});
     if(!data) {
-        res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
-        res.end();
-        return;
+        if (CONFIG.general.auto_add_group) {
+            let mingid = await utils.getGroupAvailableId();
+            let gfid = new Date().getTime();
+            let group = {name: user.group, gid: mingid, owner: user.uid};
+            await utils.mongo_groups().insertOne(group);
+            await goldap.add_group(group, fid);
+
+            try {
+                let created_file = await filer.user_add_group(group, gfid);
+                logger.info('File Created: ', created_file);
+            } catch(error){
+                logger.error('Add Group Failed for: ' + group.name, error);
+                res.status(500).send('Add Group Failed');
+                return;
+            }
+
+            data = await utils.mongo_groups().findOne({'name': user.group});
+        } else {
+
+            res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
+            res.end();
+            return;
+        }
     }
 
     user.uidnumber = minuid;

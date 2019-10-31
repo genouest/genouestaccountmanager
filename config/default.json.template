@@ -28,6 +28,7 @@
     "templates": "genouest",
     "username_max_length": 24,
     "bansec": 3600,
+    "auto_add_group": false,
     "quota": {
         "home": {
             "protocol": "http:",
