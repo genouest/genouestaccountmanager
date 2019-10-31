@@ -293,7 +293,7 @@ export class UserComponent implements OnInit {
         this.db_list();
         this.userService.getUserLogs(this.user.uid).subscribe(
             resp => {
-                this.events=resp;
+                this.events=(<any[]> resp).reverse();
                 this.dtTrigger.next();
             },
             err => console.log('failed to get events')

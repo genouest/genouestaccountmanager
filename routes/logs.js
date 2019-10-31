@@ -59,7 +59,7 @@ router.post('/log/user/:id', async function(req, res){
         return;
     }
 
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send('User not found');
         return;
