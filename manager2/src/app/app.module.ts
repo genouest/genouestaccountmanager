@@ -44,6 +44,7 @@ import { WindowWrapper, getWindow } from './windowWrapper.module';
 import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
 import { FlashComponent } from './utils/flash/flash.component';
 import { TagComponent } from './utils/tag/tag.component';
+import { UserLogsComponent } from './user/userlogs.component';
 
 import { environment } from '../environments/environment';
 import * as Sentry from "@sentry/browser";
@@ -107,7 +108,8 @@ export class SentryErrorHandler implements ErrorHandler {
         AdminpluginComponent,
         AdminQuotaExamplePluginComponent,
         FlashComponent,
-        TagComponent
+        TagComponent,
+        UserLogsComponent
     ],
     imports: [
         BrowserModule,

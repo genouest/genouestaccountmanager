@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { UserService } from './user.service'
 import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
@@ -10,13 +10,8 @@ import { ProjectsService } from '../admin/projects/projects.service'
 
 
 import { ActivatedRoute, Router } from '@angular/router';
-import { forEach } from '@angular/router/src/utils/collection';
-import { PluginItems } from '../plugin/plugin.component';
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
 import { WindowWrapper } from '../windowWrapper.module';
 import { FlashMessagesService } from '../utils/flash/flash.component';
-
 
 /*
   function _window() : any {
@@ -39,9 +34,6 @@ import { FlashMessagesService } from '../utils/flash/flash.component';
     styleUrls: ['./user.component.css']
 })
 export class UserComponent implements OnInit {
-
-    dtTrigger: Subject<any> = new Subject()
-    dtOptions: DataTables.Settings = {};
 
     user_projects: any[]
     new_projects: any[]
@@ -73,8 +65,6 @@ export class UserComponent implements OnInit {
 
     plugins: any[]
     plugin_data: any
-
-    events: any = []
 
     panel: number = 0;
 
@@ -130,9 +120,6 @@ export class UserComponent implements OnInit {
         private window: WindowWrapper,
         private _flashMessagesService: FlashMessagesService
     ) {
-        this.dtOptions = {
-            order: [[0, 'desc']]
-        };
         this.projects = []
         this.user_projects = []
         this.new_projects = []
@@ -166,7 +153,6 @@ export class UserComponent implements OnInit {
     }
 
     ngOnInit() {
-
         this.web_delete = this.web_delete.bind(this);
         this.delete_secondary_group = this.delete_secondary_group.bind(this);
         this.db_delete = this.db_delete.bind(this);
@@ -291,17 +277,12 @@ export class UserComponent implements OnInit {
         }
         this.web_list();
         this.db_list();
-        this.userService.getUserLogs(this.user.uid).subscribe(
-            resp => {
-                this.events=(<any[]> resp).reverse();
-                this.dtTrigger.next();
-            },
-            err => console.log('failed to get events')
-        );
+        
         this.user.secondarygroups.sort(function (a,b) {
             return a.localeCompare(b);
         });
     }
+
 
     subscribe() {
         let ctx = this;
@@ -495,7 +476,7 @@ export class UserComponent implements OnInit {
     }
 
     switchTo(panel) {
-        this.panel = panel
+        this.panel = panel;
     }
 
     generate_apikey(uid: string){
@@ -670,7 +651,6 @@ export class UserComponent implements OnInit {
     }
 
     ngOnDestroy() {
-        this.dtTrigger.unsubscribe();
         this.sub.unsubscribe();
     }
 

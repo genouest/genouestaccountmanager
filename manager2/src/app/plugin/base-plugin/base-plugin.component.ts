@@ -28,16 +28,19 @@ export class BasePluginComponent {
     }
 
     renderDataTables(): void {
+        if(this.dtTrigger.isStopped) {
+            console.debug('trigger is stopped');
+            return;
+        }
         // console.log('tables', this.tables);
         this.dtTrigger.next();
         this.tables.forEach(table => {
-            console.log('dttrigger?', table.dtTrigger)
+            // console.log('dttrigger?', table.dtTrigger)
             if (table.dtTrigger) {
                 table.dtInstance.then((dt: DataTables.Api) => {
                     dt.clear();
                     dt.destroy();
                     table.dtTrigger.next();
-
                 });
             }
         });
