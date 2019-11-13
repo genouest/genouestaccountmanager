@@ -1,4 +1,4 @@
-dn: cn={{ user.group }},ou=groups,{{ CONFIG.ldap.dn }}
+dn: {{ group_dn }}
 changetype: modify
 add: memberUid
 memberUid: {{ user.uid }}

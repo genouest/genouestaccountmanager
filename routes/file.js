@@ -80,7 +80,7 @@ function create_file (name, data) {
 
 
 /* Todo: find if we should export create_file or not */
-/* Todo: add method for project template (create project and add user to project) */
+/* Todo: should find a clean way to set name of param from function prototype) */
 module.exports = {
 
     /*
@@ -107,20 +107,21 @@ module.exports = {
         return create_file('ldap_add_group', { group: group, fid: fid });
     },
 
-    ldap_delete_group: function (group, fid) {
-        return create_file('ldap_delete_group', { group: group, fid: fid });
+    ldap_delete_group: function (group, group_dn, fid) {
+        return create_file('ldap_delete_group', { group: group, group_dn: group_dn, fid: fid });
     },
 
+    // todo: remove group from this, as it is only to create the user
     ldap_add_user: function (user, group, fid) {
         return create_file('ldap_add_user', { user: user, group: group, fid: fid });
     },
 
-    ldap_add_user_to_group: function (user, fid) { // will use user.group
-        return create_file('ldap_add_user_to_group', { user: user, fid: fid });
+    ldap_add_user_to_group: function (user, group_dn, fid) { // will use user.group
+        return create_file('ldap_add_user_to_group', { user: user, group_dn: group_dn, fid: fid });
     },
 
-    ldap_change_user_groups: function (user, group_add, group_remove, fid) { // will use user.group
-        return create_file('ldap_change_user_groups', { user: user, group_add: group_add, group_remove: group_remove, fid: fid });
+    ldap_change_user_groups: function (user, group_add_dn, group_remove_dn, fid) { // will use user.group
+        return create_file('ldap_change_user_groups', { user: user, group_add_dn: group_add_dn, group_remove_dn: group_remove_dn, fid: fid });
     },
 
     /* method for users.js */
