@@ -1031,7 +1031,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     notif.add(user.email, async function(){
         let msg_activ = CONFIG.message.activation.join('\n').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-        let msg_activ_html = CONFIG.message.activation_html.join('').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>'+CONFIG.message.footer.join('<br/>');
+        let msg_activ_html = CONFIG.message.activation_html.join('').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>'+CONFIG.message.footer_html.join('<br/>');
         let mailOptions = {
             origin: MAIL_CONFIG.origin, // sender address
             destinations: [user.email], // list of receivers
@@ -1284,8 +1284,8 @@ router.post('/user/:id', async function(req, res) {
     await utils.mongo_users().insertOne(user);
     let link = GENERAL_CONFIG.url +
         encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
-    let msg_activ = CONFIG.message.emailconfirmation.join('\n').replace('#LINK#', link).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-    let msg_activ_html = CONFIG.message.emailconfirmationhtml.join('').replace('#LINK#', '<a href="'+link+'">'+link+'</a>').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer.join('<br/>');
+    let msg_activ = CONFIG.message.confirmation.join('\n').replace('#LINK#', link).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
+    let msg_activ_html = CONFIG.message.confirmation_html.join('').replace('#LINK#', '<a href="'+link+'">'+link+'</a>').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer_html.join('<br/>');
     let mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
@@ -1483,7 +1483,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
         encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
     let html_link = `<a href="${link}">${link}</a>`;
     let msg = CONFIG.message.password_reset_request.join('\n').replace('#UID#', user.uid) + '\n' + link + '\n' + CONFIG.message.footer.join('\n');
-    let html_msg = CONFIG.message.password_reset_request_html.join('').replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer.join('<br/>');
+    let html_msg = CONFIG.message.password_reset_request_html.join('').replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer_html.join('<br/>');
     let mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
@@ -1548,7 +1548,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
 
         // Now send email
         let msg = CONFIG.message.password_reset.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password) + '\n' + CONFIG.message.footer.join('\n');
-        let msg_html = CONFIG.message.password_reset_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+'<br/>'+CONFIG.message.footer.join('<br/>');
+        let msg_html = CONFIG.message.password_reset_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+'<br/>'+CONFIG.message.footer_html.join('<br/>');
         let mailOptions = {
             origin: MAIL_CONFIG.origin, // sender address
             destinations: [user.email], // list of receivers
@@ -1665,7 +1665,7 @@ router.get('/user/:id/renew', async function(req, res){
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
         notif.add(user.email, function(){
             let msg_activ = CONFIG.message.reactivation.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-            let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer.join('<br/>');
+            let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer_html.join('<br/>');
 
             let mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address

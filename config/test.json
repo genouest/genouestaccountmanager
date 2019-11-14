@@ -166,12 +166,12 @@
       "<p>#LINK#</p>",
       "<hr>"
     ],
-    "emailconfirmation": [
+    "confirmation": [
      "You have created an account on GenOuest platform, please confirm your subscription at the following link:",
      "#LINK#",
      "You will receive an email when your account has been validated."
     ],
-    "emailconfirmationhtml": [
+    "confirmation_html": [
      "<h2>Welcome on the GenOuest core facility</h2>",
      "<p>You have created an account on GenOuest platform, please confirm your subscription at the following link:</p>",
      "<p>#LINK#</p>",
@@ -179,6 +179,9 @@
      "<hr>"
     ],
     "footer": [
+      "this is from MY"
+    ],
+    "footer_html": [
       "this is from MY"
     ]
     },
