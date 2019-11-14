@@ -278,20 +278,9 @@ module.exports = {
         try {
             let created_file = await filer.ldap_add_user(user, group, fid);
             logger.debug('File created', created_file);
-
-            await get_group_dn(group.name)
-                .then(
-                    group_dn => { // resolve()
-                        return filer.ldap_add_user_to_group(user,group_dn, fid);
-                    })
-                .then(
-                    created_file => {
-                        logger.info('File Created: ', created_file);
-                    })
-                .catch(error => { // reject()
-                    logger.error('Delete Group Failed for: ' + group.name, error);
-                });
-
+            let group_dn = await get_group_dn(group.name);
+            created_file = await filer.ldap_add_user_to_group(user,group_dn, fid);
+            logger.debug('File created', created_file);
 
         } catch(error) {
             logger.error('Add User Failed for: ' + user.uid, error);
