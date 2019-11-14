@@ -300,7 +300,7 @@ module.exports = {
         return true;
     },
 
-    change_user_groups: async function(user, group_add, group_remove, fid) {
+    change_user_groups: function(user, group_add, group_remove, fid) {
         return new Promise(function(resolve, reject){
 
             // Todo: change_user_groups should not managed 2 array of group as it is mostly never usefull and it is not so easy with promise and async ...
