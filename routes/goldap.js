@@ -62,12 +62,19 @@ function get_group_dn(group) {
             // eslint-disable-next-line no-unused-vars
             res.on('end', function(result) {
                 if (group_dn_list.length > 1) {
-                    logger.warn('more than one entry have been found', group_dn_list);
+                    logger.error('more than one entry have been found', group_dn_list);
+                    logger.warn('switch to default value, you should check scripts log...');
+                    // resolve with default value, or reject ?
+                    resolve("cn=" + group + ",ou=groups," + CONFIG.ldap.dn );
+                    return;
+
                 }
                 else if(group_dn_list.length == 0){
                     logger.error('no group found for', group);
                     reject('no group found');
+                    return;
                 }
+                // must have only one entry
                 resolve(group_dn_list[0]);
                 return;
             });
@@ -125,6 +132,7 @@ function get_user_dn(user) {
                 else if(user_dn_list.length == 0){
                     logger.error('no user found for uid', user.uid);
                     reject('no user found for uid');
+                    return;
                 }
                 resolve(user_dn_list[0]);
                 return;
