@@ -65,7 +65,7 @@ function get_group_dn(group) {
                     logger.error('more than one entry have been found', group_dn_list);
                     logger.warn('switch to default value, you should check scripts log...');
                     // resolve with default value, or reject ?
-                    resolve("cn=" + group + ",ou=groups," + CONFIG.ldap.dn );
+                    resolve('cn=' + group + ',ou=groups,' + CONFIG.ldap.dn );
                     return;
 
                 }
