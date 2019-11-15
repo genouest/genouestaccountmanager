@@ -2,7 +2,7 @@
 
 set -xe
 
-/usr/local/bin/num create-user --notify --firstname="{{ user.firstname }}" --lastname="{{ user.lastname }}" --email="{{ user.email }}" --username="{{ user.uid }}" {% if user.uidnumber %}--uid_number="{{ user.uidnumber }}"{% endif %} {% if user.gidnumber %}--gid_number="{{ user.gidnumber }}"{% endif %} {% if user.home %}--home_dir="{{ user.home }}"{% endif %} {% if user.password %}--password="{{ user.password }}"{% endif %}
+/usr/local/bin/num create-user --notify --firstname="{{ user.firstname }}" --lastname="{{ user.lastname }}" --email="{{ user.email }}" --username="{{ user.uid }}" {% if user.uidnumber %}--uid_number="{{ user.uidnumber }}"{% endif %} {% if user.home %}--home_dir="{{ user.home }}"{% endif %} {% if user.password %}--password="{{ user.password }}"{% endif %}
 
 # warning: disable ldap as it should have been done by num, but we don't know what is the dn created yet
 
