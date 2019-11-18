@@ -1013,13 +1013,6 @@ router.get('/user/:id/activate', async function(req, res) {
     var fid = new Date().getTime();
     try {
         await goldap.add(user, fid);
-    } catch(err) {
-        res.send({msg: err});
-        res.end();
-        return;
-    }
-
-    try {
         let created_file = await filer.user_add_user(user, fid);
         logger.info('File Created: ', created_file);
     } catch(error){
