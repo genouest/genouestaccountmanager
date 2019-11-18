@@ -1018,7 +1018,6 @@ router.get('/user/:id/activate', async function(req, res) {
         res.end();
         return;
     }
-    await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     try {
         let created_file = await filer.user_add_user(user, fid);
@@ -1028,6 +1027,8 @@ router.get('/user/:id/activate', async function(req, res) {
         res.status(500).send('Add User Failed');
         return;
     }
+
+    await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     notif.add(user.email, async function(){
         let msg_activ = CONFIG.message.activation.join('\n').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
