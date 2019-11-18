@@ -304,15 +304,15 @@ module.exports = {
             // https://flaviocopes.com/javascript-async-await-array-map/
 
             let prm_add = group_add.map((group) => {
-                return get_group_dn(group).then(
-                    group_dn => { return group_dn; }
-                );
+                return get_group_dn(group)
+                    .then(group_dn => { return group_dn; })
+                    .catch(error => { logger.error('Get Dn to Add Failed for: ' + group, error);});
             });
 
             let prm_remove = group_remove.map((group) => {
-                return get_group_dn(group).then(
-                    group_dn => { return group_dn; }
-                );
+                return get_group_dn(group)
+                    .then(group_dn => { return group_dn; })
+                    .catch(error => { logger.error('Get Dn to Remove Failed for: ' + group, error);});
             });
 
 
