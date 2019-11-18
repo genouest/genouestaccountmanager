@@ -61,17 +61,20 @@ function get_group_dn(group) {
             });
             // eslint-disable-next-line no-unused-vars
             res.on('end', function(result) {
+                let default_dn = 'cn=' + group + ',ou=groups,' + CONFIG.ldap.dn;
+
                 if (group_dn_list.length > 1) {
                     logger.error('more than one entry have been found', group_dn_list);
-                    logger.warn('switch to default value, you should check scripts log...');
+                    logger.warn('switch to default value, you should check your ldap database and scripts logs results...');
                     // resolve with default value, or reject ?
-                    resolve('cn=' + group + ',ou=groups,' + CONFIG.ldap.dn );
+                    resolve(default_dn);
                     return;
-
                 }
                 else if(group_dn_list.length == 0){
-                    logger.error('no group found for', group);
-                    reject('no group found');
+                    logger.warn('no group found for', group);
+                    // resolve with default value, or reject ?
+                    // Needed if group is not already created, for example on empty database when admin group is created, or when config option auto_add_group is set to true
+                    resolve(default_dn);
                     return;
                 }
                 // must have only one entry
