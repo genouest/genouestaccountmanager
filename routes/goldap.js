@@ -66,6 +66,7 @@ function get_group_dn(group) {
                 if (group_dn_list.length > 1) {
                     logger.error('more than one entry have been found', group_dn_list);
                     logger.warn('switch to default value, you should check your ldap database and scripts logs results...');
+                    utils.mongo_events().insertOne({'owner': CONFIG.general.admin[0] , 'date': new Date().getTime(), 'action': 'find duplicate group dn for ' + group, 'status' : -1});
                     // resolve with default value, or reject ?
                     resolve(default_dn);
                     return;
