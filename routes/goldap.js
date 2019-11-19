@@ -9,16 +9,82 @@ const filer = require('../routes/file.js');
 var utils= require('./utils');
 
 /*
-var options = {
-    uri: 'ldap://'+CONFIG.ldap.host, // string
-    //version: 3, // integer, default is 3,
-    //starttls: false, // boolean, default is false
-    connecttimeout: -1, // seconds, default is -1 (infinite timeout), connect timeout
-    //timeout: 5000, // milliseconds, default is 5000 (infinite timeout is unsupported), operation timeout
-    //reconnect: true, // boolean, default is true,
-    //backoffmax: 32 // seconds, default is 32, reconnect timeout
-};
+  var options = {
+  uri: 'ldap://'+CONFIG.ldap.host, // string
+  //version: 3, // integer, default is 3,
+  //starttls: false, // boolean, default is false
+  connecttimeout: -1, // seconds, default is -1 (infinite timeout), connect timeout
+  //timeout: 5000, // milliseconds, default is 5000 (infinite timeout is unsupported), operation timeout
+  //reconnect: true, // boolean, default is true,
+  //backoffmax: 32 // seconds, default is 32, reconnect timeout
+  };
 */
+
+
+function get_group_dn(group) {
+    return new Promise( function (resolve, reject) {
+        // todo: factorize with get_user_dn
+        let client = myldap.createClient({
+            url: 'ldap://' +  CONFIG.ldap.host
+        });
+        client.bind(CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn, CONFIG.ldap.admin_password, function(err) {
+            if(err) {
+                logger.error('Failed to bind as admin to ldap', err);
+                reject(err);
+                return;
+            }
+        });
+
+        let group_dn_list = [];
+
+        let opts = {
+            filter: '(cn=' + group + ')',
+            scope: 'sub',
+            attributes: ['dn']
+        };
+
+        client.search('ou=groups,' + CONFIG.ldap.dn, opts, function(err, res) {
+            if(err) {
+                logger.error('Could not find ' + group, err);
+                reject(err);
+                return;
+            }
+
+            res.on('searchEntry', function(entry) {
+                logger.info('dn found: ', entry.object['dn'].trim(), ' for ', group);
+                group_dn_list.push(entry.object['dn'].trim());
+            });
+            res.on('error', function(err) {
+                logger.error('error ', err);
+                reject(err);
+                return;
+            });
+            // eslint-disable-next-line no-unused-vars
+            res.on('end', function(result) {
+                let default_dn = 'cn=' + group + ',ou=groups,' + CONFIG.ldap.dn;
+
+                if (group_dn_list.length > 1) {
+                    logger.error('more than one entry have been found', group_dn_list);
+                    logger.warn('switch to default value, you should check your ldap database and scripts logs results...');
+                    utils.mongo_events().insertOne({'owner': CONFIG.general.admin[0] , 'date': new Date().getTime(), 'action': '[error] find duplicate group dn for ' + group, 'status' : -1});
+                    // resolve with default value, or reject ?
+                    resolve(default_dn);
+                    return;
+                }
+                else if(group_dn_list.length == 0){
+                    logger.warn('no group found for', group);
+                    // resolve with default value, or reject ?
+                    // Needed if group is not already created, for example on empty database when admin group is created, or when config option auto_add_group is set to true
+                    resolve(default_dn);
+                    return;
+                }
+                // must have only one entry
+                resolve(group_dn_list[0]);
+                return;
+            });
+        });
+    });
+}
 
 function get_user_dn(user) {
     return new Promise( function (resolve, reject) {
@@ -70,6 +136,7 @@ function get_user_dn(user) {
                 else if(user_dn_list.length == 0){
                     logger.error('no user found for uid', user.uid);
                     reject('no user found for uid');
+                    return;
                 }
                 resolve(user_dn_list[0]);
                 return;
@@ -194,7 +261,11 @@ module.exports = {
 
     delete_group: function(group, fid) {
         return new Promise(function(resolve, reject){
-            filer.ldap_delete_group(group, fid)
+            get_group_dn(group.name)
+                .then(
+                    group_dn => { // resolve()
+                        return filer.ldap_delete_group(group, group_dn, fid);
+                    })
                 .then(
                     created_file => {
                         logger.info('File Created: ', created_file);
@@ -215,12 +286,14 @@ module.exports = {
             logger.error(e);
             throw e;
         }
-        
+
         try {
             let created_file = await filer.ldap_add_user(user, group, fid);
             logger.debug('File created', created_file);
-            created_file = await filer.ldap_add_user_to_group(user, fid);
+            let group_dn = await get_group_dn(group.name);
+            created_file = await filer.ldap_add_user_to_group(user,group_dn, fid);
             logger.debug('File created', created_file);
+
         } catch(error) {
             logger.error('Add User Failed for: ' + user.uid, error);
             throw error;
@@ -230,15 +303,41 @@ module.exports = {
 
     change_user_groups: function(user, group_add, group_remove, fid) {
         return new Promise(function(resolve, reject){
-            filer.ldap_change_user_groups(user, group_add, group_remove, fid)
-                .then(
-                    created_file => {
-                        logger.info('File Created: ', created_file);
-                        resolve();
-                    })
-                .catch(error => { // reject()
-                    logger.error('User Group Change Failed for: ' + user.uid, error);
-                    reject(error);
+
+            // Todo: change_user_groups should not managed 2 array of group as it is mostly never usefull and it is not so easy with promise and async ...
+            // https://flaviocopes.com/javascript-async-await-array-map/
+
+            let prm_add = group_add.map((group) => {
+                return get_group_dn(group)
+                    .then(group_dn => { return group_dn; })
+                    .catch(error => { logger.error('Get Dn to Add Failed for: ' + group, error);});
+            });
+
+            let prm_remove = group_remove.map((group) => {
+                return get_group_dn(group)
+                    .then(group_dn => { return group_dn; })
+                    .catch(error => { logger.error('Get Dn to Remove Failed for: ' + group, error);});
+            });
+
+
+            Promise.all(prm_add).then(
+                group_add_dn => {
+                    //logger.info( 'To add: ', group_add_dn);
+                    Promise.all(prm_remove).then(
+                        group_remove_dn => {
+                            // logger.info( 'To remove: ', group_remove_dn);
+
+                            filer.ldap_change_user_groups(user, group_add_dn, group_remove_dn, fid)
+                                .then(
+                                    created_file => {
+                                        logger.info('File Created: ', created_file);
+                                        resolve();
+                                    })
+                                .catch(error => { // reject()
+                                    logger.error('User Group Change Failed for: ' + user.uid, error);
+                                    reject(error);
+                                });
+                        });
                 });
         });
     },
