@@ -93,7 +93,7 @@ utils.init_db().then(async () => {
             let script = '#!/bin/bash\n';
             script += 'set -e \n';
             script += 'ldapmodify -cx -w ' + CONFIG.ldap.admin_password + ' -D ' + CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn + ' -f ' + CONFIG.general.script_dir + '/' + user.uid + '.' + fid + '.ldif\n';
-            let script_file = CONFIG.general.script_dir+'/'+user.uid+' '+fid+'.update';
+            let script_file = CONFIG.general.script_dir + '/' + user.uid + '.' + fid + '.update';
             await utils.mongo_events().insertOne({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []});
 
             let plugin_call = function(plugin_info, user){
