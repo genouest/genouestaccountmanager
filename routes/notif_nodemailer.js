@@ -8,6 +8,7 @@ const logger = winston.loggers.get('gomngr');
 const nodemailer = require('nodemailer');
 
 var mail_set = false;
+var mail_verified = false;
 // mailset should be a isnull on transporter (or not)
 var transporter = null;
 
@@ -18,6 +19,11 @@ if(CONFIG.nodemailer){
         secure: false, // upgrade later with STARTTLS
     });
 
+    verify_transport();
+}
+
+
+function verify_transport () {
     // eslint-disable-next-line no-unused-vars
     transporter.verify(function(error, success) {
         if (error) {
@@ -26,12 +32,17 @@ if(CONFIG.nodemailer){
             mail_set =true;
             logger.info('Smtp Server is ready to take our messages');
         }
+        mail_verified = true;
     });
 }
+
 
 module.exports = {
 
     mailSet: function(){
+        if (!mail_verified) {
+            verify_transport();
+        }
         return mail_set;
     },
 
