@@ -826,30 +826,20 @@ router.delete('/user/:id/group/:group', async function(req, res){
     });
 });
 
-router.delete_user = async function(user, action_owner_id){
+router.delete_user = async function(user, action_owner_id, message){
+    let user_is_activ = true;
+
     if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
-        await utils.mongo_users().deleteOne({_id: user._id});
-        await utils.mongo_events().insertOne({
-            'owner': action_owner_id,
-            'date': new Date().getTime(),
-            'action': 'delete user ' + user.uid ,
-            'logs': []
-        });
-        await utils.freeUserId(user.uidnumber);
-        router.clear_user_groups(user, action_owner_id);
-        return true;
+        user_is_activ = false;
     }
-    else {
-        let fid = new Date().getTime();
-        // Remove user from groups
-        let allgroups = user.secondarygroups;
-        allgroups.push(user.group);
+
+    let fid = new Date().getTime();
+    // Remove user from groups
+    let allgroups = user.secondarygroups;
+    allgroups.push(user.group);
+
+    if(user_is_activ){
         await goldap.change_user_groups(user, [], allgroups, fid);
-        try {
-            await utils.mongo_users().deleteOne({_id: user._id});
-        } catch(err) {
-            return false;
-        }
 
         try {
             let created_file = await filer.user_delete_user(user, fid);
@@ -858,24 +848,42 @@ router.delete_user = async function(user, action_owner_id){
             logger.error('Delete User Failed for: ' + user.uid, error);
             return false;
         }
+    }
 
-        router.clear_user_groups(user, action_owner_id);
-        let msg_activ ='User ' + user.uid + ' has been deleted by ' + action_owner_id;
-        let msg_activ_html = msg_activ;
-        let mailOptions = {
-            origin: MAIL_CONFIG.origin, // sender address
-            destinations:  [GENERAL_CONFIG.accounts], // list of receivers
-            subject: GENERAL_CONFIG.name + ' account deletion: ' +user.uid, // Subject line
-            message: msg_activ, // plaintext body
-            html_message: msg_activ_html // html body
-        };
-        await utils.mongo_events().insertOne({
-            'owner': action_owner_id,
-            'date': new Date().getTime(),
-            'action': 'delete user ' + user.uid ,
-            'logs': [user.uid + '.' + fid + '.update']
-        });
+    try {
+        await utils.mongo_users().deleteOne({_id: user._id});
+    } catch(err) {
+        return false;
+    }
 
+    router.clear_user_groups(user, action_owner_id);
+
+    await utils.mongo_events().insertOne({
+        'owner': action_owner_id,
+        'date': new Date().getTime(),
+        'action': 'delete user ' + user.uid ,
+        'logs': [user.uid + '.' + fid + '.update']
+    });
+
+    let msg_destinations =  [GENERAL_CONFIG.accounts];
+    let mail_message=  'no explaination provided !';
+    if (message && message.length > 1) {
+        mail_message = message;
+        msg_destinations.push(user.email);
+    }
+
+    let msg_del = CONFIG.message.deletion.join('\n').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '\n' + CONFIG.message.footer.join('\n');
+    let msg_del_html = CONFIG.message.deletion_html.join('').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '<br/>'+CONFIG.message.footer_html.join('<br/>');
+
+    let mailOptions = {
+        origin: MAIL_CONFIG.origin, // sender address
+        destinations:  msg_destinations, // list of receivers
+        subject: GENERAL_CONFIG.name + ' account deletion: ' + user.uid, // Subject line
+        message: msg_del, // plaintext body
+        html_message: msg_del_html // html body
+    };
+
+    if(user_is_activ){
         // Call remove method of plugins if defined
         let plugin_call = function(plugin_info, userId, user, adminId){
             // eslint-disable-next-line no-unused-vars
@@ -891,13 +899,14 @@ router.delete_user = async function(user, action_owner_id){
         await Promise.all(plugins_info.map(function(plugin_info){
             return plugin_call(plugin_info, user.uid, user, action_owner_id);
         }));
-        await utils.freeUserId(user.uidnumber);
-        if(notif.mailSet()) {
-            // eslint-disable-next-line no-unused-vars
-            await notif.sendUser(mailOptions);
-        }
-        return true;
     }
+
+    await utils.freeUserId(user.uidnumber);
+    if(notif.mailSet()) {
+        // eslint-disable-next-line no-unused-vars
+        await notif.sendUser(mailOptions);
+    }
+    return true;
 };
 
 router.delete('/user/:id', async function(req, res){
@@ -909,6 +918,11 @@ router.delete('/user/:id', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
+    if(req.body.message && ! utils.sanitizeAll([req.body.message])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
         res.status(401).send('Not authorized');
@@ -916,6 +930,10 @@ router.delete('/user/:id', async function(req, res){
     }
 
     var uid = req.params.id;
+    var mail_message = '';
+    if (req.body.message) {
+        mail_message = req.body.message;
+    }
 
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
@@ -924,7 +942,7 @@ router.delete('/user/:id', async function(req, res){
         return;
     }
     if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
-        router.delete_user(user, session_user.uid).then(function(){
+        router.delete_user(user, session_user.uid, mail_message).then(function(){
             res.send({message: 'User deleted'});
             res.end();
             return;
@@ -946,7 +964,7 @@ router.delete('/user/:id', async function(req, res){
             res.end();
             return;
         }
-        router.delete_user(user, session_user.uid).then(function(){
+        router.delete_user(user, session_user.uid, mail_message).then(function(){
             res.send({message: 'User deleted'});
             res.end();
             return;
@@ -1045,7 +1063,7 @@ router.get('/user/:id/activate', async function(req, res) {
         };
         Promise.all(plugins_info.map(function(plugin_info){
             return plugin_call(plugin_info, user.uid, user, session_user.uid);
-        // eslint-disable-next-line no-unused-vars
+            // eslint-disable-next-line no-unused-vars
         })).then(function(results){
             return send_notif(mailOptions, fid, []);
         }, function(err){
@@ -1367,7 +1385,7 @@ router.get('/user/:id/expire', async function(req, res){
                 };
                 Promise.all(plugins_info.map(function(plugin_info){
                     return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                // eslint-disable-next-line no-unused-vars
+                    // eslint-disable-next-line no-unused-vars
                 })).then(function(data){
                     res.send({message: 'Operation in progress', fid: fid, error: []});
                     res.end();
@@ -1678,7 +1696,7 @@ router.get('/user/:id/renew', async function(req, res){
             };
             Promise.all(plugins_info.map(function(plugin_info){
                 return plugin_call(plugin_info, user.uid, user, session_user.uid);
-            // eslint-disable-next-line no-unused-vars
+                // eslint-disable-next-line no-unused-vars
             })).then(function(results){
                 return send_notif(mailOptions, fid, []);
             }, function(err){

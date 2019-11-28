@@ -5,7 +5,6 @@ import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-
 @Injectable({
     providedIn: 'root'
 })
@@ -68,14 +67,19 @@ export class UserService {
             httpOptions)
     }
 
-    delete(userId: string) {
+    delete(userId: string, message: string) {
+        // console.log(userId, message);
         let httpOptions = {
-            //headers: new HttpHeaders({
-            //  'x-api-key': localStorage.getItem('my-api-key')
-            //}),
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json'
+                //  'x-api-key': localStorage.getItem('my-api-key')
+            }),
+            body: {
+                message: message
+            },
         };
         return this.http.delete(
-            environment.apiUrl + '/user/' + userId ,
+            environment.apiUrl + '/user/' + userId,
             httpOptions)
     }
 
