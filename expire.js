@@ -10,9 +10,11 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
+const process = require('process');
+
 var CONFIG = require('config');
 var goldap = require('./routes/goldap.js');
-var fs = require('fs');
+const filer = require('./routes/file.js');
 
 var Promise = require('promise');
 
@@ -86,14 +88,18 @@ utils.init_db().then(async () => {
                 await goldap.reset_password(user, fid);
             } catch(err) {
                 console.log(user.uid + ': failed to reset password');
-                
+
             }
             user.history.push({'action': 'expire', date: new Date().getTime()});
             await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
-            let script = '#!/bin/bash\n';
-            script += 'set -e \n';
-            script += 'ldapmodify -cx -w ' + CONFIG.ldap.admin_password + ' -D ' + CONFIG.ldap.admin_cn + ',' + CONFIG.ldap.admin_dn + ' -f ' + CONFIG.general.script_dir + '/' + user.uid + '.' + fid + '.ldif\n';
-            let script_file = CONFIG.general.script_dir + '/' + user.uid + '.' + fid + '.update';
+            try {
+                let created_file = await filer.user_expire_user(user, fid);
+                console.log('File Created: ', created_file);
+            } catch(error){
+                console.error('Expire User Failed for: ' + user.uid, error);
+                return;
+            }
+
             await utils.mongo_events().insertOne({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []});
 
             let plugin_call = function(plugin_info, user){
@@ -111,8 +117,6 @@ utils.init_db().then(async () => {
             // eslint-disable-next-line no-unused-vars
             })).then(function(results){
                 // console.log('after plugins');
-                fs.writeFile(script_file, script, function() {
-                    fs.chmodSync(script_file,0o755);
                     // Now remove from mailing list
                     try {
                         notif.remove(user.email, function(){
@@ -128,7 +132,7 @@ utils.init_db().then(async () => {
                             process.exit(0);
                         }
                     }
-                });
+
             });
         }(i));
     }
