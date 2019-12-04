@@ -141,15 +141,7 @@ export class UserComponent implements OnInit {
 
     dateConvert = function timeConverter(tsp){
         var a = new Date(tsp);
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        var year = a.getFullYear();
-        var month = months[a.getMonth()];
-        var date = a.getDate();
-        var hour = a.getHours();
-        var min = a.getMinutes();
-        var sec = a.getSeconds();
-        var time = date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-        return time;
+        return a.toLocaleString();
     }
 
     ngOnInit() {
@@ -277,7 +269,7 @@ export class UserComponent implements OnInit {
         }
         this.web_list();
         this.db_list();
-        
+
         this.user.secondarygroups.sort(function (a,b) {
             return a.localeCompare(b);
         });
