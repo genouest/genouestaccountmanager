@@ -196,13 +196,7 @@ export class ProjectComponent implements OnInit {
 
     date_convert = function timeConverter(tsp){
         var a = new Date(tsp);
-        // Really..?
-        var months = ["01","02","03","04","05","06","07","08","09","10","11","12"];
-        var year = a.getFullYear();
-        var month = months[a.getMonth()];
-        var date = a.getDate();
-        var time =  year +'-' + month + '-' + date;
-        return time;
+        return a.toLocaleDateString();
     }
 
 }

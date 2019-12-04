@@ -62,16 +62,7 @@ export class LogsComponent implements OnInit {
 
     date_convert = function timeConverter(tsp){
         var a = new Date(tsp);
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        var year = a.getFullYear();
-        //var month = months[a.getMonth()];
-        var month = a.getMonth();
-        var date = a.getDate();
-        var hour = a.getHours();
-        var min = a.getMinutes();
-        var sec = a.getSeconds();
-        var time = this.addZero(date) + '/' + this.addZero(month) + '/' + year + ' ' + this.addZero(hour) + ':' + this.addZero(min) + ':' + this.addZero(sec) ;
-        return time;
+        return a.toLocaleDateString();
     }
 
     getLogs(): Observable<any> {
