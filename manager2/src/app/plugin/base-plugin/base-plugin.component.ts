@@ -74,6 +74,6 @@ export class BasePluginComponent {
 
     date_convert(tsp){
         var a = new Date(tsp);
-        return a.toLocaleString();
+        return a.toLocaleDateString();
     }
 }

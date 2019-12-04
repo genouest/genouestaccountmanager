@@ -53,7 +53,7 @@ export class UsersComponent implements OnInit {
 
     date_convert(tsp) {
         var a = new Date(tsp);
-        return a.toLocaleString();
+        return a.toLocaleDateString();
     }
 
 }

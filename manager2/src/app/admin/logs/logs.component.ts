@@ -62,7 +62,7 @@ export class LogsComponent implements OnInit {
 
     date_convert = function timeConverter(tsp){
         var a = new Date(tsp);
-        return a.toLocaleString();
+        return a.toLocaleDateString();
     }
 
     getLogs(): Observable<any> {

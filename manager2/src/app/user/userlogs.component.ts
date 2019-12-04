@@ -56,6 +56,6 @@ export class UserLogsComponent {
 
     dateConvert(tsp){
         var a = new Date(tsp);
-        return a.toLocaleString();
+        return a.toLocaleDateString();
     }
 }

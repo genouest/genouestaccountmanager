@@ -49,7 +49,7 @@ export class PluginService {
 
     dateConvert = function timeConverter(tsp){
         var a = new Date(tsp);
-        return a.toLocaleString();
+        return a.toLocaleDateString();
     }
 
     get(pluginName: string, user: string) {

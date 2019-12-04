@@ -141,7 +141,7 @@ export class UserComponent implements OnInit {
 
     dateConvert = function timeConverter(tsp){
         var a = new Date(tsp);
-        return a.toLocaleString();
+        return a.toLocaleDateString();
     }
 
     ngOnInit() {
