@@ -35,7 +35,7 @@ export class MyDeleteConfirmComponent implements OnInit {
         if (message && !this.data) {
            this.data = message;
         }
-        console.log('app-my-delete-confirm', this.isDeleting, message, this.data);
+        // console.log('app-my-delete-confirm', this.isDeleting, message, this.data);
 
         this.onConfirm(this.data);
     }
