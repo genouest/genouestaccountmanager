@@ -24,8 +24,13 @@ export class HomeComponent implements OnInit {
             err => console.log('failed to get config')
         )
         if (this.authService.isLoggedIn) {
-            let user = this.authService.profile;
-            this.router.navigate(['/user/' + user.uid]);
+            if ( config.default_home == "project" )
+            {
+                this.router.navigate(['/project']);
+            } else { // default to user profile page
+                let user = this.authService.profile;
+                this.router.navigate(['/user/' + user.uid]);
+            }
         } else {
             this.router.navigate(['/login']);
         }
