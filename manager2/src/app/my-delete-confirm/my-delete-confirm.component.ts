@@ -8,12 +8,16 @@ import { Component, Input, OnInit } from '@angular/core';
 export class MyDeleteConfirmComponent implements OnInit {
 
     isDeleting: boolean
+    message: string
 
     @Input()
     onConfirm: any
 
     @Input()
     data: any
+
+    @Input()
+    explainMessage: boolean
 
     constructor() { }
 
@@ -25,9 +29,13 @@ export class MyDeleteConfirmComponent implements OnInit {
     }
     cancel() {
         this.isDeleting = false;
+        this.message = "";
     }
-    confirm() {
-        // console.log('app-my-delete-confirm', this.onConfirm, this.data);
+    confirm(message: string) {
+        if (message && !this.data) {
+           this.data = message;
+        }
+        // console.log('app-my-delete-confirm', this.isDeleting, message, this.data);
 
         this.onConfirm(this.data);
     }

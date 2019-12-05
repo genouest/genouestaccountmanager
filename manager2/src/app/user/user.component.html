@@ -10,11 +10,11 @@
       </div>
       <div class="col-sm-6">
           <button *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)" class="btn btn-success" (click)="activate()">Activate</button>
-          <div *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)"><app-my-delete-confirm [onConfirm]="delete" [data]=""></app-my-delete-confirm></div>
+          <div *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
           <button *ngIf="session_user.is_admin && user.status == STATUS_ACTIVE" class="btn btn-warning" (click)="expire()">Expire</button>
           <button *ngIf="user.status == STATUS_ACTIVE" class="btn btn-success" (click)="extend()">Extend validity</button>
           <button *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED" class="btn btn-success" (click)="renew()">Renew</button>
-          <div *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED"><app-my-delete-confirm [onConfirm]="delete" [data]=""></app-my-delete-confirm></div>
+          <div *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
       </div>
   </div>
 </div>

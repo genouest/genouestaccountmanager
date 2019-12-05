@@ -241,6 +241,17 @@
       "<p>#LINK#</p>",
       "<hr>"
     ],
+    "deletion": [
+        "Your account #UID# have been deleted by #USER#",
+        "Because:",
+        "",
+        "#MSG#"
+    ],
+    "deletion_html": [
+      "<p>Your account #UID# have been deleted by #USER#</p>",
+      "<p>Because:</p>",
+      "<i>#MSG#</i>"
+    ],
     "confirmation": [
      "You have created an account on GenOuest platform, please confirm your subscription at the following link:",
      "#LINK#",

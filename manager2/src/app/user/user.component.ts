@@ -8,7 +8,6 @@ import { Plugin, PluginService} from '../plugin/plugin.service'
 import { GroupsService } from '../admin/groups/groups.service'
 import { ProjectsService } from '../admin/projects/projects.service'
 
-
 import { ActivatedRoute, Router } from '@angular/router';
 import { WindowWrapper } from '../windowWrapper.module';
 import { FlashMessagesService } from '../utils/flash/flash.component';
@@ -632,13 +631,17 @@ export class UserComponent implements OnInit {
         )
     }
 
-    delete() {
-        this.userService.delete(this.user.uid).subscribe(
+    delete(message: string) {
+        // console.log(this.user.uid, message);
+        this.userService.delete(this.user.uid, message).subscribe(
             resp => {
                 this._flashMessagesService.show(resp['message'], { cssClass: 'alert-success', timeout: 5000 });
                 this.router.navigate(['/admin/user']);
             },
-            err => console.log('failed to delete user')
+            err => {
+                this.err_msg = err.error;
+                console.log('failed to delete user', err);
+            }
         )
     }
 
