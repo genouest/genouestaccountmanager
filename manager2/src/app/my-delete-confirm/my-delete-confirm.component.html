@@ -3,10 +3,12 @@
     <button type="button" class="btn btn-danger btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i> Delete</button>
   </div>
   <div *ngIf="isDeleting">
-    <label for="message" class="col-4 col-form-label"><b>Please Explain Why:</b></label>
-    <br/>
-    <textarea *ngIf="explainMessage" id="message" [ngModelOptions]="{standalone: true}" [(ngModel)]="message"></textarea>
-    <br/>
+    <div *ngIf="explainMessage">
+      <label for="message" class="col-4 col-form-label"><b>Please Explain Why:</b></label>
+      <br/>
+      <textarea id="message" [ngModelOptions]="{standalone: true}" [(ngModel)]="message"></textarea>
+      <br/>
+    </div>
     <button type="button" class="btn btn-outline-secondary btn-xs" (click)="cancel()">Abort deletion</button>
     <button type="button" class="btn btn-danger btn-xs"  (click)="confirm(message)"><i class="fa fa-trash-o"></i>Confirm</button>
   </div>
