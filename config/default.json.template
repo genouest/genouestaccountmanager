@@ -265,6 +265,20 @@
      "<p>You will receive an email when your account has been validated.</p>",
      "<hr>"
     ],
+    "ask_project": [
+      "#UID# have asked for a new project '#NAME#' in My",
+      "Size needed: #SIZE# GB",
+      "Entity: #ORGA#",
+      "Description: #DESC#",
+      "Please consider it, and keep #UID# inform"
+    ],
+    "ask_project_html": [
+      "<p>#UID# have asked for a new project '#NAME#' in My</p>",
+      "<p>Size needed: #SIZE# GB</p>",
+      "<p>Entity: #ORGA#</p>",
+      "<p>Description: #DESC#</p>",
+      "<p>Please consider it, and keep #UID# inform</p>"
+    ],
     "footer": [
       "GenOuest BioInformatics Platform - support at support@genouest.org",
       "Campus de Beaulieu",

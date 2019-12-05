@@ -161,4 +161,21 @@ export class ProjectsService {
             httpOptions
         );
     }
+
+    askNew(new_project: any): Observable<any> {
+        // let user = this.authService.profile;
+        let params = new HttpParams();
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.post(
+            environment.apiUrl + '/ask',
+            new_project,
+            httpOptions
+        );
+    }
 }
