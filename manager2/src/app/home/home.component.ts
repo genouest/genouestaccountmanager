@@ -19,18 +19,21 @@ export class HomeComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.configService.config.subscribe(
-            resp => this.config = resp,
-            err => console.log('failed to get config')
-        )
         if (this.authService.isLoggedIn) {
-            if ( this.config.default_home == 'project' )
-            {
-                this.router.navigate(['/project']);
-            } else { // default to user profile page
-                let user = this.authService.profile;
-                this.router.navigate(['/user/' + user.uid]);
-            }
+            // Maybe we should try to use promise and async in angular too ...
+            this.configService.config.subscribe(
+                resp => {
+                    this.config = resp;
+                    if ( this.config.default_home == 'project' )
+                    {
+                        this.router.navigate(['/project']);
+                    } else { // default to user profile page
+                        let user = this.authService.profile;
+                        this.router.navigate(['/user/' + user.uid]);
+                    }
+                },
+                err => console.log('failed to get config')
+            )
         } else {
             this.router.navigate(['/login']);
         }
