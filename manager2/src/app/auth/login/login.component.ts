@@ -119,7 +119,7 @@ export class LoginComponent implements OnInit {
                         //this.authService.handleLoginCallback(userData);
                         //this.router.navigate(['/user/' + userData['uid']]);
                     } else {
-                        this.router.navigate(['/user/' + userData['uid']]);
+                        this.router.navigate(['/']); // as home will redirect us in the right page
                     }
                 }
             ).catch( err => {this.msg = err.error;});
