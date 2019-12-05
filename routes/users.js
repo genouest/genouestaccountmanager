@@ -918,10 +918,6 @@ router.delete('/user/:id', async function(req, res){
         res.status(403).send('Invalid parameters');
         return;
     }
-    if(req.body.message && ! utils.sanitizeAll([req.body.message])) {
-        res.status(403).send('Invalid parameters');
-        return;
-    }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
