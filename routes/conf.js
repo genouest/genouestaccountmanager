@@ -15,6 +15,10 @@ router.get('/conf', function(req, res){
     if (CONFIG.general.terms_of_use) {
         terms_of_use = CONFIG.general.terms_of_use;
     }
+    let default_home = 'user'; // can be user or project
+    if (CONFIG.general.web_home) {
+        default_home = CONFIG.general.web_home;
+    }
     let enable_ui = {
         'messages': true,
         'databases': true,
@@ -40,6 +44,7 @@ router.get('/conf', function(req, res){
             res.send({
                 'main_groups': CONFIG.general.main_groups,
                 'terms_of_use': terms_of_use,
+                'default_home': default_home,
                 'name': CONFIG.general.name,
                 'support': CONFIG.general.support,
                 'main_list': MAIL_CONFIG.main_list,
@@ -55,6 +60,7 @@ router.get('/conf', function(req, res){
         res.send({
             'main_groups': CONFIG.general.main_groups,
             'terms_of_use': terms_of_use,
+            'default_home': default_home,
             'name': CONFIG.general.name,
             'support': CONFIG.general.support,
             'main_list': MAIL_CONFIG.main_list,
