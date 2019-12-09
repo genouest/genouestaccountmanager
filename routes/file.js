@@ -197,7 +197,7 @@ module.exports = {
     },
 
     project_remove_user_from_project: function (project, user, fid) {
-        return create_file('project_remove_user_from_to_project', { project: project, user: user, fid: fid });
+        return create_file('project_remove_user_from_project', { project: project, user: user, fid: fid });
     },
 
     project_add_group_to_project: function (project, group, fid) {
