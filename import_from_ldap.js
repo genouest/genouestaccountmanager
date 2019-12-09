@@ -154,7 +154,7 @@ function record_group(group){
             var go_project = {
                 id: group.cn,
                 owner: group_owner,
-                expiration: new Date().getTime() + 1000*3600*24*365,
+                expire: new Date().getTime() + 1000*3600*24*365,
                 group: group.cn,
                 description: "imported from ldap",
                 path: "",
