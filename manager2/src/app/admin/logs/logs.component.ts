@@ -25,6 +25,7 @@ export class LogsComponent implements OnInit {
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 
+    // it look like this is useless, as in fact in compare string, not date ...
     private sortByDate(a, b) {
         if (a.date < b.date)
             return 1;
@@ -62,7 +63,7 @@ export class LogsComponent implements OnInit {
 
     date_convert = function timeConverter(tsp){
         var a = new Date(tsp);
-        return a.toLocaleDateString();
+        return a.toISOString();
     }
 
     getLogs(): Observable<any> {
