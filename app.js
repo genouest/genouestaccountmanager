@@ -29,8 +29,7 @@ const wlogger = winston.loggers.add('gomngr', {
     transports: [myconsole]
 });
 
-const promMid = require('express-prometheus-middleware');
-
+const promBundle = require('express-prom-bundle');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -88,11 +87,31 @@ app.use(session({
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(promMid({
-    metricsPath: '/metrics',
-    collectDefaultMetrics: true,
-    requestDurationBuckets: [0.1, 0.5, 1, 1.5],
-}));
+const metricsMiddleware = promBundle({
+    includeMethod: true,
+    includePath: true,
+    normalizePath: [
+        ['^/manager2/.*', '/manager2/#static'],
+        ['^/log/.*', '/log'],
+        ['^/group/.*', '/group/#name'],
+        ['^/database/.*', '/database/#name'],
+        ['^/web/.*', '/web/#name'],
+        ['^/user/.*', '/user/#name'],
+        ['^/list/.*', '/list/#name'],
+        ['^/project/.*', '/project/#name'],
+        ['^/ssh/.*', '/ssh/#name'],
+        ['^/plugin/.*', '/plugin/#name'],
+        ['^/quota/.*', '/quota/#name'],
+        ['^/tp/.*', '/tp/#name'],
+        ['^/tags/.*', '/tags'],
+        ['^/auth/.*', '/auth/#name'],
+        ['^/u2f/.*', '/u2f'],
+        ['^/mail/.*', '/mail/#name'],
+    ],
+});
+
+app.use(metricsMiddleware);
+
 
 const runningEnv = process.env.NODE_ENV || 'prod';
 const { spawn } = require('child_process');
