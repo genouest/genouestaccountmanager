@@ -269,7 +269,7 @@ export class UserService {
             }));
     }
 
-    removeFromProject(userId: string, projectId: string, force: boolean) {
+    removeFromProject(userId: string, projectId: string) {
         let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

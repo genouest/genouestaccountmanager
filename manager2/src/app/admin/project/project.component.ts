@@ -124,27 +124,16 @@ export class ProjectComponent implements OnInit {
         )
     }
 
-    private removeUserFromProject(userId, projectId, callback) {
-        this.userService.removeFromProject(userId, projectId, true).subscribe(
-            resp => {if (callback) { callback(resp, null)}},
-            err => {
-                console.log('failed to remove ' + userId + 'from project');
-                if (callback) { callback(null, err)}
-            }
-        );
-    }
-
     remove_user(project, userId) {
-        this.admin_user_msg = "";
-        this.admin_user_err_msg = "";
-        this.removeUserFromProject(userId, project.id, function(resp, err){
-            if(! err){
+        this.admin_user_msg = '';
+        this.admin_user_err_msg = '';
+        this.userService.removeFromProject(userId, project.id).subscribe(
+            resp => {
                 this.admin_user_msg = resp['message'];
                 this.show_project_users(project.id);
-            } else {
-                this.admin_user_err_msg = err.error;
-            }
-        });
+            },
+            err => this.admin_user_err_msg = err.error
+        );
     }
 
     update_users_group(usersList, newGroupId){
@@ -159,7 +148,10 @@ export class ProjectComponent implements OnInit {
     delete_project(project, userList) {
         this.admin_user_err_msg = '';
         for(var i = 0; i < userList.length; i++){
-            this.removeUserFromProject(userList[i].uid, project.id, null);
+            this.userService.removeFromProject(userList[i].uid, project.id)
+                .subscribe(
+                    resp => {},
+                    err => this.prj_err_msg = err.error                                         );
         }
         this.projectsService.delete(project.id).subscribe(
             resp => {
