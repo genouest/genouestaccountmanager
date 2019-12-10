@@ -130,7 +130,7 @@ export class ProjectsComponent implements OnInit {
         this.request_mngt_msg = "";
         this.request_mngt_error_msg = "";
         this.request_grp_msg = "";
-        this.userService.removeFromProject(user_id, project.id, false).subscribe(
+        this.userService.removeFromProject(user_id, project.id).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
                 this.projectService.removeRequest(project.id, {'request': 'remove', 'user': user_id}).subscribe(
