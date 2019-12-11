@@ -1,25 +1,10 @@
 var CONFIG = require('config');
-//var LDAP = require('ldap-client');
-// var http = require('http')
 var myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
 
 var utils= require('./utils');
-
-/*
-  var options = {
-  uri: 'ldap://'+CONFIG.ldap.host, // string
-  //version: 3, // integer, default is 3,
-  //starttls: false, // boolean, default is false
-  connecttimeout: -1, // seconds, default is -1 (infinite timeout), connect timeout
-  //timeout: 5000, // milliseconds, default is 5000 (infinite timeout is unsupported), operation timeout
-  //reconnect: true, // boolean, default is true,
-  //backoffmax: 32 // seconds, default is 32, reconnect timeout
-  };
-*/
-
 
 function get_group_dn(group) {
     return new Promise( function (resolve, reject) {
@@ -176,7 +161,7 @@ module.exports = {
                     logger.error('Failed to bind as admin to ldap', err);
                     reject(err);
                 }
-                var opts = {
+                let opts = {
                     filter: '(uid=' + uid + ')',
                     scope: 'sub',
                     attributes: ['dn']
@@ -189,7 +174,7 @@ module.exports = {
                     }
                     let foundMatch = false;
                     res.on('searchEntry', function(entry) {
-                        var user_dn = entry.object['dn'];
+                        let user_dn = entry.object['dn'];
                         foundMatch = true;
                         client.bind(user_dn, password, function(err) {
                             if(err) {

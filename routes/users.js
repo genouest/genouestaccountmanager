@@ -2,8 +2,6 @@
 /*jslint es6 */
 var express = require('express');
 var router = express.Router();
-// var bcrypt = require('bcryptjs');
-// var escapeshellarg = require('escapeshellarg');
 var markdown = require('markdown').markdown;
 var htmlToText = require('html-to-text');
 var validator = require('email-validator');
@@ -47,43 +45,6 @@ for(let i = 0; i< plugins.length; i++){
     plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
     plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
 }
-
-// util function to execute scripts immediatly, for test purpose only
-// on dev/prod, scripts should be executed by cron only
-
-/*
-if (runningEnv === 'test'){
-    const { spawn } = require('child_process');
-    var if_dev_execute_scripts = function(){
-        return new Promise(function (resolve, reject){
-            if (runningEnv !== 'test'){
-                resolve();
-                return;
-            }
-            logger.info('In *test* environment, check for scripts to execute');
-            let cron_bin_script = CONFIG.general.cron_bin_script || null;
-            if(cron_bin_script === null){
-                logger.error('cron script not defined');
-                reject({'err': 'cron script not defined'});
-                return;
-            }
-            var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
-            procScript.on('exit', function (code, signal) {
-                logger.info(cron_bin_script + ' process exited with ' +
-                            `code ${code} and signal ${signal}`);
-                resolve();
-            });
-        });
-    };
-
-    router.use('*', function(req, res, next){
-        res.on('finish', function() {
-            if_dev_execute_scripts().then(function(){});
-        });
-        next();
-    });
-}
-*/
 
 function get_group_home (user) {
     let group_path = CONFIG.general.home+'/'+user.group;
@@ -187,7 +148,7 @@ var create_extra_user = async function(user_name, group, internal_user){
     user.uidnumber = minuid;
     user.gidnumber = group.gid;
     user.home = get_user_home(user);
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     try {
         await goldap.add(user, fid);
     } catch(err) {
@@ -315,7 +276,7 @@ router.post('/user/:id/apikey', async function(req, res){
         return;
     }
 
-    var apikey = Math.random().toString(36).slice(-10);
+    let apikey = Math.random().toString(36).slice(-10);
     await utils.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
     res.send({'apikey': apikey});
     res.end();
@@ -521,7 +482,7 @@ router.put('/group/:id', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    var owner = req.body.owner;
+    let owner = req.body.owner;
     let user = await utils.mongo_users().findOne({uid: owner});
     if(!user) {
         res.status(404).send('User does not exist');
@@ -710,7 +671,7 @@ router.post('/user/:id/group/:group', async function(req, res){
         res.end();
         return;
     }
-    for(var g=0;g < user.secondarygroups.length;g++){
+    for(let g=0;g < user.secondarygroups.length;g++){
         if(secgroup == user.secondarygroups[g]) {
             res.send({message: 'group is already set'});
             res.end();
@@ -718,7 +679,7 @@ router.post('/user/:id/group/:group', async function(req, res){
         }
     }
     user.secondarygroups.push(secgroup);
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     // Now add group
     await goldap.change_user_groups(user, [secgroup], [], fid);
     try {
@@ -769,9 +730,9 @@ router.delete('/user/:id/group/:group', async function(req, res){
         res.end();
         return;
     }
-    var present = false;
-    var newgroup = [];
-    for(var g=0;g < user.secondarygroups.length;g++){
+    let present = false;
+    let newgroup = [];
+    for(let g=0;g < user.secondarygroups.length;g++){
         if(secgroup == user.secondarygroups[g]) {
             present = true;
         }
@@ -785,7 +746,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
         return;
     }
     user.secondarygroups = newgroup;
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     // Now add group
     await goldap.change_user_groups(user, [], [secgroup], fid);
     try {
@@ -925,8 +886,8 @@ router.delete('/user/:id', async function(req, res){
         return;
     }
 
-    var uid = req.params.id;
-    var mail_message = '';
+    let uid = req.params.id;
+    let mail_message = '';
     if (req.body.message) {
         mail_message = req.body.message;
     }
@@ -1024,7 +985,7 @@ router.get('/user/:id/activate', async function(req, res) {
     user.uidnumber = minuid;
     user.gidnumber = data.gid;
     user.home = get_user_home(user);
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     try {
         await goldap.add(user, fid);
         let created_file = await filer.user_add_user(user, fid);
@@ -1098,7 +1059,7 @@ router.get('/user/:id', async function(req, res) {
         user.is_admin = false;
     }
     user.quota = [];
-    for(var k in GENERAL_CONFIG.quota) {
+    for(let k in GENERAL_CONFIG.quota) {
         user.quota.push(k);
     }
 
@@ -1114,8 +1075,8 @@ router.get('/user/:id', async function(req, res) {
 
 // Registration mail confirmation
 router.get('/user/:id/confirm', async function(req, res) {
-    var uid = req.params.id;
-    var regkey = req.query.regkey;
+    let uid = req.params.id;
+    let regkey = req.query.regkey;
     if(! utils.sanitizeAll([uid])) {
         res.status(403).send('Invalid parameters');
         return;
@@ -1134,7 +1095,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 res.end();
                 return;
             }
-            var account_event = {action: 'email_confirm', date: new Date().getTime()};
+            let account_event = {action: 'email_confirm', date: new Date().getTime()};
             await utils.mongo_users().updateOne(
                 { _id: user._id},
                 {
@@ -1343,9 +1304,9 @@ router.get('/user/:id/expire', async function(req, res){
         session_user.is_admin = false;
     }
     if(session_user.is_admin){
-        var new_password = Math.random().toString(36).slice(-10);
+        let new_password = Math.random().toString(36).slice(-10);
         user.password = new_password;
-        var fid = new Date().getTime();
+        let fid = new Date().getTime();
         try {
             await goldap.reset_password(user, fid);
         } catch(err) {
@@ -1371,7 +1332,7 @@ router.get('/user/:id/expire', async function(req, res){
         try {
             // eslint-disable-next-line no-unused-vars
             notif.remove(user.email, function(err){
-                var plugin_call = function(plugin_info, userId, user, adminId){
+                let plugin_call = function(plugin_info, userId, user, adminId){
                     // eslint-disable-next-line no-unused-vars
                     return new Promise(function (resolve, reject){
                         plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
@@ -1435,7 +1396,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
     }
     user.password=req.body.password;
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     try {
         await goldap.reset_password(user, fid);
     } catch(err) {
@@ -1459,7 +1420,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
 
 //app.get('/user/:id/passwordreset', users);
 router.get('/user/:id/passwordreset', async function(req, res){
-    var key = Math.random().toString(36).substring(7);
+    let key = Math.random().toString(36).substring(7);
     if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send('Invalid parameters');
         return;
@@ -1528,9 +1489,9 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
     }
     if(req.params.key == user.regkey) {
         // reset the password
-        var new_password = Math.random().toString(36).slice(-10);
+        let new_password = Math.random().toString(36).slice(-10);
         user.password = new_password;
-        var fid = new Date().getTime();
+        let fid = new Date().getTime();
         try {
             await goldap.reset_password(user, fid);
         } catch(err) {
@@ -1781,7 +1742,7 @@ router.get('/user/:id/usage', function(req, res){
     }
     let usage = JSON.parse(JSON.stringify(CONFIG.usage));
     let usages = [];
-    for(var i=0;i<usage.length;i++){
+    for(let i=0;i<usage.length;i++){
         usage[i]['link'] = usage[i]['link'].replace('#USER#', req.params.id);
         usages.push(usage[i]);
     }
@@ -2025,7 +1986,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     }
     let newproject = req.params.project;
     let uid = req.params.id;
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
         res.status(404).send('User does not exist');
@@ -2035,7 +1996,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     if (!user.projects){
         user.projects = [];
     }
-    for(var g=0; g < user.projects.length; g++){
+    for(let g=0; g < user.projects.length; g++){
         if(newproject == user.projects[g]) {
             res.send({message:'User is already in project : nothing was done.'});
             res.end();
@@ -2084,7 +2045,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
     }
     let oldproject = req.params.project;
     let uid = req.params.id;
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(! user) {
         res.status(404).send('User ' + uid + ' not found');
@@ -2104,7 +2065,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         return;
     }
     let tempprojects = [];
-    for(var g=0; g < user.projects.length; g++){
+    for(let g=0; g < user.projects.length; g++){
         if(oldproject != user.projects[g]) {
             tempprojects.push(user.projects[g]);
         }

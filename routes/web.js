@@ -58,7 +58,7 @@ router.get('/web', async function(req, res) {
     else {
         session_user.is_admin = false;
     }
-    var filter = {};
+    let filter = {};
     if(!session_user.is_admin) {
         filter = {owner: session_user.uid};
     }
@@ -87,7 +87,7 @@ router.get('/web/owner/:owner', async function(req, res) {
     else {
         session_user.is_admin = false;
     }
-    var filter = {owner: req.params.owner};
+    let filter = {owner: req.params.owner};
     let webs = await utils.mongo_web().find(filter).toArray();
     res.send(webs);
 });
@@ -114,7 +114,7 @@ router.post('/web/:id', async function(req, res) {
         session_user.is_admin = false;
     }
 
-    var owner = session_user.uid;
+    let owner = session_user.uid;
     if(req.body.owner !== undefined && session_user.is_admin) {
         owner = req.body.owner;
     }
@@ -151,7 +151,7 @@ router.delete('/web/:id', async function(req, res) {
     else {
         session_user.is_admin = false;
     }
-    var filter = {name: req.params.id};
+    let filter = {name: req.params.id};
     if(!session_user.is_admin) {
         filter['owner'] = session_user.uid;
     }
@@ -175,7 +175,7 @@ router.delete_webs = async function(user){
 };
 
 var delete_web = async function(user, web_id){
-    var filter = {_id: web_id};
+    let filter = {_id: web_id};
     if(!user.is_admin) {
         filter['owner'] = user.uid;
     }

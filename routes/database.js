@@ -90,7 +90,7 @@ router.get('/database', async function(req, res) {
     else {
         session_user.is_admin = false;
     }
-    var filter = {};
+    let filter = {};
     if(!session_user.is_admin) {
         filter = {owner: session_user.uid};
     }
@@ -117,7 +117,7 @@ router.get('/database/owner/:owner', async function(req, res) {
     else {
         session_user.is_admin = false;
     }
-    var filter = {owner: req.params.owner};
+    let filter = {owner: req.params.owner};
     let databases = await utils.mongo_databases().find(filter).toArray();
     res.send(databases);
     return;
@@ -149,8 +149,8 @@ router.post('/database/:id', async function(req, res) {
         res.status(401).send('Not authorized, cant declare a database for a different user');
         return;
     }
-    var owner = session_user.uid;
-    var create_db = true;
+    let owner = session_user.uid;
+    let create_db = true;
     if(req.body.owner!=undefined && req.body.owner != ''){
         owner = req.body.owner;
     }
@@ -158,12 +158,12 @@ router.post('/database/:id', async function(req, res) {
         create_db = false;
     }
 
-    var db_type = 'mysql';
+    let db_type = 'mysql';
     if(req.body.type != undefined && req.body.type){
         db_type = req.body.type;
     }
 
-    var db_host = CONFIG.mysql.host;
+    let db_host = CONFIG.mysql.host;
     if(req.body.host!=undefined && req.body.host && utils.sanitize(req.body.host)){
         db_host = req.body.host;
     }
@@ -207,7 +207,6 @@ router.post('/database/:id', async function(req, res) {
             }
             let password = Math.random().toString(36).slice(-10);
             let createuser = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
-            // eslint-disable-next-line no-unused-vars
             try {
                 await connection.query(createuser);
             } catch(err) {
@@ -231,7 +230,7 @@ router.post('/database/:id', async function(req, res) {
             msg += '  Database: ' + req.params.id + '\t\r\n';
             msg += '  User: ' + req.params.id + '\t\r\n';
             msg += '  Password: ' + password + '\t\r\n';
-            var mailOptions = {
+            let mailOptions = {
                 origin: MAIL_CONFIG.origin, // sender address
                 destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
                 subject: 'Database creation', // Subject line

@@ -370,7 +370,7 @@ app.get('*', function (request, response) {
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
+    let err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
@@ -404,7 +404,6 @@ module.exports = app;
 
 
 utils.init_db().then(async () => {
-    // eslint-disable-next-line no-unused-vars
     await utils.loadAvailableIds();
 
     if(MY_ADMIN_USER !== null){
@@ -423,29 +422,3 @@ utils.init_db().then(async () => {
     }
 
 });
-
-/*
-if(MY_ADMIN_USER !== null){
-    users.init().then(() => {
-        return utils.init();
-    }).then(()=>{
-        console.log('create admin user', MY_ADMIN_USER);
-        users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
-    }).catch(err => {
-        console.log('init failed', err);
-        process.exit(1);
-    });
-}
-*/
-
-
-// Setup list of available user/group ids
-// eslint-disable-next-line no-unused-vars
-/*
-utils.loadAvailableIds().then(function (_alreadyLoaded) {
-    if (!module.parent) {
-        http.createServer(app).listen(app.get('port'), function(){
-            wlogger.info('Server listening on port ' + app.get('port'));
-        });
-    }
-});*/

@@ -1,26 +1,13 @@
 var express = require('express');
 var router = express.Router();
-// var bcrypt = require('bcryptjs');
-// var escapeshellarg = require('escapeshellarg');
-
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-// const MAILER = CONFIG.general.mailer;
-// const MAIL_CONFIG = CONFIG[MAILER];
-
-// var cookieParser = require('cookie-parser');
-
-// var goldap = require('../routes/goldap.js');
-// var notif = require('../routes/notif_'+MAILER+'.js');
-
 const filer = require('../routes/file.js');
 var utils = require('./utils');
-
-// var get_ip = require('ipware')().get_ip;
 
 router.get('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -314,9 +301,9 @@ router.put('/project/:id/request', async function(req, res){
         res.status(403).send('User and request type are needed');
         return;
     }
-    var temp_requests = [];
+    let temp_requests = [];
     if(req.body.request === 'add' ){
-        for(var i=0;i<project.add_requests.length;i++){
+        for(let i=0;i<project.add_requests.length;i++){
             if( project.add_requests[i] !== req.body.user ){
                 temp_requests.push(project.add_requests[i]);
             }

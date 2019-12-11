@@ -8,9 +8,11 @@ var utils = require('./utils');
 
 var mail_set = false;
 
+var baseRequest = null;
+
 if(CONFIG.gomail.api_secret && CONFIG.gomail.host && CONFIG.gomail.host !== 'fake' && CONFIG.gomail.api_root && CONFIG.gomail.main_list && CONFIG.gomail.origin){
     mail_set = true;
-    var baseRequest = request.defaults({
+    baseRequest = request.defaults({
         baseUrl: CONFIG.gomail.host + CONFIG.gomail.api_root,
         headers: {'Authorization': CONFIG.gomail.api_secret},
         json: true,
@@ -82,9 +84,9 @@ module.exports = {
                 return;
             }
             //Return all lists if no tag set
-            var listOfLists = [];
-            for ( var i = 0; i < body['lists'].length; i++){
-                var name_list = body['lists'][i];
+            let listOfLists = [];
+            for ( let i = 0; i < body['lists'].length; i++){
+                let name_list = body['lists'][i];
                 if( ! CONFIG.gomail.tag ){
                     listOfLists.push({'list_name':name_list , 'config': body['info'][name_list]});
                     continue;

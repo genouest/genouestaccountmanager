@@ -1,14 +1,9 @@
 var express = require('express');
 var router = express.Router();
-// var cookieParser = require('cookie-parser');
-// var session = require('express-session');
-
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 var utils = require('./utils');
-// const winston = require('winston');
-// const logger = winston.loggers.get('gomngr');
 
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
@@ -42,13 +37,13 @@ for(var i=0;i<plugins.length;i++){
 */
 
 router.get('/plugin', function(req, res) {
-    var plugin_list = [];
-    for(var i=0;i<plugins_info.length;i++){
+    let plugin_list = [];
+    for(let i=0;i<plugins_info.length;i++){
         if(plugins_modules[plugins_info[i].name].template === undefined) {
             plugin_list.push(plugins_info[i]);
             continue;
         }
-        var template = plugins_modules[plugins_info[i].name].template();
+        let template = plugins_modules[plugins_info[i].name].template();
         if(template !==null && template !== ''){
             plugin_list.push(plugins_info[i]);
         }
@@ -58,7 +53,7 @@ router.get('/plugin', function(req, res) {
 
 
 router.get('/plugin/:id', function(req, res) {
-    var template = plugins_modules[req.params.id].template();
+    let template = plugins_modules[req.params.id].template();
     res.send(template);
 });
 

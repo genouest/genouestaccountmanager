@@ -1,10 +1,6 @@
 var express = require('express');
 var router = express.Router();
-// var bcrypt = require('bcryptjs');
-// var path = require('path');
 var http = require('http');
-// const winston = require('winston');
-// const logger = winston.loggers.get('gomngr');
 
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
@@ -30,9 +26,9 @@ router.get('/quota/:user/:id', function(req, res) {
       {"results":[{"series":[{"name":"goacct.fixed.disk.home.user.osallou","columns":["time","last"],"values":[["2017-01-25T04:00:10Z",6.737533e+06]]}]}]}
 
     */
-    var quotas = [];
-    var serie = GENERAL_CONFIG.quota[req.params.id]['series'].replace('#USER#', req.params.user);
-    var options = {
+    let quotas = [];
+    let serie = GENERAL_CONFIG.quota[req.params.id]['series'].replace('#USER#', req.params.user);
+    let options = {
         protocol: GENERAL_CONFIG.quota[req.params.id]['protocol'],
         port: GENERAL_CONFIG.quota[req.params.id]['port'],
         host: GENERAL_CONFIG.quota[req.params.id]['hostname'],
@@ -53,7 +49,7 @@ router.get('/quota/:user/:id', function(req, res) {
                     res.end();
                     return;
                 }
-                for(var s=0;s<series.length;s++){
+                for(let s=0;s<series.length;s++){
                     quotas.push(series[s]['values'][0][1] / 1000000);
                 }
                 if(quotas.length==0){

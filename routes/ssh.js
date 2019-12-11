@@ -1,8 +1,5 @@
 var express = require('express');
 var router = express.Router();
-// var cookieParser = require('cookie-parser');
-// var session = require('express-session');
-// var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
@@ -11,13 +8,6 @@ var CONFIG = require('config');
 
 var utils = require('./utils');
 
-
-/**
-   app.get('/ssh/:id', ssh);
-   app.get('/ssh/:id/public', ssh);
-   app.get('/ssh/:id/putty', ssh);
-   app.get('/ssh/:id/private', ssh);
-*/
 
 router.get('/ssh/:id/putty', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
@@ -38,7 +28,7 @@ router.get('/ssh/:id/putty', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    var sshDir = user.home + '/.ssh';
+    let sshDir = user.home + '/.ssh';
     res.download(sshDir + '/id_rsa.ppk', 'id_rsa.ppk', function (err) {
         if (err) {
             logger.error(err);
@@ -69,7 +59,7 @@ router.get('/ssh/:id/private', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    var sshDir = user.home + '/.ssh';
+    let sshDir = user.home + '/.ssh';
     res.download(sshDir + '/id_rsa', 'id_rsa', function (err) {
         if (err) {
             logger.error(err);
@@ -97,7 +87,7 @@ router.get('/ssh/:id/public', async function(req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    var sshDir = user.home + '/.ssh';
+    let sshDir = user.home + '/.ssh';
     res.download(sshDir + '/id_rsa.pub', 'id_rsa.pub', function (err) {
         if (err) {
             logger.error(err);
@@ -126,7 +116,7 @@ router.get('/ssh/:id', async function(req, res) {
         return;
     }
 
-    var fid = new Date().getTime();
+    let fid = new Date().getTime();
 
     try {
         let created_file = filer.ssh_keygen(user, fid);

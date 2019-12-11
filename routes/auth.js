@@ -53,23 +53,23 @@ router.get('/mail/auth/:id', async function(req, res) {
     if(! notif.mailSet()){
         return res.status(403).send('No mail provider set : cannot send mail');
     }
-    var password = Math.random().toString(36).slice(-10);
+    let password = Math.random().toString(36).slice(-10);
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         return res.status(404).send('User not found');
     }
-    var msg_token = 'You requested a temporary token to login to application. This token will be valid for 10 minutes only.\t\r\n';
+    let msg_token = 'You requested a temporary token to login to application. This token will be valid for 10 minutes only.\t\r\n';
     msg_token += '  Token: -- ' + password + ' -- \n';
-    var mailOptions = {
+    let mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
         destinations: [user.email], // list of receivers
         subject: 'Authentication mail token request', // Subject line
         message: msg_token, // plaintext body
     };
-    var expire = new Date().getTime() + 60*10*1000;
+    let expire = new Date().getTime() + 60*10*1000;
     req.session.mail_token = {'token': password, 'expire': expire, 'user': user._id};
-    var mail_token = {'token': password, 'expire': expire, 'user': user._id};
-    var usertoken = jwt.sign(
+    let mail_token = {'token': password, 'expire': expire, 'user': user._id};
+    let usertoken = jwt.sign(
         { user: user._id, isLogged: true, mail_token: mail_token },
         CONFIG.general.secret,
         {expiresIn: '2 days'}
@@ -94,13 +94,13 @@ router.post('/mail/auth/:id', async function(req, res) {
     if(!user) {
         return res.status(404).send('User not found');
     }
-    var usertoken = jwt.sign(
+    let usertoken = jwt.sign(
         { user: user._id, isLogged: true },
         CONFIG.general.secret,
         {expiresIn: '2 days'}
     );
-    var sess = req.session;
-    var now = new Date().getTime();
+    let sess = req.session;
+    let now = new Date().getTime();
     if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.body.token != req.locals.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
         return res.status(403).send('Invalid or expired token');
     }
@@ -129,7 +129,7 @@ router.get('/u2f/auth/:id', async function(req, res) {
         res.status(404).send('User not found');
         return;
     }
-    var keyHandle = user.u2f.keyHandler;
+    let keyHandle = user.u2f.keyHandler;
     const authRequest = u2f.request(APP_ID, keyHandle);
     req.session.u2f = user._id;
     return res.send({'authRequest': authRequest});
@@ -148,17 +148,18 @@ router.post('/u2f/auth/:id', async function(req, res) {
     if(!req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
         res.status(401).send('U2F not challenged or invalid user');
     }
-    var publicKey = user.u2f.publicKey;
+    let publicKey = user.u2f.publicKey;
     const result = u2f.checkSignature(req.body.authRequest, req.body.authResponse, publicKey);
+
+    let sess = req.session;
     if (result.successful) {
         // Success!
         // User is authenticated.
-        var usertoken = jwt.sign(
+        let usertoken = jwt.sign(
             { user: user._id, isLogged: true },
             CONFIG.general.secret,
             {expiresIn: '2 days'}
         );
-        var sess = req.session;
         sess.gomngr = sess.u2f;
         sess.u2f = null;
         return res.send({'token': usertoken, 'user': user});
@@ -209,7 +210,7 @@ router.get('/auth', async function(req, res) {
         if(!user) {
             res.send({user: null, msg: 'user not found'});
         }
-        var token = jwt.sign(
+        let token = jwt.sign(
             { user: user._id, isLogged: true },
             CONFIG.general.secret,
             {expiresIn: '2 days'}
