@@ -341,7 +341,7 @@ async function _getUsersMaxId(minID) {
     if (!data)  {
         return minUserID;
     }
-    if (data && data.length > 0){
+    if (data.length > 0){
         minUserID = data[0].uidnumber + 1;
     }
     return minUserID;
@@ -353,7 +353,7 @@ async function _getGroupsMaxId(minID) {
     if (!data)  {
         return minGroupID;
     }
-    if (data && data.length > 0){
+    if (data.length > 0){
         minGroupID = data[0].gid + 1;
     }
     return minGroupID;

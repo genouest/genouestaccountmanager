@@ -65,12 +65,9 @@ router.get('/project/:id', async function(req, res){
         return;
     }
     let project = await utils.mongo_projects().findOne({'id': req.params.id});
-    if(!project){
-        logger.error('failed to get project', req.params.id);
-        res.status(500).send('Error retrieving project');
-        return;
-    }
+
     if (! project){
+        logger.error('failed to get project', req.params.id);
         res.status(404).send('Project ' + req.params.id + ' not found');
         return;
     }

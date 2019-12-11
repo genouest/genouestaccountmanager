@@ -120,7 +120,7 @@ export class MessagesComponent implements OnInit {
     }
 
     getListMembers(list_name): Observable<any> {
-        let user = this.authService.profile;
+        // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -133,7 +133,7 @@ export class MessagesComponent implements OnInit {
     }
 
     getMailingLists(): Observable<any> {
-        let user = this.authService.profile;
+        // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey

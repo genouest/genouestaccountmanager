@@ -14,7 +14,7 @@ export class ProjectsService {
 
 
     list(getAll: boolean): Observable<any[]> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let params = new HttpParams();
         if(getAll) {
             params = params.append("all", "true");
@@ -37,7 +37,7 @@ export class ProjectsService {
     }
 
     add(project: any): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let params = new HttpParams();
 
         let httpOptions = {
@@ -54,7 +54,7 @@ export class ProjectsService {
     }
 
     update(projectId: string, project: any): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let params = new HttpParams();
 
         let httpOptions = {
@@ -71,7 +71,7 @@ export class ProjectsService {
     }
 
     get(projectId: string): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
 
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -85,7 +85,7 @@ export class ProjectsService {
     }
 
     getUsers(projectId: string): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
 
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -99,7 +99,7 @@ export class ProjectsService {
     }
 
     getProjectsInGroup(groupName: string): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
 
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -113,7 +113,7 @@ export class ProjectsService {
     }
 
     request(projectId: string, request: any): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let params = new HttpParams();
 
         let httpOptions = {
@@ -130,7 +130,7 @@ export class ProjectsService {
     }
 
     removeRequest(projectId: string, request: any): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let params = new HttpParams();
 
         let httpOptions = {
@@ -147,7 +147,7 @@ export class ProjectsService {
     }
 
     delete(projectId: string): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let params = new HttpParams();
 
         let httpOptions = {

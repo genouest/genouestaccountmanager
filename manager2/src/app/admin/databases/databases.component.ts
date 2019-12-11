@@ -68,6 +68,7 @@ export class DatabasesComponent implements OnInit {
         this.chowner_err_msg = '';
         if(!this.owner_db_name || ! this.owner_db_owner) {
             this.chowner_err_msg = 'no database or owner selected';
+            return;
         }
         this.dbService.changeOwner(this.owner_db_name.name, this.owner_db_name.owner, this.owner_db_owner.uid).subscribe(
             resp => {

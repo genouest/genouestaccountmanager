@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
 import { Observable } from 'rxjs';
@@ -14,7 +14,7 @@ export class GroupsService {
 
 
     list(): Observable<any[]> {
-        let user = this.authService.profile;
+        // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -31,7 +31,7 @@ export class GroupsService {
     }
 
     get(groupId): Observable<any> {
-        let user = this.authService.profile;
+        // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -44,7 +44,7 @@ export class GroupsService {
     }
 
     update(group) {
-        let user = this.authService.profile;
+        // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -58,7 +58,7 @@ export class GroupsService {
     }
 
     delete(groupId) {
-        let user = this.authService.profile;
+        // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -70,7 +70,7 @@ export class GroupsService {
         );  }
 
     add(group) {
-        let user = this.authService.profile;
+        // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey

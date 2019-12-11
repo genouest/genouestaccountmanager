@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
 
@@ -67,7 +67,7 @@ export class LogsComponent implements OnInit {
     }
 
     getLogs(): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -80,7 +80,7 @@ export class LogsComponent implements OnInit {
     }
 
     getLogFile(event_file): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -92,7 +92,7 @@ export class LogsComponent implements OnInit {
         );
     }
 
-    getlog(log_id, event_file) {
+    getlog(_log_id, event_file) {
         this.logcontent = "";
         this.getLogFile(event_file).subscribe(
             resp => {

@@ -177,7 +177,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     let group_exists = false;
-                    for(var i=0;i<res.body;i++){
+                    for(var i=0;i<res.body.length;i++){
                         if(res.body[i].name == test_group_id){
                             group_exists = true;
                             break;

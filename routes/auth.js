@@ -209,6 +209,7 @@ router.get('/auth', async function(req, res) {
         let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
         if(!user) {
             res.send({user: null, msg: 'user not found'});
+            return;
         }
         let token = jwt.sign(
             { user: user._id, isLogged: true },

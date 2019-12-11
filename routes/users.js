@@ -68,7 +68,7 @@ router.user_home = function (user) {
     return get_user_home(user);
 };
 
-var send_notif = async function(mailOptions, fid, errors) {
+var send_notif = async function(mailOptions, _fid, errors) {
     if(notif.mailSet()) {
         try {
             await notif.sendUser(mailOptions);
@@ -293,7 +293,7 @@ router.put('/user/:id/subscribe', async function(req, res){
         return;
     }
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    if (req.locals.logInfo.id !== req.params.id && GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
         res.status(401).send('Not authorized');
         return;
     }
@@ -325,7 +325,7 @@ router.put('/user/:id/unsubscribe', async function(req, res){
         return;
     }
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && ! GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    if (req.locals.logInfo.id !== req.params.id && GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
         res.status(401).send('Not authorized');
         return;
     }
@@ -474,7 +474,7 @@ router.put('/group/:id', async function(req, res){
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!session_user == null){
+    if(!session_user){
         res.status(404).send('User not found');
         return;
     }
@@ -1137,12 +1137,8 @@ router.post('/user/:id', async function(req, res) {
         res.status(403).send('Invalid parameters');
         return;
     }
-    /*
-      if(req.body.ip.split('.').length != 4) {
-      res.send({'status': 1, 'msg': 'invalid ip address format'});
-      return;
-      }*/
-    if(req.body.team=='' || req.body.team==null || req.body.team==undefined) {
+
+    if(req.body.team=='' || req.body.team===null || req.body.team===undefined) {
         res.send({'status': 1, 'msg': 'Missing field: team'});
         return;
     }
@@ -1152,16 +1148,16 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    if(req.body.lab=='' || req.body.lab==null || req.body.lab==undefined) {
+    if(req.body.lab=='' || req.body.lab===null || req.body.lab===undefined) {
         res.send({'status': 1, 'msg': 'Missing field: lab'});
         return;
     }
-    if(req.body.address=='' || req.body.address==null || req.body.address==undefined) {
+    if(req.body.address=='' || req.body.address===null || req.body.address===undefined) {
         res.send({'status': 1, 'msg': 'Missing field: address'});
         return;
     }
 
-    if(req.body.responsible=='' || req.body.responsible==null || req.body.responsible==undefined) {
+    if(req.body.responsible=='' || req.body.responsible===null || req.body.responsible===undefined) {
         res.send({'status': 1, 'msg': 'Missing field: Responsible/Manager'});
         return;
     }
@@ -1180,7 +1176,7 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    if(req.body.why=='' || req.body.why==null || req.body.why==undefined) {
+    if(req.body.why=='' || req.body.why===null || req.body.why===undefined) {
         res.send({'status': 1, 'msg': 'Missing field: Why do you need an account'});
         return;
     }
@@ -2059,7 +2055,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         res.end();
         return;
     }
-    if( project && uid === project.owner && ! req.query.force){
+    if(uid === project.owner && ! req.query.force){
         res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
         res.end();
         return;

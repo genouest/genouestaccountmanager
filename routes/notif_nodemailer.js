@@ -74,7 +74,7 @@ module.exports = {
 
     add: async function(email, callback) {
         if (CONFIG.nodemailer.list) {
-            if(email==undefined ||email==null || email=='' || ! mail_set) {
+            if(email===undefined ||email===null || email=='' || ! mail_set) {
                 callback();
                 return;
             }
@@ -107,7 +107,7 @@ module.exports = {
     // todo: should be factorized with add, as there is only small difference
     remove: async function(email, callback) {
         if (CONFIG.nodemailer.list) {
-            if(email==undefined ||email==null || email=='' || ! mail_set) {
+            if(email===undefined ||email===null || email=='' || ! mail_set) {
                 callback();
                 return;
             }

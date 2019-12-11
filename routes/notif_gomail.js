@@ -101,7 +101,7 @@ module.exports = {
     },
 
     add: function(email, callback) {
-        if(email==undefined ||email==null || email=='' || ! mail_set) {
+        if(email===undefined ||email===null || email=='' || ! mail_set) {
             callback();
             return;
         }
@@ -152,7 +152,7 @@ module.exports = {
     },
 
     remove: function(email, callback) {
-        if(email==undefined ||email==null || email=='' || ! mail_set) {
+        if(email===undefined ||email===null || email=='' || ! mail_set) {
             callback();
             return;
         }
@@ -182,7 +182,7 @@ module.exports = {
 
     modify: function(oldemail, newemail, callback) {
         logger.debug('Update email ' + oldemail + ' ==> ' + newemail);
-        if(newemail==undefined ||newemail==null || newemail=='' || ! mail_set ) {
+        if(newemail===undefined ||newemail===null || newemail=='' || ! mail_set ) {
             callback();
             return;
         }
