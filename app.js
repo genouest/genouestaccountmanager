@@ -11,7 +11,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http');
-var session = require('express-session');
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 
 var log_level = 'info';
 if (process.env.NODE_ENV == 'dev' || process.env.DEBUG) {
@@ -77,11 +78,22 @@ app.set('view engine', 'hjs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+var mongoURL = CONFIG.mongo.url;
+var mongoStoreClient = null;
+if(mongoURL) {
+    mongoStoreClient = new MongoStore({ url: mongoURL });
+}
+else {
+    mongoStoreClient = new MongoStore({url: `mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}/gomngr`});
+}
+
 app.use(session({
     secret: CONFIG.general.secret,
     resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 3600*1000}
+    saveUninitialized: false,
+    cookie: { maxAge: 3600*1000},
+    store: mongoStoreClient
 }));
 // app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
