@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Subject } from "rxjs";
-import { catchError,tap} from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 
 @Injectable({

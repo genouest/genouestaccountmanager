@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { TpserviceService } from './tpservice.service';
-import { CalendarEventTimesChangedEvent, CalendarView } from 'angular-calendar';
+import { CalendarEventTimesChangedEvent } from 'angular-calendar';
 import { Subject } from 'rxjs';
 
 @Component({

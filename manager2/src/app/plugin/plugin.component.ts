@@ -1,8 +1,8 @@
-import { Component, ComponentFactoryResolver, Input, OnInit, OnChanges, ViewChild, SimpleChanges, ViewChildren, QueryList } from '@angular/core';
+import { Component, ComponentFactoryResolver, Input, OnInit, OnChanges, ViewChild, SimpleChanges } from '@angular/core';
 import { Directive, Type, ViewContainerRef } from '@angular/core';
 import { BasePluginComponent } from './base-plugin/base-plugin.component';
-import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
+//import { DataTableDirective } from 'angular-datatables';
+//import { Subject } from 'rxjs';
 
 
 @Component({

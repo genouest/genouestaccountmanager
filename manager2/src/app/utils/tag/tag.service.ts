@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+//import { Observable } from 'rxjs';
+//import { map } from 'rxjs/operators';
 
 
 @Injectable({

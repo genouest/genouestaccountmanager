@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
@@ -27,7 +27,7 @@ export class PluginService {
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     list(): Observable<Plugin[]> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -53,7 +53,7 @@ export class PluginService {
     }
 
     get(pluginName: string, user: string) {
-        let suser = this.authService.profile;
+        //let suser = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': suser.apikey
@@ -64,7 +64,7 @@ export class PluginService {
     }
 
     set(pluginName: string, user: string, data: any) {
-        let suser = this.authService.profile;
+        //let suser = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': suser.apikey

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChildren, QueryList } from '@angular/core';
+import { Component, Input, ViewChildren, QueryList } from '@angular/core';
 import { PluginService } from '../plugin.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';

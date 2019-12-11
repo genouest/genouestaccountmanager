@@ -4,7 +4,7 @@ import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
 import { Website, WebsiteService } from './website.service'
 import { Database, DatabaseService} from './database.service'
-import { Plugin, PluginService} from '../plugin/plugin.service'
+import { PluginService} from '../plugin/plugin.service'
 import { GroupsService } from '../admin/groups/groups.service'
 import { ProjectsService } from '../admin/projects/projects.service'
 

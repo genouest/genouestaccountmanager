@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from './auth/auth.service';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ConfigService } from './config.service'
 import { UserService } from './user/user.service';
 import { PluginService } from './plugin/plugin.service';

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 
@@ -12,7 +12,7 @@ export class TpserviceService {
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     list(): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -23,7 +23,7 @@ export class TpserviceService {
     }
 
     reserve(reservation): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -34,7 +34,7 @@ export class TpserviceService {
     }
 
     cancel(reservationId): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey

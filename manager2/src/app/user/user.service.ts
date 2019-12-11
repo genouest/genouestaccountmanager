@@ -16,7 +16,7 @@ export class UserService {
     }
 
     getUserLogs(userId: string) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -214,7 +214,7 @@ export class UserService {
     }
 
     isSubscribed(id: string) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             // headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -270,7 +270,7 @@ export class UserService {
     }
 
     removeFromProject(userId: string, projectId: string) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -282,7 +282,7 @@ export class UserService {
     }
 
     register(userId: string, userInfo) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
         };
         return this.http.post(

@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChildren, QueryList, ViewChild } from '@angular/
 import { ConfigService } from 'src/app/config.service';
 import { UserService } from 'src/app/user/user.service';
 
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
 
@@ -58,7 +58,7 @@ export class MessagesComponent implements OnInit {
 
         this.configService.config.subscribe(
             resp => this.origin = resp['origin'],
-            err => console.log('failed to get config')
+            err => console.log('failed to get config', err)
         )
         this.getMailingLists().subscribe(
             resp => {
@@ -71,7 +71,7 @@ export class MessagesComponent implements OnInit {
                   this.mailing_list = lists[0];
                   }*/
             },
-            err => console.log('failed to get mailing lists')
+            err => console.log('failed to get mailing lists', err)
         )
     }
 
@@ -99,7 +99,7 @@ export class MessagesComponent implements OnInit {
 
 
     sendMessage(message, subject, mailing_list, input_type, origin): Observable<any> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey

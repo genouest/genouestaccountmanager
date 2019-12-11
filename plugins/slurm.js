@@ -5,7 +5,7 @@ var CONFIG = require('config');
 var Promise = require('promise');
 var utils = require('../routes/utils');
 
-var activate_user = async function(userId, data, adminId){
+var activate_user = async function(userId, _data, adminId){
     console.log('[Slurm] : Creating slurm cron file.. ' + userId );
     var fid = new Date().getTime();
     var script = '#!/bin/bash\n';
@@ -38,7 +38,7 @@ var activate_user = async function(userId, data, adminId){
     }
     return true;
 };
-var deactivate_user = async function(userId, data, adminId){
+var deactivate_user = async function(userId, _data, adminId){
 
     console.log('[Slurm] : Creating slurm cron file.. ' + userId );
     var fid = new Date().getTime();
@@ -72,7 +72,7 @@ var deactivate_user = async function(userId, data, adminId){
 };
 
 // eslint-disable-next-line no-unused-vars
-var get_user_info = function(userId, adminId){
+var get_user_info = function(_userId, _adminId){
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('Nothing to do');
@@ -81,7 +81,7 @@ var get_user_info = function(userId, adminId){
 };
 
 // eslint-disable-next-line no-unused-vars
-var set_user_info = function(userId, data, adminId){
+var set_user_info = function(_userId, _data, _adminId){
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('Nothing to do');
@@ -90,7 +90,7 @@ var set_user_info = function(userId, data, adminId){
 };
 
 // eslint-disable-next-line no-unused-vars
-var delete_user = function(userId, user, adminId){
+var delete_user = function(_userId, _user, _adminId){
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('Nothing to do');

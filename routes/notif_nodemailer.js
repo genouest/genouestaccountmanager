@@ -132,7 +132,7 @@ module.exports = {
 
     modify: function(oldemail, newemail, callback) {
         logger.debug('Update email ' + oldemail + ' ==> ' + newemail);
-        if (newemail==undefined ||newemail==null || newemail=='' || ! mail_set ) {
+        if (newemail===undefined ||newemail===null || newemail=='' || ! mail_set ) {
             callback();
             return;
         }

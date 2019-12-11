@@ -40,7 +40,7 @@ export class DatabaseService {
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     add(db: Database) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -50,7 +50,7 @@ export class DatabaseService {
     }
 
     list(): Observable<Database[]> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -71,7 +71,7 @@ export class DatabaseService {
     }
 
     listOwner(id: string): Observable<Database[]> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -92,7 +92,7 @@ export class DatabaseService {
     }
 
     remove(db: Database) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -102,7 +102,7 @@ export class DatabaseService {
     }
 
     changeOwner(dbName, dbOldOwner, dbNewOwner) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey

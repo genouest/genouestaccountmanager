@@ -32,7 +32,7 @@ export class WebsiteService {
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     add(web: Website) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -42,7 +42,7 @@ export class WebsiteService {
     }
 
     list(): Observable<Website[]> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -64,7 +64,7 @@ export class WebsiteService {
 
 
     listOwner(id: string): Observable<Website[]> {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -85,7 +85,7 @@ export class WebsiteService {
     }
 
     remove(web: Website) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -96,7 +96,7 @@ export class WebsiteService {
     }
 
     changeOwner(siteName, siteOldOwner, siteNewOwner) {
-        let user = this.authService.profile;
+        //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
