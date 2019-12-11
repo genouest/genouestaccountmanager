@@ -12,7 +12,7 @@ var utils = require('../routes/utils');
 var remove_user = async function(userId, data, adminId){
     let user = await utils.mongo_users().findOne({'uid': userId});
     if(!user){
-        console.trace('Error finding user');
+        console.trace('Error finding user', userId);
         return false;
     }
     console.log('Plugin removal test done');
@@ -23,7 +23,7 @@ var remove_user = async function(userId, data, adminId){
 var activate_user = async function(userId, data, adminId){
     let user = await utils.mongo_users().findOne({'uid': userId});
     if(!user){
-        console.trace('Error finding user');
+        console.trace('Error finding user', userId);
         return false;
     }
     console.log('Plugin test done');

@@ -58,8 +58,8 @@ var app = express();
 app.use(cors());
 
 if (process.env.MY_ACCESS_LOG) {
-    var fs = require('fs');
-    var accessLogStream = fs.createWriteStream(process.env.MY_ACCESS_LOG, { flags: 'a' });
+    const fs = require('fs');
+    const accessLogStream = fs.createWriteStream(process.env.MY_ACCESS_LOG, { flags: 'a' });
     app.use(logger('combined', { stream: accessLogStream }));
 }
 else {
@@ -128,7 +128,7 @@ const if_dev_execute_scripts = function(){
             reject({'err': 'cron script not defined'});
             return;
         }
-        var procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+        let procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
         procScript.on('exit', function (code, signal) {
             wlogger.info(cron_bin_script + ' process exited with ' +
                         `code ${code} and signal ${signal}`);

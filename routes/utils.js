@@ -18,9 +18,9 @@ var mongo_connect = async function() {
     let url = CONFIG.mongo.url;
     let client = null;
     if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`);
+        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`, { useNewUrlParser: true, useUnifiedTopology: true });
     } else {
-        client = new MongoClient(CONFIG.mongo.url);
+        client = new MongoClient(CONFIG.mongo.url, { useNewUrlParser: true, useUnifiedTopology: true });
     }
     await client.connect();
     mongodb = client.db(CONFIG.general.db);
