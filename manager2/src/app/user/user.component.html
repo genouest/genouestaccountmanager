@@ -250,7 +250,7 @@
             <span *ngIf="u2f">{{u2f}}</span>
         </div>
     </div>
-    <div class="card bg-light">
+    <div class="card bg-light" *ngIf="session_user.is_admin">
         <div class="card-header">
             <h4>API Key</h4>
         </div>
