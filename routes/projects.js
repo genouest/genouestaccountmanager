@@ -371,7 +371,7 @@ router.post('/ask', async function(req, res){
         'orga': req.body.orga,
     };
 
-    logger.info(new_project);
+    // logger.info(new_project);
 
     // todo: find a way to use cc
     let msg_destinations =  [GENERAL_CONFIG.accounts, user.email];
@@ -399,7 +399,7 @@ router.post('/ask', async function(req, res){
         html_message: msg_ask_html // html body
     };
 
-    logger.info(mailOptions);
+    // logger.info(mailOptions);
 
     if(notif.mailSet()) {
         // eslint-disable-next-line no-unused-vars
