@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { UserService } from 'src/app/user/user.service';
@@ -39,7 +40,8 @@ export class ProjectComponent implements OnInit {
         private authService: AuthService,
         private projectsService: ProjectsService,
         private userService: UserService,
-        private groupService: GroupsService
+        private groupService: GroupsService,
+        private router: Router
     ) { }
 
     ngOnDestroy(): void {
@@ -70,19 +72,26 @@ export class ProjectComponent implements OnInit {
         this.rm_prj_err_msg = '';
         this.rm_prj_msg_ok = '';
         let project_name = project.id;
-        this.projectsService.getUsers(project_name).subscribe(
-            resp => {
-                this.users = resp;
-                this.selectedProject = project;
-                this.oldGroup = project.group;
-                for(let i = 0; i < resp.length;i++){
-                    if(resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0){
-                        this.users[i].access=true;
+
+        if (this.session_user.is_admin)
+        {
+            this.router.navigate(['/admin/project/' + project_name]);
+        }
+        else {
+            this.projectsService.getUsers(project_name).subscribe(
+                resp => {
+                    this.users = resp;
+                    this.selectedProject = project;
+                    this.oldGroup = project.group;
+                    for(let i = 0; i < resp.length;i++){
+                        if(resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0){
+                            this.users[i].access=true;
+                        }
                     }
-                }
-            },
-            err => console.log('failed to get project users')
-        )
+                },
+                err => console.log('failed to get project users')
+            )
+        }
     }
 
     request_user(project, user_id, request_type) {
