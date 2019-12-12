@@ -173,7 +173,7 @@ export class ProjectsService {
             params: params
         };
         return this.http.post(
-            environment.apiUrl + '/ask',
+            environment.apiUrl + '/ask/project',
             new_project,
             httpOptions
         );
