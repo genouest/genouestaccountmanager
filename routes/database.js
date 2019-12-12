@@ -63,6 +63,7 @@ var querydb = (sql) => {
     return new Promise((resolve, reject) => {
         if(pool === null) {
             reject('no mysql pool defined');
+            return;
         }
         pool.getConnection((err, connection) => {
             if(err) {

@@ -8,13 +8,13 @@ var Promise = require('promise');
 
 
 var get_quota = function(quota) {
-    var quotas = [];
-    var quota_name = quota['quota_name'];
-    var user = quota['user'];
     // eslint-disable-next-line no-unused-vars
     return new Promise(function(resolve, reject) {
-        var serie = GENERAL_CONFIG.quota[quota_name]['series'].replace('#USER#', user);
-        var options = {
+        let quotas = [];
+        let quota_name = quota['quota_name'];
+        let user = quota['user'];
+        let serie = GENERAL_CONFIG.quota[quota_name]['series'].replace('#USER#', user);
+        let options = {
             protocol: GENERAL_CONFIG.quota[quota_name]['protocol'],
             port: GENERAL_CONFIG.quota[quota_name]['port'],
             host: GENERAL_CONFIG.quota[quota_name]['hostname'],
@@ -22,20 +22,19 @@ var get_quota = function(quota) {
         };
         http.get(options
             , function(response){
-
-                var body = '';
+                let body = '';
                 response.on('data', function(d) {
                     body += d;
                 });
                 response.on('end', function() {
-                    var points = JSON.parse(body);
-                    var series = points.results[0]['series'];
+                    let points = JSON.parse(body);
+                    let series = points.results[0]['series'];
                     // If no stat available
                     if(series === undefined) {
                         resolve({'msg': 'no data'});
                         return;
                     }
-                    for(var s=0;s<series.length;s++){
+                    for(let s=0;s<series.length;s++){
                         quotas.push(series[s]['values'][0][1] / 1000000);
                     }
                     if(quotas.length==0){
@@ -69,9 +68,9 @@ var get_user_info = function(userId){
             quota_names.push({'quota_name': key, 'user': userId});
         }
         Promise.all(quota_names.map(get_quota)).then(function(values){
-            var errors = [];
-            var warnings = [];
-            for(var i=0;i<values.length;i++) {
+            let errors = [];
+            let warnings = [];
+            for(let i=0;i<values.length;i++) {
                 if(values[i].warning) { warnings.push(values[i].warning); }
                 if(values[i].error) { errors.push(values[i].error); }
             }
@@ -86,15 +85,19 @@ module.exports = {
 
     // eslint-disable-next-line no-unused-vars
     activate: function(userId, data, adminId){
+        console.log('Plugin quotas for activation of user : ' + userId);
         // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
+            console.log('[Quotas] nothing to do');
             resolve();
         });
     },
     // eslint-disable-next-line no-unused-vars
     deactivate: function(userId, data, adminId){
+        console.log('Plugin quotas for deactivation of user : ' + userId);
         // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
+            console.log('[Quotas] nothing to do');
             resolve();
         });
     },

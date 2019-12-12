@@ -39,7 +39,7 @@ var get_user_info = function(userId, adminId){
 var set_user_info = function(userId, data, adminId){
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
-        console.log('nothing to do');
+        console.log('[Galaxy] nothing to do');
         resolve();
     });
 };
