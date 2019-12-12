@@ -14,6 +14,18 @@ const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
 var notif = require('../routes/notif_'+MAILER+'.js');
 
+
+var pool = null;
+if(CONFIG.mysql.host) {
+    pool = mysql.createPool({
+        host     : CONFIG.mysql.host,
+        user     : CONFIG.mysql.user,
+        password : CONFIG.mysql.password,
+        insecureAuth: true
+    });
+}
+
+/*
 var connection;
 
 function handleDisconnect() {
@@ -45,6 +57,31 @@ function handleDisconnect() {
 }
 
 handleDisconnect();
+*/
+
+var querydb = (sql) => {
+    return new Promise((resolve, reject) => {
+        if(pool === null) {
+            reject('no mysql pool defined');
+        }
+        pool.getConnection((err, connection) => {
+            if(err) {
+                logger.error('failed to get connection', err);
+                reject(err);
+            }
+            // eslint-disable-next-line no-unused-vars
+            connection.query(sql, function(err, results) {
+                if(err) {
+                    logger.error('failed to exec sql', sql, err);
+                    reject(err);
+                }
+                logger.debug('sql result', sql, results);
+                resolve(true);
+            });
+        });
+    });
+};
+
 
 /**
  * Change owner
@@ -197,7 +234,8 @@ router.post('/database/:id', async function(req, res) {
         else {
             let createdb = 'CREATE DATABASE ' + req.params.id + ';\n';
             try {
-                await connection.query(createdb);
+                await querydb(createdb);
+                //await connection.query(createdb);
             } catch(err) {
                 logger.error('sql error', err);
                 await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []});
@@ -208,7 +246,8 @@ router.post('/database/:id', async function(req, res) {
             let password = Math.random().toString(36).slice(-10);
             let createuser = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
             try {
-                await connection.query(createuser);
+                await querydb(createuser);
+                //await connection.query(createuser);
             } catch(err) {
                 logger.error('sql error', err);
                 res.send({message: 'Failed to create user'});
@@ -217,7 +256,8 @@ router.post('/database/:id', async function(req, res) {
             }
             let grant = `GRANT ALL PRIVILEGES ON ${req.params.id}.* TO '${req.params.id}'@'%'\n`;
             try {
-                await connection.query(grant);
+                await querydb(grant);
+                //await connection.query(grant);
             } catch(err) {
                 logger.error('sql error', err);
                 res.send({message: 'Failed to grant access to user'});
@@ -290,7 +330,21 @@ router.delete('/database/:id', async function(req, res) {
     }
     else {
         await utils.mongo_databases().deleteOne(filter);
-        let sql = `DROP USER '${req.params.id}'@'%';\n`;
+        let dropusersql = `DROP USER '${req.params.id}'@'%';\n`;
+        let dropdbsql = `DROP DATABASE ${req.params.id};\n`;
+        try {
+            await querydb(dropusersql);
+            await querydb(dropdbsql);
+        } catch(err) {
+            logger.error('sql error', err);
+            res.send({message: 'Could not delete database:' + err});
+            return;
+        }
+        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
+        res.send({message:'Database removed'});
+        res.end();
+        return;
+        /*
         // eslint-disable-next-line no-unused-vars
         connection.query(sql, function(err, results) {
             let sql = `DROP DATABASE ${req.params.id};\n`;
@@ -302,6 +356,7 @@ router.delete('/database/:id', async function(req, res) {
                 return;
             });
         });
+        */
     }
 });
 
@@ -339,23 +394,23 @@ var delete_db = async function(user, db_id){
     }
     else {
         await utils.mongo_databases().deleteOne(filter);
-        const querydb = (sql) => {
-            // eslint-disable-next-line no-unused-vars
-            return new Promise((resolve, reject) => {
-                // eslint-disable-next-line no-unused-vars
-                connection.query(sql, function(err, results) {
-                    if(err) {
-                        logger.error('failed to exec sql', sql, err);
-                        resolve(false);
-                    }
-                    resolve(true);
-                });
-            });
-        };
-        let dropuser = `DROP USER '${db_id}'@'%';\n`;
-        await querydb(dropuser);
-        let dropdb = `DROP DATABASE ${db_id};\n`;
-        await querydb(dropdb);
+
+        try {
+            let dropuser = `DROP USER '${db_id}'@'%';\n`;
+            await querydb(dropuser);
+            let dropdb = `DROP DATABASE ${db_id};\n`;
+            await querydb(dropdb);
+            
+        } catch(err) {
+            await utils.mongo_events().insertOne(
+                {
+                    'owner': user.uid,
+                    'date': new Date().getTime(),
+                    'action': 'Error: database ' + db_id + ' could not be deleted by ' + user.uid, 'logs': []
+                }
+            );
+            return false;
+        }
         await utils.mongo_events().insertOne(
             {
                 'owner': user.uid,
