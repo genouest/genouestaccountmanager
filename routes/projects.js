@@ -6,7 +6,14 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
+const MAILER = CONFIG.general.mailer;
+const MAIL_CONFIG = CONFIG[MAILER];
+
+// var cookieParser = require('cookie-parser');
+// var goldap = require('../routes/goldap.js');
+
 const filer = require('../routes/file.js');
+var notif = require('../routes/notif_'+MAILER+'.js');
 var utils = require('./utils');
 
 router.get('/project', async function(req, res){
@@ -121,7 +128,7 @@ router.post('/project', async function(req, res){
     } catch(error) {
         logger.error('Add Project Failed for: ' + new_project.id, error);
         res.status(500).send('Add Project Failed');
-        return;                        
+        return;
     }
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
     res.send({'message': 'Project created'});
@@ -154,7 +161,7 @@ router.delete('/project/:id', async function(req, res){
     } catch(error){
         logger.error('Delete Project Failed for: ' + req.params.id, error);
         res.status(500).send('Delete Project Failed');
-        return;   
+        return;
     }
 
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.params.id , 'logs': []});
@@ -207,7 +214,7 @@ router.post('/project/:id', async function(req, res){
         res.status(500).send('Add Project Failed');
         return;
     }
-    
+
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.params.id , 'logs': []});
     res.send({'message': 'Project updated'});
 });
@@ -344,6 +351,65 @@ router.get('/group/:id/projects', async function(req, res){
     let projects_with_group = await utils.mongo_projects().find({'group': req.params.id}).toArray();
     res.send(projects_with_group);
     res.end();
+});
+
+router.post('/ask/project', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send('User not found');
+        return;
+    }
+
+    /* // New Project Structure :
+    let new_project = {
+        'id': req.body.id,
+        'size': req.body.size,
+        'description': req.body.description,
+        'orga': req.body.orga,
+    };
+    */
+
+    // logger.info(new_project);
+
+    // todo: find a way to use cc
+    let msg_destinations =  [GENERAL_CONFIG.accounts, user.email];
+
+    let msg_ask = CONFIG.message.ask_project.join('\n')
+        .replace(/#UID#/g, user.uid)
+        .replace(/#NAME#/g, req.body.id)
+        .replace(/#SIZE#/g, req.body.size)
+        .replace(/#ORGA#/g, req.body.orga)
+        .replace(/#DESC#/g, req.body.description)
+        + '\n' + CONFIG.message.footer.join('\n');
+    let msg_ask_html = CONFIG.message.ask_project_html.join('')
+        .replace(/#UID#/g, user.uid)
+        .replace(/#NAME#/g, req.body.id)
+        .replace(/#SIZE#/g, req.body.size)
+        .replace(/#ORGA#/g, req.body.orga)
+        .replace(/#DESC#/g, req.body.description)
+        + '<br/>' + CONFIG.message.footer_html.join('<br/>');
+
+    let mailOptions = {
+        origin: MAIL_CONFIG.origin, // sender address
+        destinations:  msg_destinations, // list of receivers
+        subject: 'Project creation request: ' + req.body.id, // Subject line
+        message: msg_ask, // plaintext body
+        html_message: msg_ask_html // html body
+    };
+
+    // logger.info(mailOptions);
+
+    if(notif.mailSet()) {
+        // eslint-disable-next-line no-unused-vars
+        await notif.sendUser(mailOptions);
+    }
+
+    res.end();
+    return;
 });
 
 module.exports = router;

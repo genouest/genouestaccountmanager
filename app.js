@@ -338,6 +338,7 @@ app.post('/project/:id', projects);
 app.post('/project/:id/request', projects);
 app.delete('/project/:id', projects);
 app.put('/project/:id/request', projects);
+app.post('/ask/project', projects);
 app.get('/quota/:user/:id', quota);
 app.get('/plugin', plugin);
 app.get('/plugin/:id', plugin);

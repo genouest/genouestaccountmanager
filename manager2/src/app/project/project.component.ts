@@ -13,6 +13,7 @@ import { Subject } from 'rxjs';
 })
 export class ProjectComponent implements OnInit {
 
+    new_project: any
     projects: any
     users: any
     groups: any
@@ -51,6 +52,7 @@ export class ProjectComponent implements OnInit {
 
     ngOnInit() {
 
+        this.new_project = {}
         this.groups = [];
         this.manager_visible = true;
         this.session_user = this.authService.userProfile;
@@ -64,6 +66,22 @@ export class ProjectComponent implements OnInit {
                 this.dtTrigger.next();
             },
             err => console.log('failed to get projects')
+        )
+    }
+
+    ask_for_project() {
+        // todo: should rename it project_msg
+        this.request_msg = '';
+        this.request_err_msg = '';
+        this.projectsService.askNew(this.new_project).subscribe(
+            resp => {
+                this.request_msg = 'An email have been sent to admin';
+                this.new_project = {};
+            },
+            err => {
+                console.log('failed to get project users', err);
+                this.request_err_msg = err.error;
+            }
         )
     }
 
@@ -98,7 +116,7 @@ export class ProjectComponent implements OnInit {
         this.request_msg = '';
         this.request_err_msg = '';
         if (! user_id ) {
-            this.request_err_msg = 'Genouest id is required';
+            this.request_err_msg = 'User id is required';
             return;
         };
         if (request_type === "add"){
