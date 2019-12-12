@@ -364,12 +364,14 @@ router.post('/ask/project', async function(req, res){
         return;
     }
 
+    /* // New Project Structure :
     let new_project = {
         'id': req.body.id,
         'size': req.body.size,
         'description': req.body.description,
         'orga': req.body.orga,
     };
+    */
 
     // logger.info(new_project);
 
