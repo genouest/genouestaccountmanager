@@ -20,7 +20,7 @@ touch "{{ user.home }}/.ssh/authorized_keys"
 echo 'Host *' > "{{ user.home }}/.ssh/config"
 echo '  StrictHostKeyChecking no' >> "{{ user.home }}/.ssh/config"
 echo '  UserKnownHostsFile=/dev/null' >> "{{ user.home }}/.ssh/config"
-chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "{{ user.home }}"
+chown -R {{ user.uid }}:{{ user.uid }} "{{ user.home }}"
 
 {% include "user/add_extra_dirs.sh" %}
 
