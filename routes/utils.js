@@ -203,7 +203,7 @@ exports.moveExtraDirs = function(userUID, oldUserGroupName, newUserGroupName, us
 
 exports.isInitOver = function () {
     // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {  
+    return new Promise(function (resolve, reject) {
         if (redis_client !== null) {
             redis_client.get('my:ids:set', function(err , res){
                 resolve(res !== undefined && res === 'done');
@@ -331,7 +331,7 @@ exports.getUserAvailableId = function () {
 exports.getGroupAvailableId = function () {
     if (redis_client === null) {
         return _getGroupsMaxId(CONFIG.general.mingid);
-    }    
+    }
     return _getAvailableId(1);
 };
 
@@ -344,6 +344,10 @@ async function _getUsersMaxId(minID) {
     if (data.length > 0){
         minUserID = data[0].uidnumber + 1;
     }
+    if (minUserID < minID)
+    {
+        minUserID = minID;
+    }
     return minUserID;
 }
 
@@ -355,6 +359,10 @@ async function _getGroupsMaxId(minID) {
     }
     if (data.length > 0){
         minGroupID = data[0].gid + 1;
+    }
+    if (minGroupID < minID)
+    {
+        minGroupID = minID;
     }
     return minGroupID;
 }
