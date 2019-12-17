@@ -18,8 +18,10 @@ export class HomeComponent implements OnInit {
         this.config = {}
     }
 
-    ngOnInit() {
-        if (this.authService.isLoggedIn) {
+    async ngOnInit() {
+        let logged = await this.authService.isLoggedIn;
+        let user = await this.authService.profile;
+        if (logged) {
             // Maybe we should try to use promise and async in angular too ...
             this.configService.config.subscribe(
                 resp => {
@@ -28,7 +30,6 @@ export class HomeComponent implements OnInit {
                     {
                         this.router.navigate(['/project']);
                     } else { // default to user profile page
-                        let user = this.authService.profile;
                         this.router.navigate(['/user/' + user.uid]);
                     }
                 },

@@ -50,12 +50,12 @@ export class ProjectComponent implements OnInit {
         this.dtTriggerUser.unsubscribe();
     }
 
-    ngOnInit() {
+    async ngOnInit() {
 
         this.new_project = {}
         this.groups = [];
         this.manager_visible = true;
-        this.session_user = this.authService.userProfile;
+        this.session_user = await this.authService.profile;
         this.users = [];
         this.projectsService.list(false).subscribe(
             resp => {
