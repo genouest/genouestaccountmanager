@@ -9,23 +9,6 @@ var GENERAL_CONFIG = CONFIG.general;
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
 
-var plugins = CONFIG.plugins;
-
-if (plugins === undefined) {
-    plugins = [];
-}
-
-var plugins_modules = {};
-var plugins_info = [];
-
-for (var i = 0; i < plugins.length; i++) {
-    if(plugins[i]['admin']) {
-        continue;
-    }
-    plugins_modules[plugins[i].name] = require('../plugins/' + plugins[i].name);
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
-}
-
 // var cookieParser = require('cookie-parser')
 
 var goldap = require('../routes/goldap.js');
@@ -333,11 +316,13 @@ var activate_tp_user = async function(user, adminId){
     let plugin_call = function(plugin_info, userId, data, adminId){
         // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
+            let plugins_modules = utils.plugins_modules();
             plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
                 resolve(true);
             });
         });
     };
+    let plugins_info = utils.plugins_info();
     await Promise.all(plugins_info.map(function(plugin_info){
         return plugin_call(plugin_info, user.uid, ldap_user, adminId);
     }));

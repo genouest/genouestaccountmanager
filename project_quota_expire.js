@@ -29,7 +29,7 @@ function timeConverter(tsp){
 */
 
 utils.init_db().then(async () => {
-
+    utils.load_plugins();
     let projects = await utils.mongo_projects().find({}).toArray();
     // Find project expiring in less then 2 month
     let mail_sent = 0;

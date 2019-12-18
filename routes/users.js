@@ -20,13 +20,6 @@ if (CONFIG[MAILER]) { MAIL_CONFIG = CONFIG[MAILER]; }
 // todo: find a cleaner way to allow registration if no mail are configured
 if (!MAIL_CONFIG.origin) { MAIL_CONFIG.origin = 'nomail@nomail.org'; }
 
-var plugins = CONFIG.plugins;
-if(plugins === undefined){
-    plugins = [];
-}
-var plugins_modules = {};
-var plugins_info = [];
-
 var goldap = require('../routes/goldap.js');
 var notif = require('../routes/notif_'+MAILER+'.js');
 var utils = require('../routes/utils.js');
@@ -37,14 +30,6 @@ var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
 //const runningEnv = process.env.NODE_ENV || 'prod';
-
-for(let i = 0; i< plugins.length; i++){
-    if(plugins[i]['admin']) {
-        continue;
-    }
-    plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
-}
 
 function get_group_home (user) {
     let group_path = CONFIG.general.home+'/'+user.group;
@@ -171,6 +156,7 @@ var create_extra_user = async function(user_name, group, internal_user){
     let plugin_call = function(plugin_info, userId, data, adminId){
         // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
+            let plugins_modules = utils.plugins_modules();
             plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
                 resolve(true);
             });
@@ -178,6 +164,7 @@ var create_extra_user = async function(user_name, group, internal_user){
     };
 
     try {
+        let plugins_info = utils.plugins_info();
         await Promise.all(plugins_info.map(function(plugin_info){
             return plugin_call(plugin_info, user.uid, user, 'auto');
         }));
@@ -849,6 +836,7 @@ router.delete_user = async function(user, action_owner_id, message){
         let plugin_call = function(plugin_info, userId, user, adminId){
             // eslint-disable-next-line no-unused-vars
             return new Promise(function (resolve, reject){
+                let plugins_modules = utils.plugins_modules();
                 if(plugins_modules[plugin_info.name].remove === undefined) {
                     resolve(true);
                 }
@@ -857,6 +845,7 @@ router.delete_user = async function(user, action_owner_id, message){
                 });
             });
         };
+        let plugins_info = utils.plugins_info();
         await Promise.all(plugins_info.map(function(plugin_info){
             return plugin_call(plugin_info, user.uid, user, action_owner_id);
         }));
@@ -1013,11 +1002,13 @@ router.get('/user/:id/activate', async function(req, res) {
         let plugin_call = function(plugin_info, userId, data, adminId){
             // eslint-disable-next-line no-unused-vars
             return new Promise(function (resolve, reject){
+                let plugins_modules = utils.plugins_modules();
                 plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
                     resolve(true);
                 });
             });
         };
+        let plugins_info = utils.plugins_info();
         Promise.all(plugins_info.map(function(plugin_info){
             return plugin_call(plugin_info, user.uid, user, session_user.uid);
             // eslint-disable-next-line no-unused-vars
@@ -1331,11 +1322,13 @@ router.get('/user/:id/expire', async function(req, res){
                 let plugin_call = function(plugin_info, userId, user, adminId){
                     // eslint-disable-next-line no-unused-vars
                     return new Promise(function (resolve, reject){
+                        let plugins_modules = utils.plugins_modules();
                         plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
                             resolve(true);
                         });
                     });
                 };
+                let plugins_info = utils.plugins_info();
                 Promise.all(plugins_info.map(function(plugin_info){
                     return plugin_call(plugin_info, user.uid, user, session_user.uid);
                     // eslint-disable-next-line no-unused-vars
@@ -1642,11 +1635,13 @@ router.get('/user/:id/renew', async function(req, res){
             let plugin_call = function(plugin_info, userId, data, adminId){
                 // eslint-disable-next-line no-unused-vars
                 return new Promise(function (resolve, reject){
+                    let plugins_modules = utils.plugins_modules();
                     plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
                         resolve(true);
                     });
                 });
             };
+            let plugins_info = utils.plugins_info();
             Promise.all(plugins_info.map(function(plugin_info){
                 return plugin_call(plugin_info, user.uid, user, session_user.uid);
                 // eslint-disable-next-line no-unused-vars

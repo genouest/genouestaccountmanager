@@ -34,6 +34,7 @@ function timeConverter(tsp){
 }
 
 utils.init_db().then(async ()=>{
+    utils.load_plugins();
     let users = await utils.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
     // Find users expiring in less then 2 month
     let mail_sent = 0;

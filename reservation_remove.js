@@ -24,6 +24,7 @@ ended_after = new Date(ended_after.getFullYear(), ended_after.getMonth(), ended_
 
 logger.info('[INFO] Check expiring reservations');
 utils.init_db().then(()=>{
+    utils.load_plugins();
     utils.mongo_reservations().find({
         'to': {'$lte': ended_after.getTime()},
         'created': true,

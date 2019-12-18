@@ -418,7 +418,7 @@ module.exports = app;
 
 utils.init_db().then(async () => {
     await utils.loadAvailableIds();
-
+    utils.load_plugins();
     if(MY_ADMIN_USER !== null){
         wlogger.info('Create admin user');
         await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);

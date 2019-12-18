@@ -95,6 +95,7 @@ program
     });
 
 utils.init_db().then(() => {
+    utils.load_plugins();
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });

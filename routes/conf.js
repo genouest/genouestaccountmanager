@@ -4,13 +4,14 @@ var router = express.Router();
 // const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var MAIL_CONFIG = CONFIG.gomail;
+var utils = require('./utils');
 
-var monk = require('monk');
-var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
-var users_db = db.get('users');
+//var monk = require('monk');
+//var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
+//var users_db = db.get('users');
 
 
-router.get('/conf', function(req, res){
+router.get('/conf', async function(req, res){
     let terms_of_use = '/doc/terms_of_use.txt';
     if (CONFIG.general.terms_of_use) {
         terms_of_use = CONFIG.general.terms_of_use;
@@ -37,23 +38,24 @@ router.get('/conf', function(req, res){
     // todo: factorize res.send
     let max_account = false;
     if (CONFIG.general.max_account && CONFIG.general.max_account > 0) {
-        users_db.count({status: 'Active'}, function(err, count) {
-            if(count >= CONFIG.general.max_account) {
-                max_account = true;
-            }
-            res.send({
-                'main_groups': CONFIG.general.main_groups,
-                'terms_of_use': terms_of_use,
-                'default_home': default_home,
-                'name': CONFIG.general.name,
-                'support': CONFIG.general.support,
-                'main_list': MAIL_CONFIG.main_list,
-                'origin': MAIL_CONFIG.origin,
-                'max_account': max_account,
-                'enable_ui': enable_ui
-            });
-            res.end();
+        let count = await utils.mongo_users().count({status: 'Active'});
+        //utils.mongo_users().count({status: 'Active'}, function(err, count) {
+        if(count >= CONFIG.general.max_account) {
+            max_account = true;
+        }
+        res.send({
+            'main_groups': CONFIG.general.main_groups,
+            'terms_of_use': terms_of_use,
+            'default_home': default_home,
+            'name': CONFIG.general.name,
+            'support': CONFIG.general.support,
+            'main_list': MAIL_CONFIG.main_list,
+            'origin': MAIL_CONFIG.origin,
+            'max_account': max_account,
+            'enable_ui': enable_ui
         });
+        res.end();
+        //});
 
     }
     else {

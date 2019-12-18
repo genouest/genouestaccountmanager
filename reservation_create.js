@@ -54,6 +54,7 @@ create_before.setDate(create_before.getDate() + 5);
 
 logger.info('Check coming reservations');
 utils.init_db().then(()=> {
+    utils.load_plugins();
     utils.mongo_reservations().find({
         'from': {'$lte': create_before.getTime()},
         'created': false,

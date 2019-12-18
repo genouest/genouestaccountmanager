@@ -211,8 +211,7 @@
     ]
     },
     "plugins": [
-            {"name": "test", "display_name": "Test", "admin": false},
-      {"name": "adminquotatest", "display_name": "Quotas", "admin": true},
+      {"name": "test", "display_name": "Test", "admin": false},
       {"name": "amqp", "display_name": "RabbitMQ", "admin": false}
     ],
     "plugin_config" : {

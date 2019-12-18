@@ -31,6 +31,7 @@ fi
 echo "$(date) Execute cron tasks"
 
 if [ -e /tmp/gomngr.lock ]; then
+  echo "gomngr locked"
   exit 1
 fi
 

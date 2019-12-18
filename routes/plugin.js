@@ -5,19 +5,7 @@ var GENERAL_CONFIG = CONFIG.general;
 
 var utils = require('./utils');
 
-var plugins = CONFIG.plugins;
-if(plugins === undefined){
-    plugins = [];
-}
-var plugins_modules = {};
-var plugins_info = [];
-for(var i=0;i<plugins.length;i++){
-    plugins_modules[plugins[i].name] = require('../plugins/'+plugins[i].name);
-    if(plugins[i].display_name === undefined) { plugins[i]['display_name'] = plugins[i].name; }
-    if(plugins[i].admin_only === undefined) { plugins[i]['admin_only'] = false; }
-    if(plugins[i].admin === undefined) { plugins[i]['admin'] = false; }
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name, 'display_name': plugins[i]['display_name'], 'admin_only': plugins[i]['admin_only'], 'admin': plugins[i]['admin']});
-}
+
 /**
    Plugins must provide functions:
 
@@ -37,6 +25,10 @@ for(var i=0;i<plugins.length;i++){
 */
 
 router.get('/plugin', function(req, res) {
+
+    let plugins_info = utils.plugins_info();
+    let plugins_modules = utils.plugins_modules();
+
     let plugin_list = [];
     for(let i=0;i<plugins_info.length;i++){
         if(plugins_modules[plugins_info[i].name].template === undefined) {
@@ -53,6 +45,7 @@ router.get('/plugin', function(req, res) {
 
 
 router.get('/plugin/:id', function(req, res) {
+    let plugins_modules = utils.plugins_modules();
     let template = plugins_modules[req.params.id].template();
     res.send(template);
 });
@@ -73,6 +66,7 @@ router.get('/plugin/:id/:user', async function(req, res) {
     else {
         user.is_admin = true;
     }
+    let plugins_modules = utils.plugins_modules();
     plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
         res.send(result);
     });
@@ -95,6 +89,7 @@ router.post('/plugin/:id/:user', async function(req, res) {
     else {
         user.is_admin = true;
     }
+    let plugins_modules = utils.plugins_modules();
     plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
         res.send(result);
     }, function(err){

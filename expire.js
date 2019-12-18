@@ -25,20 +25,6 @@ const MAIL_CONFIG = CONFIG[MAILER];
 
 var notif = require('./routes/notif_'+MAILER+'.js');
 
-var plugins = CONFIG.plugins;
-if(plugins === undefined){
-    plugins = [];
-}
-var plugins_modules = {};
-var plugins_info = [];
-for(var i=0;i<plugins.length;i++){
-    if(plugins[i]['admin']) {
-        continue;
-    }
-    plugins_modules[plugins[i].name] = require('./plugins/'+plugins[i].name);
-    plugins_info.push({'name': plugins[i].name, 'url': '../plugin/' + plugins[i].name});
-}
-
 /*
 function timeConverter(tsp){
     var a = new Date(tsp);
@@ -55,6 +41,7 @@ function timeConverter(tsp){
 */
 
 utils.init_db().then(async () => {
+    utils.load_plugins();
     let users = await utils.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}).toArray();
     // Find users expiring
     var mail_sent = 0;
@@ -105,6 +92,7 @@ utils.init_db().then(async () => {
             let plugin_call = function(plugin_info, user){
                 // eslint-disable-next-line no-unused-vars
                 return new Promise(function (resolve, reject){
+                    let plugins_modules = utils.plugins_modules();
                     plugins_modules[plugin_info.name].deactivate(user).then(function(){
                         resolve(true);
                     });
@@ -112,26 +100,27 @@ utils.init_db().then(async () => {
                 });
             };
             // console.log('call plugins');
+            let plugins_info = utils.plugins_info();
             Promise.all(plugins_info.map(function(plugin_info){
                 return plugin_call(plugin_info, user.uid);
             // eslint-disable-next-line no-unused-vars
             })).then(function(results){
                 // console.log('after plugins');
-                    // Now remove from mailing list
-                    try {
-                        notif.remove(user.email, function(){
-                            mail_sent++;
-                            if(mail_sent == users.length) {
-                                process.exit(0);
-                            }
-                        });
-                    }
-                    catch(err) {
+                // Now remove from mailing list
+                try {
+                    notif.remove(user.email, function(){
                         mail_sent++;
                         if(mail_sent == users.length) {
                             process.exit(0);
                         }
+                    });
+                }
+                catch(err) {
+                    mail_sent++;
+                    if(mail_sent == users.length) {
+                        process.exit(0);
                     }
+                }
 
             });
         }(i));

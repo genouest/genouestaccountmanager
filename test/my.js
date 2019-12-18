@@ -37,6 +37,7 @@ describe('My', () => {
             });
     });
 
+
     describe('/POST Login', () => {
         it('login should work', (done) => {
             chai.request('http://localhost:3000')
@@ -439,12 +440,6 @@ describe('My', () => {
                 });
         });
         it('Admin change owner web site', (done) => {
-            /*
-            let website = {
-                name: test_web_id,
-                url: 'http://localhost/webtest',
-                description: 'some web site'
-            }*/
             chai.request('http://localhost:3000')
                 .put('/web/' + test_web_id + '/owner/user1/user2')
                 .set('X-Api-Key', token_id)
