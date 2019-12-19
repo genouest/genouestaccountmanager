@@ -33,7 +33,7 @@ replace: loginShell
 loginShell: /bin/bash
 {% if user.is_admin and user.oldgroup != user.group %}
 
-{% if user.oldgroup }}
+{% if user.oldgroup %}}
 dn: cn={{ user.oldgroup }},ou=groups,{{ CONFIG.ldap.dn }}
 changetype: modify
 delete: memberUid
