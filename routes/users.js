@@ -111,7 +111,7 @@ var create_extra_user = async function(user_name, group, internal_user){
         address: '',
         lab: '',
         responsible: '',
-        group: group.name,
+        group: (CONFIG.general.disable_user_group) ? '' : group.name,
         secondarygroups: [],
         maingroup: '',
         home: '',
@@ -131,7 +131,7 @@ var create_extra_user = async function(user_name, group, internal_user){
     };
     let minuid = await utils.getUserAvailableId();
     user.uidnumber = minuid;
-    user.gidnumber = group.gid;
+    user.gidnumber = (CONFIG.general.disable_user_group) ? '' : group.gid;
     user.home = get_user_home(user);
     let fid = new Date().getTime();
     try {
@@ -950,29 +950,31 @@ router.get('/user/:id/activate', async function(req, res) {
     }
     user.password = Math.random().toString(36).slice(-10);
     let minuid = await utils.getUserAvailableId();
+    user.uidnumber = minuid;
+    user.gidnumber = '';
+    if (!CONFIG.general.disable_user_group) {
+        let data = await utils.mongo_groups().findOne({'name': user.group});
+        if(!data) {
+            if (CONFIG.general.auto_add_group) {
+                try {
+                    await create_group(user.group, user.uid);
+                } catch(error){
+                    logger.error('Add Group Failed for: ' + user.group, error);
+                    res.status(500).send('Add Group Failed');
+                    return;
+                }
 
-    let data = await utils.mongo_groups().findOne({'name': user.group});
-    if(!data) {
-        if (CONFIG.general.auto_add_group) {
-            try {
-                await create_group(user.group, user.uid);
-            } catch(error){
-                logger.error('Add Group Failed for: ' + user.group, error);
-                res.status(500).send('Add Group Failed');
+                data = await utils.mongo_groups().findOne({'name': user.group});
+            } else {
+
+                res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
+                res.end();
                 return;
             }
-
-            data = await utils.mongo_groups().findOne({'name': user.group});
-        } else {
-
-            res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
-            res.end();
-            return;
         }
+        user.gidnumber = data.gid;
     }
 
-    user.uidnumber = minuid;
-    user.gidnumber = data.gid;
     user.home = get_user_home(user);
     let fid = new Date().getTime();
     try {
@@ -1191,17 +1193,19 @@ router.post('/user/:id', async function(req, res) {
     let regkey = Math.random().toString(36).substring(7);
     let default_main_group = GENERAL_CONFIG.default_main_group || '';
     let group = '';
-    switch (CONFIG.general.registration_group) {
-    case 'username':
-        group = req.params.id;
-        break;
-    case 'main':
-        group = default_main_group;
-        break;
-    case 'team': // use the team by default for retro-compatibility
-    default:
-        group = req.body.team;
-        break;
+    if (!CONFIG.general.disable_user_group) {
+        switch (CONFIG.general.registration_group) {
+        case 'username':
+            group = req.params.id;
+            break;
+        case 'main':
+            group = default_main_group;
+            break;
+        case 'team': // use the team by default for retro-compatibility
+        default:
+            group = req.body.team;
+            break;
+        }
     }
 
     let user = {
@@ -1836,7 +1840,7 @@ router.put('/user/:id', async function(req, res) {
 
     if(session_user.is_admin){
         let group = await utils.mongo_groups().findOne({'name': req.body.group});
-        if(!group) {
+        if(!group && !CONFIG.general.disable_user_group) {
             res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
             return;
         }
@@ -1860,7 +1864,7 @@ router.put('/user/:id', async function(req, res) {
             user.maingroup = req.body.maingroup;
         }
         user.home = get_user_home(user);
-        if(user.group == '' || user.group == null) {
+        if((user.group == '' || user.group == null) && !CONFIG.general.disable_user_group) {
             res.status(403).send('Some mandatory fields are empty');
             return;
         }
@@ -1880,7 +1884,7 @@ router.put('/user/:id', async function(req, res) {
         try {
             await goldap.modify(user, fid);
         } catch(err) {
-            res.status(403).send('Group '+user.group+' does not exist, please create it first');
+            res.status(403).send('User update failed');
             return;
         }
 
