@@ -122,11 +122,11 @@
              </select>
           </div>
           <div class="col-sm-2">
-            <label>Group&nbsp;
+            <label for="project_group">Group&nbsp;
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" tooltip> </span>
             </label>
-            <select [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.group" class="form-control">
+            <select  id="project_group" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.group" class="form-control">
                 <option *ngFor="let group of groups" [value]="group.name">{{group.name}}</option>
             </select>
           </div>
