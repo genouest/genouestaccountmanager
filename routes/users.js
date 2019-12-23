@@ -403,7 +403,9 @@ router.delete_group = async function(group, admin_user_id){
 
 router.clear_user_groups = async function(user, admin_user_id){
     let allgroups = user.secondarygroups;
-    allgroups.push(user.group);
+    if (user.group && user.group != '') {
+        allgroups.push(user.group);
+    }
     for(let i=0;i < allgroups.length;i++){
         let group = await utils.mongo_groups().findOne({name: allgroups[i]});
         if(group){
@@ -784,8 +786,9 @@ router.delete_user = async function(user, action_owner_id, message){
     let fid = new Date().getTime();
     // Remove user from groups
     let allgroups = user.secondarygroups;
-    allgroups.push(user.group);
-
+    if (user.group && user.group != '') {
+        allgroups.push(user.group);
+    }
     if(user_is_activ){
         await goldap.change_user_groups(user, [], allgroups, fid);
 
