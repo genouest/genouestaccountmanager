@@ -131,7 +131,7 @@ var create_extra_user = async function(user_name, group, internal_user){
     };
     let minuid = await utils.getUserAvailableId();
     user.uidnumber = minuid;
-    user.gidnumber = (CONFIG.general.disable_user_group) ? '' : group.gid;
+    user.gidnumber = (CONFIG.general.disable_user_group) ? -1 : group.gid;
     user.home = get_user_home(user);
     let fid = new Date().getTime();
     try {
@@ -951,7 +951,7 @@ router.get('/user/:id/activate', async function(req, res) {
     user.password = Math.random().toString(36).slice(-10);
     let minuid = await utils.getUserAvailableId();
     user.uidnumber = minuid;
-    user.gidnumber = '';
+    user.gidnumber = -1;
     if (!CONFIG.general.disable_user_group) {
         let data = await utils.mongo_groups().findOne({'name': user.group});
         if(!data) {
@@ -1837,25 +1837,33 @@ router.put('/user/:id', async function(req, res) {
 
     user.history.push({'action': 'update info', date: new Date().getTime()});
 
-
+    user.oldgroup = user.group;
+    user.oldgidnumber = user.gidnumber;
+    user.oldmaingroup = user.maingroup;
+    user.oldhome = user.home;
+    user.group = '';
+    user.gidnumber = -1;
     if(session_user.is_admin){
-        let group = await utils.mongo_groups().findOne({'name': req.body.group});
-        if(!group && !CONFIG.general.disable_user_group) {
-            res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
-            return;
+        if ( !CONFIG.general.disable_user_group) {
+            let group = await utils.mongo_groups().findOne({'name': req.body.group});
+
+            if(!group) {
+                res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
+                return;
+            }
+
+            if(user.secondarygroups.indexOf(group.name) != -1) {
+                res.status(403).send('Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!');
+                return;
+            }
+            user.group = req.body.group;
+            user.gidnumber = group.gid;
+            if(user.group == '' || user.group == null) {
+                res.status(403).send('Some mandatory fields are empty');
+                return;
+            }
         }
 
-        if(user.secondarygroups.indexOf(group.name) != -1) {
-            res.status(403).send('Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!');
-            return;
-        }
-
-        user.oldgroup = user.group;
-        user.oldgidnumber = user.gidnumber;
-        user.oldmaingroup = user.maingroup;
-        user.oldhome = user.home;
-        user.group = req.body.group;
-        user.gidnumber = group.gid;
         user.ip = req.body.ip;
         if (req.body.is_internal !== undefined) {
             user.is_internal = req.body.is_internal;
@@ -1864,15 +1872,7 @@ router.put('/user/:id', async function(req, res) {
             user.maingroup = req.body.maingroup;
         }
         user.home = get_user_home(user);
-        if((user.group == '' || user.group == null) && !CONFIG.general.disable_user_group) {
-            res.status(403).send('Some mandatory fields are empty');
-            return;
-        }
-    } else {
-        user.oldgroup = user.group;
-        user.oldgidnumber = user.gidnumber;
-        user.oldmaingroup = user.maingroup;
-        user.oldhome = user.home;
+
     }
 
     if(user.status == STATUS_ACTIVE){
