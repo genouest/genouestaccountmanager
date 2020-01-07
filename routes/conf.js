@@ -10,6 +10,36 @@ var utils = require('./utils');
 //var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
 //var users_db = db.get('users');
 
+let is_init = false;
+let config = CONFIG;
+
+module.exports = {
+    // todo: should add all default value here
+    init: function () {
+        if (!is_init) {
+            let duration_list = {
+                '3 months': 91,
+                '6 months': 182,
+                '1 year': 365,
+                '2 years': 730,
+                '3 years': 1095
+            };
+
+            if (!CONFIG.duration) {
+                CONFIG.duration = duration_list;
+            }
+
+            is_init = true;
+        }
+    },
+
+    // todo: should replace all {var CONFIG = require('config');} by a call to this function
+    get_conf: function(){
+        this.init();
+        return (config);
+ },
+
+};
 
 router.get('/conf', async function(req, res){
     let terms_of_use = '/doc/terms_of_use.txt';
@@ -52,7 +82,8 @@ router.get('/conf', async function(req, res){
             'main_list': MAIL_CONFIG.main_list,
             'origin': MAIL_CONFIG.origin,
             'max_account': max_account,
-            'enable_ui': enable_ui
+            'enable_ui': enable_ui,
+            'duration': CONFIG.duration.keys()
         });
         res.end();
         //});
@@ -68,7 +99,8 @@ router.get('/conf', async function(req, res){
             'main_list': MAIL_CONFIG.main_list,
             'origin': MAIL_CONFIG.origin,
             'max_account': false,
-            'enable_ui': enable_ui
+            'enable_ui': enable_ui,
+            'duration': CONFIG.duration.keys()
         });
         res.end();
     }

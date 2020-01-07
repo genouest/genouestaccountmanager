@@ -10,6 +10,7 @@ var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../routes/file.js');
+const conf = require('../routes/conf.js');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
@@ -29,6 +30,9 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
+
+let day_time = 1000 * 60 * 60 * 3600;
+let duration_list = conf.get_conf().duration;
 //const runningEnv = process.env.NODE_ENV || 'prod';
 
 function get_group_home (user) {
@@ -985,7 +989,7 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }
 
-    await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + 1000*3600*24*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*user.duration}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     notif.add(user.email, async function(){
         let msg_activ = CONFIG.message.activation.join('\n').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
@@ -1177,6 +1181,12 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
+    if (!(req.body.duration in duration_list))
+    {
+        res.send({'status': 1, 'msg': 'Invalid duration format'});
+        return;
+    }
+
     let user_email = await utils.mongo_users().findOne({email: req.body.email, is_fake: false});
     if(user_email){
         res.send({'status': 1, 'msg': 'User email already exists'});
@@ -1226,8 +1236,8 @@ router.post('/user/:id', async function(req, res) {
         uidnumber: -1,
         gidnumber: -1,
         cloud: false,
-        duration: req.body.duration,
-        expiration: new Date().getTime() + 1000*3600*24*req.body.duration,
+        duration: duration_list[req.body.duration],
+        expiration: new Date().getTime() + day_time*duration_list[req.body.duration],
         loginShell: '/bin/bash',
         history: [{action: 'register', date: new Date().getTime()}]
     };
@@ -1556,7 +1566,7 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     let regkey = req.params.regkey;
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
-        let expiration = new Date().getTime() + 1000*3600*24*user.duration;
+        let expiration = new Date().getTime() + day_time*user.duration;
         await utils.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
@@ -1609,7 +1619,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + 1000*3600*24*user.duration), history: user.history}});
+        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + day_time*user.duration), history: user.history}});
 
         try {
             let created_file = await filer.user_renew_user(user, fid);
@@ -1824,8 +1834,13 @@ router.put('/user/:id', async function(req, res) {
     if(req.body.why) {
         user.why = req.body.why;
     }
+    if (!(req.body.duration in duration_list))
+    {
+        res.status(403).send('Duration is not valid');
+        return;
+    }
     if(req.body.duration) {
-        user.duration = req.body.duration;
+        user.duration = duration_list[req.body.duration];
     }
     if(req.body.team) {
         user.team = req.body.team;
