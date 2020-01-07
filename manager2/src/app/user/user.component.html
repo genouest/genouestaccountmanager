@@ -158,7 +158,7 @@
                               <label for="duration" class="col-4 col-form-label">Duration</label>
                               <div class="col-6">
                                   <select [ngModelOptions]="{standalone: true}" [(ngModel)]="user.duration" class="form-control" >
-                                    <option *ngFor="let duration of config.duration">duration</option>
+                                    <option *ngFor="let duration of config.duration">{{duration}}</option>
 
                                   </select>
                               </div>

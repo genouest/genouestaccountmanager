@@ -272,7 +272,7 @@ app.all('*', async function(req, res, next){
 
 
 app.get('/', routes);
-app.get('/conf', conf);
+app.get('/conf', conf.router);
 app.get('/ip', users);
 app.get('/log/status/:id/:status', logs);
 app.get('/log/:id', logs);

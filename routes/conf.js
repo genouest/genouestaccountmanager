@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-// const winston = require('winston');
-// const logger = winston.loggers.get('gomngr');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var MAIL_CONFIG = CONFIG.gomail;
 var utils = require('./utils');
@@ -11,35 +11,33 @@ var utils = require('./utils');
 //var users_db = db.get('users');
 
 let is_init = false;
-let config = CONFIG;
+let conf = null;
+// todo: should add all default value here
+function init () {
+    if (!is_init) {
+        conf = CONFIG;
+        let duration_list = {
+            '3 months': 91,
+            '6 months': 182,
+            '1 year': 365,
+            '2 years': 730,
+            '3 years': 1095
+        };
 
-module.exports = {
-    // todo: should add all default value here
-    init: function () {
-        if (!is_init) {
-            let duration_list = {
-                '3 months': 91,
-                '6 months': 182,
-                '1 year': 365,
-                '2 years': 730,
-                '3 years': 1095
-            };
-
-            if (!CONFIG.duration) {
-                CONFIG.duration = duration_list;
-            }
-
-            is_init = true;
+        if (!conf.duration) {
+            conf.duration = duration_list;
         }
-    },
+        // logger.info(CONFIG.duration);
+        is_init = true;
+    }
+}
 
-    // todo: should replace all {var CONFIG = require('config');} by a call to this function
-    get_conf: function(){
-        this.init();
-        return (config);
- },
+// todo: should replace all {var CONFIG = require('config');} by a call to this function
+function get_conf () {
+    init();
+    return conf;
+}
 
-};
 
 router.get('/conf', async function(req, res){
     let terms_of_use = '/doc/terms_of_use.txt';
@@ -64,7 +62,7 @@ router.get('/conf', async function(req, res){
         enable_ui = CONFIG.enable_ui;
     }
     enable_ui.main_group = CONFIG.general.use_group_in_path;
-
+    let duration = Object.keys(get_conf().duration);
     // todo: factorize res.send
     let max_account = false;
     if (CONFIG.general.max_account && CONFIG.general.max_account > 0) {
@@ -83,7 +81,7 @@ router.get('/conf', async function(req, res){
             'origin': MAIL_CONFIG.origin,
             'max_account': max_account,
             'enable_ui': enable_ui,
-            'duration': CONFIG.duration.keys()
+            'duration': duration
         });
         res.end();
         //});
@@ -100,10 +98,14 @@ router.get('/conf', async function(req, res){
             'origin': MAIL_CONFIG.origin,
             'max_account': false,
             'enable_ui': enable_ui,
-            'duration': CONFIG.duration.keys()
+            'duration': duration
         });
         res.end();
     }
 });
 
-module.exports = router;
+module.exports = {
+    router: router,
+    get_conf: get_conf
+
+};

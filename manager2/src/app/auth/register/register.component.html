@@ -70,7 +70,7 @@
             <div class="form-group">
                 <label for="duration">Duration</label>
                 <select id="duration" [ngModelOptions]="{standalone: true}" [(ngModel)]="duration" class="form-control" required>
-                  <option *ngFor="let duration of config.duration">duration</option>
+                  <option *ngFor="let duration of config.duration">{{duration}}</option>
                 </select>
             </div>
             <input *ngIf="config.enable_ui && config.enable_ui.ip" type="hidden" [ngModelOptions]="{standalone: true}" [(ngModel)]="ip" type="text" id="ip" class="form-control" placeholder="IP Address" required>
