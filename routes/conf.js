@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const winston = require('winston');
-const logger = winston.loggers.get('gomngr');
+// const winston = require('winston');
+// const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var MAIL_CONFIG = CONFIG.gomail;
 var utils = require('./utils');
