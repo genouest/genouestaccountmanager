@@ -277,8 +277,7 @@ module.exports = {
             let created_file = await filer.ldap_add_user(user, group, fid);
             logger.debug('File created', created_file);
 
-            // should we do if (group) ?
-            if (!CONFIG.general.disable_user_group) {
+            if (group) {
                 let group_dn = await get_group_dn(group.name);
                 created_file = await filer.ldap_add_user_to_group(user,group_dn, fid);
                 logger.debug('File created', created_file);
