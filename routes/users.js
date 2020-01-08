@@ -30,7 +30,7 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
-let day_time = 1000 * 60 * 60 * 3600;
+let day_time = 1000 * 60 * 60 * 24;
 let duration_list = conf.get_conf().duration;
 //const runningEnv = process.env.NODE_ENV || 'prod';
 
