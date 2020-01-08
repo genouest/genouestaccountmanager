@@ -1833,12 +1833,12 @@ router.put('/user/:id', async function(req, res) {
     if(req.body.why) {
         user.why = req.body.why;
     }
-    if (!(req.body.duration in duration_list))
-    {
-        res.status(403).send('Duration is not valid');
-        return;
-    }
     if(req.body.duration) {
+        if (!(req.body.duration in duration_list))
+        {
+            res.status(403).send('Duration is not valid');
+            return;
+        }
         user.duration = duration_list[req.body.duration];
     }
     if(req.body.team) {
