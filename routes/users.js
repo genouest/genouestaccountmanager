@@ -1235,7 +1235,7 @@ router.post('/user/:id', async function(req, res) {
         uidnumber: -1,
         gidnumber: -1,
         cloud: false,
-        duration: duration_list[req.body.duration],
+        duration: req.body.duration,
         expiration: new Date().getTime() + day_time*duration_list[req.body.duration],
         loginShell: '/bin/bash',
         history: [{action: 'register', date: new Date().getTime()}]
