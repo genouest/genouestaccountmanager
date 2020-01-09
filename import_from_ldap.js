@@ -263,7 +263,7 @@ function record_user(user){
         address: "unknown",
         lab: "unknown",
         responsible: "unknown",
-        group: (ldap_groups[gid] ? ldap_groups[gid].cn : ''), //todo: maybe use default group from config
+        group: (!CONFIG.general.disable_user_group && ldap_groups[gid]) ? ldap_groups[gid].cn : '',
         secondarygroups: secondary_groups,
         projects: projects,
         home: user.homeDirectory,
