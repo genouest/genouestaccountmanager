@@ -70,55 +70,49 @@ var deleteExtraGroup = async function (group) {
     return true;
 };
 
-var create_tp_users_db = function (owner, quantity, duration, end_date, userGroup) {
-    // Duration in days
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        logger.debug('create_tp_users ', owner, quantity, duration);
-        let minuid = utils.getUserAvailableId();
+var create_tp_users_db = async function (owner, quantity, duration, end_date, userGroup) {
+    logger.debug('create_tp_users ', owner, quantity, duration);
+    let minuid = await utils.getUserAvailableId();
 
-        let users = [];
-        for(let i=0;i<quantity;i++){
-            logger.debug('create user ', CONFIG.tp.prefix + minuid);
-            let user = {
-                status: STATUS_PENDING_APPROVAL,
-                uid: CONFIG.tp.prefix + minuid,
-                firstname: CONFIG.tp.prefix,
-                lastname: minuid,
-                email: CONFIG.tp.prefix + minuid + '@fake.' + CONFIG.tp.fake_mail_domain,
-                address: '',
-                lab: '',
-                responsible: owner,
-                group: userGroup.name,
-                secondarygroups: [],
-                maingroup: CONFIG.general.default_main_group,
-                home: '',
-                why: 'TP/Training',
-                ip: '',
-                regkey: '',
-                is_internal: false,
-                is_fake: true,
-                uidnumber: minuid,
-                gidnumber: userGroup.gid,
-                duration: duration,
-                expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
-                loginShell: '/bin/bash',
-                history: []
-            };
-            user.home = fusers.user_home(user);
-            users.push(user);
-            minuid++;
-        }
-        Promise.all(users.map(function(user){
-            logger.debug('map users to create_tp_user_db ', user);
-            return create_tp_user_db(user);
-        })).then(function(results){
-            logger.debug('now activate users');
-            return activate_tp_users(owner, results);
-        }).then(function(activated_users){
-            resolve(activated_users);
-        });
+    let users = [];
+    for(let i=0;i<quantity;i++){
+        logger.debug('create user ', CONFIG.tp.prefix + minuid);
+        let user = {
+            status: STATUS_PENDING_APPROVAL,
+            uid: CONFIG.tp.prefix + minuid,
+            firstname: CONFIG.tp.prefix,
+            lastname: minuid,
+            email: CONFIG.tp.prefix + minuid + '@fake.' + CONFIG.tp.fake_mail_domain,
+            address: '',
+            lab: '',
+            responsible: owner,
+            group: userGroup.name,
+            secondarygroups: [],
+            maingroup: CONFIG.general.default_main_group,
+            home: '',
+            why: 'TP/Training',
+            ip: '',
+            regkey: '',
+            is_internal: false,
+            is_fake: true,
+            uidnumber: minuid,
+            gidnumber: userGroup.gid,
+            duration: duration,
+            expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
+            loginShell: '/bin/bash',
+            history: []
+        };
+        user.home = await fusers.user_home(user);
+        await users.push(user);
+        minuid++;
+    }
+    let users_saved = await users.map(function(user){
+        logger.debug('map users to create_tp_user_db ', user);
+        return create_tp_user_db(user);
     });
+    logger.debug('now activate users');
+    let activate_users = await activate_tp_users(owner, users_saved);
+    return activate_users;
 };
 
 var create_tp_user_db = async function (tp_user) {
