@@ -75,7 +75,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         logger.debug('create_tp_users ', owner, quantity, duration);
-        let minuid = 1000;
+        let minuid = utils.getUserAvailableId();
 
         let users = [];
         for(let i=0;i<quantity;i++){
@@ -125,12 +125,6 @@ var create_tp_user_db = async function (tp_user) {
     let user = {...tp_user};
     logger.debug('create_tp_user_db', user.uid);
     try {
-        let uid = await utils.getUserAvailableId();
-        user.uid = CONFIG.tp.prefix + uid;
-        user.lastname = uid;
-        user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
-        user.uidnumber = uid;
-        user.home = fusers.user_home(user);
         await utils.mongo_users().insertOne(user);
         user.password = Math.random().toString(36).slice(-10);
         return user;
