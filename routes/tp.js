@@ -143,6 +143,7 @@ var create_tp_user_db = async function (tp_user) {
 
 var send_user_passwords = async function(owner, from_date, to_date, users){
     logger.debug('send_user_passwords');
+    let group = (CONFIG.general.disable_user_group) ? users[0].secondarygroups[0] : users[0].group;
     let from = new Date(from_date);
     let to = new Date(to_date);
     let msg = 'TP account credentials from ' + from.toDateString() + ' to ' + to.toDateString() + '\n\n';
@@ -159,8 +160,8 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
         msg_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>';
     }
     msg_html += '</tbody></table>';
-    msg += 'New TP group: ' + users[0].group + '\n';
-    msg_html += '<hr><p>Users are in the group <strong>' + users[0].group + '</strong></p>';
+    msg += 'New TP group: ' + group + '\n';
+    msg_html += '<hr><p>Users are in the group <strong>' + group + '</strong></p>';
     msg += 'Users can create an SSH key at ' + CONFIG.general.url + ' in SSH Keys section\n';
     msg_html += '<hr>';
     msg_html += '<h2>Access</h2>';
