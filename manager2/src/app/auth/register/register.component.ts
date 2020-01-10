@@ -16,7 +16,7 @@ export class RegisterComponent implements OnInit {
     msgstatus: number = 0
 
     uid: string
-    duration: number = 365
+    duration: string = '1 year'
     config: any = {}
 
     userid: string

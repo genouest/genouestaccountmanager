@@ -276,7 +276,7 @@ function record_user(user){
         uidnumber: uid,
         gidnumber: gid,
         cloud: false,
-        duration: 365,
+        duration: '1 year',
         expiration: new Date().getTime() + 1000*3600*24*365,
         loginShell: user.loginShell,
         history: []

@@ -10,6 +10,34 @@ var utils = require('./utils');
 //var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
 //var users_db = db.get('users');
 
+let is_init = false;
+let conf = null;
+// todo: should add all default value here
+function init () {
+    if (!is_init) {
+        conf = CONFIG;
+        let duration_list = {
+            '3 months': 91,
+            '6 months': 182,
+            '1 year': 365,
+            '2 years': 730,
+            '3 years': 1095
+        };
+
+        if (!conf.duration) {
+            conf.duration = duration_list;
+        }
+        // logger.info(CONFIG.duration);
+        is_init = true;
+    }
+}
+
+// todo: should replace all {var CONFIG = require('config');} by a call to this function
+function get_conf () {
+    init();
+    return conf;
+}
+
 
 router.get('/conf', async function(req, res){
     let terms_of_use = '/doc/terms_of_use.txt';
@@ -36,6 +64,8 @@ router.get('/conf', async function(req, res){
     enable_ui.main_group = CONFIG.general.use_group_in_path;
     enable_ui.user_group = !CONFIG.general.disable_user_group;
 
+    let duration = Object.keys(get_conf().duration);
+
     let config = {
         'main_groups': CONFIG.general.main_groups,
         'terms_of_use': terms_of_use,
@@ -45,7 +75,8 @@ router.get('/conf', async function(req, res){
         'main_list': MAIL_CONFIG.main_list,
         'origin': MAIL_CONFIG.origin,
         'max_account': false,
-        'enable_ui': enable_ui
+        'enable_ui': enable_ui,
+        'duration': duration
     };
 
     if (CONFIG.general.max_account && CONFIG.general.max_account > 0) {
@@ -62,4 +93,8 @@ router.get('/conf', async function(req, res){
     }
 });
 
-module.exports = router;
+module.exports = {
+    router: router,
+    get_conf: get_conf
+
+};

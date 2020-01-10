@@ -90,7 +90,7 @@ describe('My', () => {
                     'team': test_group_id,
                     'why': 'because',
                     'ip': '127.0.0.1',
-                    'duration': 365
+                    'duration': '1 year'
                 })
                 .end((err, res) => {
                     assert(res.body.status == 0);
@@ -140,7 +140,7 @@ describe('My', () => {
                     'team': test_group_id2,
                     'why': 'because',
                     'ip': '127.0.0.1',
-                    'duration': 365
+                    'duration': '1 year'
                 })
                 .end((err, res) => {
                     assert(res.body.status == 0);
@@ -592,7 +592,7 @@ describe('My', () => {
                     'group': test_group_id,
                     'why': 'because',
                     'ip': '127.0.0.1',
-                    'duration': 365,
+                    'duration': '1 year',
                     'loginShell': '/bin/bash'
                 })
                 .end((err, res) => {
