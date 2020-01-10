@@ -117,7 +117,7 @@
                                   <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.regkey" class="form-control" readonly/>
                               </div>
                           </div>
-                          <div class="form-group row">
+                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
                               <label for="group" class="col-4 col-form-label">Group</label>
                               <div class="col-6">
                                   <input disabled type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control"/>

@@ -62,44 +62,33 @@ router.get('/conf', async function(req, res){
         enable_ui = CONFIG.enable_ui;
     }
     enable_ui.main_group = CONFIG.general.use_group_in_path;
+    enable_ui.user_group = !CONFIG.general.disable_user_group;
+
     let duration = Object.keys(get_conf().duration);
-    // todo: factorize res.send
-    let max_account = false;
+
+    let config = {
+        'main_groups': CONFIG.general.main_groups,
+        'terms_of_use': terms_of_use,
+        'default_home': default_home,
+        'name': CONFIG.general.name,
+        'support': CONFIG.general.support,
+        'main_list': MAIL_CONFIG.main_list,
+        'origin': MAIL_CONFIG.origin,
+        'max_account': false,
+        'enable_ui': enable_ui,
+        'duration': duration
+    };
+
     if (CONFIG.general.max_account && CONFIG.general.max_account > 0) {
         let count = await utils.mongo_users().count({status: 'Active'});
-        //utils.mongo_users().count({status: 'Active'}, function(err, count) {
         if(count >= CONFIG.general.max_account) {
-            max_account = true;
+            config.max_account = true;
         }
-        res.send({
-            'main_groups': CONFIG.general.main_groups,
-            'terms_of_use': terms_of_use,
-            'default_home': default_home,
-            'name': CONFIG.general.name,
-            'support': CONFIG.general.support,
-            'main_list': MAIL_CONFIG.main_list,
-            'origin': MAIL_CONFIG.origin,
-            'max_account': max_account,
-            'enable_ui': enable_ui,
-            'duration': duration
-        });
+        res.send(config);
         res.end();
-        //});
-
     }
     else {
-        res.send({
-            'main_groups': CONFIG.general.main_groups,
-            'terms_of_use': terms_of_use,
-            'default_home': default_home,
-            'name': CONFIG.general.name,
-            'support': CONFIG.general.support,
-            'main_list': MAIL_CONFIG.main_list,
-            'origin': MAIL_CONFIG.origin,
-            'max_account': false,
-            'enable_ui': enable_ui,
-            'duration': duration
-        });
+        res.send(config);
         res.end();
     }
 });
