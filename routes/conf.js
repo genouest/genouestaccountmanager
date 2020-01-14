@@ -60,7 +60,7 @@ function get_conf () {
 
 
 router.get('/conf', async function(req, res){
-     let config = {
+    let config = {
         'main_groups': get_conf().general.main_groups,
         'terms_of_use': get_conf().general.terms_of_use,
         'default_home': get_conf().general.web_home,
