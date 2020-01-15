@@ -60,17 +60,18 @@ function get_conf () {
 
 
 router.get('/conf', async function(req, res){
+    let my_conf = get_conf();
     let config = {
-        'main_groups': get_conf().general.main_groups,
-        'terms_of_use': get_conf().general.terms_of_use,
-        'default_home': get_conf().general.web_home,
-        'name': get_conf().general.name,
-        'support': get_conf().general.support,
+        'main_groups': my_conf.general.main_groups,
+        'terms_of_use': my_conf.general.terms_of_use,
+        'default_home': my_conf.general.web_home,
+        'name': my_conf.general.name,
+        'support': my_conf.general.support,
         'main_list': MAIL_CONFIG.main_list,
         'origin': MAIL_CONFIG.origin,
         'max_account': false,
-        'enable_ui': get_conf().enable_ui,
-        'duration': Object.keys(get_conf().duration)
+        'enable_ui': my_conf.enable_ui,
+        'duration': Object.keys(my_conf.duration)
     };
 
     // should be check on each call
