@@ -260,7 +260,7 @@
      "You will receive an email when your account has been validated."
     ],
     "confirmation_html": [
-     "<h2>Welcome on the GenOuest core facility</h2>",
+     "<h2>Welcome to the GenOuest core facility</h2>",
      "<p>You have created an account on GenOuest platform, please confirm your subscription at the following link:</p>",
      "<p>#LINK#</p>",
      "<p>You will receive an email when your account has been validated.</p>",
