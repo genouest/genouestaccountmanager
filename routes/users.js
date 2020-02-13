@@ -1899,6 +1899,31 @@ router.put('/user/:id', async function(req, res) {
 
     }
 
+
+    let plugin_call = function(plugin_info, userId, data, adminId){
+        // eslint-disable-next-line no-unused-vars
+        return new Promise(function (resolve, reject){
+            let plugins_modules = utils.plugins_modules();
+            if (plugins_modules[plugin_info.name].update !== undefined) {
+                plugins_modules[plugin_info.name].update(userId, data, adminId).then(function(){
+                    resolve(true);
+                });
+            } else {
+                resolve(true);
+            }
+        });
+    };
+
+    try {
+        let plugins_info = utils.plugins_info();
+        await Promise.all(plugins_info.map(function(plugin_info){
+            return plugin_call(plugin_info, user.uid, user, session_user.uid);
+        }));
+    } catch(err) {
+        logger.error('failed to update user', user, err);
+    }
+
+
     if(user.status == STATUS_ACTIVE){
         await utils.mongo_users().replaceOne({_id: user._id}, user);
         if(session_user.is_admin) {

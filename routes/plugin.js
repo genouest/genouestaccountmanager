@@ -10,10 +10,11 @@ var utils = require('./utils');
    Plugins must provide functions:
 
    - template() <= return Angular html data. Template can use model from plugin_data.PLUGIN_NAME.MODEL_VARIABLE_NAME, form buttons should will updated model and must be called with method plugin_update(PLUGIN_NAME)
-   - activate(user_id, user_info), returns updated user info (same as get_data)
-   - deactivate(user_id)
-   - get_data(user_id)
-   - set_data(user_id, user_info)
+   - activate(user_id, user_info, session_user_id), called on user activation, returns updated user info (same as get_data)
+   - deactivate(user_id, user_info, session_user_id), called on user deactivation
+   - get_data(user_id, session_user_id), called on plugin info request
+   - set_data(user_id, user_info, session_user_id), called on plugin info update
+   - update(user_id, user_info, session_user_id) called when user info are updated
 
    They also must return a Promise, except template() which must return template text
 
