@@ -8,6 +8,7 @@ var utils = require('../routes/utils');
 var Promise = require('promise');
 var path_to_script = CONFIG.general.plugin_script_dir + '/remove_galaxy_user.py';
 
+var apikey = '';
 
 // eslint-disable-next-line no-unused-vars
 var activate_user = function(userId, data, adminId){
@@ -52,7 +53,7 @@ var remove_user_from_galaxy = async function(userId, data, adminId) {
     var fid = new Date().getTime();
     var script = '#!/bin/bash\n';
     script += 'set -e\n';
-    script += 'python ' + path_to_script + ' --user ' + data.email + ' --url https://galaxy.genouest.org --api 165dea6468f0a01e12c93c3b6c17da53\n';
+    script += 'python ' + path_to_script + ' --user ' + data.email + ' --url https://galaxy.genouest.org --api ' + apikey +'\n';
     var script_file = CONFIG.general.script_dir+'/'+data.uid+'.'+fid+'.galaxy.update';
     const create_script = function() {
         return new Promise((resolve, reject) => {
@@ -99,6 +100,12 @@ module.exports = {
         return get_user_info(userId,adminId);
     },
     set_data: function(userId, data, adminId){
+        return new Promise(function (resolve, reject){
+            console.log('[Galaxy] Nothing to do');
+            resolve();
+        });
+    },
+    update: function(userId, data, adminId){
         return set_user_info(userId, data, adminId);
     },
     remove: function(userId, data, adminId){
