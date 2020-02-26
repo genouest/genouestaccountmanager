@@ -42,10 +42,15 @@ ls $MYDIR/*.update | sort -n -t . -k 2 > /tmp/gomngr.list
 while read p; do
   $p &> $p.log
   EXITCODE=$?
+  echo "Exit code: $EXITCODE" >> $p.log
   filename=$(basename $p)
   if [ $EXITCODE -ne 0 ]; then
+    echo "Got an error" >> $p.log
     if [ "a$SENTRY_DSN" != "a" ]; then
+      echo "Send sentry event" >> $p.log
       /usr/local/bin/sentry-cli send-event -m "$p execution failure" --logfile $p.log
+    else
+      echo "no sentry, skip..." >> $p.log
     fi
   fi
   curl -v "$MYURL/log/status/$filename/$EXITCODE"
