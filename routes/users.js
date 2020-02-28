@@ -1865,9 +1865,11 @@ router.put('/user/:id', async function(req, res) {
     user.oldgidnumber = user.gidnumber;
     user.oldmaingroup = user.maingroup;
     user.oldhome = user.home;
-    user.group = '';
-    user.gidnumber = -1;
+    // user.group = '';
+    // user.gidnumber = -1;
     if(session_user.is_admin){
+        user.group = '';
+        user.gidnumber = -1;
         if ( !CONFIG.general.disable_user_group) {
             let group = await utils.mongo_groups().findOne({'name': req.body.group});
 
