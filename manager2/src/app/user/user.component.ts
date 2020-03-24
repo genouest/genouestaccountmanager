@@ -143,19 +143,7 @@ export class UserComponent implements OnInit {
         return a.toLocaleDateString();
     }
 
-    ngOnInit() {
-        this.web_delete = this.web_delete.bind(this);
-        this.delete_secondary_group = this.delete_secondary_group.bind(this);
-        this.db_delete = this.db_delete.bind(this);
-        this.delete = this.delete.bind(this);
-        this.subscribe = this.subscribe.bind(this);
-        this.unsubscribe = this.unsubscribe.bind(this);
-
-        this.configService.config.subscribe(
-            resp => this.config = resp,
-            err => console.log('failed to get config')
-        )
-
+    initUser = function() {
         this.sub = this.route.params.subscribe(params => {
             this.pluginService.list().subscribe(
                 resp => {
@@ -185,6 +173,26 @@ export class UserComponent implements OnInit {
                 err => {console.log('subscribedError',err);}
             )
         });
+    }
+
+    ngOnInit() {
+        this.web_delete = this.web_delete.bind(this);
+        this.delete_secondary_group = this.delete_secondary_group.bind(this);
+        this.db_delete = this.db_delete.bind(this);
+        this.delete = this.delete.bind(this);
+        this.subscribe = this.subscribe.bind(this);
+        this.unsubscribe = this.unsubscribe.bind(this);
+        this.initUser = this.initUser.bind(this);
+
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                this.initUser();
+            },
+            err => console.log('failed to get config')
+        )
+
+        
     }
 
     _compareName(a,b) {
@@ -646,7 +654,9 @@ export class UserComponent implements OnInit {
     }
 
     ngOnDestroy() {
-        this.sub.unsubscribe();
+        if(this.sub) {
+            this.sub.unsubscribe();
+        }
     }
 
 
