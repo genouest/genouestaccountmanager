@@ -195,6 +195,16 @@
      "<p>You will receive an email when your account has been validated.</p>",
      "<hr>"
     ],
+    "add_to_project": [
+        "#UID# has been added to project '#NAME#' in My",
+        "#DESC#",
+        "The project quota is #SIZE#, and the path is #PATH#"
+    ],
+    "add_to_project_html": [
+        "<p>#UID# has been added to project '#NAME#' in My</p>",
+        "<p>#DESC#</p>",
+        "<p>The project quota is #SIZE#, and the path is #PATH#</p>"
+    ],
     "ask_project": [
       "#UID# have asked for a new project '#NAME#' in My",
       "Size needed: #SIZE# GB",

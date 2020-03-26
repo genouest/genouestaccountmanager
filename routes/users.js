@@ -866,10 +866,6 @@ router.delete_user = async function(user, action_owner_id, message){
         msg_destinations.push(user.email);
     }
 
-    let msg_del = CONFIG.message.deletion.join('\n').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '\n' + CONFIG.message.footer.join('\n');
-    let msg_del_html = CONFIG.message.deletion_html.join('').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '<br/>'+CONFIG.message.footer_html.join('<br/>');
-
-
     try {
         var mailOptions = await gen_mail_opt({
             'name': 'deletion',
@@ -2146,6 +2142,35 @@ router.post('/user/:id/project/:project', async function(req, res){
     }
 
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
+
+    let project = await utils.mongo_projects().findOne({id:newproject});
+    let owner = await utils.mongo_users().findOne({uid:project.owner});
+    let msg_destinations = [user.email, owner.email];
+    try {
+        var mailOptions = await gen_mail_opt({
+            'name': 'add_to_project',
+            'destinations': msg_destinations,
+            'subject': 'account added to project : ' + project.id
+        }, {
+            '#UID#': user.uid,
+            '#NAME#': project.id,
+            '#SIZE#': project.size,
+            '#DESC#': project.description,
+            '#PATH#': project.path
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+
+    if(notif.mailSet()) {
+        try {
+            // eslint-disable-next-line no-unused-vars
+            await notif.sendUser(mailOptions);
+        } catch(error) {
+            logger.error(error);
+        }
+    }
+
     res.send({message: 'User added to project', fid: fid});
     res.end();
 });
