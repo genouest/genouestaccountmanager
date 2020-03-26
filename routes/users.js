@@ -1147,13 +1147,15 @@ router.get('/user/:id/confirm', async function(req, res) {
                     $push: {history: account_event}
                 });
 
+            let link = GENERAL_CONFIG.url + encodeURI('/user/'+user.uid);
             try {
                 let mailOptions = await gen_mail_opt({
                     'name': 'registration',
                     'destinations': [GENERAL_CONFIG.accounts],
                     'subject': GENERAL_CONFIG.name + ' account registration: '+uid
                 }, {
-                    '#UID#':  user.uid
+                    '#UID#':  user.uid,
+                    '#LINK#': link
                 });
             } catch(error) {
                 logger.error(error);
@@ -1302,19 +1304,23 @@ router.post('/user/:id', async function(req, res) {
 
     await utils.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
 
-    let uid = req.params.id;
+
     await utils.mongo_users().insertOne(user);
-    let link = GENERAL_CONFIG.url +
-        encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
-    let msg_activ = CONFIG.message.confirmation.join('\n').replace('#LINK#', link).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-    let msg_activ_html = CONFIG.message.confirmation_html.join('').replace('#LINK#', '<a href="'+link+'">'+link+'</a>').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer_html.join('<br/>');
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations: [user.email], // list of receivers
-        subject: GENERAL_CONFIG.name + ' account registration', // Subject line
-        message: msg_activ,
-        html_message: msg_activ_html
-    };
+    let uid = req.params.id;
+    let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
+    try {
+        let mailOptions = await gen_mail_opt({
+            'name' : 'confirmation',
+            'destinations': [user.email],
+            'subject': GENERAL_CONFIG.name + ' account confirmation'
+        }, {
+            '#UID#':  user.uid,
+            '#LINK#': link
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+
     if(notif.mailSet()) {
         try {
             await notif.sendUser(mailOptions);
