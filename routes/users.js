@@ -56,6 +56,39 @@ router.user_home = function (user) {
     return get_user_home(user);
 };
 
+// todo: maybe move this in utils.js
+function gen_mail_opt(name,
+                      destinations,
+                      subject,
+                      variable){
+
+    //find message
+    let message = CONFIG.message[name].join('\n');
+    let html_message = CONFIG.message[name + '_html'].join('');
+
+    // replace variable in message
+    variable.forEach(function (value, key, map) {
+        let re = new RegExp(key,"g");
+        message = message.replace(re, value);
+        html_message = html_message.replace(re, value);
+    });
+
+    // always add footer
+    message = message + '\n' + CONFIG.message.footer.join('\n');
+    html_message = html_message + '<br/>' + CONFIG.message.footer_html.join('<br/>');
+
+    // set mailOptions
+    let mailOptions = {
+        origin: MAIL_CONFIG.origin, // sender address
+        destinations:  destinations, // list of receivers
+        subject: subject, // Subject line
+        message: message, // plaintext body
+        html_message: html_message // html body
+    };
+
+    return mailOptions;
+}
+
 var send_notif = async function(mailOptions, _fid, errors) {
     if(notif.mailSet()) {
         try {
