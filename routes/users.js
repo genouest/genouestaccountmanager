@@ -68,7 +68,7 @@ function gen_mail_opt(name,
 
     // replace variable in message
     for (key in variable) {
-	value = variable[key];
+        value = variable[key];
         let re = new RegExp(key,"g");
         message = message.replace(re, value);
         html_message = html_message.replace(re, value);
@@ -1139,13 +1139,14 @@ router.get('/user/:id/confirm', async function(req, res) {
                     $push: {history: account_event}
                 });
 
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [GENERAL_CONFIG.accounts], // list of receivers
-                subject: GENERAL_CONFIG.name + ' account registration: '+uid, // Subject line
-                message: 'New account registration waiting for approval: '+uid, // plaintext body
-                html_message: 'New account registration waiting for approval: '+uid // html body
-            };
+            let mailOptions = gen_mail_opt('registration',
+                                           [GENERAL_CONFIG.accounts],
+                                           GENERAL_CONFIG.name + ' account registration: '+uid,
+                                           {
+                                               '#UID#':  user.uid
+                                           }
+                                          );
+
             await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
             if(notif.mailSet()) {
                 try {

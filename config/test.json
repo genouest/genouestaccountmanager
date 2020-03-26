@@ -98,6 +98,12 @@
     "fake_mail_domain": "my.org"
   },
   "message": {
+    "registration": [
+     "New account registration waiting for approval: #UID#"
+    ],
+    "registration_html": [
+     "<p>New account registration waiting for approval: #UID#</p>"
+    ],
     "activation": [
       "Your account has been activated, you will be able to connect within one day.",
       "Your credentials are:",
