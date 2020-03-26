@@ -67,11 +67,12 @@ function gen_mail_opt(name,
     let html_message = CONFIG.message[name + '_html'].join('');
 
     // replace variable in message
-    variable.forEach(function (value, key, map) {
+    for (key in variable) {
+	value = variable[key];
         let re = new RegExp(key,"g");
         message = message.replace(re, value);
         html_message = html_message.replace(re, value);
-    });
+    };
 
     // always add footer
     message = message + '\n' + CONFIG.message.footer.join('\n');
@@ -1029,15 +1030,18 @@ router.get('/user/:id/activate', async function(req, res) {
     await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     notif.add(user.email, async function(){
-        let msg_activ = CONFIG.message.activation.join('\n').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-        let msg_activ_html = CONFIG.message.activation_html.join('').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>'+CONFIG.message.footer_html.join('<br/>');
-        let mailOptions = {
-            origin: MAIL_CONFIG.origin, // sender address
-            destinations: [user.email], // list of receivers
-            subject: GENERAL_CONFIG.name + ' account activation', // Subject line
-            message: msg_activ, // plaintext body
-            html_message: msg_activ_html // html body
-        };
+
+        let mailOptions = gen_mail_opt('activation',
+                                       [user.email],
+                                       GENERAL_CONFIG.name + ' account activation',
+                                       {
+                                           '#UID#':  user.uid,
+                                           '#PASSWORD#': user.password,
+                                           '#IP#': user.ip
+                                       }
+                                      );
+
+
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
         let plugin_call = function(plugin_info, userId, data, adminId){
