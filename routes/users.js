@@ -1519,18 +1519,21 @@ router.get('/user/:id/passwordreset', async function(req, res){
 
     user.password='';
     // Now send email
-    let link = CONFIG.general.url +
-        encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
-    let html_link = `<a href="${link}">${link}</a>`;
-    let msg = CONFIG.message.password_reset_request.join('\n').replace('#UID#', user.uid) + '\n' + link + '\n' + CONFIG.message.footer.join('\n');
-    let html_msg = CONFIG.message.password_reset_request_html.join('').replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer_html.join('<br/>');
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations: [user.email], // list of receivers
-        subject: GENERAL_CONFIG.name + ' account password reset request',
-        message: msg,
-        html_message: html_msg
-    };
+    let link = CONFIG.general.url + encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
+
+    try {
+        var mailOptions = await gen_mail_opt({
+            'name' : 'password_reset_request',
+            'destinations': [user.email],
+            'subject': 'account password reset request'
+        }, {
+            '#UID#':  user.uid,
+            '#LINK#': link
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
 
     if(notif.mailSet()) {
