@@ -62,7 +62,7 @@ async function gen_mail_opt(options, variables)
     // todo: check if each option exist and use default value
     let name = options['name'];
     let destinations = options['destinations'];
-    let subject = options['subject'];
+    let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
 
     //find message
     let message = CONFIG.message[name].join('\n');
@@ -869,13 +869,19 @@ router.delete_user = async function(user, action_owner_id, message){
     let msg_del = CONFIG.message.deletion.join('\n').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '\n' + CONFIG.message.footer.join('\n');
     let msg_del_html = CONFIG.message.deletion_html.join('').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '<br/>'+CONFIG.message.footer_html.join('<br/>');
 
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations:  msg_destinations, // list of receivers
-        subject: GENERAL_CONFIG.name + ' account deletion: ' + user.uid, // Subject line
-        message: msg_del, // plaintext body
-        html_message: msg_del_html // html body
-    };
+
+    try {
+        let mailOptions = await gen_mail_opt({
+            'name': 'deletion',
+            'destinations': msg_destinations,
+            'subject': 'account deletion: ' + user.uid
+        }, {
+            '#UID#': user.uid,
+            '#MSG#': mail_message
+        });
+    } catch(error) {
+        logger.error(error);
+    }
 
     if(user_is_activ){
         // Call remove method of plugins if defined
@@ -899,8 +905,12 @@ router.delete_user = async function(user, action_owner_id, message){
 
     await utils.freeUserId(user.uidnumber);
     if(notif.mailSet()) {
-        // eslint-disable-next-line no-unused-vars
-        await notif.sendUser(mailOptions);
+        try {
+            // eslint-disable-next-line no-unused-vars
+            await notif.sendUser(mailOptions);
+        } catch(error) {
+            logger.error(error);
+        }
     }
     return true;
 };
@@ -1040,7 +1050,7 @@ router.get('/user/:id/activate', async function(req, res) {
             let mailOptions = await gen_mail_opt({
                 'name' : 'activation',
                 'destinations': [user.email],
-                'subject': GENERAL_CONFIG.name + ' account activation'
+                'subject': 'account activation'
             }, {
                 '#UID#':  user.uid,
                 '#PASSWORD#': user.password,
@@ -1152,7 +1162,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 let mailOptions = await gen_mail_opt({
                     'name': 'registration',
                     'destinations': [GENERAL_CONFIG.accounts],
-                    'subject': GENERAL_CONFIG.name + ' account registration: '+uid
+                    'subject': 'account registration: '+uid
                 }, {
                     '#UID#':  user.uid,
                     '#LINK#': link
@@ -1312,7 +1322,7 @@ router.post('/user/:id', async function(req, res) {
         let mailOptions = await gen_mail_opt({
             'name' : 'confirmation',
             'destinations': [user.email],
-            'subject': GENERAL_CONFIG.name + ' account confirmation'
+            'subject': 'account confirmation'
         }, {
             '#UID#':  user.uid,
             '#LINK#': link
