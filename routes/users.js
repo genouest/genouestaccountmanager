@@ -56,19 +56,21 @@ router.user_home = function (user) {
     return get_user_home(user);
 };
 
-// todo: maybe move this in utils.js
-function gen_mail_opt(name,
-                      destinations,
-                      subject,
-                      variable){
+// todo: maybe move this to utils.js
+async function gen_mail_opt(options, variables)
+{
+    // todo: check if each option exist and use default value
+    let name = options['name'];
+    let destinations = options['destinations'];
+    let subject = options['subject'];
 
     //find message
     let message = CONFIG.message[name].join('\n');
     let html_message = CONFIG.message[name + '_html'].join('');
 
     // replace variable in message
-    for (key in variable) {
-        value = variable[key];
+    for (let key in variables) {
+        let value = variables[key];
         let re = new RegExp(key,"g");
         message = message.replace(re, value);
         html_message = html_message.replace(re, value);
@@ -87,6 +89,7 @@ function gen_mail_opt(name,
         html_message: html_message // html body
     };
 
+    // todo: find if we should return or send mail ...
     return mailOptions;
 }
 
@@ -1031,15 +1034,15 @@ router.get('/user/:id/activate', async function(req, res) {
 
     notif.add(user.email, async function(){
 
-        let mailOptions = gen_mail_opt('activation',
-                                       [user.email],
-                                       GENERAL_CONFIG.name + ' account activation',
-                                       {
-                                           '#UID#':  user.uid,
-                                           '#PASSWORD#': user.password,
-                                           '#IP#': user.ip
-                                       }
-                                      );
+        let mailOptions = gen_mail_opt({
+            'name' : 'activation',
+            'destinations': [user.email],
+            'subject': GENERAL_CONFIG.name + ' account activation'
+        }, {
+            '#UID#':  user.uid,
+            '#PASSWORD#': user.password,
+            '#IP#': user.ip
+        });
 
 
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
@@ -1139,13 +1142,13 @@ router.get('/user/:id/confirm', async function(req, res) {
                     $push: {history: account_event}
                 });
 
-            let mailOptions = gen_mail_opt('registration',
-                                           [GENERAL_CONFIG.accounts],
-                                           GENERAL_CONFIG.name + ' account registration: '+uid,
-                                           {
-                                               '#UID#':  user.uid
-                                           }
-                                          );
+            let mailOptions = gen_mail_opt({
+                'name': 'registration',
+                'destinations': [GENERAL_CONFIG.accounts],
+                'subject': GENERAL_CONFIG.name + ' account registration: '+uid
+            }, {
+                '#UID#':  user.uid
+            });
 
             await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
             if(notif.mailSet()) {
