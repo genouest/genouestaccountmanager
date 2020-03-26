@@ -57,7 +57,7 @@ router.user_home = function (user) {
 };
 
 // todo: maybe move this to utils.js
-function gen_mail_opt(options, variables)
+async function gen_mail_opt(options, variables)
 {
     // todo: check if each option exist and use default value
     let name = options['name'];
@@ -90,7 +90,7 @@ function gen_mail_opt(options, variables)
     };
 
     // tmp for debug
-    logger.info(mailOptions);
+    // logger.info(mailOptions);
 
     // todo: find if we should return or send mail ...
     return mailOptions;
