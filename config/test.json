@@ -33,7 +33,7 @@
     "plugin_script_dir": "/opt/my/plugin-scripts"
  },
   "enable_ui": {
-      "messages": true,
+     "messages": true,
      "databases": true,
      "tps": true,
      "websites": true,
@@ -104,7 +104,7 @@
     ],
     "registration_html": [
         "<p>New account registration waiting for approval: #UID#</p>",
-        "<p><a href='#LINK#'>'#LINK#'</a></p>"
+        "<p><a href='#LINK#'>#LINK#</a></p>"
     ],
     "activation": [
       "Your account has been activated, you will be able to connect within one day.",
@@ -193,7 +193,7 @@
     "confirmation_html": [
      "<h2>Welcome on the GenOuest core facility</h2>",
      "<p>You have created an account on GenOuest platform, please confirm your subscription at the following link:</p>",
-     "<p><a href='#LINK#'>'#LINK#'</a></p>",
+     "<p><a href='#LINK#'>#LINK#</a></p>",
      "<p>You will receive an email when your account has been validated.</p>",
      "<hr>"
     ],

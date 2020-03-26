@@ -871,7 +871,7 @@ router.delete_user = async function(user, action_owner_id, message){
 
 
     try {
-        let mailOptions = await gen_mail_opt({
+        var mailOptions = await gen_mail_opt({
             'name': 'deletion',
             'destinations': msg_destinations,
             'subject': 'account deletion: ' + user.uid
@@ -1047,7 +1047,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     notif.add(user.email, async function(){
         try {
-            let mailOptions = await gen_mail_opt({
+            var mailOptions = await gen_mail_opt({
                 'name' : 'activation',
                 'destinations': [user.email],
                 'subject': 'account activation'
@@ -1159,7 +1159,7 @@ router.get('/user/:id/confirm', async function(req, res) {
 
             let link = GENERAL_CONFIG.url + encodeURI('/user/'+user.uid);
             try {
-                let mailOptions = await gen_mail_opt({
+                var mailOptions = await gen_mail_opt({
                     'name': 'registration',
                     'destinations': [GENERAL_CONFIG.accounts],
                     'subject': 'account registration: '+uid
@@ -1319,7 +1319,7 @@ router.post('/user/:id', async function(req, res) {
     let uid = req.params.id;
     let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     try {
-        let mailOptions = await gen_mail_opt({
+        var mailOptions = await gen_mail_opt({
             'name' : 'confirmation',
             'destinations': [user.email],
             'subject': 'account confirmation'
