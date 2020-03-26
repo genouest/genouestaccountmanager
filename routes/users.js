@@ -1590,15 +1590,19 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
 
         // Now send email
-        let msg = CONFIG.message.password_reset.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password) + '\n' + CONFIG.message.footer.join('\n');
-        let msg_html = CONFIG.message.password_reset_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+'<br/>'+CONFIG.message.footer_html.join('<br/>');
-        let mailOptions = {
-            origin: MAIL_CONFIG.origin, // sender address
-            destinations: [user.email], // list of receivers
-            subject: GENERAL_CONFIG.name + ' account password reset',
-            message: msg,
-            html_message: msg_html
-        };
+        try {
+            var mailOptions = await gen_mail_opt({
+                'name' : 'password_reset',
+                'destinations': [user.email],
+                'subject': 'account password reset'
+            }, {
+                '#UID#':  user.uid,
+                '#PASSWORD#': user.password
+            });
+        } catch(error) {
+            logger.error(error);
+        }
+
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
 
         if(notif.mailSet()) {
@@ -1707,16 +1711,21 @@ router.get('/user/:id/renew', async function(req, res){
 
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
         notif.add(user.email, function(){
-            let msg_activ = CONFIG.message.reactivation.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-            let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer_html.join('<br/>');
 
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [user.email], // list of receivers
-                subject: GENERAL_CONFIG.name + ' account reactivation', // Subject line
-                message: msg_activ, // plaintext body
-                html_message: msg_activ_html // html body
-            };
+            try {
+                var mailOptions = gen_mail_opt({
+                    'name' : 'reactivation',
+                    'destinations': [user.email],
+                    'subject': 'account reactivation'
+                }, {
+                    '#UID#':  user.uid,
+                    '#PASSWORD#': user.password,
+                    '#IP#': user.ip
+                });
+            } catch(error) {
+                logger.error(error);
+            }
+
             let plugin_call = function(plugin_info, userId, data, adminId){
                 // eslint-disable-next-line no-unused-vars
                 return new Promise(function (resolve, reject){
