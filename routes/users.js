@@ -14,16 +14,11 @@ const conf = require('../routes/conf.js');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-const MAILER = CONFIG.general.mailer;
-var MAIL_CONFIG = {};
-// todo: more and more ugly init...
-if (CONFIG[MAILER]) { MAIL_CONFIG = CONFIG[MAILER]; }
-// todo: find a cleaner way to allow registration if no mail are configured
-if (!MAIL_CONFIG.origin) { MAIL_CONFIG.origin = 'nomail@nomail.org'; }
-
 var goldap = require('../routes/goldap.js');
-var notif = require('../routes/notif_'+MAILER+'.js');
 var utils = require('../routes/utils.js');
+
+const MAILER = CONFIG.general.mailer;
+var notif = require('../routes/notif_'+MAILER+'.js');
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -56,56 +51,6 @@ router.user_home = function (user) {
     return get_user_home(user);
 };
 
-// todo: maybe move this to utils.js
-async function gen_mail_opt(options, variables)
-{
-    // todo: check if each option exist and use default value
-    let name = options['name'];
-    let destinations = options['destinations'];
-    let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
-
-    //find message
-    let message = CONFIG.message[name].join('\n');
-    let html_message = CONFIG.message[name + '_html'].join('');
-
-    // replace variable in message
-    for (let key in variables) {
-        let value = variables[key];
-        let re = new RegExp(key,"g");
-        message = message.replace(re, value);
-        html_message = html_message.replace(re, value);
-    };
-
-    // always add footer
-    message = message + '\n' + CONFIG.message.footer.join('\n');
-    html_message = html_message + '<br/>' + CONFIG.message.footer_html.join('<br/>');
-
-    // set mailOptions
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations:  destinations, // list of receivers
-        subject: subject, // Subject line
-        message: message, // plaintext body
-        html_message: html_message // html body
-    };
-
-    // tmp for debug
-    // logger.info(mailOptions);
-
-    // todo: find if we should return or send mail ...
-    return mailOptions;
-}
-
-async function send_notif_mail(options, variables) {
-    if(notif.mailSet()) {
-        try {
-            let mailOptions = await gen_mail_opt(options, variables);
-            await notif.sendUser(mailOptions);
-        } catch(err) {
-            logger.error('send notif mail error', err);
-        }
-    }
-}
 
 var create_group = async function(group_name, owner_name){
     let mingid = await utils.getGroupAvailableId();
@@ -865,7 +810,7 @@ router.delete_user = async function(user, action_owner_id, message){
     }
 
     try {
-        await send_notif_mail({
+        await utils.send_notif_mail({
             'name': 'deletion',
             'destinations': msg_destinations,
             'subject': 'account deletion: ' + user.uid
@@ -1033,7 +978,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     notif.add(user.email, async function(){
         try {
-            await send_notif_mail({
+            await utils.send_notif_mail({
                 'name' : 'activation',
                 'destinations': [user.email],
                 'subject': 'account activation'
@@ -1146,7 +1091,7 @@ router.get('/user/:id/confirm', async function(req, res) {
 
             let link = GENERAL_CONFIG.url + encodeURI('/user/'+user.uid);
             try {
-                await send_notif_mail({
+                await utils.send_notif_mail({
                     'name': 'registration',
                     'destinations': [GENERAL_CONFIG.accounts],
                     'subject': 'account registration: '+uid
@@ -1299,7 +1244,7 @@ router.post('/user/:id', async function(req, res) {
     let uid = req.params.id;
     let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     try {
-        await send_notif_mail({
+        await utils.send_notif_mail({
             'name' : 'confirmation',
             'destinations': [user.email],
             'subject': 'account confirmation'
@@ -1495,7 +1440,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     let link = CONFIG.general.url + encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
 
     try {
-        await send_notif_mail({
+        await utils.send_notif_mail({
             'name' : 'password_reset_request',
             'destinations': [user.email],
             'subject': 'account password reset request'
@@ -1559,7 +1504,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
 
         // Now send email
         try {
-            await send_notif_mail({
+            await utils.send_notif_mail({
                 'name' : 'password_reset',
                 'destinations': [user.email],
                 'subject': 'account password reset'
@@ -1676,7 +1621,7 @@ router.get('/user/:id/renew', async function(req, res){
         notif.add(user.email, function(){
 
             try {
-                send_notif_mail({
+                utils.send_notif_mail({
                     'name' : 'reactivation',
                     'destinations': [user.email],
                     'subject': 'account reactivation'
@@ -2112,7 +2057,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     let owner = await utils.mongo_users().findOne({uid:project.owner});
     let msg_destinations = [user.email, owner.email];
     try {
-        await send_notif_mail({
+        await utils.send_notif_mail({
             'name': 'add_to_project',
             'destinations': msg_destinations,
             'subject': 'account added to project : ' + project.id
