@@ -96,18 +96,16 @@ async function gen_mail_opt(options, variables)
     return mailOptions;
 }
 
-var send_notif = async function(mailOptions, _fid, errors) {
+async function send_notif_mail(options, variables) {
     if(notif.mailSet()) {
         try {
+            let mailOptions = await gen_mail_opt(options, variables);
             await notif.sendUser(mailOptions);
         } catch(err) {
-            logger.error('send_notif error', err);
+            logger.error('send notif mail error', err);
         }
-        return errors;
-    } else {
-        return errors;
     }
-};
+}
 
 var create_group = async function(group_name, owner_name){
     let mingid = await utils.getGroupAvailableId();
@@ -867,7 +865,7 @@ router.delete_user = async function(user, action_owner_id, message){
     }
 
     try {
-        var mailOptions = await gen_mail_opt({
+        await send_notif_mail({
             'name': 'deletion',
             'destinations': msg_destinations,
             'subject': 'account deletion: ' + user.uid
@@ -900,14 +898,6 @@ router.delete_user = async function(user, action_owner_id, message){
     }
 
     await utils.freeUserId(user.uidnumber);
-    if(notif.mailSet()) {
-        try {
-            // eslint-disable-next-line no-unused-vars
-            await notif.sendUser(mailOptions);
-        } catch(error) {
-            logger.error(error);
-        }
-    }
     return true;
 };
 
@@ -1043,7 +1033,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     notif.add(user.email, async function(){
         try {
-            var mailOptions = await gen_mail_opt({
+            await send_notif_mail({
                 'name' : 'activation',
                 'destinations': [user.email],
                 'subject': 'account activation'
@@ -1072,14 +1062,15 @@ router.get('/user/:id/activate', async function(req, res) {
             return plugin_call(plugin_info, user.uid, user, session_user.uid);
             // eslint-disable-next-line no-unused-vars
         })).then(function(results){
-            return send_notif(mailOptions, fid, []);
+            res.send({msg: 'Activation in progress', fid: fid, error: []});
+            res.end();
+            return;
         }, function(err){
-            return send_notif(mailOptions, fid, err);
-        }).then(function(errs){
             res.send({msg: 'Activation in progress', fid: fid, error: errs});
             res.end();
             return;
         });
+
     });
 });
 
@@ -1155,7 +1146,7 @@ router.get('/user/:id/confirm', async function(req, res) {
 
             let link = GENERAL_CONFIG.url + encodeURI('/user/'+user.uid);
             try {
-                var mailOptions = await gen_mail_opt({
+                await send_notif_mail({
                     'name': 'registration',
                     'destinations': [GENERAL_CONFIG.accounts],
                     'subject': 'account registration: '+uid
@@ -1168,13 +1159,6 @@ router.get('/user/:id/confirm', async function(req, res) {
             }
 
             await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
-            if(notif.mailSet()) {
-                try {
-                    await notif.sendUser(mailOptions);
-                } catch(err) {
-                    logger.error('notif failed', err);
-                }
-            }
             res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
             res.end();
         }
@@ -1315,7 +1299,7 @@ router.post('/user/:id', async function(req, res) {
     let uid = req.params.id;
     let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     try {
-        var mailOptions = await gen_mail_opt({
+        await send_notif_mail({
             'name' : 'confirmation',
             'destinations': [user.email],
             'subject': 'account confirmation'
@@ -1327,13 +1311,6 @@ router.post('/user/:id', async function(req, res) {
         logger.error(error);
     }
 
-    if(notif.mailSet()) {
-        try {
-            await notif.sendUser(mailOptions);
-        } catch(error) {
-            logger.error(error);
-        }
-    }
     res.send({'status': 0, 'msg': 'Could not send an email, please contact the support.'});
     res.end();
     return;
@@ -1518,7 +1495,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     let link = CONFIG.general.url + encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
 
     try {
-        var mailOptions = await gen_mail_opt({
+        await send_notif_mail({
             'name' : 'password_reset_request',
             'destinations': [user.email],
             'subject': 'account password reset request'
@@ -1533,11 +1510,6 @@ router.get('/user/:id/passwordreset', async function(req, res){
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
 
     if(notif.mailSet()) {
-        try {
-            await notif.sendUser(mailOptions);
-        } catch(error) {
-            logger.error(error);
-        }
         res.send({message: 'Password reset requested, check your inbox for instructions to reset your password.'});
     }
     else {
@@ -1587,7 +1559,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
 
         // Now send email
         try {
-            var mailOptions = await gen_mail_opt({
+            await send_notif_mail({
                 'name' : 'password_reset',
                 'destinations': [user.email],
                 'subject': 'account password reset'
@@ -1602,11 +1574,6 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
 
         if(notif.mailSet()) {
-            try {
-                await notif.sendUser(mailOptions);
-            } catch(error) {
-                logger.error(error);
-            }
             res.redirect(GENERAL_CONFIG.url+'/manager2/passwordresetconfirm');
             res.end();
         }
@@ -1709,7 +1676,7 @@ router.get('/user/:id/renew', async function(req, res){
         notif.add(user.email, function(){
 
             try {
-                var mailOptions = gen_mail_opt({
+                send_notif_mail({
                     'name' : 'reactivation',
                     'destinations': [user.email],
                     'subject': 'account reactivation'
@@ -1736,18 +1703,16 @@ router.get('/user/:id/renew', async function(req, res){
                 return plugin_call(plugin_info, user.uid, user, session_user.uid);
                 // eslint-disable-next-line no-unused-vars
             })).then(function(results){
-                return send_notif(mailOptions, fid, []);
+                res.send({message: 'Activation in progress', fid: fid, error: []});
+                res.end();
+                return;
             }, function(err){
-                return send_notif(mailOptions, fid, err);
-            }).then(function(errs){
                 res.send({message: 'Activation in progress', fid: fid, error: errs});
                 res.end();
                 return;
             });
         });
-
         return;
-
     }
     else {
         res.status(401).send('Not authorized');
@@ -2147,7 +2112,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     let owner = await utils.mongo_users().findOne({uid:project.owner});
     let msg_destinations = [user.email, owner.email];
     try {
-        var mailOptions = await gen_mail_opt({
+        await send_notif_mail({
             'name': 'add_to_project',
             'destinations': msg_destinations,
             'subject': 'account added to project : ' + project.id
@@ -2160,15 +2125,6 @@ router.post('/user/:id/project/:project', async function(req, res){
         });
     } catch(error) {
         logger.error(error);
-    }
-
-    if(notif.mailSet()) {
-        try {
-            // eslint-disable-next-line no-unused-vars
-            await notif.sendUser(mailOptions);
-        } catch(error) {
-            logger.error(error);
-        }
     }
 
     res.send({message: 'User added to project', fid: fid});
