@@ -7,7 +7,6 @@ var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
 
 // var cookieParser = require('cookie-parser');
 // var goldap = require('../routes/goldap.js');
@@ -378,35 +377,22 @@ router.post('/ask/project', async function(req, res){
     // todo: find a way to use cc
     let msg_destinations =  [GENERAL_CONFIG.accounts, user.email];
 
-    let msg_ask = CONFIG.message.ask_project.join('\n')
-        .replace(/#UID#/g, user.uid)
-        .replace(/#NAME#/g, req.body.id)
-        .replace(/#SIZE#/g, req.body.size)
-        .replace(/#ORGA#/g, req.body.orga)
-        .replace(/#DESC#/g, req.body.description)
-        + '\n' + CONFIG.message.footer.join('\n');
-    let msg_ask_html = CONFIG.message.ask_project_html.join('')
-        .replace(/#UID#/g, user.uid)
-        .replace(/#NAME#/g, req.body.id)
-        .replace(/#SIZE#/g, req.body.size)
-        .replace(/#ORGA#/g, req.body.orga)
-        .replace(/#DESC#/g, req.body.description)
-        + '<br/>' + CONFIG.message.footer_html.join('<br/>');
-
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations:  msg_destinations, // list of receivers
-        subject: 'Project creation request: ' + req.body.id, // Subject line
-        message: msg_ask, // plaintext body
-        html_message: msg_ask_html // html body
-    };
-
-    // logger.info(mailOptions);
-
-    if(notif.mailSet()) {
-        // eslint-disable-next-line no-unused-vars
-        await notif.sendUser(mailOptions);
+    try {
+        await utils.send_notif_mail({
+            'name': 'ask_project',
+            'destinations': msg_destinations,
+            'subject': 'Project creation request: ' + req.body.id
+        }, {
+            '#UID#':  user.uid,
+            '#NAME#': req.body.id,
+            '#SIZE#': req.body.size,
+            '#ORGA#': req.body.orga,
+            '#DESC#': req.body.description
+        });
+    } catch(error) {
+        logger.error(error);
     }
+
 
     res.end();
     return;
