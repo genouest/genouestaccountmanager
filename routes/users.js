@@ -2065,7 +2065,7 @@ router.post('/user/:id/project/:project', async function(req, res){
         await utils.send_notif_mail({
             'name': 'add_to_project',
             'destinations': msg_destinations,
-            'subject': 'account added to project : ' + project.id
+            'subject': 'account ' + user.uid + ' added to project : ' + project.id
         }, {
             '#UID#': user.uid,
             '#NAME#': project.id,

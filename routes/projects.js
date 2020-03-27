@@ -6,13 +6,10 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-const MAILER = CONFIG.general.mailer;
-
 // var cookieParser = require('cookie-parser');
 // var goldap = require('../routes/goldap.js');
 
 const filer = require('../routes/file.js');
-var notif = require('../routes/notif_'+MAILER+'.js');
 var utils = require('./utils');
 
 router.get('/project', async function(req, res){
