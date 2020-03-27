@@ -2054,8 +2054,13 @@ router.post('/user/:id/project/:project', async function(req, res){
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
 
     let project = await utils.mongo_projects().findOne({id:newproject});
+
+    let msg_destinations = [user.email];
     let owner = await utils.mongo_users().findOne({uid:project.owner});
-    let msg_destinations = [user.email, owner.email];
+    if (owner) {
+        msg_destinations.push(owner.email);
+    }
+
     try {
         await utils.send_notif_mail({
             'name': 'add_to_project',
