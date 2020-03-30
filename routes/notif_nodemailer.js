@@ -39,9 +39,9 @@ function verify_transport () {
 
 module.exports = {
 
-    mailSet: function(){
+    mailSet: async function(){
         if (!mail_verified) {
-            verify_transport();
+            await verify_transport();
         }
         return mail_set;
     },
