@@ -43,7 +43,7 @@ utils.init_db().then(async () => {
         }
     }
     for(let i=0;i<notifs.length;i++){
-        let project = project[i];
+        let project = notif[i];
         console.log('Project will expire: '+project.id);
 
         try {
