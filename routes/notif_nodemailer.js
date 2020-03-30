@@ -23,9 +23,9 @@ if(CONFIG.nodemailer){
 }
 
 
-function verify_transport () {
+async function verify_transport () {
     // eslint-disable-next-line no-unused-vars
-    transporter.verify(function(error, success) {
+    await transporter.verify(function(error, success) {
         if (error) {
             logger.error(error);
         } else {
