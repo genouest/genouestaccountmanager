@@ -251,6 +251,18 @@
       "<p>#LINK#</p>",
       "<hr>"
     ],
+    "expired": [
+        "User #UID# has expired, updating account"
+    ],
+    "expired_html": [
+        "<p>User #UID# has expired, updating account</p>"
+    ],
+    "project_expiration": [
+        "Project quota for #NAME# will expire at #DATE#"
+    ],
+    "project_expiration_html": [
+        "<p>Project quota for #NAME# will expire at #DATE#</p>"
+    ],
     "deletion": [
         "Your account #UID# have been deleted by #USER#",
         "Because:",

@@ -38,40 +38,31 @@ utils.init_db().then(async () => {
         let project = projects[i];
         if(project.expire !== undefined && project.expire!=null) {
             if(project.expire < new Date().getTime() + 1000*3600*24*30) {
-                var msg = 'Project '+project.id+' will expire at '+new Date(project.expire);
-                notifs.push(msg);
+                notifs.push(project);
             }
         }
     }
     for(let i=0;i<notifs.length;i++){
-        let notification = notifs[i];
-        let mailOptions = {
-            origin: MAIL_CONFIG.origin, // sender address
-            destinations: [CONFIG.general.accounts], // list of receivers
-            subject: 'Project expiration', // Subject line
-            message: notification, // plaintext body
-            html_message: notification // html body
-        };
-        if( notif.mailSet()) {
-            // eslint-disable-next-line no-unused-vars
-            try {
-                await notif.sendUser(mailOptions);
-            } catch(error) {
-                console.log(error);
-            }
-            mail_sent++;
-            if(mail_sent == notifs.length) {
-                process.exit(0);
-            }
-        }
-        else {
-            console.log(notif);
-            mail_sent++;
-            if(mail_sent == notifs.length) {
-                process.exit(0);
-            }
-        }
+        let project = project[i];
+        console.log('Project will expire: '+project.id);
 
+        try {
+            await utils.send_notif_mail({
+                'name': 'project_expiration',
+                'destinations': [CONFIG.general.support], // maybe add owner mail too ...
+                'subject': 'Project expiration ' + project.id
+            }, {
+                '#NAME#': project.id,
+                '#DATE#': new Date(project.expire)
+            });
+
+        } catch(error) {
+            console.log(error);
+        }
+        mail_sent++;
+        if(mail_sent == notifs.length) {
+            process.exit(0);
+        }
     }
 
     if(mail_sent == notifs.length) {
