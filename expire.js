@@ -57,7 +57,7 @@ utils.init_db().then(async () => {
                 await utils.send_notif_mail({
                     'name': 'expired',
                     destinations: [CONFIG.general.support],
-                    subject: 'account expire: ' + user.uid
+                    subject: 'account expiration: ' + user.uid
                 }, {
                     '#UID#': user.uid
                 });
