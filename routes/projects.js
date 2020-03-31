@@ -275,7 +275,7 @@ router.post('/project/:id/request', async function(req, res){
         await utils.send_notif_mail({
             'name': 'ask_project_user',
             'destinations': [GENERAL_CONFIG.accounts],
-            'subject': 'Project ' + req.body.request + ' user request: ' + req.body.id
+            'subject': 'Project ' + req.body.request + ' user request: ' + req.body.user
         }, {
             '#UID#':  user.uid,
             '#NAME#': project.id,
