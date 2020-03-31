@@ -269,7 +269,25 @@ router.post('/project/:id/request', async function(req, res){
         'remove_requests': project.remove_requests
     }};
     await utils.mongo_projects().updateOne({'id': req.params.id}, new_project);
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.body.request + ' for user ' + req.body.uid + ' in project ' + project.id , 'logs': []});
+    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.body.request + ' for user ' + req.body.user + ' in project ' + project.id , 'logs': []});
+
+    try {
+        await utils.send_notif_mail({
+            'name': 'ask_project_user',
+            'destinations': [GENERAL_CONFIG.accounts],
+            'subject': 'Project ' + req.body.request + ' user request: ' + req.body.id
+        }, {
+            '#UID#':  user.uid,
+            '#NAME#': project.id,
+            '#USER#': req.body.user,
+            '#REQUEST#': req.body.request
+
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+
+
     res.send({'message': 'Request sent'});
 });
 

@@ -218,18 +218,24 @@
         "<p>The project quota is #SIZE#, and the path is #PATH#</p>"
     ],
     "ask_project": [
-      "#UID# have asked for a new project '#NAME#' in My",
+      "#UID# has requested a new project '#NAME#' in My",
       "Size needed: #SIZE# GB",
       "Entity: #ORGA#",
       "Description: #DESC#",
-      "Please consider it, and keep #UID# inform"
+      "Please review it, and keep #UID# inform"
     ],
     "ask_project_html": [
-      "<p>#UID# have asked for a new project '#NAME#' in My</p>",
+      "<p>#UID# has requested a new project '#NAME#' in My</p>",
       "<p>Size needed: #SIZE# GB</p>",
       "<p>Entity: #ORGA#</p>",
       "<p>Description: #DESC#</p>",
-      "<p>Please consider it, and keep #UID# inform</p>"
+      "<p>Please review it, and keep #UID# inform</p>"
+    ],
+    "ask_project_user": [
+      "#UID# has asked to #REQUEST# #USER# to project '#NAME#' in My",
+     ],
+    "ask_project_user_html": [
+      "<p>#UID# has asked to #REQUEST# #USER# to project '#NAME#' in My</p>",
     ],
     "footer": [
       "this is from MY"
