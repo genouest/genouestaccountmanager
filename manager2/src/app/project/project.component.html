@@ -107,7 +107,7 @@
           <div class="col-sm-2">
             <label for="remove_user">Remove project member</label>
             <select id="remove_user"  [ngModelOptions]="{standalone: true}" [(ngModel)]="remove_user" class="form-control">
-              <option *ngFor="let user of users" [value]="user">{{user.uid}}</option>
+              <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
             </select>
           </div>
           <div class="col-sm-3">
