@@ -457,7 +457,6 @@ async function gen_mail_opt (options, variables)
     let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
 
     let message = 'Email message not found';
-    let html_message = '<h2>Email message not found</h2>';
 
     //find message
     if (name && CONFIG.message[name]) {
@@ -465,10 +464,10 @@ async function gen_mail_opt (options, variables)
     } else {
         logger.error('Email Message not found!');
     }
+
+    let html_message = message;
     if (CONFIG.message[name + '_html']) {
         html_message = CONFIG.message[name + '_html'].join('');
-    } else {
-        html_message = message;
     }
 
     // replace variable in message
