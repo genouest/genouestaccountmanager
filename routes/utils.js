@@ -442,8 +442,9 @@ function get_mail_config () {
     var MAIL_CONFIG = {};
     // todo: more and more ugly init...
     if (CONFIG[MAILER]) { MAIL_CONFIG = CONFIG[MAILER]; }
-    // todo: find a cleaner way to allow registration if no mail are configured
-    if (!MAIL_CONFIG.origin) { MAIL_CONFIG.origin = 'nomail@nomail.org'; }
+    if (!MAIL_CONFIG.origin) {
+        logger.error('No email origin are configured !');
+    }
     return MAIL_CONFIG;
 }
 
@@ -455,9 +456,16 @@ async function gen_mail_opt (options, variables)
     let destinations = options['destinations'];
     let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
 
+    let message = 'Email message not found';
+    let html_message = '<h2>Email message not found</h2>';
+
     //find message
-    let message = CONFIG.message[name].join('\n');
-    let html_message = CONFIG.message[name + '_html'].join('');
+    if (name && CONFIG.message[name]) {
+        message = CONFIG.message[name].join('\n');
+        html_message = CONFIG.message[name + '_html'].join('');
+    } else {
+        logger.error('Email Message not found!');
+    }
 
     // replace variable in message
     for (let key in variables) {
