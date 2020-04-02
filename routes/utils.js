@@ -462,9 +462,13 @@ async function gen_mail_opt (options, variables)
     //find message
     if (name && CONFIG.message[name]) {
         message = CONFIG.message[name].join('\n');
-        html_message = CONFIG.message[name + '_html'].join('');
     } else {
         logger.error('Email Message not found!');
+    }
+    if (CONFIG.message[name + '_html']) {
+        html_message = CONFIG.message[name + '_html'].join('');
+    } else {
+        html_message = message;
     }
 
     // replace variable in message
