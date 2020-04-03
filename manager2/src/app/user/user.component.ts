@@ -135,6 +135,8 @@ export class UserComponent implements OnInit {
         this.groups = []
         this.note = ''
         this.err_note = ''
+        this.password1  = ''
+        this.password2 = ''
 
     }
 
