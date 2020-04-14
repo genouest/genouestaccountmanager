@@ -1011,7 +1011,7 @@ router.get('/user/:id/activate', async function(req, res) {
             res.end();
             return;
         }, function(err){
-            res.send({msg: 'Activation in progress', fid: fid, error: errs});
+            res.send({msg: 'Activation in progress', fid: fid, error: err});
             res.end();
             return;
         });
@@ -1652,7 +1652,7 @@ router.get('/user/:id/renew', async function(req, res){
                 res.end();
                 return;
             }, function(err){
-                res.send({message: 'Activation in progress', fid: fid, error: errs});
+                res.send({message: 'Activation in progress', fid: fid, error: err});
                 res.end();
                 return;
             });

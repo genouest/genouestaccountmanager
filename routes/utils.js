@@ -473,10 +473,10 @@ async function gen_mail_opt (options, variables)
     // replace variable in message
     for (let key in variables) {
         let value = variables[key];
-        let re = new RegExp(key,"g");
+        let re = new RegExp(key,'g');
         message = message.replace(re, value);
         html_message = html_message.replace(re, value);
-    };
+    }
 
     // always add footer
     message = message + '\n' + CONFIG.message.footer.join('\n');
