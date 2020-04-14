@@ -251,6 +251,14 @@
         "<tr><td>User:</td><td>#DBUSER#</td></tr>",
         "<tr><td>Password:</td><td>#DBPASSWORD#</td></tr></table>"
     ],
+    "mail_token": [
+        "You requested a temporary token to login to application. This token will be valid for 10 minutes only.",
+        "  Token: -- #TOKEN# -- "
+    ],
+    "mail_token_html": [
+        "<p>You requested a temporary token to login to application. This token will be valid for 10 minutes only.</p>",
+        "  Token: -- <b>#TOKEN#</b> -- "
+    ],
     "footer": [
       "this is from MY"
     ],

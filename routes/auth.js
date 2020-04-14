@@ -17,7 +17,6 @@ const APP_ID= CONFIG.general.url;
 var GENERAL_CONFIG = CONFIG.general;
 
 const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -58,14 +57,7 @@ router.get('/mail/auth/:id', async function(req, res) {
     if(!user) {
         return res.status(404).send('User not found');
     }
-    let msg_token = 'You requested a temporary token to login to application. This token will be valid for 10 minutes only.\t\r\n';
-    msg_token += '  Token: -- ' + password + ' -- \n';
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations: [user.email], // list of receivers
-        subject: 'Authentication mail token request', // Subject line
-        message: msg_token, // plaintext body
-    };
+
     let expire = new Date().getTime() + 60*10*1000;
     req.session.mail_token = {'token': password, 'expire': expire, 'user': user._id};
     let mail_token = {'token': password, 'expire': expire, 'user': user._id};
@@ -76,7 +68,13 @@ router.get('/mail/auth/:id', async function(req, res) {
     );
 
     try {
-        await notif.sendUser(mailOptions);
+        await utils.send_notif_mail({
+            'name': 'mail_token',
+            'destinations': [user.email],
+            'subject': 'Authentication mail token request'
+        }, {
+            '#TOKEN#': password
+        });
     } catch(err) {
         logger.error('failed to send notif', err);
         return res.send({'status': false});
