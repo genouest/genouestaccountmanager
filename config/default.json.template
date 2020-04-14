@@ -311,10 +311,10 @@
       "<p>Please review it, and keep #UID# inform</p>"
     ],
     "ask_project_user": [
-      "#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My",
-     ],
+      "#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My"
+    ],
     "ask_project_user_html": [
-      "<p>#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My</p>",
+      "<p>#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My</p>"
     ],
     "database_creation": [
         "The MySQL database you requested (#DBNAME#, owned by #owner#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
