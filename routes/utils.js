@@ -1,4 +1,5 @@
 var Promise = require('promise');
+const htmlToText = require('html-to-text');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
@@ -473,9 +474,17 @@ async function gen_mail_opt (options, variables)
     // replace variable in message
     for (let key in variables) {
         let value = variables[key];
+        let html_value = value;
         let re = new RegExp(key,'g');
+
+        // check if there is html tag in variable
+        let re_html = /(<([^>]+)>)/;
+        if (value.match(re_html)) {
+            value = htmlToText.fromString(value);
+        }
+
         message = message.replace(re, value);
-        html_message = html_message.replace(re, value);
+        html_message = html_message.replace(re, html_value);
     }
 
     // always add footer
