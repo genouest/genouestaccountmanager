@@ -25,15 +25,16 @@ if(CONFIG.nodemailer){
 
 async function verify_transport () {
     // eslint-disable-next-line no-unused-vars
-    await transporter.verify(function(error, success) {
-        if (error) {
-            logger.error(error);
-        } else {
-            mail_set =true;
-            logger.info('Smtp Server is ready to take our messages');
-        }
-        mail_verified = true;
-    });
+    try {
+        await transporter.verify();
+        mail_set =true;
+        logger.info('Smtp Server is ready to take our messages');
+    }
+    catch (error) {
+        logger.error(error);
+    }
+    mail_verified = true;
+
 }
 
 
