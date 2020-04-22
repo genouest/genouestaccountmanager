@@ -457,18 +457,21 @@ async function gen_mail_opt (options, variables)
     let destinations = options['destinations'];
     let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
 
-    let message = 'Email message not found';
-
     //find message
+    let message = undefined;
     if (name && CONFIG.message[name]) {
         message = CONFIG.message[name].join('\n');
-    } else {
-        logger.error('Email Message not found!');
+    }
+    let html_message = message;
+    if (name && CONFIG.message[name + '_html']) {
+        html_message = CONFIG.message[name + '_html'].join('');
     }
 
-    let html_message = message;
-    if (CONFIG.message[name + '_html']) {
-        html_message = CONFIG.message[name + '_html'].join('');
+    if (!html_message) { // if html_message is not set then message is not set too
+        logger.error('Email Message not found!');
+        return;
+    } else if (!message) { // if html_message is set and message is not set too
+        message = htmlToText.fromString(html_message);
     }
 
     // replace variable in message
@@ -511,7 +514,9 @@ async function send_notif_mail (options, variables) {
     if(notif.mailSet()) {
         try {
             let mailOptions = await gen_mail_opt(options, variables);
-            await notif.sendUser(mailOptions);
+            if (mailOptions) {
+                await notif.sendUser(mailOptions);
+            }
         } catch(err) {
             logger.error('send notif mail error', err);
         }
