@@ -816,6 +816,7 @@ router.delete_user = async function(user, action_owner_id, message){
             'subject': 'account deletion: ' + user.uid
         }, {
             '#UID#': user.uid,
+            '#USER#': action_owner_id,
             '#MSG#': mail_message
         });
     } catch(error) {
