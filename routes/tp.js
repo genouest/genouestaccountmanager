@@ -6,13 +6,9 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
-
 // var cookieParser = require('cookie-parser')
 
 var goldap = require('../routes/goldap.js');
-var notif = require('../routes/notif_'+MAILER+'.js');
 var fdbs = require('../routes/database.js');
 var fwebs = require('../routes/web.js');
 var fusers = require('../routes/users.js');
@@ -146,7 +142,6 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
     let group = (CONFIG.general.disable_user_group) ? users[0].secondarygroups[0] : users[0].group;
     let from = new Date(from_date);
     let to = new Date(to_date);
-    let msg = 'TP account credentials from ' + from.toDateString() + ' to ' + to.toDateString() + '\n\n';
 
     let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
     for(let i=0;i<users.length;i++){
