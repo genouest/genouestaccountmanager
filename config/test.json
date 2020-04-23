@@ -259,6 +259,30 @@
         "<p>You requested a temporary token to login to application. This token will be valid for 10 minutes only.</p>",
         "  Token: -- <b>#TOKEN#</b> -- "
     ],
+    "tps_password": [
+        'TP account credentials from #FROMDATE# to #TODATE#',
+        'Accounts will remain available for #EXPIRATION# extra days for data access',
+        '#CREDENTIALS#',
+        'Users are in the group #GROUP#',
+        'Users can create an SSH key at #URL# in SSH Keys section',
+        'In case of issue, you can contact us at #SUPPORT#'
+    ],
+    "tps_password_html": [
+        '<h2>Date</h2>',
+        '<table border="0" cellpadding="0" cellspacing="15" align="left"><thead><tr><th align="left" valign="top">Start date</th><th align="left" valign="top">End date</th></tr></thead>',
+        '<tbody><tr><td align="left" valign="top">#FROMDATE#</td><td align="left" valign="top">#TODATE#</td></tr></tbody></table>',
+        '<p>Accounts will remain available for <b>#EXPIRATION# extra days </b>for data access</p>',
+        '<hr>',
+        '<h2>Credentials</h2>',
+        '#CREDENTIALS#',
+        '<hr>',
+        '<p>Users are in the group <strong>#GROUP#</strong></p>',
+        '<hr>',
+        '<h2>Access</h2>',
+        '<p>Users can create an SSH key at #URL# in SSH Keys section</p>',
+        '<hr>',
+        '<p>In case of issue, you can contact us at #SUPPORT#</p>'
+    ],
     "footer": [
       "this is from MY"
     ],

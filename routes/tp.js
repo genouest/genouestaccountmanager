@@ -147,41 +147,32 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
     let from = new Date(from_date);
     let to = new Date(to_date);
     let msg = 'TP account credentials from ' + from.toDateString() + ' to ' + to.toDateString() + '\n\n';
-    let msg_html = '<h2>Date</h2>';
-    msg_html += '<table border="0" cellpadding="0" cellspacing="15" align="left"><thead><tr><th align="left" valign="top">Start date</th><th align="left" valign="top">End date</th></tr></thead>';
-    msg_html += '<tbody><tr><td align="left" valign="top">' + from.toDateString()+ '</td><td align="left" valign="top">' + to.toDateString()+ '</td></tr></tbody></table>';
-    msg_html += '<p>Accounts will remain available for <b>' + CONFIG.tp.extra_expiration + ' extra days </b>for data access</p>';
-    msg_html += '<hr>';
-    msg_html += '<h2>Credentials</h2>';
-    msg_html += '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
 
+    let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
     for(let i=0;i<users.length;i++){
-        msg += users[i].uid + ' / ' + users[i].password + ', fake email: ' + users[i].email + '\n';
-        msg_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>';
+        credentials_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>';
     }
-    msg_html += '</tbody></table>';
-    msg += 'New TP group: ' + group + '\n';
-    msg_html += '<hr><p>Users are in the group <strong>' + group + '</strong></p>';
-    msg += 'Users can create an SSH key at ' + CONFIG.general.url + ' in SSH Keys section\n';
-    msg_html += '<hr>';
-    msg_html += '<h2>Access</h2>';
-    msg_html += '<p>Users can create an SSH key at ' + CONFIG.general.url + ' in SSH Keys section</p>';
-    msg += 'Accounts will remain available for ' + CONFIG.tp.extra_expiration + ' extra days for data access.\n\n';
-    msg += 'In case of issue, you can contact us at ' + CONFIG.general.support + '\n\n';
-    msg_html += '<hr>';
-    msg_html += '<p>In case of issue, you can contact us at ' + CONFIG.general.support + '</p>';
+    credentials_html += '</tbody></table>';
 
-    let user_owner = await utils.mongo_users().findOne({'uid': owner});
-    if( notif.mailSet()){
-        let mailOptions = {
-            origin: MAIL_CONFIG.origin, // sender address
-            destinations: [user_owner.email, CONFIG.general.accounts], // list of receivers
-            subject: '[TP accounts reservation] ' + owner,
-            message: msg,
-            html_message: msg_html
-        };
-        await notif.sendUser(mailOptions);
+    try {
+        await utils.send_notif_mail({
+            'name': 'tps_password',
+            'destinations': [user_owner.email, CONFIG.general.accounts],
+            'subject': '[TP accounts reservation] ' + owner
+        }, {
+            '#FROMDATE#':  from.toDateString(),
+            '#TODATE#':  to.toDateString(),
+            '#EXPIRATION#': CONFIG.tp.extra_expiration,
+            '#CREDENTIALS#': credentials_html, // should be converted by utils.send_notif_mail in plain text for text mail
+            '#GROUP#': group,
+            '#URL#': CONFIG.general.url,
+            '#SUPPORT#': CONFIG.general.support
+
+        });
+    } catch(error) {
+        logger.error(error);
     }
+
     return users;
 };
 
