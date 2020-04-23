@@ -149,6 +149,7 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
     }
     credentials_html += '</tbody></table>';
 
+    let user_owner = await utils.mongo_users().findOne({'uid': owner});
     try {
         await utils.send_notif_mail({
             'name': 'tps_password',
