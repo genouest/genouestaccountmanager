@@ -482,7 +482,7 @@ async function gen_mail_opt (options, variables)
 
         // check if there is html tag in variable
         let re_html = /(<([^>]+)>)/;
-        if (value.match(re_html)) {
+        if (value.toString().match(re_html)) {
             value = htmlToText.fromString(value);
         }
 
