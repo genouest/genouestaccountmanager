@@ -32,7 +32,6 @@ utils.init_db().then(async () => {
     utils.load_plugins();
     let projects = await utils.mongo_projects().find({}).toArray();
     // Find project expiring in less then 2 month
-    let mail_sent = 0;
     let notifs = [];
     for(let i=0;i<projects.length;i++){
         let project = projects[i];
@@ -59,14 +58,7 @@ utils.init_db().then(async () => {
         } catch(error) {
             console.log(error);
         }
-        mail_sent++;
-        if(mail_sent == notifs.length) {
-            process.exit(0);
-        }
-    }
 
-    if(mail_sent == notifs.length) {
-        process.exit(0);
     }
 
 });
