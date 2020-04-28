@@ -500,7 +500,7 @@ async function gen_mail_opt (options, variables)
     if (CONFIG.message.footer_html) {
         html_footer = CONFIG.message.footer_html.join('<br/>');
         if (! CONFIG.message.footer) { // if there is only html value
-             footer = htmlToText.fromString(html_footer);
+            footer = htmlToText.fromString(html_footer);
         }
     }
 

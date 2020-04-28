@@ -977,48 +977,48 @@ router.get('/user/:id/activate', async function(req, res) {
 
     await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
-        try {
-            await utils.send_notif_mail({
-                'name' : 'activation',
-                'destinations': [user.email],
-                'subject': 'account activation'
-            }, {
-                '#UID#':  user.uid,
-                '#PASSWORD#': user.password,
-                '#IP#': user.ip
-            });
-        } catch(error) {
-            logger.error(error);
-        }
+    try {
+        await utils.send_notif_mail({
+            'name' : 'activation',
+            'destinations': [user.email],
+            'subject': 'account activation'
+        }, {
+            '#UID#':  user.uid,
+            '#PASSWORD#': user.password,
+            '#IP#': user.ip
+        });
+    } catch(error) {
+        logger.error(error);
+    }
 
-        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+    await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
-        let plugin_call = function(plugin_info, userId, data, adminId){
-            // eslint-disable-next-line no-unused-vars
-            return new Promise(function (resolve, reject){
-                let plugins_modules = utils.plugins_modules();
-                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
+    let plugin_call = function(plugin_info, userId, data, adminId){
+        // eslint-disable-next-line no-unused-vars
+        return new Promise(function (resolve, reject){
+            let plugins_modules = utils.plugins_modules();
+            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                resolve(true);
             });
-        };
-        let plugins_info = utils.plugins_info();
-        Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-            // eslint-disable-next-line no-unused-vars
-        })).then(function(results){
-            notif.add(user.email, function() {
-                res.send({msg: 'Activation in progress', fid: fid, error: []});
-                res.end();
-            });
-            return;
-        }, function(err){
-            notif.add(user.email, function() {
+        });
+    };
+    let plugins_info = utils.plugins_info();
+    Promise.all(plugins_info.map(function(plugin_info){
+        return plugin_call(plugin_info, user.uid, user, session_user.uid);
+        // eslint-disable-next-line no-unused-vars
+    })).then(function(results){
+        notif.add(user.email, function() {
+            res.send({msg: 'Activation in progress', fid: fid, error: []});
+            res.end();
+        });
+        return;
+    }, function(err){
+        notif.add(user.email, function() {
             res.send({msg: 'Activation Error', fid: fid, error: err});
             res.end();
-            });
-            return;
         });
+        return;
+    });
 
 
 });
@@ -1624,46 +1624,46 @@ router.get('/user/:id/renew', async function(req, res){
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
 
-            try {
-                await utils.send_notif_mail({
-                    'name' : 'reactivation',
-                    'destinations': [user.email],
-                    'subject': 'account reactivation'
-                }, {
-                    '#UID#':  user.uid,
-                    '#PASSWORD#': user.password,
-                    '#IP#': user.ip
-                });
-            } catch(error) {
-                logger.error(error);
-            }
-
-            let plugin_call = function(plugin_info, userId, data, adminId){
-                // eslint-disable-next-line no-unused-vars
-                return new Promise(function (resolve, reject){
-                    let plugins_modules = utils.plugins_modules();
-                    plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                        resolve(true);
-                    });
-                });
-            };
-            let plugins_info = utils.plugins_info();
-            Promise.all(plugins_info.map(function(plugin_info){
-                return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                // eslint-disable-next-line no-unused-vars
-            })).then(function(results){
-                notif.add(user.email, function() {
-                    res.send({message: 'Activation in progress', fid: fid, error: []});
-                    res.end();
-                });
-                return;
-            }, function(err){
-                notif.add(user.email, function() {
-                    res.send({message: 'Activation Error', fid: fid, error: err});
-                    res.end();
-                });
-                return;
+        try {
+            await utils.send_notif_mail({
+                'name' : 'reactivation',
+                'destinations': [user.email],
+                'subject': 'account reactivation'
+            }, {
+                '#UID#':  user.uid,
+                '#PASSWORD#': user.password,
+                '#IP#': user.ip
             });
+        } catch(error) {
+            logger.error(error);
+        }
+
+        let plugin_call = function(plugin_info, userId, data, adminId){
+            // eslint-disable-next-line no-unused-vars
+            return new Promise(function (resolve, reject){
+                let plugins_modules = utils.plugins_modules();
+                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                    resolve(true);
+                });
+            });
+        };
+        let plugins_info = utils.plugins_info();
+        Promise.all(plugins_info.map(function(plugin_info){
+            return plugin_call(plugin_info, user.uid, user, session_user.uid);
+            // eslint-disable-next-line no-unused-vars
+        })).then(function(results){
+            notif.add(user.email, function() {
+                res.send({message: 'Activation in progress', fid: fid, error: []});
+                res.end();
+            });
+            return;
+        }, function(err){
+            notif.add(user.email, function() {
+                res.send({message: 'Activation Error', fid: fid, error: err});
+                res.end();
+            });
+            return;
+        });
 
         return;
     }
