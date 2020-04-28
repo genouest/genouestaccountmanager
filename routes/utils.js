@@ -490,9 +490,23 @@ async function gen_mail_opt (options, variables)
         html_message = html_message.replace(re, html_value);
     }
 
+    // check footer
+    let footer = 'From My';
+    let html_footer = 'From My';
+
+    if (CONFIG.message.footer) {
+        footer = CONFIG.message.footer.join('\n');
+    }
+    if (CONFIG.message.footer_html) {
+        html_footer = CONFIG.message.footer_html.join('<br/>');
+        if (! CONFIG.message.footer) { // if there is only html value
+             footer = htmlToText.fromString(html_footer);
+        }
+    }
+
     // always add footer
-    message = message + '\n' + CONFIG.message.footer.join('\n');
-    html_message = html_message + '<br/>' + CONFIG.message.footer_html.join('<br/>');
+    message = message + '\n' + footer;
+    html_message = html_message + '<br/>' + html_footer;
 
     // set mailOptions
     let mailOptions = {
