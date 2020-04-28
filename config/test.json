@@ -179,10 +179,10 @@
         "<p>User #UID# has expired, updating account</p>"
     ],
     "project_expiration": [
-        "Project quota for #NAME# will expire at #DATE#"
+        "Project for #NAME# will expire at #DATE#"
     ],
     "project_expiration_html": [
-        "<p>Project quota for #NAME# will expire at #DATE#</p>"
+        "<p>Project for #NAME# will expire at #DATE#</p>"
     ],
     "deletion": [
         "Your account #UID# have been deleted by #USER#",
