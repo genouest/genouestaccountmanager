@@ -263,13 +263,13 @@
     "project_expiration_html": [
         "<p>Project for #NAME# will expire at #DATE#</p>"
     ],
-    "deletion": [
+    "user_deletion": [
         "Your account #UID# have been deleted by #USER#",
         "Because:",
         "",
         "#MSG#"
     ],
-    "deletion_html": [
+    "user_deletion_html": [
       "<p>Your account #UID# have been deleted by #USER#</p>",
       "<p>Because:</p>",
       "<i>#MSG#</i>"

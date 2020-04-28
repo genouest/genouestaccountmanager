@@ -811,7 +811,7 @@ router.delete_user = async function(user, action_owner_id, message){
 
     try {
         await utils.send_notif_mail({
-            'name': 'deletion',
+            'name': 'user_deletion',
             'destinations': msg_destinations,
             'subject': 'account deletion: ' + user.uid
         }, {
