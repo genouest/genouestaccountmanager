@@ -469,7 +469,7 @@ async function gen_mail_opt (options, variables)
 
     if (!html_message) { // if html_message is not set then message is not set too
         logger.error('Email Message not found!');
-        return;
+        return null;
     } else if (!message) { // if html_message is set and message is not set too
         message = htmlToText.fromString(html_message);
     }
