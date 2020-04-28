@@ -977,7 +977,6 @@ router.get('/user/:id/activate', async function(req, res) {
 
     await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
-    notif.add(user.email, async function(){
         try {
             await utils.send_notif_mail({
                 'name' : 'activation',
@@ -1008,16 +1007,20 @@ router.get('/user/:id/activate', async function(req, res) {
             return plugin_call(plugin_info, user.uid, user, session_user.uid);
             // eslint-disable-next-line no-unused-vars
         })).then(function(results){
-            res.send({msg: 'Activation in progress', fid: fid, error: []});
-            res.end();
+            notif.add(user.email, function() {
+                res.send({msg: 'Activation in progress', fid: fid, error: []});
+                res.end();
+            });
             return;
         }, function(err){
-            res.send({msg: 'Activation in progress', fid: fid, error: err});
+            notif.add(user.email, function() {
+            res.send({msg: 'Activation Error', fid: fid, error: err});
             res.end();
+            });
             return;
         });
 
-    });
+
 });
 
 // Get user - for logged user or admin
@@ -1619,7 +1622,7 @@ router.get('/user/:id/renew', async function(req, res){
         }
 
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-        notif.add(user.email, async function(){
+
 
             try {
                 await utils.send_notif_mail({
@@ -1649,15 +1652,19 @@ router.get('/user/:id/renew', async function(req, res){
                 return plugin_call(plugin_info, user.uid, user, session_user.uid);
                 // eslint-disable-next-line no-unused-vars
             })).then(function(results){
-                res.send({message: 'Activation in progress', fid: fid, error: []});
-                res.end();
+                notif.add(user.email, function() {
+                    res.send({message: 'Activation in progress', fid: fid, error: []});
+                    res.end();
+                });
                 return;
             }, function(err){
-                res.send({message: 'Activation in progress', fid: fid, error: err});
-                res.end();
+                notif.add(user.email, function() {
+                    res.send({message: 'Activation Error', fid: fid, error: err});
+                    res.end();
+                });
                 return;
             });
-        });
+
         return;
     }
     else {
