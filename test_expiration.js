@@ -66,5 +66,9 @@ utils.init_db().then(async ()=>{
     }
     if(mail_sent == users.length) {
         process.exit(0);
+    } else {
+        console.log('Error: mail not sent' + mail_sent + '/' + users.length);
+        process.exit(1);
     }
+
 });
