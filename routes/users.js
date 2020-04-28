@@ -1619,10 +1619,10 @@ router.get('/user/:id/renew', async function(req, res){
         }
 
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-        notif.add(user.email, function(){
+        notif.add(user.email, async function(){
 
             try {
-                utils.send_notif_mail({
+                await utils.send_notif_mail({
                     'name' : 'reactivation',
                     'destinations': [user.email],
                     'subject': 'account reactivation'
