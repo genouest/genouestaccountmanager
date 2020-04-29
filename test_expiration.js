@@ -43,33 +43,32 @@ utils.init_db().then(async ()=>{
         process.exit(1);
     }
     for(let i=0;i<users.length;i++){
-        (async function(index){
+        (async function(index) {
             var user = users[index];
             console.log('User will expire: '+user.uid);
             var link = CONFIG.general.url +
                 encodeURI('/user/'+user.uid+'/renew/'+user.regkey);
-                // encodeURI('/manager2/user/'+user.uid+'/renew/'+user.regkey);
-            var msg_activ = CONFIG.message.expiration.join('\n').replace('#LINK#', link).replace('#EXPIRE#', timeConverter(user.expiration)) + '\n' + CONFIG.message.footer.join('\n');
-            var msg_activ_html = CONFIG.message.expiration_html.join('').replace('#LINK#', link).replace('#EXPIRE#', timeConverter(user.expiration)) + '<br/>' + CONFIG.message.footer.join('<br/>');
-            var mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [user.email], // list of receivers
-                subject: CONFIG.general.name + ' account expiration', // Subject line
-                message: msg_activ, // plaintext body
-                html_message: msg_activ_html // html body
-            };
             try {
-                await notif.sendUser(mailOptions);
+                await utils.send_notif_mail({
+                    'name': 'expiration',
+                    'destinations': [user.email],
+                    'subject': 'account expiration ' + user.uid
+                }, {
+                    '#LINK#': link,
+                    '#EXPIRE#': timeConverter(user.expiration)
+                });
+
             } catch(error) {
                 console.log(error);
             }
             mail_sent++;
-            if(mail_sent == users.length) {
-                process.exit(0);
-            }
         }(i));
     }
     if(mail_sent == users.length) {
         process.exit(0);
+    } else {
+        console.log('Error: mail not sent' + mail_sent + '/' + users.length);
+        process.exit(1);
     }
+
 });

@@ -10,11 +10,6 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 // const request = require('request');
 
-const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
-var notif = require('../routes/notif_'+MAILER+'.js');
-
-
 var pool = null;
 if(CONFIG.mysql.host) {
     pool = mysql.createPool({
@@ -174,7 +169,7 @@ router.post('/database/:id', async function(req, res) {
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user) {
         res.status(401).send('Not authorized');
-        return;        
+        return;
     }
 
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -243,7 +238,7 @@ router.post('/database/:id', async function(req, res) {
                 await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + req.params.id , 'logs': []});
                 res.send({message: 'Creation error: '+err});
                 res.end();
-                return;  
+                return;
             }
             let password = Math.random().toString(36).slice(-10);
             let createuser = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
@@ -266,32 +261,29 @@ router.post('/database/:id', async function(req, res) {
                 res.end();
                 return;
             }
-            // Now send message
-            let msg = 'The MySQL database you requested (' + req.params.id + ', owned by ' + owner + ') was created. You can connect to it using the following credentials:\t\r\n\t\r\n';
-            msg += '  Host: ' + CONFIG.mysql.host + '\t\r\n';
-            msg += '  Database: ' + req.params.id + '\t\r\n';
-            msg += '  User: ' + req.params.id + '\t\r\n';
-            msg += '  Password: ' + password + '\t\r\n';
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [session_user.email, CONFIG.general.accounts], // list of receivers
-                subject: 'Database creation', // Subject line
-                message: msg, // plaintext body
-                html_message: msg // html body
-            };
+
+            try {
+                await utils.send_notif_mail({
+                    'name': 'database_creation',
+                    'destinations': [session_user.email, CONFIG.general.accounts],
+                    'subject': 'Database creation'
+                }, {
+                    '#OWNER#': owner,
+                    '#DBHOST#': CONFIG.mysql.host,
+                    '#DBNAME#': req.params.id,
+                    '#DBUSER#': req.params.id,
+                    '#DBPASSWORD#': password
+                });
+            } catch(error) {
+                logger.error(error);
+            }
+
+
             await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
 
-            if(notif.mailSet()) {
-                try {
-                    await notif.sendUser(mailOptions);
-                } catch(error) {
-                    logger.error(error);
-                }
-
-            }
             res.send({message:'Database created, credentials will be sent by mail'});
             res.end();
-        }  
+        }
     }
 
 });
@@ -402,7 +394,7 @@ var delete_db = async function(user, db_id){
             await querydb(dropuser);
             let dropdb = `DROP DATABASE ${db_id};\n`;
             await querydb(dropdb);
-            
+
         } catch(err) {
             await utils.mongo_events().insertOne(
                 {

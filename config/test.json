@@ -33,7 +33,7 @@
     "plugin_script_dir": "/opt/my/plugin-scripts"
  },
   "enable_ui": {
-      "messages": true,
+     "messages": true,
      "databases": true,
      "tps": true,
      "websites": true,
@@ -98,6 +98,14 @@
     "fake_mail_domain": "my.org"
   },
   "message": {
+    "registration": [
+        "New account registration waiting for approval: #UID#",
+        "#LINK#"
+    ],
+    "registration_html": [
+        "<p>New account registration waiting for approval: #UID#</p>",
+        "<p><a href='#LINK#'>#LINK#</a></p>"
+    ],
     "activation": [
       "Your account has been activated, you will be able to connect within one day.",
       "Your credentials are:",
@@ -128,16 +136,14 @@
       "A password reset has been requested for your account #UID#.",
       "If this is an error or an abuse, simply trash this email, your password will not be modified.",
       "If you really want to reset you password, click on the following link, a confirmation email will be sent afterward:",
-      ""
+      "#LINK#"
     ],
     "password_reset_request_html": [
       "<h2>Password reset request</h2>",
       "<p>A password reset has been requested for your account <b>#UID#</b> </p>",
       "<p>If this is an error or an abuse, simply trash this email, your password will not be modified.</p>",
       "<p>If you really want to reset you password, click on the following link, a confirmation email will be sent afterward:</p>",
-      "#LINK#",
-      "<br/>",
-      "<br/>",
+      "<p><a href='#LINK#'>#LINK#</a></p>",
       "<hr>"
     ],
     "password_reset": [
@@ -166,13 +172,25 @@
       "<p>#LINK#</p>",
       "<hr>"
     ],
-    "deletion": [
+    "expired": [
+        "User #UID# has expired, updating account"
+    ],
+    "expired_html": [
+        "<p>User #UID# has expired, updating account</p>"
+    ],
+    "project_expiration": [
+        "Project for #NAME# will expire at #DATE#"
+    ],
+    "project_expiration_html": [
+        "<p>Project for #NAME# will expire at #DATE#</p>"
+    ],
+    "user_deletion": [
         "Your account #UID# have been deleted by #USER#",
         "Because:",
         "",
         "#MSG#"
     ],
-    "deletion_html": [
+    "user_deletion_html": [
       "<p>Your account #UID# have been deleted by #USER#</p>",
       "<p>Because:</p>",
       "<i>#MSG#</i>"
@@ -185,23 +203,85 @@
     "confirmation_html": [
      "<h2>Welcome on the GenOuest core facility</h2>",
      "<p>You have created an account on GenOuest platform, please confirm your subscription at the following link:</p>",
-     "<p>#LINK#</p>",
+     "<p><a href='#LINK#'>#LINK#</a></p>",
      "<p>You will receive an email when your account has been validated.</p>",
      "<hr>"
     ],
+    "add_to_project": [
+        "#UID# has been added to project '#NAME#' in My",
+        "#DESC#",
+        "The project quota is #SIZE#, and the path is #PATH#"
+    ],
+    "add_to_project_html": [
+        "<p>#UID# has been added to project '#NAME#' in My</p>",
+        "<p>#DESC#</p>",
+        "<p>The project quota is #SIZE#, and the path is #PATH#</p>"
+    ],
     "ask_project": [
-      "#UID# have asked for a new project '#NAME#' in My",
+      "#UID# has requested a new project '#NAME#' in My",
       "Size needed: #SIZE# GB",
       "Entity: #ORGA#",
       "Description: #DESC#",
-      "Please consider it, and keep #UID# inform"
+      "Please review it, and keep #UID# inform"
     ],
     "ask_project_html": [
-      "<p>#UID# have asked for a new project '#NAME#' in My</p>",
+      "<p>#UID# has requested a new project '#NAME#' in My</p>",
       "<p>Size needed: #SIZE# GB</p>",
       "<p>Entity: #ORGA#</p>",
       "<p>Description: #DESC#</p>",
-      "<p>Please consider it, and keep #UID# inform</p>"
+      "<p>Please review it, and keep #UID# inform</p>"
+    ],
+    "ask_project_user": [
+      "#UID# has asked to #REQUEST# #USER# to project '#NAME#' in My"
+    ],
+    "ask_project_user_html": [
+      "<p>#UID# has asked to #REQUEST# #USER# to project '#NAME#' in My</p>"
+    ],
+    "database_creation": [
+        "The MySQL database you requested (#DBNAME#, owned by #owner#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
+        "\tHost: #DBHOST#\t\r\n",
+        "\tDatabase: #DBNAME#\t\r\n",
+        "\tUser: #DBUSER#\t\r\n",
+        "\tPassword: #DBPASSWORD#\t\r\n"
+    ],
+    "database_creation_html": [
+        "<p>The MySQL database you requested (#DBNAME#, owned by #owner#) was created. You can connect to it using the following credentials:</p>",
+        "<table><tr><td>Host:</td><td>#DBHOST#</td></tr>",
+        "<tr><td>Database:</td><td>#DBNAME#</td></tr>",
+        "<tr><td>User:</td><td>#DBUSER#</td></tr>",
+        "<tr><td>Password:</td><td>#DBPASSWORD#</td></tr></table>"
+    ],
+    "mail_token": [
+        "You requested a temporary token to login to application. This token will be valid for 10 minutes only.",
+        "  Token: -- #TOKEN# -- "
+    ],
+    "mail_token_html": [
+        "<p>You requested a temporary token to login to application. This token will be valid for 10 minutes only.</p>",
+        "  Token: -- <b>#TOKEN#</b> -- "
+    ],
+    "tps_password": [
+        "TP account credentials from #FROMDATE# to #TODATE#",
+        "Accounts will remain available for #EXPIRATION# extra days for data access",
+        "#CREDENTIALS#",
+        "Users are in the group #GROUP#",
+        "Users can create an SSH key at #URL# in SSH Keys section",
+        "In case of issue, you can contact us at #SUPPORT#"
+    ],
+    "tps_password_html": [
+        "<h2>Date</h2>",
+        "<table border='0' cellpadding='0' cellspacing='15' align='left'><thead><tr><th align='left' valign='top'>Start date</th><th align='left' valign='top'>End date</th></tr></thead>",
+        "<tbody><tr><td align='left' valign='top'>#FROMDATE#</td><td align='left' valign='top'>#TODATE#</td></tr></tbody></table>",
+        "<p>Accounts will remain available for <b>#EXPIRATION# extra days </b>for data access</p>",
+        "<hr>",
+        "<h2>Credentials</h2>",
+        "#CREDENTIALS#",
+        "<hr>",
+        "<p>Users are in the group <strong>#GROUP#</strong></p>",
+        "<hr>",
+        "<h2>Access</h2>",
+        "<p>Users can create an SSH key at #URL# in SSH Keys section</p>",
+        "<hr>",
+        "<p>In case of issue, you can contact us at #SUPPORT#</p>"
     ],
     "footer": [
       "this is from MY"

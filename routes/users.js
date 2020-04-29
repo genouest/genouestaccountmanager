@@ -14,16 +14,11 @@ const conf = require('../routes/conf.js');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-const MAILER = CONFIG.general.mailer;
-var MAIL_CONFIG = {};
-// todo: more and more ugly init...
-if (CONFIG[MAILER]) { MAIL_CONFIG = CONFIG[MAILER]; }
-// todo: find a cleaner way to allow registration if no mail are configured
-if (!MAIL_CONFIG.origin) { MAIL_CONFIG.origin = 'nomail@nomail.org'; }
-
 var goldap = require('../routes/goldap.js');
-var notif = require('../routes/notif_'+MAILER+'.js');
 var utils = require('../routes/utils.js');
+
+const MAILER = CONFIG.general.mailer;
+var notif = require('../routes/notif_'+MAILER+'.js');
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -56,18 +51,6 @@ router.user_home = function (user) {
     return get_user_home(user);
 };
 
-var send_notif = async function(mailOptions, _fid, errors) {
-    if(notif.mailSet()) {
-        try {
-            await notif.sendUser(mailOptions);
-        } catch(err) {
-            logger.error('send_notif error', err);
-        }
-        return errors;
-    } else {
-        return errors;
-    }
-};
 
 var create_group = async function(group_name, owner_name){
     let mingid = await utils.getGroupAvailableId();
@@ -826,16 +809,19 @@ router.delete_user = async function(user, action_owner_id, message){
         msg_destinations.push(user.email);
     }
 
-    let msg_del = CONFIG.message.deletion.join('\n').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '\n' + CONFIG.message.footer.join('\n');
-    let msg_del_html = CONFIG.message.deletion_html.join('').replace(/#UID#/g, user.uid).replace('#USER#', action_owner_id).replace('#MSG#', mail_message) + '<br/>'+CONFIG.message.footer_html.join('<br/>');
-
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations:  msg_destinations, // list of receivers
-        subject: GENERAL_CONFIG.name + ' account deletion: ' + user.uid, // Subject line
-        message: msg_del, // plaintext body
-        html_message: msg_del_html // html body
-    };
+    try {
+        await utils.send_notif_mail({
+            'name': 'user_deletion',
+            'destinations': msg_destinations,
+            'subject': 'account deletion: ' + user.uid
+        }, {
+            '#UID#': user.uid,
+            '#USER#': action_owner_id,
+            '#MSG#': mail_message
+        });
+    } catch(error) {
+        logger.error(error);
+    }
 
     if(user_is_activ){
         // Call remove method of plugins if defined
@@ -858,10 +844,6 @@ router.delete_user = async function(user, action_owner_id, message){
     }
 
     await utils.freeUserId(user.uidnumber);
-    if(notif.mailSet()) {
-        // eslint-disable-next-line no-unused-vars
-        await notif.sendUser(mailOptions);
-    }
     return true;
 };
 
@@ -995,41 +977,50 @@ router.get('/user/:id/activate', async function(req, res) {
 
     await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
-    notif.add(user.email, async function(){
-        let msg_activ = CONFIG.message.activation.join('\n').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-        let msg_activ_html = CONFIG.message.activation_html.join('').replace(/#UID#/g, user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>'+CONFIG.message.footer_html.join('<br/>');
-        let mailOptions = {
-            origin: MAIL_CONFIG.origin, // sender address
-            destinations: [user.email], // list of receivers
-            subject: GENERAL_CONFIG.name + ' account activation', // Subject line
-            message: msg_activ, // plaintext body
-            html_message: msg_activ_html // html body
-        };
-        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-
-        let plugin_call = function(plugin_info, userId, data, adminId){
-            // eslint-disable-next-line no-unused-vars
-            return new Promise(function (resolve, reject){
-                let plugins_modules = utils.plugins_modules();
-                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
-            });
-        };
-        let plugins_info = utils.plugins_info();
-        Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-            // eslint-disable-next-line no-unused-vars
-        })).then(function(results){
-            return send_notif(mailOptions, fid, []);
-        }, function(err){
-            return send_notif(mailOptions, fid, err);
-        }).then(function(errs){
-            res.send({msg: 'Activation in progress', fid: fid, error: errs});
-            res.end();
-            return;
+    try {
+        await utils.send_notif_mail({
+            'name' : 'activation',
+            'destinations': [user.email],
+            'subject': 'account activation'
+        }, {
+            '#UID#':  user.uid,
+            '#PASSWORD#': user.password,
+            '#IP#': user.ip
         });
+    } catch(error) {
+        logger.error(error);
+    }
+
+    await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+
+    let plugin_call = function(plugin_info, userId, data, adminId){
+        // eslint-disable-next-line no-unused-vars
+        return new Promise(function (resolve, reject){
+            let plugins_modules = utils.plugins_modules();
+            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                resolve(true);
+            });
+        });
+    };
+    let plugins_info = utils.plugins_info();
+    Promise.all(plugins_info.map(function(plugin_info){
+        return plugin_call(plugin_info, user.uid, user, session_user.uid);
+        // eslint-disable-next-line no-unused-vars
+    })).then(function(results){
+        notif.add(user.email, function() {
+            res.send({msg: 'Activation in progress', fid: fid, error: []});
+            res.end();
+        });
+        return;
+    }, function(err){
+        notif.add(user.email, function() {
+            res.send({msg: 'Activation Error', fid: fid, error: err});
+            res.end();
+        });
+        return;
     });
+
+
 });
 
 // Get user - for logged user or admin
@@ -1102,21 +1093,21 @@ router.get('/user/:id/confirm', async function(req, res) {
                     $push: {history: account_event}
                 });
 
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [GENERAL_CONFIG.accounts], // list of receivers
-                subject: GENERAL_CONFIG.name + ' account registration: '+uid, // Subject line
-                message: 'New account registration waiting for approval: '+uid, // plaintext body
-                html_message: 'New account registration waiting for approval: '+uid // html body
-            };
-            await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
-            if(notif.mailSet()) {
-                try {
-                    await notif.sendUser(mailOptions);
-                } catch(err) {
-                    logger.error('notif failed', err);
-                }
+            let link = GENERAL_CONFIG.url + encodeURI('/user/'+user.uid);
+            try {
+                await utils.send_notif_mail({
+                    'name': 'registration',
+                    'destinations': [GENERAL_CONFIG.accounts],
+                    'subject': 'account registration: '+uid
+                }, {
+                    '#UID#':  user.uid,
+                    '#LINK#': link
+                });
+            } catch(error) {
+                logger.error(error);
             }
+
+            await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
             res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
             res.end();
         }
@@ -1252,26 +1243,23 @@ router.post('/user/:id', async function(req, res) {
 
     await utils.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
 
-    let uid = req.params.id;
+
     await utils.mongo_users().insertOne(user);
-    let link = GENERAL_CONFIG.url +
-        encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
-    let msg_activ = CONFIG.message.confirmation.join('\n').replace('#LINK#', link).replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-    let msg_activ_html = CONFIG.message.confirmation_html.join('').replace('#LINK#', '<a href="'+link+'">'+link+'</a>').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer_html.join('<br/>');
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations: [user.email], // list of receivers
-        subject: GENERAL_CONFIG.name + ' account registration', // Subject line
-        message: msg_activ,
-        html_message: msg_activ_html
-    };
-    if(notif.mailSet()) {
-        try {
-            await notif.sendUser(mailOptions);
-        } catch(error) {
-            logger.error(error);
-        }
+    let uid = req.params.id;
+    let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
+    try {
+        await utils.send_notif_mail({
+            'name' : 'confirmation',
+            'destinations': [user.email],
+            'subject': 'account confirmation'
+        }, {
+            '#UID#':  user.uid,
+            '#LINK#': link
+        });
+    } catch(error) {
+        logger.error(error);
     }
+
     res.send({'status': 0, 'msg': 'Could not send an email, please contact the support.'});
     res.end();
     return;
@@ -1453,26 +1441,24 @@ router.get('/user/:id/passwordreset', async function(req, res){
 
     user.password='';
     // Now send email
-    let link = CONFIG.general.url +
-        encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
-    let html_link = `<a href="${link}">${link}</a>`;
-    let msg = CONFIG.message.password_reset_request.join('\n').replace('#UID#', user.uid) + '\n' + link + '\n' + CONFIG.message.footer.join('\n');
-    let html_msg = CONFIG.message.password_reset_request_html.join('').replace('#UID#', user.uid).replace('#LINK#', html_link)+CONFIG.message.footer_html.join('<br/>');
-    let mailOptions = {
-        origin: MAIL_CONFIG.origin, // sender address
-        destinations: [user.email], // list of receivers
-        subject: GENERAL_CONFIG.name + ' account password reset request',
-        message: msg,
-        html_message: html_msg
-    };
+    let link = CONFIG.general.url + encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
+
+    try {
+        await utils.send_notif_mail({
+            'name' : 'password_reset_request',
+            'destinations': [user.email],
+            'subject': 'account password reset request'
+        }, {
+            '#UID#':  user.uid,
+            '#LINK#': link
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
 
     if(notif.mailSet()) {
-        try {
-            await notif.sendUser(mailOptions);
-        } catch(error) {
-            logger.error(error);
-        }
         res.send({message: 'Password reset requested, check your inbox for instructions to reset your password.'});
     }
     else {
@@ -1521,23 +1507,22 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
 
         // Now send email
-        let msg = CONFIG.message.password_reset.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password) + '\n' + CONFIG.message.footer.join('\n');
-        let msg_html = CONFIG.message.password_reset_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password)+'<br/>'+CONFIG.message.footer_html.join('<br/>');
-        let mailOptions = {
-            origin: MAIL_CONFIG.origin, // sender address
-            destinations: [user.email], // list of receivers
-            subject: GENERAL_CONFIG.name + ' account password reset',
-            message: msg,
-            html_message: msg_html
-        };
+        try {
+            await utils.send_notif_mail({
+                'name' : 'password_reset',
+                'destinations': [user.email],
+                'subject': 'account password reset'
+            }, {
+                '#UID#':  user.uid,
+                '#PASSWORD#': user.password
+            });
+        } catch(error) {
+            logger.error(error);
+        }
+
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
 
         if(notif.mailSet()) {
-            try {
-                await notif.sendUser(mailOptions);
-            } catch(error) {
-                logger.error(error);
-            }
             res.redirect(GENERAL_CONFIG.url+'/manager2/passwordresetconfirm');
             res.end();
         }
@@ -1637,43 +1622,50 @@ router.get('/user/:id/renew', async function(req, res){
         }
 
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-        notif.add(user.email, function(){
-            let msg_activ = CONFIG.message.reactivation.join('\n').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '\n' + CONFIG.message.footer.join('\n');
-            let msg_activ_html = CONFIG.message.reactivation_html.join('').replace('#UID#', user.uid).replace('#PASSWORD#', user.password).replace('#IP#', user.ip) + '<br/>' + CONFIG.message.footer_html.join('<br/>');
 
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [user.email], // list of receivers
-                subject: GENERAL_CONFIG.name + ' account reactivation', // Subject line
-                message: msg_activ, // plaintext body
-                html_message: msg_activ_html // html body
-            };
-            let plugin_call = function(plugin_info, userId, data, adminId){
-                // eslint-disable-next-line no-unused-vars
-                return new Promise(function (resolve, reject){
-                    let plugins_modules = utils.plugins_modules();
-                    plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                        resolve(true);
-                    });
-                });
-            };
-            let plugins_info = utils.plugins_info();
-            Promise.all(plugins_info.map(function(plugin_info){
-                return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                // eslint-disable-next-line no-unused-vars
-            })).then(function(results){
-                return send_notif(mailOptions, fid, []);
-            }, function(err){
-                return send_notif(mailOptions, fid, err);
-            }).then(function(errs){
-                res.send({message: 'Activation in progress', fid: fid, error: errs});
-                res.end();
-                return;
+
+        try {
+            await utils.send_notif_mail({
+                'name' : 'reactivation',
+                'destinations': [user.email],
+                'subject': 'account reactivation'
+            }, {
+                '#UID#':  user.uid,
+                '#PASSWORD#': user.password,
+                '#IP#': user.ip
             });
+        } catch(error) {
+            logger.error(error);
+        }
+
+        let plugin_call = function(plugin_info, userId, data, adminId){
+            // eslint-disable-next-line no-unused-vars
+            return new Promise(function (resolve, reject){
+                let plugins_modules = utils.plugins_modules();
+                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
+                    resolve(true);
+                });
+            });
+        };
+        let plugins_info = utils.plugins_info();
+        Promise.all(plugins_info.map(function(plugin_info){
+            return plugin_call(plugin_info, user.uid, user, session_user.uid);
+            // eslint-disable-next-line no-unused-vars
+        })).then(function(results){
+            notif.add(user.email, function() {
+                res.send({message: 'Activation in progress', fid: fid, error: []});
+                res.end();
+            });
+            return;
+        }, function(err){
+            notif.add(user.email, function() {
+                res.send({message: 'Activation Error', fid: fid, error: err});
+                res.end();
+            });
+            return;
         });
 
         return;
-
     }
     else {
         res.status(401).send('Not authorized');
@@ -2068,6 +2060,31 @@ router.post('/user/:id/project/:project', async function(req, res){
     }
 
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
+
+    let project = await utils.mongo_projects().findOne({id:newproject});
+
+    let msg_destinations = [user.email];
+    let owner = await utils.mongo_users().findOne({uid:project.owner});
+    if (owner) {
+        msg_destinations.push(owner.email);
+    }
+
+    try {
+        await utils.send_notif_mail({
+            'name': 'add_to_project',
+            'destinations': msg_destinations,
+            'subject': 'account ' + user.uid + ' added to project : ' + project.id
+        }, {
+            '#UID#': user.uid,
+            '#NAME#': project.id,
+            '#SIZE#': project.size,
+            '#DESC#': project.description,
+            '#PATH#': project.path
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+
     res.send({message: 'User added to project', fid: fid});
     res.end();
 });

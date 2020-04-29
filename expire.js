@@ -53,17 +53,15 @@ utils.init_db().then(async () => {
         (async function(index) {
             let user = users[index];
             console.log('User: ' + user.uid + ' has expired');
-            let msg_activ = 'User ' + user.uid + ' has expired, updating account';
-            let msg_activ_html = msg_activ;
-            let mailOptions = {
-                origin: MAIL_CONFIG.origin, // sender address
-                destinations: [CONFIG.general.support], // list of receivers
-                subject: CONFIG.general.name + ' account expiration: ' + user.uid, // Subject line
-                message: msg_activ, // plaintext body
-                html_message: msg_activ_html // html body
-            };
             try {
-                await notif.sendUser(mailOptions);
+                await utils.send_notif_mail({
+                    'name': 'expired',
+                    destinations: [CONFIG.general.support],
+                    subject: 'account expiration: ' + user.uid
+                }, {
+                    '#UID#': user.uid
+                });
+
             } catch(error) {
                 console.log(error);
             }
@@ -127,5 +125,8 @@ utils.init_db().then(async () => {
     }
     if(mail_sent == users.length) {
         process.exit(0);
+    } else {
+        console.log('Error: mail not sent' + mail_sent + '/' + users.length);
+        process.exit(1);
     }
 });
