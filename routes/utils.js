@@ -477,7 +477,7 @@ async function gen_mail_opt (options, variables)
     // replace variable in message
     for (let key in variables) {
         let value = variables[key];
-        if (!value) { value = '';} // value may not be defined
+        if (value === undefined || value === null) { value = '';} // value may not be defined
         let html_value = value;
         let re = new RegExp(key,'g');
 
