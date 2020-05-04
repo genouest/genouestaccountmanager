@@ -1093,7 +1093,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                     $push: {history: account_event}
                 });
 
-            let link = GENERAL_CONFIG.url + encodeURI('/user/'+user.uid);
+            let link = GENERAL_CONFIG.url + encodeURI('/manager2/user/'+user.uid);
             try {
                 await utils.send_notif_mail({
                     'name': 'registration',
