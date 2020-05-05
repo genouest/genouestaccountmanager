@@ -238,14 +238,14 @@
       "<p>#UID# has asked to #REQUEST# #USER# to project '#NAME#' in My</p>"
     ],
     "database_creation": [
-        "The MySQL database you requested (#DBNAME#, owned by #owner#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
+        "The MySQL database you requested (#DBNAME#, owned by #OWNER#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
         "\tHost: #DBHOST#\t\r\n",
         "\tDatabase: #DBNAME#\t\r\n",
         "\tUser: #DBUSER#\t\r\n",
         "\tPassword: #DBPASSWORD#\t\r\n"
     ],
     "database_creation_html": [
-        "<p>The MySQL database you requested (#DBNAME#, owned by #owner#) was created. You can connect to it using the following credentials:</p>",
+        "<p>The MySQL database you requested (#DBNAME#, owned by #OWNER#) was created. You can connect to it using the following credentials:</p>",
         "<table><tr><td>Host:</td><td>#DBHOST#</td></tr>",
         "<tr><td>Database:</td><td>#DBNAME#</td></tr>",
         "<tr><td>User:</td><td>#DBUSER#</td></tr>",
