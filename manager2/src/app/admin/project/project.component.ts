@@ -188,7 +188,8 @@ export class ProjectComponent implements OnInit {
 
     date_convert = function timeConverter(tsp){
         var a = new Date(tsp);
-        return a.toLocaleDateString();
+        return a.toISOString().substring(0, 10)
+        //return a.toLocaleDateString();
     }
 
 }
