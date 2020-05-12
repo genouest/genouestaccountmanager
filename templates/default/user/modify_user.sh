@@ -16,11 +16,23 @@ if [ "$oh" != "$nh" ]
 then
     mkdir -p $(dirname "$nh")
     mv "$oh" "$nh"
-    chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$nh"
+
+    {% if user.oldgidnumber %}
+    old_gid_number="{{ user.oldgidnumber }}"
+    gid_number="{{ user.gidnumber }}"
+    if [ "$old_gid_number" != "$gid_number" ]
+    then
+        chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$nh"
+    fi
+    {% endif %}
+
 fi
+
 
 {% include "user/move_extra_dirs.sh" %}
 
 {% endif %}
+
+
 
 echo "End modify_user.sh in $0 ..."
