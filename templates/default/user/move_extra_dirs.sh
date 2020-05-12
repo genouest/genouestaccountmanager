@@ -15,8 +15,9 @@ then
     else
         mkdir -p "$extra_dir"
     fi
-    chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$extra_dir"
 fi
+
+chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$extra_dir"
 
 {% endfor %}
 
