@@ -614,7 +614,7 @@ router.get('/user', async function(req, res) {
     res.json(users);
 });
 
-var add_user_to_group = async function (uid, secgroup) {
+var add_user_to_group = async function (uid, secgroup, action_owner) {
     logger.info('Adding user ' + uid + ' to group ' + secgroup);
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user){
@@ -641,10 +641,12 @@ var add_user_to_group = async function (uid, secgroup) {
     try {
         let created_file = await filer.user_change_group(user, fid);
         logger.info('File Created: ', created_file);
+        await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to secondary  group ' + secgroup , 'logs': [created_file]});
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
         throw {code: 500, msg:'Change Group Failed'};
     }
+
 
 };
 
@@ -671,7 +673,7 @@ router.post('/user/:id/group/:group', async function(req, res){
     let secgroup = req.params.group;
 
     try {
-        await add_user_to_group(uid, secgroup);
+        await add_user_to_group(uid, secgroup, session_user.uid);
     } catch (e) {
         logger.error(e);
         if (e.code && e.msg) {
@@ -685,7 +687,6 @@ router.post('/user/:id/group/:group', async function(req, res){
         }
     }
 
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
     res.send({message: 'User added to group'});
     res.end();
     return;
@@ -2015,7 +2016,7 @@ router.get('/project/:id/users', async function(req, res){
     res.end();
 });
 
-var add_user_to_project = async function (newproject, uid) {
+var add_user_to_project = async function (newproject, uid, action_owner) {
     logger.info('Adding user ' + uid + ' to project ' + newproject);
 
     let fid = new Date().getTime();
@@ -2041,13 +2042,13 @@ var add_user_to_project = async function (newproject, uid) {
     try {
         let created_file = await filer.project_add_user_to_project({id: newproject}, user, fid);
         logger.info('File Created: ', created_file);
+        await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to project ' + newproject , 'logs': [created_file]});
     } catch(error){
         logger.error(error);
         throw {code: 500, msg:'Add User to Project Failed for: ' + newproject};
     }
-
+    
     let project = await utils.mongo_projects().findOne({id:newproject});
-
     let msg_destinations = [user.email];
     let owner = await utils.mongo_users().findOne({uid:project.owner});
     if (owner) {
@@ -2069,7 +2070,6 @@ var add_user_to_project = async function (newproject, uid) {
     } catch(error) {
         logger.error(error);
     }
-
 };
 
 router.post('/user/:id/project/:project', async function(req, res){
@@ -2093,7 +2093,7 @@ router.post('/user/:id/project/:project', async function(req, res){
     let uid = req.params.id;
 
     try {
-        await add_user_to_project(newproject, uid);
+        await add_user_to_project(newproject, uid, session_user.uid);
     } catch (e) {
         logger.error(e);
         if (e.code && e.msg) {
@@ -2107,7 +2107,6 @@ router.post('/user/:id/project/:project', async function(req, res){
         }
     }
 
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
     res.send({message: 'User added to project'});
     res.end();
 
