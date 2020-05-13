@@ -615,6 +615,7 @@ router.get('/user', async function(req, res) {
 });
 
 var add_user_to_group = async function (uid, secgroup) {
+    logger.info('Adding user ' + uid + ' to group ' + secgroup);
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user){
         throw {code: 404, msg:'User not found'};
@@ -2015,6 +2016,8 @@ router.get('/project/:id/users', async function(req, res){
 });
 
 var add_user_to_project = async function (newproject, uid) {
+    logger.info('Adding user ' + uid + ' to project ' + newproject);
+
     let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
