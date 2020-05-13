@@ -675,6 +675,8 @@ router.post('/user/:id/group/:group', async function(req, res){
     }
 
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
+
+
     res.send({message: 'User added to group', fid: fid});
     res.end();
     return;
@@ -2006,60 +2008,34 @@ router.get('/project/:id/users', async function(req, res){
     res.end();
 });
 
-router.post('/user/:id/project/:project', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
-        return;
-    }
-    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
-        res.status(403).send('Invalid parameters');
-        return;
-    }
-
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
-        res.end();
-        return;
-    }
-    let newproject = req.params.project;
-    let uid = req.params.id;
+var add_user_to_project = async function (newproject, uid) {
     let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
-        res.status(404).send('User does not exist');
-        res.end();
-        return;
+        throw {code: 404, msg: 'User does not exist'};
     }
     if (!user.projects){
         user.projects = [];
     }
     for(let g=0; g < user.projects.length; g++){
         if(newproject == user.projects[g]) {
-            res.send({message:'User is already in project : nothing was done.'});
-            res.end();
-            return;
+            throw {code: 208, msg: 'User is already in project : nothing was done.'};
         }
     }
     user.projects.push(newproject);
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
-        res.status(403).send('Could not update user');
-        res.end();
-        return;
+        throw {code: 403, msg: 'Could not update user'};
     }
 
     try {
         let created_file = await filer.project_add_user_to_project({id: newproject}, user, fid);
         logger.info('File Created: ', created_file);
     } catch(error){
-        logger.error('Add User to Project Failed for: ' + newproject, error);
-        res.status(500).send('Add Project Failed');
-        return;
+        logger.error(error);
+        throw {code: 500, msg:'Add User to Project Failed for: ' + newproject};
     }
-
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
 
     let project = await utils.mongo_projects().findOne({id:newproject});
 
@@ -2085,8 +2061,41 @@ router.post('/user/:id/project/:project', async function(req, res){
         logger.error(error);
     }
 
-    res.send({message: 'User added to project', fid: fid});
+};
+
+router.post('/user/:id/project/:project', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        res.end();
+        return;
+    }
+
+    let newproject = req.params.project;
+    let uid = req.params.id;
+
+    try {
+        await add_user_to_project(newproject, uid);
+    } catch (e) {
+        logger.error(e);
+        res.status(e.code).send(e.msg);
+        res.end();
+        return;
+    }
+
+    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
+    res.send({message: 'User added to project'});
     res.end();
+
 });
 
 router.delete('/user/:id/project/:project', async function(req, res){
