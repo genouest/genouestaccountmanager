@@ -614,6 +614,38 @@ router.get('/user', async function(req, res) {
     res.json(users);
 });
 
+var add_user_to_group = async function (uid, secgroup) {
+    let user = await utils.mongo_users().findOne({uid: uid});
+    if(!user){
+        throw {code: 404, msg:'User not found'};
+    }
+    if(secgroup == user.group) {
+        throw {code: 208, msg: 'Group is user main\'s group: '+user.group};
+    }
+    for(let g=0;g < user.secondarygroups.length;g++){
+        if(secgroup == user.secondarygroups[g]) {
+            throw {code: 208, msg: 'group is already set'};
+        }
+    }
+    user.secondarygroups.push(secgroup);
+    let fid = new Date().getTime();
+    // Now add group
+    await goldap.change_user_groups(user, [secgroup], [], fid);
+    try {
+        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+    } catch(err) {
+        throw {code: 500, msg: 'Could not update user'};
+    }
+
+    try {
+        let created_file = await filer.user_change_group(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Group Change Failed for: ' + user.uid, error);
+        throw {code: 500, msg:'Change Group Failed'};
+    }
+
+};
 
 router.post('/user/:id/group/:group', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -636,52 +668,26 @@ router.post('/user/:id/group/:group', async function(req, res){
     }
     let uid = req.params.id;
     let secgroup = req.params.group;
-    let user = await utils.mongo_users().findOne({uid: uid});
-    if(!user){
-        res.status(404).send('User not found');
-        return;
-    }
-    if(secgroup == user.group) {
-        res.send({message: 'Group is user main\'s group: '+user.group});
-        res.end();
-        return;
-    }
-    for(let g=0;g < user.secondarygroups.length;g++){
-        if(secgroup == user.secondarygroups[g]) {
-            res.send({message: 'group is already set'});
+
+    try {
+        await add_user_to_group(uid, secgroup);
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.msg) {
+            res.status(e.code).send(e.msg);
+            res.end();
+            return;
+        } else {
+            res.status(500).send('Server Error, contact admin');
             res.end();
             return;
         }
     }
-    user.secondarygroups.push(secgroup);
-    let fid = new Date().getTime();
-    // Now add group
-    await goldap.change_user_groups(user, [secgroup], [], fid);
-    try {
-        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
-    } catch(err) {
-        res.send({message: 'Could not update user'});
-        res.end();
-        return;
-    }
-
-    try {
-        let created_file = await filer.user_change_group(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch(error){
-        logger.error('Group Change Failed for: ' + user.uid, error);
-        res.status(500).send('Change Group Failed');
-        return;
-    }
 
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
-
-
-    res.send({message: 'User added to group', fid: fid});
+    res.send({message: 'User added to group'});
     res.end();
     return;
-
-
 
 });
 
@@ -2026,7 +2032,7 @@ var add_user_to_project = async function (newproject, uid) {
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
-        throw {code: 403, msg: 'Could not update user'};
+        throw {code: 500, msg: 'Could not update user'};
     }
 
     try {
@@ -2087,9 +2093,15 @@ router.post('/user/:id/project/:project', async function(req, res){
         await add_user_to_project(newproject, uid);
     } catch (e) {
         logger.error(e);
-        res.status(e.code).send(e.msg);
-        res.end();
-        return;
+        if (e.code && e.msg) {
+            res.status(e.code).send(e.msg);
+            res.end();
+            return;
+        } else {
+            res.status(500).send('Server Error, contact admin');
+            res.end();
+            return;
+        }
     }
 
     await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
