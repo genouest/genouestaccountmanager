@@ -1,11 +1,11 @@
 FROM node:12-buster
 COPY manager2 /root/genouestaccountmanager/manager2
-RUN npm install -g @angular/cli@7.0.3
+RUN npm install -g @angular/cli@7.3.10
 ARG APIURL
 ARG SENTRY
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
-RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules && rm -f dist/my-ui/*.gz &&  npm run compress || true
+RUN cd /root/genouestaccountmanager/manager2 && npm ci && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules && rm -f dist/my-ui/*.gz &&  npm run compress || true
 
 
 FROM node:12-buster
@@ -17,7 +17,7 @@ WORKDIR /root/genouestaccountmanager
 
 
 COPY *.json .bowerrc /root/genouestaccountmanager/
-RUN npm install
+RUN npm ci
 COPY *.js /root/genouestaccountmanager/
 
 RUN mkdir plugins public routes views tests test manager manager2 config
