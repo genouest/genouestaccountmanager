@@ -113,10 +113,10 @@ export class ProjectsComponent implements OnInit {
                 this.projectService.removeRequest(project.id, {'request': 'add', 'user': user_id}).subscribe(
                     resp => {
                         this.project_list(true);
-                        this.userService.addGroup(user_id, project.group).subscribe(
+                        /* this.userService.addGroup(user_id, project.group).subscribe(
                             resp => this.request_grp_msg = resp['message'],
                             err => this.request_mngt_error_msg = err.error
-                        )
+                        ) */
                     },
                     err => this.request_mngt_error_msg = err.error
                 )
@@ -180,14 +180,14 @@ export class ProjectsComponent implements OnInit {
                                        this.project_list();
                                        this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
                                            resp => {
-                                               this.userService.addGroup(this.new_project.owner, this.new_project.group).subscribe(
+                                               /* this.userService.addGroup(this.new_project.owner, this.new_project.group).subscribe(
                                                    resp => {},
                                                    err => {
                                                        console.log('failed to add user to group');
                                                        this.add_project_error_msg = err.error;
 
                                                    }
-                                               )
+                                               ) */
                                            },
                                            err => {
                                                console.log('failed  to add user to project');

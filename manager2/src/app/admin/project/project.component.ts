@@ -115,10 +115,10 @@ export class ProjectComponent implements OnInit {
         this.userService.addToProject(userId, project.id).subscribe(
             resp => {
                 this.admin_user_msg = resp['message'];
-                this.userService.addGroup(userId, project.group).subscribe(
+                /* this.userService.addGroup(userId, project.group).subscribe(
                     resp => this.show_project_users(project.id),
                     err => this.admin_user_err_msg = err.error
-                )
+                ) */
             },
             err => this.admin_user_err_msg = err.error
         )
