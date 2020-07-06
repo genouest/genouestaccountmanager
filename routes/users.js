@@ -2047,7 +2047,7 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
         logger.error(error);
         throw {code: 500, msg:'Add User to Project Failed for: ' + newproject};
     }
-    
+
     let project = await utils.mongo_projects().findOne({id:newproject});
     let msg_destinations = [user.email];
     let owner = await utils.mongo_users().findOne({uid:project.owner});
@@ -2069,6 +2069,10 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
         });
     } catch(error) {
         logger.error(error);
+    }
+
+    if (CONFIG.projects.enable_group) {
+        add_user_to_group(project.group, user.uid, action_owner);
     }
 };
 
