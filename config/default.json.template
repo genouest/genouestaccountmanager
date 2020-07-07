@@ -61,7 +61,7 @@
     "newsletters": true,
     "log": true
   },
-  "projects": {
+  "project": {
      "enable_group": true,
      "default_size": 500,
      "default_path": "/opt/project"
