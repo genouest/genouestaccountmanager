@@ -2073,7 +2073,7 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
 
     if (CONFIG.project === undefined || CONFIG.project.enable_group) {
         try {
-            await add_user_to_group(project.group, user.uid, action_owner);
+            await add_user_to_group(user.uid, project.group, action_owner);
         } catch (error) {
             logger.error(error);
             throw {code: 500, msg:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
