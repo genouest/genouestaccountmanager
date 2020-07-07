@@ -2071,7 +2071,7 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
         logger.error(error);
     }
 
-    if (CONFIG.projects.enable_group) {
+    if (CONFIG.project.enable_group) {
         add_user_to_group(project.group, user.uid, action_owner);
     }
 };
