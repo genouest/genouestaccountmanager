@@ -194,7 +194,7 @@ export class UserComponent implements OnInit {
             err => console.log('failed to get config')
         )
 
-        
+
     }
 
     _compareName(a,b) {
@@ -616,13 +616,13 @@ export class UserComponent implements OnInit {
             this.userService.addToProject(this.user.uid, newproject.id).subscribe(
                 resp =>  {
                     this.add_to_project_msg = resp['message'];
-                    this.userService.addGroup(this.user.uid, newproject.group).subscribe(
+                    /* this.userService.addGroup(this.user.uid, newproject.group).subscribe(
                         resp => {
                             this.add_to_project_grp_msg = resp['message'];
                             this.user_projects.push({id: newproject.id, owner: false, member: true})
                         },
                         err => this.request_mngt_error_msg = err.error
-                    )
+                    ) */
                 },
                 err => this.add_to_project_error_msg = err.error
             )
