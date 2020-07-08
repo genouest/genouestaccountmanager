@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
@@ -16,6 +16,7 @@ export class ProjectComponent implements OnInit {
 
     dtTrigger: Subject<any> = new Subject()
 
+    config: any
     project: any
     groups: any[]
     users: any[]
@@ -32,6 +33,7 @@ export class ProjectComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private configService: ConfigService,
         private router: Router,
         private groupService: GroupsService,
         private projectsService: ProjectsService,
@@ -51,6 +53,7 @@ export class ProjectComponent implements OnInit {
         this.users = [];
         this.groups = [];
         this.all_users = [];
+        this.config = {};
     }
 
     ngOnDestroy(): void {
@@ -83,6 +86,14 @@ export class ProjectComponent implements OnInit {
             resp => this.all_users = resp,
             err => console.log('failed to get all users')
         );
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                this.initUser();
+            },
+            err => console.log('failed to get config')
+        );
+
     }
 
     show_project_users(projectId) {
@@ -136,6 +147,7 @@ export class ProjectComponent implements OnInit {
         );
     }
 
+    // todo: maybe move this in backend too
     update_users_group(usersList, newGroupId){
         for(var i = 0; i< usersList.length; i++){
             this.userService.addGroup(usersList[i].uid, newGroupId).subscribe(
@@ -168,7 +180,7 @@ export class ProjectComponent implements OnInit {
                 'size': project.size,
                 'expire': new Date(project.expire).getTime(),
                 'owner': project.owner,
-                'group': project.group,
+                'group': config.project.enable_group ? project.group : '',
                 'description' : project.description,
                 'access' : project.access,
                 'path': project.path,
@@ -177,7 +189,7 @@ export class ProjectComponent implements OnInit {
         ).subscribe(
             resp => {
                 this.prj_msg = resp['message'];
-                if(project.group !== this.oldGroup) {
+                if(config.project.enable_group && project.group !== this.oldGroup) {
                     this.update_users_group(this.users, project.group);
                 }
                 this.show_project_users(project);

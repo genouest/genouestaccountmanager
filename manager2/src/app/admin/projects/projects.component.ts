@@ -1,6 +1,6 @@
 import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
+import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
@@ -17,10 +17,11 @@ export class ProjectsComponent implements OnInit {
     @ViewChildren(DataTableDirective)
     tables: QueryList<DataTableDirective>;
 
-
     dtTriggerAdd: Subject<any> = new Subject()
     dtTriggerRemove: Subject<any> = new Subject()
     dtTriggerProjects: Subject<any> = new Subject()
+
+    config: any
 
     notification: string
     requests_visible: boolean
@@ -43,10 +44,13 @@ export class ProjectsComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private configService: ConfigService,
         private projectService: ProjectsService,
         private groupService: GroupsService,
         private userService: UserService
-    ) { }
+    ) {
+        this.config = {};
+    }
 
     ngOnDestroy(): void {
         this.dtTriggerAdd.unsubscribe();
@@ -96,6 +100,15 @@ export class ProjectsComponent implements OnInit {
             resp => this.all_users = resp,
             err => console.log('failed to get all users')
         );
+
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                this.initUser();
+            },
+            err => console.log('failed to get config')
+        );
+
     }
 
     ngAfterViewInit(): void {
@@ -158,6 +171,10 @@ export class ProjectsComponent implements OnInit {
 
     add_project(){
         this.notification = "";
+        if (! config.project.enable_group ) {
+            this.new_project.group = '';
+        }
+
         if(! this.new_project.id || ! this.new_project.group || ! this.new_project.owner) {
             this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
             return;
@@ -167,7 +184,7 @@ export class ProjectsComponent implements OnInit {
         this.projectService.add({
             'id': this.new_project.id,
             'owner': this.new_project.owner,
-            'group': this.new_project.group,
+            'group': config.project.enable_group ? this.new_project.group : '',
             'size': this.new_project.size,
             'description': this.new_project.description,
             'access': this.new_project.access,

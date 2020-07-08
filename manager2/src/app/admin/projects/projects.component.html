@@ -77,7 +77,7 @@
         <thead><tr>
           <th>Project</th>
           <th>Owner</th>
-          <th>Group</th>
+          <th *ngIf="!config.project || config.project.enable_group">Group</th>
           <th>Path</th>
           <th>Size (Go)</th>
           <th>Expiration</th>
@@ -86,7 +86,7 @@
           <tr *ngFor="let project of projects">
             <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
             <td>{{project.owner}}</td>
-            <td>{{project.group}}</td>
+            <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
             <td>{{project.path}}</td>
             <td>{{project.size}}</td>
             <td>{{date_convert(project.expire)}}</td>
@@ -121,7 +121,7 @@
                 <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
              </select>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
             <label for="project_group">Group&nbsp;
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" tooltip> </span>
@@ -132,7 +132,7 @@
           </div>
           <div class="col-sm-2">
             <label for="project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="project_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+            <input placeholder="project size in G" type="number" id="project_size" [ngValue]="config.project.edefault_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
           </div>
           <div class="col-sm-2">
             <label for="project_expire">Expiration date</label>
@@ -152,7 +152,7 @@
           </div>
         </div>
         <div class="form-group row">
-          <div class="col-sm-2">
+          <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
             <label >Write permission&nbsp;
               <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
             </label>
@@ -165,7 +165,7 @@
             <label >Path to project&nbsp;
               <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" tooltip> </span>
             </label>
-            <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
+            <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [ngValue]="config.project.edefault_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
           </div>
         </div>
         <div class="form-group row">
