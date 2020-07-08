@@ -76,7 +76,6 @@ export class ProjectComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                this.initUser();
             },
             err => console.log('failed to get config')
         )

@@ -89,7 +89,6 @@ export class ProjectComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                this.initUser();
             },
             err => console.log('failed to get config')
         );
@@ -180,7 +179,7 @@ export class ProjectComponent implements OnInit {
                 'size': project.size,
                 'expire': new Date(project.expire).getTime(),
                 'owner': project.owner,
-                'group': config.project.enable_group ? project.group : '',
+                'group': this.config.project.enable_group ? project.group : '',
                 'description' : project.description,
                 'access' : project.access,
                 'path': project.path,
@@ -189,7 +188,7 @@ export class ProjectComponent implements OnInit {
         ).subscribe(
             resp => {
                 this.prj_msg = resp['message'];
-                if(config.project.enable_group && project.group !== this.oldGroup) {
+                if(this.config.project.enable_group && project.group !== this.oldGroup) {
                     this.update_users_group(this.users, project.group);
                 }
                 this.show_project_users(project);

@@ -104,7 +104,6 @@ export class ProjectsComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                this.initUser();
             },
             err => console.log('failed to get config')
         );
@@ -171,11 +170,8 @@ export class ProjectsComponent implements OnInit {
 
     add_project(){
         this.notification = "";
-        if (! config.project.enable_group ) {
-            this.new_project.group = '';
-        }
 
-        if(! this.new_project.id || ! this.new_project.group || ! this.new_project.owner) {
+        if(! this.new_project.id || (this.config.project.enable_group && ! this.new_project.group) || ! this.new_project.owner) {
             this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
             return;
         }
@@ -184,7 +180,7 @@ export class ProjectsComponent implements OnInit {
         this.projectService.add({
             'id': this.new_project.id,
             'owner': this.new_project.owner,
-            'group': config.project.enable_group ? this.new_project.group : '',
+            'group': this.config.project.enable_group ? this.new_project.group : '',
             'size': this.new_project.size,
             'description': this.new_project.description,
             'access': this.new_project.access,
