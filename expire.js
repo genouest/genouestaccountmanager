@@ -50,7 +50,7 @@ utils.init_db().then(async () => {
         process.exit(1);
     }
     for(var i=0;i<users.length;i++){
-        (async function(index) {
+        await (async function(index) {
             let user = users[index];
             console.log('User: ' + user.uid + ' has expired');
             try {

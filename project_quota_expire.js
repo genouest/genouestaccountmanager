@@ -9,7 +9,7 @@ var CONFIG = require('config');
 var utils = require('./routes/utils');
 
 const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
+// const MAIL_CONFIG = CONFIG[MAILER];
 
 var notif = require('../routes/notif_'+MAILER+'.js');
 

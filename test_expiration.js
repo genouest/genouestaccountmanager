@@ -43,7 +43,7 @@ utils.init_db().then(async ()=>{
         process.exit(1);
     }
     for(let i=0;i<users.length;i++){
-        (async function(index) {
+        await (async function(index) {
             var user = users[index];
             console.log('User will expire: '+user.uid);
             var link = CONFIG.general.url +
