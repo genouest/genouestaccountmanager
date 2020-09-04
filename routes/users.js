@@ -623,6 +623,9 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
     if(secgroup == user.group) {
         throw {code: 208, msg: 'Group is user main\'s group: '+user.group};
     }
+    if(!user.secondarygroups) {
+        user.secondarygroups = [];
+    }
     for(let g=0;g < user.secondarygroups.length;g++){
         if(secgroup == user.secondarygroups[g]) {
             throw {code: 208, msg: 'group is already set'};
