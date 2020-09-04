@@ -313,7 +313,7 @@
                 <div class="col-sm-6">
                     <label for="newgroup" class="col-form-label">Groups</label>
                     <select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newgroup" class="form-control">
-                        <option *ngFor="let group of groups">{{group.name}}</option>
+                        <option *ngFor="let group of groups" [ngValue]="group.name">{{group.name}}</option>
                     </select>
                 </div>
             </div>
