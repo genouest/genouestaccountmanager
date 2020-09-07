@@ -2079,7 +2079,10 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
             await add_user_to_group(user.uid, project.group, action_owner);
         } catch (error) {
             logger.error(error);
-            throw {code: 500, msg:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
+            // as it may throw any 20* http ok code...
+            if (!error.code || error.code >= 300) {
+                throw {code: 500, msg:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
+            }
         }
     }
 };
