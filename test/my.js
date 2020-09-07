@@ -326,7 +326,8 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     res.should.have.status(200);
-                    assert(res.body.fid);
+                    // assert(res.body.fid); // fid should not be used by frontend as if it is changed it may be a security issue
+                    assert(res.body.message == 'User added to group');
                     done();
                 });
         });
@@ -338,7 +339,8 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     res.should.have.status(200);
-                    assert(res.body.fid);
+                    assert(res.body.message == 'User added to group');
+                    // assert(res.body.fid);
                     done();
                 });
         });
@@ -350,7 +352,8 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     res.should.have.status(200);
-                    assert(res.body.fid);
+                    // assert(res.body.fid);
+                    assert(res.body.message == 'User added to group');
                     done();
                 });
         });
