@@ -436,7 +436,7 @@ router.post('/askDmp', async function(req, res){
     //     res.status(1000).send('No answer from DMP')
     //     return;
     // }
-    res.send(DMP_data);
+    // res.send(DMP_data);
     res.end();
 });
 
