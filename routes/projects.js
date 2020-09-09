@@ -428,13 +428,14 @@ router.post('/ask/dmp', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    try {
-        print("Getting DMP from Opidor...")
-        DMP_data = {}
-    } catch(error) {
-        res.status(1000).send('No answer from DMP')
-        return;
-    }
+    DMP_data = {}
+    // try {
+    //     print("Getting DMP from Opidor...")
+    //     DMP_data = {}
+    // } catch(error) {
+    //     res.status(1000).send('No answer from DMP')
+    //     return;
+    // }
     res.send(DMP_data);
     res.end();
 });
