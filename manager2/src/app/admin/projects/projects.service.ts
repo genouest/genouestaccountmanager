@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ɵConsole } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
@@ -178,4 +178,24 @@ export class ProjectsService {
             httpOptions
         );
     }
+
+    askDmpData(new_project: any): Observable<any> {
+        //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
+        // let user = this.authService.profile;
+        console.log("asking")
+        let params = new HttpParams();
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params:params
+
+        };
+        return this.http.post(
+            environment.apiUrl + '/ask/dmp',
+            new_project,
+            httpOptions
+        );
+    }
+
 }

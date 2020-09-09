@@ -21,6 +21,7 @@ export class ProjectComponent implements OnInit {
     session_user: any
     new_user: any
     remove_user: any
+    
 
     manager_visible: boolean
 
@@ -142,6 +143,23 @@ export class ProjectComponent implements OnInit {
     date_convert = function timeConverter(tsp){
         var a = new Date(tsp);
         return a.toLocaleDateString();
+    }
+
+    request_dmp_data() {
+
+        console.log("Getting data")
+        this.request_msg = '';
+        this.request_err_msg = '';
+        this.projectsService.askDmpData(this.new_project).subscribe(
+            resp => {
+                this.request_msg = 'Loading sucessful';
+                this.new_project = {};
+            },
+            err => {
+                console.log('failed to get DMP', err);
+                this.request_err_msg = err.error;
+            }
+        )
     }
 
 
