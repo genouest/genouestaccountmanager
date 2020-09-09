@@ -192,7 +192,7 @@ export class ProjectsService {
 
         };
         return this.http.post(
-            environment.apiUrl + '/ask/dmp',
+            environment.apiUrl + '/askDmp',
             new_project,
             httpOptions
         );

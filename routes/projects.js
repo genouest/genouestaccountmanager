@@ -413,8 +413,8 @@ router.post('/ask/project', async function(req, res){
     return;
 });
 
-router.post('/ask/dmp', async function(req, res){
-    print("here we are")
+router.post('/askDmp', async function(req, res){
+
     if(! req.locals.logInfo.is_logged){
         res.status(401).send('Not authorized');
         return;
