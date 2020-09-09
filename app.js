@@ -56,7 +56,7 @@ const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
 
 
 var app = express();
-app.use(cors());
+app.use(cors({origin: true, credentials: true}));
 
 if (process.env.MY_ACCESS_LOG) {
     const fs = require('fs');
