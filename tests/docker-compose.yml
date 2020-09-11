@@ -80,7 +80,7 @@ services:
             - LDAP_SERVER_HOST=openldap
             - MY_ADMIN_USER=admin
             - MY_ADMIN_GROUP=admin
-            - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL:-konogan.bourhy@gmail.com}
+            - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL:-admin@my.org}
             - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD:-admin}
         volumes:
             - ./home_dir:/home
