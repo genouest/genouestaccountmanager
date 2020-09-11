@@ -351,7 +351,7 @@ app.get('/tp', tp);
 app.post('/tp', tp);
 app.delete('/tp/:id', tp);
 app.get('/tp/:id', tp);
-app.put('/tp/:id/reserve/now', tp);let params = new HttpParams();
+app.put('/tp/:id/reserve/now', tp);
 app.put('/tp/:id/reserve/stop', tp);
 
 app.get('/auth', auth);
