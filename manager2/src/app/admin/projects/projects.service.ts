@@ -183,12 +183,10 @@ export class ProjectsService {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;
         console.log("asking")
-        let params = new HttpParams();
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
             //}),
-            params:params
 
         };
         return this.http.post(

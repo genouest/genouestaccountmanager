@@ -414,16 +414,14 @@ router.post('/ask/project', async function(req, res){
 });
 
 router.post('/askDmp', async function(req, res){
-    res.status(401).send('Not authorized');
-    return;
     if(! req.locals.logInfo.is_logged){
         res.status(401).send('Not authorized');
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
-        return;
-    }
+    // if(! utils.sanitizeAll([req.params.id])) {
+    //     res.status(403).send('Invalid parameters');
+    //     return;
+    // }
 
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
         res.status(401).send('Not authorized');
