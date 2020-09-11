@@ -423,6 +423,7 @@ utils.init_db().then(async () => {
     if(MY_ADMIN_USER !== null){
         wlogger.info('Create admin user');
         await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+        await users.create_extra_user('kbourhy', 'cosmo')
         if (runningEnv == 'test'){
             wlogger.info('Execute cron script');
             await if_dev_execute_scripts();
