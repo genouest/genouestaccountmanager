@@ -153,7 +153,9 @@ export class ProjectComponent implements OnInit {
         this.projectsService.askDmpData(this.new_project).subscribe(
             resp => {
                 this.request_msg = 'Loading sucessful';
-                this.new_project = resp.DMP_data;
+                this.new_project.id = resp.DMP_data.title;
+                console.log(resp.DMP_data)
+                
             },
             err => {
                 console.log('failed to get DMP', err);

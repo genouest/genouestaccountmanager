@@ -427,7 +427,7 @@ router.post('/askDmp', async function(req, res){
         res.status(401).send('Not authorized');
         return;
     }
-    DMP_data = {}
+    DMP_data = {title: "Test"}
     // try {
     //     print("Getting DMP from Opidor...")
     //     DMP_data = {}
