@@ -60,7 +60,7 @@ router.get('/mail/auth/:id', async function(req, res) {
 
     let expire = new Date().getTime() + 60*10*1000;
     req.session.mail_token = {'token': password, 'expire': expire, 'user': user._id};
-    let mail_token = {'token': password, 'expire': expire, 'user': user._id};
+    let mail_token = {'token': password, 'expire': expire, '    ser': user._id};
     let usertoken = jwt.sign(
         { user: user._id, isLogged: true, mail_token: mail_token },
         CONFIG.general.secret,
@@ -345,7 +345,7 @@ router.post('/auth/:id', async function(req, res) {
             }
             attemps[user.uid]['attemps'] += 1;
             attemps[user.uid]['last'] = new Date();
-            res.send({user: null, msg: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
+            res.send({err: err, user: null, msg: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
             res.end();
             return;
         }
