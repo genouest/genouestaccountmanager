@@ -22,6 +22,8 @@ export class ProjectComponent implements OnInit {
     new_user: any
     remove_user: any
     
+    dmp_err_msg: string
+    dmp_msg: string
 
     manager_visible: boolean
 
@@ -146,23 +148,29 @@ export class ProjectComponent implements OnInit {
     }
 
     request_dmp_data() {
-
-        console.log("Getting data")
-        this.request_msg = '';
-        this.request_err_msg = '';
+        console.log(this.new_project.dmp_key)
+        this.dmp_msg = '';
+        this.dmp_err_msg = '';
+        if ([undefined, ""].includes(this.new_project.dmp_key)) {
+            this.dmp_err_msg = 'The DMP key field is empty';
+            return;
+        }
         this.projectsService.askDmpData(this.new_project).subscribe(
             resp => {
-                this.request_msg = 'Loading sucessful';
-                this.new_project.id = resp.DMP_data.title;
+                this.dmp_msg = 'Loaded the data sucessfully';
+                this.new_project.id = {
+                    ...resp.DMP_data.title,
+                    ...this.new_project.id};
                 console.log(resp.DMP_data)
-                
+
             },
             err => {
-                console.log('failed to get DMP', err);
-                this.request_err_msg = err.error;
+                console.log('failed to get the DMP data', err);
+                this.dmp_err_msg = err.error;
             }
         )
     }
+
 
 
 }

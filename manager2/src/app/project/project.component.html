@@ -24,12 +24,16 @@
             <div class="row col-sm-8"><label for="new_project_dmp">DMP access key </label></div>
             <div class="row">
               <div class="col-sm-8">
-                <input placeholder="Paste key" type="string" id="new_project_size" [ngModelOptions]="{standalone: true}"
+                <input placeholder="Paste key" type="string" id="DMP_key" [ngModelOptions]="{standalone: true}"
                   [(ngModel)]="new_project.dmp_key" class="form-control" />
                 <small id="nameHelp" class="form-text text-muted"><i>Optional, but highly recommended: <a
                       href="https://dmp.opidor.fr/" target="_blank">Create one</a></i></small></div>
               <div class="col"><button type="button" class="btn btn-outline-primary"
                   (click)="request_dmp_data()">Load</button></div>
+              <div class="col-sm-8">
+                  <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
+                  <div *ngIf="dmp_msg" class="alert alert-info">{{dmp_msg}}</div>
+                </div>
             </div>
 
 
