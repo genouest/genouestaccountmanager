@@ -414,7 +414,6 @@ router.post('/ask/project', async function(req, res){
 });
 
 router.post('/askDmp', async function(req, res){
-<<<<<<< HEAD
     // if(! req.locals.logInfo.is_logged){
     //     res.status(401).send('Not authorized');
     //     return;
@@ -428,23 +427,6 @@ router.post('/askDmp', async function(req, res){
     //     return;
     // }
     let DMP_data = {title: 'Test'};
-=======
-    console.log("on y est!")
-    if(! req.locals.logInfo.is_logged){
-        res.status(401).send('Not authorized');
-        return;
-    }
-    // if(! utils.sanitizeAll([req.params.id])) {
-    //     res.status(403).send('Invalid parameters');
-    //     return;
-    // }
-    
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
-        return;
-    }
-    DMP_data = {title: "Test"}
->>>>>>> parent of b23dc3c... remove tests
     // try {
     //     print("Getting DMP from Opidor...")
     //     DMP_data = {}
