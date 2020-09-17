@@ -179,6 +179,22 @@ export class ProjectsService {
         );
     }
 
+    pingDmpDatabase(new_project: any): Observable<any> {
+        //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
+        // let user = this.authService.profile;
+        console.log("asking")
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+
+        };
+        return this.http.post(
+            environment.apiUrl + '/askDmp',
+            new_project,
+            httpOptions
+        );
+    }
     askDmpData(new_project: any): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;

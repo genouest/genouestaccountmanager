@@ -1,90 +1,101 @@
-  <div *ngIf="notification" class="alert alert-success">{{notification}}</div>
-  <div class="card bg-light">
-    <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
-      <h3>{{requests_number}} request(s) waiting </h3>
-    </div>
-    <div *ngIf="requests_visible" class="card-body">
-      <div class="row">
-        <div class="col-md-12">
-          <div *ngIf="request_mngt_msg" class="alert alert-success">{{request_mngt_msg}}</div>
-          <div *ngIf="request_grp_msg" class="alert alert-success">{{request_grp_msg}}</div>
-          <div *ngIf="request_mngt_error_msg" class="alert alert-danger">{{request_mngt_error_msg}}</div>
-        </div>
-        <div class="col-md-6">
-          <div class="card bg-light">
-            <div class="card-header">
-              <h3>Add user</h3>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table id="dtAddRequests" datatable [dtTrigger]="dtTriggerAdd" class="table table-striped">
-                  <thead><tr>
+<div *ngIf="notification" class="alert alert-success">{{notification}}</div>
+<div class="card bg-light">
+  <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
+    <h3>{{requests_number}} request(s) waiting </h3>
+  </div>
+  <div *ngIf="requests_visible" class="card-body">
+    <div class="row">
+      <div class="col-md-12">
+        <div *ngIf="request_mngt_msg" class="alert alert-success">{{request_mngt_msg}}</div>
+        <div *ngIf="request_grp_msg" class="alert alert-success">{{request_grp_msg}}</div>
+        <div *ngIf="request_mngt_error_msg" class="alert alert-danger">{{request_mngt_error_msg}}</div>
+      </div>
+      <div class="col-md-6">
+        <div class="card bg-light">
+          <div class="card-header">
+            <h3>Add user</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="dtAddRequests" datatable [dtTrigger]="dtTriggerAdd" class="table table-striped">
+                <thead>
+                  <tr>
                     <th>Project</th>
                     <th>User</th>
                     <th></th>
                     <th></th>
-                  </tr></thead>
-                  <tbody>
-                    <tr *ngFor="let request of add_requests">
-                      <td>{{request.project.id}}</td>
-                      <td>{{request.user}}</td>
-                      <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span class="label label-success">Add</span></td>
-                      <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span class="label label-danger">Cancel</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let request of add_requests">
+                    <td>{{request.project.id}}</td>
+                    <td>{{request.user}}</td>
+                    <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span
+                        class="label label-success">Add</span></td>
+                    <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span
+                        class="label label-danger">Cancel</span></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="card bg-light">
-            <div class="card-header">
-              <h3>Remove user</h3>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table id="dtRemoveRequests" datatable [dtTrigger]="dtTriggerRemove" class="table table-striped">
-                  <thead><tr>
+      </div>
+      <div class="col-md-6">
+        <div class="card bg-light">
+          <div class="card-header">
+            <h3>Remove user</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="dtRemoveRequests" datatable [dtTrigger]="dtTriggerRemove" class="table table-striped">
+                <thead>
+                  <tr>
                     <th>Project</th>
                     <th>User</th>
                     <th></th>
                     <th></th>
-                  </tr></thead>
-                  <tbody>
-                    <tr *ngFor="let request of remove_requests">
-                      <td>{{request.project.id}}</td>
-                      <td>{{request.user}}</td>
-                      <td><button type="button" class="btn btn-success" (click)="validate_remove_request(request.project,request.user)">Remove</button></td>
-                      <td><button type="button" class="btn btn-danger" (click)="remove_request(request.project,request.user, 'remove')">Cancel</button></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let request of remove_requests">
+                    <td>{{request.project.id}}</td>
+                    <td>{{request.user}}</td>
+                    <td><button type="button" class="btn btn-success"
+                        (click)="validate_remove_request(request.project,request.user)">Remove</button></td>
+                    <td><button type="button" class="btn btn-danger"
+                        (click)="remove_request(request.project,request.user, 'remove')">Cancel</button></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="card bg-light">
+</div>
+<div class="card bg-light">
   <div class="card-header">
     <h3>All projects</h3>
   </div>
   <div class="card-body">
     <div class="table-responsive">
       <table id="dtProjects" datatable [dtTrigger]="dtTriggerProjects" class="table table-striped">
-        <thead><tr>
-          <th>Project</th>
-          <th>Owner</th>
-          <th>Group</th>
-          <th>Path</th>
-          <th>Size (Go)</th>
-          <th>Expiration</th>
-        </tr></thead>
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Owner</th>
+            <th>Group</th>
+            <th>Path</th>
+            <th>Size (Go)</th>
+            <th>Expiration</th>
+          </tr>
+        </thead>
         <tbody>
           <tr *ngFor="let project of projects">
-            <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
+            <td><a routerLink="/admin/project/{{project.id}}"><span
+                  class="label label-primary">{{project.id}}</span></a></td>
             <td>{{project.owner}}</td>
             <td>{{project.group}}</td>
             <td>{{project.path}}</td>
@@ -95,85 +106,107 @@
       </table>
     </div>
   </div>
+</div>
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Project creation</h3>
   </div>
-  <div class="card bg-light">
-    <div class="card-header">
-      <h3>Project creation</h3>
-    </div>
-    <div class="card-body">
-      <div *ngIf="add_project_msg" class="alert alert-success">{{add_project_msg}}</div>
-      <div *ngIf="add_project_error_msg" class="alert alert-danger">{{add_project_error_msg}}</div>
-      <form role="form" class="user-form form-horizonal">
-        <div class="form-group row">
-          <div class="col-sm-2">
-            <label for="project_id">Name&nbsp;
-              <span style="color:red">(required)&nbsp;</span>
-              <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
-            </label>
-            <input placeholder="project name" type="text" id="project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
-          </div>
-          <div class="col-sm-2">
-            <label for="project_owner">Owner&nbsp;
-              <span style="color:red">(required)&nbsp;</span>
-              <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" tooltip> </span>
-            </label>
-             <select id="project_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.owner" class="form-control">
-                <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
-             </select>
-          </div>
-          <div class="col-sm-2">
-            <label for="project_group">Group&nbsp;
-              <span style="color:red">(required)&nbsp;</span>
-              <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" tooltip> </span>
-            </label>
-            <select  id="project_group" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.group" class="form-control">
-                <option *ngFor="let group of groups" [value]="group.name">{{group.name}}</option>
-            </select>
-          </div>
-          <div class="col-sm-2">
-            <label for="project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="project_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
-          </div>
-          <div class="col-sm-2">
-            <label for="project_expire">Expiration date</label>
-            <input type="date" id="project_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.expire" class="form-control"/>
-          </div>
-          <div class="col-sm-2">
-            <label for="project_org">Financing&nbsp;
-              <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
-            </label>
-            <input placeholder="Ex : CNRS" type="text" id="project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
-          </div>
+  <div class="card-body">
+    <div *ngIf="add_project_msg" class="alert alert-success">{{add_project_msg}}</div>
+    <div *ngIf="add_project_error_msg" class="alert alert-danger">{{add_project_error_msg}}</div>
+    <form role="form" class="user-form form-horizonal">
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label for="project_id">Name&nbsp;
+            <span style="color:red">(required)&nbsp;</span>
+            <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
+          </label>
+          <input placeholder="project name" type="text" id="project_id" [ngModelOptions]="{standalone: true}"
+            [(ngModel)]="new_project.id" class="form-control" />
         </div>
-        <div class="form-group row">
-          <div class="col-sm-12">
-            <label for="project_description">Description</label>
-            <textarea placeholder="A short description for the project" rows="2" id="project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
-          </div>
+        <div class="col-sm-2">
+          <label for="project_owner">Owner&nbsp;
+            <span style="color:red">(required)&nbsp;</span>
+            <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" tooltip> </span>
+          </label>
+          <select id="project_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.owner"
+            class="form-control">
+            <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
+          </select>
         </div>
-        <div class="form-group row">
-          <div class="col-sm-2">
-            <label >Write permission&nbsp;
-              <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
-            </label>
-            <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.access" class="form-control">
-              <option value="Group" [selected]="true" >Group</option>
-              <option value="Data manager">Data manager</option>
-            </select>
-          </div>
-          <div class="col-sm-3">
-            <label >Path to project&nbsp;
-              <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" tooltip> </span>
-            </label>
-            <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
-          </div>
+        <div class="col-sm-2">
+          <label for="project_group">Group&nbsp;
+            <span style="color:red">(required)&nbsp;</span>
+            <span class="glyphicon glyphicon-question-sign" data-html="true"
+              title="Unix group: <br> Project members will be added to it" tooltip> </span>
+          </label>
+          <select id="project_group" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.group"
+            class="form-control">
+            <option *ngFor="let group of groups" [value]="group.name">{{group.name}}</option>
+          </select>
         </div>
-        <div class="form-group row">
-          <div class="col-sm-2">
-            <label style="opacity: 0;">Create</label>
-            <button type="button" class="btn btn-success" (click)="add_project()">Create</button>
-          </div>
+        <div class="col-sm-2">
+          <label for="project_size">Size (GB)</label>
+          <input placeholder="project size in G" type="number" id="project_size" [ngModelOptions]="{standalone: true}"
+            [(ngModel)]="new_project.size" class="form-control" />
         </div>
-      </form>
-    </div>
+        <div class="col-sm-2">
+          <label for="project_expire">Expiration date</label>
+          <input type="date" id="project_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.expire"
+            class="form-control" />
+        </div>
+        <div class="col-sm-2">
+          <label for="project_org">Financing&nbsp;
+            <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
+          </label>
+          <input placeholder="Ex : CNRS" type="text" id="project_org" [ngModelOptions]="{standalone: true}"
+            [(ngModel)]="new_project.orga" class="form-control" />
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-12">
+          <label for="project_description">Description</label>
+          <textarea placeholder="A short description for the project" rows="2" id="project_description"
+            [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label>Write permission&nbsp;
+            <span class="glyphicon glyphicon-question-sign" data-html="true"
+              title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
+          </label>
+          <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.access"
+            class="form-control">
+            <option value="Group" [selected]="true">Group</option>
+            <option value="Data manager">Data manager</option>
+          </select>
+        </div>
+        <div class="col-sm-3">
+          <label>Path to project&nbsp;
+            <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" tooltip> </span>
+          </label>
+          <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [ngModelOptions]="{standalone: true}"
+            [(ngModel)]="new_project.path" class="form-control" />
+        </div>
+        <div class="col-sm-3">
+          <div class="row"><label for="new_project_dmp">DMP access key </label>
+            <div class="row">
+              <input placeholder="Paste key" type="string" id="DMP_key" [ngModelOptions]="{standalone: true}"
+                [(ngModel)]="new_project.dmp_key" class="form-control" />
+              </div>
+              <div class="col"><button type="button" class="btn btn-outline-primary"
+                (click)="request_dmp_data()">Load</button></div>
+        </div>
+      </div>
+
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label style="opacity: 0;">Create</label>
+          <button type="button" class="btn btn-success" (click)="add_project()">Create</button>
+        </div>
+      </div>
+    </form>
   </div>
+</div>

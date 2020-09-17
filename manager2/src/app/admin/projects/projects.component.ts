@@ -40,6 +40,9 @@ export class ProjectsComponent implements OnInit {
     groups: any[]
     all_users: any[]
     new_project: any
+    
+    dmp_msg: any
+    dmp_err_msg: any
 
     constructor(
         private route: ActivatedRoute,
@@ -260,5 +263,26 @@ export class ProjectsComponent implements OnInit {
     date_convert = function timeConverter(tsp){
         var a = new Date(tsp);
         return a.toLocaleDateString();
+    }
+
+    request_dmp_data() {
+        console.log(this.new_project.dmp_key)
+        this.dmp_msg = '';
+        this.dmp_err_msg = '';
+        if ([undefined, ""].includes(this.new_project.dmp_key)) {
+            this.dmp_err_msg = 'The DMP key field is empty';
+            return;
+        }
+        this.projectService.askDmpData(this.new_project).subscribe(
+            resp => {
+                this.dmp_msg = 'Successfuly loaded the DMP data';
+                console.log(resp.ping)
+
+            },
+            err => {
+                console.log('failed to reach the DMP database with your key', err);
+                this.dmp_err_msg = err.error;
+            }
+        )
     }
 }
