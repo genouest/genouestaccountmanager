@@ -110,7 +110,7 @@ router.post('/project', async function(req, res){
         'owner': req.body.owner,
         'group': req.body.group,
         'size': req.body.size,
-        'expire': req.bodyexpire,
+        'expire': req.body.expire,
         'description': req.body.description,
         'path': req.body.path,
         'orga': req.body.orga,
