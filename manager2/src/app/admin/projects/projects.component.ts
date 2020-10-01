@@ -125,10 +125,6 @@ export class ProjectsComponent implements OnInit {
                 this.projectService.removeRequest(project.id, {'request': 'add', 'user': user_id}).subscribe(
                     resp => {
                         this.project_list(true);
-                        /* this.userService.addGroup(user_id, project.group).subscribe(
-                            resp => this.request_grp_msg = resp['message'],
-                            err => this.request_mngt_error_msg = err.error
-                        ) */
                     },
                     err => this.request_mngt_error_msg = err.error
                 )
