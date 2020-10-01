@@ -98,8 +98,8 @@ export class ProjectComponent implements OnInit {
     show_project_users(projectId) {
         this.projectsService.get(projectId).subscribe(
             resp => {
-                resp.expire = this.date_convert(resp.expire);
                 this.project = resp;
+                project.expire = (resp.expire) ? this.date_convert(resp.expire) : this.date_convert(new Date());
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
                         this.users = resp;
