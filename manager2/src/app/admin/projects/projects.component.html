@@ -110,7 +110,7 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input placeholder="project name" type="text" id="project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <input placeholder="project name" type="text" (ngModelChange)="update_project_on_event($event)" id="project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
           </div>
           <div class="col-sm-2">
             <label for="project_owner">Owner&nbsp;
