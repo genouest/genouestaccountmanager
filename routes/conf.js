@@ -51,7 +51,8 @@ function init () {
             conf.project = {
                 'enable_group': true,
                 'default_size': 500,
-                'default_path': '/opt/project'
+                'default_path': '/opt/project',
+                'default_expire': 360
             };
         }
 
