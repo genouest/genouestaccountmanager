@@ -110,7 +110,7 @@ var create_extra_user = async function(user_name, group, internal_user){
         gidnumber: -1,
         cloud: false,
         duration: '1 year',
-        expiration: new Date().getTime() + 1000*3600*24*3,
+        expiration: new Date().getTime() + day_time*360,
         loginShell: '/bin/bash',
         history: [],
         password: password
