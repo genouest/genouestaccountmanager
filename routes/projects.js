@@ -3,7 +3,8 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-var CONFIG = require('config');
+const conf = require('../routes/conf.js');
+var CONFIG = conf.get_conf();
 var GENERAL_CONFIG = CONFIG.general;
 
 // var cookieParser = require('cookie-parser');
@@ -11,6 +12,8 @@ var GENERAL_CONFIG = CONFIG.general;
 
 const filer = require('../routes/file.js');
 var utils = require('./utils');
+
+let day_time = 1000 * 60 * 60 * 24;
 
 router.get('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -110,7 +113,7 @@ router.post('/project', async function(req, res){
         'owner': req.body.owner,
         'group': req.body.group,
         'size': req.body.size,
-        'expire': req.body.expire,
+        'expire': (req.body.expire) ? req.body.expire : new Date().getTime() + CONFIG.project.default.expire * day_time,
         'description': req.body.description,
         'path': req.body.path,
         'orga': req.body.orga,
@@ -193,7 +196,7 @@ router.post('/project/:id', async function(req, res){
         'owner': req.body.owner,
         'group': req.body.group,
         'size': req.body.size,
-        'expire': req.body.expire,
+        'expire': (req.body.expire) ? req.body.expire : new Date().getTime() +  CONFIG.project.default.expire * day_time,
         'description': req.body.description,
         'access': req.body.access,
         'orga': req.body.orga,
