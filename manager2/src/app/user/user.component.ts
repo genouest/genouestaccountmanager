@@ -460,9 +460,14 @@ export class UserComponent implements OnInit {
         this.userService.extend(this.user.uid, this.user.regkey).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.user.expiration = resp['expiration']
+                this.user.expiration = resp['expiration'];
+                this._flashMessagesService.show('Your account validity period has been extended', { cssClass: 'alert-success', timeout: 5000 });
+
+
             },
-            err => console.log('failed to extend user', err)
+            err => {
+                console.log('failed to extend user', err)
+            }
         )
     }
 
