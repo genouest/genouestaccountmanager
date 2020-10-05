@@ -140,9 +140,16 @@ export class UserComponent implements OnInit {
 
     }
 
-    dateConvert = function timeConverter(tsp){
-        var a = new Date(tsp);
-        return a.toLocaleDateString();
+    date_convert = function timeConverter(tsp){
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
     initUser = function() {
