@@ -122,25 +122,25 @@ export class ProjectComponent implements OnInit {
 
     }
 
-    add_user(project, userId) {
+    add_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
-        this.userService.addToProject(userId, project.id).subscribe(
+        this.userService.addToProject(this.new_user_admin, this.project.id).subscribe(
             resp => {
                 this.admin_user_msg = resp['message'];
-                this.show_project_users(project.id);
+                this.show_project_users(this.project.id);
             },
             err => this.admin_user_err_msg = err.error
         )
     }
 
-    remove_user(project, userId) {
+    remove_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
-        this.userService.removeFromProject(userId, project.id).subscribe(
+        this.userService.removeFromProject(this.remove_user_admin, this.project.id).subscribe(
             resp => {
                 this.admin_user_msg = resp['message'];
-                this.show_project_users(project.id);
+                this.show_project_users(this.project.id);
             },
             err => this.admin_user_err_msg = err.error
         );
