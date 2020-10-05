@@ -29,7 +29,7 @@
                 <small id="nameHelp" class="form-text text-muted"><i>Optional, but highly recommended: <a
                       href="https://dmp.opidor.fr/" target="_blank">Create one</a></i></small></div>
               <div class="col"><button type="button" class="btn btn-outline-primary"
-                  (click)="ping_dmp_data()">Load</button></div>
+                  (click)="ping_dmp_data()">Ping</button></div>
               <div class="col-sm-8">
                   <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
                   <div *ngIf="dmp_msg" class="alert alert-success">{{dmp_msg}}</div>

@@ -86,6 +86,10 @@
     "admin_password": "my",
     "team" : "genouest"
   },
+  "dmp": {
+    "client_id": "id",
+    "client_secret": "secret"
+  },
   "mysql": {
     "host": "mysql",
     "user": "root",
