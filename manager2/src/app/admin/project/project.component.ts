@@ -110,6 +110,9 @@ export class ProjectComponent implements OnInit {
                             }
                         }
                         this.renderDataTables();
+                        this.remove_user_admin = '';
+                        this.new_user_admin = '';
+
                     },
                     err => console.log('failed to get project users')
                 )
