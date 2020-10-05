@@ -195,11 +195,15 @@ export class ProjectComponent implements OnInit {
     }
 
     date_convert = function timeConverter(tsp){
-        if (!tsp) {
-            tsp = new Date();
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
         }
-        var a = new Date(tsp);
-        return a.toISOString().substring(0, 10)
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
 }
