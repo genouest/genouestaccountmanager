@@ -35,8 +35,15 @@ export class UserExtendComponent implements OnInit {
     }
 
     date_convert = function timeConverter(tsp){
-        var a = new Date(tsp);
-        return a.toLocaleDateString();
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
 }
