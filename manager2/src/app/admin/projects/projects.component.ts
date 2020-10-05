@@ -168,7 +168,9 @@ export class ProjectsComponent implements OnInit {
     update_project_on_event(new_value) {
         let tmpprojectid = new_value.replace(/[^0-9a-z]+/gi,'_').toLowerCase();
         this.new_project.path = this.config.project.default_path + '/' +  tmpprojectid;
-        // this.new_project.id = tmpprojectid; // todo: maybe add an option to enable or disable this one
+        // warning: for this.new_project.id, (ngModelChange) must be after [ngModel] in html line
+        // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
+        this.new_project.id = tmpprojectid; // todo: maybe add an option to enable or disable this one
     }
 
 
