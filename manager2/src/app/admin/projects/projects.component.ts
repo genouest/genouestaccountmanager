@@ -42,6 +42,8 @@ export class ProjectsComponent implements OnInit {
     all_users: any[]
     new_project: any
 
+    day_time: number
+
     constructor(
         private route: ActivatedRoute,
         private configService: ConfigService,
@@ -50,6 +52,7 @@ export class ProjectsComponent implements OnInit {
         private userService: UserService
     ) {
         this.config = {};
+        this.day_time = 1000 * 60 * 60 * 24;
     }
 
     ngOnDestroy(): void {
@@ -104,6 +107,7 @@ export class ProjectsComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
+                this.new_project.expire = this.date_convert(new Date().getTime() + config.project.default_expire * this.day_time)
             },
             err => console.log('failed to get config')
         );
