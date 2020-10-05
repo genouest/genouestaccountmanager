@@ -4,9 +4,9 @@ import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
-
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
+import * as latinize from 'latinize'
 
 @Component({
     selector: 'app-projects',
@@ -170,7 +170,7 @@ export class ProjectsComponent implements OnInit {
 
 
     update_project_on_event(new_value) {
-        let tmpprojectid = new_value.replace(/[^0-9a-z]+/gi,'_').toLowerCase();
+        let tmpprojectid = latinize(new_value.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
         this.new_project.path = this.config.project.default_path + '/' +  tmpprojectid;
         // warning: for this.new_project.id, (ngModelChange) must be after [ngModel] in html line
         // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
