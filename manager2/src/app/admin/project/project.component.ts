@@ -44,7 +44,7 @@ export class ProjectComponent implements OnInit {
             owner: '',
             group: '',
             size: 0,
-            expire: new Date(),
+            expire: '',
             orga: '',
             description: '',
             access: 'Group',
@@ -99,7 +99,7 @@ export class ProjectComponent implements OnInit {
         this.projectsService.get(projectId).subscribe(
             resp => {
                 this.project = resp;
-                this.project.expire = (resp.expire) ? this.date_convert(resp.expire) : this.date_convert(new Date());
+                this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
                         this.users = resp;
@@ -195,9 +195,11 @@ export class ProjectComponent implements OnInit {
     }
 
     date_convert = function timeConverter(tsp){
+        if (!tsp) {
+            tsp = new Date();
+        }
         var a = new Date(tsp);
         return a.toISOString().substring(0, 10)
-        //return a.toLocaleDateString();
     }
 
 }

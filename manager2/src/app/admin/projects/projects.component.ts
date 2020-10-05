@@ -79,7 +79,7 @@ export class ProjectsComponent implements OnInit {
             owner: '',
             group: '',
             size: 0,
-            expire: new Date(),
+            expire: '',
             orga: '',
             description: '',
             access: 'Group',
@@ -268,7 +268,10 @@ export class ProjectsComponent implements OnInit {
     }
 
     date_convert = function timeConverter(tsp){
+        if (!tsp) {
+            tsp = new Date();
+        }
         var a = new Date(tsp);
-        return a.toLocaleDateString();
+        return a.toISOString().substring(0, 10)
     }
 }
