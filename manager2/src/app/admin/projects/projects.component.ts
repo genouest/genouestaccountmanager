@@ -107,7 +107,7 @@ export class ProjectsComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                this.new_project.expire = this.date_convert(new Date().getTime() + config.project.default_expire * this.day_time)
+                this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
             },
             err => console.log('failed to get config')
         );
