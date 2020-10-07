@@ -26,13 +26,8 @@ COPY plugins /root/genouestaccountmanager/plugins
 COPY public /root/genouestaccountmanager/public
 COPY routes /root/genouestaccountmanager/routes
 COPY templates /root/genouestaccountmanager/templates
-COPY views /root/genouestaccountmanager/views
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
-# Disable old manager
-#COPY manager /root/genouestaccountmanager/manager
-#RUN npm install -g bower
-#RUN bower install --allow-root
 RUN mkdir -p /opt/my/readmes/readmes1
 RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts
