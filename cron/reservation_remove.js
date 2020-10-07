@@ -3,9 +3,9 @@ var Promise = require('promise');
 
 var CONFIG = require('config');
 
-var tps = require('./routes/tp.js');
+var tps = require('../routes/tp.js');
 
-var utils = require('./routes/utils');
+var utils = require('../routes/utils');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({

@@ -8,7 +8,7 @@ var CONFIG = require('config');
 
 var ObjectID = require('mongodb').ObjectID;
 
-var utils = require('./routes/utils');
+var utils = require('../routes/utils');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -21,7 +21,7 @@ winston.loggers.add('gomngr', {
 
 const logger = winston.loggers.get('gomngr');
 
-var tps = require('./routes/tp.js');
+var tps = require('../routes/tp.js');
 
 if (!console.table){
     require('console.table');
@@ -77,7 +77,7 @@ function createReservations(rid) {
         processArray(reservations, processReservation).then(function(){
             process.exit(0);
         });
-    });    
+    });
 }
 
 function removeReservations(rid) {
@@ -97,7 +97,7 @@ function removeReservations(rid) {
             'to': {'$lte': ended_after.getTime()},
             'created': true,
             'over': false
-            
+
         };
     }
     logger.info('[INFO] Check for ending reservations');
@@ -170,4 +170,3 @@ utils.init_db().then(() => {
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });
-
