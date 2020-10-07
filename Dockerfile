@@ -16,7 +16,7 @@ RUN mkdir -p /root/genouestaccountmanager
 WORKDIR /root/genouestaccountmanager
 
 
-COPY *.json .bowerrc /root/genouestaccountmanager/
+COPY *.json /root/genouestaccountmanager/
 RUN npm ci
 COPY *.js /root/genouestaccountmanager/
 
