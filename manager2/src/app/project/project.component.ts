@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
 import { GroupsService} from 'src/app/admin/groups/groups.service';
 import { Subject } from 'rxjs';
@@ -19,6 +20,7 @@ export class ProjectComponent implements OnInit {
     groups: any
     selectedProject: any
     session_user: any
+    config: any
     new_user: any
     remove_user: any
 
@@ -39,11 +41,14 @@ export class ProjectComponent implements OnInit {
 
     constructor(
         private authService: AuthService,
+        private configService: ConfigService,
         private projectsService: ProjectsService,
         private userService: UserService,
         private groupService: GroupsService,
         private router: Router
-    ) { }
+    ) {
+        this.config = {}
+    }
 
     ngOnDestroy(): void {
         this.dtTrigger.unsubscribe();
@@ -67,6 +72,14 @@ export class ProjectComponent implements OnInit {
             },
             err => console.log('failed to get projects')
         )
+
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+            },
+            err => console.log('failed to get config')
+        )
+
     }
 
     ask_for_project() {
@@ -140,9 +153,14 @@ export class ProjectComponent implements OnInit {
     }
 
     date_convert = function timeConverter(tsp){
-        var a = new Date(tsp);
-        return a.toLocaleDateString();
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
-
-
 }

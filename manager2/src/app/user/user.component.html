@@ -5,7 +5,7 @@
           <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
            -
-           <small>Expires: {{dateConvert(user.expiration)}}</small></h2>
+           <small>Expires: {{date_convert(user.expiration)}}</small></h2>
           <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
       </div>
       <div class="col-sm-6">
@@ -313,7 +313,7 @@
                 <div class="col-sm-6">
                     <label for="newgroup" class="col-form-label">Groups</label>
                     <select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newgroup" class="form-control">
-                        <option *ngFor="let group of groups">{{group.name}}</option>
+                        <option *ngFor="let group of groups" [ngValue]="group.name">{{group.name}}</option>
                     </select>
                 </div>
             </div>

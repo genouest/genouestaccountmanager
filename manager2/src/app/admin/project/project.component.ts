@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
@@ -16,6 +16,7 @@ export class ProjectComponent implements OnInit {
 
     dtTrigger: Subject<any> = new Subject()
 
+    config: any
     project: any
     groups: any[]
     users: any[]
@@ -32,6 +33,7 @@ export class ProjectComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private configService: ConfigService,
         private router: Router,
         private groupService: GroupsService,
         private projectsService: ProjectsService,
@@ -42,7 +44,7 @@ export class ProjectComponent implements OnInit {
             owner: '',
             group: '',
             size: 0,
-            expire: new Date(),
+            expire: '',
             orga: '',
             description: '',
             access: 'Group',
@@ -51,6 +53,7 @@ export class ProjectComponent implements OnInit {
         this.users = [];
         this.groups = [];
         this.all_users = [];
+        this.config = {};
     }
 
     ngOnDestroy(): void {
@@ -83,13 +86,20 @@ export class ProjectComponent implements OnInit {
             resp => this.all_users = resp,
             err => console.log('failed to get all users')
         );
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+            },
+            err => console.log('failed to get config')
+        );
+
     }
 
     show_project_users(projectId) {
         this.projectsService.get(projectId).subscribe(
             resp => {
-                resp.expire = this.date_convert(resp.expire);
                 this.project = resp;
+                this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
                         this.users = resp;
@@ -100,6 +110,9 @@ export class ProjectComponent implements OnInit {
                             }
                         }
                         this.renderDataTables();
+                        this.remove_user_admin = '';
+                        this.new_user_admin = '';
+
                     },
                     err => console.log('failed to get project users')
                 )
@@ -109,33 +122,31 @@ export class ProjectComponent implements OnInit {
 
     }
 
-    add_user(project, userId) {
+    add_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
-        this.userService.addToProject(userId, project.id).subscribe(
+        this.userService.addToProject(this.new_user_admin, this.project.id).subscribe(
             resp => {
                 this.admin_user_msg = resp['message'];
-                this.userService.addGroup(userId, project.group).subscribe(
-                    resp => this.show_project_users(project.id),
-                    err => this.admin_user_err_msg = err.error
-                )
+                this.show_project_users(this.project.id);
             },
             err => this.admin_user_err_msg = err.error
         )
     }
 
-    remove_user(project, userId) {
+    remove_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
-        this.userService.removeFromProject(userId, project.id).subscribe(
+        this.userService.removeFromProject(this.remove_user_admin, this.project.id).subscribe(
             resp => {
                 this.admin_user_msg = resp['message'];
-                this.show_project_users(project.id);
+                this.show_project_users(this.project.id);
             },
             err => this.admin_user_err_msg = err.error
         );
     }
 
+    // todo: maybe move this in backend too
     update_users_group(usersList, newGroupId){
         for(var i = 0; i< usersList.length; i++){
             this.userService.addGroup(usersList[i].uid, newGroupId).subscribe(
@@ -168,7 +179,7 @@ export class ProjectComponent implements OnInit {
                 'size': project.size,
                 'expire': new Date(project.expire).getTime(),
                 'owner': project.owner,
-                'group': project.group,
+                'group': this.config.project.enable_group ? project.group : '',
                 'description' : project.description,
                 'access' : project.access,
                 'path': project.path,
@@ -177,7 +188,7 @@ export class ProjectComponent implements OnInit {
         ).subscribe(
             resp => {
                 this.prj_msg = resp['message'];
-                if(project.group !== this.oldGroup) {
+                if(this.config.project.enable_group && project.group !== this.oldGroup) {
                     this.update_users_group(this.users, project.group);
                 }
                 this.show_project_users(project);
@@ -187,9 +198,15 @@ export class ProjectComponent implements OnInit {
     }
 
     date_convert = function timeConverter(tsp){
-        var a = new Date(tsp);
-        return a.toISOString().substring(0, 10)
-        //return a.toLocaleDateString();
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
 }

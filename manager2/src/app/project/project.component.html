@@ -19,7 +19,7 @@
 
           <div class="form-group row col-sm-8">
             <label for="new_project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="new_project_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+            <input placeholder="project size in G" type="number" id="new_project_size" [value]="config.project.default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
@@ -61,7 +61,7 @@
         <thead><tr>
             <th>Project</th>
             <th>Owner</th>
-            <th>Group</th>
+            <th *ngIf="!config.project || config.project.enable_group">Group</th>
             <th>Path</th>
             <th>Size (Go)</th>
             <th>Expiration</th>
@@ -70,7 +70,7 @@
           <tr *ngFor="let project of projects">
             <td (click)="show_project_users(project)" style="cursor: pointer;"><span class="label label-primary">{{project.id}}</span></td>
             <td>{{project.owner}}</td>
-            <td>{{project.group}}</td>
+            <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
             <td>{{project.path}}</td>
             <td>{{project.size}}</td>
             <td>{{date_convert(project.expire)}}</td>

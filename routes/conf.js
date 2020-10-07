@@ -12,7 +12,7 @@ var utils = require('./utils');
 
 let is_init = false;
 let conf = null;
-// todo: should add all default value here
+// todo: maybe add a file in config with all the default value, load it and overide it with custom config
 function init () {
     if (!is_init) {
         conf = CONFIG;
@@ -47,6 +47,15 @@ function init () {
         conf.enable_ui.main_group = CONFIG.general.use_group_in_path;
         conf.enable_ui.user_group = !CONFIG.general.disable_user_group;
 
+        if (!conf.project) {
+            conf.project = {
+                'enable_group': true,
+                'default_size': 500,
+                'default_path': '/opt/project',
+                'default_expire': 360
+            };
+        }
+
 
         is_init = true;
     }
@@ -71,7 +80,8 @@ router.get('/conf', async function(req, res){
         'origin': MAIL_CONFIG.origin,
         'max_account': false,
         'enable_ui': my_conf.enable_ui,
-        'duration': Object.keys(my_conf.duration)
+        'duration': Object.keys(my_conf.duration),
+        'project': my_conf.project,
     };
 
     // should be check on each call

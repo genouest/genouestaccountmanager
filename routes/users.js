@@ -110,7 +110,7 @@ var create_extra_user = async function(user_name, group, internal_user){
         gidnumber: -1,
         cloud: false,
         duration: '1 year',
-        expiration: new Date().getTime() + 1000*3600*24*3,
+        expiration: new Date().getTime() + day_time*360,
         loginShell: '/bin/bash',
         history: [],
         password: password
@@ -614,6 +614,44 @@ router.get('/user', async function(req, res) {
     res.json(users);
 });
 
+var add_user_to_group = async function (uid, secgroup, action_owner) {
+    logger.info('Adding user ' + uid + ' to group ' + secgroup);
+    let user = await utils.mongo_users().findOne({uid: uid});
+    if(!user){
+        throw {code: 404, msg:'User not found'};
+    }
+    if(secgroup == user.group) {
+        throw {code: 208, msg: 'Group is user main\'s group: '+user.group};
+    }
+    if(!user.secondarygroups) {
+        user.secondarygroups = [];
+    }
+    for(let g=0;g < user.secondarygroups.length;g++){
+        if(secgroup == user.secondarygroups[g]) {
+            throw {code: 208, msg: 'group is already set'};
+        }
+    }
+    user.secondarygroups.push(secgroup);
+    let fid = new Date().getTime();
+    // Now add group
+    await goldap.change_user_groups(user, [secgroup], [], fid);
+    try {
+        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+    } catch(err) {
+        throw {code: 500, msg: 'Could not update user'};
+    }
+
+    try {
+        let created_file = await filer.user_change_group(user, fid);
+        logger.info('File Created: ', created_file);
+        await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to secondary  group ' + secgroup , 'logs': [created_file]});
+    } catch(error){
+        logger.error('Group Change Failed for: ' + user.uid, error);
+        throw {code: 500, msg:'Change Group Failed'};
+    }
+
+
+};
 
 router.post('/user/:id/group/:group', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -636,50 +674,25 @@ router.post('/user/:id/group/:group', async function(req, res){
     }
     let uid = req.params.id;
     let secgroup = req.params.group;
-    let user = await utils.mongo_users().findOne({uid: uid});
-    if(!user){
-        res.status(404).send('User not found');
-        return;
-    }
-    if(secgroup == user.group) {
-        res.send({message: 'Group is user main\'s group: '+user.group});
-        res.end();
-        return;
-    }
-    for(let g=0;g < user.secondarygroups.length;g++){
-        if(secgroup == user.secondarygroups[g]) {
-            res.send({message: 'group is already set'});
+
+    try {
+        await add_user_to_group(uid, secgroup, session_user.uid);
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.msg) {
+            res.status(e.code).send(e.msg);
+            res.end();
+            return;
+        } else {
+            res.status(500).send('Server Error, contact admin');
             res.end();
             return;
         }
     }
-    user.secondarygroups.push(secgroup);
-    let fid = new Date().getTime();
-    // Now add group
-    await goldap.change_user_groups(user, [secgroup], [], fid);
-    try {
-        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
-    } catch(err) {
-        res.send({message: 'Could not update user'});
-        res.end();
-        return;
-    }
 
-    try {
-        let created_file = await filer.user_change_group(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch(error){
-        logger.error('Group Change Failed for: ' + user.uid, error);
-        res.status(500).send('Change Group Failed');
-        return;
-    }
-
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
-    res.send({message: 'User added to group', fid: fid});
+    res.send({message: 'User added to group'});
     res.end();
     return;
-
-
 
 });
 
@@ -2006,63 +2019,39 @@ router.get('/project/:id/users', async function(req, res){
     res.end();
 });
 
-router.post('/user/:id/project/:project', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
-        return;
-    }
-    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
-        res.status(403).send('Invalid parameters');
-        return;
-    }
+var add_user_to_project = async function (newproject, uid, action_owner) {
+    logger.info('Adding user ' + uid + ' to project ' + newproject);
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
-        res.end();
-        return;
-    }
-    let newproject = req.params.project;
-    let uid = req.params.id;
     let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
-        res.status(404).send('User does not exist');
-        res.end();
-        return;
+        throw {code: 404, msg: 'User does not exist'};
     }
     if (!user.projects){
         user.projects = [];
     }
     for(let g=0; g < user.projects.length; g++){
         if(newproject == user.projects[g]) {
-            res.send({message:'User is already in project : nothing was done.'});
-            res.end();
-            return;
+            throw {code: 208, msg: 'User is already in project : nothing was done.'};
         }
     }
     user.projects.push(newproject);
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
-        res.status(403).send('Could not update user');
-        res.end();
-        return;
+        throw {code: 500, msg: 'Could not update user'};
     }
 
     try {
         let created_file = await filer.project_add_user_to_project({id: newproject}, user, fid);
         logger.info('File Created: ', created_file);
+        await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to project ' + newproject , 'logs': [created_file]});
     } catch(error){
-        logger.error('Add User to Project Failed for: ' + newproject, error);
-        res.status(500).send('Add Project Failed');
-        return;
+        logger.error(error);
+        throw {code: 500, msg:'Add User to Project Failed for: ' + newproject};
     }
 
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'add user ' + req.params.id + ' to project ' + newproject , 'logs': []});
-
     let project = await utils.mongo_projects().findOne({id:newproject});
-
     let msg_destinations = [user.email];
     let owner = await utils.mongo_users().findOne({uid:project.owner});
     if (owner) {
@@ -2085,8 +2074,57 @@ router.post('/user/:id/project/:project', async function(req, res){
         logger.error(error);
     }
 
-    res.send({message: 'User added to project', fid: fid});
+    if (CONFIG.project === undefined || CONFIG.project.enable_group) {
+        try {
+            await add_user_to_group(user.uid, project.group, action_owner);
+        } catch (error) {
+            logger.error(error);
+            // as it may throw any 20* http ok code...
+            if (!error.code || error.code >= 300) {
+                throw {code: 500, msg:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
+            }
+        }
+    }
+};
+
+router.post('/user/:id/project/:project', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        res.end();
+        return;
+    }
+
+    let newproject = req.params.project;
+    let uid = req.params.id;
+
+    try {
+        await add_user_to_project(newproject, uid, session_user.uid);
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.msg) {
+            res.status(e.code).send(e.msg);
+            res.end();
+            return;
+        } else {
+            res.status(500).send('Server Error, contact admin');
+            res.end();
+            return;
+        }
+    }
+
+    res.send({message: 'User added to project'});
     res.end();
+
 });
 
 router.delete('/user/:id/project/:project', async function(req, res){
