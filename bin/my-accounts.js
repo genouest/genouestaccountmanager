@@ -6,7 +6,7 @@ const program = require('commander');
 
 //var CONFIG = require('config');
 
-var utils = require('./routes/utils');
+var utils = require('../routes/utils');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -19,8 +19,8 @@ winston.loggers.add('gomngr', {
 
 //const logger = winston.loggers.get('gomngr');
 
-//var tps = require('./routes/users.js');
-var notif = require('./routes/notif');
+//var tps = require('../routes/users.js');
+var notif = require('../routes/notif');
 
 if (!console.table){
     require('console.table');
@@ -99,4 +99,3 @@ utils.init_db().then(() => {
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });
-
