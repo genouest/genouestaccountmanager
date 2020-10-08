@@ -1,19 +1,30 @@
 # Detail of config variable
 
+```json
+{
+```
+
 ## general
+
+```json
+"general": {
+```
 
 + name
 
     The name of the application, it will be use in the main website title and in some other place.
 
-    example:
     ```json
-        "name": "my entity"
+      "name": "my entity",
     ```
 
 + max_account
 
     The maximum number of account, registration will disable if this limit is reach, this limit is disabled if you set it to 0.
+
+    ```json
+      "max_account": 0,
+    ```
 
 + readme
 
@@ -21,6 +32,19 @@
 
     + language
     + source_folder
+
+    ```json
+      "readme": [
+        {
+          "language": "francais",
+          "source_folder" : "/opt/my/readmes/readmes1/"
+        },
+        {
+          "language": "english",
+          "source_folder" : "/opt/my/readmes/readme2/"
+        }
+      ],
+   ```
 
 + terms_of_use
 
