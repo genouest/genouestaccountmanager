@@ -6,6 +6,11 @@
 
     The name of the application, it will be use in the main website title and in some other place.
 
+    example:
+    ```
+        "name": "my entity"
+    ```
+
 + max_account
 
     The maximum number of account, registration will disable if this limit is reach, this limit is disabled if you set it to 0.
