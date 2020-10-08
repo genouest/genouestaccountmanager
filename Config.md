@@ -56,7 +56,7 @@
 
 + web_home
 
-    Define the user home, it can be "project" to be redirected to project page after login, or as default "user" to be redirected to user profil
+    Define the user home, ie which page will be loaded on user login. It can be "project" to be redirected to project page, or, as default, "user" to be redirected to user profil.
 
     ```json
       "web_home": "project",
@@ -314,7 +314,7 @@
 
 ## usage
 
-    A list of url added in the main website menu to allow user to acces some other tool. It can contain some variable like #USER#.
+A list of url added in the main website menu to allow user to acces some other tool. It can contain some variable like #USER#.
 
 ```json
 "usage": [
@@ -324,7 +324,7 @@
 
 ## duration
 
-    A list of duration availlable on registration form and user update for admin. It defined for each label a number of day to be added to the current date.
+A list of duration availlable on registration form and user update for admin. It defined for each label a number of day to be added to the current date.
 
 ```json
 "duration": {
@@ -337,7 +337,7 @@
 
 ## enable_ui
 
-    A list of boolean to disable some part of the main website. It will not prevent the use of those page, it will only remove the visible link to it.
+A list of boolean to disable some part of the main website. It will not prevent the use of those page, it will only remove the visible link to it.
 
 ```json
   "enable_ui": {
