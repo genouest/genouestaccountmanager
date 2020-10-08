@@ -2,346 +2,346 @@
 
 ## general
 
-### name
++ name
 
-The name of the application, it will be use in the main website title and in some other place.
+    The name of the application, it will be use in the main website title and in some other place.
 
-###  max_account
++ max_account
 
-The maximum number of account, registration will disable if this limit is reach, this limit is disabled if you set it to 0.
+    The maximum number of account, registration will disable if this limit is reach, this limit is disabled if you set it to 0.
 
-###  readme
++ readme
 
-A list of documentation path by language, it will create the link to those path in each user home.
+    A list of documentation path by language, it will create the link to those path in each user home.
 
-#####  language
-#####  source_folder
+    + language
+    + source_folder
 
-###  terms_of_use
++ terms_of_use
 
-A link to terms of use, registration form will ask user to accept it before creating an account. It can be relative or absolute as html link.
+    A link to terms of use, registration form will ask user to accept it before creating an account. It can be relative or absolute as html link.
 
-###  web_home
++ web_home
 
-Define the user home, it can be "project" to be redirected to project page after login, or as default "user" to be redirected to profil
+    Define the user home, it can be "project" to be redirected to project page after login, or as default "user" to be redirected to profil
 
-###  double_authentication_for_admin
++ double_authentication_for_admin
 
-A boolean to enable or disable double authentification.
+    A boolean to enable or disable double authentification.
 
-###  db
++ db
 
-Look like it is not used in the source, should be removed.
+    Look like it is not used in the source, should be removed.
 
-###  url
++ url
 
-The main url of the website backend, which provide api service.
+    The main url of the website backend, which provide api service.
 
-###  admin
++ admin
 
-A list of admin. Username in this list will have access to the admin part of the main website.
+    A list of admin. Username in this list will have access to the admin part of the main website.
 
-###  support
++ support
 
-The email of the support team, it is displayed on some page in the main website.
+    The email of the support team, it is displayed on some page in the main website.
 
-###  accounts
++ accounts
 
-The email of the tech team which will be notified on some event (as for example account creation), most of time it should be the same as "support"
+    The email of the tech team which will be notified on some event (as for example account creation), most of time it should be the same as "support"
 
-###  secret
++ secret
 
-A secret seed, for secret hash ...
+    A secret seed, for secret hash ...
 
-###  script_dir
++ script_dir
 
-The path where the shell script are generated. For some operation like user home creation My will generate shell script, it the path where they are created.
+    The path where the shell script are generated. For some operation like user home creation My will generate shell script, it the path where they are created.
 
-###  cron_bin_script
++ cron_bin_script
 
-Look like it is not used in the source, should be removed.
+    Look like it is not used in the source, should be removed.
 
-###  admin_ip
++ admin_ip
 
-A list of ip adress allowed for admin connection, it can be empty to allow any ip.
+    A list of ip adress allowed for admin connection, it can be empty to allow any ip.
 
-###  usage_directory
++ usage_directory
 
-Look like it is not used in the source, should be removed.
+    Look like it is not used in the source, should be removed.
 
-###  home
++ home
 
-The base path to the user home. It will be concatened with some other info, like username.
+    The base path to the user home. It will be concatened with some other info, like username.
 
-###  use_group_in_path
++ use_group_in_path
 
-A boolean to add the user group in the user home path, if it is enable, user home will be [home]/[main group]/[user group]/[username] else it will be [home]/[username].
+    A boolean to add the user group in the user home path, if it is enable, user home will be [home]/[main group]/[user group]/[username] else it will be [home]/[username].
 
-###  main_groups
++ main_groups
 
-A list of user "main" group, it will be updatable in the user profil page and it is used in home path.
+    A list of user "main" group, it will be updatable in the user profil page and it is used in home path.
 
-###  default_main_group
++ default_main_group
 
-The default main group when a user is created
+    The default main group when a user is created
 
-###  minuid
++ minuid
 
-The minimum user id, new user will not have any id lesser than this.
+    The minimum user id, new user will not have any id lesser than this.
 
-###  maxuid
++ maxuid
 
-The maximum user id, new user will not have any id greater than this.
+    The maximum user id, new user will not have any id greater than this.
 
-###  mingid
++ mingid
 
-The minimum group id, new user will not have any id lesser than this.
+    The minimum group id, new user will not have any id lesser than this.
 
-###  maxgid
++ maxgid
 
-The maximum group id, new user will not have any id greater than this.
+    The maximum group id, new user will not have any id greater than this.
 
-###  mailer
++ mailer
 
-The mailer used to send email, it can be "gomail" or "nodemailer", nodemailer should be used if you are not at genouest.
+    The mailer used to send email, it can be "gomail" or "nodemailer", nodemailer should be used if you are not at genouest.
 
-###  templates
++ templates
 
-The name of the template list to use, it can be "default" "genouest" or "ifb", if a template file is not find in the corresponding directory, it will fallback to "default".
+    The name of the template list to use, it can be "default" "genouest" or "ifb", if a template file is not find in the corresponding directory, it will fallback to "default".
 
-###  bansec
++ bansec
 
-The number of second a user is banned if he enter a bad password on login page.
+    The number of second a user is banned if he enter a bad password on login page.
 
-###  username_max_length
++ username_max_length
 
-The maximum username length, it is checked on user registration.
+    The maximum username length, it is checked on user registration.
 
-###  registration_group
++ registration_group
 
-The group the user will be associed after registration, it can be "username" to be the same as the username, "main" to be the value of the config variable "default_main_group", or "team" to be the value filled by user in the team field on registration.
+    The group the user will be associed after registration, it can be "username" to be the same as the username, "main" to be the value of the config variable "default_main_group", or "team" to be the value filled by user in the team field on registration.
 
-###  auto_add_group
++ auto_add_group
 
-A boolean to auto create registration group if it does not exist before user activation.
+    A boolean to auto create registration group if it does not exist before user activation.
 
-###  disable_user_group
++ disable_user_group
 
-A boolean to disable user group management. In case it is handle by external tools. If set to true, you should also update template file to disable it.
+    A boolean to disable user group management. In case it is handle by external tools. If set to true, you should also update template file to disable it.
 
-###  quota
++ quota
 
 
-###  user_extra_dirs
++ user_extra_dirs
 
-A list of extra directory to create on user activation. It can contain some variable like #USER# or #GROUP#.
+    A list of extra directory to create on user activation. It can contain some variable like #USER# or #GROUP#.
 
-###  plugin_script_dir
++ plugin_script_dir
 
-The path where to find My plugins.
+    The path where to find My plugins.
 
 ## usage
 
-A list of url added in the main website menu to allow user to acces some other tool. It can contain some variable like #USER#.
+    A list of url added in the main website menu to allow user to acces some other tool. It can contain some variable like #USER#.
 
 ## duration
 
-A list of duration availlable on registration form and user update for admin. It defined for each label a number of day.
+    A list of duration availlable on registration form and user update for admin. It defined for each label a number of day.
 
 ## enable_ui
 
-A list of boolean to disable some part of the main website. It will not prevent the use of those page, it will only remove the visible link to it.
+    A list of boolean to disable some part of the main website. It will not prevent the use of those page, it will only remove the visible link to it.
 
-###  databases
++ databases
 
-For the databases management part of the user profil. If you don't use mysql or don't want to declare it in My.
+    For the databases management part of the user profil. If you don't use mysql or don't want to declare it in My.
 
-###  ip
++ ip
 
-The user Ip address field in registration form and user update form.
+    The user Ip address field in registration form and user update form.
 
-###  main_group
++ main_group
 
-The main group field in the user update form.
+    The main group field in the user update form.
 
-###  messages
++ messages
 
-The admin link to send message to mailing list. It should be disabled if you user nodemailer as default mailer because it is not implemented yet.
+    The admin link to send message to mailing list. It should be disabled if you user nodemailer as default mailer because it is not implemented yet.
 
-###  newsletters
++ newsletters
 
-The button to unsbuscribed from the newsletter.
+    The button to unsbuscribed from the newsletter.
 
-###  tps
++ tps
 
-The menu link to tp reservation page.
+    The menu link to tp reservation page.
 
-###  u2f_key
++ u2f_key
 
-The u2f key field in the user update page. If you don't use it.
+    The u2f key field in the user update page. If you don't use it.
 
-###  websites
++ websites
 
-For the websites management part of the user profil.
+    For the websites management part of the user profil.
 
 ## bills
 
 ## mongo
 
-The information about mongo database.
+    The information about mongo database.
 
-###  host
++ host
 
-###  port
++ port
 
 ## rabbitmq
 
-The information about rabbitmq messaging service.
+    The information about rabbitmq messaging service.
 
-###  url
++ url
 
-###  exchange
++ exchange
 
 ## redis
 
-The information about redis database. To disable it you can set host as "null".
+    The information about redis database. To disable it you can set host as "null".
 
-###  host
++ host
 
-###  port
++ port
 
 ## nodemailer
 
-The information about the smtp server and email management with nodemailer.
+    The information about the smtp server and email management with nodemailer.
 
-###  prefix
++ prefix
 
-A prefix added to all mail subject sent by My.
+    A prefix added to all mail subject sent by My.
 
-###  host
++ host
 
-###  port
++ port
 
-###  origin
++ origin
 
-The "From" of the email sent by My.
+    The "From" of the email sent by My.
 
-###  list
++ list
 
-The Sympa Mailing list information to auto add user to it.
+    The Sympa Mailing list information to auto add user to it.
 
-####  address
-####  cmd_add
-####  cmd_del
-####  cmd_address
+    + address
+    + cmd_add
+    + cmd_del
+    + cmd_address
 
 ## gomail
 
-The information about the email api management with gomail.
+    The information about the email api management with gomail.
 
-###  host
++ host
 
-###  api_root
++ api_root
 
-###  api_secret
++ api_secret
 
-###  main_list
++ main_list
 
-###  origin
++ origin
 
-###  tag
++ tag
 
 ## ldap
 
-The information about ldap user database.
+    The information about ldap user database.
 
-###  host
++ host
 
-###  dn
++ dn
 
-###  admin_cn
++ admin_cn
 
-###  admin_dn
++ admin_dn
 
-###  admin_password
++ admin_password
 
-###  team
++ team
 
 ## mysql
 
-The information about mysql database if you want My to auto create your user database
+    The information about mysql database if you want My to auto create your user database
 
-###  host
++ host
 
-###  user
++ user
 
-###  password
++ password
 
 ## tp
 
-The information about tp user creation
+    The information about tp user creation
 
-###  prefix
++ prefix
 
-The first part of the tp username, after this the user id will be added.
+    The first part of the tp username, after this the user id will be added.
 
-###  group
++ group
 
-Look like it is not used in the source, should be removed.
+    Look like it is not used in the source, should be removed.
 
-####  name
-####  gid
+    + name
+    + gid
 
-###  extra_expiration
++ extra_expiration
 
-The number of day the account will be availlable after the end of the tp
+    The number of day the account will be availlable after the end of the tp
 
-###  fake_mail_domain
++ fake_mail_domain
 
 ## message
 
-The list of email template sent by mail, each have a plain text and html version.
+    The list of email template sent by mail, each have a plain text and html version.
 
-###  activation
++ activation
 
-###  activation_html
++ activation_html
 
-###  ask_project
++ ask_project
 
-###  ask_project_html
++ ask_project_html
 
-###  confirmation
++ confirmation
 
-###  confirmation_html
++ confirmation_html
 
-###  deletion
++ deletion
 
-###  deletion_html
++ deletion_html
 
-###  expiration
++ expiration
 
-###  expiration_html
++ expiration_html
 
-###  footer
++ footer
 
-###  footer_html
++ footer_html
 
-###  password_reset
++ password_reset
 
-###  password_reset_html
++ password_reset_html
 
-###  password_reset_request
++ password_reset_request
 
-###  password_reset_request_html
++ password_reset_request_html
 
-###  reactivation
++ reactivation
 
-###  reactivation_html
++ reactivation_html
 
 ## plugins
 
-A list of activated plugins.
+    A list of activated plugins.
 
 ## plugin_config
 
-A list of plugin configuration variable.
+    A list of plugin configuration variable.
