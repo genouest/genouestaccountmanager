@@ -7,7 +7,7 @@
     The name of the application, it will be use in the main website title and in some other place.
 
     example:
-    ```
+    ```json
         "name": "my entity"
     ```
 
