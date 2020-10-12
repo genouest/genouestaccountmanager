@@ -422,7 +422,7 @@ router.post('/ask/project', async function (req, res) {
 });
 
 
-router.post('/dmp/ping', async function (req, res) {
+router.get('/dmp/ping', async function (req, res) {
     let online = this.http.get(
         environment.opidorUrl + '/api/v1/heartbeat'
     );
@@ -436,6 +436,8 @@ router.post('/dmp/ping', async function (req, res) {
     res.send(DMP_data);
     res.end();
 });
+
+
 
 router.post('/dmp/download', async function (req, res) {
     let online = this.http.get(
@@ -473,11 +475,14 @@ router.post('/dmp/download', async function (req, res) {
         return;
     }
     
-    await utils.mongo_projects().updateOne({ 'id': req.params.id }, new_project);
-    let DMP_data = { error: '', ping: true };
+    await utils.mongo_projects().updateOne({ 'id': req.params.id },);
 
     
     res.send(DMP_data);
     res.end();
 });
+
+
+
+router.post
 module.exports = router;

@@ -189,9 +189,8 @@ export class ProjectsService {
             //}),
 
         };
-        return this.http.post(
+        return this.http.get(
             environment.apiUrl + '/dmp/ping',
-            new_project,
             httpOptions
         );
     }
