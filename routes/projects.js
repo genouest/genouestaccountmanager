@@ -430,23 +430,7 @@ router.post('/dmp/ping', async function (req, res) {
         res.status(404).send('Can\'t reach Opidor API');
         return;
     }
-    let httpOptions = {
-        headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            'Accept': 'application/json'
-        }
-    };
-    let auth_data = {'grant_type':'client_credentials','client_id':CONFIG.dmp.client_id,'client_secret':CONFIG.dmp.client_secret};
-    let auth = this.http.get(
-        environment.opidorUrl + '/api/v1/authenticate',
-        auth_data,
-        httpOptions
-    );
-    if ( auth['code'] != 200) {
-        res.status(401).send('Not Authorized ');
-        return;
-    }
     
-
     let DMP_data = { error: '', ping: true };
 
     res.send(DMP_data);
@@ -467,7 +451,7 @@ router.post('/dmp/download', async function (req, res) {
         }
     };
     let auth_data = {'grant_type':'client_credentials','client_id':CONFIG.dmp.client_id,'client_secret':CONFIG.dmp.client_secret};
-    let auth = this.http.get(
+    let auth = this.http.post(
         environment.opidorUrl + '/api/v1/authenticate',
         auth_data,
         httpOptions
@@ -476,14 +460,23 @@ router.post('/dmp/download', async function (req, res) {
         res.status(401).send('Not Authorized ');
         return;
     }
+    httpOptions = {
+        headers: auth_data
+        
+    };
+    let DMP_data = this.http.get(
+        environment.opidorUrl + '/api/v1/authenticate',
+        httpOptions
+    );
+    if ( auth['code'] != 200) {
+        res.status(401).send('Not Authorized ');
+        return;
+    }
+    
+    await utils.mongo_projects().updateOne({ 'id': req.params.id }, new_project);
     let DMP_data = { error: '', ping: true };
-    // try {
-    //     print("Getting DMP from Opidor...")
-    //     DMP_data = {}
-    // } catch(error) {
-    //     res.status(1000).send('No answer from DMP')
-    //     return;
-    // }
+
+    
     res.send(DMP_data);
     res.end();
 });
