@@ -1,5 +1,3 @@
-sudo: required
-
 language: node_js
 node_js:
   - "node"
@@ -18,6 +16,6 @@ script:
   - docker build -t osallou/my .
   - cd $TRAVIS_BUILD_DIR/cron && docker build -f Dockerfile-cron -t osallou/mycron .
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose up -d
-  - cd $TRAVIS_BUILD_DIR && sleep 180 && docker ps && mocha -b -t 20000 --full-trace
+  - cd $TRAVIS_BUILD_DIR && sleep 180 && ls -lstr /opt/my/scripts && docker ps && mocha -b -t 20000 --full-trace
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose logs my-app
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose down
