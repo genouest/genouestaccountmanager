@@ -18,14 +18,12 @@ Cron tasks will manage background scripts to create user home directories, etc.
 
 Web interface and user life cycle are linked to optional plugins. It is easy to add new ones to add features (execute *this* at user activation, execute *that* on user deletion, ...)
 
-
 ## Config
 
 All configuration is in config/default.json. One can use [config/default.json.template](config/default.json.template) as example.
 
 Optional double authentication for administrators with config parameter double_authentication_for_admin.
 It provides additional authentication via U2F devices or temporary email tokens.
-
 
 ## Installation
 
@@ -35,7 +33,6 @@ Also needs nodejs, npm installed
     npm install && cd manager2 && npm install
 
 You need to *npm install* both backend and frontend
-
 
 ## User Home management
 
@@ -51,7 +48,6 @@ User is also set as memberOf for main group.
 
 You may disable this by setting the config option **general.use_group_in_path** to **false**
 
-
 ## Databases
 
 Database used by softwaremanager is MongoDB. It also use OpenLDAP to insert LDIF files for account creation/update.
@@ -64,7 +60,6 @@ For an existing LDAP database, users should be migrated to match this DN.
 Note that uid attribute is mandatory for each user entries in ldap, even if you change ldap template to modify DN management.
 
 For an existing LDAP directory, one must import existing users and groups in mongo. There is an example of automated script for this: [import_from_ldap.js](import_from_ldap.js), you should adapt it to fit your ldap schema
-
 
 ### Starting from An empty LDAP
 
@@ -85,13 +80,11 @@ If specified env vars refer to an exiting group or user, then their creation is 
 
 All other users will use standard registration process via WEB UI and admin will be able to validate them via the UI (as well as for other admin).
 
-
 ## Running and Stopping
 
     forever start -o out.log -e err.log app.js
 
     forever stop app.js
-
 
 ## Cron
 
@@ -112,19 +105,15 @@ To manage user account expiration, add the following script to your cron:
 test_expiration check if user will expire *soon* and sends an email to the user so that he extends his account if needed.
 expiration deactivates accounts if their expiration date is reached.
 
-
 ## Logging
 
 By default all logging is done on standard output and error.
 
 You may want to have the access log (http log) to a specific file using environment variable:
 
-```
-MY_ACCESS_LOG=/var/log/my.access.log /usr/bin/node /opt/my/app.js
-```
+    MY_ACCESS_LOG=/var/log/my.access.log /usr/bin/node /opt/my/app.js
 
 Please note that it will affect only express http log, for application log you will have to redirect the standard output to file.
-
 
 ## Mailing
 
@@ -134,7 +123,6 @@ This is used to broadcast messages to all users. Mailing list is using **gomail*
 Standard smtp configuration is used for user notifications.
 
 If you wish to use other mailing list system, or no mailing list, one can add routes/notif_**your mailer system**.js, replacing functions content by your own api or empty calls. Then set the config variable **general.mailer** to the name of **your mailer system**.
-
 
 ## Plugins
 
@@ -158,13 +146,11 @@ After that you can copy any file from [templates/default](templates/default) to 
 
 Please note that you must use the same directory tree as in default.
 
-
 ## Testing
 
 With env variable *export gomngr_auth=fake*, one can disable authentication password verification (**FOR TESTING ONLY**)
 
 In *tests* directory, a docker-compose is available to setup whole infrastructure but needs adaptation if needed to use in production (volumes, database url, ...)
-
 
 ## Development
 
@@ -182,7 +168,6 @@ with sentry support:
 
 Sentry is a service to catch bugs in app and record them in Sentry web app (optional). Sentry key must be set at docker build time.
 
-
 ## Deploying
 
 ### With Docker
@@ -193,4 +178,4 @@ See and adapt [docker-compose.yml](./tests/docker-compose.yml) file then:
 
 ### With Ansible
 
-Using https://gitlab.com/ifb-elixirfr/ansible-roles/ansible-my
+Using [https://gitlab.com/ifb-elixirfr/ansible-roles/ansible-my](https://gitlab.com/ifb-elixirfr/ansible-roles/ansible-my)
