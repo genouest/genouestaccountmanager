@@ -146,6 +146,11 @@ const if_dev_execute_scripts = function(){
                         `code ${code} and signal ${signal}`);
             resolve();
         });
+
+        procScript.on('error', (err) => {
+            wlogger.error('failed to execute cron scripts', err);
+            reject(err);
+        });
     });
 };
 
@@ -425,6 +430,7 @@ utils.init_db().then(async () => {
         if (runningEnv == 'test'){
             wlogger.info('Execute cron script');
             await if_dev_execute_scripts();
+            wlogger.info('Test setup scripts executed');
         }
     }
 
