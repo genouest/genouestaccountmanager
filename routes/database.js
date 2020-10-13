@@ -64,6 +64,7 @@ var querydb = (sql) => {
             if(err) {
                 logger.error('failed to get connection', err);
                 reject(err);
+                return;
             }
             // eslint-disable-next-line no-unused-vars
             connection.query(sql, function(err, results) {
@@ -71,6 +72,7 @@ var querydb = (sql) => {
                 if(err) {
                     logger.error('failed to exec sql', sql, err);
                     reject(err);
+                    return;
                 }
                 logger.debug('sql result', sql, results);
                 resolve(true);
