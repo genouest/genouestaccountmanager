@@ -14,9 +14,8 @@ script:
   - eslint routes
   - npm install -g mocha
   - docker build -t osallou/my .
-  - mkdir -p /opt/my/scripts
   - cd $TRAVIS_BUILD_DIR/cron && docker build -f Dockerfile-cron -t osallou/mycron .
-  - cd $TRAVIS_BUILD_DIR/tests && docker-compose up -d
-  - cd $TRAVIS_BUILD_DIR && sleep 120 && ls -l /opt/my/scripts && docker ps && mocha -b -t 20000 --full-trace
+  - cd $TRAVIS_BUILD_DIR/tests && docker-compose up -d && sleep 120 && docker-compose exec my-app ls -l /opt/my/scripts
+  - cd $TRAVIS_BUILD_DIR && docker ps && mocha -b -t 20000 --full-trace
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose logs my-app
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose down
