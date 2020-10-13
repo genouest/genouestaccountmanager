@@ -1,12 +1,12 @@
 process.env.NODE_ENV = 'test';
 
-//let CONFIG = require('config');
-//Require the dev-dependencies
+// let CONFIG = require('config');
+// Require the dev-dependencies
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-//let server = require('../app');
-let should = chai.should();
-//let expect = chai.expect;
+// let server = require('../app');
+// let should = chai.should;
+let expect = chai.expect;
 let assert = chai.assert;
 
 let fs = require('fs');
@@ -32,7 +32,7 @@ describe('My', () => {
         chai.request('http://localhost:8025')
             .delete('/api/v1/messages')
             .end((err, res) => {
-                res.should.have.status(200);
+                expect(res).to.have.status(200);
                 done();
             });
     });
@@ -44,7 +44,7 @@ describe('My', () => {
                 .post('/auth/admin')
                 .send({'password': 'admin'})
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     token_id = res.body.user.apikey;
                     assert(res.body.user.status == 'Active');
                     done();
@@ -55,7 +55,7 @@ describe('My', () => {
                 .post('/auth/admin')
                 .send({'password': 'wrong'})
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.user === null);
                     done();
                 });
@@ -68,7 +68,7 @@ describe('My', () => {
                 .get('/user')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.length >= 1);
                     assert(res.body[0].uid == 'admin');
                     done();
@@ -99,7 +99,7 @@ describe('My', () => {
                         chai.request('http://localhost:8025')
                             .get('/api/v2/messages')
                             .end((err, resMsg) => {
-                                resMsg.should.have.status(200);
+                                expect(resMsg).to.have.status(200);
                                 // check email confirmation sent
                                 let gotMail = false;
                                 let msg_list = JSON.parse(resMsg.text);
@@ -116,7 +116,7 @@ describe('My', () => {
                                         chai.request('http://localhost:3000')
                                             .get('/user/' + test_user_id + '/confirm?regkey=' + regkey)
                                             .end((err, resConfirm) => {
-                                                resConfirm.should.have.status(200);
+                                                expect(resConfirm).to.have.status(200);
                                                 done();
                                             });
                                         break;
@@ -155,7 +155,7 @@ describe('My', () => {
                 .get('/user')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.length >= 1);
                     let pending_user = null;
                     for(var i=0;i<res.body.length;i++){
@@ -194,7 +194,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .send({'owner': test_user_id})
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/group')
                         .set('X-Api-Key', token_id)
@@ -218,7 +218,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .send({'owner': test_user_id2})
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/group')
                         .set('X-Api-Key', token_id)
@@ -242,7 +242,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .send({'owner': test_user_id2})
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/group')
                         .set('X-Api-Key', token_id)
@@ -265,19 +265,19 @@ describe('My', () => {
                 .get('/user/' + test_user_id + '/activate')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/user/' + test_user_id)
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             user_info = res.body;
                             assert(res.body.status == 'Active');
                             setTimeout(function(){
                                 chai.request('http://localhost:8025')
                                     .get('/api/v2/messages')
                                     .end((err, resMsg) => {
-                                        resMsg.should.have.status(200);
+                                        expect(resMsg).to.have.status(200);
                                         // check email confirmation sent
                                         let gotMail = false;
                                         let msg_list = JSON.parse(resMsg.text);
@@ -306,12 +306,12 @@ describe('My', () => {
                 .get('/user/' + test_user_id2 + '/activate')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/user/' + test_user_id2)
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             user_info = res.body;
                             assert(res.body.status == 'Active');
                             done();
@@ -325,7 +325,7 @@ describe('My', () => {
                 .post('/user/' + test_user_id + '/group/admin')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     // assert(res.body.fid); // fid should not be used by frontend as if it is changed it may be a security issue
                     assert(res.body.message == 'User added to group');
                     done();
@@ -338,7 +338,7 @@ describe('My', () => {
                 .post('/user/' + test_user_id2 + '/group/admin')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.message == 'User added to group');
                     // assert(res.body.fid);
                     done();
@@ -351,7 +351,7 @@ describe('My', () => {
                 .post('/user/' + test_user_id2 + '/group/' + test_group_id3)
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     // assert(res.body.fid);
                     assert(res.body.message == 'User added to group');
                     done();
@@ -364,7 +364,7 @@ describe('My', () => {
                 .get('/user/' + test_user_id)
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.secondarygroups.indexOf('admin') >= 0);
                     done();
                 });
@@ -376,7 +376,7 @@ describe('My', () => {
                 .get('/user/' + test_user_id2)
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.secondarygroups.indexOf('admin') >= 0);
                     assert(res.body.secondarygroups.indexOf(test_group_id3) >= 0);
                     done();
@@ -424,12 +424,12 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .send(website)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/web')
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].name == test_web_id){
@@ -447,12 +447,12 @@ describe('My', () => {
                 .put('/web/' + test_web_id + '/owner/user1/user2')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/web')
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].name == test_web_id && res.body[i].owner == 'user2'){
@@ -472,12 +472,12 @@ describe('My', () => {
                 .delete('/web/' + test_web_id)
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/web')
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].name == test_web_id){
@@ -508,12 +508,12 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .send(project)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/project?all=true')
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].id == test_project_id){
@@ -532,12 +532,12 @@ describe('My', () => {
                 .post('/user/' + test_user_id + '/project/' + test_project_id)
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/project/' + test_project_id + '/users')
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].uid == test_user_id){
@@ -560,7 +560,7 @@ describe('My', () => {
                 .post('/auth/' + test_user_id)
                 .send({'password': user_test_password})
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.user !== null);
                     user_token_id = res.body.user.apikey;
                     assert(res.body.user.status == 'Active');
@@ -574,7 +574,7 @@ describe('My', () => {
                 .get('/auth')
                 .set('X-Api-Key', user_token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     assert(res.body.user !== null);
                     done();
                 });
@@ -599,12 +599,12 @@ describe('My', () => {
                     'loginShell': '/bin/bash'
                 })
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/user/' + test_user_id)
                         .set('X-Api-Key', user_token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             assert(res.body.lab == 'new');
                             done();
                         });
@@ -621,12 +621,12 @@ describe('My', () => {
                 .set('X-Api-Key', user_token_id)
                 .send(db)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/database')
                         .set('X-Api-Key', user_token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].name == test_db_id){
@@ -646,12 +646,12 @@ describe('My', () => {
                 .delete('/database/' + test_db_id)
                 .set('X-Api-Key', user_token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/database')
                         .set('X-Api-Key', user_token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].name == test_db_id){
@@ -673,12 +673,12 @@ describe('My', () => {
                 .delete('/user/' + test_user_id2 + '/group/' + test_group_id3)
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/user/' + test_user_id2)
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(200);
+                            expect(res).to.have.status(200);
                             assert(res.body.secondarygroups.indexOf(test_group_id3) == '-1');
                             done();
                         });
@@ -710,12 +710,12 @@ describe('My', () => {
                 .delete('/user/' + test_user_id2)
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/user/' + test_user_id2)
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-                            res.should.have.status(404);
+                            expect(res).to.have.status(404);
                             done();
                         });
                 });
@@ -757,14 +757,14 @@ describe('My', () => {
                         'quantity': 2,
                         'about': 'test resa'
                     });
-                res.should.have.status(200);
+                expect(res).to.have.status(200);
                 let new_resa = res.body.reservation;
                 assert(new_resa.created == false);
                 let res2 = await chai.request('http://localhost:3000')
                     .get('/tp/' + new_resa._id)
                     .set('X-Api-Key', token_id);
                 let resa = res2.body.reservation;
-                res2.should.have.status(200);
+                expect(res2).to.have.status(200);
                 assert(resa.created == false);
                 // Reserve now /tp/:id/reservenow
                 let resnow = await chai.request('http://localhost:3000')
@@ -776,7 +776,7 @@ describe('My', () => {
                         'quantity': 2,
                         'about': 'test resa'
                     });
-                resnow.should.have.status(200);
+                expect(resnow).to.have.status(200);
                 res2 = await chai.request('http://localhost:3000')
                     .get('/tp/' + new_resa._id)
                     .set('X-Api-Key', token_id);
