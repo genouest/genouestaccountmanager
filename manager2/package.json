@@ -23,6 +23,7 @@
     "@angular/router": "^7.2.16",
     "@ng-bootstrap/ng-bootstrap": "^4.2.2",
     "@sentry/browser": "^5.17.0",
+    "angular": "^1.8.1",
     "angular-calendar": "^0.26.11",
     "angular-datatables": "^7.0.0",
     "bootstrap": "^4.5.0",
