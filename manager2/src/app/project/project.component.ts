@@ -23,6 +23,7 @@ export class ProjectComponent implements OnInit {
     config: any
     new_user: any
     remove_user: any
+    default_size: any
 
     manager_visible: boolean
 
@@ -48,6 +49,7 @@ export class ProjectComponent implements OnInit {
         private router: Router
     ) {
         this.config = {}
+        this.default_size = 0
     }
 
     ngOnDestroy(): void {
@@ -76,6 +78,9 @@ export class ProjectComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
+                if (this.config.project && this.config.project.default_size) {
+                    this.default_size = this.config.project.default_size;
+                }
             },
             err => console.log('failed to get config')
         )

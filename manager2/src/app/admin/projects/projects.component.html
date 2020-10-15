@@ -132,7 +132,7 @@
           </div>
           <div class="col-sm-2">
             <label for="project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="project_size" [value]="config.project.default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+            <input placeholder="project size in G" type="number" id="project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
           </div>
           <div class="col-sm-2">
             <label for="project_expire">Expiration date</label>
@@ -165,7 +165,7 @@
             <label >Path to project&nbsp;
               <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" tooltip> </span>
             </label>
-            <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [value]="config.project.default_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
+            <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [value]="default_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
           </div>
         </div>
         <div class="form-group row">

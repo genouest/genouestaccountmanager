@@ -44,6 +44,10 @@ export class ProjectsComponent implements OnInit {
 
     day_time: number
 
+
+    default_path: any
+    default_size: any
+
     constructor(
         private route: ActivatedRoute,
         private configService: ConfigService,
@@ -71,6 +75,8 @@ export class ProjectsComponent implements OnInit {
                 };
             });
 
+        this.default_path = "";
+        this.default_size = 0;
         this.requests_visible = false;
         this.add_requests = [];
         this.remove_requests = [];
@@ -108,6 +114,12 @@ export class ProjectsComponent implements OnInit {
             resp => {
                 this.config = resp;
                 this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+                if (this.config.project && this.config.project.default_path) {
+                    this.default_path = this.config.project.default_path;
+                }
+                if (this.config.project && this.config.project.default_size) {
+                    this.default_size = this.config.project.default_size;
+                }
             },
             err => console.log('failed to get config')
         );

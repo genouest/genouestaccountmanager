@@ -19,7 +19,7 @@
 
           <div class="form-group row col-sm-8">
             <label for="new_project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="new_project_size" [value]="config.project.default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+            <input placeholder="project size in G" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
