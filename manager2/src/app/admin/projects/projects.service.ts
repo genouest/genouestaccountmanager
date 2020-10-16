@@ -202,7 +202,6 @@ export class ProjectsService {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
             //}),
-
         };
         return this.http.post(
             environment.apiUrl + '/dmp/download',

@@ -440,6 +440,7 @@ router.get('/dmp/ping', async function (req, res) {
 
 
 router.post('/dmp/download', async function (req, res) {
+    // Checks first if the DMP database is accessible
     let online = this.http.get(
         environment.opidorUrl + '/api/v1/heartbeat'
     );
@@ -447,6 +448,7 @@ router.post('/dmp/download', async function (req, res) {
         res.status(404).send('Can\'t reach Opidor API');
         return;
     }
+    // Authenticates Genouest using the API
     let httpOptions = {
         headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
             'Accept': 'application/json'
@@ -463,22 +465,25 @@ router.post('/dmp/download', async function (req, res) {
         return;
     }
     httpOptions = {
-        headers: auth_data
+        headers: {'Accept': 'application/json', "Authorization": `Bearer ${auth['access_token']}`}
         
     };
     let DMP_data = this.http.get(
-        environment.opidorUrl + '/api/v1/authenticate',
+        environment.opidorUrl + `/api/v1/plans/${req.new_project.dmp_key}`,
         httpOptions
     );
     if ( auth['code'] != 200) {
         res.status(401).send('Not Authorized ');
         return;
     }
-    
-    await utils.mongo_projects().updateOne({ 'id': req.params.id },);
+
+    let new_project = {'id': DMP_data.project.title, 'size': DMP_data.resarchOutput.sharing.distribution.fileVolume, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name}
 
     
-    res.send(DMP_data);
+    // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
+
+    
+    res.send(new_project);
     res.end();
 });
 

@@ -147,7 +147,7 @@ export class ProjectComponent implements OnInit {
         return a.toLocaleDateString();
     }
 
-    ping_dmp_data() {
+    Get_essential_data() {
         console.log(this.new_project.dmp_key)
         this.dmp_msg = '';
         this.dmp_err_msg = '';
@@ -155,10 +155,10 @@ export class ProjectComponent implements OnInit {
             this.dmp_err_msg = 'The DMP key field is empty';
             return;
         }
-        this.projectsService.pingDmpDatabase(this.new_project).subscribe(
+        this.projectsService.askDmpData(this.new_project).subscribe(
             resp => {
                 this.dmp_msg = 'Connection successful with DMP_Opidor using your key';
-                console.log(resp.ping)
+                this.new_project = resp.new_project
 
             },
             err => {
