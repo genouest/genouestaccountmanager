@@ -395,9 +395,14 @@ router.post('/ask/project', async function (req, res) {
     };
     */
 
-    // logger.info(new_project);
+    logger.info(new_project);
 
     // todo: find a way to use cc
+
+    // Save in mongo the pending project data fr the admin to use
+    let saving_for_later = await utils.mongo_pending_projects().insertOne({_id: req.locals.logInfo.id , info: req.new_project});
+    logger.info(saving_for_later);
+
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
 
     try {
@@ -415,8 +420,6 @@ router.post('/ask/project', async function (req, res) {
     } catch (error) {
         logger.error(error);
     }
-
-
     res.end();
     return;
 });
