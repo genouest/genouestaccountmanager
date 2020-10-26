@@ -82,7 +82,7 @@ services:
             - MY_ADMIN_GROUP=admin
             - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL:-admin@my.org}
             - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD:-admin}
-            - GOMNGR_AUTH=fake
+            - gomngr_auth=fake
         volumes:
             - ./home_dir:/home
             - ./cron:/opt/my/scripts
