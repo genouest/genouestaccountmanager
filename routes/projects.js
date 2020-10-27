@@ -445,7 +445,7 @@ router.get('/dmp/ping', async function (req, res) {
 router.post('/dmp/download', async function (req, res) {
     // Checks first if the DMP database is accessible
     let online = this.http.get(
-        environment.opidorUrl + '/api/v1/heartbeat'
+        environment.opidorUrl + '/heartbeat'
     );
     if ( online['code'] != 200) {
         res.status(404).send('Can\'t reach Opidor API');
