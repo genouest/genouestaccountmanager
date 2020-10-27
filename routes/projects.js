@@ -427,7 +427,7 @@ router.post('/ask/project', async function (req, res) {
 
 router.get('/dmp/ping', async function (req, res) {
     let online = this.http.get(
-        environment.opidorUrl + '/api/v1/heartbeat'
+        environment.opidorUrl + '/heartbeat'
     );
     if ( online['code'] != 200) {
         res.status(404).send('Can\'t reach Opidor API');

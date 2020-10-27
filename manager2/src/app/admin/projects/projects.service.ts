@@ -179,7 +179,7 @@ export class ProjectsService {
         );
     }
 
-    pingDmpDatabase(new_project: any): Observable<any> {
+    pingDmpDatabase(): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;
         console.log("pinging")

@@ -24,7 +24,7 @@ export class ProjectComponent implements OnInit {
     
     dmp_err_msg: string
     dmp_msg: string
-
+    dmp_available: boolean
     manager_visible: boolean
 
 
@@ -147,6 +147,8 @@ export class ProjectComponent implements OnInit {
         return a.toLocaleDateString();
     }
 
+
+
     Get_essential_data() {
         console.log(this.new_project.dmp_key)
         this.dmp_msg = '';
@@ -166,6 +168,23 @@ export class ProjectComponent implements OnInit {
                 this.dmp_err_msg = err.error;
             }
         )
+    }
+
+    Ping_DMP() {
+        console.log('pinging Dmp db...')
+        this.projectsService.pingDmpDatabase().subscribe(
+            resp => {
+                this.dmp_available = true;
+            },
+            err => {
+                this.dmp_available = false;
+            }
+        )
+
+    }
+
+    Get_research_output() {
+
     }
 
 
