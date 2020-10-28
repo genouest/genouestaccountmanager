@@ -49,6 +49,9 @@
         <li class="nav-item" (click)="switchTo(3)">
           <button class="btn btn-outline-primary nav-link">History</button>
         </li>
+        <li class="nav-item" *ngIf="session_user.is_admin" (click)="switchTo(4)">
+            <button class="btn btn-outline-primary nav-link">Send mail</button>
+        </li>
       </ul>
     </div>
     <div class="card-body">
@@ -521,6 +524,30 @@
         </div>
     </div>
   </div>
+
+    <div class="col-md-6 col-sm-12" *ngIf="session_user.is_admin && panel == 4">
+        <div class="card bg-light">
+                <div class="card-header">
+                    <h4>Send message to user</h4>
+                </div>
+                <div class="card-body">
+
+            <div class="alert alert-danger" role="alert" *ngIf="notify_err">{{err_notify}}</div>
+            <div class="form-group">
+                <input class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="notify_subject" placeholder="mail subject"/>
+            </div>
+            <div class="form-group">
+                <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="notify_message" placeholder="mail message in markdown">
+                </textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-outline-secondary" (click)="sendmail()">Send mail</button>
+            </div>
+
+
+                </div>
+        </div>
+    </div>
 
 </div>
 

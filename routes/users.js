@@ -227,6 +227,50 @@ router.get('/user/:id/apikey', async function(req, res){
     }
 });
 
+
+router.post('/user/:id/notify', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(! utils.sanitizeAll([req.params.id])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+        res.status(401).send('Not authorized');
+        return;
+    }
+
+    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    if(!user) {
+        res.send({msg: 'User does not exist'});
+        res.end();
+        return;
+    }
+    let message = req.body.message;
+    let subject = req.body.subject;
+
+    try {
+        await utils.send_notif_mail({
+            'name': null,
+            'destinations': [user.email],
+            'subject': subject,
+            'markdown': message,
+        }, {});
+    } catch(error) {
+        logger.error(error);
+        res.status(500).send({'message': 'message error', 'error': error});
+        res.end();
+        return;
+    }
+    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'message: ' + subject , 'logs': []});
+
+    res.send({'message': 'message sent'});
+    res.end();
+});
+
 router.post('/user/:id/apikey', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');

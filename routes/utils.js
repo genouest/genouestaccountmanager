@@ -6,6 +6,7 @@ var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 const MAILER = CONFIG.general.mailer;
 var notif = require('../routes/notif_'+MAILER+'.js');
+const marked = require('marked');
 
 const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;
@@ -465,6 +466,10 @@ async function gen_mail_opt (options, variables)
     let html_message = message;
     if (name && CONFIG.message[name + '_html']) {
         html_message = CONFIG.message[name + '_html'].join('');
+    }
+
+    if (options['markdown'] !== undefined && options['markdown'] != '') {
+        html_message = marked(options['markdown']);
     }
 
     if (!html_message) { // if html_message is not set then message is not set too

@@ -105,6 +105,10 @@ export class UserComponent implements OnInit {
     rm_dbmsg: string
     rm_dbmsg_error: string
 
+    notify_subject: string
+    notify_message: string
+    notify_err: string
+
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
@@ -137,6 +141,10 @@ export class UserComponent implements OnInit {
         this.err_note = ''
         this.password1  = ''
         this.password2 = ''
+
+        this.notify_subject = ''
+        this.notify_message = ''
+        this.notify_err = ''
 
     }
 
@@ -192,6 +200,7 @@ export class UserComponent implements OnInit {
         this.subscribe = this.subscribe.bind(this);
         this.unsubscribe = this.unsubscribe.bind(this);
         this.initUser = this.initUser.bind(this);
+        this.sendmail = this.sendmail.bind(this);
 
         this.configService.config.subscribe(
             resp => {
@@ -490,6 +499,26 @@ export class UserComponent implements OnInit {
 
     switchTo(panel) {
         this.panel = panel;
+    }
+
+    sendmail() {
+        console.log('should send mail', {subject: this.notify_subject, msg: this.notify_message});
+        this.userService.notify(this.user.uid,
+            {
+                subject: this.notify_subject,
+                message: this.notify_message
+            }).subscribe(
+                resp => {
+                    this.notify_subject = ''
+                    this.notify_message = ''
+                    this.notify_err = ''
+                    this.msg = 'mail sent'
+                },
+                err => {
+                    this.notify_err = 'failed to send email'
+                    console.log(('failed to send mail'))
+                }
+            )
     }
 
     generate_apikey(uid: string){

@@ -314,6 +314,7 @@ app.get('/user/:id/confirm', users);
 app.get('/user/:id/passwordreset', users);
 app.get('/user/:id/apikey', users);
 app.post('/user/:id/apikey', users);
+app.post('/user/:id/notify', users);
 app.get('/lists', users),
 app.get('/list/:list', users),
 app.post('/user/:id/passwordreset', users);
