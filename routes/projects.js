@@ -1,5 +1,4 @@
 import { environment } from '../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
 var express = require('express');
 var router = express.Router();
 const winston = require('winston');
@@ -400,7 +399,7 @@ router.post('/ask/project', async function (req, res) {
     // todo: find a way to use cc
 
     // Save in mongo the pending project data fr the admin to use
-    // let saving_for_later = await utils.mongo_pending_projects().insertOne({_id: req.locals.logInfo.id , info: req.new_project});
+    let saving_for_later = await utils.mongo_pending_projects().insertOne({_id: req.locals.logInfo.id , info: req.new_project});
     // logger.info(saving_for_later);
 
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
@@ -444,62 +443,39 @@ router.get('/dmp/ping', async function (req, res) {
 
 router.post('/dmp/getResearchOutput', async function (req, res) {
 
-    httpOptions = {
+    let httpOptions = {
         headers: {'X-CONSULTKEY': '', 'X-AUTHKEY': ''}
         
     };
-    let research_output_list= this.http.post(
+    let research_output_answer= this.http.post(
         environment.opidorUrl + `/plans/${req.dmp_key}/research_outputs`,
         httpOptions
     );
-    if ( auth['code'] != 200) {
+    if ( research_output_answer['code'] != 200) {
         res.status(401).send('Not Authorized ');
         return;
     }
 
-    res.send(research_output_list);
+    res.send(research_output_answer);
     res.end();
 });
 
 router.post('/dmp/download', async function (req, res) {
-    // Checks first if the DMP database is accessible
-    let online = this.http.get(
-        environment.opidorUrl + '/heartbeat'
-    );
-    if ( online['code'] != 200) {
-        res.status(404).send('Can\'t reach Opidor API');
-        return;
-    }
     // Authenticates Genouest using the API
     let httpOptions = {
-        headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            'Accept': 'application/json'
-        }
+        headers: {'X-CONSULTKEY': '', 'X-AUTHKEY': ''}
     };
-    let auth_data = {'grant_type':'client_credentials','client_id':CONFIG.dmp.client_id,'client_secret':CONFIG.dmp.client_secret};
-    let auth = this.http.post(
-        environment.opidorUrl + '/api/v1/authenticate',
-        auth_data,
-        httpOptions
-    );
-    if ( auth['code'] != 200) {
-        res.status(401).send('Not Authorized ');
-        return;
-    }
-    httpOptions = {
-        headers: {'Accept': 'application/json', "Authorization": `Bearer ${auth['access_token']}`}
         
-    };
     let DMP_data = this.http.get(
-        environment.opidorUrl + `/api/v1/plans/${req.new_project.dmp_key}`,
+        environment.opidorUrl + `/plans/${req.new_project.dmp_key}?research_output_id=${req.new_project.research_output}`,
         httpOptions
     );
-    if ( auth['code'] != 200) {
+    if ( DMP_data['code'] != 200) {
         res.status(401).send('Not Authorized ');
         return;
     }
 
-    let new_project = {'id': DMP_data.project.title, 'size': DMP_data.resarchOutput.sharing.distribution.fileVolume, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name}
+    let new_project = {'id': DMP_data.project.title, 'size': DMP_data.resarchOutput.sharing.distribution.fileVolume, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name};
 
     
     // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
@@ -510,5 +486,5 @@ router.post('/dmp/download', async function (req, res) {
 });
 
 
-router.post
+router.post;
 module.exports = router;

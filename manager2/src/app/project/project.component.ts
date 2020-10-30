@@ -88,10 +88,9 @@ export class ProjectComponent implements OnInit {
         this.dmp_RO.forEach(element => {
             console.log(element)
             var opt = document.createElement('option');
-
+            opt.text = element.title
             // create text node to add to option element (opt)
-            opt.appendChild( document.createTextNode(element.title) );
-
+            opt.value = element
             // add opt to end of select box (sel)
             RO_selection.appendChild(opt); 
             
@@ -100,6 +99,8 @@ export class ProjectComponent implements OnInit {
 
     ask_for_project() {
         // todo: should rename it project_msg
+        console.log('ICI')
+        console.log(this.new_project.research_output)
         this.request_msg = '';
         this.request_err_msg = '';
         this.projectsService.askNew(this.new_project).subscribe(
@@ -223,14 +224,14 @@ export class ProjectComponent implements OnInit {
         this.projectsService.askDmpResearchOutput(this.new_project.dmp_key).subscribe(
             resp => {
                 this.dmp_msg = 'Acquired the list of Research outputs';
-                this.dmp_RO = resp.research_output_list
+                this.dmp_RO = resp.research_output_answer
 
                 var RO_selection = document.getElementById('choose_research_output');
                 this.dmp_RO.forEach(element => {
                     var opt = document.createElement('option');
 
                     // create text node to add to option element (opt)
-                    opt.appendChild( document.createTextNode(element.title) );
+                    opt.appendChild( document.createTextNode(element) );
 
                     // add opt to end of select box (sel)
                     RO_selection.appendChild(opt); 
