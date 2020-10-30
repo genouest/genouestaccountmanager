@@ -401,7 +401,7 @@ router.post('/ask/project', async function (req, res) {
     // Save in mongo the pending project data fr the admin to use
     let saving_for_later = await utils.mongo_pending().insertOne({_id: req.locals.logInfo.id , info: req.new_project});
     // logger.info(saving_for_later);
-    console.log(saving_for_later);
+    // console.log(saving_for_later);
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
 
     try {
