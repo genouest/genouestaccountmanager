@@ -1,4 +1,4 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
@@ -8,12 +8,17 @@ import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import * as latinize from 'latinize'
 
+import {Table} from 'primeng/table'
+
 @Component({
     selector: 'app-projects',
     templateUrl: './projects.component.html',
     styleUrls: ['./projects.component.css']
 })
 export class ProjectsComponent implements OnInit {
+    @ViewChild('dt') table: Table;
+
+
     @ViewChildren(DataTableDirective)
     tables: QueryList<DataTableDirective>;
 
