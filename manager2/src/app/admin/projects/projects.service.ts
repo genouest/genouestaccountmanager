@@ -194,10 +194,25 @@ export class ProjectsService {
             httpOptions
         );
     }
-    askDmpData(new_project: any): Observable<any> {
+    askDmpResearchOutput(dmp_key: any): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;
-        console.log("asking")
+        console.log("asking research output")
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/dmp/getResearchOutput',
+            dmp_key,
+            httpOptions
+        );
+    }
+    askDmpData(dmp_key: any): Observable<any> {
+        //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
+        // let user = this.authService.profile;
+        console.log("Downloading")
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
@@ -205,7 +220,7 @@ export class ProjectsService {
         };
         return this.http.post(
             environment.apiUrl + '/dmp/download',
-            new_project,
+            dmp_key,
             httpOptions
         );
     }

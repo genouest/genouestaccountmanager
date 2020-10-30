@@ -26,6 +26,7 @@ export class ProjectComponent implements OnInit {
     dmp_msg: string
     dmp_available: boolean
     manager_visible: boolean
+    dmp_RO: any
 
 
     request_err_msg: string
@@ -55,6 +56,8 @@ export class ProjectComponent implements OnInit {
 
     async ngOnInit() {
 
+        
+
         this.new_project = {}
         this.groups = [];
         this.manager_visible = true;
@@ -70,6 +73,29 @@ export class ProjectComponent implements OnInit {
             },
             err => console.log('failed to get projects')
         )
+        this.dmp_RO = [
+            {
+              "dbid": 54,
+              "title": "Confinement round 2"
+            },
+            {
+              "dbid": 55,
+              "title": "Proteomics data"
+            }
+          ];
+        console.log(this.dmp_RO)
+        var RO_selection = document.getElementById('choose_research_output');
+        this.dmp_RO.forEach(element => {
+            console.log(element)
+            var opt = document.createElement('option');
+
+            // create text node to add to option element (opt)
+            opt.appendChild( document.createTextNode(element.title) );
+
+            // add opt to end of select box (sel)
+            RO_selection.appendChild(opt); 
+            
+        });
     }
 
     ask_for_project() {
@@ -172,21 +198,58 @@ export class ProjectComponent implements OnInit {
 
     Ping_DMP() {
         console.log('pinging Dmp db...')
-        this.projectsService.pingDmpDatabase().subscribe(
-            resp => {
-                this.dmp_available = true;
-            },
-            err => {
-                this.dmp_available = false;
-            }
-        )
+        console.log(this.dmp_available)
+        this.dmp_available = true;
+        console.log(this.dmp_available)
+        // this.projectsService.pingDmpDatabase().subscribe(
+        //     resp => {
+        //         this.dmp_available = true;
+        //     },
+        //     err => {
+        //         this.dmp_available = false;
+        //     }
+        // )
 
     }
 
     Get_research_output() {
+        console.log(this.new_project.dmp_key)
+        this.dmp_msg = '';
+        this.dmp_err_msg = '';
+        if ([undefined, ""].includes(this.new_project.dmp_key)) {
+            this.dmp_err_msg = 'The DMP key field is empty';
+            return;
+        }
+        this.projectsService.askDmpResearchOutput(this.new_project.dmp_key).subscribe(
+            resp => {
+                this.dmp_msg = 'Acquired the list of Research outputs';
+                this.dmp_RO = resp.research_output_list
 
+                var RO_selection = document.getElementById('choose_research_output');
+                this.dmp_RO.forEach(element => {
+                    var opt = document.createElement('option');
+
+                    // create text node to add to option element (opt)
+                    opt.appendChild( document.createTextNode(element.title) );
+
+                    // add opt to end of select box (sel)
+                    RO_selection.appendChild(opt); 
+                    
+                });
+                document.getElementById('RO_div').style.display = 'block';
+
+            },
+            err => {
+                console.log('failed to reach the DMP database with your key', err);
+                this.dmp_err_msg = err.error;
+            }
+        )
     }
-
-
+    // For dev only
+    display() {
+        console.log("display")
+        document.getElementById('RO_div').style.display = 'block';
+        
+    }
 
 }

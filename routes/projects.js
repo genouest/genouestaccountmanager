@@ -442,6 +442,25 @@ router.get('/dmp/ping', async function (req, res) {
 
 
 
+router.post('/dmp/getResearchOutput', async function (req, res) {
+
+    httpOptions = {
+        headers: {'X-CONSULTKEY': '', 'X-AUTHKEY': ''}
+        
+    };
+    let research_output_list= this.http.post(
+        environment.opidorUrl + `/plans/${req.dmp_key}/research_outputs`,
+        httpOptions
+    );
+    if ( auth['code'] != 200) {
+        res.status(401).send('Not Authorized ');
+        return;
+    }
+
+    res.send(research_output_list);
+    res.end();
+});
+
 router.post('/dmp/download', async function (req, res) {
     // Checks first if the DMP database is accessible
     let online = this.http.get(
@@ -489,7 +508,6 @@ router.post('/dmp/download', async function (req, res) {
     res.send(new_project);
     res.end();
 });
-
 
 
 router.post
