@@ -16,7 +16,7 @@ import {Table} from 'primeng/table'
     styleUrls: ['./projects.component.css']
 })
 export class ProjectsComponent implements OnInit {
-    @ViewChild('dt') table: Table;
+    @ViewChild('dtp') table: Table;
 
 
     @ViewChildren(DataTableDirective)
