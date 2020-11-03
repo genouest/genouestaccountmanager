@@ -396,12 +396,12 @@ router.post('/ask/project', async function (req, res) {
 
 
     // todo: find a way to use cc
-    let new_project = {
-        'id': req.body.id,
-        'size': req.body.size,
-        'description': req.body.description,
-        'orga': req.body.orga
-    };
+    // let new_project = {
+    //     'id': req.body.id,
+    //     'size': req.body.size,
+    //     'description': req.body.description,
+    //     'orga': req.body.orga
+    // };
     // Save in mongo the pending project data fr the admin to use
     // let saving_for_later = await utils.mongo_projects().insertOne(new_project);
     
