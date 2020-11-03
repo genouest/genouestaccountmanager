@@ -406,7 +406,6 @@ router.post('/ask/project', async function (req, res) {
     // let saving_for_later = await utils.mongo_projects().insertOne(new_project);
     
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
-
     try {
         await utils.send_notif_mail({
             'name': 'ask_project',
@@ -422,7 +421,6 @@ router.post('/ask/project', async function (req, res) {
     } catch (error) {
         logger.error(error);
     }
-    
     res.end();
     return;
 });

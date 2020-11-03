@@ -105,21 +105,21 @@ export class ProjectComponent implements OnInit {
         }
         this.request_msg = '';
         this.request_err_msg = '';
-        this.projectsService.askNew({'id': this.new_project.id,
-        'owner': this.new_project.owner,
-        'group': this.new_project.group,
-        'size': this.new_project.size,
-        'description': this.new_project.description,
-        'orga': this.new_project.orga}).subscribe(
-            resp => {
-                this.request_msg = 'An email have been sent to admin';
-                this.new_project = {};
-            },
-            err => {
-                console.log('failed to get project users', err);
-                this.request_err_msg = err.error;
-            }
-        )
+        // this.projectsService.askNew({'id': this.new_project.id,
+        // 'owner': this.new_project.owner,
+        // 'group': this.new_project.group,
+        // 'size': this.new_project.size,
+        // 'description': this.new_project.description,
+        // 'orga': this.new_project.orga}).subscribe(
+        //     resp => {
+        //         this.request_msg = 'An email have been sent to admin';
+        //         this.new_project = {};
+        //     },
+        //     err => {
+        //         console.log('failed to get project users', err);
+        //         this.request_err_msg = err.error;
+        //     }
+        // )
     }
 
     show_project_users(project) {
