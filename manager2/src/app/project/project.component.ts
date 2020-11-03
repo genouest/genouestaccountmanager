@@ -99,11 +99,18 @@ export class ProjectComponent implements OnInit {
 
     ask_for_project() {
         // todo: should rename it project_msg
-        console.log('ICI')
-        console.log(this.new_project.research_output)
+        if (!this.new_project.id) {
+            this.request_err_msg = 'Enter a title to your project'
+            return
+        }
         this.request_msg = '';
         this.request_err_msg = '';
-        this.projectsService.askNew(this.new_project).subscribe(
+        this.projectsService.askNew({'id': this.new_project.id,
+        'owner': this.new_project.owner,
+        'group': this.new_project.group,
+        'size': this.new_project.size,
+        'description': this.new_project.description,
+        'orga': this.new_project.orga}).subscribe(
             resp => {
                 this.request_msg = 'An email have been sent to admin';
                 this.new_project = {};
