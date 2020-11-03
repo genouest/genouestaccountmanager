@@ -421,6 +421,7 @@ router.post('/ask/project', async function (req, res) {
     } catch (error) {
         logger.error(error);
     }
+    res.send('yo');
     res.end();
     return;
 });
