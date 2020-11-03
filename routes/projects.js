@@ -375,6 +375,7 @@ router.get('/group/:id/projects', async function (req, res) {
 });
 
 router.post('/ask/project', async function (req, res) {
+    res.status(401).send('Not authorized');
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
