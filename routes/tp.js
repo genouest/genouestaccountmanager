@@ -361,7 +361,7 @@ router.post('/tp', async function(req, res) {
         return;
     }
     tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about).then(function(reservation){
-        res.send({'reservation': reservation, 'msg': 'Reservation done'});
+        res.send({'reservation': reservation, 'message': 'Reservation done'});
         res.end();
         return;
     });
@@ -401,7 +401,7 @@ router.get('/tp/:id', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to get this reservation'});
+        res.status(403).send({'message': 'Not allowed to get this reservation'});
         res.end();
         return;
     }
@@ -443,24 +443,24 @@ router.delete('/tp/:id', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to delete this reservation'});
+        res.status(403).send({'message': 'Not allowed to delete this reservation'});
         res.end();
         return;
     }
 
     if(reservation.over){
-        res.status(403).send({'msg': 'Reservation is already closed'});
+        res.status(403).send({'message': 'Reservation is already closed'});
         res.end();
         return;
     }
 
     if(reservation.created){
-        res.status(403).send({'msg': 'Reservation accounts already created, reservation will be closed after closing date'});
+        res.status(403).send({'message': 'Reservation accounts already created, reservation will be closed after closing date'});
         res.end();
         return;
     }
     await utils.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
-    res.send({'msg': 'Reservation cancelled'});
+    res.send({'message': 'Reservation cancelled'});
     res.end();
     return;
 });
@@ -499,7 +499,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to delete this reservation'});
+        res.status(403).send({'message': 'Not allowed to delete this reservation'});
         res.end();
         return;
     }
@@ -551,7 +551,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to reserve now this reservation'});
+        res.status(403).send({'message': 'Not allowed to reserve now this reservation'});
         res.end();
         return;
     }

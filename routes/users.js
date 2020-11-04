@@ -477,7 +477,7 @@ router.delete('/group/:id', async function(req, res){
         return;
     }
     router.delete_group(group, user.uid).then(function(){
-        res.send({'msg': 'group ' + req.params.id + ' deleted'});
+        res.send({'message': 'group ' + req.params.id + ' deleted'});
         res.end();
     });
 });
@@ -1186,30 +1186,30 @@ router.post('/user/:id', async function(req, res) {
     }
 
     if(req.body.team=='' || req.body.team===null || req.body.team===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: team'});
+        res.send({'status': 1, 'message': 'Missing field: team'});
         return;
     }
     if (!req.body.team.match(/^[0-9a-z_]+$/)) {
-        res.send({'status': 1, 'msg': 'Team name must be alphanumeric and lowercase [0-9a-z_]'});
+        res.send({'status': 1, 'message': 'Team name must be alphanumeric and lowercase [0-9a-z_]'});
         res.end();
         return;
     }
 
     if(req.body.lab=='' || req.body.lab===null || req.body.lab===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: lab'});
+        res.send({'status': 1, 'message': 'Missing field: lab'});
         return;
     }
     if(req.body.address=='' || req.body.address===null || req.body.address===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: address'});
+        res.send({'status': 1, 'message': 'Missing field: address'});
         return;
     }
 
     if(req.body.responsible=='' || req.body.responsible===null || req.body.responsible===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: Responsible/Manager'});
+        res.send({'status': 1, 'message': 'Missing field: Responsible/Manager'});
         return;
     }
     if(!req.params.id.match(/^[0-9a-z]+$/)){
-        res.send({'status': 1, 'msg': 'invalid data identifier, numeric and lowercase letters only'});
+        res.send({'status': 1, 'message': 'invalid data identifier, numeric and lowercase letters only'});
         return;
     }
 
@@ -1218,35 +1218,35 @@ router.post('/user/:id', async function(req, res) {
         usermaxlen = CONFIG.general.username_max_length;
     }
     if (req.params.id.length > usermaxlen) {
-        res.send({'status': 1, 'msg': 'user id too long, must be < ' + usermaxlen + ' characters'});
+        res.send({'status': 1, 'message': 'user id too long, must be < ' + usermaxlen + ' characters'});
         res.end();
         return;
     }
 
     if(req.body.why=='' || req.body.why===null || req.body.why===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: Why do you need an account'});
+        res.send({'status': 1, 'message': 'Missing field: Why do you need an account'});
         return;
     }
 
     if(!validator.validate(req.body.email)) {
-        res.send({'status': 1, 'msg': 'Invalid email format'});
+        res.send({'status': 1, 'message': 'Invalid email format'});
         return;
     }
 
     if (!(req.body.duration in duration_list))
     {
-        res.send({'status': 1, 'msg': 'Invalid duration format'});
+        res.send({'status': 1, 'message': 'Invalid duration format'});
         return;
     }
 
     let user_email = await utils.mongo_users().findOne({email: req.body.email, is_fake: false});
     if(user_email){
-        res.send({'status': 1, 'msg': 'User email already exists'});
+        res.send({'status': 1, 'message': 'User email already exists'});
         return;
     }
     let userexists = await utils.mongo_users().findOne({uid: req.params.id});
     if(userexists){
-        res.send({'status': 1, 'msg': 'User id already exists'});
+        res.send({'status': 1, 'message': 'User id already exists'});
         return;
     }
 
@@ -1317,7 +1317,7 @@ router.post('/user/:id', async function(req, res) {
         logger.error(error);
     }
 
-    res.send({'status': 0, 'msg': 'Could not send an email, please contact the support.'});
+    res.send({'status': 0, 'message': 'Could not send an email, please contact the support.'});
     res.end();
     return;
 

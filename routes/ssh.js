@@ -128,7 +128,7 @@ router.get('/ssh/:id', async function(req, res) {
     }
 
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']});
-    res.send({'msg': 'SSH key will be generated, refresh page in a minute to download your key'});
+    res.send({'message': 'SSH key will be generated, refresh page in a minute to download your key'});
     res.end();
 });
 

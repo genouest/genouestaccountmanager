@@ -105,7 +105,7 @@ export class TpsComponent implements OnInit {
         }
         this.tpService.reserve(reservation).subscribe(
             resp => {
-                this.msg = resp['msg'];
+                this.msg = resp['message'];
                 this.listEvents();
             },
             err => this.errmsg = err.error
@@ -116,7 +116,7 @@ export class TpsComponent implements OnInit {
         this.msg = '';
         this.errmsg = '';
         this.tpService.cancel(this.selectedEvent.id).subscribe(
-            resp => this.msg = resp['msg'],
+            resp => this.msg = resp['message'],
             err => this.errmsg = err.error
         )
     }

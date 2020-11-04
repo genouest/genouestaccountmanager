@@ -66,7 +66,7 @@ router.post('/log/user/:id', async function(req, res){
         'logs': []
     };
     await utils.mongo_events().insertOne(event);
-    res.send({'msg': 'event created'});
+    res.send({'message': 'event created'});
     res.end();
 });
 

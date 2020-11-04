@@ -533,7 +533,7 @@ export class UserComponent implements OnInit {
 
     ssh_new_key(){
         this.userService.getNewSSHKey(this.user.uid).subscribe(
-            resp => this.new_key_message = resp['msg'],
+            resp => this.new_key_message = resp['message'],
             err => console.log('failed to get new ssh key')
         )
     }
@@ -592,7 +592,7 @@ export class UserComponent implements OnInit {
         this.userService.activate(this.user.uid).subscribe(
             resp => {
                 this.user.status = this.STATUS_ACTIVE;
-                this.msg = resp['msg']
+                this.msg = resp['message']
             },
             err => this.err_msg = err.error
         )
