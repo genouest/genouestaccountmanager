@@ -341,7 +341,7 @@ export class UserComponent implements OnInit {
         this.dbmsg_error='';
         this.databaseService.add(this.database).subscribe(
             resp => { this.dbmsg = resp['message']; this.db_list()},
-            err => { this.dbmsg_error = err.error; console.log('failed to add database')}
+            err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
         )
     }
 
@@ -352,7 +352,7 @@ export class UserComponent implements OnInit {
             if(ws.name == dbName) {
                 this.databaseService.remove(ws).subscribe(
                     resp => { this.rm_dbmsg = resp['message']; this.db_list()},
-                    err => { this.rm_dbmsg_error = err.error; console.log('failed to delete database')}
+                    err => { this.rm_dbmsg_error = err.error.message; console.log('failed to delete database')}
                 )
             }
         });
@@ -418,7 +418,7 @@ export class UserComponent implements OnInit {
                 this.website = new Website('', '', '', this.user.uid);
                 //this.web_list();
             },
-            err => { this.webmsg = err.error; console.log('failed to add web site')}
+            err => { this.webmsg = err.error.message; console.log('failed to add web site')}
         )
     }
     web_delete(siteName: string) {
@@ -426,7 +426,7 @@ export class UserComponent implements OnInit {
             if(ws.name == siteName) {
                 this.websiteService.remove(ws).subscribe(
                     resp => { this.rmwebmsg = ''; this.web_list()},
-                    err  => { this.rmwebmsg = err.error; console.log('failed to delete web site', err)}
+                    err  => { this.rmwebmsg = err.error.message; console.log('failed to delete web site', err)}
                 )
             }
         });
@@ -568,7 +568,7 @@ export class UserComponent implements OnInit {
                 this.update_msg = 'User info updated';
                 this.user = resp;
             },
-            err => this.update_error_msg = err.error
+            err => this.update_error_msg = err.error.message
         )
     }
 
@@ -594,7 +594,7 @@ export class UserComponent implements OnInit {
                 this.user.status = this.STATUS_ACTIVE;
                 this.msg = resp['message']
             },
-            err => this.err_msg = err.error
+            err => this.err_msg = err.error.message
         )
     }
 
@@ -654,7 +654,7 @@ export class UserComponent implements OnInit {
                     this.add_to_project_msg = resp['message'];
                     this.user_projects.push({id: newproject.id, owner: false, member: true})
                 },
-                err => this.add_to_project_error_msg = err.error
+                err => this.add_to_project_error_msg = err.error.message
             )
         }
 
@@ -672,7 +672,7 @@ export class UserComponent implements OnInit {
                 }
                 this.user_projects = tmpproject;
             },
-            err => this.remove_from_project_error_msg = err.error
+            err => this.remove_from_project_error_msg = err.error.message
         )
     }
 
@@ -684,7 +684,7 @@ export class UserComponent implements OnInit {
                 this.router.navigate(['/admin/user']);
             },
             err => {
-                this.err_msg = err.error;
+                this.err_msg = err.error.message;
                 console.log('failed to delete user', err);
             }
         )

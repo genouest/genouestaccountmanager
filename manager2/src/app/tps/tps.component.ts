@@ -108,7 +108,7 @@ export class TpsComponent implements OnInit {
                 this.msg = resp['message'];
                 this.listEvents();
             },
-            err => this.errmsg = err.error
+            err => this.errmsg = err.error.message
         )
     }
 
@@ -117,7 +117,7 @@ export class TpsComponent implements OnInit {
         this.errmsg = '';
         this.tpService.cancel(this.selectedEvent.id).subscribe(
             resp => this.msg = resp['message'],
-            err => this.errmsg = err.error
+            err => this.errmsg = err.error.message
         )
     }
 

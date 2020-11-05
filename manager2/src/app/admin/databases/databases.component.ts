@@ -99,7 +99,7 @@ export class DatabasesComponent implements OnInit {
                     err => console.log('failed to list databases')
                 )
             },
-            err => this.err_msg = err.error
+            err => this.err_msg = err.error.message
         )
     }
 

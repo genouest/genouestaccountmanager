@@ -106,7 +106,7 @@ export class LogsComponent implements OnInit {
                 this.logcontent = resp.log.replace(/(\r\n|\n|\r)/g,"<br />");
                 this.event = event_file;
             },
-            err => this.err_msg = err.error
+            err => this.err_msg = err.error.message
         );
 
     }

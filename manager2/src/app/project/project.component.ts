@@ -98,7 +98,7 @@ export class ProjectComponent implements OnInit {
             },
             err => {
                 console.log('failed to get project users', err);
-                this.request_err_msg = err.error;
+                this.request_err_msg = err.error.message;
             }
         )
     }
@@ -151,7 +151,7 @@ export class ProjectComponent implements OnInit {
         }
         this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
             resp => this.request_msg = resp['message'],
-            err => this.request_err_msg = err.error
+            err => this.request_err_msg = err.error.message
         )
 
 
