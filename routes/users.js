@@ -230,16 +230,16 @@ router.get('/user/:id/apikey', async function(req, res){
 
 router.post('/user/:id/notify', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send({message: 'Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -2160,7 +2160,7 @@ router.post('/user/:id/project/:project', async function(req, res){
             res.end();
             return;
         } else {
-            res.status(500).send({message: 'Server Error, contact admin');
+            res.status(500).send({message: 'Server Error, contact admin'});
             res.end();
             return;
         }
