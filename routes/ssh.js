@@ -20,7 +20,7 @@ router.get('/ssh/:id/putty', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -47,7 +47,7 @@ router.get('/ssh/:id/private', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -79,7 +79,7 @@ router.get('/ssh/:id/public', async function(req, res) {
     let user = await utils.mongo_users().findOne({uid: req.params.id});
 
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -107,7 +107,7 @@ router.get('/ssh/:id', async function(req, res) {
     let user = await utils.mongo_users().findOne({uid: req.params.id});
 
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }

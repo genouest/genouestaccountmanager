@@ -211,7 +211,7 @@ router.get('/user/:id/apikey', async function(req, res){
 
     let user= await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -245,7 +245,7 @@ router.post('/user/:id/notify', async function(req, res){
 
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -288,7 +288,7 @@ router.post('/user/:id/apikey', async function(req, res){
 
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -316,7 +316,7 @@ router.put('/user/:id/subscribe', async function(req, res){
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -348,7 +348,7 @@ router.put('/user/:id/unsubscribe', async function(req, res){
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -376,7 +376,7 @@ router.get('/user/:id/subscribed', async function(req, res){
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -662,17 +662,17 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
     logger.info('Adding user ' + uid + ' to group ' + secgroup);
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user){
-        throw {code: 404, msg:'User not found'};
+        throw {code: 404, message:'User not found'};
     }
     if(secgroup == user.group) {
-        throw {code: 208, msg: 'Group is user main\'s group: '+user.group};
+        throw {code: 208, message: 'Group is user main\'s group: '+user.group};
     }
     if(!user.secondarygroups) {
         user.secondarygroups = [];
     }
     for(let g=0;g < user.secondarygroups.length;g++){
         if(secgroup == user.secondarygroups[g]) {
-            throw {code: 208, msg: 'group is already set'};
+            throw {code: 208, message: 'group is already set'};
         }
     }
     user.secondarygroups.push(secgroup);
@@ -682,7 +682,7 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
     } catch(err) {
-        throw {code: 500, msg: 'Could not update user'};
+        throw {code: 500, message: 'Could not update user'};
     }
 
     try {
@@ -691,7 +691,7 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
         await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to secondary  group ' + secgroup , 'logs': [created_file]});
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
-        throw {code: 500, msg:'Change Group Failed'};
+        throw {code: 500, message:'Change Group Failed'};
     }
 
 
@@ -723,8 +723,8 @@ router.post('/user/:id/group/:group', async function(req, res){
         await add_user_to_group(uid, secgroup, session_user.uid);
     } catch (e) {
         logger.error(e);
-        if (e.code && e.msg) {
-            res.status(e.code).send({message: e.msg});
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
             res.end();
             return;
         } else {
@@ -1065,13 +1065,13 @@ router.get('/user/:id/activate', async function(req, res) {
         // eslint-disable-next-line no-unused-vars
     })).then(function(results){
         notif.add(user.email, function() {
-            res.send({msg: 'Activation in progress', fid: fid, error: []});
+            res.send({message: 'Activation in progress', fid: fid, error: []});
             res.end();
         });
         return;
     }, function(err){
         notif.add(user.email, function() {
-            res.send({msg: 'Activation Error', fid: fid, error: err});
+            res.send({message: 'Activation Error', fid: fid, error: err});
             res.end();
         });
         return;
@@ -1619,7 +1619,7 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
         if(accept == 'json') {
-            res.send({msg: 'validity period extended', expiration: expiration});
+            res.send({message: 'validity period extended', expiration: expiration});
             res.end();
             return;
         }
@@ -2069,21 +2069,21 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
     let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
-        throw {code: 404, msg: 'User does not exist'};
+        throw {code: 404, message: 'User does not exist'};
     }
     if (!user.projects){
         user.projects = [];
     }
     for(let g=0; g < user.projects.length; g++){
         if(newproject == user.projects[g]) {
-            throw {code: 208, msg: 'User is already in project : nothing was done.'};
+            throw {code: 208, message: 'User is already in project : nothing was done.'};
         }
     }
     user.projects.push(newproject);
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
-        throw {code: 500, msg: 'Could not update user'};
+        throw {code: 500, message: 'Could not update user'};
     }
 
     try {
@@ -2092,7 +2092,7 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
         await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to project ' + newproject , 'logs': [created_file]});
     } catch(error){
         logger.error(error);
-        throw {code: 500, msg:'Add User to Project Failed for: ' + newproject};
+        throw {code: 500, message:'Add User to Project Failed for: ' + newproject};
     }
 
     let project = await utils.mongo_projects().findOne({id:newproject});
@@ -2125,7 +2125,7 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
             logger.error(error);
             // as it may throw any 20* http ok code...
             if (!error.code || error.code >= 300) {
-                throw {code: 500, msg:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
+                throw {code: 500, message:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
             }
         }
     }
@@ -2155,8 +2155,8 @@ router.post('/user/:id/project/:project', async function(req, res){
         await add_user_to_project(newproject, uid, session_user.uid);
     } catch (e) {
         logger.error(e);
-        if (e.code && e.msg) {
-            res.status(e.code).send({message: e.msg});
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
             res.end();
             return;
         } else {

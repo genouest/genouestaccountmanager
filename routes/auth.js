@@ -206,7 +206,7 @@ router.get('/auth', async function(req, res) {
     if(req.locals.logInfo.id) {
         let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
         if(!user) {
-            res.send({user: null, msg: 'user not found'});
+            res.send({user: null, message: 'user not found'});
             return;
         }
         let token = jwt.sign(
@@ -223,21 +223,21 @@ router.get('/auth', async function(req, res) {
             user.is_admin = false;
         }
         if(user.status == STATUS_PENDING_EMAIL){
-            res.send({token: token, user: user, msg: 'Your account is waiting for email approval, check your mail inbox'});
+            res.send({token: token, user: user, message: 'Your account is waiting for email approval, check your mail inbox'});
             return;
         }
         if(user.status == STATUS_PENDING_APPROVAL){
-            res.send({token: token, user: user, msg: 'Your account is waiting for admin approval'});
+            res.send({token: token, user: user, message: 'Your account is waiting for admin approval'});
             return;
         }
         if(user.status == STATUS_EXPIRED){
-            res.send({token: token, user: user, msg: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
+            res.send({token: token, user: user, message: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
             return;
         }
-        res.send({token: token, user: user, msg: ''});
+        res.send({token: token, user: user, message: ''});
     }
     else {
-        res.send({user: null, msg: 'User does not exist'});
+        res.send({user: null, message: 'User does not exist'});
     }
 });
 
@@ -267,7 +267,7 @@ router.post('/auth/:id', async function(req, res) {
         }
         sess.gomngr = user._id;
         sess.apikey = true;
-        res.send({token: usertoken, user: user, msg: '', double_auth: false});
+        res.send({token: usertoken, user: user, message: '', double_auth: false});
         res.end();
         return;
     }
@@ -313,7 +313,7 @@ router.post('/auth/:id', async function(req, res) {
         req.connection.socket.remoteAddress;
     if((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth=='fake') {
         // Skip auth
-        res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
+        res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
         res.end();
         return;
     }
@@ -329,12 +329,12 @@ router.post('/auth/:id', async function(req, res) {
                 let apikey = Math.random().toString(36).slice(-10);
                 user.apikey = apikey;
                 await utils.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
-                res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
+                res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
                 res.end();
                 return;
 
             } else {
-                res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
+                res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
                 res.end();
                 return;
             }
@@ -345,7 +345,7 @@ router.post('/auth/:id', async function(req, res) {
             }
             attemps[user.uid]['attemps'] += 1;
             attemps[user.uid]['last'] = new Date();
-            res.send({user: null, msg: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
+            res.send({user: null, message: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
             res.end();
             return;
         }

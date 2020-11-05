@@ -325,7 +325,7 @@ router.get('/tp', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -350,7 +350,7 @@ router.post('/tp', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -378,7 +378,7 @@ router.get('/tp/:id', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -420,7 +420,7 @@ router.delete('/tp/:id', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -476,7 +476,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -528,7 +528,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
