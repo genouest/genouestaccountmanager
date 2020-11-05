@@ -405,7 +405,7 @@ router.get('/tp/:id', async function(req, res) {
         res.end();
         return;
     }
-    res.send({'reservation': reservation});
+    res.send({reservation: reservation});
     res.end();
 });
 

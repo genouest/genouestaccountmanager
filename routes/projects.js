@@ -130,7 +130,7 @@ router.post('/project', async function(req, res){
         return;
     }
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
-    res.send({'message': 'Project created'});
+    res.send({message: 'Project created'});
     return;
 });
 
@@ -165,7 +165,7 @@ router.delete('/project/:id', async function(req, res){
 
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.params.id , 'logs': []});
 
-    res.send({'message': 'Project deleted'});
+    res.send({message: 'Project deleted'});
 
 });
 

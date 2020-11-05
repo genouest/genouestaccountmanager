@@ -77,9 +77,9 @@ router.get('/mail/auth/:id', async function(req, res) {
         });
     } catch(err) {
         logger.error('failed to send notif', err);
-        return res.send({'status': false});
+        return res.send({status: false});
     }
-    res.send({'status': true, token: usertoken});
+    res.send({status: true, token: usertoken});
 });
 
 
@@ -111,7 +111,7 @@ router.post('/mail/auth/:id', async function(req, res) {
     else {
         user.is_admin = false;
     }
-    res.send({'user': user, 'token': usertoken});
+    res.send({user: user, token: usertoken});
     res.end();
     return;
 });
@@ -130,7 +130,7 @@ router.get('/u2f/auth/:id', async function(req, res) {
     let keyHandle = user.u2f.keyHandler;
     const authRequest = u2f.request(APP_ID, keyHandle);
     req.session.u2f = user._id;
-    return res.send({'authRequest': authRequest});
+    return res.send({authRequest: authRequest});
 
 });
 
@@ -160,7 +160,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
         );
         sess.gomngr = sess.u2f;
         sess.u2f = null;
-        return res.send({'token': usertoken, 'user': user});
+        return res.send({token: usertoken, user: user});
     }
     else {
         sess.gomngr = null;
@@ -182,7 +182,7 @@ router.get('/u2f/register/:id', async function(req, res) {
         res.status(403).send({message: 'A key is already defined'});
     }
     const registrationRequest = u2f.request(APP_ID);
-    return res.send({'registrationRequest': registrationRequest});
+    return res.send({registrationRequest: registrationRequest});
 });
 
 router.post('/u2f/register/:id', async function(req, res) {
@@ -195,7 +195,7 @@ router.post('/u2f/register/:id', async function(req, res) {
     const result = u2f.checkRegistration(registrationRequest, registrationResponse);
     if (result.successful) {
         await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
-        return res.send({'publicKey': result.publicKey});
+        return res.send({publicKey: result.publicKey});
     }
     else{
         return res.send(result);

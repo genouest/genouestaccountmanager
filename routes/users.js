@@ -217,11 +217,11 @@ router.get('/user/:id/apikey', async function(req, res){
     }
 
     if (user.apikey === undefined) {
-        res.send({'apikey': ''});
+        res.send({apikey: ''});
         res.end();
         return;
     } else {
-        res.send({'apikey': user.apikey});
+        res.send({apikey: user.apikey});
         res.end();
         return;
     }
@@ -295,7 +295,7 @@ router.post('/user/:id/apikey', async function(req, res){
 
     let apikey = Math.random().toString(36).slice(-10);
     await utils.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
-    res.send({'apikey': apikey});
+    res.send({apikey: apikey});
     res.end();
 });
 
@@ -353,11 +353,11 @@ router.put('/user/:id/unsubscribe', async function(req, res){
         return;
     }
     if(user.email == undefined || user.email == ''){
-        res.send({'unsubscribed': false});
+        res.send({unsubscribed: false});
         res.end();
     } else {
         notif.remove(user.email, function() {
-            res.send({'unsubscribed': true});
+            res.send({unsubscribed: true});
             res.end();
         });
     }
@@ -381,11 +381,11 @@ router.get('/user/:id/subscribed', async function(req, res){
         return;
     }
     if(user.email == undefined || user.email == ''){
-        res.send({'subscribed': false});
+        res.send({subscribed: false});
         res.end();
     } else {
         notif.subscribed(user.email, function(is_subscribed) {
-            res.send({'subscribed': is_subscribed});
+            res.send({subscribed: is_subscribed});
             res.end();
         });
     }
