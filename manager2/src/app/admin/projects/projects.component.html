@@ -16,29 +16,24 @@
               <h3>Add user</h3>
             </div>
             <div class="card-body">
-              <p-table #dta [value]="add_requests"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true" 
-                      [rowsPerPageOptions]="[10,25,50]"
-              >
-                <ng-template pTemplate="header">
-                    <tr>
-                      <th>Project</th>
-                      <th>User</th>
-                      <th></th>
-                      <th></th>
+              <div class="table-responsive">
+                <table id="dtAddRequests" datatable [dtTrigger]="dtTriggerAdd" class="table table-striped">
+                  <thead><tr>
+                    <th>Project</th>
+                    <th>User</th>
+                    <th></th>
+                    <th></th>
+                  </tr></thead>
+                  <tbody>
+                    <tr *ngFor="let request of add_requests">
+                      <td>{{request.project.id}}</td>
+                      <td>{{request.user}}</td>
+                      <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span class="label label-success">Add</span></td>
+                      <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span class="label label-danger">Cancel</span></td>
                     </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-request>
-                  <tr>
-                    <td>{{request.project.id}}</td>
-                    <td>{{request.user}}</td>
-                    <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span class="label label-success">Add</span></td>
-                    <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span class="label label-danger">Cancel</span></td>
-                  </tr>
-                </ng-template>
-                </p-table>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -48,29 +43,6 @@
               <h3>Remove user</h3>
             </div>
             <div class="card-body">
-              <p-table #dtd [value]="remove_requests"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true" 
-                      [rowsPerPageOptions]="[10,25,50]"
-              >
-                <ng-template pTemplate="header">
-                    <tr>
-                      <th>Project</th>
-                      <th>User</th>
-                      <th></th>
-                      <th></th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-request>
-                  <tr>
-                    <td>{{request.project.id}}</td>
-                    <td>{{request.user}}</td>
-                    <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span class="label label-success">Add</span></td>
-                    <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span class="label label-danger">Cancel</span></td>
-                  </tr>
-                </ng-template>
-                </p-table>
               <div class="table-responsive">
                 <table id="dtRemoveRequests" datatable [dtTrigger]="dtTriggerRemove" class="table table-striped">
                   <thead><tr>
@@ -100,45 +72,29 @@
     <h3>All projects</h3>
   </div>
   <div class="card-body">
-      <p-table #dtp [value]="projects"
-        [paginator]="true"
-        [rows]="10"
-        [showCurrentPageReport]="true" 
-        
-        [rowsPerPageOptions]="[10,25,50]"
-        [globalFilterFields]="['id','owner']"
-        [filterDelay]="0"
-      >
-        <ng-template pTemplate="caption">
-            <div class="table-header">
-                List of Projects
-                <span class="p-input-icon-left">
-                    <i class="pi pi-search"></i>
-                    <input pInputText type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-                </span>
-            </div>
-        </ng-template>
-        <ng-template pTemplate="header">
-            <tr>
-              <th>Project</th>
-              <th>Owner</th>
-              <th *ngIf="!config.project || config.project.enable_group">Group</th>
-              <th>Path</th>
-              <th>Size (Go)</th>
-              <th>Expiration</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-project>
-              <tr>
-                <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
-                <td>{{project.owner}}</td>
-                <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
-                <td>{{project.path}}</td>
-                <td>{{project.size}}</td>
-                <td>{{date_convert(project.expire)}}</td>
-              </tr>
-        </ng-template>
-      </p-table>
+    <div class="table-responsive">
+      <table id="dtProjects" datatable [dtTrigger]="dtTriggerProjects" class="table table-striped">
+        <thead><tr>
+          <th>Project</th>
+          <th>Owner</th>
+          <th *ngIf="!config.project || config.project.enable_group">Group</th>
+          <th>Path</th>
+          <th>Size (Go)</th>
+          <th>Expiration</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let project of projects">
+            <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
+            <td>{{project.owner}}</td>
+            <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
+            <td>{{project.path}}</td>
+            <td>{{project.size}}</td>
+            <td>{{date_convert(project.expire)}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
   </div>
   <div class="card bg-light">
     <div class="card-header">
