@@ -186,11 +186,11 @@ router.create_admin = async function(default_admin, default_admin_group){
 
 router.get('/user/:id/apikey', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
@@ -199,29 +199,29 @@ router.get('/user/:id/apikey', async function(req, res){
         session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     } catch(e) {
         logger.error(e);
-        res.status(404).send('not found');
+        res.status(404).send({message: 'not found'});
         res.end();
         return;
     }
 
     if(session_user.uid !== req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     let user= await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
     if (user.apikey === undefined) {
-        res.send({'apikey': ''});
+        res.send({apikey: ''});
         res.end();
         return;
     } else {
-        res.send({'apikey': user.apikey});
+        res.send({apikey: user.apikey});
         res.end();
         return;
     }
@@ -230,22 +230,22 @@ router.get('/user/:id/apikey', async function(req, res){
 
 router.post('/user/:id/notify', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -261,71 +261,71 @@ router.post('/user/:id/notify', async function(req, res){
         }, {});
     } catch(error) {
         logger.error(error);
-        res.status(500).send({'message': 'message error', 'error': error});
+        res.status(500).send({message: 'message error', error: error});
         res.end();
         return;
     }
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'message: ' + subject , 'logs': []});
 
-    res.send({'message': 'message sent'});
+    res.send({message: 'message sent'});
     res.end();
 });
 
 router.post('/user/:id/apikey', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(session_user.uid !== req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
     let apikey = Math.random().toString(36).slice(-10);
     await utils.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
-    res.send({'apikey': apikey});
+    res.send({apikey: apikey});
     res.end();
 });
 
 
 router.put('/user/:id/subscribe', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     // if not user nor admin
     if (req.locals.logInfo.id !== req.params.id && GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
     if(user.email == undefined || user.email == ''){
-        res.send({'subscribed': false});
+        res.send({subscribed: false});
         res.end();
     } else {
         notif.add(user.email, function() {
-            res.send({'subscribed': true});
+            res.send({subscribed: true});
             res.end();
         });
     }
@@ -334,30 +334,30 @@ router.put('/user/:id/subscribe', async function(req, res){
 
 router.put('/user/:id/unsubscribe', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     // if not user nor admin
     if (req.locals.logInfo.id !== req.params.id && GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
     if(user.email == undefined || user.email == ''){
-        res.send({'unsubscribed': false});
+        res.send({unsubscribed: false});
         res.end();
     } else {
         notif.remove(user.email, function() {
-            res.send({'unsubscribed': true});
+            res.send({unsubscribed: true});
             res.end();
         });
     }
@@ -367,25 +367,25 @@ router.put('/user/:id/unsubscribe', async function(req, res){
 
 router.get('/user/:id/subscribed', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
     if(user.email == undefined || user.email == ''){
-        res.send({'subscribed': false});
+        res.send({subscribed: false});
         res.end();
     } else {
         notif.subscribed(user.email, function(is_subscribed) {
-            res.send({'subscribed': is_subscribed});
+            res.send({subscribed: is_subscribed});
             res.end();
         });
     }
@@ -393,20 +393,20 @@ router.get('/user/:id/subscribed', async function(req, res){
 
 router.get('/group/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
@@ -450,34 +450,34 @@ router.clear_user_groups = async function(user, admin_user_id){
 
 router.delete('/group/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let group = await utils.mongo_groups().findOne({name: req.params.id});
     if(!group) {
-        res.status(403).send('Group does not exist');
+        res.status(403).send({message: 'Group does not exist'});
         return;
     }
     let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
     if(users_in_group && users_in_group.length > 0){
-        res.status(403).send('Group has some users, cannot delete it');
+        res.status(403).send({message: 'Group has some users, cannot delete it'});
         return;
     }
     router.delete_group(group, user.uid).then(function(){
-        res.send({'msg': 'group ' + req.params.id + ' deleted'});
+        res.send({message: 'group ' + req.params.id + ' deleted'});
         res.end();
     });
 });
@@ -485,32 +485,32 @@ router.delete('/group/:id', async function(req, res){
 
 router.put('/group/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let owner = req.body.owner;
     let user = await utils.mongo_users().findOne({uid: owner});
     if(!user) {
-        res.status(404).send('User does not exist');
+        res.status(404).send({message: 'User does not exist'});
         res.end();
         return;
     }
     let group = await utils.mongo_groups().findOne({name: req.params.id});
     if(! group) {
-        res.status(404).send('Group does not exist');
+        res.status(404).send({message: 'Group does not exist'});
         return;
     }
     await utils.mongo_events().insertOne({
@@ -526,32 +526,32 @@ router.put('/group/:id', async function(req, res){
 
 router.post('/group/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(session_user == null){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let owner = req.body.owner;
     let user = await utils.mongo_users().findOne({uid: owner});
     if(!user) {
-        res.status(404).send('Owner user does not exist');
+        res.status(404).send({message: 'Owner user does not exist'});
         res.end();
         return;
     }
     let group = await utils.mongo_groups().findOne({name: new RegExp('^' + req.params.id + '$', 'i')});
     if(group) {
-        res.status(403).send('Group already exists');
+        res.status(403).send({message: 'Group already exists'});
         return;
     }
 
@@ -559,7 +559,7 @@ router.post('/group/:id', async function(req, res){
         group = await create_group(req.params.id , owner);
     } catch(error){
         logger.error('Add Group Failed for: ' + req.params.id, error);
-        res.status(500).send('Add Group Failed');
+        res.status(500).send({message: 'Add Group Failed'});
         return;
     }
 
@@ -579,16 +579,16 @@ router.get('/ip', function(req, res) {
 
 router.get('/group', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let groups = await utils.mongo_groups().find().toArray();
@@ -598,22 +598,22 @@ router.get('/group', async function(req, res){
 
 router.post('/message', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     if(! notif.mailSet()){
-        res.status(403).send('Mail provider is not set');
+        res.status(403).send({message: 'Mail provider is not set'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let message = req.body.message;
@@ -634,7 +634,7 @@ router.post('/message', async function(req, res){
     };
     // eslint-disable-next-line no-unused-vars
     notif.sendList(req.body.list, mailOptions, function(err, response) {
-        res.send('');
+        res.send({message: ''});
         return;
     });
 });
@@ -642,16 +642,16 @@ router.post('/message', async function(req, res){
 // Get users listing - for admin
 router.get('/user', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let users = await utils.mongo_users().find({}).toArray();
@@ -662,17 +662,17 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
     logger.info('Adding user ' + uid + ' to group ' + secgroup);
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user){
-        throw {code: 404, msg:'User not found'};
+        throw {code: 404, message:'User not found'};
     }
     if(secgroup == user.group) {
-        throw {code: 208, msg: 'Group is user main\'s group: '+user.group};
+        throw {code: 208, message: 'Group is user main\'s group: '+user.group};
     }
     if(!user.secondarygroups) {
         user.secondarygroups = [];
     }
     for(let g=0;g < user.secondarygroups.length;g++){
         if(secgroup == user.secondarygroups[g]) {
-            throw {code: 208, msg: 'group is already set'};
+            throw {code: 208, message: 'group is already set'};
         }
     }
     user.secondarygroups.push(secgroup);
@@ -682,7 +682,7 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
     } catch(err) {
-        throw {code: 500, msg: 'Could not update user'};
+        throw {code: 500, message: 'Could not update user'};
     }
 
     try {
@@ -691,7 +691,7 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
         await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to secondary  group ' + secgroup , 'logs': [created_file]});
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
-        throw {code: 500, msg:'Change Group Failed'};
+        throw {code: 500, message:'Change Group Failed'};
     }
 
 
@@ -699,21 +699,21 @@ var add_user_to_group = async function (uid, secgroup, action_owner) {
 
 router.post('/user/:id/group/:group', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id, req.params.group])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user){
-        res.status(401).send('User not found');
+        res.status(401).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let uid = req.params.id;
@@ -723,12 +723,12 @@ router.post('/user/:id/group/:group', async function(req, res){
         await add_user_to_group(uid, secgroup, session_user.uid);
     } catch (e) {
         logger.error(e);
-        if (e.code && e.msg) {
-            res.status(e.code).send(e.msg);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
             res.end();
             return;
         } else {
-            res.status(500).send('Server Error, contact admin');
+            res.status(500).send({message: 'Server Error, contact admin'});
             res.end();
             return;
         }
@@ -742,16 +742,16 @@ router.post('/user/:id/group/:group', async function(req, res){
 
 router.delete('/user/:id/group/:group', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id, req.params.group])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(! session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let uid = req.params.id;
@@ -794,7 +794,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
-        res.status(500).send('Change Group Failed');
+        res.status(500).send({message: 'Change Group Failed'});
         return;
     }
 
@@ -906,17 +906,17 @@ router.delete_user = async function(user, action_owner_id, message){
 
 router.delete('/user/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -966,30 +966,30 @@ router.delete('/user/:id', async function(req, res){
 // activate user
 router.get('/user/:id/activate', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.status(403).send('User does not exist');
+        res.status(403).send({message: 'User does not exist'});
         res.end();
         return;
     }
     if(user.maingroup == undefined || user.group == undefined) {
-        res.status(403).send('Group or main group directory are not set');
+        res.status(403).send({message: 'Group or main group directory are not set'});
         res.end();
         return;
     }
@@ -1005,14 +1005,14 @@ router.get('/user/:id/activate', async function(req, res) {
                     await create_group(user.group, user.uid);
                 } catch(error){
                     logger.error('Add Group Failed for: ' + user.group, error);
-                    res.status(500).send('Add Group Failed');
+                    res.status(500).send({message: 'Add Group Failed'});
                     return;
                 }
 
                 data = await utils.mongo_groups().findOne({'name': user.group});
             } else {
 
-                res.status(403).send('Group ' + user.group + ' does not exist, please create it first');
+                res.status(403).send({message: 'Group ' + user.group + ' does not exist, please create it first'});
                 res.end();
                 return;
             }
@@ -1028,7 +1028,7 @@ router.get('/user/:id/activate', async function(req, res) {
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Add User Failed for: ' + user.uid, error);
-        res.status(500).send('Add User Failed');
+        res.status(500).send({message: 'Add User Failed'});
         return;
     }
 
@@ -1065,13 +1065,13 @@ router.get('/user/:id/activate', async function(req, res) {
         // eslint-disable-next-line no-unused-vars
     })).then(function(results){
         notif.add(user.email, function() {
-            res.send({msg: 'Activation in progress', fid: fid, error: []});
+            res.send({message: 'Activation in progress', fid: fid, error: []});
             res.end();
         });
         return;
     }, function(err){
         notif.add(user.email, function() {
-            res.send({msg: 'Activation Error', fid: fid, error: err});
+            res.send({message: 'Activation Error', fid: fid, error: err});
             res.end();
         });
         return;
@@ -1083,17 +1083,17 @@ router.get('/user/:id/activate', async function(req, res) {
 // Get user - for logged user or admin
 router.get('/user/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized, need to login first');
+        res.status(401).send({message: 'Not authorized, need to login first'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(user.is_fake===undefined) {
@@ -1115,7 +1115,7 @@ router.get('/user/:id', async function(req, res) {
         return;
     }
     else {
-        res.status(401).send('Not authorized to access this user info');
+        res.status(401).send({message: 'Not authorized to access this user info'});
         return;
     }
 });
@@ -1125,12 +1125,12 @@ router.get('/user/:id/confirm', async function(req, res) {
     let uid = req.params.id;
     let regkey = req.query.regkey;
     if(! utils.sanitizeAll([uid])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: uid});
     if(! user) {
-        res.status(401).send('Invalid user');
+        res.status(401).send({message: 'Invalid user'});
         return;
     }
     else {
@@ -1169,7 +1169,7 @@ router.get('/user/:id/confirm', async function(req, res) {
             res.end();
         }
         else {
-            res.status(401).send('Invalid registration key');
+            res.status(401).send({message: 'Invalid registration key'});
             return;
         }
     }
@@ -1181,35 +1181,35 @@ router.get('/user/:id/confirm', async function(req, res) {
 router.post('/user/:id', async function(req, res) {
     logger.info('New register request for '+req.params.id);
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     if(req.body.team=='' || req.body.team===null || req.body.team===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: team'});
+        res.send({status: 1, message: 'Missing field: team'});
         return;
     }
     if (!req.body.team.match(/^[0-9a-z_]+$/)) {
-        res.send({'status': 1, 'msg': 'Team name must be alphanumeric and lowercase [0-9a-z_]'});
+        res.send({status: 1, message: 'Team name must be alphanumeric and lowercase [0-9a-z_]'});
         res.end();
         return;
     }
 
     if(req.body.lab=='' || req.body.lab===null || req.body.lab===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: lab'});
+        res.send({status: 1, message: 'Missing field: lab'});
         return;
     }
     if(req.body.address=='' || req.body.address===null || req.body.address===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: address'});
+        res.send({status: 1, message: 'Missing field: address'});
         return;
     }
 
     if(req.body.responsible=='' || req.body.responsible===null || req.body.responsible===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: Responsible/Manager'});
+        res.send({status: 1, message: 'Missing field: Responsible/Manager'});
         return;
     }
     if(!req.params.id.match(/^[0-9a-z]+$/)){
-        res.send({'status': 1, 'msg': 'invalid data identifier, numeric and lowercase letters only'});
+        res.send({status: 1, message: 'invalid data identifier, numeric and lowercase letters only'});
         return;
     }
 
@@ -1218,35 +1218,35 @@ router.post('/user/:id', async function(req, res) {
         usermaxlen = CONFIG.general.username_max_length;
     }
     if (req.params.id.length > usermaxlen) {
-        res.send({'status': 1, 'msg': 'user id too long, must be < ' + usermaxlen + ' characters'});
+        res.send({status: 1, message: 'user id too long, must be < ' + usermaxlen + ' characters'});
         res.end();
         return;
     }
 
     if(req.body.why=='' || req.body.why===null || req.body.why===undefined) {
-        res.send({'status': 1, 'msg': 'Missing field: Why do you need an account'});
+        res.send({status: 1, message: 'Missing field: Why do you need an account'});
         return;
     }
 
     if(!validator.validate(req.body.email)) {
-        res.send({'status': 1, 'msg': 'Invalid email format'});
+        res.send({status: 1, message: 'Invalid email format'});
         return;
     }
 
     if (!(req.body.duration in duration_list))
     {
-        res.send({'status': 1, 'msg': 'Invalid duration format'});
+        res.send({status: 1, message: 'Invalid duration format'});
         return;
     }
 
     let user_email = await utils.mongo_users().findOne({email: req.body.email, is_fake: false});
     if(user_email){
-        res.send({'status': 1, 'msg': 'User email already exists'});
+        res.send({status: 1, message: 'User email already exists'});
         return;
     }
     let userexists = await utils.mongo_users().findOne({uid: req.params.id});
     if(userexists){
-        res.send({'status': 1, 'msg': 'User id already exists'});
+        res.send({status: 1, message: 'User id already exists'});
         return;
     }
 
@@ -1317,7 +1317,7 @@ router.post('/user/:id', async function(req, res) {
         logger.error(error);
     }
 
-    res.send({'status': 0, 'msg': 'Could not send an email, please contact the support.'});
+    res.send({status: 0, message: 'Could not send an email, please contact the support.'});
     res.end();
     return;
 
@@ -1325,21 +1325,21 @@ router.post('/user/:id', async function(req, res) {
 
 router.get('/user/:id/expire', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if (!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
 
@@ -1370,7 +1370,7 @@ router.get('/user/:id/expire', async function(req, res){
             logger.info('File Created: ', created_file);
         } catch(error){
             logger.error('Expire User Failed for: ' + user.uid, error);
-            res.status(500).send('Expire User Failed');
+            res.status(500).send({message: 'Expire User Failed'});
             return;
         }
 
@@ -1412,7 +1412,7 @@ router.get('/user/:id/expire', async function(req, res){
 
     }
     else {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 });
@@ -1420,11 +1420,11 @@ router.get('/user/:id/expire', async function(req, res){
 
 router.post('/user/:id/passwordreset', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
@@ -1435,12 +1435,12 @@ router.post('/user/:id/passwordreset', async function(req, res){
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.status(404).send('User does not exist:'+req.params.id);
+        res.status(404).send({message: 'User does not exist:'+req.params.id});
         res.end();
         return;
     }
     if(user.status != STATUS_ACTIVE){
-        res.status(401).send('Your account is not active');
+        res.status(401).send({message: 'Your account is not active'});
         res.end();
         return;
     }
@@ -1459,7 +1459,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Reset Password Failed for: ' + user.uid, error);
-        res.status(500).send('Reset Password Failed');
+        res.status(500).send({message: 'Reset Password Failed'});
         return;
     }
 
@@ -1472,18 +1472,18 @@ router.post('/user/:id/passwordreset', async function(req, res){
 router.get('/user/:id/passwordreset', async function(req, res){
     let key = Math.random().toString(36).substring(7);
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.status(404).send('User does not exist');
+        res.status(404).send({message: 'User does not exist'});
         res.end();
         return;
     }
     if(user.status != STATUS_ACTIVE){
-        res.status(401).send('Your account is not active');
+        res.status(401).send({message: 'Your account is not active'});
         res.end();
         return;
     }
@@ -1491,7 +1491,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     try {
         await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: key}});
     } catch(err) {
-        res.status(404).send('User cannot be updated');
+        res.status(404).send({message: 'User cannot be updated'});
         res.end();
         return;
     }
@@ -1525,13 +1525,13 @@ router.get('/user/:id/passwordreset', async function(req, res){
 
 router.get('/user/:id/passwordreset/:key', async function(req, res){
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.status(404).send('User does not exist');
+        res.status(404).send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -1555,7 +1555,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             logger.info('File Created: ', created_file);
         } catch(error){
             logger.error('Reset Password Failed for: ' + user.uid, error);
-            res.status(500).send('Reset Password Failed');
+            res.status(500).send({message: 'Reset Password Failed'});
             return;
         }
 
@@ -1588,7 +1588,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         }
     }
     else {
-        res.status(401).send('Invalid authorization key.');
+        res.status(401).send({message: 'Invalid authorization key.'});
         return;
     }
 });
@@ -1599,16 +1599,16 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
  */
 router.get('/user/:id/renew/:regkey', async function(req, res){
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(user.status != STATUS_ACTIVE) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let regkey = req.params.regkey;
@@ -1619,7 +1619,7 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
         if(accept == 'json') {
-            res.send({msg: 'validity period extended', 'expiration': expiration});
+            res.send({message: 'validity period extended', expiration: expiration});
             res.end();
             return;
         }
@@ -1628,7 +1628,7 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         return;
     }
     else {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 });
@@ -1636,18 +1636,18 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
 // reactivate user
 router.get('/user/:id/renew', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
@@ -1674,7 +1674,7 @@ router.get('/user/:id/renew', async function(req, res){
             logger.info('File Created: ', created_file);
         } catch(error){
             logger.error('Renew User Failed for: ' + user.uid, error);
-            res.status(500).send('Renew User Failed');
+            res.status(500).send({message: 'Renew User Failed'});
             return;
         }
 
@@ -1725,7 +1725,7 @@ router.get('/user/:id/renew', async function(req, res){
         return;
     }
     else {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 });
@@ -1733,11 +1733,11 @@ router.get('/user/:id/renew', async function(req, res){
 
 router.put('/user/:id/ssh', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
@@ -1750,7 +1750,7 @@ router.put('/user/:id/ssh', async function(req, res) {
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     // If not admin nor logged user
     if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let key = req.body.ssh;
@@ -1758,11 +1758,11 @@ router.put('/user/:id/ssh', async function(req, res) {
     // Escape some special chars for security
     user.ssh = key.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
     if (utils.sanitizeSSHKey(user.ssh) === undefined) {
-        res.status(403).send('Invalid SSH Key');
+        res.status(403).send({message: 'Invalid SSH Key'});
         return;
     }
     if (utils.sanitizePath(user.home) === undefined) {
-        res.status(403).send('Invalid home directory');
+        res.status(403).send({message: 'Invalid home directory'});
         return;
     }
     // Update SSH Key
@@ -1774,7 +1774,7 @@ router.put('/user/:id/ssh', async function(req, res) {
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Add Ssh Key Failed for: ' + user.uid, error);
-        res.status(500).send('Ssh Key Failed');
+        res.status(500).send({message: 'Ssh Key Failed'});
         return;
     }
 
@@ -1789,11 +1789,11 @@ router.put('/user/:id/ssh', async function(req, res) {
 
 router.get('/user/:id/usage', function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let usage = JSON.parse(JSON.stringify(CONFIG.usage));
@@ -1802,7 +1802,7 @@ router.get('/user/:id/usage', function(req, res){
         usage[i]['link'] = usage[i]['link'].replace('#USER#', req.params.id);
         usages.push(usage[i]);
     }
-    res.send({'usages': usages});
+    res.send({usages: usages});
     res.end();
     return;
 });
@@ -1811,17 +1811,17 @@ router.get('/user/:id/usage', function(req, res){
 router.put('/user/:id', async function(req, res) {
 
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
@@ -1833,12 +1833,12 @@ router.put('/user/:id', async function(req, res) {
     let user = await utils.mongo_users().findOne({uid: req.params.id});
 
     if(!user){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     // If not admin nor logged user
     if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -1870,7 +1870,7 @@ router.put('/user/:id', async function(req, res) {
 
     if(user.email == '' || user.firstname == '' || user.lastname == '') {
         if(! user.is_fake) {
-            res.status(403).send('Some mandatory fields are empty');
+            res.status(403).send({message: 'Some mandatory fields are empty'});
             return;
         }
     }
@@ -1892,7 +1892,7 @@ router.put('/user/:id', async function(req, res) {
     if(req.body.duration) {
         if (!(req.body.duration in duration_list))
         {
-            res.status(403).send('Duration is not valid');
+            res.status(403).send({message: 'Duration is not valid'});
             return;
         }
         // update expiration if duration have changed
@@ -1923,18 +1923,18 @@ router.put('/user/:id', async function(req, res) {
             let group = await utils.mongo_groups().findOne({'name': req.body.group});
 
             if(!group) {
-                res.status(403).send('Group ' + req.body.group + ' does not exist, please create it first');
+                res.status(403).send({message: 'Group ' + req.body.group + ' does not exist, please create it first'});
                 return;
             }
 
             if(user.secondarygroups.indexOf(group.name) != -1) {
-                res.status(403).send('Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!');
+                res.status(403).send({message: 'Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!'});
                 return;
             }
             user.group = req.body.group;
             user.gidnumber = group.gid;
             if(user.group == '' || user.group == null) {
-                res.status(403).send('Some mandatory fields are empty');
+                res.status(403).send({message: 'Some mandatory fields are empty'});
                 return;
             }
         }
@@ -1984,7 +1984,7 @@ router.put('/user/:id', async function(req, res) {
         try {
             await goldap.modify(user, fid);
         } catch(err) {
-            res.status(403).send('User update failed');
+            res.status(403).send({message: 'User update failed'});
             return;
         }
 
@@ -2046,16 +2046,16 @@ router.put('/user/:id', async function(req, res) {
 
 router.get('/project/:id/users', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     let users_in_project = await utils.mongo_users().find({'projects': req.params.id}).toArray();
@@ -2069,21 +2069,21 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
     let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(!user) {
-        throw {code: 404, msg: 'User does not exist'};
+        throw {code: 404, message: 'User does not exist'};
     }
     if (!user.projects){
         user.projects = [];
     }
     for(let g=0; g < user.projects.length; g++){
         if(newproject == user.projects[g]) {
-            throw {code: 208, msg: 'User is already in project : nothing was done.'};
+            throw {code: 208, message: 'User is already in project : nothing was done.'};
         }
     }
     user.projects.push(newproject);
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
-        throw {code: 500, msg: 'Could not update user'};
+        throw {code: 500, message: 'Could not update user'};
     }
 
     try {
@@ -2092,7 +2092,7 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
         await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to project ' + newproject , 'logs': [created_file]});
     } catch(error){
         logger.error(error);
-        throw {code: 500, msg:'Add User to Project Failed for: ' + newproject};
+        throw {code: 500, message:'Add User to Project Failed for: ' + newproject};
     }
 
     let project = await utils.mongo_projects().findOne({id:newproject});
@@ -2125,7 +2125,7 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
             logger.error(error);
             // as it may throw any 20* http ok code...
             if (!error.code || error.code >= 300) {
-                throw {code: 500, msg:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
+                throw {code: 500, message:'Add User to group;' + project.group + ' Failed for project: ' + project.id};
             }
         }
     }
@@ -2133,17 +2133,17 @@ var add_user_to_project = async function (newproject, uid, action_owner) {
 
 router.post('/user/:id/project/:project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id, req.params.project])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         res.end();
         return;
     }
@@ -2155,12 +2155,12 @@ router.post('/user/:id/project/:project', async function(req, res){
         await add_user_to_project(newproject, uid, session_user.uid);
     } catch (e) {
         logger.error(e);
-        if (e.code && e.msg) {
-            res.status(e.code).send(e.msg);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
             res.end();
             return;
         } else {
-            res.status(500).send('Server Error, contact admin');
+            res.status(500).send({message: 'Server Error, contact admin'});
             res.end();
             return;
         }
@@ -2173,18 +2173,18 @@ router.post('/user/:id/project/:project', async function(req, res){
 
 router.delete('/user/:id/project/:project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id, req.params.project])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         res.end();
         return;
     }
@@ -2193,19 +2193,19 @@ router.delete('/user/:id/project/:project', async function(req, res){
     let fid = new Date().getTime();
     let user = await utils.mongo_users().findOne({uid: uid});
     if(! user) {
-        res.status(404).send('User ' + uid + ' not found');
+        res.status(404).send({message: 'User ' + uid + ' not found'});
         res.end();
         return;
     }
     let project = await utils.mongo_projects().findOne({id:oldproject});
     if(!project){
         logger.info('project not found', oldproject);
-        res.status(500).send('Error, project not found');
+        res.status(500).send({message: 'Error, project not found'});
         res.end();
         return;
     }
     if(uid === project.owner && ! req.query.force){
-        res.status(403).send('Cannot remove project owner. Please change the owner before deletion');
+        res.status(403).send({message: 'Cannot remove project owner. Please change the owner before deletion'});
         res.end();
         return;
     }
@@ -2218,7 +2218,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
     try {
         await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: tempprojects}});
     } catch(err) {
-        res.status(403).send('Could not update user');
+        res.status(403).send({message: 'Could not update user'});
         res.end();
         return;
     }
@@ -2227,7 +2227,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Remove User from Project Failed for: ' + oldproject, error);
-        res.status(500).send('Remove from Project Failed');
+        res.status(500).send({message: 'Remove from Project Failed'});
         return;
     }
 
@@ -2238,17 +2238,17 @@ router.delete('/user/:id/project/:project', async function(req, res){
 
 router.get('/list/:list', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.list])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let list_name = req.params.list;
@@ -2261,13 +2261,13 @@ router.get('/list/:list', async function(req, res){
 
 router.get('/lists', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     notif.getLists(function(listOfLists) {

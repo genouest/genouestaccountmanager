@@ -45,7 +45,7 @@ export class ProjectsComponent implements OnInit {
                     this.user_projects.push({id: newproject.id, owner: false, member: true});
                 },
                 err => {
-                    this.add_to_project_error_msg = err.error;
+                    this.add_to_project_error_msg = err.error.message;
                 }
             )
         };
@@ -64,7 +64,7 @@ export class ProjectsComponent implements OnInit {
                 this.user_projects = tmpproject;
             },
             err => {
-                this.remove_from_project_error_msg = err.error;
+                this.remove_from_project_error_msg = err.error.message;
             }
         )
     }

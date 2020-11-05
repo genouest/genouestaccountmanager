@@ -96,7 +96,7 @@ export class GroupsComponent implements OnInit {
             },
             err => {
                 this.success_msg = '';
-                this.err_msg = err.error;
+                this.err_msg = err.error.message;
             }
         )
     }
@@ -114,7 +114,7 @@ export class GroupsComponent implements OnInit {
                 this.selectedGroup = null;
             },
             err => {
-                this.rm_grp_err_msg = err.error;
+                this.rm_grp_err_msg = err.error.message;
             }
         )
     }
@@ -134,7 +134,7 @@ export class GroupsComponent implements OnInit {
             },
             err => {
                 this.msg = '';
-                this.rm_grp_err_msg = err.error;
+                this.rm_grp_err_msg = err.error.message;
             }
         )
     }

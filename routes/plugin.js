@@ -53,12 +53,12 @@ router.get('/plugin/:id', function(req, res) {
 
 router.get('/plugin/:id/:user', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
@@ -75,13 +75,13 @@ router.get('/plugin/:id/:user', async function(req, res) {
 
 router.post('/plugin/:id/:user', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
@@ -94,7 +94,7 @@ router.post('/plugin/:id/:user', async function(req, res) {
     plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
         res.send(result);
     }, function(err){
-        res.status(400).send(err);
+        res.status(400).send({message: err}); // Maybe we should check if err is a string
     });
 });
 

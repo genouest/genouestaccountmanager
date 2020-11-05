@@ -46,16 +46,16 @@ router.get('/logout', function(req, res) {
 router.get('/mail/auth/:id', async function(req, res) {
     // Request email token
     if(!req.locals.logInfo.is_logged){
-        return res.status(401).send('You need to login first');
+        return res.status(401).send({message: 'You need to login first'});
     }
 
     if(! notif.mailSet()){
-        return res.status(403).send('No mail provider set : cannot send mail');
+        return res.status(403).send({message: 'No mail provider set : cannot send mail'});
     }
     let password = Math.random().toString(36).slice(-10);
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        return res.status(404).send('User not found');
+        return res.status(404).send({message: 'User not found'});
     }
 
     let expire = new Date().getTime() + 60*10*1000;
@@ -77,20 +77,20 @@ router.get('/mail/auth/:id', async function(req, res) {
         });
     } catch(err) {
         logger.error('failed to send notif', err);
-        return res.send({'status': false});
+        return res.send({status: false});
     }
-    res.send({'status': true, token: usertoken});
+    res.send({status: true, token: usertoken});
 });
 
 
 router.post('/mail/auth/:id', async function(req, res) {
     // Check email token
     if(!req.locals.logInfo.is_logged){
-        return res.status(401).send('You need to login first');
+        return res.status(401).send({message: 'You need to login first'});
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        return res.status(404).send('User not found');
+        return res.status(404).send({message: 'User not found'});
     }
     let usertoken = jwt.sign(
         { user: user._id, isLogged: true },
@@ -100,7 +100,7 @@ router.post('/mail/auth/:id', async function(req, res) {
     let sess = req.session;
     let now = new Date().getTime();
     if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.body.token != req.locals.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
-        return res.status(403).send('Invalid or expired token');
+        return res.status(403).send({message: 'Invalid or expired token'});
     }
     sess.gomngr = sess.mail_token['user'];
     sess.mail_token = null;
@@ -111,7 +111,7 @@ router.post('/mail/auth/:id', async function(req, res) {
     else {
         user.is_admin = false;
     }
-    res.send({'user': user, 'token': usertoken});
+    res.send({user: user, token: usertoken});
     res.end();
     return;
 });
@@ -119,32 +119,32 @@ router.post('/mail/auth/:id', async function(req, res) {
 router.get('/u2f/auth/:id', async function(req, res) {
     // challenge
     if(!req.locals.logInfo.is_logged){
-        return res.status(401).send('You need to login first');
+        return res.status(401).send({message: 'You need to login first'});
     }
     req.session.u2f = null;
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     let keyHandle = user.u2f.keyHandler;
     const authRequest = u2f.request(APP_ID, keyHandle);
     req.session.u2f = user._id;
-    return res.send({'authRequest': authRequest});
+    return res.send({authRequest: authRequest});
 
 });
 
 router.post('/u2f/auth/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged){
-        return res.status(401).send('You need to login first');
+        return res.status(401).send({message: 'You need to login first'});
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(!req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
-        res.status(401).send('U2F not challenged or invalid user');
+        res.status(401).send({message: 'U2F not challenged or invalid user'});
     }
     let publicKey = user.u2f.publicKey;
     const result = u2f.checkSignature(req.body.authRequest, req.body.authResponse, publicKey);
@@ -160,7 +160,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
         );
         sess.gomngr = sess.u2f;
         sess.u2f = null;
-        return res.send({'token': usertoken, 'user': user});
+        return res.send({token: usertoken, user: user});
     }
     else {
         sess.gomngr = null;
@@ -172,30 +172,30 @@ router.post('/u2f/auth/:id', async function(req, res) {
 router.get('/u2f/register/:id', async function(req, res) {
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(!req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
-        return res.status(401).send('You need to login first');
+        return res.status(401).send({message: 'You need to login first'});
     }
     if(user.u2f !== undefined && user.u2f.keyHandle!=null){
-        res.status(403).send('A key is already defined');
+        res.status(403).send({message: 'A key is already defined'});
     }
     const registrationRequest = u2f.request(APP_ID);
-    return res.send({'registrationRequest': registrationRequest});
+    return res.send({registrationRequest: registrationRequest});
 });
 
 router.post('/u2f/register/:id', async function(req, res) {
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
-        return res.status(401).send('You need to login first');
+        return res.status(401).send({message: 'You need to login first'});
     }
     const registrationRequest = req.body.registrationRequest;
     const registrationResponse = req.bodyregistrationResponse;
     const result = u2f.checkRegistration(registrationRequest, registrationResponse);
     if (result.successful) {
         await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
-        return res.send({'publicKey': result.publicKey});
+        return res.send({publicKey: result.publicKey});
     }
     else{
         return res.send(result);
@@ -206,7 +206,7 @@ router.get('/auth', async function(req, res) {
     if(req.locals.logInfo.id) {
         let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
         if(!user) {
-            res.send({user: null, msg: 'user not found'});
+            res.send({user: null, message: 'user not found'});
             return;
         }
         let token = jwt.sign(
@@ -223,21 +223,21 @@ router.get('/auth', async function(req, res) {
             user.is_admin = false;
         }
         if(user.status == STATUS_PENDING_EMAIL){
-            res.send({token: token, user: user, msg: 'Your account is waiting for email approval, check your mail inbox'});
+            res.send({token: token, user: user, message: 'Your account is waiting for email approval, check your mail inbox'});
             return;
         }
         if(user.status == STATUS_PENDING_APPROVAL){
-            res.send({token: token, user: user, msg: 'Your account is waiting for admin approval'});
+            res.send({token: token, user: user, message: 'Your account is waiting for admin approval'});
             return;
         }
         if(user.status == STATUS_EXPIRED){
-            res.send({token: token, user: user, msg: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
+            res.send({token: token, user: user, message: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
             return;
         }
-        res.send({token: token, user: user, msg: ''});
+        res.send({token: token, user: user, message: ''});
     }
     else {
-        res.send({user: null, msg: 'User does not exist'});
+        res.send({user: null, message: 'User does not exist'});
     }
 });
 
@@ -245,13 +245,13 @@ router.post('/auth/:id', async function(req, res) {
     let apikey = req.headers['x-my-apikey'] || '';
     if(apikey === ''){
         if(req.body.password === undefined || req.body.password === null || req.body.password == '') {
-            res.status(401).send('Missing password');
+            res.status(401).send({message: 'Missing password'});
             return;
         }
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(! user) {
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     let usertoken = jwt.sign(
@@ -267,14 +267,14 @@ router.post('/auth/:id', async function(req, res) {
         }
         sess.gomngr = user._id;
         sess.apikey = true;
-        res.send({token: usertoken, user: user, msg: '', double_auth: false});
+        res.send({token: usertoken, user: user, message: '', double_auth: false});
         res.end();
         return;
     }
     if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
         let diffTime = (new Date()).getTime() - attemps[user.uid]['last'].getTime();
         if(diffTime < 1000 * bansec) {
-            res.status(401).send('You have reached the maximum of login attemps, your account access is blocked for ' + Math.floor((1000 * bansec - diffTime)/ 60000) + ' minutes');
+            res.status(401).send({message: 'You have reached the maximum of login attemps, your account access is blocked for ' + Math.floor((1000 * bansec - diffTime)/ 60000) + ' minutes'});
             return;
         }
         else {
@@ -313,7 +313,7 @@ router.post('/auth/:id', async function(req, res) {
         req.connection.socket.remoteAddress;
     if((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth=='fake') {
         // Skip auth
-        res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
+        res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
         res.end();
         return;
     }
@@ -329,12 +329,12 @@ router.post('/auth/:id', async function(req, res) {
                 let apikey = Math.random().toString(36).slice(-10);
                 user.apikey = apikey;
                 await utils.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
-                res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
+                res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
                 res.end();
                 return;
 
             } else {
-                res.send({token: usertoken, user: user, msg: '', double_auth: need_double_auth});
+                res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
                 res.end();
                 return;
             }
@@ -345,7 +345,7 @@ router.post('/auth/:id', async function(req, res) {
             }
             attemps[user.uid]['attemps'] += 1;
             attemps[user.uid]['last'] = new Date();
-            res.send({user: null, msg: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
+            res.send({user: null, message: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
             res.end();
             return;
         }

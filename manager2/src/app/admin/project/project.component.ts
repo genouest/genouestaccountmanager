@@ -130,7 +130,7 @@ export class ProjectComponent implements OnInit {
                 this.admin_user_msg = resp['message'];
                 this.show_project_users(this.project.id);
             },
-            err => this.admin_user_err_msg = err.error
+            err => this.admin_user_err_msg = err.error.message
         )
     }
 
@@ -142,7 +142,7 @@ export class ProjectComponent implements OnInit {
                 this.admin_user_msg = resp['message'];
                 this.show_project_users(this.project.id);
             },
-            err => this.admin_user_err_msg = err.error
+            err => this.admin_user_err_msg = err.error.message
         );
     }
 
@@ -151,7 +151,7 @@ export class ProjectComponent implements OnInit {
         for(var i = 0; i< usersList.length; i++){
             this.userService.addGroup(usersList[i].uid, newGroupId).subscribe(
                 resp => {},
-                err => this.prj_err_msg = err.error
+                err => this.prj_err_msg = err.error.message
             );
         };
     }
@@ -162,13 +162,13 @@ export class ProjectComponent implements OnInit {
             this.userService.removeFromProject(userList[i].uid, project.id)
                 .subscribe(
                     resp => {},
-                    err => this.prj_err_msg = err.error                                         );
+                    err => this.prj_err_msg = err.error.message                                         );
         }
         this.projectsService.delete(project.id).subscribe(
             resp => {
                 this.router.navigate(['/admin/project'], { queryParams: {'deleted': 'ok'}})
             },
-            err => this.admin_user_err_msg = err.error
+            err => this.admin_user_err_msg = err.error.message
         )
     }
 
@@ -193,7 +193,7 @@ export class ProjectComponent implements OnInit {
                 }
                 this.show_project_users(project);
             },
-            err => this.prj_err_msg = err.error
+            err => this.prj_err_msg = err.error.message
         )
     }
 

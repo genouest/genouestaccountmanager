@@ -35,11 +35,11 @@ export class WebsitesComponent implements OnInit {
     ngOnInit() {
         this.userService.list().subscribe(
             resp => this.users = resp,
-            err => this.msg = err.error
+            err => this.msg = err.error.message
         )
         this.websitesService.list().subscribe(
             resp => {this.websites = resp; this.dtTrigger.next();},
-            err => this.msg = err.error
+            err => this.msg = err.error.message
         )
     }
 
@@ -50,7 +50,7 @@ export class WebsitesComponent implements OnInit {
         }
         this.websitesService.changeOwner(this.owner_web_name.name, this.owner_web_name.owner, this.owner_web_owner.uid).subscribe(
             resp => this.chowner_msg = resp['message'],
-            err => this.chowner_err_msg = err.error
+            err => this.chowner_err_msg = err.error.message
         )
     }
 
