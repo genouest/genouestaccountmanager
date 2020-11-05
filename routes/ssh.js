@@ -11,11 +11,11 @@ var utils = require('./utils');
 
 router.get('/ssh/:id/putty', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
@@ -25,7 +25,7 @@ router.get('/ssh/:id/putty', async function(req, res) {
         return;
     }
     if(user._id.str != req.locals.logInfo.id.str){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let sshDir = user.home + '/.ssh';
@@ -38,11 +38,11 @@ router.get('/ssh/:id/putty', async function(req, res) {
 
 router.get('/ssh/:id/private', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
@@ -52,11 +52,11 @@ router.get('/ssh/:id/private', async function(req, res) {
         return;
     }
     if(CONFIG.general.admin.indexOf(user.uid) >= 0){
-        res.status(401).send('[admin user] not authorized to download private key');
+        res.status(401).send({message: '[admin user] not authorized to download private key'});
         return;
     }
     if(user._id.str != req.locals.logInfo.id.str){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let sshDir = user.home + '/.ssh';
@@ -69,11 +69,11 @@ router.get('/ssh/:id/private', async function(req, res) {
 
 router.get('/ssh/:id/public', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
@@ -84,7 +84,7 @@ router.get('/ssh/:id/public', async function(req, res) {
         return;
     }
     if(user._id.str != req.locals.logInfo.id.str){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let sshDir = user.home + '/.ssh';
@@ -97,11 +97,11 @@ router.get('/ssh/:id/public', async function(req, res) {
 
 router.get('/ssh/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({uid: req.params.id});
@@ -112,7 +112,7 @@ router.get('/ssh/:id', async function(req, res) {
         return;
     }
     if(user._id.str != req.locals.logInfo.id.str){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -123,8 +123,8 @@ router.get('/ssh/:id', async function(req, res) {
         logger.debug('Created file', created_file);
     } catch(error) {
         logger.error('Create User Failed for: ' + user.uid, error);
-        res.status(500).send('Ssh Keygen Failed');
-        return;  
+        res.status(500).send({message: 'Ssh Keygen Failed'});
+        return;
     }
 
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']});
