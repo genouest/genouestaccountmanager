@@ -264,8 +264,14 @@ export class PluginItems {
 export class PluginComponent implements OnInit, OnChanges {
     @Input() pluginItem: string
     @Input() userId: string
-    @ViewChild(PluginDirective) appPlugin: PluginDirective;
+    @ViewChild(PluginDirective, {static: true}) appPlugin: PluginDirective;
     constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
+
+
+    ngAfterViewInit() {
+
+    }
+
 
     ngOnInit() {
         // should load component from its name (pluginItem should be plugin name, a string)
@@ -276,13 +282,12 @@ export class PluginComponent implements OnInit, OnChanges {
 
         // pItem.userId = this.userId;
         let componentFactory = this.componentFactoryResolver.resolveComponentFactory(pItem.component);
-
         let viewContainerRef = this.appPlugin.viewContainerRef;
         viewContainerRef.clear();
 
         let componentRef = viewContainerRef.createComponent(componentFactory);
         (<BasePluginComponent>componentRef.instance).userId = this.userId;
-        //(<BasePluginComponent>componentRef.instance).loadData(this.userId);
+        componentRef.changeDetectorRef.detectChanges();
     }
 
     ngOnChanges(changes: SimpleChanges) {
