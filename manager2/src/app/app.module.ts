@@ -45,7 +45,7 @@ import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component'
 import { FlashComponent } from './utils/flash/flash.component';
 import { TagComponent } from './utils/tag/tag.component';
 import { UserLogsComponent } from './user/userlogs.component';
-
+import {TableModule} from 'primeng/table';
 import { environment } from '../environments/environment';
 import * as Sentry from "@sentry/browser";
 
@@ -119,6 +119,7 @@ export class SentryErrorHandler implements ErrorHandler {
         FormsModule,
         DataTablesModule,
         BrowserAnimationsModule,
+        TableModule,
         CalendarModule.forRoot({
             provide: DateAdapter,
             useFactory: adapterFactory

@@ -141,7 +141,7 @@
                               <label label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
                               <div class="col-6">
                                   <div *ngFor="let secondarygroup of user.secondarygroups">
-                                      <input type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="secondarygroup" class="form-control" readonly/>
+                                      <input type="text" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
                                   </div>
                               </div>
                           </div>
@@ -197,7 +197,7 @@
                               <label *ngIf="user.secondarygroups && user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
                               <div class="col-6">
                                   <div *ngFor="let secondarygroup of user.secondarygroups">
-                                      <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="secondarygroup" class="form-control" readonly/>
+                                      <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
                                   </div>
                               </div>
                           </div>
