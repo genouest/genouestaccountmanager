@@ -16,7 +16,7 @@ script:
   - docker build -t osallou/my .
   - cd $TRAVIS_BUILD_DIR/cron && docker build -f Dockerfile-cron -t osallou/mycron .
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose up -d
-  - for i in {0..10}; do echo Try $i; sleep 30; docker-compose logs my-app | grep "Server listening on port 3000"; if [ $? -eq 0 ] ; then  echo Server is started; break; fi;  if [ $i -eq 0 ]; then echo Server does not start; exit 1; fi; done
+  - for i in {0..10}; do echo Try $i; sleep 30; docker-compose logs my-app | grep "Server listening on port 3000"; if [ $? -eq 0 ] ; then  echo Server is started; nb_done=$(docker-compose exec my-app ls -l /opt/my/scripts/ | grep admin | grep 'update.done' | wc -l); if [ $nb_done -eq 2 ] ; then echo Admin user created; break; fi; fi;  if [ $i -eq 0 ]; then echo Server does not start; exit 1; fi; done
   - cd $TRAVIS_BUILD_DIR && docker ps && mocha -b -t 20000 --full-trace
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose logs my-app
   - cd $TRAVIS_BUILD_DIR/tests && docker-compose down
