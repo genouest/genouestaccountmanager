@@ -522,7 +522,7 @@ router.post('/dmp/askProject', async function (req, res) {
         return;
     }
 
-     // Save in mongo the pending project data fr the admin to use
+    // Save in mongo the pending project data fr the admin to use
     let saving_for_later = await utils.mongo_pending().insertOne(new_project);
     
     // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
@@ -532,6 +532,30 @@ router.post('/dmp/askProject', async function (req, res) {
     res.end();
 });
 
+router.post('/dmp/download', async function (req, res) {
+    // Authenticates Genouest using the API
+    let httpOptions = {
+        headers: {'X-CONSULTKEY': '', 'X-AUTHKEY': ''}
+    };
+        
+    let DMP_data = this.http.get(
+        environment.opidorUrl + `/plans/${req.new_project.dmp_key}?research_output_id=${req.new_project.research_output}`,
+        httpOptions
+    );
+    if ( DMP_data['code'] != 200) {
+        res.status(401).send('Not Authorized ');
+        return;
+    }
+
+    let new_project = {'id': DMP_data.project.title, 'size': DMP_data.resarchOutput.sharing.distribution.fileVolume, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name};
+
+    
+    // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
+
+    
+    res.send(new_project);
+    res.end();
+});
 
 router.post;
 module.exports = router;
