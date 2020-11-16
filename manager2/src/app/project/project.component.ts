@@ -122,6 +122,23 @@ export class ProjectComponent implements OnInit {
             }
         )
     }
+    ask_for_project_from_dmp() {
+        // todo: should rename it project_msg
+        this.request_msg = '';
+        this.request_err_msg = '';
+        this.projectsService.askNewFromDmp({'dmp_key': this.new_project.dmp_key,
+                'research_outputs': this.new_project.dmp_RO}).subscribe(
+            resp => {
+                console.log(resp)
+                this.request_msg = 'An email have been sent to admin';
+                this.new_project = {};
+            },
+            err => {
+                console.log('failed to get project users', err);
+                this.request_err_msg = err.error;
+            }
+        )
+    }
 
     show_project_users(project) {
         this.msg = '';

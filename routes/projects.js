@@ -463,28 +463,72 @@ router.post('/dmp/getResearchOutput', async function (req, res) {
     res.end();
 });
 
-router.post('/dmp/download', async function (req, res) {
-    // Authenticates Genouest using the API
+router.post('/dmp/askProject', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        res.status(404).send('User not found');
+        return;
+    }
     let httpOptions = {
         headers: {'X-CONSULTKEY': '', 'X-AUTHKEY': ''}
     };
-        
-    let DMP_data = this.http.get(
-        environment.opidorUrl + `/plans/${req.new_project.dmp_key}?research_output_id=${req.new_project.research_output}`,
-        httpOptions
-    );
+    let project_total_size = 0; 
+    let DMP_data = {};
+    for (const researchOutput in this.new_project.researchOutput  ) {
+        DMP_data = this.http.get(
+            environment.opidorUrl + `/plans/${req.new_project.dmp_key}?research_output_id=${researchOutput}`,
+            httpOptions
+        );
+        project_total_size+= DMP_data.researchOutput.sharing.distribution.fileVolume;
+
+    }
+    
+
+    let new_project = {'id': DMP_data.project.title, 'size': project_total_size, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name};
+
+    // todo: find a way to use cc
+    // let new_project = {
+    //     'id': req.body.id,
+    //     'size': req.body.size,
+    //     'description': req.body.description,
+    //     'orga': req.body.orga
+    // };
+   
+    
+    let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
+    try {
+        await utils.send_notif_mail({
+            'name': 'ask_project',
+            'destinations': msg_destinations,
+            'subject': 'Project creation request: ' + req.body.id
+        }, {
+            '#UID#': user.uid,
+            '#NAME#': req.body.id,
+            '#SIZE#': req.body.size,
+            '#ORGA#': req.body.orga,
+            '#DESC#': req.body.description
+        });
+    } catch (error) {
+        logger.error(error);
+    }
+    // Authenticates Genouest using the API
+    
     if ( DMP_data['code'] != 200) {
         res.status(401).send('Not Authorized ');
         return;
     }
 
-    let new_project = {'id': DMP_data.project.title, 'size': DMP_data.resarchOutput.sharing.distribution.fileVolume, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name};
-
+     // Save in mongo the pending project data fr the admin to use
+    let saving_for_later = await utils.mongo_pending().insertOne(new_project);
     
     // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
 
     
-    res.send(new_project);
+    res.send(saving_for_later);
     res.end();
 });
 
