@@ -335,7 +335,7 @@ router.get('/tp', async function(req, res) {
 });
 
 router.post('/tp', async function(req, res) {
-    if(req.body.quantity<=0){
+    if(req.body.quantity === undefined || req.body.quantity === null || req.body.quantity<=0){
         res.status(403).send({message: 'Quantity must be >= 1'});
         return;
     }
