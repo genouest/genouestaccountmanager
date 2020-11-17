@@ -71,7 +71,7 @@ export class ProjectComponent implements OnInit {
     this.dmp_RO = [
       {
         dbid: 54,
-        title: "Confinement round 2",
+        title: "RNAseq",
       },
       {
         dbid: 55,
