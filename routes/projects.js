@@ -655,8 +655,6 @@ router.post('/dmp/download', async function (req, res) {
 //     //         }
 //     //     }
 //     // }
-//     res.send('yo');
-//     return;
 // });
 
 router.post;
