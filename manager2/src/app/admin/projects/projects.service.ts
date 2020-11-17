@@ -16,7 +16,7 @@ export class ProjectsService {
     list(getAll: boolean): Observable<any[]> {
         //let user = this.authService.profile;
         let params = new HttpParams();
-        if(getAll) {
+        if (getAll) {
             params = params.append("all", "true");
         }
 
@@ -30,7 +30,7 @@ export class ProjectsService {
             environment.apiUrl + '/project',
             httpOptions
         ).pipe(map((response: any[]) => {
-            return response.sort(function (a,b) {
+            return response.sort(function (a, b) {
                 return a.id.localeCompare(b.id);
             });
         }));
@@ -196,7 +196,7 @@ export class ProjectsService {
             new_project,
             httpOptions
         );
-    
+
     }
     pingDmpDatabase(): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
@@ -243,11 +243,11 @@ export class ProjectsService {
             httpOptions
         );
     }
-    
+
     list_pending(getAll: boolean): Observable<any[]> {
         //let user = this.authService.profile;
         let params = new HttpParams();
-        if(getAll) {
+        if (getAll) {
             params = params.append("all", "true");
         }
 
@@ -261,7 +261,7 @@ export class ProjectsService {
             environment.apiUrl + '/pending',
             httpOptions
         ).pipe(map((response: any[]) => {
-            return response.sort(function (a,b) {
+            return response.sort(function (a, b) {
                 return a.id.localeCompare(b.id);
             });
         }));
