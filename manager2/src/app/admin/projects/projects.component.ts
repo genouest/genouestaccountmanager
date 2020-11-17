@@ -21,6 +21,7 @@ export class ProjectsComponent implements OnInit {
     dtTriggerAdd: Subject<any> = new Subject()
     dtTriggerRemove: Subject<any> = new Subject()
     dtTriggerProjects: Subject<any> = new Subject()
+    dtTriggerPending: Subject<any> = new Subject()
 
     notification: string
     requests_visible: boolean
@@ -35,7 +36,7 @@ export class ProjectsComponent implements OnInit {
 
     add_requests: any[]
     remove_requests: any[]
-
+    pending_projects: any[]
     projects: any[]
     groups: any[]
     all_users: any[]
@@ -70,6 +71,7 @@ export class ProjectsComponent implements OnInit {
         this.requests_visible = false;
         this.add_requests = [];
         this.remove_requests = [];
+        this.pending_projects = [];
         this.projects = [];
         this.groups = [];
         this.all_users = [];
@@ -246,6 +248,27 @@ export class ProjectsComponent implements OnInit {
 
     }
 
+    pending_list(refresh_requests = false) {
+        this.pending_projects = [];
+        this.projectService.list(true).subscribe(
+            resp => {
+                if(resp.length == 0) {
+                    return;
+                }
+                if(refresh_requests) {
+                    this.add_requests = [];
+                    this.remove_requests = [];
+                    this.requests_number = 0;
+                }
+                let data = resp;
+                if(data.length > 0){this.requests_visible = true;};
+                this.pending_projects = data;
+                this.renderDataTables('dtPending');
+            },
+            err => console.log('failed to get pending projects')
+        );
+
+    }
     renderDataTables(table): void {
         if ($('#' + table).DataTable() !== undefined) {
             $('#' + table).DataTable().clear();
@@ -257,6 +280,8 @@ export class ProjectsComponent implements OnInit {
             this.dtTriggerAdd.next();
         } else if (table == 'dtRemoveRequests') {
             this.dtTriggerRemove.next();
+        } else if (table == 'dtPending') {
+            this.dtTriggerPending.next();
         }
     }
 

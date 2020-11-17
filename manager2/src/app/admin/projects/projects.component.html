@@ -73,6 +73,40 @@
         </div>
       </div>
     </div>
+  <div class="row">
+    <div class="col-md-12">
+    <div class="card bg-light">
+      <div class="card-header">
+        <h3>Pending projects</h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table id="dtPending" datatable [dtTrigger]="dtTriggerProjects" class="table table-striped">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>User</th>
+                <th>Size (Go)</th>
+                <th>orga</th>
+                <th>Dmp access key</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let project of pending">
+                <td><a routerLink="/admin/project/{{pending.id}}"><span
+                      class="label label-primary">{{pending.id}}</span></a></td>
+                <td>{{pending.owner}}</td>
+                <td>{{project.size}}</td>
+                <td>{{pending.orga}}</td>
+                <td>{{pending.dmp_key}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
   </div>
 </div>
 <div class="card bg-light">
