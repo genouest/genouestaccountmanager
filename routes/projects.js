@@ -473,14 +473,15 @@ router.post('/dmp/askProject', async function (req, res) {
         res.status(404).send('User not found');
         return;
     }
+    
     let httpOptions = {
         headers: {'X-CONSULTKEY': '', 'X-AUTHKEY': ''}
     };
     let project_total_size = 0; 
     let DMP_data = {};
-    for (const researchOutput in this.new_project.researchOutput  ) {
+    for (const researchOutput in req.research_outputs  ) {
         DMP_data = this.http.get(
-            environment.opidorUrl + `/plans/${req.new_project.dmp_key}?research_output_id=${researchOutput}`,
+            environment.opidorUrl + `/plans/${req.dmp_key}?research_output_id=${researchOutput}`,
             httpOptions
         );
         project_total_size+= DMP_data.researchOutput.sharing.distribution.fileVolume;
@@ -488,7 +489,7 @@ router.post('/dmp/askProject', async function (req, res) {
     }
     
 
-    let new_project = {'id': DMP_data.project.title, 'size': project_total_size, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name};
+    let new_project = {'id': DMP_data.project.title, 'size': project_total_size, 'description': DMP_data.project.description, 'orga': DMP_data.project.funding.funder.name, 'dmp_key': req.dmp_key };
 
     // todo: find a way to use cc
     // let new_project = {
@@ -556,6 +557,44 @@ router.post('/dmp/download', async function (req, res) {
     res.send(new_project);
     res.end();
 });
+
+router.get('/pending', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        res.status(404).send('User not found');
+        return;
+    }
+    if (GENERAL_CONFIG.admin.indexOf(user.uid) < 0) {
+        if (!user.pending) {
+            res.send([]);
+            return;
+        } else {
+            let pendings = await utils.mongo_pending().find({ id: { $in: user.projects } }).toArray();
+            res.send(pendings);
+            return;
+        }
+    } else {
+        if (req.query.all === 'true') {
+            let pendings = await utils.mongo_pending().find({}).toArray();
+            res.send(pendings);
+            return;
+        } else {
+            if (!user.pending) {
+                res.send([]);
+                return;
+            } else {
+                let pendings = await utils.mongo_pending().find({ id: { $in: user.projects } }).toArray();
+                res.send(pendings);
+                return;
+            }
+        }
+    }
+});
+
 
 router.post;
 module.exports = router;
