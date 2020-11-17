@@ -654,7 +654,8 @@ router.get('/pending', async function (req, res) {
     //             return;
     //         }
     //     }
-    }
+    // }
+    return;
 });
 
 router.post;
