@@ -41,7 +41,7 @@ export class ProjectsComponent implements OnInit {
     groups: any[]
     all_users: any[]
     new_project: any
-    
+
     dmp_msg: any
     dmp_err_msg: any
 
@@ -63,7 +63,7 @@ export class ProjectsComponent implements OnInit {
     ngOnInit() {
         this.route.queryParams
             .subscribe(params => {
-                if(params.deleted == "ok") {
+                if (params.deleted == "ok") {
                     this.notification = "Project was deleted successfully";
                 };
             });
@@ -92,7 +92,7 @@ export class ProjectsComponent implements OnInit {
             resp => {
                 this.groups = resp;
                 if (this.groups.length > 0) {
-                    this.new_project.group =this.groups[0].name;
+                    this.new_project.group = this.groups[0].name;
                 }
             },
             err => console.log('failed to get groups')
@@ -115,7 +115,7 @@ export class ProjectsComponent implements OnInit {
         this.userService.addToProject(user_id, project.id).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
-                this.projectService.removeRequest(project.id, {'request': 'add', 'user': user_id}).subscribe(
+                this.projectService.removeRequest(project.id, { 'request': 'add', 'user': user_id }).subscribe(
                     resp => {
                         this.project_list(true);
                         this.userService.addGroup(user_id, project.group).subscribe(
@@ -138,7 +138,7 @@ export class ProjectsComponent implements OnInit {
         this.userService.removeFromProject(user_id, project.id).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
-                this.projectService.removeRequest(project.id, {'request': 'remove', 'user': user_id}).subscribe(
+                this.projectService.removeRequest(project.id, { 'request': 'remove', 'user': user_id }).subscribe(
                     resp => this.project_list(true),
                     err => this.request_mngt_error_msg = err.error
                 )
@@ -152,7 +152,7 @@ export class ProjectsComponent implements OnInit {
         this.request_mngt_msg = "";
         this.request_mngt_error_msg = "";
         this.request_grp_msg = "";
-        this.projectService.removeRequest(project.id, {'request': request_type, 'user': user_id}).subscribe(
+        this.projectService.removeRequest(project.id, { 'request': request_type, 'user': user_id }).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
                 this.project_list(true);
@@ -161,10 +161,10 @@ export class ProjectsComponent implements OnInit {
         )
     }
 
-    add_project(){
+    add_project() {
         this.notification = "";
-        if(! this.new_project.id || ! this.new_project.group || ! this.new_project.owner) {
-            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
+        if (!this.new_project.id || !this.new_project.group || !this.new_project.owner) {
+            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
             return;
         }
         this.add_project_msg = '';
@@ -178,68 +178,69 @@ export class ProjectsComponent implements OnInit {
             'access': this.new_project.access,
             'orga': this.new_project.orga,
             'path': this.new_project.path,
-            'expire': new Date(this.new_project.expire).getTime()}
-                               ).subscribe(
-                                   resp => {
-                                       this.add_project_msg = resp.message;
-                                       this.project_list();
-                                       this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
-                                           resp => {
-                                               this.userService.addGroup(this.new_project.owner, this.new_project.group).subscribe(
-                                                   resp => {},
-                                                   err => {
-                                                       console.log('failed to add user to group');
-                                                       this.add_project_error_msg = err.error;
+            'expire': new Date(this.new_project.expire).getTime()
+        }
+        ).subscribe(
+            resp => {
+                this.add_project_msg = resp.message;
+                this.project_list();
+                this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
+                    resp => {
+                        this.userService.addGroup(this.new_project.owner, this.new_project.group).subscribe(
+                            resp => { },
+                            err => {
+                                console.log('failed to add user to group');
+                                this.add_project_error_msg = err.error;
 
-                                                   }
-                                               )
-                                           },
-                                           err => {
-                                               console.log('failed  to add user to project');
-                                               this.add_project_error_msg = err.error;
-                                           }
-                                       )
+                            }
+                        )
+                    },
+                    err => {
+                        console.log('failed  to add user to project');
+                        this.add_project_error_msg = err.error;
+                    }
+                )
 
-                                   },
-                                   err => {
-                                       console.log('failed to add project', this.new_project);
-                                       this.add_project_error_msg = err.error;
-                                   }
-                               );
+            },
+            err => {
+                console.log('failed to add project', this.new_project);
+                this.add_project_error_msg = err.error;
+            }
+        );
     }
 
-    project_list(refresh_requests = false){
+    project_list(refresh_requests = false) {
         this.projects = [];
         this.projectService.list(true).subscribe(
             resp => {
-                if(resp.length == 0) {
+                if (resp.length == 0) {
                     return;
                 }
-                if(refresh_requests) {
+                if (refresh_requests) {
                     this.add_requests = [];
                     this.remove_requests = [];
                     this.requests_number = 0;
                 }
                 let data = resp;
-                for(var i=0;i<data.length;i++){
+                for (var i = 0; i < data.length; i++) {
                     data[i].expire = new Date(data[i].expire);
-                    if (! refresh_requests){ continue;};
-                    if (data[i]["add_requests"]){
-                        for(var j=0;j<data[i]["add_requests"].length;j++){
-                            this.add_requests.push({'project': data[i], 'user': data[i]["add_requests"][j]});
+                    if (!refresh_requests) { continue; };
+                    if (data[i]["add_requests"]) {
+                        for (var j = 0; j < data[i]["add_requests"].length; j++) {
+                            this.add_requests.push({ 'project': data[i], 'user': data[i]["add_requests"][j] });
                         }
                         this.requests_number += data[i]["add_requests"].length;
                         this.renderDataTables('dtAddRequests');
                     }
-                    if (data[i]["remove_requests"]){
-                        for(var j=0;j<data[i]["remove_requests"].length;j++){
-                            this.remove_requests.push({'project': data[i], 'user': data[i]["remove_requests"][j]});
+                    if (data[i]["remove_requests"]) {
+                        for (var j = 0; j < data[i]["remove_requests"].length; j++) {
+                            this.remove_requests.push({ 'project': data[i], 'user': data[i]["remove_requests"][j] });
                         }
                         this.requests_number += data[i]["remove_requests"].length;
                         this.renderDataTables('dtRemoveRequests');
                     }
                 }
-                if(this.requests_number > 0){this.requests_visible = true;};
+                if (this.requests_number > 0) { this.requests_visible = true; };
                 this.projects = data;
                 this.renderDataTables('dtProjects');
             },
@@ -252,16 +253,16 @@ export class ProjectsComponent implements OnInit {
         this.pending_projects = [];
         this.projectService.list(true).subscribe(
             resp => {
-                if(resp.length == 0) {
+                if (resp.length == 0) {
                     return;
                 }
-                if(refresh_requests) {
+                if (refresh_requests) {
                     this.add_requests = [];
                     this.remove_requests = [];
                     this.requests_number = 0;
                 }
                 let data = resp;
-                if(data.length > 0){this.requests_visible = true;};
+                if (data.length > 0) { this.requests_visible = true; };
                 this.pending_projects = data;
                 this.renderDataTables('dtPending');
             },
@@ -285,7 +286,7 @@ export class ProjectsComponent implements OnInit {
         }
     }
 
-    date_convert = function timeConverter(tsp){
+    date_convert = function timeConverter(tsp) {
         var a = new Date(tsp);
         return a.toLocaleDateString();
     }
