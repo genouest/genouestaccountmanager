@@ -243,6 +243,29 @@ export class ProjectsService {
             httpOptions
         );
     }
+    
+    list_pending(getAll: boolean): Observable<any[]> {
+        //let user = this.authService.profile;
+        let params = new HttpParams();
+        if(getAll) {
+            params = params.append("all", "true");
+        }
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.get(
+            environment.apiUrl + '/pending',
+            httpOptions
+        ).pipe(map((response: any[]) => {
+            return response.sort(function (a,b) {
+                return a.id.localeCompare(b.id);
+            });
+        }));
+    }
 
     list_pending(getAll: boolean): Observable<any[]> {
         //let user = this.authService.profile;
