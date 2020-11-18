@@ -620,40 +620,40 @@ router.post('/dmp/download', async function (req, res) {
 
 router.get('/pending', async function (req, res) {
     
-    // if (!req.locals.logInfo.is_logged) {
-    //     res.status(401).send('Not authorized');
-    //     return;
-    // }
-    // let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
-    // if (!user) {
-    //     res.status(404).send('User not found');
-    //     return;
-    // }
-    // if (GENERAL_CONFIG.admin.indexOf(user.uid) < 0) {
-    //     if (!user.pending) {
-    //         res.send([]);
-    //         return;
-    //     } else {
-    //         let pendings = await utils.mongo_pending().find({ id: { $in: user.projects } }).toArray();
-    //         res.send(pendings);
-    //         return;
-    //     }
-    // } else {
-    //     if (req.query.all === 'true') {
-    //         let pendings = await utils.mongo_pending().find({}).toArray();
-    //         res.send(pendings);
-    //         return;
-    //     } else {
-    //         if (!user.pending) {
-    //             res.send([]);
-    //             return;
-    //         } else {
-    //             let pendings = await utils.mongo_pending().find({ id: { $in: user.projects } }).toArray();
-    //             res.send(pendings);
-    //             return;
-    //         }
-    //     }
-    // }
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        res.status(404).send('User not found');
+        return;
+    }
+    if (GENERAL_CONFIG.admin.indexOf(user.uid) < 0) {
+        if (!user.pending) {
+            res.send([]);
+            return;
+        } else {
+            let pendings = await utils.mongo_pending().find({ id: { $in: user.projects } }).toArray();
+            res.send(pendings);
+            return;
+        }
+    } else {
+        if (req.query.all === 'true') {
+            let pendings = await utils.mongo_pending().find({}).toArray();
+            res.send(pendings);
+            return;
+        } else {
+            if (!user.pending) {
+                res.send([]);
+                return;
+            } else {
+                let pendings = await utils.mongo_pending().find({ id: { $in: user.projects } }).toArray();
+                res.send(pendings);
+                return;
+            }
+        }
+    }
 });
 
 router.post;
