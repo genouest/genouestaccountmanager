@@ -621,10 +621,10 @@ router.post('/dmp/download', async function (req, res) {
 
 router.get('/pending', async function (req, res) {
     
-    // if (!req.locals.logInfo.is_logged) {
-    //     res.status(401).send('Not authorized');
-    //     return;
-    // }
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
     // let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
     // if (!user) {
     //     res.status(404).send('User not found');
