@@ -618,7 +618,6 @@ router.post('/dmp/download', async function (req, res) {
     res.end();
 });
 
-
 router.get('/pending', async function (req, res) {
     
     // if (!req.locals.logInfo.is_logged) {
