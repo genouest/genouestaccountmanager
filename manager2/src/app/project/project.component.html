@@ -57,26 +57,33 @@
   </div>
   <div class="card-body">
     <div class="table-responsive">
-      <table id="dtProjects" datatable [dtTrigger]="dtTrigger" class="table table-striped">
-        <thead><tr>
-            <th>Project</th>
-            <th>Owner</th>
-            <th *ngIf="!config.project || config.project.enable_group">Group</th>
-            <th>Path</th>
-            <th>Size (Go)</th>
-            <th>Expiration</th>
-        </tr></thead>
-        <tbody>
-          <tr *ngFor="let project of projects">
-            <td (click)="show_project_users(project)" style="cursor: pointer;"><span class="label label-primary">{{project.id}}</span></td>
-            <td>{{project.owner}}</td>
-            <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
-            <td>{{project.path}}</td>
-            <td>{{project.size}}</td>
-            <td>{{date_convert(project.expire)}}</td>
-          </tr>
-        </tbody>
-      </table>
+          <p-table #dtp [value]="projects"
+                      [paginator]="true"
+                      [rows]="10"
+                      [showCurrentPageReport]="true" 
+                      [rowsPerPageOptions]="[10,25,50]"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Project</th>
+                <th>Owner</th>
+                <th *ngIf="!config.project || config.project.enable_group">Group</th>
+                <th>Path</th>
+                <th>Size (Go)</th>
+                <th>Expiration</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-project>
+              <tr>
+                <td (click)="show_project_users(project)" style="cursor: pointer;"><span class="label label-primary">{{project.id}}</span></td>
+                <td>{{project.owner}}</td>
+                <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
+                <td>{{project.path}}</td>
+                <td>{{project.size}}</td>
+                <td>{{date_convert(project.expire)}}</td>
+              </tr>
+            </ng-template>
+          </p-table>
     </div>
   </div>
 </div>
@@ -190,24 +197,29 @@
       <h3>Project members</h3>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
-        <table id="dtUsers" datatable [dtTrigger]="dtTriggerUser" class="table table-striped">
-          <thead>
-            <tr><th>User</th><th>Email</th><th>Access</th><th>Owner</th></tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let user of users">
-              <td>{{user.uid}}</td>
+      <div class="table-responsive table-striped">
+          <p-table #dtu [value]="users"
+                      [paginator]="true"
+                      [rows]="10"
+                      [showCurrentPageReport]="true" 
+                      [rowsPerPageOptions]="[10,25,50]"
+          >
+            <ng-template pTemplate="header">
+                          <tr><th>User</th><th>Email</th><th>Access</th><th>Owner</th></tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user>
+              <tr>
+             <td>{{user.uid}}</td>
               <td>
                 <span *ngIf="session_user.uid === selectedProject.owner">{{user.email}}</span>
                 <span *ngIf="session_user.uid !== selectedProject.owner">Restricted to owner</span>
               </td>
               <td><span *ngIf="user.access">x</span></td>
               <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </tr>
+            </ng-template>
+          </p-table>
+          </div>
     </div>
   </div>
 </div>

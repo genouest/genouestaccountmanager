@@ -103,20 +103,25 @@
             </div>
           </div>
         </form>
-        <div class="table-responsive">
-          <table id="dtUsers" datatable [dtTrigger]="dtTrigger" class="table table-striped">
-            <thead>
-              <tr><th>User</th><th>Email</th><th>Access</th><th>Owner</th></tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let user_l of users">
+        <div class="table-responsive table-striped">
+          <p-table #dtp [value]="users"
+                      [paginator]="true"
+                      [rows]="10"
+                      [showCurrentPageReport]="true" 
+                      [rowsPerPageOptions]="[10,25,50]"
+          >
+            <ng-template pTemplate="header">
+                <tr><th>User</th><th>Email</th><th>Access</th><th>Owner</th></tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user_l>
+              <tr>
                 <td>{{user_l.uid}}</td>
                 <td>{{user_l.email}}</td>
                 <td><span *ngIf="user_l.access">x</span></td>
                 <td><span *ngIf="user_l.uid === project.owner">x</span></td>
               </tr>
-            </tbody>
-          </table>
+            </ng-template>
+          </p-table>
         </div>
       </div>
     </div>

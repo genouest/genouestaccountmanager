@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -6,6 +6,7 @@ import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
 import { GroupsService} from 'src/app/admin/groups/groups.service';
 import { Subject } from 'rxjs';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-project',
@@ -13,6 +14,9 @@ import { Subject } from 'rxjs';
     styleUrls: ['./project.component.css']
 })
 export class ProjectComponent implements OnInit {
+    @ViewChild('dtp') table: Table;
+    @ViewChild('dtu') tableuser: Table;
+
 
     new_project: any
     projects: any
@@ -33,9 +37,6 @@ export class ProjectComponent implements OnInit {
 
     oldGroup: string
 
-    dtTrigger: Subject<any> = new Subject()
-    dtTriggerUser: Subject<any> = new Subject()
-
     msg: string
     rm_prj_err_msg: string
     rm_prj_msg_ok: string
@@ -53,8 +54,6 @@ export class ProjectComponent implements OnInit {
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
-        this.dtTriggerUser.unsubscribe();
     }
 
     async ngOnInit() {
@@ -70,7 +69,6 @@ export class ProjectComponent implements OnInit {
                     resp[i].expire = new Date(resp[i].expire);
                 }
                 this.projects = resp;
-                this.dtTrigger.next();
             },
             err => console.log('failed to get projects')
         )

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
@@ -6,6 +6,7 @@ import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
 
 import { Subject } from 'rxjs';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-project',
@@ -13,8 +14,7 @@ import { Subject } from 'rxjs';
     styleUrls: ['./project.component.css']
 })
 export class ProjectComponent implements OnInit {
-
-    dtTrigger: Subject<any> = new Subject()
+    @ViewChild('dtp') table: Table;
 
     config: any
     project: any
@@ -57,19 +57,9 @@ export class ProjectComponent implements OnInit {
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
     ngAfterViewInit(): void {
-        this.dtTrigger.next();
-    }
-
-    renderDataTables(): void {
-        if ($('#dtUsers').DataTable() !== undefined) {
-            $('#dtUsers').DataTable().clear();
-            $('#dtUsers').DataTable().destroy();
-        }
-        this.dtTrigger.next();
     }
 
     ngOnInit() {
@@ -109,7 +99,6 @@ export class ProjectComponent implements OnInit {
                                 this.users[i].access=true;
                             }
                         }
-                        this.renderDataTables();
                         this.remove_user_admin = '';
                         this.new_user_admin = '';
 

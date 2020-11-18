@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Website, WebsiteService } from 'src/app/user/website.service';
 import { UserService } from 'src/app/user/user.service';
 
 import { Subject } from 'rxjs';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-websites',
@@ -10,8 +11,7 @@ import { Subject } from 'rxjs';
     styleUrls: ['./websites.component.css']
 })
 export class WebsitesComponent implements OnInit {
-
-    dtTrigger: Subject<any> = new Subject()
+    @ViewChild('dtp') table: Table;
 
     msg: string
     chowner_msg: string
@@ -29,7 +29,6 @@ export class WebsitesComponent implements OnInit {
     ) { }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
     ngOnInit() {
@@ -38,7 +37,7 @@ export class WebsitesComponent implements OnInit {
             err => this.msg = err.error.message
         )
         this.websitesService.list().subscribe(
-            resp => {this.websites = resp; this.dtTrigger.next();},
+            resp => {this.websites = resp; },
             err => this.msg = err.error.message
         )
     }

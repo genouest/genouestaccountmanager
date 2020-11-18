@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { GroupsService } from './groups.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-groups',
@@ -11,11 +12,8 @@ import { DataTableDirective } from 'angular-datatables';
     styleUrls: ['./groups.component.css']
 })
 export class GroupsComponent implements OnInit {
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
-
-    dtTriggerGroups: Subject<any> = new Subject()
-    dtTriggerUsers: Subject<any> = new Subject()
+    @ViewChild('dtg') tableGroups: Table;
+    @ViewChild('dtu') tableUsers: Table;
 
     success_msg: string
     err_msg: string
@@ -45,33 +43,17 @@ export class GroupsComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
-        // this.dtTriggerGroups.next();
-        // this.dtTriggerUsers.next();
     }
 
-    renderDataTables(table): void {
-        if ($('#' + table).DataTable() !== undefined) {
-            $('#' + table).DataTable().clear();
-            $('#' + table).DataTable().destroy();
-        }
-        if (table == 'dtUsers') {
-            this.dtTriggerUsers.next();
-        } else {
-            this.dtTriggerGroups.next();
-        }
-    }
 
     ngOnDestroy(): void {
-        this.dtTriggerGroups.unsubscribe();
-        this.dtTriggerUsers.unsubscribe();
+
     }
 
     ngOnInit() {
         this.groupsService.list().subscribe(
             resp => {
                 this.groups = resp;
-                this.renderDataTables('dtGroups');
-                this.renderDataTables('dtUsers');
             },
             err => console.log('failed to get groups')
         )
@@ -89,7 +71,6 @@ export class GroupsComponent implements OnInit {
                 this.groupsService.list().subscribe(
                     resp => {
                         this.groups = resp;
-                        this.renderDataTables('dtGroups');
                     },
                     err => console.log('failed to get groups')
                 )
@@ -107,7 +88,6 @@ export class GroupsComponent implements OnInit {
                 this.groupsService.list().subscribe(
                     resp => {
                         this.groups = resp;
-                        this.renderDataTables('dtGroups');
                     },
                     err => console.log('failed to get groups')
                 );
@@ -127,7 +107,6 @@ export class GroupsComponent implements OnInit {
                 this.groupsService.list().subscribe(
                     resp => {
                         this.groups = resp;
-                        this.renderDataTables('dtGroups');
                     },
                     err => console.log('failed to get groups')
                 )
@@ -162,7 +141,6 @@ export class GroupsComponent implements OnInit {
                             }
                             this.users[i].authorized = is_authorized;
                         }
-                        this.renderDataTables('dtUsers');
                     },
                     err => console.log('failed to get users in group', group)
                 )

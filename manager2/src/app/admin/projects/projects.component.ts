@@ -20,15 +20,6 @@ export class ProjectsComponent implements OnInit {
     @ViewChild('dta') tableadd: Table;
     @ViewChild('dtd') tabledel: Table;
 
-
-
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
-
-    dtTriggerAdd: Subject<any> = new Subject()
-    dtTriggerRemove: Subject<any> = new Subject()
-    dtTriggerProjects: Subject<any> = new Subject()
-
     config: any
 
     notification: string
@@ -68,9 +59,6 @@ export class ProjectsComponent implements OnInit {
     }
 
     ngOnDestroy(): void {
-        this.dtTriggerAdd.unsubscribe();
-        this.dtTriggerRemove.unsubscribe();
-        this.dtTriggerProjects.unsubscribe();
     }
 
     // TODO sort groups by name
@@ -135,7 +123,6 @@ export class ProjectsComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
-        //this.dtTriggerProjects.next();
     }
 
     validate_add_request(project, user_id) {
@@ -258,37 +245,20 @@ export class ProjectsComponent implements OnInit {
                             this.add_requests.push({'project': data[i], 'user': data[i]["add_requests"][j]});
                         }
                         this.requests_number += data[i]["add_requests"].length;
-                        this.renderDataTables('dtAddRequests');
                     }
                     if (data[i]["remove_requests"]){
                         for(var j=0;j<data[i]["remove_requests"].length;j++){
                             this.remove_requests.push({'project': data[i], 'user': data[i]["remove_requests"][j]});
                         }
                         this.requests_number += data[i]["remove_requests"].length;
-                        this.renderDataTables('dtRemoveRequests');
                     }
                 }
                 if(this.requests_number > 0){this.requests_visible = true;};
                 this.projects = data;
-                this.renderDataTables('dtProjects');
             },
             err => console.log('failed to get projects')
         );
 
-    }
-
-    renderDataTables(table): void {
-        if ($('#' + table).DataTable() !== undefined) {
-            $('#' + table).DataTable().clear();
-            $('#' + table).DataTable().destroy();
-        }
-        if (table == 'dtProjects') {
-            this.dtTriggerProjects.next();
-        } else if (table == 'dtAddRequests') {
-            this.dtTriggerAdd.next();
-        } else if (table == 'dtRemoveRequests') {
-            this.dtTriggerRemove.next();
-        }
     }
 
     date_convert = function timeConverter(tsp){

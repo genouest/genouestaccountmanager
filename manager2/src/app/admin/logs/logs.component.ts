@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-logs',
@@ -11,9 +12,9 @@ import { AuthService } from '../../auth/auth.service';
     styleUrls: ['./logs.component.css']
 })
 export class LogsComponent implements OnInit {
+    @ViewChild('dtp') table: Table;
 
-    dtTrigger: Subject<any> = new Subject()
-    dtOptions: DataTables.Settings = {};
+
 
     logs: any
     logcontent: string
@@ -35,20 +36,15 @@ export class LogsComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dtOptions = {
-            order: [[2, 'desc']]
-        };
         this.getLogs().subscribe(
             resp => {
                 this.logs = resp.sort(this.sortByDate);
-                this.dtTrigger.next();
             },
             err => console.log('failed to get logs')
         )
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
     get_status = function(status){

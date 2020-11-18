@@ -149,7 +149,7 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
 <div class="row">
 <div class="col-md-6">
 
-<table id="dtAdminTestPlugin" datatable [dtTrigger]="dtTrigger" class="table table-striped">
+<table class="table table-striped">
 <thead><tr><td>User</td><td>Quota</td><td>Expire</td></tr></thead>
 <tbody>
 <tr *ngFor="let l of data.list">

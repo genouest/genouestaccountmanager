@@ -12,6 +12,7 @@ import marked from 'marked';
 import { DataTableDirective } from 'angular-datatables';
 import { Router } from '@angular/router';
 import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-messages',
@@ -19,13 +20,7 @@ import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
     styleUrls: ['./messages.component.css']
 })
 export class MessagesComponent implements OnInit {
-
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
-
-    @ViewChild(DataTableDirective) dtElement: DataTableDirective;
-
-    dtTrigger: Subject<any> = new Subject()
+    @ViewChild('dtp') table: Table;
 
     origin: string
 
@@ -76,25 +71,9 @@ export class MessagesComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
-        this.dtTrigger.next();
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
-    }
-
-    renderDataTables(): void {
-        if ($('#dtMembers').DataTable() !== undefined) {
-            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-                dtInstance.destroy();
-                this.dtTrigger.next();
-            });
-
-        }
-        else {
-            this.dtTrigger.next();
-        }
-
     }
 
 
@@ -169,7 +148,6 @@ export class MessagesComponent implements OnInit {
         this.getListMembers(list_name).subscribe(
             resp => {
                 this.members = resp;
-                this.renderDataTables();
             },
             err => console.log('failed to get members')
         )

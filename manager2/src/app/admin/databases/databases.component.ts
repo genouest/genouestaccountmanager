@@ -1,9 +1,10 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
 import { UserService } from 'src/app/user/user.service';
 
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-databases',
@@ -11,10 +12,8 @@ import { DataTableDirective } from 'angular-datatables';
     styleUrls: ['./databases.component.css']
 })
 export class DatabasesComponent implements OnInit {
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
+    @ViewChild('dtp') table: Table;
 
-    dtTrigger: Subject<any> = new Subject()
 
     db: Database
     owner_db_name: any
@@ -31,24 +30,12 @@ export class DatabasesComponent implements OnInit {
     constructor(private dbService: DatabaseService, private userService: UserService) { }
 
     ngAfterViewInit(): void {
-        this.dtTrigger.next();
     }
 
     renderDataTables(): void {
-        this.tables.forEach(table => {
-            if (table.dtTrigger) {
-                table.dtInstance.then((dt: DataTables.Api) => {
-                    dt.clear();
-                    dt.destroy();
-                    table.dtTrigger.next();
-
-                });
-            }
-        });
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
     ngOnInit() {

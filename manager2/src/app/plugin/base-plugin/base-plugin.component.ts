@@ -13,38 +13,13 @@ export class BasePluginComponent {
     data: any;
     loading: boolean;
 
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
-
-    dtTrigger: Subject<any> = new Subject()
-
     constructor(private pluginService: PluginService) {}
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
     ngAfterViewInit(): void {
-        this.dtTrigger.next();
     }
 
-    renderDataTables(): void {
-        if(this.dtTrigger.isStopped) {
-            console.debug('trigger is stopped');
-            return;
-        }
-        // console.log('tables', this.tables);
-        this.dtTrigger.next();
-        this.tables.forEach(table => {
-            // console.log('dttrigger?', table.dtTrigger)
-            if (table.dtTrigger) {
-                table.dtInstance.then((dt: DataTables.Api) => {
-                    dt.clear();
-                    dt.destroy();
-                    table.dtTrigger.next();
-                });
-            }
-        });
-    }
 
     loadData(userId: string) {
         if (!userId) { return; }
@@ -55,7 +30,6 @@ export class BasePluginComponent {
                 resp => {
                     this.loading = false;
                     this.data = resp;
-                    this.renderDataTables();
                 },
                 err => console.log('failed to get plugin data:', err)
             );

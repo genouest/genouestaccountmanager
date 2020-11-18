@@ -1,5 +1,6 @@
-import { Component, Input, ViewChildren, QueryList } from '@angular/core';
+import { Component, Input, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
+import { Table } from 'primeng/table';
 import { Subject } from 'rxjs';
 import { UserService } from './user.service';
 
@@ -11,17 +12,11 @@ export class UserLogsComponent {
     @Input() user: string;
     events: any = [];
 
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
+    @ViewChild('dtp') table: Table;
 
-    dtTrigger: Subject<any> = new Subject()
-    dtOptions: DataTables.Settings = {};
 
 
     constructor(private userService: UserService) {
-        this.dtOptions = {
-            ordering: false
-        };
     }
 
     ngOnInit() {
@@ -30,17 +25,8 @@ export class UserLogsComponent {
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
-
-    renderDataTables(): void {
-        if(this.dtTrigger.isStopped) {
-            console.debug('trigger is stopped');
-            return;
-        }
-        this.dtTrigger.next();
-    }
     load_logs() {
         if (!this.user) {
             return;
@@ -48,7 +34,6 @@ export class UserLogsComponent {
         this.userService.getUserLogs(this.user).subscribe(
             resp => {
                 this.events=(<any[]> resp).reverse();
-                this.renderDataTables()
             },
             err => console.log('failed to get events')
         );
