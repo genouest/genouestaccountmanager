@@ -4,8 +4,6 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 
-import { DataTablesModule } from 'angular-datatables';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { UserComponent } from './user/user.component';
@@ -117,7 +115,6 @@ export class SentryErrorHandler implements ErrorHandler {
         HttpClientModule,
         AppRoutingModule,
         FormsModule,
-        DataTablesModule,
         BrowserAnimationsModule,
         TableModule,
         CalendarModule.forRoot({

@@ -4,8 +4,6 @@ import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
-import { Subject } from 'rxjs';
-import { DataTableDirective } from 'angular-datatables';
 import * as latinize from 'latinize'
 
 import {Table} from 'primeng/table'

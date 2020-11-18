@@ -3,7 +3,6 @@ import { GroupsService } from './groups.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 
 import { Subject } from 'rxjs';
-import { DataTableDirective } from 'angular-datatables';
 import { Table } from 'primeng/table';
 
 @Component({

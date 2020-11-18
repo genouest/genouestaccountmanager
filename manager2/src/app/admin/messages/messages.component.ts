@@ -9,7 +9,6 @@ import { AuthService } from '../../auth/auth.service';
 import { Subject, Observable } from 'rxjs';
 
 import marked from 'marked';
-import { DataTableDirective } from 'angular-datatables';
 import { Router } from '@angular/router';
 import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
 import { Table } from 'primeng/table';

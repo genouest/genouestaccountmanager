@@ -1,7 +1,5 @@
 import { Component, Input, ViewChildren, QueryList, ViewChild } from '@angular/core';
-import { DataTableDirective } from 'angular-datatables';
 import { Table } from 'primeng/table';
-import { Subject } from 'rxjs';
 import { UserService } from './user.service';
 
 @Component({

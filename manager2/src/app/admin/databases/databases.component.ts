@@ -3,7 +3,6 @@ import { Database, DatabaseService } from 'src/app/user/database.service';
 import { UserService } from 'src/app/user/user.service';
 
 import { Subject } from 'rxjs';
-import { DataTableDirective } from 'angular-datatables';
 import { Table } from 'primeng/table';
 
 @Component({
@@ -32,8 +31,7 @@ export class DatabasesComponent implements OnInit {
     ngAfterViewInit(): void {
     }
 
-    renderDataTables(): void {
-    }
+
 
     ngOnDestroy(): void {
     }
@@ -41,7 +39,7 @@ export class DatabasesComponent implements OnInit {
     ngOnInit() {
         this.db = new Database('','mysql','','', false)
         this.dbService.list().subscribe(
-            resp => {this.databases = resp; this.renderDataTables();},
+            resp => {this.databases = resp;},
             err => console.log('failed to get databases')
         )
         this.userService.list().subscribe(
@@ -61,7 +59,7 @@ export class DatabasesComponent implements OnInit {
             resp => {
                 this.chowner_msg = resp['message'];
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp; this.renderDataTables();},
+                    resp => {this.databases = resp;},
                     err => console.log('failed to list databases')
                 )
             },
@@ -82,7 +80,7 @@ export class DatabasesComponent implements OnInit {
                 this.msg = resp['message'];
                 this.db = new Database('', 'mysql', '', '');
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp; this.renderDataTables();},
+                    resp => {this.databases = resp;},
                     err => console.log('failed to list databases')
                 )
             },
