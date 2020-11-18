@@ -70,6 +70,7 @@ export class TpsComponent implements OnInit {
         this.fromDate = new Date();
         this.toDate = new Date();
         this.viewDate = new Date();
+        this.quantity = 1;
         this.events = [];
         this.authorized = (this.authService.profile.is_trainer || this.authService.profile.is_admin);
         this.listEvents();
@@ -93,6 +94,10 @@ export class TpsComponent implements OnInit {
     reserve(){
         this.msg = '';
         this.errmsg = '';
+        if (this.quantity <= 0) {
+            this.reserrmsg = 'Quantity must be > 0';
+            return;
+        }
         if(this.fromDate > this.toDate) {
             this.reserrmsg = 'Final date must be superior to start date';
             return;
@@ -105,10 +110,10 @@ export class TpsComponent implements OnInit {
         }
         this.tpService.reserve(reservation).subscribe(
             resp => {
-                this.msg = resp['msg'];
+                this.msg = resp['message'];
                 this.listEvents();
             },
-            err => this.errmsg = err.error
+            err => this.errmsg = err.error.message
         )
     }
 
@@ -116,8 +121,8 @@ export class TpsComponent implements OnInit {
         this.msg = '';
         this.errmsg = '';
         this.tpService.cancel(this.selectedEvent.id).subscribe(
-            resp => this.msg = resp['msg'],
-            err => this.errmsg = err.error
+            resp => this.msg = resp['message'],
+            err => this.errmsg = err.error.message
         )
     }
 

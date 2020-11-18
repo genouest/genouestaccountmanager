@@ -159,7 +159,7 @@ export class MessagesComponent implements OnInit {
                 this.router.navigate(['/user', this.authService.profile.uid]);
             },
             err => {
-                this.error_msg = err.error
+                this.error_msg = err.error.message
             }
         )
     }

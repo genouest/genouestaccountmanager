@@ -87,11 +87,11 @@ var querydb = (sql) => {
  */
 router.put('/database/:id/owner/:old/:new', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id, req.params.old, req.params.new])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
@@ -102,7 +102,7 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         session_user.is_admin = false;
     }
     if(!session_user.is_admin) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     await utils.mongo_databases().updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
@@ -115,7 +115,7 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
 
 router.get('/database', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
@@ -138,11 +138,11 @@ router.get('/database', async function(req, res) {
 
 router.get('/database/owner/:owner', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.owner])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
@@ -161,16 +161,16 @@ router.get('/database/owner/:owner', async function(req, res) {
 
 router.post('/database/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if (!session_user) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -182,7 +182,7 @@ router.post('/database/:id', async function(req, res) {
     }
 
     if (req.body.owner!=undefined && req.body.owner!='' && req.body.owner != session_user.uid && ! session_user.is_admin){
-        res.status(401).send('Not authorized, cant declare a database for a different user');
+        res.status(401).send({message: 'Not authorized, cant declare a database for a different user'});
         return;
     }
     let owner = session_user.uid;
@@ -227,7 +227,7 @@ router.post('/database/:id', async function(req, res) {
         await utils.mongo_databases().insertOne(db);
         if(!create_db){
             await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []});
-            res.send({message:'Database declared'});
+            res.send({message: 'Database declared'});
             return;
         }
         else {
@@ -283,7 +283,7 @@ router.post('/database/:id', async function(req, res) {
 
             await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
 
-            res.send({message:'Database created, credentials will be sent by mail'});
+            res.send({message: 'Database created, credentials will be sent by mail'});
             res.end();
         }
     }
@@ -292,17 +292,17 @@ router.post('/database/:id', async function(req, res) {
 
 router.delete('/database/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -337,7 +337,7 @@ router.delete('/database/:id', async function(req, res) {
             return;
         }
         await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
-        res.send({message:'Database removed'});
+        res.send({message: 'Database removed'});
         res.end();
         return;
         /*
@@ -347,7 +347,7 @@ router.delete('/database/:id', async function(req, res) {
             // eslint-disable-next-line no-unused-vars
             connection.query(sql, async function(err, results) {
                 await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
-                res.send({message:'Database removed'});
+                res.send({message: 'Database removed'});
                 res.end();
                 return;
             });

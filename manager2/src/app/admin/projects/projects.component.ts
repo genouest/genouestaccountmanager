@@ -150,10 +150,10 @@ export class ProjectsComponent implements OnInit {
                     resp => {
                         this.project_list(true);
                     },
-                    err => this.request_mngt_error_msg = err.error
+                    err => this.request_mngt_error_msg = err.error.message
                 )
             },
-            err => this.request_mngt_error_msg = err.error
+            err => this.request_mngt_error_msg = err.error.message
         )
     }
 
@@ -167,10 +167,10 @@ export class ProjectsComponent implements OnInit {
                 this.request_mngt_msg = resp['message'];
                 this.projectService.removeRequest(project.id, {'request': 'remove', 'user': user_id}).subscribe(
                     resp => this.project_list(true),
-                    err => this.request_mngt_error_msg = err.error
+                    err => this.request_mngt_error_msg = err.error.message
                 )
             },
-            err => this.request_mngt_error_msg = err.error
+            err => this.request_mngt_error_msg = err.error.message
         )
     }
 
@@ -184,7 +184,7 @@ export class ProjectsComponent implements OnInit {
                 this.request_mngt_msg = resp['message'];
                 this.project_list(true);
             },
-            err => this.request_mngt_error_msg = err.error
+            err => this.request_mngt_error_msg = err.error.message
         )
     }
 
@@ -225,14 +225,14 @@ export class ProjectsComponent implements OnInit {
                                            resp => {},
                                            err => {
                                                console.log('failed  to add user to project');
-                                               this.add_project_error_msg = err.error;
+                                               this.add_project_error_msg = err.error.message;
                                            }
                                        )
 
                                    },
                                    err => {
                                        console.log('failed to add project', this.new_project);
-                                       this.add_project_error_msg = err.error;
+                                       this.add_project_error_msg = err.error.message;
                                    }
                                );
     }
