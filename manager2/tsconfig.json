@@ -1,5 +1,9 @@
 {
   "compileOnSave": false,
+  // "angularCompilerOptions": {
+  //   "fullTemplateTypeCheck": true,
+  //   "strictInjectionParameters": true
+  // },
   "compilerOptions": {
     "baseUrl": "./",
     "downlevelIteration": true,
