@@ -468,8 +468,10 @@ router.post('/ask/project', async function (req, res) {
             'description': req.body.description,
             'orga': req.body.orga
         };
-        let saving_for_later = await utils.mongo_().insertOne(new_project);
-
+        console.log(new_project);
+        // Save in mongo the pending project data fr the admin to use
+        let saving_for_later = await utils.mongo_projects().insertOne(new_project);
+        console.log(saving_for_later);
 
     } catch (error) {
         logger.error(error);
