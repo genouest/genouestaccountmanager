@@ -65,7 +65,7 @@ exports.mongo_web = function() {return mongo_web;};
 exports.mongo_projects = function() {return mongo_projects;};
 exports.mongo_tags = function() {return mongo_tags;};
 exports.mongo_pending = function() {return mongo_pending;};
-mongo_pending.insertOne({});
+
 
 var plugins = CONFIG.plugins;
 if(plugins === undefined){
