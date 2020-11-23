@@ -1,4 +1,3 @@
-
     <div class="card bg-light">
         <div class="card-header">
             <h3>Databases</h3>
@@ -8,7 +7,7 @@
           <p-table #dtp [value]="databases"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
                       [globalFilterFields]="['name', 'type', 'host', 'owner']"
                       [filterDelay]="0"
@@ -17,7 +16,7 @@
             <div class="table-header">
                 <span class="p-input-icon-right">
                     <i class="pi pi-search"></i>
-                    <input pInputText type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                    <input pInputText id="search_databases" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
                 </span>
             </div>
         </ng-template>
@@ -89,7 +88,7 @@
           </div>
           <div class="card-body">
               <form role="form" data-toggle="validator" class="user-form form-horizonal">
-                <div class="form-group">            
+                <div class="form-group">
                   <div class="col-sm-2">
                       <label for="owner_db_name">Database name</label>
                       <select id="owner_db_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_name" class="form-control">
@@ -110,4 +109,3 @@
             </form>
           </div>
     </div>
-
