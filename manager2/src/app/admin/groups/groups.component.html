@@ -29,7 +29,7 @@
           <p-table #dtg [value]="groups"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
                       [globalFilterFields]="['name', 'gid', 'owner']"
                       [filterDelay]="0"
@@ -38,7 +38,7 @@
             <div class="table-header">
                 <span class="p-input-icon-right">
                     <i class="pi pi-search"></i>
-                    <input pInputText type="text" (input)="dtg.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                    <input pInputText id="search_groups" type="text" (input)="dtg.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
                 </span>
             </div>
         </ng-template>
@@ -73,7 +73,7 @@
         </div>
     </div>
 
-  
+
     <div class="card bg-light">
         <div class="card-header">
             <h3>Users in group {{selectedGroup.name}}</h3>
@@ -113,7 +113,7 @@
           <p-table #dtu [value]="users"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">
