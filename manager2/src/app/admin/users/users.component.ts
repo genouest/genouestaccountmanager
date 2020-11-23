@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Pipe, PipeTransform } from '@angular/core';
 import { UserService } from 'src/app/user/user.service';
 
-import { Subject } from 'rxjs';
 import { Table } from 'primeng/table';
 
 @Pipe({

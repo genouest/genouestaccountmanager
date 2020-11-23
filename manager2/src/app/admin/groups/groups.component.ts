@@ -1,8 +1,7 @@
-import { Component, OnInit, ViewChildren, QueryList, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { GroupsService } from './groups.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 
-import { Subject } from 'rxjs';
 import { Table } from 'primeng/table';
 
 @Component({
