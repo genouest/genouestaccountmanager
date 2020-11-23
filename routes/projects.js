@@ -462,7 +462,9 @@ router.post('/ask/project', async function (req, res) {
     console.log(new_project);
     // Save in mongo the pending project data fr the admin to use
     
-    let saving_for_later = await utils.mongo_pending().insertOne(new_project);
+    let saving_for_later = await utils.init_db().then(() => {
+        utils.mongo_pending().insertOne(new_project);
+    })    
     console.log(saving_for_later);
 
     
