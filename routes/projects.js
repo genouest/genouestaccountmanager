@@ -459,25 +459,11 @@ router.post('/ask/project', async function (req, res) {
         'orga': req.body.orga
     };
     // Save in mongo the pending project data fr the admin to use
-    try {
-        let new_project = {
-            'id': req.body.id,
-            'owner': req.locals.logInfo.id,
-            'group': req.locals.logInfo.group,
-            'size': req.body.size,
-            'description': req.body.description,
-            'orga': req.body.orga
-        };
-        console.log(new_project);
-        // Save in mongo the pending project data fr the admin to use
-        let saving_for_later = await utils.mongo_projects().insertOne(new_project);
-        console.log(saving_for_later);
+    console.log(new_project);
+    // Save in mongo the pending project data fr the admin to use
+    let saving_for_later = await utils.mongo_projects().insertOne(new_project);
+    console.log(saving_for_later);
 
-    } catch (error) {
-        logger.error(error);
-        res.status(405).send('Can\'t save');
-        return;
-    }
     
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
     try {
