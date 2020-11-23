@@ -598,10 +598,11 @@ router.post('/dmp/askProject', async function (req, res) {
         res.status(401).send('Not Authorized ');
         return;
     }
-
+    
+    console.log(new_project);
     // Save in mongo the pending project data fr the admin to use
     let saving_for_later = await utils.mongo_projects().insertOne(new_project);
-
+    console.log(saving_for_later);
     // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
 
     res.send(saving_for_later);
