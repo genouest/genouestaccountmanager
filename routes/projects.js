@@ -434,7 +434,7 @@ router.post('/ask/project', async function (req, res) {
         return;
     }
     let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
-    if (!user) {
+    if (user) {
         res.status(404).send('User not found');
         return;
     }
@@ -461,9 +461,9 @@ router.post('/ask/project', async function (req, res) {
     // Save in mongo the pending project data fr the admin to use
     console.log(new_project);
     // Save in mongo the pending project data fr the admin to use
-    let saving_for_later = await utils.mongo_events().insertOne(new_project);
-    // let saving_for_later = await utils.mongo_projects().insertOne(new_project);
-    // console.log(saving_for_later);
+    
+    let saving_for_later = await utils.mongo_pending().insertOne(new_project);
+    console.log(saving_for_later);
 
     
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
