@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChildren, QueryList, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ConfigService } from 'src/app/config.service';
 import { UserService } from 'src/app/user/user.service';
 
@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
 
-import { Subject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import marked from 'marked';
 import { Router } from '@angular/router';

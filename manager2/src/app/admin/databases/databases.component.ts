@@ -1,8 +1,7 @@
-import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
 import { UserService } from 'src/app/user/user.service';
 
-import { Subject } from 'rxjs';
 import { Table } from 'primeng/table';
 
 @Component({

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';

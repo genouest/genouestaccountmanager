@@ -1,4 +1,4 @@
-import { Component, Input, ViewChildren, QueryList } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { PluginService } from '../plugin.service';
 
 @Component({

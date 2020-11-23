@@ -5,7 +5,6 @@ import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
 
-import { Subject } from 'rxjs';
 import { Table } from 'primeng/table';
 
 @Component({

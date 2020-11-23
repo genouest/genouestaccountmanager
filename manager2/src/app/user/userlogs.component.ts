@@ -1,4 +1,4 @@
-import { Component, Input, ViewChildren, QueryList, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Table } from 'primeng/table';
 import { UserService } from './user.service';
 
