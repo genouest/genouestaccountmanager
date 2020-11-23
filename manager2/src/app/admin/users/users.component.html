@@ -6,22 +6,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive table-striped">
-                        <p-table #dt1 [value]="pending_email_users"
-                                    [paginator]="true"
-                                    [rows]="10"
-                                    [showCurrentPageReport]="true" 
-                                    [rowsPerPageOptions]="[10,25,50]"
-                                    [globalFilterFields]="['name', 'uid', 'email', 'uidnumber']"
-                                    [filterDelay]="0"
-                        >
-                        <ng-template pTemplate="caption">
-                            <div class="table-header">
-                                <span class="p-input-icon-right">
-                                    <i class="pi pi-search"></i>
-                                    <input pInputText type="text" (input)="dt1.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-                                </span>
-                            </div>
-                        </ng-template>
+                        <p-table #dt1 [value]="pending_email_users">
                             <ng-template pTemplate="header">
                                 <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
                             </ng-template>
@@ -36,7 +21,7 @@
                         </p-table>
                 </div>
 
-               
+
             </div>
         </div>
     </div>
@@ -47,22 +32,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive table-striped">
-                        <p-table #dt2 [value]="pending_approval_users"
-                                    [paginator]="true"
-                                    [rows]="10"
-                                    [showCurrentPageReport]="true" 
-                                    [rowsPerPageOptions]="[10,25,50]"
-                                    [globalFilterFields]="['name', 'uid', 'email', 'uidnumber']"
-                                    [filterDelay]="0"
-                        >
-                        <ng-template pTemplate="caption">
-                            <div class="table-header">
-                                <span class="p-input-icon-right">
-                                    <i class="pi pi-search"></i>
-                                    <input pInputText type="text" (input)="dt2.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-                                </span>
-                            </div>
-                        </ng-template>
+                        <p-table #dt2 [value]="pending_approval_users">
                             <ng-template pTemplate="header">
                                 <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
                             </ng-template>
@@ -91,7 +61,7 @@
                         <p-table #dt3 [value]="active_users"
                                     [paginator]="true"
                                     [rows]="10"
-                                    [showCurrentPageReport]="true" 
+                                    [showCurrentPageReport]="true"
                                     [rowsPerPageOptions]="[10,25,50]"
                                     [globalFilterFields]="['name', 'uid', 'email', 'uidnumber']"
                                     [filterDelay]="0"
@@ -132,7 +102,7 @@
                         <p-table #dt3 [value]="expired_users"
                                     [paginator]="true"
                                     [rows]="10"
-                                    [showCurrentPageReport]="true" 
+                                    [showCurrentPageReport]="true"
                                     [rowsPerPageOptions]="[10,25,50]"
                                     [globalFilterFields]="['name', 'uid', 'email', 'uidnumber']"
                                     [filterDelay]="0"
