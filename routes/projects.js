@@ -461,8 +461,9 @@ router.post('/ask/project', async function (req, res) {
     // Save in mongo the pending project data fr the admin to use
     console.log(new_project);
     // Save in mongo the pending project data fr the admin to use
-    let saving_for_later = await utils.mongo_projects().insertOne(new_project);
-    console.log(saving_for_later);
+    let saving_for_later = await utils.mongo_events().insertOne(new_project);
+    // let saving_for_later = await utils.mongo_projects().insertOne(new_project);
+    // console.log(saving_for_later);
 
     
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
@@ -475,7 +476,7 @@ router.post('/ask/project', async function (req, res) {
             },
             {
                 '#UID#': user.uid,
-                '#NAME#': 'MICHELCLEBRESIL',
+                '#NAME#': req.body.id,
                 '#SIZE#': req.body.size,
                 '#ORGA#': req.body.orga,
                 '#DESC#': req.body.description,
