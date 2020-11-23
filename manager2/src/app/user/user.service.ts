@@ -201,6 +201,15 @@ export class UserService {
             httpOptions)
     }
 
+    notify(id: string, options: any) {
+
+        let httpOptions = {};
+        return this.http.post(
+            environment.apiUrl + '/user/' + id + '/notify',
+            options,
+            httpOptions)
+    }
+
     updatePassword(id: string, password: string) {
         let httpOptions = {
             //headers: new HttpHeaders({
