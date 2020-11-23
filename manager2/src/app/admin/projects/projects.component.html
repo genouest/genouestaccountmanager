@@ -16,12 +16,7 @@
               <h3>Add user</h3>
             </div>
             <div class="card-body">
-              <p-table #dta [value]="add_requests"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true" 
-                      [rowsPerPageOptions]="[10,25,50]"
-              >
+              <p-table #dta [value]="add_requests">
                 <ng-template pTemplate="header">
                     <tr>
                       <th>Project</th>
@@ -48,12 +43,7 @@
               <h3>Remove user</h3>
             </div>
             <div class="card-body">
-              <p-table #dtd [value]="remove_requests"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true" 
-                      [rowsPerPageOptions]="[10,25,50]"
-              >
+              <p-table #dtd [value]="remove_requests">
                 <ng-template pTemplate="header">
                     <tr>
                       <th>Project</th>
@@ -85,8 +75,8 @@
       <p-table #dtp [value]="projects"
         [paginator]="true"
         [rows]="10"
-        [showCurrentPageReport]="true" 
-        
+        [showCurrentPageReport]="true"
+
         [rowsPerPageOptions]="[10,25,50]"
         [globalFilterFields]="['id','owner']"
         [filterDelay]="0"
