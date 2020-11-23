@@ -172,7 +172,7 @@ export class ProjectsService {
             //}),
             params: params
         };
-        console.log("ask")
+        console.log(new_project)
         return this.http.post(
             environment.apiUrl + '/ask/project',
             new_project,

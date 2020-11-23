@@ -84,7 +84,7 @@ export class ProjectsComponent implements OnInit {
             orga: '',
             description: '',
             access: 'Group',
-            path: ''
+            path: '',
         }
 
         this.project_list(true);
