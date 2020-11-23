@@ -1,6 +1,6 @@
 FROM node:12-buster
 COPY manager2 /root/genouestaccountmanager/manager2
-RUN npm install -g @angular/cli@7.3.10
+RUN npm install -g @angular/cli@10.2.0
 RUN npm install -g express
 ARG APIURL
 ARG SENTRY
