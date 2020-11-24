@@ -459,10 +459,10 @@ router.post('/ask/project', async function (req, res) {
         'orga': req.body.orga
     };
     // Save in mongo the pending project data fr the admin to use
-    console.log(new_project);
+    logger.info(new_project);
     // Save in mongo the pending project data fr the admin to use
     let saving_for_later = await utils.mongo_pending().insertOne(new_project);
-    console.log(saving_for_later);
+    logger.info(saving_for_later);
 
 
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
