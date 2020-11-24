@@ -124,7 +124,6 @@ router.post('/project', async function (req, res) {
         access: req.body.access,
     };
     await utils.mongo_projects().insertOne(new_project);
-    await utils.mongo_pending().insertOne(new_project);
     let fid = new Date().getTime();
     try {
         let created_file = await filer.project_add_project(new_project, fid);
