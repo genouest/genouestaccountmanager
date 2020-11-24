@@ -587,10 +587,10 @@ router.post('/dmp/askProject', async function (req, res) {
         return;
     }
     
-    console.log(new_project);
+    logger.info(new_project);
     // Save in mongo the pending project data fr the admin to use
     let saving_for_later = await utils.mongo_pending().insertOne(new_project);
-    console.log(saving_for_later);
+    logger.info(saving_for_later);
     // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
 
     res.send(saving_for_later);
