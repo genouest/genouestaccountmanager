@@ -1,4 +1,3 @@
-import { environment } from '../environments/environment';
 var express = require('express');
 var router = express.Router();
 const winston = require('winston');
@@ -490,7 +489,7 @@ router.post('/ask/project', async function (req, res) {
 });
 
 router.get('/dmp/ping', async function (req, res) {
-    let online = this.http.get(environment.opidorUrl + '/heartbeat');
+    let online = this.http.get(GENERAL_CONFIG.dmp.url + '/heartbeat');
     if (online['code'] != 200) {
         res.status(404).send('Can\'t reach Opidor API');
         return;
@@ -507,7 +506,7 @@ router.post('/dmp/getResearchOutput', async function (req, res) {
         headers: { 'X-CONSULTKEY': '', 'X-AUTHKEY': '' },
     };
     let research_output_answer = this.http.post(
-        environment.opidorUrl + `/plans/${req.dmp_key}/research_outputs`,
+        GENERAL_CONFIG.dmp.url + `/plans/${req.dmp_key}/research_outputs`,
         httpOptions
     );
     if (research_output_answer['code'] != 200) {
@@ -537,7 +536,7 @@ router.post('/dmp/askProject', async function (req, res) {
     let DMP_data = {};
     for (const researchOutput in req.research_outputs) {
         DMP_data = this.http.get(
-            environment.opidorUrl +
+            GENERAL_CONFIG.dmp.url +
             `/plans/${req.dmp_key}?research_output_id=${researchOutput}`,
             httpOptions
         );
@@ -604,7 +603,7 @@ router.post('/dmp/download', async function (req, res) {
     };
 
     let DMP_data = this.http.get(
-        environment.opidorUrl +
+        GENERAL_CONFIG.dmp.url +
         `/plans/${req.new_project.dmp_key}?research_output_id=${req.new_project.research_output}`,
         httpOptions
     );

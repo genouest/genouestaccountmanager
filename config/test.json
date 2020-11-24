@@ -87,6 +87,7 @@
     "team" : "genouest"
   },
   "dmp": {
+    "url": "https://localhost:3001",
     "client_id": "id",
     "client_secret": "secret"
   },
