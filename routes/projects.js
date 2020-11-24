@@ -124,6 +124,7 @@ router.post('/project', async function (req, res) {
         access: req.body.access,
     };
     await utils.mongo_projects().insertOne(new_project);
+    await utils.mongo_pending().insertOne(new_project);
     let fid = new Date().getTime();
     try {
         let created_file = await filer.project_add_project(new_project, fid);
@@ -434,7 +435,7 @@ router.post('/ask/project', async function (req, res) {
         return;
     }
     let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
-    if (user) {
+    if (!user) {
         res.status(404).send('User not found');
         return;
     }
@@ -461,13 +462,10 @@ router.post('/ask/project', async function (req, res) {
     // Save in mongo the pending project data fr the admin to use
     console.log(new_project);
     // Save in mongo the pending project data fr the admin to use
-    
-    let saving_for_later = await utils.init_db().then(() => {
-        utils.mongo_pending().insertOne(new_project);
-    })    
+    let saving_for_later = await utils.mongo_pending().insertOne(new_project);
     console.log(saving_for_later);
 
-    
+
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
     try {
         await utils.send_notif_mail(
@@ -592,7 +590,7 @@ router.post('/dmp/askProject', async function (req, res) {
     
     console.log(new_project);
     // Save in mongo the pending project data fr the admin to use
-    let saving_for_later = await utils.mongo_projects().insertOne(new_project);
+    let saving_for_later = await utils.mongo_pending().insertOne(new_project);
     console.log(saving_for_later);
     // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
 
