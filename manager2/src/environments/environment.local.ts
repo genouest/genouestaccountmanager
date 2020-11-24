@@ -7,7 +7,6 @@ export const environment = {
     envName: "local",
     apiUrl: "https://myapp-192-168-100-103.vm.openstack.genouest.org",
     sentry: "",
-    opidorUrl: "https://localhost:3001"
 };
 
 /*
