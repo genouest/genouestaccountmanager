@@ -451,7 +451,7 @@ router.post('/ask/project', async function (req, res) {
     let new_project = {
         'id': req.body.id,
         'owner': user.uid,
-        'group': req.locals.logInfo.group,
+        'group': user.group,
         'size': req.body.size,
         'description': req.body.description,
         'orga': req.body.orga
