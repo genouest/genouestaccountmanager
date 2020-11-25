@@ -312,4 +312,10 @@ export class ProjectsComponent implements OnInit {
             }
         )
     }
+
+    accept_project(project) {
+        this.new_project = project
+        console.log(project)
+
+    }
 }
