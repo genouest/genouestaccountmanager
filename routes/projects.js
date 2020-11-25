@@ -458,7 +458,22 @@ router.post('/ask/project', async function (req, res) {
     };
     // Save in mongo the pending project data for the admin to use
     await utils.mongo_pending().insertOne(new_project);
-
+    let fid = new Date().getTime();
+    try {
+        let created_file = await filer.project_add_pending(new_project, fid);
+        logger.debug('Created file', created_file);
+    } catch (error) {
+        logger.error('Add Pending Project Failed for: ' + new_project.id, error);
+        res.status(500).send('Add Pending Project Failed');
+        return;
+    }
+    await utils.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'new pending project creation: ' + req.body.id,
+        logs: [],
+    });
+    
 
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
     try {
@@ -479,6 +494,7 @@ router.post('/ask/project', async function (req, res) {
     } catch (error) {
         logger.error(error);
     }
+    res.send({ message: 'Pending project created' });
     res.end();
     return;
 });
