@@ -674,7 +674,7 @@ router.get('/pending', async function (req, res) {
     }
 });
 
-router.delete('pending/:id', async function(req, res){
+router.delete('/pending/:id', async function(req, res){
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
