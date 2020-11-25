@@ -204,5 +204,16 @@ module.exports = {
         return create_file('project_add_group_to_project', { project: project, group: group, fid: fid });
     },
 
+    project_add_pending: function (project, fid) {
+        return create_file('project_add_pending', { project: project, fid: fid });
+    },
+
+    project_delete_pending: function (project, fid) {
+        return create_file('project_delete_pending', { project: project, fid: fid });
+    },
+
+    project_update_pending: function (project, fid) {
+        return create_file('project_update_pending', { project: project, fid: fid });
+    },
 
 };

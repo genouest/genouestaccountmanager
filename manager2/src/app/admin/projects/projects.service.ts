@@ -267,4 +267,20 @@ export class ProjectsService {
         }));
     }
 
+    delete_pending(projectId: string): Observable<any> {
+        //let user = this.authService.profile;
+        let params = new HttpParams();
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.delete(
+            environment.apiUrl + '/pending/' + projectId,
+            httpOptions
+        );
+    }
+
 }

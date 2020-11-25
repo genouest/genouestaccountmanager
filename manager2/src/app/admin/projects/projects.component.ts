@@ -45,6 +45,8 @@ export class ProjectsComponent implements OnInit {
     dmp_msg: any
     dmp_err_msg: any
 
+    pending_msg: any
+    pending_err_msg: any
     constructor(
         private route: ActivatedRoute,
         private projectService: ProjectsService,
@@ -317,5 +319,16 @@ export class ProjectsComponent implements OnInit {
         this.new_project = project
         console.log(project)
 
+    }
+
+    reject_project(project) {
+        this.pending_err_msg = '';
+        this.pending_msg = '';
+        this.projectService.delete_pending(project.id).subscribe(
+            resp => {
+                this.pending_msg = resp.message
+            },
+            err => this.pending_err_msg = err.error
+        )
     }
 }
