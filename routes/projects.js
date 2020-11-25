@@ -438,7 +438,6 @@ router.post('/ask/project', async function (req, res) {
         return;
     }
     
-
     /* // New Project Structure :
       let new_project = {
           'id': req.body.id,
@@ -451,17 +450,14 @@ router.post('/ask/project', async function (req, res) {
     // todo: find a way to use cc
     let new_project = {
         'id': req.body.id,
-        'owner': req.locals.logInfo.id,
+        'owner': user.uid,
         'group': req.locals.logInfo.group,
         'size': req.body.size,
         'description': req.body.description,
         'orga': req.body.orga
     };
-    // Save in mongo the pending project data fr the admin to use
-    logger.info(new_project);
-    // Save in mongo the pending project data fr the admin to use
-    let saving_for_later = await utils.mongo_pending().insertOne(new_project);
-    logger.info(saving_for_later);
+    // Save in mongo the pending project data for the admin to use
+    await utils.mongo_pending().insertOne(new_project);
 
 
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
@@ -483,7 +479,6 @@ router.post('/ask/project', async function (req, res) {
     } catch (error) {
         logger.error(error);
     }
-    res.send('yo');
     res.end();
     return;
 });

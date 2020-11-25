@@ -92,13 +92,13 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let project of pending">
-                <td><a routerLink="/admin/project/{{pending.id}}"><span
-                      class="label label-primary">{{pending.id}}</span></a></td>
-                <td>{{pending.owner}}</td>
+              <tr *ngFor="let project of pending_projects">
+                <td><a routerLink="/admin/project/{{project.id}}"><span
+                      class="label label-primary">{{project.id}}</span></a></td>
+                <td>{{project.owner}}</td>
                 <td>{{project.size}}</td>
-                <td>{{pending.orga}}</td>
-                <td>{{pending.dmp_key}}</td>
+                <td>{{project.orga}}</td>
+                <td>{{project.dmp_key}}</td>
               </tr>
             </tbody>
           </table>
