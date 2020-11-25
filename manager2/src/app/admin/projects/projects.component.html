@@ -100,7 +100,7 @@
                 <td>{{project.size}}</td>
                 <td>{{project.orga}}</td>
                 <td>{{project.dmp_key}}</td>
-                <td><button type="button" class="btn btn-success" (click)= "accept_project(project)">Accept</button><button type="button" class="btn btn-danger">Reject</button></td>
+                <td><button type="button" class="btn btn-success" (click)= "accept_project(project)">Accept</button><button type="button" class="btn btn-danger" (click)= "reject_project(project)">Reject</button></td>
               </tr>
             </tbody>
           </table>
@@ -111,6 +111,11 @@
   </div>
   </div>
 </div>
+<div>
+  <div class="alert alert-danger" *ngIf="pending_err_msg">{{pending_err_msg}}</div>
+  <div *ngIf="pending_msg" class="alert alert-info">{{pending_msg}}</div>
+</div>
+
 <div class="card bg-light">
   <div class="card-header">
     <h3>All projects</h3>

@@ -658,5 +658,48 @@ router.get('/pending', async function (req, res) {
     }
 });
 
+router.delete('pending/:id', async function(req, res){
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if (!utils.sanitizeAll([req.params.id])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        res.status(404).send('User not found');
+        return;
+    }
+    if (GENERAL_CONFIG.admin.indexOf(user.uid) < 0) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    await utils.mongo_pending().deleteOne({ id: req.params.id });
+    let fid = new Date().getTime();
+    try {
+        let created_file = await filer.project_delete_pending(
+            { id: req.params.id },
+            fid
+        );
+        logger.debug('Created file', created_file);
+    } catch (error) {
+        logger.error('Delete Pending Project Failed for: ' + req.params.id, error);
+        res.status(500).send('Delete Pending Project Failed');
+        return;
+    }
+
+    await utils.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'remove Pending project ' + req.params.id,
+        logs: [],
+    });
+
+    res.send({ message: 'Pending Project deleted' });
+
+});
+
 router.post;
 module.exports = router;
