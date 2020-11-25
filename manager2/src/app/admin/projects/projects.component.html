@@ -89,6 +89,7 @@
                 <th>Size (Go)</th>
                 <th>orga</th>
                 <th>Dmp access key</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -99,6 +100,7 @@
                 <td>{{project.size}}</td>
                 <td>{{project.orga}}</td>
                 <td>{{project.dmp_key}}</td>
+                <td><button type="button" class="btn btn-success" (click)= "accept_project(project)">Accept</button><button type="button" class="btn btn-danger">Reject</button></td>
               </tr>
             </tbody>
           </table>
