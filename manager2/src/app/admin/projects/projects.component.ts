@@ -88,6 +88,7 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.project_list(true);
+        this.pending_list(false);
         this.groupService.list().subscribe(
             resp => {
                 this.groups = resp;
@@ -251,7 +252,7 @@ export class ProjectsComponent implements OnInit {
 
     pending_list(refresh_requests = false) {
         this.pending_projects = [];
-        this.projectService.list(true).subscribe(
+        this.projectService.list_pending(true).subscribe(
             resp => {
                 if (resp.length == 0) {
                     return;
