@@ -16,28 +16,28 @@
             <h3>Add user</h3>
           </div>
           <div class="card-body">
-            <div class="table-responsive">
-              <table id="dtAddRequests" datatable [dtTrigger]="dtTriggerAdd" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>User</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let request of add_requests">
-                    <td>{{request.project.id}}</td>
-                    <td>{{request.user}}</td>
-                    <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span
-                        class="label label-success">Add</span></td>
-                    <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span
-                        class="label label-danger">Cancel</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <p-table #dta [value]="add_requests">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Project</th>
+                  <th>User</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-request>
+                <tr>
+                  <td>{{request.project.id}}</td>
+                  <td>{{request.user}}</td>
+                  <td><button type="button" class="btn btn-success"
+                      (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;">Add</button>
+                  </td>
+                  <td><button type="button" class="btn btn-danger"
+                      (click)="remove_request(request.project,request.user, 'add')"
+                      style="cursor: pointer;">Cancel</button></td>
+                </tr>
+              </ng-template>
+            </p-table>
           </div>
         </div>
       </div>
@@ -47,68 +47,67 @@
             <h3>Remove user</h3>
           </div>
           <div class="card-body">
-            <div class="table-responsive">
-              <table id="dtRemoveRequests" datatable [dtTrigger]="dtTriggerRemove" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>User</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let request of remove_requests">
-                    <td>{{request.project.id}}</td>
-                    <td>{{request.user}}</td>
-                    <td><button type="button" class="btn btn-success"
-                        (click)="validate_remove_request(request.project,request.user)">Remove</button></td>
-                    <td><button type="button" class="btn btn-danger"
-                        (click)="remove_request(request.project,request.user, 'remove')">Cancel</button></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <p-table #dtd [value]="remove_requests">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Project</th>
+                  <th>User</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-request>
+                <tr>
+                  <td>{{request.project.id}}</td>
+                  <td>{{request.user}}</td>
+                  <td><button type="button" class="btn btn-success"
+                      (click)="validate_remove_request(request.project,request.user)"
+                      style="cursor: pointer;">Remove</button></td>
+                  <td><button type="button" class="btn btn-danger"
+                      (click)="remove_request(request.project,request.user, 'add')"
+                      style="cursor: pointer;">Cancel</button></td>
+                </tr>
+              </ng-template>
+            </p-table>
           </div>
         </div>
       </div>
     </div>
-  <div class="row">
-    <div class="col-md-12">
-    <div class="card bg-light">
-      <div class="card-header">
-        <h3>Pending projects</h3>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table id="dtPending" datatable [dtTrigger]="dtTriggerProjects" class="table table-striped">
-            <thead>
-              <tr>
-                <th>Project</th>
-                <th>User</th>
-                <th>Size (Go)</th>
-                <th>orga</th>
-                <th>Dmp access key</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let project of pending_projects">
-                <td><a routerLink="/admin/project/{{project.id}}"><span
-                      class="label label-primary">{{project.id}}</span></a></td>
-                <td>{{project.owner}}</td>
-                <td>{{project.size}}</td>
-                <td>{{project.orga}}</td>
-                <td>{{project.dmp_key}}</td>
-                <td><button type="button" class="btn btn-success" (click)= "accept_project(project)">Accept</button><button type="button" class="btn btn-danger" (click)= "reject_project(project)">Reject</button></td>
-              </tr>
-            </tbody>
-          </table>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card bg-light">
+          <div class="card-header">
+            <h3>Pending projects</h3>
+          </div>
+          <div class="card-body">
+            <p-table #dtpp [value]="pending_projects">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Project</th>
+                  <th>User</th>
+                  <th>Size (Go)</th>
+                  <th>orga</th>
+                  <th>Dmp access key</th>
+                  <th></th>
+                </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-pending>
+                  <tr>
+                    <td>{{pending.project.id}}</td>
+                    <td>{{pending.owner}}</td>
+                    <td>{{pending.size}}</td>
+                    <td>{{pending.orga}}</td>
+                    <td>{{pending.dmp_key}}</td>
+                    <td><button type="button" class="btn btn-success"
+                        (click)="accept_project(pending)">Accept</button><button type="button" class="btn btn-danger"
+                        (click)="reject_project(pending)">Reject</button></td>
+                  </tr>
+                </ng-template>
+            </p-table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  </div>
   </div>
 </div>
 <div>
@@ -121,33 +120,46 @@
     <h3>All projects</h3>
   </div>
   <div class="card-body">
-    <div class="table-responsive">
-      <table id="dtProjects" datatable [dtTrigger]="dtTriggerProjects" class="table table-striped">
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Owner</th>
-            <th>Group</th>
-            <th>Path</th>
-            <th>Size (Go)</th>
-            <th>Expiration</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let project of projects">
-            <td><a routerLink="/admin/project/{{project.id}}"><span
-                  class="label label-primary">{{project.id}}</span></a></td>
-            <td>{{project.owner}}</td>
-            <td>{{project.group}}</td>
-            <td>{{project.path}}</td>
-            <td>{{project.size}}</td>
-            <td>{{date_convert(project.expire)}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <p-table #dtp [value]="projects"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+
+        [rowsPerPageOptions]="[10,25,50]"
+        [globalFilterFields]="['id','owner']"
+        [filterDelay]="0"
+      >
+        <ng-template pTemplate="caption">
+            <div class="table-header">
+                List of Projects
+                <span class="p-input-icon-right">
+                    <i class="pi pi-search"></i>
+                    <input pInputText id="search_projects" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+              <th>Project</th>
+              <th>Owner</th>
+              <th *ngIf="!config.project || config.project.enable_group">Group</th>
+              <th>Path</th>
+              <th>Size (Go)</th>
+              <th>Expiration</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-project>
+              <tr>
+                <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
+                <td>{{project.owner}}</td>
+                <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
+                <td>{{project.path}}</td>
+                <td>{{project.size}}</td>
+                <td>{{date_convert(project.expire)}}</td>
+              </tr>
+        </ng-template>
+      </p-table>
   </div>
-</div>
 <div class="card bg-light">
   <div class="card-header">
     <h3>Project creation</h3>
@@ -229,18 +241,20 @@
           </label>
           <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [ngModelOptions]="{standalone: true}"
             [(ngModel)]="new_project.path" class="form-control" />
-        </div>  
+        </div>
         <div class="col-sm-5">
           <label for="new_project_dmp">DMP access key </label>
           <div class="row">
-              <div class="col"> <input placeholder="Paste key" type="string" id="DMP_key" [ngModelOptions]="{standalone: true}"
-                [(ngModel)]="new_project.dmp_key" class="form-control dmpitems" /></div>
-              <div class="col"><button type="button" class="btn btn-outline-primary dmpitems"
-                (click)="request_dmp_data()">Load</button></div></div>
-              
-                  <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
-                  <div *ngIf="dmp_msg" class="alert alert-success">{{dmp_msg}}</div>
-              
+            <div class="col"> <input placeholder="Paste key" type="string" id="DMP_key"
+                [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.dmp_key" class="form-control dmpitems" />
+            </div>
+            <div class="col"><button type="button" class="btn btn-outline-primary dmpitems"
+                (click)="request_dmp_data()">Load</button></div>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
+          <div *ngIf="dmp_msg" class="alert alert-success">{{dmp_msg}}</div>
+
         </div>
       </div>
 

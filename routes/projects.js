@@ -437,7 +437,7 @@ router.post('/ask/project', async function (req, res) {
         res.status(404).send('User not found');
         return;
     }
-    
+
     /* // New Project Structure :
       let new_project = {
           'id': req.body.id,
@@ -458,14 +458,14 @@ router.post('/ask/project', async function (req, res) {
     };
     // Save in mongo the pending project data for the admin to use
     await utils.mongo_pending().insertOne(new_project);
-    
+
     await utils.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),
         action: 'new pending project creation: ' + req.body.id,
         logs: [],
     });
-    
+
 
     let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
     try {
@@ -588,7 +588,7 @@ router.post('/dmp/askProject', async function (req, res) {
         res.status(401).send('Not Authorized ');
         return;
     }
-    
+
     logger.info(new_project);
     // Save in mongo the pending project data fr the admin to use
     let saving_for_later = await utils.mongo_pending().insertOne(new_project);
@@ -666,7 +666,7 @@ router.get('/pending', async function (req, res) {
     }
 });
 
-router.delete('/pending/:id', async function(req, res){
+router.delete('/pending/:id', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
