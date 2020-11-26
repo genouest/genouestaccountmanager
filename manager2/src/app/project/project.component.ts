@@ -39,8 +39,6 @@ export class ProjectComponent implements OnInit {
 
   oldGroup: string;
 
-  dtTrigger: Subject<any> = new Subject();
-  dtTriggerUser: Subject<any> = new Subject();
 
   msg: string;
   rm_prj_err_msg: string;
@@ -73,7 +71,6 @@ export class ProjectComponent implements OnInit {
           resp[i].expire = new Date(resp[i].expire);
         }
         this.projects = resp;
-        this.dtTrigger.next();
       },
       (err) => console.log("failed to get projects")
     );
