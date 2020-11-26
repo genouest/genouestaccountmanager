@@ -6,7 +6,7 @@
 
 var CONFIG = require('config');
 
-var utils = require('./routes/utils');
+var utils = require('../routes/utils');
 
 const MAILER = CONFIG.general.mailer;
 // const MAIL_CONFIG = CONFIG[MAILER];

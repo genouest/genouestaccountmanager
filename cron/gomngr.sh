@@ -53,7 +53,8 @@ while read p; do
       echo "no sentry, skip..." >> $p.log
     fi
   fi
-  curl -v "$MYURL/log/status/$filename/$EXITCODE"
+  echo "send status code to $MYURL/log/status/$filename/$EXITCODE" >> $p.log
+  curl -m 10 --connect-timeout 2 -v "$MYURL/log/status/$filename/$EXITCODE"
   mv $p $p.done
 done </tmp/gomngr.list
 

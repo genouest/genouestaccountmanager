@@ -1,7 +1,6 @@
 FROM node:12-buster
 COPY manager2 /root/genouestaccountmanager/manager2
-RUN npm install -g @angular/cli@7.3.10
-RUN npm install -g express
+RUN npm install -g @angular/cli@10.2.0
 ARG APIURL
 ARG SENTRY
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
@@ -17,7 +16,7 @@ RUN mkdir -p /root/genouestaccountmanager
 WORKDIR /root/genouestaccountmanager
 
 
-COPY *.json .bowerrc /root/genouestaccountmanager/
+COPY *.json /root/genouestaccountmanager/
 RUN npm ci
 COPY *.js /root/genouestaccountmanager/
 
@@ -27,13 +26,8 @@ COPY plugins /root/genouestaccountmanager/plugins
 COPY public /root/genouestaccountmanager/public
 COPY routes /root/genouestaccountmanager/routes
 COPY templates /root/genouestaccountmanager/templates
-COPY views /root/genouestaccountmanager/views
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
-# Disable old manager
-#COPY manager /root/genouestaccountmanager/manager
-#RUN npm install -g bower
-#RUN bower install --allow-root
 RUN mkdir -p /opt/my/readmes/readmes1
 RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts

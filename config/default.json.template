@@ -61,6 +61,12 @@
     "newsletters": true,
     "log": true
   },
+  "project": {
+     "enable_group": true,
+     "default_size": 500,
+     "default_path": "/opt/project",
+     "default_expire": 360
+  },
   "rabbitmq": {
     "url": "amqp://localhost",
     "exchange": "gomngr"

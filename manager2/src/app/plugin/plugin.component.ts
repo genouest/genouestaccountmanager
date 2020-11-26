@@ -1,8 +1,7 @@
 import { Component, ComponentFactoryResolver, Input, OnInit, OnChanges, ViewChild, SimpleChanges } from '@angular/core';
 import { Directive, Type, ViewContainerRef } from '@angular/core';
 import { BasePluginComponent } from './base-plugin/base-plugin.component';
-//import { DataTableDirective } from 'angular-datatables';
-//import { Subject } from 'rxjs';
+
 
 
 @Component({
@@ -149,7 +148,7 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
 <div class="row">
 <div class="col-md-6">
 
-<table id="dtAdminTestPlugin" datatable [dtTrigger]="dtTrigger" class="table table-striped">
+<table class="table table-striped">
 <thead><tr><td>User</td><td>Quota</td><td>Expire</td></tr></thead>
 <tbody>
 <tr *ngFor="let l of data.list">
@@ -264,7 +263,7 @@ export class PluginItems {
 export class PluginComponent implements OnInit, OnChanges {
     @Input() pluginItem: string
     @Input() userId: string
-    @ViewChild(PluginDirective) appPlugin: PluginDirective;
+    @ViewChild(PluginDirective, {static: true}) appPlugin: PluginDirective;
     constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
     ngOnInit() {

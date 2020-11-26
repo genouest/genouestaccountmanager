@@ -105,6 +105,10 @@ export class UserComponent implements OnInit {
     rm_dbmsg: string
     rm_dbmsg_error: string
 
+    notify_subject: string
+    notify_message: string
+    notify_err: string
+
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
@@ -138,11 +142,22 @@ export class UserComponent implements OnInit {
         this.password1  = ''
         this.password2 = ''
 
+        this.notify_subject = ''
+        this.notify_message = ''
+        this.notify_err = ''
+
     }
 
-    dateConvert = function timeConverter(tsp){
-        var a = new Date(tsp);
-        return a.toLocaleDateString();
+    date_convert = function timeConverter(tsp){
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
     initUser = function() {
@@ -185,6 +200,7 @@ export class UserComponent implements OnInit {
         this.subscribe = this.subscribe.bind(this);
         this.unsubscribe = this.unsubscribe.bind(this);
         this.initUser = this.initUser.bind(this);
+        this.sendmail = this.sendmail.bind(this);
 
         this.configService.config.subscribe(
             resp => {
@@ -194,7 +210,7 @@ export class UserComponent implements OnInit {
             err => console.log('failed to get config')
         )
 
-        
+
     }
 
     _compareName(a,b) {
@@ -325,7 +341,7 @@ export class UserComponent implements OnInit {
         this.dbmsg_error='';
         this.databaseService.add(this.database).subscribe(
             resp => { this.dbmsg = resp['message']; this.db_list()},
-            err => { this.dbmsg_error = err.error; console.log('failed to add database')}
+            err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
         )
     }
 
@@ -336,7 +352,7 @@ export class UserComponent implements OnInit {
             if(ws.name == dbName) {
                 this.databaseService.remove(ws).subscribe(
                     resp => { this.rm_dbmsg = resp['message']; this.db_list()},
-                    err => { this.rm_dbmsg_error = err.error; console.log('failed to delete database')}
+                    err => { this.rm_dbmsg_error = err.error.message; console.log('failed to delete database')}
                 )
             }
         });
@@ -402,7 +418,7 @@ export class UserComponent implements OnInit {
                 this.website = new Website('', '', '', this.user.uid);
                 //this.web_list();
             },
-            err => { this.webmsg = err.error; console.log('failed to add web site')}
+            err => { this.webmsg = err.error.message; console.log('failed to add web site')}
         )
     }
     web_delete(siteName: string) {
@@ -410,7 +426,7 @@ export class UserComponent implements OnInit {
             if(ws.name == siteName) {
                 this.websiteService.remove(ws).subscribe(
                     resp => { this.rmwebmsg = ''; this.web_list()},
-                    err  => { this.rmwebmsg = err.error; console.log('failed to delete web site', err)}
+                    err  => { this.rmwebmsg = err.error.message; console.log('failed to delete web site', err)}
                 )
             }
         });
@@ -460,9 +476,14 @@ export class UserComponent implements OnInit {
         this.userService.extend(this.user.uid, this.user.regkey).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.user.expiration = resp['expiration']
+                this.user.expiration = resp['expiration'];
+                this._flashMessagesService.show('Your account validity period has been extended', { cssClass: 'alert-success', timeout: 5000 });
+
+
             },
-            err => console.log('failed to extend user', err)
+            err => {
+                console.log('failed to extend user', err)
+            }
         )
     }
 
@@ -480,6 +501,26 @@ export class UserComponent implements OnInit {
         this.panel = panel;
     }
 
+    sendmail() {
+        console.log('should send mail', {subject: this.notify_subject, msg: this.notify_message});
+        this.userService.notify(this.user.uid,
+            {
+                subject: this.notify_subject,
+                message: this.notify_message
+            }).subscribe(
+                resp => {
+                    this.notify_subject = ''
+                    this.notify_message = ''
+                    this.notify_err = ''
+                    this.msg = 'mail sent'
+                },
+                err => {
+                    this.notify_err = 'failed to send email'
+                    console.log(('failed to send mail'))
+                }
+            )
+    }
+
     generate_apikey(uid: string){
         this.userService.generateApiKey(this.user.uid).subscribe(
             resp => {
@@ -492,7 +533,7 @@ export class UserComponent implements OnInit {
 
     ssh_new_key(){
         this.userService.getNewSSHKey(this.user.uid).subscribe(
-            resp => this.new_key_message = resp['msg'],
+            resp => this.new_key_message = resp['message'],
             err => console.log('failed to get new ssh key')
         )
     }
@@ -527,7 +568,7 @@ export class UserComponent implements OnInit {
                 this.update_msg = 'User info updated';
                 this.user = resp;
             },
-            err => this.update_error_msg = err.error
+            err => this.update_error_msg = err.error.message
         )
     }
 
@@ -551,9 +592,9 @@ export class UserComponent implements OnInit {
         this.userService.activate(this.user.uid).subscribe(
             resp => {
                 this.user.status = this.STATUS_ACTIVE;
-                this.msg = resp['msg']
+                this.msg = resp['message']
             },
-            err => this.err_msg = err.error
+            err => this.err_msg = err.error.message
         )
     }
 
@@ -611,15 +652,9 @@ export class UserComponent implements OnInit {
             this.userService.addToProject(this.user.uid, newproject.id).subscribe(
                 resp =>  {
                     this.add_to_project_msg = resp['message'];
-                    this.userService.addGroup(this.user.uid, newproject.group).subscribe(
-                        resp => {
-                            this.add_to_project_grp_msg = resp['message'];
-                            this.user_projects.push({id: newproject.id, owner: false, member: true})
-                        },
-                        err => this.request_mngt_error_msg = err.error
-                    )
+                    this.user_projects.push({id: newproject.id, owner: false, member: true})
                 },
-                err => this.add_to_project_error_msg = err.error
+                err => this.add_to_project_error_msg = err.error.message
             )
         }
 
@@ -637,7 +672,7 @@ export class UserComponent implements OnInit {
                 }
                 this.user_projects = tmpproject;
             },
-            err => this.remove_from_project_error_msg = err.error
+            err => this.remove_from_project_error_msg = err.error.message
         )
     }
 
@@ -649,7 +684,7 @@ export class UserComponent implements OnInit {
                 this.router.navigate(['/admin/user']);
             },
             err => {
-                this.err_msg = err.error;
+                this.err_msg = err.error.message;
                 console.log('failed to delete user', err);
             }
         )

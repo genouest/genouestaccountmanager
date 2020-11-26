@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-logs',
@@ -11,9 +12,9 @@ import { AuthService } from '../../auth/auth.service';
     styleUrls: ['./logs.component.css']
 })
 export class LogsComponent implements OnInit {
+    @ViewChild('dtp') table: Table;
 
-    dtTrigger: Subject<any> = new Subject()
-    dtOptions: DataTables.Settings = {};
+
 
     logs: any
     logcontent: string
@@ -35,20 +36,15 @@ export class LogsComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dtOptions = {
-            order: [[2, 'desc']]
-        };
         this.getLogs().subscribe(
             resp => {
                 this.logs = resp.sort(this.sortByDate);
-                this.dtTrigger.next();
             },
             err => console.log('failed to get logs')
         )
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
     get_status = function(status){
@@ -62,8 +58,15 @@ export class LogsComponent implements OnInit {
     }
 
     date_convert = function timeConverter(tsp){
-        var a = new Date(tsp);
-        return a.toISOString();
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
     getLogs(): Observable<any> {
@@ -99,7 +102,7 @@ export class LogsComponent implements OnInit {
                 this.logcontent = resp.log.replace(/(\r\n|\n|\r)/g,"<br />");
                 this.event = event_file;
             },
-            err => this.err_msg = err.error
+            err => this.err_msg = err.error.message
         );
 
     }

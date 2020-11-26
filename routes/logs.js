@@ -8,16 +8,16 @@ var utils = require('./utils');
 
 router.get('/log', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let events = await utils.mongo_events().find({}, {limit: 200, sort: {date: -1}}).toArray();
@@ -27,12 +27,12 @@ router.get('/log', async function(req, res){
 
 router.get('/log/user/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     let events = await utils.mongo_events().find({'owner': req.params.id}).toArray();
@@ -42,23 +42,23 @@ router.get('/log/user/:id', async function(req, res){
 
 router.post('/log/user/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!session_user){
-        res.status(404).send('Session user not found');
+        res.status(404).send({message: 'Session user not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     let user = await utils.mongo_users().findOne({uid: req.params.id});
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     let event = {
@@ -66,7 +66,7 @@ router.post('/log/user/:id', async function(req, res){
         'logs': []
     };
     await utils.mongo_events().insertOne(event);
-    res.send({'msg': 'event created'});
+    res.send({message: 'event created'});
     res.end();
 });
 
@@ -78,17 +78,17 @@ router.get('/log/status/:id/:status', async function(req, res){
 
 router.get('/log/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
     if(!user){
-        res.status(404).send('User not found');
+        res.status(404).send({message: 'User not found'});
         return;
     }
     if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 

@@ -56,7 +56,7 @@ const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
 
 
 var app = express();
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({origin: true, credentials: true}));
 
 if (process.env.MY_ACCESS_LOG) {
     const fs = require('fs');
@@ -145,6 +145,11 @@ const if_dev_execute_scripts = function(){
             wlogger.info(cron_bin_script + ' process exited with ' +
                         `code ${code} and signal ${signal}`);
             resolve();
+        });
+
+        procScript.on('error', (err) => {
+            wlogger.error('failed to execute cron scripts', err);
+            reject(err);
         });
     });
 };
@@ -309,6 +314,7 @@ app.get('/user/:id/confirm', users);
 app.get('/user/:id/passwordreset', users);
 app.get('/user/:id/apikey', users);
 app.post('/user/:id/apikey', users);
+app.post('/user/:id/notify', users);
 app.get('/lists', users),
 app.get('/list/:list', users),
 app.post('/user/:id/passwordreset', users);
@@ -427,6 +433,7 @@ utils.init_db().then(async () => {
         if (runningEnv == 'test'){
             wlogger.info('Execute cron script');
             await if_dev_execute_scripts();
+            wlogger.info('Test setup scripts executed');
         }
     }
 
