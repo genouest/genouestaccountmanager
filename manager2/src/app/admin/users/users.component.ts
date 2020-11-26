@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Pipe, PipeTransform } from '@angular/core';
 import { UserService } from 'src/app/user/user.service';
 
-import { Subject } from 'rxjs';
+import { Table } from 'primeng/table';
 
 @Pipe({
     name: 'statusFilter',
@@ -25,8 +25,11 @@ export class MyStatusFilterPipe implements PipeTransform {
     styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
+    @ViewChild('dt1') table1: Table;
+    @ViewChild('dt2') table2: Table;
+    @ViewChild('dt3') table3: Table;
+    @ViewChild('dt4') table4: Table;
 
-    dtTrigger: Subject<any> = new Subject()
 
     STATUS_PENDING_EMAIL = 'Waiting for email approval';
     STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -35,25 +38,54 @@ export class UsersComponent implements OnInit {
 
     users: any
 
+    pending_email_users: any
+    pending_approval_users: any
+    active_users: any
+    expired_users: any
+
     constructor(private userService: UserService) { }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
     ngOnInit() {
         this.userService.list().subscribe(
             resp => {
-                this.users = resp;
-                this.dtTrigger.next();
+                //this.users = resp;
+                let pendingEmail = [];
+                let pendingApproval = [];
+                let active = [];
+                let expired = [];
+                resp.forEach(user => {
+                    if (user.status == this.STATUS_PENDING_EMAIL) {
+                        pendingEmail.push(user);
+                    } else if (user.status == this.STATUS_PENDING_APPROVAL) {
+                        pendingApproval.push(user);
+                    } else if (user.status == this.STATUS_ACTIVE) {
+                        active.push(user);
+                    } else if (user.status == this.STATUS_EXPIRED) {
+                        expired.push(user);
+                    }
+                });
+                this.pending_email_users = pendingEmail;
+                this.pending_approval_users = pendingApproval;
+                this.active_users = active;
+                this.expired_users = expired;
             },
             err => console.log('failed to get users')
         )
     }
 
-    date_convert(tsp) {
-        var a = new Date(tsp);
-        return a.toLocaleDateString();
+    date_convert = function timeConverter(tsp){
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
 }

@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
 import { GroupsService} from 'src/app/admin/groups/groups.service';
-import { Subject } from 'rxjs';
+
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-project',
@@ -12,6 +14,9 @@ import { Subject } from 'rxjs';
     styleUrls: ['./project.component.css']
 })
 export class ProjectComponent implements OnInit {
+    @ViewChild('dtp') table: Table;
+    @ViewChild('dtu') tableuser: Table;
+
 
     new_project: any
     projects: any
@@ -19,11 +24,13 @@ export class ProjectComponent implements OnInit {
     groups: any
     selectedProject: any
     session_user: any
+    config: any
     new_user: any
     remove_user: any
     
     dmp_err_msg: string
     dmp_msg: string
+    default_size: any
 
     manager_visible: boolean
 
@@ -33,24 +40,23 @@ export class ProjectComponent implements OnInit {
 
     oldGroup: string
 
-    dtTrigger: Subject<any> = new Subject()
-    dtTriggerUser: Subject<any> = new Subject()
-
     msg: string
     rm_prj_err_msg: string
     rm_prj_msg_ok: string
 
     constructor(
         private authService: AuthService,
+        private configService: ConfigService,
         private projectsService: ProjectsService,
         private userService: UserService,
         private groupService: GroupsService,
         private router: Router
-    ) { }
+    ) {
+        this.config = {}
+        this.default_size = 0
+    }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
-        this.dtTriggerUser.unsubscribe();
     }
 
     async ngOnInit() {
@@ -66,10 +72,20 @@ export class ProjectComponent implements OnInit {
                     resp[i].expire = new Date(resp[i].expire);
                 }
                 this.projects = resp;
-                this.dtTrigger.next();
             },
             err => console.log('failed to get projects')
         )
+
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                if (this.config.project && this.config.project.default_size) {
+                    this.default_size = this.config.project.default_size;
+                }
+            },
+            err => console.log('failed to get config')
+        )
+
     }
 
     ask_for_project() {
@@ -83,7 +99,7 @@ export class ProjectComponent implements OnInit {
             },
             err => {
                 console.log('failed to get project users', err);
-                this.request_err_msg = err.error;
+                this.request_err_msg = err.error.message;
             }
         )
     }
@@ -136,15 +152,22 @@ export class ProjectComponent implements OnInit {
         }
         this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
             resp => this.request_msg = resp['message'],
-            err => this.request_err_msg = err.error
+            err => this.request_err_msg = err.error.message
         )
 
 
     }
 
     date_convert = function timeConverter(tsp){
-        var a = new Date(tsp);
-        return a.toLocaleDateString();
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
     }
 
     ping_dmp_data() {

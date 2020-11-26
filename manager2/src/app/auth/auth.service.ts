@@ -29,7 +29,7 @@ export class AuthService {
                 { observe: 'response' }).subscribe(
                     resp => {
                         if(! resp.body['user']) {
-                            reject({'error': resp.body['msg']});
+                            reject({'error': resp.body['message']});
                             return;
                         }
 
@@ -71,7 +71,7 @@ export class AuthService {
                 { observe: 'response' }).subscribe(
                     resp => {
                         if(! resp.body['user']) {
-                            reject({'error': resp.body['msg']});
+                            reject({'error': resp.body['message']});
                             return;
                         }
                         if(resp.body['token']) {

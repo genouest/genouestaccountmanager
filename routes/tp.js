@@ -320,12 +320,12 @@ var activate_tp_user = async function(user, adminId){
 
 router.get('/tp', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -335,33 +335,33 @@ router.get('/tp', async function(req, res) {
 });
 
 router.post('/tp', async function(req, res) {
-    if(req.body.quantity<=0){
-        res.status(403).send('Quantity must be >= 1');
+    if(req.body.quantity === undefined || req.body.quantity === null || req.body.quantity<=0){
+        res.status(403).send({message: 'Quantity must be >= 1'});
         return;
     }
     if(req.body.about === undefined || req.body.about == ''){
-        res.status(403).send('Tell us why you need some tp accounts');
+        res.status(403).send({message: 'Tell us why you need some tp accounts'});
         return;
     }
 
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
     let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
     tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about).then(function(reservation){
-        res.send({'reservation': reservation, 'msg': 'Reservation done'});
+        res.send({reservation: reservation, message: 'Reservation done'});
         res.end();
         return;
     });
@@ -369,23 +369,23 @@ router.post('/tp', async function(req, res) {
 
 router.get('/tp/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
     let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
 
@@ -401,33 +401,33 @@ router.get('/tp/:id', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to get this reservation'});
+        res.status(403).send({message: 'Not allowed to get this reservation'});
         res.end();
         return;
     }
-    res.send({'reservation': reservation});
+    res.send({reservation: reservation});
     res.end();
 });
 
 router.delete('/tp/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
     let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
 
@@ -443,47 +443,47 @@ router.delete('/tp/:id', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to delete this reservation'});
+        res.status(403).send({message: 'Not allowed to delete this reservation'});
         res.end();
         return;
     }
 
     if(reservation.over){
-        res.status(403).send({'msg': 'Reservation is already closed'});
+        res.status(403).send({message: 'Reservation is already closed'});
         res.end();
         return;
     }
 
     if(reservation.created){
-        res.status(403).send({'msg': 'Reservation accounts already created, reservation will be closed after closing date'});
+        res.status(403).send({message: 'Reservation accounts already created, reservation will be closed after closing date'});
         res.end();
         return;
     }
     await utils.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
-    res.send({'msg': 'Reservation cancelled'});
+    res.send({message: 'Reservation cancelled'});
     res.end();
     return;
 });
 
 router.put('/tp/:id/reserve/stop', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
     let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
 
@@ -499,7 +499,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to delete this reservation'});
+        res.status(403).send({message: 'Not allowed to delete this reservation'});
         res.end();
         return;
     }
@@ -519,23 +519,23 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
 
 router.put('/tp/:id/reserve/now', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
+        res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
-        res.send({msg: 'User does not exist'});
+        res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
     let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send('Not authorized');
+        res.status(403).send({message: 'Not authorized'});
         return;
     }
 
@@ -551,7 +551,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     }
     let reservation = await utils.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({'msg': 'Not allowed to reserve now this reservation'});
+        res.status(403).send({message: 'Not allowed to reserve now this reservation'});
         res.end();
         return;
     }
@@ -560,7 +560,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     logger.debug('set reservation as done', newresa);
     await utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'created': true}});
     newresa.created = true;
-    res.send({'reservation': newresa});
+    res.send({reservation: newresa});
     res.end();
 });
 

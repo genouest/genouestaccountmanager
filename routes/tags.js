@@ -6,7 +6,7 @@ var utils = require('./utils');
 
 router.get('/tags', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let tags = await utils.mongo_tags().find({}).toArray();
@@ -24,12 +24,12 @@ router.get('/tags', async function(req, res) {
 
 router.post('/tags/:kind/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
-        return;  
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
     }
     let tags = req.body.tags;
     let session_user= await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
@@ -40,13 +40,13 @@ router.post('/tags/:kind/:id', async function(req, res) {
         session_user.is_admin = false;
     }
     if(req.params.kind != 'group' && req.params.kind != 'user') {
-        res.status(404).send('Not found');
+        res.status(404).send({message: 'Not found'});
         return;
     }
 
     if(!session_user.is_admin) {
-        res.status(403).send('Admin only');
-        return;  
+        res.status(403).send({message: 'Admin only'});
+        return;
     }
 
     tags.forEach(tag => {

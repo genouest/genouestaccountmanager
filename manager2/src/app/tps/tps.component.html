@@ -62,9 +62,10 @@
                             </tr>
                             <tr>
                                 <th>Status</th>
-                                <td *ngIf="!selectedEvent.created">Pending</td>
+                                <td *ngIf="!selectedEvent.created && !selectedEvent.over">Pending</td>
                                 <td *ngIf="selectedEvent.created && selectedEvent.over">Over</td>
                                 <td *ngIf="selectedEvent.created && !selectedEvent.over">Active</td>
+                                <td *ngIf="!selectedEvent.created && selectedEvent.over">Cancelled</td>
                             </tr>
                         </tbody>
                     </table>

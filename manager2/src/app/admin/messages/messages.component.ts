@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChildren, QueryList, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ConfigService } from 'src/app/config.service';
 import { UserService } from 'src/app/user/user.service';
 
@@ -6,12 +6,12 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
 
-import { Subject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import marked from 'marked';
-import { DataTableDirective } from 'angular-datatables';
 import { Router } from '@angular/router';
 import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-messages',
@@ -19,13 +19,7 @@ import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
     styleUrls: ['./messages.component.css']
 })
 export class MessagesComponent implements OnInit {
-
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
-
-    @ViewChild(DataTableDirective) dtElement: DataTableDirective;
-
-    dtTrigger: Subject<any> = new Subject()
+    @ViewChild('dtp') table: Table;
 
     origin: string
 
@@ -76,25 +70,9 @@ export class MessagesComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
-        this.dtTrigger.next();
     }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
-    }
-
-    renderDataTables(): void {
-        if ($('#dtMembers').DataTable() !== undefined) {
-            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-                dtInstance.destroy();
-                this.dtTrigger.next();
-            });
-
-        }
-        else {
-            this.dtTrigger.next();
-        }
-
     }
 
 
@@ -159,7 +137,7 @@ export class MessagesComponent implements OnInit {
                 this.router.navigate(['/user', this.authService.profile.uid]);
             },
             err => {
-                this.error_msg = err.error
+                this.error_msg = err.error.message
             }
         )
     }
@@ -169,7 +147,6 @@ export class MessagesComponent implements OnInit {
         this.getListMembers(list_name).subscribe(
             resp => {
                 this.members = resp;
-                this.renderDataTables();
             },
             err => console.log('failed to get members')
         )

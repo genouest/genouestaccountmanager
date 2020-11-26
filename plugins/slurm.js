@@ -89,8 +89,10 @@ var set_user_info = function(_userId, _data, _adminId){
     });
 };
 
-// eslint-disable-next-line no-unused-vars
-var delete_user = function(_userId, _user, _adminId){
+var delete_user = function(userId, user, adminId){
+    if (user.status == 'Active') {
+        return deactivate_user(userId, user, adminId);
+    }
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         console.log('Nothing to do');
