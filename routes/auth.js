@@ -345,11 +345,7 @@ router.post('/auth/:id', async function(req, res) {
             }
             attemps[user.uid]['attemps'] += 1;
             attemps[user.uid]['last'] = new Date();
-<<<<<<< HEAD
-            res.send({err: err, user: null, msg: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
-=======
             res.send({user: null, message: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
->>>>>>> 75689ae3c3a5227d5dab4c4c6f6004ec9763145c
             res.end();
             return;
         }

@@ -1,75 +1,3 @@
-<<<<<<< HEAD
-<div *ngIf="notification" class="alert alert-success">{{notification}}</div>
-<div class="card bg-light">
-  <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
-    <h3>{{requests_number}} request(s) waiting </h3>
-  </div>
-  <div *ngIf="requests_visible" class="card-body">
-    <div class="row">
-      <div class="col-md-12">
-        <div *ngIf="request_mngt_msg" class="alert alert-success">{{request_mngt_msg}}</div>
-        <div *ngIf="request_grp_msg" class="alert alert-success">{{request_grp_msg}}</div>
-        <div *ngIf="request_mngt_error_msg" class="alert alert-danger">{{request_mngt_error_msg}}</div>
-      </div>
-      <div class="col-md-6">
-        <div class="card bg-light">
-          <div class="card-header">
-            <h3>Add user</h3>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table id="dtAddRequests" datatable [dtTrigger]="dtTriggerAdd" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>User</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let request of add_requests">
-                    <td>{{request.project.id}}</td>
-                    <td>{{request.user}}</td>
-                    <td (click)="validate_add_request(request.project,request.user)" style="cursor: pointer;"><span
-                        class="label label-success">Add</span></td>
-                    <td (click)="remove_request(request.project,request.user, 'add')" style="cursor: pointer;"><span
-                        class="label label-danger">Cancel</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card bg-light">
-          <div class="card-header">
-            <h3>Remove user</h3>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table id="dtRemoveRequests" datatable [dtTrigger]="dtTriggerRemove" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>User</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let request of remove_requests">
-                    <td>{{request.project.id}}</td>
-                    <td>{{request.user}}</td>
-                    <td><button type="button" class="btn btn-success"
-                        (click)="validate_remove_request(request.project,request.user)">Remove</button></td>
-                    <td><button type="button" class="btn btn-danger"
-                        (click)="remove_request(request.project,request.user, 'remove')">Cancel</button></td>
-                  </tr>
-                </tbody>
-              </table>
-=======
   <div *ngIf="notification" class="alert alert-success">{{notification}}</div>
   <div class="card bg-light">
     <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
@@ -133,7 +61,6 @@
                   </tr>
                 </ng-template>
               </p-table>
->>>>>>> 75689ae3c3a5227d5dab4c4c6f6004ec9763145c
             </div>
           </div>
         </div>
@@ -146,51 +73,6 @@
     <h3>All projects</h3>
   </div>
   <div class="card-body">
-<<<<<<< HEAD
-    <div class="table-responsive">
-      <table id="dtProjects" datatable [dtTrigger]="dtTriggerProjects" class="table table-striped">
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Owner</th>
-            <th>Group</th>
-            <th>Path</th>
-            <th>Size (Go)</th>
-            <th>Expiration</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let project of projects">
-            <td><a routerLink="/admin/project/{{project.id}}"><span
-                  class="label label-primary">{{project.id}}</span></a></td>
-            <td>{{project.owner}}</td>
-            <td>{{project.group}}</td>
-            <td>{{project.path}}</td>
-            <td>{{project.size}}</td>
-            <td>{{date_convert(project.expire)}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-<div class="card bg-light">
-  <div class="card-header">
-    <h3>Project creation</h3>
-  </div>
-  <div class="card-body">
-    <div *ngIf="add_project_msg" class="alert alert-success">{{add_project_msg}}</div>
-    <div *ngIf="add_project_error_msg" class="alert alert-danger">{{add_project_error_msg}}</div>
-    <form role="form" class="user-form form-horizonal">
-      <div class="form-group row">
-        <div class="col-sm-2">
-          <label for="project_id">Name&nbsp;
-            <span style="color:red">(required)&nbsp;</span>
-            <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
-          </label>
-          <input placeholder="project name" type="text" id="project_id" [ngModelOptions]="{standalone: true}"
-            [(ngModel)]="new_project.id" class="form-control" />
-=======
       <p-table #dtp [value]="projects"
         [paginator]="true"
         [rows]="10"
@@ -279,7 +161,6 @@
             </label>
             <input placeholder="Ex : CNRS" type="text" id="project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
           </div>
->>>>>>> 75689ae3c3a5227d5dab4c4c6f6004ec9763145c
         </div>
         <div class="col-sm-2">
           <label for="project_owner">Owner&nbsp;
@@ -291,18 +172,6 @@
             <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
           </select>
         </div>
-<<<<<<< HEAD
-        <div class="col-sm-2">
-          <label for="project_group">Group&nbsp;
-            <span style="color:red">(required)&nbsp;</span>
-            <span class="glyphicon glyphicon-question-sign" data-html="true"
-              title="Unix group: <br> Project members will be added to it" tooltip> </span>
-          </label>
-          <select id="project_group" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.group"
-            class="form-control">
-            <option *ngFor="let group of groups" [value]="group.name">{{group.name}}</option>
-          </select>
-=======
         <div class="form-group row">
           <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
             <label >Write permission&nbsp;
@@ -319,7 +188,6 @@
             </label>
             <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [value]="default_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
           </div>
->>>>>>> 75689ae3c3a5227d5dab4c4c6f6004ec9763145c
         </div>
         <div class="col-sm-2">
           <label for="project_size">Size (GB)</label>

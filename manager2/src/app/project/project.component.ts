@@ -27,13 +27,10 @@ export class ProjectComponent implements OnInit {
     config: any
     new_user: any
     remove_user: any
-<<<<<<< HEAD
     
     dmp_err_msg: string
     dmp_msg: string
-=======
     default_size: any
->>>>>>> 75689ae3c3a5227d5dab4c4c6f6004ec9763145c
 
     manager_visible: boolean
 
@@ -172,7 +169,6 @@ export class ProjectComponent implements OnInit {
         }
         return res;
     }
-<<<<<<< HEAD
 
     ping_dmp_data() {
         console.log(this.new_project.dmp_key)
@@ -197,6 +193,4 @@ export class ProjectComponent implements OnInit {
 
 
 
-=======
->>>>>>> 75689ae3c3a5227d5dab4c4c6f6004ec9763145c
 }
