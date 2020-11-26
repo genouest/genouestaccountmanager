@@ -458,15 +458,7 @@ router.post('/ask/project', async function (req, res) {
     };
     // Save in mongo the pending project data for the admin to use
     await utils.mongo_pending().insertOne(new_project);
-    let fid = new Date().getTime();
-    try {
-        let created_file = await filer.project_add_pending(new_project, fid);
-        logger.debug('Created file', created_file);
-    } catch (error) {
-        logger.error('Add Pending Project Failed for: ' + new_project.id, error);
-        res.status(500).send('Add Pending Project Failed');
-        return;
-    }
+    
     await utils.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),
@@ -693,19 +685,6 @@ router.delete('/pending/:id', async function(req, res){
         return;
     }
     await utils.mongo_pending().deleteOne({ id: req.params.id });
-    let fid = new Date().getTime();
-    try {
-        let created_file = await filer.project_delete_pending(
-            { id: req.params.id },
-            fid
-        );
-        logger.debug('Created file', created_file);
-    } catch (error) {
-        logger.error('Delete Pending Project Failed for: ' + req.params.id, error);
-        res.status(500).send('Delete Pending Project Failed');
-        return;
-    }
-
     await utils.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),

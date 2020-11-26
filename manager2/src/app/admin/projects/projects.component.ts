@@ -329,6 +329,7 @@ export class ProjectsComponent implements OnInit {
                 this.pending_msg = resp.message
             },
             err => this.pending_err_msg = err.error
-        )
+        );
+        this.pending_list(false);
     }
 }
