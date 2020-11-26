@@ -267,7 +267,6 @@ export class ProjectsService {
         }));
     }
 
-
     delete_pending(projectId: string): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();

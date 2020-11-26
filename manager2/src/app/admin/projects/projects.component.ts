@@ -38,7 +38,6 @@ export class ProjectsComponent implements OnInit {
     add_requests: any[]
     remove_requests: any[]
     pending_projects: any[]
-
     projects: any[]
     groups: any[]
     all_users: any[]
@@ -216,7 +215,6 @@ export class ProjectsComponent implements OnInit {
             }
         );
     }
-
 
     project_list(refresh_requests = false) {
         this.projects = [];
