@@ -1,10 +1,12 @@
-import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
-import { ProjectsService } from "src/app/admin/projects/projects.service";
-import { AuthService } from "src/app/auth/auth.service";
-import { UserService } from "src/app/user/user.service";
-import { GroupsService } from "src/app/admin/groups/groups.service";
-import { Subject } from "rxjs";
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { ProjectsService } from 'src/app/admin/projects/projects.service';
+import { AuthService } from 'src/app/auth/auth.service';
+import { ConfigService } from '../config.service'
+import { UserService } from 'src/app/user/user.service';
+import { GroupsService} from 'src/app/admin/groups/groups.service';
+
+import { Table } from 'primeng/table';
 
 @Component({
   selector: "app-project",
@@ -12,6 +14,10 @@ import { Subject } from "rxjs";
   styleUrls: ["./project.component.css"],
 })
 export class ProjectComponent implements OnInit {
+
+
+  @ViewChild('dtp') table: Table;
+  @ViewChild('dtu') tableuser: Table;
   new_project: any;
   projects: any;
   users: any;
@@ -26,7 +32,8 @@ export class ProjectComponent implements OnInit {
   dmp_available: boolean;
   manager_visible: boolean;
   dmp_RO: any;
-
+  config: any;
+  default_size: any;
   request_err_msg: string;
   request_msg: string;
 
@@ -41,15 +48,17 @@ export class ProjectComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private configService: ConfigService,
     private projectsService: ProjectsService,
     private userService: UserService,
     private groupService: GroupsService,
     private router: Router
-  ) {}
-
+  ) {
+    this.config = {}
+    this.default_size = 0
+  }
+  
   ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-    this.dtTriggerUser.unsubscribe();
   }
 
   async ngOnInit() {
@@ -199,8 +208,15 @@ export class ProjectComponent implements OnInit {
   }
 
   date_convert = function timeConverter(tsp) {
-    var a = new Date(tsp);
-    return a.toLocaleDateString();
+    let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
   };
 
   Get_essential_data() {

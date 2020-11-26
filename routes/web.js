@@ -13,17 +13,17 @@ var utils = require('./utils');
  */
 router.put('/web/:id/owner/:old/:new', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     if(! utils.sanitizeAll([req.params.id, req.params.old, req.params.new])) {
-        res.status(403).send('Invalid parameters');
-        return;  
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -33,7 +33,7 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
         session_user.is_admin = false;
     }
     if(!session_user.is_admin) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     await utils.mongo_web().updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
@@ -44,12 +44,12 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
 
 router.get('/web', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -68,17 +68,17 @@ router.get('/web', async function(req, res) {
 
 router.get('/web/owner/:owner', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.owner])) {
-        res.status(403).send('Invalid parameters');
-        return;  
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
     }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -95,16 +95,16 @@ router.get('/web/owner/:owner', async function(req, res) {
 
 router.post('/web/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
-        return;  
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
     }
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
@@ -132,17 +132,17 @@ router.post('/web/:id', async function(req, res) {
 
 router.delete('/web/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send('Invalid parameters');
-        return;  
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
     }
 
     let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!session_user) {
-        res.status(401).send('Not authorized');
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {

@@ -122,7 +122,7 @@ export class LoginComponent implements OnInit {
                         this.router.navigate(['/']); // as home will redirect us in the right page
                     }
                 }
-            ).catch( err => {this.msg = err.error;});
+            ).catch( err => {this.msg = err.error.message;});
         }
         this.password = "";
     }
@@ -133,7 +133,7 @@ export class LoginComponent implements OnInit {
                 resp => this.msg = resp['message'],
                 err => {
                     console.log('failed to reset password', err);
-                    this.msg = err.error;
+                    this.msg = err.error.message;
                 }
             )
         }

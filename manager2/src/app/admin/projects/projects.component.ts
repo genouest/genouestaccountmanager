@@ -1,15 +1,12 @@
-import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
+import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
-import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { DataTableDirective } from 'angular-datatables';
 import * as latinize from 'latinize'
-import { Table } from 'primeng/table'
-import { ConfigService } from 'src/app/config.service';
+
+import {Table} from 'primeng/table'
 
 @Component({
     selector: 'app-projects',
@@ -49,6 +46,7 @@ export class ProjectsComponent implements OnInit {
 
     pending_msg: any
     pending_err_msg: any
+
 
     default_path: any
     default_size: any
@@ -90,7 +88,7 @@ export class ProjectsComponent implements OnInit {
             owner: '',
             group: '',
             size: 0,
-            expire: new Date(),
+            expire: '',
             orga: '',
             description: '',
             access: 'Group',
@@ -112,10 +110,24 @@ export class ProjectsComponent implements OnInit {
             resp => this.all_users = resp,
             err => console.log('failed to get all users')
         );
+
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+                if (this.config.project && this.config.project.default_path) {
+                    this.default_path = this.config.project.default_path;
+                }
+                if (this.config.project && this.config.project.default_size) {
+                    this.default_size = this.config.project.default_size;
+                }
+            },
+            err => console.log('failed to get config')
+        );
+
     }
 
     ngAfterViewInit(): void {
-        //this.dtTriggerProjects.next();
     }
 
     validate_add_request(project, user_id) {
@@ -130,10 +142,10 @@ export class ProjectsComponent implements OnInit {
                     resp => {
                         this.project_list(true);
                     },
-                    err => this.request_mngt_error_msg = err.error
+                    err => this.request_mngt_error_msg = err.error.message
                 )
             },
-            err => this.request_mngt_error_msg = err.error
+            err => this.request_mngt_error_msg = err.error.message
         )
     }
 
@@ -147,10 +159,10 @@ export class ProjectsComponent implements OnInit {
                 this.request_mngt_msg = resp['message'];
                 this.projectService.removeRequest(project.id, { 'request': 'remove', 'user': user_id }).subscribe(
                     resp => this.project_list(true),
-                    err => this.request_mngt_error_msg = err.error
+                    err => this.request_mngt_error_msg = err.error.message
                 )
             },
-            err => this.request_mngt_error_msg = err.error
+            err => this.request_mngt_error_msg = err.error.message
         )
     }
 
@@ -164,23 +176,25 @@ export class ProjectsComponent implements OnInit {
                 this.request_mngt_msg = resp['message'];
                 this.project_list(true);
             },
-            err => this.request_mngt_error_msg = err.error
+            err => this.request_mngt_error_msg = err.error.message
         )
     }
 
+
     update_project_on_event(new_value) {
-        let tmpprojectid = latinize(new_value.toLowerCase()).replace(/[^0-9a-z]+/gi, '_');
-        this.new_project.path = this.config.project.default_path + '/' + tmpprojectid;
+        let tmpprojectid = latinize(new_value.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
+        this.new_project.path = this.config.project.default_path + '/' +  tmpprojectid;
         // warning: for this.new_project.id, (ngModelChange) must be after [ngModel] in html line
         // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
         this.new_project.id = tmpprojectid; // todo: maybe add an option to enable or disable this one
     }
 
-    add_project() {
+
+    add_project(){
         this.notification = "";
 
-        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
-            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
+        if(! this.new_project.id || (this.config.project.enable_group && ! this.new_project.group) || ! this.new_project.owner) {
+            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
             return;
         }
         this.add_project_msg = '';
@@ -194,26 +208,25 @@ export class ProjectsComponent implements OnInit {
             'access': this.new_project.access,
             'orga': this.new_project.orga,
             'path': this.new_project.path,
-            'expire': new Date(this.new_project.expire).getTime()
-        }
-        ).subscribe(
-            resp => {
-                this.add_project_msg = resp.message;
-                this.project_list();
-                this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
-                    resp => { },
-                    err => {
-                        console.log('failed  to add user to project');
-                        this.add_project_error_msg = err.error.message;
-                    }
-                )
+            'expire': new Date(this.new_project.expire).getTime()}
+                               ).subscribe(
+                                   resp => {
+                                       this.add_project_msg = resp.message;
+                                       this.project_list();
+                                       this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
+                                           resp => {},
+                                           err => {
+                                               console.log('failed  to add user to project');
+                                               this.add_project_error_msg = err.error.message;
+                                           }
+                                       )
 
-            },
-            err => {
-                console.log('failed to add project', this.new_project);
-                this.add_project_error_msg = err.error.message;
-            }
-        );
+                                   },
+                                   err => {
+                                       console.log('failed to add project', this.new_project);
+                                       this.add_project_error_msg = err.error.message;
+                                   }
+                               );
     }
 
     project_list(refresh_requests = false) {
@@ -315,7 +328,6 @@ export class ProjectsComponent implements OnInit {
         }
         return res;
     }
-
 
     request_dmp_data() {
         console.log(this.new_project.dmp_key)

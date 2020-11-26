@@ -4,6 +4,16 @@ body {
     font-size: 13px !important;
 }
 
+.p-component {
+    font-size: 13px !important;
+}
+.p-inputtext {
+    font-size: 13px !important;
+}
+.p-link {
+    font-size: 13px !important;
+}
+
 .card-header h3{
     font-size: 17px;
 }

@@ -1,9 +1,8 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
 import { UserService } from 'src/app/user/user.service';
 
-import { Subject } from 'rxjs';
-import { DataTableDirective } from 'angular-datatables';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-databases',
@@ -11,10 +10,8 @@ import { DataTableDirective } from 'angular-datatables';
     styleUrls: ['./databases.component.css']
 })
 export class DatabasesComponent implements OnInit {
-    @ViewChildren(DataTableDirective)
-    tables: QueryList<DataTableDirective>;
+    @ViewChild('dtp') table: Table;
 
-    dtTrigger: Subject<any> = new Subject()
 
     db: Database
     owner_db_name: any
@@ -31,30 +28,17 @@ export class DatabasesComponent implements OnInit {
     constructor(private dbService: DatabaseService, private userService: UserService) { }
 
     ngAfterViewInit(): void {
-        this.dtTrigger.next();
     }
 
-    renderDataTables(): void {
-        this.tables.forEach(table => {
-            if (table.dtTrigger) {
-                table.dtInstance.then((dt: DataTables.Api) => {
-                    dt.clear();
-                    dt.destroy();
-                    table.dtTrigger.next();
 
-                });
-            }
-        });
-    }
 
     ngOnDestroy(): void {
-        this.dtTrigger.unsubscribe();
     }
 
     ngOnInit() {
         this.db = new Database('','mysql','','', false)
         this.dbService.list().subscribe(
-            resp => {this.databases = resp; this.renderDataTables();},
+            resp => {this.databases = resp;},
             err => console.log('failed to get databases')
         )
         this.userService.list().subscribe(
@@ -74,7 +58,7 @@ export class DatabasesComponent implements OnInit {
             resp => {
                 this.chowner_msg = resp['message'];
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp; this.renderDataTables();},
+                    resp => {this.databases = resp;},
                     err => console.log('failed to list databases')
                 )
             },
@@ -95,11 +79,11 @@ export class DatabasesComponent implements OnInit {
                 this.msg = resp['message'];
                 this.db = new Database('', 'mysql', '', '');
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp; this.renderDataTables();},
+                    resp => {this.databases = resp;},
                     err => console.log('failed to list databases')
                 )
             },
-            err => this.err_msg = err.error
+            err => this.err_msg = err.error.message
         )
     }
 

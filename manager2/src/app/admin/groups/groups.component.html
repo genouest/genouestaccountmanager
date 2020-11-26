@@ -25,21 +25,37 @@
             <h3>Groups</h3>
         </div>
         <div class="card-body">
-             <div class="table-responsive">
-              <table id="dtGroups" datatable [dtTrigger]="dtTriggerGroups" class="table table-striped">
-                <thead><tr>
+         <div class="table-responsive table-striped">
+          <p-table #dtg [value]="groups"
+                      [paginator]="true"
+                      [rows]="10"
+                      [showCurrentPageReport]="true"
+                      [rowsPerPageOptions]="[10,25,50]"
+                      [globalFilterFields]="['name', 'gid', 'owner']"
+                      [filterDelay]="0"
+          >
+        <ng-template pTemplate="caption">
+            <div class="table-header">
+                <span class="p-input-icon-right">
+                    <i class="pi pi-search"></i>
+                    <input pInputText id="search_groups" type="text" (input)="dtg.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                </span>
+            </div>
+        </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
                   <th>Group</th>
                   <th>gid</th>
                   <th>owner</th>
-                </tr></thead>
-                <tbody>
-                  <tr *ngFor="let group of groups">
+                </tr>            </ng-template>
+            <ng-template pTemplate="body" let-group>
+              <tr>
                     <td (click)="show_group_users(group)" style="cursor: pointer;"><span class="label label-primary">{{group.name}}</span></td>
                     <td>{{group.gid}}</td>
                     <td>{{group.owner}}</td>
-                  </tr>
-                </tbody>
-              </table>
+              </tr>
+            </ng-template>
+          </p-table>
           </div>
       </div>
   </div>
@@ -57,7 +73,7 @@
         </div>
     </div>
 
-  
+
     <div class="card bg-light">
         <div class="card-header">
             <h3>Users in group {{selectedGroup.name}}</h3>
@@ -93,21 +109,26 @@
             </div>
             <br>
             <h5>Group members</h5>
-            <div class="table-responsive">
-                <table id="dtUsers" datatable [dtTrigger]="dtTriggerUsers" class="table table-striped">
-                  <thead>
-                    <tr><th>User</th><th>Email</th><th>In associated project?</th><th>Main group?</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let user of users">
+          <div class="table-responsive table-striped">
+          <p-table #dtu [value]="users"
+                      [paginator]="true"
+                      [rows]="10"
+                      [showCurrentPageReport]="true"
+                      [rowsPerPageOptions]="[10,25,50]"
+          >
+            <ng-template pTemplate="header">
+                <tr><th>User</th><th>Email</th><th>In associated project?</th><th>Main group?</th></tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user>
+              <tr>
                       <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
                       <td>{{user.email}}</td>
                       <td><span *ngIf="user.authorized">x</span></td>
                       <td><span *ngIf="user.group == selectedGroup.name">x</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-            </div>
+              </tr>
+            </ng-template>
+          </p-table>
+          </div>
             <button class="btn btn-danger" (click)="delete_group(selectedGroup)">Delete</button>
         </div>
     </div>

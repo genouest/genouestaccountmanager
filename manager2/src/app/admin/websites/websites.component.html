@@ -1,31 +1,45 @@
-
-
-
     <div class="label label-primary">{{msg}}</div>
     <div class="card bg-light">
       <div class="card-header">
-        <h3>Change web site owner</h3>
+        <h3>Web sites</h3>
       </div>
       <div class="card-body">
-          <div class='table-responsive'>
-              <table id="dtWeb" datatable [dtTrigger]="dtTrigger" class="table table-striped">
-                <thead><tr>
+          <div class="table-responsive table-striped">
+          <p-table #dtp [value]="websites"
+                      [paginator]="true"
+                      [rows]="10"
+                      [showCurrentPageReport]="true"
+                      [rowsPerPageOptions]="[10,25,50]"
+                      [globalFilterFields]="['name', 'description', 'owner']"
+                      [filterDelay]="0"
+          >
+        <ng-template pTemplate="caption">
+            <div class="table-header">
+                <span class="p-input-icon-right">
+                    <i class="pi pi-search"></i>
+                    <input pInputText id="search_websites" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                </span>
+            </div>
+        </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
                   <th>Name</th>
                   <th>Owner</th>
                   <th>URL</th>
                   <th>Description</th>
                   <th></th>
-                </tr></thead>
-                <tbody>
-                  <tr *ngFor="let web of websites">
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-web>
+                  <tr>
                     <td><span class="label label-primary">{{web.name}}</span></td>
                     <td><a [routerLink]="['/user', {id: web.owner}]"><span class="label label-primary">{{web.owner}}</span></a></td>
                     <td>{{web.url}}</td>
                     <td>{{web.description}}</td>
                     <td></td>
                   </tr>
-                </tbody>
-              </table>
+            </ng-template>
+          </p-table>
           </div>
       </div>
   </div>
@@ -57,5 +71,3 @@
               </div>
           </div>
     </div>
-
-
