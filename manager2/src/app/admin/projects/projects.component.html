@@ -123,7 +123,7 @@
   <div class="card-header">
     <h3>All projects</h3>
   </div>
-  <div class="card-body">
+  <div class="card bg-light">
     <p-table #dtp [value]="projects" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
       [rowsPerPageOptions]="[10,25,50]" [globalFilterFields]="['id','owner']" [filterDelay]="0">
       <ng-template pTemplate="caption">

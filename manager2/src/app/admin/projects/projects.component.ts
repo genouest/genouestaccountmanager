@@ -96,7 +96,7 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.project_list(true);
-        this.pending_list(true);
+        this.pending_list(false);
         this.groupService.list().subscribe(
             resp => {
                 
@@ -195,9 +195,6 @@ export class ProjectsComponent implements OnInit {
 
     add_project(){
         this.notification = "";
-        console.log(this.new_project);
-        console.log((! this.new_project.id || (this.config.project.enable_group && ! this.new_project.group) || ! this.new_project.owner));
-
         if(! this.new_project.id || (this.config.project.enable_group && ! this.new_project.group) || ! this.new_project.owner) {
             this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
             return;
@@ -239,6 +236,8 @@ export class ProjectsComponent implements OnInit {
         this.projects = [];
         this.projectService.list(true).subscribe(
             resp => {
+                console.log(resp)
+                console.log('---')
                 if (resp.length == 0) {
                     return;
                 }
@@ -253,8 +252,10 @@ export class ProjectsComponent implements OnInit {
                     if (!refresh_requests) { continue; };
                     if (data[i]["add_requests"]) {
                         for (var j = 0; j < data[i]["add_requests"].length; j++) {
+                            console.log({ 'project': data[i], 'user': data[i]["add_requests"][j] })
                             this.add_requests.push({ 'project': data[i], 'user': data[i]["add_requests"][j] });
                         }
+                        console.log(data[i]["add_requests"].length)
                         this.requests_number += data[i]["add_requests"].length;
                     }
                     if (data[i]["remove_requests"]) {
@@ -266,7 +267,7 @@ export class ProjectsComponent implements OnInit {
                 }
                 if (this.requests_number > 0) { this.requests_visible = true; };
                 this.projects = data;
-                console.log(this.projects)
+                console.log(this.requests_number);
             },
             err => console.log('failed to get projects')
         );
@@ -287,8 +288,8 @@ export class ProjectsComponent implements OnInit {
                 }
                 let data = resp;
                 if (data.length > 0) { this.requests_visible = true; };
+                this.requests_number+= data.length;
                 this.pending_projects = data;
-                console.log(this.pending_projects)
                 // this.renderDataTables('dtPending');
             },
             err => console.log('failed to get pending projects')
@@ -319,7 +320,6 @@ export class ProjectsComponent implements OnInit {
         this.projectService.askDmpData(this.new_project).subscribe(
             resp => {
                 this.dmp_msg = 'Successfuly loaded the DMP data';
-                console.log(resp.ping)
 
             },
             err => {
@@ -345,9 +345,14 @@ export class ProjectsComponent implements OnInit {
         this.projectService.delete_pending(project.id).subscribe(
             resp => {
                 this.pending_msg = resp.message
+                this.pending_projects = resp.data
+                this.requests_number-= 1
+                if (this.requests_number > 0) { this.requests_visible = true; }
+                else { this.requests_visible =  false;};
             },
             err => this.pending_err_msg = err.error
         );
-        this.pending_list(false);
+        
+        console.log(project)
     }
 }
