@@ -46,7 +46,7 @@ function init () {
         }
         conf.enable_ui.main_group = CONFIG.general.use_group_in_path;
         conf.enable_ui.user_group = !CONFIG.general.disable_user_group;
-
+        
         if (!conf.project) {
             conf.project = {
                 'enable_group': true,

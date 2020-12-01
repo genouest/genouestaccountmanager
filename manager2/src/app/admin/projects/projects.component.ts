@@ -17,7 +17,7 @@ export class ProjectsComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dta') tableadd: Table;
     @ViewChild('dtd') tabledel: Table;
-    @ViewChild('dtpp') tablepending: Table;
+    @ViewChild('dtw') tablepending: Table;
 
     config: any
 
@@ -96,9 +96,10 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.project_list(true);
-        this.pending_list(false);
+        this.pending_list(true);
         this.groupService.list().subscribe(
             resp => {
+                
                 this.groups = resp;
                 if (this.groups.length > 0) {
                     this.new_project.group = this.groups[0].name;
@@ -107,12 +108,15 @@ export class ProjectsComponent implements OnInit {
             err => console.log('failed to get groups')
         );
         this.userService.list().subscribe(
-            resp => this.all_users = resp,
-            err => console.log('failed to get all users')
+            resp => {this.all_users = resp },
+            err => {console.log('failed to get all users')}
         );
+        
+
 
         this.configService.config.subscribe(
             resp => {
+                console.log(resp)
                 this.config = resp;
                 this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
                 if (this.config.project && this.config.project.default_path) {
@@ -124,7 +128,6 @@ export class ProjectsComponent implements OnInit {
             },
             err => console.log('failed to get config')
         );
-
     }
 
     ngAfterViewInit(): void {
@@ -192,6 +195,8 @@ export class ProjectsComponent implements OnInit {
 
     add_project(){
         this.notification = "";
+        console.log(this.new_project);
+        console.log((! this.new_project.id || (this.config.project.enable_group && ! this.new_project.group) || ! this.new_project.owner));
 
         if(! this.new_project.id || (this.config.project.enable_group && ! this.new_project.group) || ! this.new_project.owner) {
             this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
@@ -199,6 +204,7 @@ export class ProjectsComponent implements OnInit {
         }
         this.add_project_msg = '';
         this.add_project_error_msg = '';
+        console.log("go");
         this.projectService.add({
             'id': this.new_project.id,
             'owner': this.new_project.owner,
@@ -260,6 +266,7 @@ export class ProjectsComponent implements OnInit {
                 }
                 if (this.requests_number > 0) { this.requests_visible = true; };
                 this.projects = data;
+                console.log(this.projects)
             },
             err => console.log('failed to get projects')
         );
@@ -288,34 +295,6 @@ export class ProjectsComponent implements OnInit {
         );
 
     }
-    // pending_list(refresh_requests = false){
-    //     this.projects = [];
-    //     this.projectService.list_pending(true).subscribe(
-    //         resp => {
-    //             if(resp.length == 0) {
-    //                 return;
-    //             }
-    //             if(refresh_requests) {
-    //                 this.add_requests = [];
-    //                 this.remove_requests = [];
-    //                 this.requests_number = 0;
-    //             }
-    //             let data = resp;
-    //             for(var i=0;i<data.length;i++){
-    //                 if (! refresh_requests){ continue;};
-
-    //                 this.pending_requests.push({'project': data[i], 'user': data[i]});
-    //                 }
-    //                 this.requests_number += data[i]["remove_requests"].length;
-    //                 }
-    //             }
-    //             if(this.requests_number > 0){this.requests_visible = true;};
-    //             this.projects = data;
-    //         },
-    //         err => console.log('failed to get projects')
-    //     );
-
-    // }
 
     date_convert = function timeConverter(tsp) {
         let res;
@@ -351,6 +330,10 @@ export class ProjectsComponent implements OnInit {
     }
 
     accept_project(project) {
+        
+    }
+
+    modify_project(project) {
         this.new_project = project
         console.log(project)
 
