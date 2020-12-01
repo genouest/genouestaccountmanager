@@ -329,9 +329,57 @@ export class ProjectsComponent implements OnInit {
         )
     }
 
-    accept_project(project) {
+    // accept_project(project) {
+    //     this.notification = "";
+    //     if(! project.id || (this.config.project.enable_group && ! project.group) || ! project.owner) {
+    //         this.pending_err_msg = "Project Id, group, and owner are required fields, check the missing fields";
+    //         return;
+    //     }
+    //     this.add_project_msg = '';
+    //     this.add_project_error_msg = '';
+    //     console.log("go");
+    //     this.projectService.add({
+    //         'id': this.new_project.id,
+    //         'owner': this.new_project.owner,
+    //         'group': this.config.project.enable_group ? this.new_project.group : '',
+    //         'size': this.new_project.size,
+    //         'description': this.new_project.description,
+    //         'access': this.new_project.access,
+    //         'orga': this.new_project.orga,
+    //         'path': this.new_project.path,
+    //         'expire': new Date(this.new_project.expire).getTime()}
+    //                            ).subscribe(
+    //                                resp => {
+    //                                    this.add_project_msg = resp.message;
+    //                                    this.project_list();
+    //                                    this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
+    //                                        resp => {},
+    //                                        err => {
+    //                                            console.log('failed  to add user to project');
+    //                                            this.add_project_error_msg = err.error.message;
+    //                                        }
+    //                                    )
+
+    //                                },
+    //                                err => {
+    //                                    console.log('failed to add project', this.new_project);
+    //                                    this.add_project_error_msg = err.error.message;
+    //                                }
+    //                            );
+    // }
+
+    //     this.projectService.delete_pending(project.id).subscribe(
+    //         resp => {
+    //             this.pending_msg = resp.message
+    //             this.pending_projects = resp.data
+    //             this.requests_number-= 1
+    //             if (this.requests_number > 0) { this.requests_visible = true; }
+    //             else { this.requests_visible =  false;};
+    //         },
+    //         err => this.pending_err_msg = err.error
+    //     );
         
-    }
+    // }
 
     modify_project(project) {
         this.new_project = project
