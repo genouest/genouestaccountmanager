@@ -76,7 +76,7 @@ export class GalaxyPluginComponent extends BasePluginComponent implements OnInit
 <div *ngIf="data.my" class ="alert alert-success">{{data.my}}</div>
 <div *ngIf="data.has_project == 'True'">
   <div>Current project(s) :</div><br>
-  <table style ="width:100%;" class="table table-striped"><tr><th>Project name</th></tr>
+  <table style ="width:100%;" class="table table-striped">
     <tr *ngFor="let project of data.projects">
       <td>{{project.name}}</td>
     </tr>
