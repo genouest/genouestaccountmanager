@@ -69,7 +69,7 @@ export class GalaxyPluginComponent extends BasePluginComponent implements OnInit
 
 @Component({
     template: `
-<div>
+<div *ngIf="data">
 <div *ngIf="loading">Loading...</div>
 <div *ngIf="data.api_status" class ="alert alert-danger">{{data.api_status}}</div>
 <div *ngIf="data.has_project == 'False'" style="text-align:center;"><button (click)="sendData()" type="button" class="btn btn-primary">Activate cloud account</button></div>
