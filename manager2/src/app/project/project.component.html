@@ -10,11 +10,7 @@
       <div class="modal-header">
         <h3>Request a new project creation</h3>
       </div>
-      <ul class="nav nav-tabs" id="tabContent">
-        
-        <li class="nav-item active"><a class="nav-link" href="#legacy" data-toggle="tab">Legacy</a></li>
-        <li class="nav-item"><a class="nav-link" href="#dmp" data-toggle="tab">DMP</a></li>
-    </ul>
+      
 
     <div class="tab-content">
       <div class="tab-pane active" id="legacy">
@@ -124,114 +120,7 @@
           </div>
         </form>
       </div> 
-      <div class="tab-pane" id="dmp">
-        <form role="form" class="user-form form-horizonal">
-          <div class="modal-body">
-            
-            <div class="form-group row col-sm-8">
-              <div class="row col-sm-8">
-                <label for="new_project_dmp">DMP access key </label>
-                
-              </div>
-              <div class="alert alert-danger" *ngIf="dmp_available == false">
-                The DMP API is currently unavailable
-              </div>
-              <div class="row">
-                <div class="col-sm-8">
-                  <input
-                    placeholder="Paste key"
-                    type="string"
-                    id="DMP_key"
-                    [ngModelOptions]="{ standalone: true }"
-                    [(ngModel)]="new_project.dmp_key"
-                    class="form-control"
-                  /> 
-                  <small id="nameHelp" class="form-text text-muted"
-                    ><i
-                      >Optional, but highly recommended:
-                      <a href="https://dmp.opidor.fr/" target="_blank"
-                        >Create one</a
-                      ></i
-                    ></small
-                  >
-                </div>
-                <div class="col">
-                  <button
-                    type="button"
-                    class="btn btn-outline-primary"
-                    (click)="Get_essential_data()"
-                    
-                  >
-                    Get DMP
-                  </button>
-                  <!-- <button
-                    type="button"
-                    class="btn btn-outline-primary"
-                    (click)="display()"
-                  >
-                    display
-                  </button> -->
-                </div>
-                <div class="col-sm-8">
-                  <div class="alert alert-danger" *ngIf="dmp_err_msg">
-                    {{ dmp_err_msg }}
-                  </div>
-                  <div *ngIf="dmp_msg" class="alert alert-success">
-                    {{ dmp_msg }}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="RO_div" class="form-group row col-sm-8" style="display:block">
-              <label for="choose_research_output">Choose which research output you wish to import</label>
-              <select multiple class="browser-default custom-select" name="cars" id="choose_research_output" [(ngModel)] ="research_output">
-              </select>
-              
-            </div>
-            
-  
-  
-            
-          </div>
-  
-          <div class="modal-footer">
-            <div class="form-group row col-sm-12">
-              <button
-                type="button"
-                class="btn btn-outline-primary"
-                (click)="ask_for_project_from_dmp()"
-                data-dismiss="modal"
-              >
-                Ask Admin
-              </button>
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                data-dismiss="modal"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </form>
-      </div> 
-  </div>
-
-
       
-    </div>
-  </div>
-</div>
-<button
-  *ngIf="session_user && !session_user.is_admin"
-  type="button"
-  class="btn btn-primary"
-  data-toggle="modal"
-  data-target="#ask_project"
-  (click)="Ping_DMP()"
->
-  Request A New Project
-</button>
 
 <div class="card bg-light">
   <div class="card-header">

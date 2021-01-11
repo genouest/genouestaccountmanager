@@ -27,11 +27,7 @@ export class ProjectComponent implements OnInit {
   new_user: any;
   remove_user: any;
   research_output: any;
-  dmp_err_msg: string;
-  dmp_msg: string;
-  dmp_available: boolean;
   manager_visible: boolean;
-  dmp_RO: any;
   config: any;
   default_size: any;
   request_err_msg: string;
@@ -74,27 +70,6 @@ export class ProjectComponent implements OnInit {
       },
       (err) => console.log("failed to get projects")
     );
-    this.dmp_RO = [
-      {
-        dbid: 54,
-        title: "Confinement round 2",
-      },
-      {
-        dbid: 55,
-        title: "Proteomics data",
-      },
-    ];
-    console.log(this.dmp_RO);
-    var RO_selection = document.getElementById("choose_research_output");
-    this.dmp_RO.forEach((element) => {
-      console.log(element);
-      var opt = document.createElement("option");
-      opt.text = element.title;
-      // create text node to add to option element (opt)
-      opt.value = element.title;
-      // add opt to end of select box (sel)
-      RO_selection.appendChild(opt);
-    });
   }
 
   ask_for_project() {
@@ -126,29 +101,7 @@ export class ProjectComponent implements OnInit {
         }
       );
   }
-  ask_for_project_from_dmp() {
-    console.log("go");
-    // todo: should rename it project_msg
-    this.request_msg = "";
-    this.request_err_msg = "";
-    this.projectsService
-      .askNewFromDmp({
-        dmp_key: this.new_project.dmp_key,
-        research_outputs: this.research_output,
-      })
-      .subscribe(
-        (resp) => {
-          console.log(resp);
-          this.request_msg = "An email have been sent to admin";
-          this.new_project = {};
-        },
-        (err) => {
-          console.log("failed to get project users", err);
-          this.request_err_msg = err.error;
-        }
-      );
-  }
-
+ 
   show_project_users(project) {
     this.msg = "";
     this.rm_prj_err_msg = "";
@@ -216,74 +169,7 @@ export class ProjectComponent implements OnInit {
         return res;
   };
 
-  Get_essential_data() {
-    console.log(this.new_project.dmp_key);
-    this.dmp_msg = "";
-    this.dmp_err_msg = "";
-    if ([undefined, ""].includes(this.new_project.dmp_key)) {
-      this.dmp_err_msg = "The DMP key field is empty";
-      return;
-    }
-    this.projectsService.askDmpData(this.new_project).subscribe(
-      (resp) => {
-        this.dmp_msg = "Connection successful with DMP_Opidor using your key";
-        this.new_project = resp.new_project;
-      },
-      (err) => {
-        console.log("failed to reach the DMP database with your key", err);
-        this.dmp_err_msg = err.error;
-      }
-    );
-  }
 
-  Ping_DMP() {
-    console.log("pinging Dmp db...");
-    console.log(this.dmp_available);
-    this.dmp_available = true;
-    console.log(this.dmp_available);
-    // this.projectsService.pingDmpDatabase().subscribe(
-    //     resp => {
-    //         this.dmp_available = true;
-    //     },
-    //     err => {
-    //         this.dmp_available = false;
-    //     }
-    // )
-  }
-
-  Get_research_output() {
-    console.log(this.new_project.dmp_key);
-    this.dmp_msg = "";
-    this.dmp_err_msg = "";
-    if ([undefined, ""].includes(this.new_project.dmp_key)) {
-      this.dmp_err_msg = "The DMP key field is empty";
-      return;
-    }
-    this.projectsService
-      .askDmpResearchOutput(this.new_project.dmp_key)
-      .subscribe(
-        (resp) => {
-          this.dmp_msg = "Acquired the list of Research outputs";
-          this.dmp_RO = resp.research_output_answer;
-
-          var RO_selection = document.getElementById("choose_research_output");
-          this.dmp_RO.forEach((element) => {
-            console.log(element);
-            var opt = document.createElement("option");
-            opt.text = element.title;
-            // create text node to add to option element (opt)
-            opt.value = element.dbid;
-            // add opt to end of select box (sel)
-            RO_selection.appendChild(opt);
-          });
-          document.getElementById("RO_div").style.display = "block";
-        },
-        (err) => {
-          console.log("failed to reach the DMP database with your key", err);
-          this.dmp_err_msg = err.error;
-        }
-      );
-  }
   // For dev only
   display() {
     console.log("display");
