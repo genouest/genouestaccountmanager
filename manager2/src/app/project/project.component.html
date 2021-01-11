@@ -10,10 +10,8 @@
       <div class="modal-header">
         <h3>Request a new project creation</h3>
       </div>
-      
 
-    <div class="tab-content">
-      <div class="tab-pane active" id="legacy">
+    <div>
         <form role="form" class="user-form form-horizonal">
           <div class="modal-body">
             <div class="form-group row col-sm-8">
@@ -119,8 +117,22 @@
             </div>
           </div>
         </form>
-      </div> 
+  </div>
+
+
       
+    </div>
+  </div>
+</div>
+<button
+  *ngIf="session_user && !session_user.is_admin"
+  type="button"
+  class="btn btn-primary"
+  data-toggle="modal"
+  data-target="#ask_project"
+>
+  Request A New Project
+</button>
 
 <div class="card bg-light">
   <div class="card-header">

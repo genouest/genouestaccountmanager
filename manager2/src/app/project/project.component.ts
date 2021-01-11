@@ -5,7 +5,8 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
 import { GroupsService} from 'src/app/admin/groups/groups.service';
-
+import { CommonModule } from '@angular/common';  
+import { BrowserModule } from '@angular/platform-browser';
 import { Table } from 'primeng/table';
 
 @Component({
@@ -61,6 +62,7 @@ export class ProjectComponent implements OnInit {
     this.manager_visible = true;
     this.session_user = await this.authService.profile;
     this.users = [];
+    
     this.projectsService.list(false).subscribe(
       (resp) => {
         for (var i = 0; i < resp.length; i++) {
@@ -70,6 +72,7 @@ export class ProjectComponent implements OnInit {
       },
       (err) => console.log("failed to get projects")
     );
+    console.log("ici")
   }
 
   ask_for_project() {
