@@ -228,6 +228,7 @@ export class ProjectsComponent implements OnInit {
                                        this.add_project_error_msg = err.error.message;
                                    }
                                );
+        this.pending_list();
     }
 
     project_list(refresh_requests = false) {
@@ -277,6 +278,7 @@ export class ProjectsComponent implements OnInit {
         this.projectService.list_pending(true).subscribe(
             resp => {
                 if (resp.length == 0) {
+                    this.requests_number = 0;
                     return;
                 }
                 if (refresh_requests) {
@@ -307,11 +309,13 @@ export class ProjectsComponent implements OnInit {
         return res;
     }
 
-
+    accept_project(project) {
+        this.new_project = project;
+        this.add_project();
+    }
 
     modify_project(project) {
-        this.new_project = project
-        console.log(project)
+        this.new_project = project;
 
     }
 
