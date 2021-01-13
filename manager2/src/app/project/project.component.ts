@@ -5,8 +5,6 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
 import { GroupsService} from 'src/app/admin/groups/groups.service';
-import { CommonModule } from '@angular/common';  
-import { BrowserModule } from '@angular/platform-browser';
 import { Table } from 'primeng/table';
 
 @Component({
