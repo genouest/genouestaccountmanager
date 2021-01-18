@@ -121,7 +121,15 @@ function removeReservations(rid) {
                     process.exit(0);
                 });
             });
-        }));
+        })).then(
+            (result) => { 
+                console.debug('something went wrong...', result);
+                process.exit(1);
+            }
+        ).catch((err) => {
+            console.error('an error occured', err);
+            process.exit(1);
+        });
     });
 }
 
