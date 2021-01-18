@@ -1185,6 +1185,16 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
+    if(req.body.firstname=='' || req.body.firstname===null || req.body.firstname===undefined) {
+        res.send({status: 1, message: 'Missing field: firstname'});
+        return;
+    }
+
+    if(req.body.lastname=='' || req.body.lastname===null || req.body.lastname===undefined) {
+        res.send({status: 1, message: 'Missing field: lastname'});
+        return;
+    }
+
     if(req.body.team=='' || req.body.team===null || req.body.team===undefined) {
         res.send({status: 1, message: 'Missing field: team'});
         return;
