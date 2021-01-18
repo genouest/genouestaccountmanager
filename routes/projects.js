@@ -416,4 +416,30 @@ router.post('/ask/project', async function(req, res){
     return;
 });
 
+router.post('/ask/dmp', async function(req, res){
+    print("here we are")
+    if(! req.locals.logInfo.is_logged){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    if(! utils.sanitizeAll([req.params.id])) {
+        res.status(403).send('Invalid parameters');
+        return;
+    }
+
+    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+        res.status(401).send('Not authorized');
+        return;
+    }
+    try {
+        print("Getting DMP from Opidor...")
+        DMP_data = {}
+    } catch(error) {
+        res.status(1000).send('No answer from DMP')
+        return;
+    }
+    res.send(DMP_data);
+    res.end();
+});
+
 module.exports = router;

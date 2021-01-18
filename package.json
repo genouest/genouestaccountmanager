@@ -27,6 +27,7 @@
     "express-prom-bundle": "^5.1.5",
     "express-session": "^1.17.1",
     "express-static-gzip": "^2.0.6",
+    "forever": "^3.0.2",
     "hjs": "0.0.6",
     "html-to-text": "^4.0.0",
     "ipware": "0.0.3",
