@@ -99,7 +99,7 @@
         </div>
         <div class="card-body">
              <div class="table-responsive table-striped">
-                        <p-table #dt3 [value]="expired_users"
+                        <p-table #dt4 [value]="expired_users"
                                     [paginator]="true"
                                     [rows]="10"
                                     [showCurrentPageReport]="true"
@@ -111,7 +111,7 @@
                             <div class="table-header">
                                 <span class="p-input-icon-right">
                                     <i class="pi pi-search"></i>
-                                    <input pInputText id="search_expired_users" type="text" (input)="dt3.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                                    <input pInputText id="search_expired_users" type="text" (input)="dt4.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
                                 </span>
                             </div>
                         </ng-template>

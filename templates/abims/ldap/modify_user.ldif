@@ -1,0 +1,47 @@
+dn: {{ user_dn }}
+changetype: modify
+replace: sn
+sn: {{ user.lastname }}
+{% if user.is_admin %}
+  {% if user.is_internal %}
+-
+replace: ou
+ou: {{ CONFIG.ldap.team }}
+  {% else %}
+-
+replace: ou
+ou: external
+  {% endif %}
+{% endif %}
+{% if user.home %}
+-
+replace: homeDirectory
+homeDirectory: {{ user.home }}
+{% endif %}
+{% if user.firstname %}
+-
+replace: givenName
+givenName: {{ user.firstname }}
+{% endif %}
+{% if not user.is_fake %}
+-
+replace: mail
+mail: {{ user.email }}
+{% endif %}
+-
+replace: loginShell
+loginShell: /bin/bash
+{% if user.is_admin and user.oldgroup != user.group %}
+
+{% if user.oldgroup %}}
+dn: cn={{ user.oldgroup }},ou=groups,{{ CONFIG.ldap.dn }}
+changetype: modify
+delete: memberUid
+memberUid: {{ user.uid }}
+{% endif %}
+
+dn: cn={{ user.group }},ou=groups,{{ CONFIG.ldap.dn }}
+changetype: modify
+add: memberUid
+memberUid: {{ user.uid }}
+{% endif %}
