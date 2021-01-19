@@ -1071,7 +1071,8 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }, function(err){
         notif.add(user.email, function() {
-            res.send({message: 'Activation Error', fid: fid, error: err});
+            logger.error('[notif][error=add][mail=' + user.email + ']');
+            res.send({message: 'Failed to add to mailing list', fid: fid, error: err});
             res.end();
         });
         return;

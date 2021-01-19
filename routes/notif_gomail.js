@@ -102,6 +102,7 @@ module.exports = {
 
     add: function(email, callback) {
         if(email===undefined ||email===null || email=='' || ! mail_set) {
+            logger.error('[notif][add] email not valid');
             callback();
             return;
         }
