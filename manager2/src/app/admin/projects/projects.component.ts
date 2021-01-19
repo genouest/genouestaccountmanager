@@ -17,6 +17,7 @@ export class ProjectsComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dta') tableadd: Table;
     @ViewChild('dtd') tabledel: Table;
+    @ViewChild('dtw') tablepending: Table;
 
     config: any
 
@@ -34,6 +35,7 @@ export class ProjectsComponent implements OnInit {
     add_requests: any[]
     remove_requests: any[]
 
+    pending_projects: any[]
     projects: any[]
     groups: any[]
     all_users: any[]
@@ -41,6 +43,8 @@ export class ProjectsComponent implements OnInit {
 
     day_time: number
 
+    pending_msg: any
+    pending_err_msg: any
 
     default_path: any
     default_size: any
@@ -74,6 +78,7 @@ export class ProjectsComponent implements OnInit {
         this.requests_visible = false;
         this.add_requests = [];
         this.remove_requests = [];
+        this.pending_projects = [];
         this.projects = [];
         this.groups = [];
         this.all_users = [];
@@ -90,6 +95,7 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.project_list(true);
+        this.pending_list(false);
         this.groupService.list().subscribe(
             resp => {
                 this.groups = resp;
@@ -220,6 +226,7 @@ export class ProjectsComponent implements OnInit {
                                        this.add_project_error_msg = err.error.message;
                                    }
                                );
+            this.pending_list();
     }
 
     project_list(refresh_requests = false){
@@ -259,6 +266,30 @@ export class ProjectsComponent implements OnInit {
 
     }
 
+    pending_list(refresh_requests = false) {
+        this.pending_projects = [];
+        this.projectService.list_pending(true).subscribe(
+            resp => {
+                if (resp.length == 0) {
+                    this.requests_number = 0;
+                    return;
+                }
+                if (refresh_requests) {
+                    this.add_requests = [];
+                    this.remove_requests = [];
+                    this.requests_number = 0;
+                }
+                let data = resp;
+                if (data.length > 0) { this.requests_visible = true; };
+                this.requests_number+= data.length;
+                this.pending_projects = data;
+                // this.renderDataTables('dtPending');
+            },
+            err => console.log('failed to get pending projects')
+        );
+
+    }
+
     date_convert = function timeConverter(tsp){
         let res;
         try {
@@ -270,4 +301,31 @@ export class ProjectsComponent implements OnInit {
         }
         return res;
     }
+
+    accept_project(project) {
+        this.new_project = project;
+        this.add_project();
+    }
+
+    modify_project(project) {
+        this.new_project = project;
+
+    }
+
+    reject_project(project) {
+        this.pending_err_msg = '';
+        this.pending_msg = '';
+        this.projectService.delete_pending(project.id).subscribe(
+            resp => {
+                this.pending_msg = resp.message
+                this.pending_projects = resp.data
+                this.requests_number-= 1
+                if (this.requests_number > 0) { this.requests_visible = true; }
+                else { this.requests_visible =  false;};
+            },
+            err => this.pending_err_msg = err.error
+        );
+
+    }
+
 }

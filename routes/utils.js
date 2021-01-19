@@ -18,6 +18,7 @@ var mongo_databases = null;
 var mongo_web = null;
 var mongo_projects = null;
 var mongo_tags = null;
+var mongo_pending = null;
 
 var mongo_connect = async function() {
     let url = CONFIG.mongo.url;
@@ -37,6 +38,7 @@ var mongo_connect = async function() {
     mongo_web = mongodb.collection('web');
     mongo_projects = mongodb.collection('projects');
     mongo_tags = mongodb.collection('tags');
+    mongo_pending = mongodb.collection('pending');
 };
 // mongo_connect();
 
@@ -63,6 +65,7 @@ exports.mongo_databases = function() {return mongo_databases;};
 exports.mongo_web = function() {return mongo_web;};
 exports.mongo_projects = function() {return mongo_projects;};
 exports.mongo_tags = function() {return mongo_tags;};
+exports.mongo_pending = function() {return mongo_pending;};
 
 
 var plugins = CONFIG.plugins;
