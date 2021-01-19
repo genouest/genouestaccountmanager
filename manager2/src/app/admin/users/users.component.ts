@@ -38,10 +38,10 @@ export class UsersComponent implements OnInit {
 
     users: any
 
-    pending_email_users: any
-    pending_approval_users: any
-    active_users: any
-    expired_users: any
+    pending_email_users: any = []
+    pending_approval_users: any = []
+    active_users: any = []
+    expired_users: any = []
 
     constructor(private userService: UserService) { }
 
