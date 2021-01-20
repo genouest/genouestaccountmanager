@@ -95,7 +95,7 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.project_list(true);
-        this.pending_list(false);
+        this.pending_list(true);
         this.groupService.list().subscribe(
             resp => {
                 this.groups = resp;
@@ -226,7 +226,7 @@ export class ProjectsComponent implements OnInit {
                                        this.add_project_error_msg = err.error.message;
                                    }
                                );
-            this.pending_list();
+            this.pending_list(true);
     }
 
     project_list(refresh_requests = false){

@@ -129,6 +129,8 @@ router.post('/project', async function(req, res){
         res.status(500).send({message: 'Add Project Failed'});
         return;
     }
+
+    await utils.mongo_pending().deleteOne({ id: req.body.id });
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
     res.send({message: 'Project created'});
     return;
