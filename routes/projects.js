@@ -498,7 +498,7 @@ router.delete('/pending/:id', async function (req, res) {
         logs: [],
     });
 
-    res.send({ message: 'Pending Project deleted', data: await utils.mongo_pending().findOne()});
+    res.send({ message: 'Pending Project deleted'});
 
 });
 

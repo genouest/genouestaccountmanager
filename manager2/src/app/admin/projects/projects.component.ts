@@ -7,6 +7,7 @@ import { UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
 
 import {Table} from 'primeng/table'
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Component({
     selector: 'app-projects',
@@ -24,6 +25,7 @@ export class ProjectsComponent implements OnInit {
     notification: string
     requests_visible: boolean
     requests_number: number
+    pending_number: number
 
     request_mngt_msg: string
     request_grp_msg: string
@@ -72,7 +74,8 @@ export class ProjectsComponent implements OnInit {
                     this.notification = "Project was deleted successfully";
                 };
             });
-
+        this.pending_number = 0;
+        this.requests_number = 0;
         this.default_path = "";
         this.default_size = 0;
         this.requests_visible = false;
@@ -212,6 +215,7 @@ export class ProjectsComponent implements OnInit {
                                    resp => {
                                        this.add_project_msg = resp.message;
                                        this.project_list();
+                                       this.pending_list(true);
                                        this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
                                            resp => {},
                                            err => {
@@ -226,7 +230,8 @@ export class ProjectsComponent implements OnInit {
                                        this.add_project_error_msg = err.error.message;
                                    }
                                );
-            this.pending_list(true);
+            
+            console.log("hello")
     }
 
     project_list(refresh_requests = false){
@@ -275,15 +280,15 @@ export class ProjectsComponent implements OnInit {
                     return;
                 }
                 if (refresh_requests) {
-                    this.add_requests = [];
-                    this.remove_requests = [];
-                    this.requests_number = 0;
+                    this.pending_number = 0;
                 }
                 let data = resp;
                 if (data.length > 0) { this.requests_visible = true; };
-                this.requests_number+= data.length;
+                this.pending_number= data.length;
                 this.pending_projects = data;
                 // this.renderDataTables('dtPending');
+                console.log(this.requests_number)
+                console.log(this.pending_number)
             },
             err => console.log('failed to get pending projects')
         );
@@ -317,11 +322,8 @@ export class ProjectsComponent implements OnInit {
         this.pending_msg = '';
         this.projectService.delete_pending(project.id).subscribe(
             resp => {
-                this.pending_msg = resp.message
-                this.pending_projects = resp.data
-                this.requests_number-= 1
-                if (this.requests_number > 0) { this.requests_visible = true; }
-                else { this.requests_visible =  false;};
+                this.pending_msg = resp.message;
+                this.pending_list(true);
             },
             err => this.pending_err_msg = err.error
         );

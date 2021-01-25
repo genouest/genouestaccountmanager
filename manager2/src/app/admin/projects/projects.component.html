@@ -1,7 +1,7 @@
   <div *ngIf="notification" class="alert alert-success">{{notification}}</div>
   <div class="card bg-light">
     <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
-      <h3>{{requests_number}} request(s) waiting </h3>
+      <h3>{{requests_number + pending_number}} request(s) waiting </h3>
     </div>
     <div *ngIf="requests_visible" class="card-body">
       <div class="row">
@@ -71,7 +71,7 @@
                   <h3>Pending projects</h3>
                 </div>
                 <div class="card-body">
-                  <p-table #dtw [value]="pending_projects" [autolayout]="false">
+                  <p-table #dtw [(value)]="pending_projects" [autolayout]="false">
                     <ng-template pTemplate="header">
                       <tr>
                         <th>Project</th>
