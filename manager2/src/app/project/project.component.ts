@@ -90,7 +90,6 @@ export class ProjectComponent implements OnInit {
         // todo: should rename it project_msg
         this.request_msg = '';
         this.request_err_msg = '';
-        console.log(this.new_project);
         this.projectsService.askNew(this.new_project).subscribe(
             resp => {
                 this.request_msg = 'An email have been sent to admin';
