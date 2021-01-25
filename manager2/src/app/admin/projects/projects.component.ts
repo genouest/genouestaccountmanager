@@ -230,8 +230,6 @@ export class ProjectsComponent implements OnInit {
                                        this.add_project_error_msg = err.error.message;
                                    }
                                );
-            
-            console.log("hello")
     }
 
     project_list(refresh_requests = false){

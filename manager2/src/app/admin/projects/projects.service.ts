@@ -193,7 +193,7 @@ export class ProjectsService {
             params: params
         };
         return this.http.get(
-            environment.apiUrl + '/pending',
+            environment.apiUrl + '/pending/project',
             httpOptions
         ).pipe(map((response: any[]) => {
             return response.sort(function (a, b) {
@@ -213,7 +213,7 @@ export class ProjectsService {
             params: params
         };
         return this.http.delete(
-            environment.apiUrl + '/pending/' + projectId,
+            environment.apiUrl + '/pending/project' + projectId,
             httpOptions
         );
     }
