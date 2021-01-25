@@ -7,7 +7,7 @@ import { UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
 
 import {Table} from 'primeng/table'
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+
 
 @Component({
     selector: 'app-projects',
