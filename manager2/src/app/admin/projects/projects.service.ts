@@ -213,7 +213,7 @@ export class ProjectsService {
             params: params
         };
         return this.http.delete(
-            environment.apiUrl + '/pending/project' + projectId,
+            environment.apiUrl + '/pending/project/' + projectId,
             httpOptions
         );
     }
