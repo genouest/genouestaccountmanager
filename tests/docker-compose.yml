@@ -74,7 +74,7 @@ services:
     my-app:
         image: osallou/my
         ports:
-            - "80:3000"
+            - "3000:3000"
         environment:
             - NODE_ENV=test
             - LDAP_SERVER_HOST=openldap
