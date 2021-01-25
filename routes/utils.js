@@ -38,7 +38,7 @@ var mongo_connect = async function() {
     mongo_web = mongodb.collection('web');
     mongo_projects = mongodb.collection('projects');
     mongo_tags = mongodb.collection('tags');
-    mongo_pending_projects = mongodb.collection('pending');
+    mongo_pending_projects = mongodb.collection('pending_projects');
 };
 // mongo_connect();
 
