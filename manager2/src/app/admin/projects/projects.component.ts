@@ -8,6 +8,7 @@ import * as latinize from 'latinize'
 
 import {Table} from 'primeng/table'
 
+
 @Component({
     selector: 'app-projects',
     templateUrl: './projects.component.html',
@@ -17,12 +18,14 @@ export class ProjectsComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dta') tableadd: Table;
     @ViewChild('dtd') tabledel: Table;
+    @ViewChild('dtw') tablepending: Table;
 
     config: any
 
     notification: string
     requests_visible: boolean
     requests_number: number
+    pending_number: number
 
     request_mngt_msg: string
     request_grp_msg: string
@@ -34,6 +37,7 @@ export class ProjectsComponent implements OnInit {
     add_requests: any[]
     remove_requests: any[]
 
+    pending_projects: any[]
     projects: any[]
     groups: any[]
     all_users: any[]
@@ -41,6 +45,8 @@ export class ProjectsComponent implements OnInit {
 
     day_time: number
 
+    pending_msg: any
+    pending_err_msg: any
 
     default_path: any
     default_size: any
@@ -68,12 +74,14 @@ export class ProjectsComponent implements OnInit {
                     this.notification = "Project was deleted successfully";
                 };
             });
-
+        this.pending_number = 0;
+        this.requests_number = 0;
         this.default_path = "";
         this.default_size = 0;
         this.requests_visible = false;
         this.add_requests = [];
         this.remove_requests = [];
+        this.pending_projects = [];
         this.projects = [];
         this.groups = [];
         this.all_users = [];
@@ -90,6 +98,7 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.project_list(true);
+        this.pending_list(true);
         this.groupService.list().subscribe(
             resp => {
                 this.groups = resp;
@@ -206,6 +215,7 @@ export class ProjectsComponent implements OnInit {
                                    resp => {
                                        this.add_project_msg = resp.message;
                                        this.project_list();
+                                       this.pending_list(true);
                                        this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
                                            resp => {},
                                            err => {
@@ -259,6 +269,30 @@ export class ProjectsComponent implements OnInit {
 
     }
 
+    pending_list(refresh_requests = false) {
+        this.pending_projects = [];
+        this.projectService.list_pending(true).subscribe(
+            resp => {
+                if (resp.length == 0) {
+                    this.requests_number = 0;
+                    return;
+                }
+                if (refresh_requests) {
+                    this.pending_number = 0;
+                }
+                let data = resp;
+                if (data.length > 0) { this.requests_visible = true; };
+                this.pending_number= data.length;
+                this.pending_projects = data;
+                // this.renderDataTables('dtPending');
+                console.log(this.requests_number)
+                console.log(this.pending_number)
+            },
+            err => console.log('failed to get pending projects')
+        );
+
+    }
+
     date_convert = function timeConverter(tsp){
         let res;
         try {
@@ -270,4 +304,28 @@ export class ProjectsComponent implements OnInit {
         }
         return res;
     }
+
+    accept_project(project) {
+        this.new_project = project;
+        this.add_project();
+    }
+
+    modify_project(project) {
+        this.new_project = project;
+
+    }
+
+    reject_project(project) {
+        this.pending_err_msg = '';
+        this.pending_msg = '';
+        this.projectService.delete_pending(project.id).subscribe(
+            resp => {
+                this.pending_msg = resp.message;
+                this.pending_list(true);
+            },
+            err => this.pending_err_msg = err.error
+        );
+
+    }
+
 }
