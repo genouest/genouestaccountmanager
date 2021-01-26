@@ -130,7 +130,7 @@ router.post('/project', async function(req, res){
         return;
     }
 
-    await utils.mongo_pending_projects().deleteOne({ id: req.body.id });
+    await utils.mongo_pending_projects().deleteOne({ _id: req.body._id });
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
     res.send({message: 'Project created'});
     return;
