@@ -396,6 +396,7 @@ router.post('/ask/project', async function(req, res){
 
     // todo: find a way to use cc
     let new_project = {
+        '_id': new Date().getTime(),
         'id': req.body.id,
         'owner': user.uid,
         'group': user.group,
@@ -403,7 +404,7 @@ router.post('/ask/project', async function(req, res){
         'description': req.body.description,
         'orga': req.body.orga,
     }
-    await utils.mongo_pending_projects().insertOne(new_project.push({'_id': new Date().getTime()}));
+    await utils.mongo_pending_projects().insertOne(new_project);
     await utils.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),
