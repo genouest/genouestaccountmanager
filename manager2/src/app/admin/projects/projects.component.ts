@@ -270,7 +270,7 @@ export class ProjectsComponent implements OnInit {
         this.projectService.list_pending(true).subscribe(
             resp => {
                 if (resp.length == 0) {
-                    this.requests_number = 0;
+                    this.pending_number = 0;
                     return;
                 }
                 if (refresh_requests) {
