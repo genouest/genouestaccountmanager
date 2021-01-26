@@ -209,9 +209,10 @@ export class ProjectsComponent implements OnInit {
                                        this.add_project_msg = resp.message;
                                        this.project_list();
                                        this.pending_list(true);
-                                       this.new_project = {}
                                        this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
-                                           resp => {},
+                                           resp => {
+                                               this.new_project = {};
+                                           },
                                            err => {
                                                console.log('failed  to add user to project');
                                                this.add_project_error_msg = err.error.message;
@@ -301,6 +302,7 @@ export class ProjectsComponent implements OnInit {
 
     accept_project(project) {
         this.new_project = project;
+        console.log(project)
         this.add_project();
     }
 
