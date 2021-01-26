@@ -403,7 +403,7 @@ router.post('/ask/project', async function(req, res){
         'description': req.body.description,
         'orga': req.body.orga,
     }
-    await utils.mongo_pending_projects().insertOne(new_project.push({'_id': new date().getTime()}));
+    await utils.mongo_pending_projects().insertOne(new_project.push({'_id': new Date().getTime()}));
     await utils.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),
