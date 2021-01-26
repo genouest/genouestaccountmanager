@@ -74,7 +74,7 @@ services:
     my-app:
         image: osallou/my
         ports:
-            - "80:3000"
+            - "3000:3000"
         environment:
             - NODE_ENV=test
             - LDAP_SERVER_HOST=openldap
@@ -82,7 +82,6 @@ services:
             - MY_ADMIN_GROUP=admin
             - MY_ADMIN_EMAIL=${MY_ADMIN_EMAIL:-admin@my.org}
             - MY_ADMIN_PASSWORD=${MY_ADMIN_PASSWORD:-admin}
-            - gomngr_auth=fake
         volumes:
             - ./home_dir:/home
             - ./cron:/opt/my/scripts

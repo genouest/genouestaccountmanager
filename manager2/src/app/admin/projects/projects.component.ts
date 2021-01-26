@@ -280,9 +280,6 @@ export class ProjectsComponent implements OnInit {
                 if (data.length > 0) { this.requests_visible = true; };
                 this.pending_number= data.length;
                 this.pending_projects = data;
-                // this.renderDataTables('dtPending');
-                console.log(this.requests_number)
-                console.log(this.pending_number)
             },
             err => console.log('failed to get pending projects')
         );
@@ -303,7 +300,6 @@ export class ProjectsComponent implements OnInit {
 
     accept_project(project) {
         this.new_project = project;
-        console.log(project)
         this.add_project();
     }
 
