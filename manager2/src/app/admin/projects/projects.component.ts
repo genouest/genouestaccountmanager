@@ -310,7 +310,7 @@ export class ProjectsComponent implements OnInit {
 
     reject_project(project) {
         this.reset_msgs()
-        this.projectService.delete_pending(project.id).subscribe(
+        this.projectService.delete_pending(project.uuid).subscribe(
             resp => {
                 this.pending_msg = resp.message;
                 this.pending_list(true);

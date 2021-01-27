@@ -473,12 +473,12 @@ router.get('/pending/project', async function (req, res) {
     }
 });
 
-router.delete('/pending/project/:id', async function (req, res) {
+router.delete('/pending/project/:uuid', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
     }
-    if (!utils.sanitizeAll([req.params.id])) {
+    if (!utils.sanitizeAll([req.params.uuid])) {
         res.status(403).send('Invalid parameters');
         return;
     }
@@ -491,11 +491,11 @@ router.delete('/pending/project/:id', async function (req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    await utils.mongo_pending_projects().deleteOne({ id: req.params.id });
+    await utils.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
     await utils.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),
-        action: 'remove Pending project ' + req.params.id,
+        action: 'remove Pending project ' + req.params.uuid,
         logs: [],
     });
 
