@@ -403,7 +403,7 @@ router.post('/ask/project', async function(req, res){
         'size': req.body.size,
         'description': req.body.description,
         'orga': req.body.orga,
-    }
+    };
     await utils.mongo_pending_projects().insertOne(new_project);
     await utils.mongo_events().insertOne({
         owner: user.uid,
@@ -499,7 +499,7 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.send({ message: 'Pending Project deleted'});
     }
     else {
-        res.status(404).send('No pending project found')
+        res.status(404).send('No pending project found');
     }
     
 
