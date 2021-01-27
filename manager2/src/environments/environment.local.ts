@@ -5,7 +5,7 @@
 export const environment = {
     production: false,
     envName: "local",
-    apiUrl: "http://localhost:3000",
+    apiUrl: "https://myapp-192-168-100-120.vm.openstack.genouest.org",
     sentry: "",
 };
 
