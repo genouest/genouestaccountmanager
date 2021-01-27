@@ -465,7 +465,7 @@ router.get('/pending/project', async function (req, res) {
                 res.send([]);
                 return;
             } else {
-                let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.projects } }).toArray();
+                let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
                 res.send(pendings);
                 return;
             }
@@ -476,10 +476,6 @@ router.get('/pending/project', async function (req, res) {
 router.delete('/pending/project/:uuid', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
-        return;
-    }
-    if (!utils.sanitizeAll([req.params.uuid])) {
-        res.status(403).send('Invalid parameters');
         return;
     }
     let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
