@@ -503,7 +503,7 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.send({ message: 'Pending Project deleted'});
     }
     else {
-        res.send ( {error: 'No pending project was deleted'})
+        res.status(404).send('No pending project found')
     }
     
 
