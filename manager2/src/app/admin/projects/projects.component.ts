@@ -195,7 +195,7 @@ export class ProjectsComponent implements OnInit {
         }
         this.reset_msgs()
         this.projectService.add({
-            '_id': this.new_project._id,
+            'uuid': this.new_project.uuid,
             'id': this.new_project.id,
             'owner': this.new_project.owner,
             'group': this.config.project.enable_group ? this.new_project.group : '',

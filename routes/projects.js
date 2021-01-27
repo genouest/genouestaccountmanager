@@ -130,7 +130,7 @@ router.post('/project', async function(req, res){
         return;
     }
 
-    await utils.mongo_pending_projects().deleteOne({ _id: req.body._id });
+    await utils.mongo_pending_projects().deleteOne({ uuid: req.body.uuid });
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
     res.send({message: 'Project created'});
     return;
@@ -396,7 +396,7 @@ router.post('/ask/project', async function(req, res){
 
     // todo: find a way to use cc
     let new_project = {
-        '_id': new Date().getTime(),
+        'uuid': new Date().getTime(),
         'id': req.body.id,
         'owner': user.uid,
         'group': user.group,
@@ -451,7 +451,7 @@ router.get('/pending/project', async function (req, res) {
             res.send([]);
             return;
         } else {
-            let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.projects } }).toArray();
+            let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
             res.send(pendings);
             return;
         }
