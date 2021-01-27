@@ -491,15 +491,22 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    await utils.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
-    await utils.mongo_events().insertOne({
-        owner: user.uid,
-        date: new Date().getTime(),
-        action: 'remove Pending project ' + req.params.uuid,
-        logs: [],
-    });
-
-    res.send({ message: 'Pending Project deleted'});
+    console.log(req.params.uuid)
+    const result = await utils.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
+    if (result.deletedCount === 1) {
+        await utils.mongo_events().insertOne({
+            owner: user.uid,
+            date: new Date().getTime(),
+            action: 'remove Pending project ' + req.params.uuid,
+            logs: [],
+        });
+    
+        res.send({ message: 'Pending Project deleted'});
+    }
+    else {
+        res.send ( {error: 'No pending project was deleted'})
+    }
+    
 
 });
 
