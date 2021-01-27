@@ -396,7 +396,7 @@ router.post('/ask/project', async function(req, res){
 
     // todo: find a way to use cc
     let new_project = {
-        'uuid': new Date().getTime(),
+        'uuid': (new Date().getTime()).toString(),
         'id': req.body.id,
         'owner': user.uid,
         'group': user.group,
