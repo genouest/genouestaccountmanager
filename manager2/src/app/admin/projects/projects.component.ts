@@ -134,9 +134,7 @@ export class ProjectsComponent implements OnInit {
 
     validate_add_request(project, user_id) {
         this.notification = "";
-        this.request_mngt_msg = "";
-        this.request_mngt_error_msg = "";
-        this.request_grp_msg = "";
+        this.reset_msgs();
         this.userService.addToProject(user_id, project.id).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
@@ -153,9 +151,7 @@ export class ProjectsComponent implements OnInit {
 
     validate_remove_request(project, user_id) {
         this.notification = "";
-        this.request_mngt_msg = "";
-        this.request_mngt_error_msg = "";
-        this.request_grp_msg = "";
+        this.reset_msgs();
         this.userService.removeFromProject(user_id, project.id).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
@@ -170,9 +166,7 @@ export class ProjectsComponent implements OnInit {
 
     remove_request(project, user_id, request_type) {
         this.notification = "";
-        this.request_mngt_msg = "";
-        this.request_mngt_error_msg = "";
-        this.request_grp_msg = "";
+        this.reset_msgs();
         this.projectService.removeRequest(project.id, {'request': request_type, 'user': user_id}).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
@@ -199,9 +193,9 @@ export class ProjectsComponent implements OnInit {
             this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
             return;
         }
-        this.add_project_msg = '';
-        this.add_project_error_msg = '';
+        this.reset_msgs()
         this.projectService.add({
+            'uuid': this.new_project.uuid,
             'id': this.new_project.id,
             'owner': this.new_project.owner,
             'group': this.config.project.enable_group ? this.new_project.group : '',
@@ -217,7 +211,9 @@ export class ProjectsComponent implements OnInit {
                                        this.project_list();
                                        this.pending_list(true);
                                        this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
-                                           resp => {},
+                                           resp => {
+                                               this.new_project = {};
+                                           },
                                            err => {
                                                console.log('failed  to add user to project');
                                                this.add_project_error_msg = err.error.message;
@@ -274,7 +270,7 @@ export class ProjectsComponent implements OnInit {
         this.projectService.list_pending(true).subscribe(
             resp => {
                 if (resp.length == 0) {
-                    this.requests_number = 0;
+                    this.pending_number = 0;
                     return;
                 }
                 if (refresh_requests) {
@@ -284,9 +280,6 @@ export class ProjectsComponent implements OnInit {
                 if (data.length > 0) { this.requests_visible = true; };
                 this.pending_number= data.length;
                 this.pending_projects = data;
-                // this.renderDataTables('dtPending');
-                console.log(this.requests_number)
-                console.log(this.pending_number)
             },
             err => console.log('failed to get pending projects')
         );
@@ -316,9 +309,8 @@ export class ProjectsComponent implements OnInit {
     }
 
     reject_project(project) {
-        this.pending_err_msg = '';
-        this.pending_msg = '';
-        this.projectService.delete_pending(project.id).subscribe(
+        this.reset_msgs()
+        this.projectService.delete_pending(project.uuid).subscribe(
             resp => {
                 this.pending_msg = resp.message;
                 this.pending_list(true);
@@ -328,4 +320,13 @@ export class ProjectsComponent implements OnInit {
 
     }
 
+    reset_msgs() {
+        this.add_project_msg = "";
+        this.add_project_error_msg = "";
+        this.request_grp_msg = "";
+        this.request_mngt_msg = "";
+        this.request_mngt_error_msg = "";
+        this.pending_msg = "";
+        this.pending_err_msg = "";
+    }
 }
