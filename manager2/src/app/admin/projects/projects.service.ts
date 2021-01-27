@@ -212,7 +212,6 @@ export class ProjectsService {
             //}),
             params: params
         };
-        console.log(projectUuid);
         return this.http.delete(
             environment.apiUrl + '/pending/project/' + projectUuid,
             httpOptions

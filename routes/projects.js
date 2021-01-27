@@ -491,7 +491,6 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    console.log(req.params.uuid)
     const result = await utils.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
     if (result.deletedCount === 1) {
         await utils.mongo_events().insertOne({
