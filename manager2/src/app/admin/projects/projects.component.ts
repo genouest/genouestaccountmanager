@@ -299,13 +299,13 @@ export class ProjectsComponent implements OnInit {
     }
 
     accept_project(project) {
-        this.new_project = project;
+        this.modify_project(project);
         this.add_project();
     }
 
     modify_project(project) {
         this.new_project = project;
-
+        this.update_project_on_event(project.id);
     }
 
     reject_project(project) {
