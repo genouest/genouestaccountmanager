@@ -13,7 +13,7 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input placeholder="project name" type="text" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <input placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat several projects, it is quite possible for you to request more project spaces.</i></small>
           </div>
 
