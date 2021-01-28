@@ -36,7 +36,7 @@
             </div>
             <div class="col-sm-2">
               <label for="project_exp">Creation date</label>
-              <input type="date" id="project_date" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.created_at" class="form-control" readonly/>
+              <input type="date" id="project_date" value="{{ date_convert(project.created_at) }}" class="form-control" readonly/>
             </div>
             <div class="col-sm-2">
               <label for="update_project_exp">Expiration date</label>
