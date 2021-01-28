@@ -113,6 +113,7 @@ router.post('/project', async function(req, res){
         'owner': req.body.owner,
         'group': req.body.group,
         'size': req.body.size,
+        'created_at': new Date().getTime(),
         'expire': (req.body.expire) ? req.body.expire : new Date().getTime() + CONFIG.project.default_expire * day_time,
         'description': req.body.description,
         'path': req.body.path,
@@ -212,7 +213,7 @@ router.post('/project/:id', async function(req, res){
         logger.debug('Created file', created_file);
     } catch(error) {
         logger.error('Update Project Failed for: ' + new_project.id, error);
-        res.status(500).send({message: 'Add Project Failed'});
+        res.status(500).send({message: 'Update Project Failed'});
         return;
     }
 
@@ -495,13 +496,13 @@ router.delete('/pending/project/:uuid', async function (req, res) {
             action: 'remove Pending project ' + req.params.uuid,
             logs: [],
         });
-    
+
         res.send({ message: 'Pending Project deleted'});
     }
     else {
         res.status(404).send('No pending project found');
     }
-    
+
 
 });
 
