@@ -1071,7 +1071,8 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }, function(err){
         notif.add(user.email, function() {
-            res.send({message: 'Activation Error', fid: fid, error: err});
+            logger.error('[notif][error=add][mail=' + user.email + ']');
+            res.send({message: 'Failed to add to mailing list', fid: fid, error: err});
             res.end();
         });
         return;
@@ -1182,6 +1183,16 @@ router.post('/user/:id', async function(req, res) {
     logger.info('New register request for '+req.params.id);
     if(! utils.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+
+    if(req.body.firstname=='' || req.body.firstname===null || req.body.firstname===undefined) {
+        res.send({status: 1, message: 'Missing field: firstname'});
+        return;
+    }
+
+    if(req.body.lastname=='' || req.body.lastname===null || req.body.lastname===undefined) {
+        res.send({status: 1, message: 'Missing field: lastname'});
         return;
     }
 

@@ -8,6 +8,7 @@ import * as latinize from 'latinize'
 
 import {Table} from 'primeng/table'
 
+
 @Component({
     selector: 'app-projects',
     templateUrl: './projects.component.html',
@@ -17,12 +18,14 @@ export class ProjectsComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dta') tableadd: Table;
     @ViewChild('dtd') tabledel: Table;
+    @ViewChild('dtw') tablepending: Table;
 
     config: any
 
     notification: string
     requests_visible: boolean
     requests_number: number
+    pending_number: number
 
     request_mngt_msg: string
     request_grp_msg: string
@@ -34,6 +37,7 @@ export class ProjectsComponent implements OnInit {
     add_requests: any[]
     remove_requests: any[]
 
+    pending_projects: any[]
     projects: any[]
     groups: any[]
     all_users: any[]
@@ -41,6 +45,8 @@ export class ProjectsComponent implements OnInit {
 
     day_time: number
 
+    pending_msg: any
+    pending_err_msg: any
 
     default_path: any
     default_size: any
@@ -68,12 +74,14 @@ export class ProjectsComponent implements OnInit {
                     this.notification = "Project was deleted successfully";
                 };
             });
-
+        this.pending_number = 0;
+        this.requests_number = 0;
         this.default_path = "";
         this.default_size = 0;
         this.requests_visible = false;
         this.add_requests = [];
         this.remove_requests = [];
+        this.pending_projects = [];
         this.projects = [];
         this.groups = [];
         this.all_users = [];
@@ -90,6 +98,7 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.project_list(true);
+        this.pending_list(true);
         this.groupService.list().subscribe(
             resp => {
                 this.groups = resp;
@@ -125,9 +134,7 @@ export class ProjectsComponent implements OnInit {
 
     validate_add_request(project, user_id) {
         this.notification = "";
-        this.request_mngt_msg = "";
-        this.request_mngt_error_msg = "";
-        this.request_grp_msg = "";
+        this.reset_msgs();
         this.userService.addToProject(user_id, project.id).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
@@ -144,9 +151,7 @@ export class ProjectsComponent implements OnInit {
 
     validate_remove_request(project, user_id) {
         this.notification = "";
-        this.request_mngt_msg = "";
-        this.request_mngt_error_msg = "";
-        this.request_grp_msg = "";
+        this.reset_msgs();
         this.userService.removeFromProject(user_id, project.id).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
@@ -161,9 +166,7 @@ export class ProjectsComponent implements OnInit {
 
     remove_request(project, user_id, request_type) {
         this.notification = "";
-        this.request_mngt_msg = "";
-        this.request_mngt_error_msg = "";
-        this.request_grp_msg = "";
+        this.reset_msgs();
         this.projectService.removeRequest(project.id, {'request': request_type, 'user': user_id}).subscribe(
             resp => {
                 this.request_mngt_msg = resp['message'];
@@ -180,6 +183,11 @@ export class ProjectsComponent implements OnInit {
         // warning: for this.new_project.id, (ngModelChange) must be after [ngModel] in html line
         // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
         this.new_project.id = tmpprojectid; // todo: maybe add an option to enable or disable this one
+
+        if (!this.new_project.expire) {
+            this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+        }
+
     }
 
 
@@ -190,9 +198,9 @@ export class ProjectsComponent implements OnInit {
             this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner ;
             return;
         }
-        this.add_project_msg = '';
-        this.add_project_error_msg = '';
+        this.reset_msgs()
         this.projectService.add({
+            'uuid': this.new_project.uuid,
             'id': this.new_project.id,
             'owner': this.new_project.owner,
             'group': this.config.project.enable_group ? this.new_project.group : '',
@@ -206,8 +214,11 @@ export class ProjectsComponent implements OnInit {
                                    resp => {
                                        this.add_project_msg = resp.message;
                                        this.project_list();
+                                       this.pending_list(true);
                                        this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
-                                           resp => {},
+                                           resp => {
+                                               this.new_project = {};
+                                           },
                                            err => {
                                                console.log('failed  to add user to project');
                                                this.add_project_error_msg = err.error.message;
@@ -259,6 +270,27 @@ export class ProjectsComponent implements OnInit {
 
     }
 
+    pending_list(refresh_requests = false) {
+        this.pending_projects = [];
+        this.projectService.list_pending(true).subscribe(
+            resp => {
+                if (resp.length == 0) {
+                    this.pending_number = 0;
+                    return;
+                }
+                if (refresh_requests) {
+                    this.pending_number = 0;
+                }
+                let data = resp;
+                if (data.length > 0) { this.requests_visible = true; };
+                this.pending_number= data.length;
+                this.pending_projects = data;
+            },
+            err => console.log('failed to get pending projects')
+        );
+
+    }
+
     date_convert = function timeConverter(tsp){
         let res;
         try {
@@ -269,5 +301,37 @@ export class ProjectsComponent implements OnInit {
             res = '';
         }
         return res;
+    }
+
+    accept_project(project) {
+        this.modify_project(project);
+        this.add_project();
+    }
+
+    modify_project(project) {
+        this.new_project = project;
+        this.update_project_on_event(project.id);
+    }
+
+    reject_project(project) {
+        this.reset_msgs()
+        this.projectService.delete_pending(project.uuid).subscribe(
+            resp => {
+                this.pending_msg = resp.message;
+                this.pending_list(true);
+            },
+            err => this.pending_err_msg = err.error
+        );
+
+    }
+
+    reset_msgs() {
+        this.add_project_msg = "";
+        this.add_project_error_msg = "";
+        this.request_grp_msg = "";
+        this.request_mngt_msg = "";
+        this.request_mngt_error_msg = "";
+        this.pending_msg = "";
+        this.pending_err_msg = "";
     }
 }
