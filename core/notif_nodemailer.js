@@ -1,11 +1,10 @@
 const CONFIG = require('config');
-
-var utils= require('./utils');
-
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 // const request = require('request');
 const nodemailer = require('nodemailer');
+
+const utils= require('../core/utils.js');
 
 var mail_set = false;
 var mail_verified = false;

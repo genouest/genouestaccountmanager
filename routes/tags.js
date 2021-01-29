@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var CONFIG = require('config');
 
-var utils = require('./utils');
+var utils = require('../core/utils.js');
 
 router.get('/tags', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {

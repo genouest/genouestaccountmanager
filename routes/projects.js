@@ -10,8 +10,8 @@ var GENERAL_CONFIG = CONFIG.general;
 // var cookieParser = require('cookie-parser');
 // var goldap = require('../routes/goldap.js');
 
-const filer = require('../routes/file.js');
-var utils = require('./utils');
+const filer = require('../core/file.js');
+const utils = require('../core/utils.js');
 
 let day_time = 1000 * 60 * 60 * 24;
 

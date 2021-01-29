@@ -2,9 +2,9 @@ var CONFIG = require('config');
 var myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const filer = require('../routes/file.js');
+const filer = require('../core/file.js');
 
-var utils= require('./utils');
+const utils = require('../core/utils.js');
 
 function get_group_dn(group) {
     return new Promise( function (resolve, reject) {

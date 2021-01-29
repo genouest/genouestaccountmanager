@@ -3,7 +3,7 @@ var router = express.Router();
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-var utils = require('./utils');
+const utils = require('../core/utils.js');
 
 
 /**

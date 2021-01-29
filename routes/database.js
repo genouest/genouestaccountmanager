@@ -3,7 +3,7 @@ var router = express.Router();
 var CONFIG = require('config');
 var Promise = require('promise');
 
-var utils = require('./utils.js');
+const utils = require('../core/utils.js');
 
 var mysql = require('mysql');
 const winston = require('winston');

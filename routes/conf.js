@@ -4,7 +4,7 @@ var router = express.Router();
 // const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var MAIL_CONFIG = CONFIG.gomail;
-var utils = require('./utils');
+const utils = require('../core/utils.js');
 
 //var monk = require('monk');
 //var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);

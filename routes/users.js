@@ -9,16 +9,17 @@ var validator = require('email-validator');
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const filer = require('../routes/file.js');
+
 const conf = require('../routes/conf.js');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
-var goldap = require('../routes/goldap.js');
-var utils = require('../routes/utils.js');
+const goldap = require('../core/goldap.js');
+const utils = require('../core/utils.js');
+const filer = require('../core/file.js');
 
 const MAILER = CONFIG.general.mailer;
-var notif = require('../routes/notif_'+MAILER+'.js');
+const notif = require('../core/notif_'+MAILER+'.js');
 
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
