@@ -35,6 +35,10 @@
               <input id="update_project_size" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.size" class="form-control"/>
             </div>
             <div class="col-sm-2">
+              <label for="project_date">Creation date</label>
+              <input type="date" id="project_date" value="{{ date_convert(project.created_at) }}" class="form-control" readonly/>
+            </div>
+            <div class="col-sm-2">
               <label for="update_project_exp">Expiration date</label>
               <input type="date" id="update_project_exp" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.expire" class="form-control"/>
             </div>
@@ -107,7 +111,7 @@
           <p-table #dtp [value]="users"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">

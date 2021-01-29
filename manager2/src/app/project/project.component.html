@@ -13,7 +13,7 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input placeholder="project name" type="text" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <input placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat several projects, it is quite possible for you to request more project spaces.</i></small>
           </div>
 
@@ -60,7 +60,7 @@
           <p-table #dtp [value]="projects"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">
@@ -70,6 +70,7 @@
                 <th *ngIf="!config.project || config.project.enable_group">Group</th>
                 <th>Path</th>
                 <th>Size (Go)</th>
+                <th>Creation</th>
                 <th>Expiration</th>
               </tr>
             </ng-template>
@@ -80,6 +81,7 @@
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
                 <td>{{project.size}}</td>
+                <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
               </tr>
             </ng-template>
@@ -164,6 +166,12 @@
               <td>{{selectedProject.size}} Gb</td>
             </tr>
             <tr>
+              <td><b>Creation</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Creation date" tooltip></span>
+              </td>
+              <td>{{selectedProject.created_at | date}}</td>
+            </tr>
+            <tr>
               <td><b>Expiration</b>&nbsp;
                 <span class="glyphicon glyphicon-question-sign" title="Expiration date" tooltip></span>
               </td>
@@ -201,7 +209,7 @@
           <p-table #dtu [value]="users"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">
