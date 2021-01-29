@@ -227,6 +227,7 @@
           <th *ngIf="!config.project || config.project.enable_group">Group</th>
           <th>Path</th>
           <th>Size (Go)</th>
+          <th>Creation</th>
           <th>Expiration</th>
         </tr>
       </ng-template>
@@ -237,6 +238,7 @@
           <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
           <td>{{project.path}}</td>
           <td>{{project.size}}</td>
+          <td>{{date_convert(project.created_at)}}</td>
           <td>{{date_convert(project.expire)}}</td>
         </tr>
       </ng-template>
