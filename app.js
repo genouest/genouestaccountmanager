@@ -33,6 +33,7 @@ const wlogger = winston.loggers.add('gomngr', {
 const promBundle = require('express-prom-bundle');
 
 const utils = require('./core/utils.js');
+const usrsrv = require('./core/users.service.js');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -430,7 +431,7 @@ utils.init_db().then(async () => {
     utils.load_plugins();
     if(MY_ADMIN_USER !== null){
         wlogger.info('Create admin user');
-        await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+        await usrsrv.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
         if (runningEnv == 'test'){
             wlogger.info('Execute cron script');
             await if_dev_execute_scripts();
