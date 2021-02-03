@@ -9,6 +9,11 @@ const filer = require('../core/file.js');
 
 const grpsrv = require('../core/group.service.js')
 
+/* TODO : find somewhere smart to put this */
+const STATUS_PENDING_EMAIL = 'Waiting for email approval';
+const STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
+const STATUS_ACTIVE = 'Active';
+const STATUS_EXPIRED = 'Expired';
 
 // module exports
 exports.get_user_home = get_user_home;
