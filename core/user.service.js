@@ -7,7 +7,7 @@ const goldap = require('../core/goldap.js');
 const utils = require('../core/utils.js');
 const filer = require('../core/file.js');
 
-const grpsrv = require('../core/groups.service.js')
+const grpsrv = require('../core/group.service.js')
 
 
 // module exports
