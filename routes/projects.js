@@ -404,7 +404,14 @@ router.post('/ask/project', async function(req, res){
         'size': req.body.size,
         'description': req.body.description,
         'orga': req.body.orga,
+        'linked': false
+        
     }
+    if (!(req.body.dmpid == null)) {
+        let_project.dmpid = req.body.dmpid,
+        let_project.linked = true
+    }
+
     await utils.mongo_pending_projects().insertOne(new_project);
     await utils.mongo_events().insertOne({
         owner: user.uid,

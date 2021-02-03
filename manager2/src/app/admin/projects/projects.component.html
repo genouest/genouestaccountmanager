@@ -78,6 +78,7 @@
                         <th>User</th>
                         <th>Size (Go)</th>
                         <th>orga</th>
+                        <th>DMP</th>
                         <th>Action</th>
                         <th></th>
                       </tr>
@@ -88,6 +89,7 @@
                         <td>{{pending.owner}}</td>
                         <td>{{pending.size}}</td>
                         <td>{{pending.orga}}</td>
+                        <td><span [class]="'dmp-badge status-' + pending.linked">{{pending.linked}}</span></td>
                         <td>
                           <div class="btn-group">
                           <button type="button" style="margin-right: 0px !important; " class="btn btn-sm btn-success" (click)="accept_project(pending)">Accept</button>
