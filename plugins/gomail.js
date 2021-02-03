@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-var notif = require('../routes/notif_gomail.js');
+var notif = require('../core/notif_gomail.js');
 var Promise = require('promise');
 
 // eslint-disable-next-line no-unused-vars

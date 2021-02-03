@@ -1,3 +1,5 @@
+/* TODO : SHOULD SPLIT THIS FILE, one for mongo, one for redis, on for mail ..... */
+
 var Promise = require('promise');
 const htmlToText = require('html-to-text');
 const winston = require('winston');
@@ -8,8 +10,6 @@ const MAILER = CONFIG.general.mailer;
 const marked = require('marked');
 
 const notif = require('../core/notif_'+MAILER+'.js');
-
-/* TODO : SHOULD SPLIT THIS FILE, one for mongo, one for redis, on for mail ..... */
 
 const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;

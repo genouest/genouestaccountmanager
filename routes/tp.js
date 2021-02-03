@@ -1,3 +1,5 @@
+/* TODO : create a core/tps.service.js and move all method in it */
+
 var express = require('express');
 var router = express.Router();
 var Promise = require('promise');
