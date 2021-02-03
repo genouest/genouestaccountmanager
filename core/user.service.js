@@ -291,7 +291,7 @@ async function delete_user(user, action_owner_id, message){
         'logs': [user.uid + '.' + fid + '.update']
     });
 
-    let msg_destinations =  [GENERAL_CONFIG.accounts];
+    let msg_destinations =  [CONFIG.general.accounts];
     let mail_message=  'no explaination provided !';
     if (message && message.length > 1) {
         mail_message = message;
