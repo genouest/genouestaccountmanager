@@ -33,7 +33,7 @@ const wlogger = winston.loggers.add('gomngr', {
 const promBundle = require('express-prom-bundle');
 
 const utils = require('./core/utils.js');
-const usrsrv = require('./core/users.service.js');
+const usrsrv = require('./core/user.service.js');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
