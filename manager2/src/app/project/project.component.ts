@@ -7,6 +7,7 @@ import { UserService } from 'src/app/user/user.service';
 import { GroupsService} from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Component({
     selector: 'app-project',
@@ -28,6 +29,9 @@ export class ProjectComponent implements OnInit {
     new_user: any
     remove_user: any
     default_size: any
+    dmp_err_msg: string;
+    dmp_msg: string;
+    dmp_available: boolean;
 
     manager_visible: boolean
 
@@ -167,4 +171,39 @@ export class ProjectComponent implements OnInit {
         }
         return res;
     }
+
+    ping_dmp() {
+        console.log("pinging Dmp db...");
+        this.projectsService.pingDmpDatabase().subscribe(
+            resp => {
+                this.dmp_msg = resp['message'];
+                this.dmp_available = true;
+            },
+            err => {
+                this.dmp_err_msg = err.error.message
+                this.dmp_available = false;
+            }
+        )
+        
+      }
+
+    get_dmp(dmpid) {
+        this.dmp_err_msg = ""
+        if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
+            this.projectsService.fetch_dmp(dmpid).subscribe(
+                resp => {
+                    this.dmp_available = true;
+                },
+                err => {
+                    this.dmp_available = false;
+                }
+            )
+        }
+        else {
+            this.dmp_err_msg = "Please enter a valid ID"
+        }
+        
+    }
+    
+
 }

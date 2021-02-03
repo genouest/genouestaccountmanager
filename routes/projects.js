@@ -372,6 +372,7 @@ router.get('/group/:id/projects', async function(req, res){
     res.end();
 });
 
+//puts the new project with the projects waiting for the admin approval
 router.post('/ask/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
@@ -435,6 +436,7 @@ router.post('/ask/project', async function(req, res){
     return;
 });
 
+//gets all the projects waiting the Admin approval
 router.get('/pending/project', async function (req, res) {
 
     if (!req.locals.logInfo.is_logged) {
@@ -473,6 +475,7 @@ router.get('/pending/project', async function (req, res) {
     }
 });
 
+//once the new project is approved by the admin it is removed from the pending projects 
 router.delete('/pending/project/:uuid', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
@@ -505,6 +508,7 @@ router.delete('/pending/project/:uuid', async function (req, res) {
 
 });
 
+//checks if the DMP OPIDoR API is online
 router.get('/dmp/ping', async function (req, res) {
     let online = this.http.get(GENERAL_CONFIG.dmp.url + '/heartbeat');
     if (online['code'] != 200) {
@@ -518,140 +522,30 @@ router.get('/dmp/ping', async function (req, res) {
     res.end();
 });
 
-router.post('/dmp/getResearchOutput', async function (req, res) {
-    let httpOptions = {
-        headers: { 'X-CONSULTKEY': '', 'X-AUTHKEY': '' },
-    };
-    let research_output_answer = this.http.post(
-        GENERAL_CONFIG.dmp.url + `/plans/${req.dmp_key}/research_outputs`,
-        httpOptions
-    );
-    if (research_output_answer['code'] != 200) {
-        res.status(401).send('Not Authorized ');
-        return;
+//fetchs a dmp based on his ID, using the dmp OPIDoR API
+router.post('/dmp/:id', async function (req, res) {
+    //request to DMP opidor API to get all of the DMP with a json format
+
+    //
+    //Keeps only the required data for the project
+    dmp_data = {}
+    test = true;
+    required_data = {
+        id: "test",
+        size: "300",
+        orga: "CNRS",
+        description: "TEST data"
+
     }
+    if ( test == true ) {
+        res.send({ message: 'Dmp found', data: required_data})
 
-    res.send(research_output_answer);
-    res.end();
-});
 
-router.post('/dmp/askProject', async function (req, res) {
-    if (!req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
-        return;
+    } else {
+        res.status(404).send('No pending project found')
     }
-    let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
-    if (!user) {
-        res.status(404).send('User not found');
-        return;
-    }
-
-    let httpOptions = {
-        headers: { 'X-CONSULTKEY': '', 'X-AUTHKEY': '' },
-    };
-    let project_total_size = 0;
-    let DMP_data = {};
-    for (const researchOutput in req.research_outputs) {
-        DMP_data = this.http.get(
-            GENERAL_CONFIG.dmp.url +
-            `/plans/${req.dmp_key}?research_output_id=${researchOutput}`,
-            httpOptions
-        );
-        project_total_size +=
-            DMP_data.researchOutput.sharing.distribution.fileVolume;
-    }
-
-    let new_project = {
-        id: DMP_data.project.title,
-        size: project_total_size,
-        description: DMP_data.project.description,
-        orga: DMP_data.project.funding.funder.name,
-        dmp_key: req.dmp_key,
-    };
-
-    // todo: find a way to use cc
-    let msg_destinations =  [GENERAL_CONFIG.accounts, user.email];
-    // let new_project = {
-    //     'id': req.body.id,
-    //     'size': req.body.size,
-    //     'description': req.body.description,
-    //     'orga': req.body.orga
-    // };
-
-    let msg_destinations = [GENERAL_CONFIG.accounts, user.email];
-    try {
-        await utils.send_notif_mail({
-            'name': 'ask_project',
-            'destinations': msg_destinations,
-            'subject': 'Project creation request: ' + req.body.id
-        }, {
-            '#UID#':  user.uid,
-            '#NAME#': req.body.id,
-            '#SIZE#': req.body.size,
-            '#ORGA#': req.body.orga,
-            '#DESC#': req.body.description
-        });
-    } catch(error) {
-        await utils.send_notif_mail(
-            {
-                name: 'ask_project',
-                destinations: msg_destinations,
-                subject: 'Project creation request: ' + req.body.id,
-            },
-            {
-                '#UID#': user.uid,
-                '#NAME#': req.body.id,
-                '#SIZE#': req.body.size,
-                '#ORGA#': req.body.orga,
-                '#DESC#': req.body.description,
-            }
-        );
-    } catch (error) {
-        logger.error(error);
-    }
-    // Authenticates Genouest using the API
-
-    if (DMP_data['code'] != 200) {
-        res.status(401).send('Not Authorized ');
-        return;
-    }
-    logger.info(new_project);
-    // Save in mongo the pending project data fr the admin to use
-    let saving_for_later = await utils.mongo_pending().insertOne(new_project);
-    logger.info(saving_for_later);
-    // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
-
-    res.send(saving_for_later);
-    res.end();
-    return;
-});
-
-router.post('/dmp/download', async function (req, res) {
-    // Authenticates Genouest using the API
-    let httpOptions = {
-        headers: { 'X-CONSULTKEY': '', 'X-AUTHKEY': '' },
-    };
-
-    let DMP_data = this.http.get(
-        GENERAL_CONFIG.dmp.url +
-        `/plans/${req.new_project.dmp_key}?research_output_id=${req.new_project.research_output}`,
-        httpOptions
-    );
-    if (DMP_data['code'] != 200) {
-        res.status(401).send('Not Authorized ');
-        return;
-    }
-
-    let new_project = {
-        id: DMP_data.project.title,
-        size: DMP_data.resarchOutput.sharing.distribution.fileVolume,
-        description: DMP_data.project.description,
-        orga: DMP_data.project.funding.funder.name,
-    };
-
-    // await utils.mongo_projects().updateOne({ 'id': req.params.id },);
-
-    res.send(new_project);
+    
+    res.send(required_data);
     res.end();
 });
 
