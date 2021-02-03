@@ -374,7 +374,7 @@ router.post('/group/:id', async function(req, res){
     }
 
     try {
-        group = await create_group(req.params.id , owner);
+        group = await grpsrv.create_group(req.params.id , owner);
     } catch(error){
         logger.error('Add Group Failed for: ' + req.params.id, error);
         res.status(500).send({message: 'Add Group Failed'});
@@ -698,7 +698,7 @@ router.get('/user/:id/activate', async function(req, res) {
         if(!data) {
             if (CONFIG.general.auto_add_group) {
                 try {
-                    await create_group(user.group, user.uid);
+                    await grpsrv.create_group(user.group, user.uid);
                 } catch(error){
                     logger.error('Add Group Failed for: ' + user.group, error);
                     res.status(500).send({message: 'Add Group Failed'});
