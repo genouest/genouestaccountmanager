@@ -89,7 +89,7 @@
                         <td>{{pending.owner}}</td>
                         <td>{{pending.size}}</td>
                         <td>{{pending.orga}}</td>
-                        <td><span [class]="'dmp-badge status-' + pending.linked">{{pending.linked}}</span></td>
+                        <td><span [class]="'dmp-badge status-' + pending.linked">{{function () => {if (pending.linked) {return Linked} else {}}}}</span></td>
                         <td>
                           <div class="btn-group">
                           <button type="button" style="margin-right: 0px !important; " class="btn btn-sm btn-success" (click)="accept_project(pending)">Accept</button>

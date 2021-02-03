@@ -404,12 +404,12 @@ router.post('/ask/project', async function(req, res){
         'size': req.body.size,
         'description': req.body.description,
         'orga': req.body.orga,
-        'linked': false
+        'dmp_status': "Legacy"
         
     }
     if (!(req.body.dmpid == null)) {
         let_project.dmpid = req.body.dmpid,
-        let_project.linked = true
+        let_project.dmp_status = "Linked"
     }
 
     await utils.mongo_pending_projects().insertOne(new_project);
