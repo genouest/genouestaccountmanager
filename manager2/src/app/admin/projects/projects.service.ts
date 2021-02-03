@@ -241,7 +241,7 @@ export class ProjectsService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.get(
+        return this.http.post(
             environment.apiUrl + '/dmp/' + dmpid,
             httpOptions
         );

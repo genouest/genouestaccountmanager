@@ -189,12 +189,17 @@ export class ProjectComponent implements OnInit {
 
     get_dmp(dmpid) {
         this.dmp_err_msg = ""
+        this.dmp_msg = ""
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
             this.projectsService.fetch_dmp(dmpid).subscribe(
                 resp => {
+                    this.dmp_msg = resp['message'];
                     this.dmp_available = true;
+                    this.new_project = resp.data
+                    
                 },
                 err => {
+                    this.dmp_err_msg = err.error.message
                     this.dmp_available = false;
                 }
             )

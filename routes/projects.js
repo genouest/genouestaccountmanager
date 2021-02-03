@@ -525,12 +525,14 @@ router.get('/dmp/ping', async function (req, res) {
 //fetchs a dmp based on his ID, using the dmp OPIDoR API
 router.post('/dmp/:id', async function (req, res) {
     //request to DMP opidor API to get all of the DMP with a json format
-
     //
     //Keeps only the required data for the project
+
+    id = req
     dmp_data = {}
     test = true;
     required_data = {
+        dmpid: req.params.id,
         id: "test",
         size: "300",
         orga: "CNRS",
