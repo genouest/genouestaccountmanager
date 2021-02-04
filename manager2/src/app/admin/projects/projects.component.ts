@@ -188,6 +188,9 @@ export class ProjectsComponent implements OnInit {
             this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
         }
 
+        if (!this.new_project.size || this.new_project.size == 0) {
+            this.new_project.size = this.default_size;
+        }
     }
 
 
