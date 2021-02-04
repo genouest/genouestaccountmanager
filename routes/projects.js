@@ -408,8 +408,8 @@ router.post('/ask/project', async function(req, res){
         
     }
     if (!(req.body.dmpid == null)) {
-        let_project.dmpid = req.body.dmpid,
-        let_project.dmp_status = "Linked"
+        new_project.dmpid = req.body.dmpid,
+        new_project.dmp_status = "Linked"
     }
 
     await utils.mongo_pending_projects().insertOne(new_project);
