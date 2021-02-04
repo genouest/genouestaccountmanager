@@ -554,7 +554,6 @@ router.post('/dmp/:id', async function (req, res) {
         res.status(404).send('No pending project found')
     }
     
-    res.send(required_data);
     res.end();
 });
 
