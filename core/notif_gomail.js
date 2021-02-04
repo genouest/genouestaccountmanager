@@ -4,7 +4,7 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const request = require('request');
 
-var utils = require('./utils');
+const utils = require('../core/utils.js');
 
 var mail_set = false;
 

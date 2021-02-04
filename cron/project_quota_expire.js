@@ -6,12 +6,12 @@
 
 var CONFIG = require('config');
 
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 const MAILER = CONFIG.general.mailer;
 // const MAIL_CONFIG = CONFIG[MAILER];
 
-var notif = require('../routes/notif_'+MAILER+'.js');
+var notif = require('../core/notif_'+MAILER+'.js');
 
 /*
 function timeConverter(tsp){

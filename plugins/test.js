@@ -6,7 +6,7 @@ var monk = require('monk'),
     users_db = db.get('users');
 */
 //var Promise = require('promise');
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 // eslint-disable-next-line no-unused-vars
 var remove_user = async function(userId, data, adminId){

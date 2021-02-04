@@ -5,7 +5,7 @@ var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-var utils = require('./utils');
+const utils = require('../core/utils.js');
 
 
 /**

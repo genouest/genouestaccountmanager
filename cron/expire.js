@@ -13,17 +13,17 @@ var STATUS_EXPIRED = 'Expired';
 const process = require('process');
 
 var CONFIG = require('config');
-var goldap = require('../routes/goldap.js');
-const filer = require('../routes/file.js');
+var goldap = require('../core/goldap.js');
+const filer = require('../core/file.js');
 
 var Promise = require('promise');
 
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
 
-var notif = require('../routes/notif_'+MAILER+'.js');
+var notif = require('../core/notif_'+MAILER+'.js');
 
 /*
 function timeConverter(tsp){

@@ -3,10 +3,10 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const filer = require('../routes/file.js');
 var CONFIG = require('config');
 
-var utils = require('./utils');
+const filer = require('../core/file.js');
+const utils = require('../core/utils.js');
 
 
 router.get('/ssh/:id/putty', async function(req, res) {

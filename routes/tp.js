@@ -1,3 +1,5 @@
+/* TODO : create a core/tps.service.js and move all method in it */
+
 var express = require('express');
 var router = express.Router();
 var Promise = require('promise');
@@ -8,13 +10,13 @@ var GENERAL_CONFIG = CONFIG.general;
 
 // var cookieParser = require('cookie-parser')
 
-var goldap = require('../routes/goldap.js');
 var fdbs = require('../routes/database.js');
 var fwebs = require('../routes/web.js');
 var fusers = require('../routes/users.js');
 
-const filer = require('../routes/file.js');
-var utils = require('../routes/utils.js');
+const goldap = require('../core/goldap.js');
+const filer = require('../core/file.js');
+const utils = require('../core/utils.js');
 
 var ObjectID = require('mongodb').ObjectID;
 

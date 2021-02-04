@@ -8,7 +8,7 @@ var CONFIG = require('config');
 
 var ObjectID = require('mongodb').ObjectID;
 
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -122,7 +122,7 @@ function removeReservations(rid) {
                 });
             });
         })).then(
-            (result) => { 
+            (result) => {
                 console.debug('something went wrong...', result);
                 process.exit(1);
             }
