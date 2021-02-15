@@ -6,16 +6,11 @@ var monk = require('monk'),
     users_db = db.get('users');
 */
 //var Promise = require('promise');
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 // eslint-disable-next-line no-unused-vars
 var remove_user = async function(userId, data, adminId){
-    let user = await utils.mongo_users().findOne({'uid': userId});
-    if(!user){
-        console.trace('Error finding user', userId);
-        return false;
-    }
-    console.log('Plugin removal test done');
+    console.log('Plugin removal test done, nothing to do');
     return true;
 };
 

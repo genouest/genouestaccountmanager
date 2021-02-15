@@ -32,6 +32,9 @@ const wlogger = winston.loggers.add('gomngr', {
 
 const promBundle = require('express-prom-bundle');
 
+const utils = require('./core/utils.js');
+const usrsrv = require('./core/user.service.js');
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var ssh = require('./routes/ssh');
@@ -45,7 +48,6 @@ var quota = require('./routes/quota');
 var plugin = require('./routes/plugin');
 var tp = require('./routes/tp');
 var conf = require('./routes/conf');
-var utils = require('./routes/utils.js');
 var tags = require('./routes/tags.js');
 var ObjectID = require('mongodb').ObjectID;
 
@@ -345,6 +347,8 @@ app.post('/project/:id/request', projects);
 app.delete('/project/:id', projects);
 app.put('/project/:id/request', projects);
 app.post('/ask/project', projects);
+app.get('/pending/project', projects);
+app.delete('/pending/project/:id', projects);
 app.get('/quota/:user/:id', quota);
 app.get('/plugin', plugin);
 app.get('/plugin/:id', plugin);
@@ -427,7 +431,7 @@ utils.init_db().then(async () => {
     utils.load_plugins();
     if(MY_ADMIN_USER !== null){
         wlogger.info('Create admin user');
-        await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+        await usrsrv.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
         if (runningEnv == 'test'){
             wlogger.info('Execute cron script');
             await if_dev_execute_scripts();

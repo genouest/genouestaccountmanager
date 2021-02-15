@@ -78,6 +78,7 @@ export class ProjectComponent implements OnInit {
                 this.config = resp;
                 if (this.config.project && this.config.project.default_size) {
                     this.default_size = this.config.project.default_size;
+                    this.new_project.size = this.default_size
                 }
             },
             err => console.log('failed to get config')

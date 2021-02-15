@@ -1,3 +1,5 @@
+/* TODO : create a core/project.service.js and move all method in it */
+
 var express = require('express');
 var router = express.Router();
 const winston = require('winston');
@@ -10,8 +12,8 @@ var GENERAL_CONFIG = CONFIG.general;
 // var cookieParser = require('cookie-parser');
 // var goldap = require('../routes/goldap.js');
 
-const filer = require('../routes/file.js');
-var utils = require('./utils');
+const filer = require('../core/file.js');
+const utils = require('../core/utils.js');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -113,6 +115,7 @@ router.post('/project', async function(req, res){
         'owner': req.body.owner,
         'group': req.body.group,
         'size': req.body.size,
+        'created_at': new Date().getTime(),
         'expire': (req.body.expire) ? req.body.expire : new Date().getTime() + CONFIG.project.default_expire * day_time,
         'description': req.body.description,
         'path': req.body.path,
@@ -129,6 +132,8 @@ router.post('/project', async function(req, res){
         res.status(500).send({message: 'Add Project Failed'});
         return;
     }
+
+    await utils.mongo_pending_projects().deleteOne({ uuid: req.body.uuid });
     await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
     res.send({message: 'Project created'});
     return;
@@ -210,7 +215,7 @@ router.post('/project/:id', async function(req, res){
         logger.debug('Created file', created_file);
     } catch(error) {
         logger.error('Update Project Failed for: ' + new_project.id, error);
-        res.status(500).send({message: 'Add Project Failed'});
+        res.status(500).send({message: 'Update Project Failed'});
         return;
     }
 
@@ -393,6 +398,23 @@ router.post('/ask/project', async function(req, res){
     // logger.info(new_project);
 
     // todo: find a way to use cc
+    let new_project = {
+        'uuid': (new Date().getTime()).toString(),
+        'id': req.body.id,
+        'owner': user.uid,
+        'group': user.group,
+        'size': req.body.size,
+        'description': req.body.description,
+        'orga': req.body.orga,
+    };
+    await utils.mongo_pending_projects().insertOne(new_project);
+    await utils.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'new pending project creation: ' + req.body.id,
+        logs: [],
+    });
+
     let msg_destinations =  [GENERAL_CONFIG.accounts, user.email];
 
     try {
@@ -416,4 +438,75 @@ router.post('/ask/project', async function(req, res){
     return;
 });
 
+router.get('/pending/project', async function (req, res) {
+
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        res.status(404).send('User not found');
+        return;
+    }
+    if (GENERAL_CONFIG.admin.indexOf(user.uid) < 0) {
+        if (!user.pending) {
+            res.send([]);
+            return;
+        } else {
+            let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
+            res.send(pendings);
+            return;
+        }
+    } else {
+        if (req.query.all === 'true') {
+            let pendings = await utils.mongo_pending_projects().find({}).toArray();
+            res.send(pendings);
+            return;
+        } else {
+            if (!user.pending) {
+                res.send([]);
+                return;
+            } else {
+                let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
+                res.send(pendings);
+                return;
+            }
+        }
+    }
+});
+
+router.delete('/pending/project/:uuid', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    let user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        res.status(404).send('User not found');
+        return;
+    }
+    if (GENERAL_CONFIG.admin.indexOf(user.uid) < 0) {
+        res.status(401).send('Not authorized');
+        return;
+    }
+    const result = await utils.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
+    if (result.deletedCount === 1) {
+        await utils.mongo_events().insertOne({
+            owner: user.uid,
+            date: new Date().getTime(),
+            action: 'remove Pending project ' + req.params.uuid,
+            logs: [],
+        });
+
+        res.send({ message: 'Pending Project deleted'});
+    }
+    else {
+        res.status(404).send('No pending project found');
+    }
+
+
+});
+
+router.post;
 module.exports = router;

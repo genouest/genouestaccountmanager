@@ -4,7 +4,7 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const request = require('request');
 
-var utils = require('./utils');
+const utils = require('../core/utils.js');
 
 var mail_set = false;
 
@@ -102,6 +102,7 @@ module.exports = {
 
     add: function(email, callback) {
         if(email===undefined ||email===null || email=='' || ! mail_set) {
+            logger.error('[notif][add] email not valid');
             callback();
             return;
         }

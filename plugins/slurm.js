@@ -3,7 +3,7 @@ var fs = require('fs');
 var CONFIG = require('config');
 
 var Promise = require('promise');
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 var activate_user = async function(userId, _data, adminId){
     console.log('[Slurm] : Creating slurm cron file.. ' + userId );
@@ -33,7 +33,7 @@ var activate_user = async function(userId, _data, adminId){
         await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']});
         console.log('[slurm] : done');
     } catch (err) {
-        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [], 'status': 1}); 
+        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [], 'status': 1});
         console.log('[slurm]: failed');
     }
     return true;
@@ -125,4 +125,3 @@ module.exports = {
         return delete_user(userId, user, adminId);
     }
 };
-

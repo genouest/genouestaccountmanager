@@ -4,9 +4,9 @@
  */
 const program = require('commander');
 
-//var CONFIG = require('config');
+var CONFIG = require('config');
 
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -20,7 +20,8 @@ winston.loggers.add('gomngr', {
 //const logger = winston.loggers.get('gomngr');
 
 //var tps = require('../routes/users.js');
-var notif = require('../routes/notif');
+const MAILER = CONFIG.general.mailer;
+var notif = require('../core/notif_'+MAILER+'.js');
 
 if (!console.table){
     require('console.table');

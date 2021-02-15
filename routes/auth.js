@@ -4,7 +4,7 @@ var express = require('express');
 var router = express.Router();
 // var cookieParser = require('cookie-parser');
 // var session = require('express-session');
-var goldap = require('../routes/goldap.js');
+const goldap = require('../core/goldap.js');
 // var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
@@ -24,10 +24,8 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
-
-var notif = require('../routes/notif_'+MAILER+'.js');
-
-var utils = require('./utils');
+const notif = require('../core/notif_'+MAILER+'.js');
+const utils = require('../core/utils.js');
 
 var attemps = {};
 

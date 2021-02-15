@@ -3,7 +3,7 @@ var fs = require('fs');
 //var http = require('http');
 var CONFIG = require('config');
 
-var utils = require('../routes/utils');
+var utils = require('../core/utils.js');
 
 var Promise = require('promise');
 var path_to_script = CONFIG.general.plugin_script_dir + '/remove_galaxy_user.py';

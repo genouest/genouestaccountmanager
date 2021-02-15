@@ -12,7 +12,7 @@
           <label for="mailing_list" class="col-form-label">Mailing list</label>
             <select id="mailing_list" placeholder="Choose your mailing list" [ngModelOptions]="{standalone: true}" [(ngModel)]="mailing_list" (change)="decode_template($event); generate_list_members($event);" class="form-control" >
               <option value="" disabled selected>Select your mailing list</option>
-              <option *ngFor="let list of mailing_lists" [value]="list">{{list}}</option>
+              <option *ngFor="let list of mailing_lists" [value]="list.list_name">{{list.list_name}}</option>
             </select>
             <br *ngIf="mailing_list"/>
             <button type="button" *ngIf="mailing_list" class="btn btn-primary" data-toggle="modal" data-target="#members_view">

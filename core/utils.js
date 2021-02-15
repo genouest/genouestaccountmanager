@@ -1,3 +1,5 @@
+/* TODO : SHOULD SPLIT THIS FILE, one for mongo, one for redis, on for mail ..... */
+
 var Promise = require('promise');
 const htmlToText = require('html-to-text');
 const winston = require('winston');
@@ -5,8 +7,9 @@ const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 const MAILER = CONFIG.general.mailer;
-var notif = require('../routes/notif_'+MAILER+'.js');
 const marked = require('marked');
+
+const notif = require('../core/notif_'+MAILER+'.js');
 
 const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;
@@ -18,6 +21,7 @@ var mongo_databases = null;
 var mongo_web = null;
 var mongo_projects = null;
 var mongo_tags = null;
+var mongo_pending_projects = null;
 
 var mongo_connect = async function() {
     let url = CONFIG.mongo.url;
@@ -37,6 +41,7 @@ var mongo_connect = async function() {
     mongo_web = mongodb.collection('web');
     mongo_projects = mongodb.collection('projects');
     mongo_tags = mongodb.collection('tags');
+    mongo_pending_projects = mongodb.collection('pending_projects');
 };
 // mongo_connect();
 
@@ -63,6 +68,7 @@ exports.mongo_databases = function() {return mongo_databases;};
 exports.mongo_web = function() {return mongo_web;};
 exports.mongo_projects = function() {return mongo_projects;};
 exports.mongo_tags = function() {return mongo_tags;};
+exports.mongo_pending_projects = function() {return mongo_pending_projects;};
 
 
 var plugins = CONFIG.plugins;
