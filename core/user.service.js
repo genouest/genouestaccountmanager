@@ -15,6 +15,8 @@ const STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 const STATUS_ACTIVE = 'Active';
 const STATUS_EXPIRED = 'Expired';
 
+let day_time = 1000 * 60 * 60 * 24;
+
 // module exports
 exports.get_user_home = get_user_home;
 // exports.create_extra_user = create_extra_user; // todo check exports is needed
