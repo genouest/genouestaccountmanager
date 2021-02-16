@@ -134,7 +134,7 @@ async function create_admin(default_admin, default_admin_group){
         }
         else {
             logger.info('need to create admin group');
-            let group = await create_group(default_admin_group, default_admin);
+            let group = await grpsrv.create_group(default_admin_group, default_admin);
             logger.info('admin group created', group);
             let user = await create_extra_user(default_admin, group, true);
             logger.info('admin user created', user);
