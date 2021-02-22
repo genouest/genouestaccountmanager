@@ -25,9 +25,12 @@ COPY config/test.json /root/genouestaccountmanager/config
 COPY plugins /root/genouestaccountmanager/plugins
 COPY public /root/genouestaccountmanager/public
 COPY routes /root/genouestaccountmanager/routes
+COPY core /root/genouestaccountmanager/core
 COPY templates /root/genouestaccountmanager/templates
 COPY tests /root/genouestaccountmanager/tests
 COPY test /root/genouestaccountmanager/test
+COPY cron /root/genouestaccountmanager/cron
+
 RUN mkdir -p /opt/my/readmes/readmes1
 RUN mkdir -p /opt/my/readmes/readmes2
 RUN mkdir -p /opt/my/scripts
