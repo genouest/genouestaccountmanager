@@ -117,7 +117,8 @@ router.post('/project', async function(req, res){
         'description': req.body.description,
         'path': req.body.path,
         'orga': req.body.orga,
-        'access': req.body.access
+        'access': req.body.access,
+        'dmp_linked': req.body.dmp_linked
     };
     await utils.mongo_projects().insertOne(new_project);
     let fid = new Date().getTime();

@@ -24,6 +24,8 @@ export class ProjectComponent implements OnInit {
     prj_msg: string
     oldGroup: string
 
+    dmp_visible:boolean
+
     new_user_admin: string = ''
     remove_user_admin: string = ''
 
@@ -47,7 +49,8 @@ export class ProjectComponent implements OnInit {
             orga: '',
             description: '',
             access: 'Group',
-            path: ''
+            path: '',
+            dmp_linked: Boolean,
         }
         this.users = [];
         this.groups = [];
@@ -81,13 +84,14 @@ export class ProjectComponent implements OnInit {
             },
             err => console.log('failed to get config')
         );
-
+        this.dmp_visible = false;
     }
 
     show_project_users(projectId) {
         this.projectsService.get(projectId).subscribe(
             resp => {
                 this.project = resp;
+                console.log(this.project)
                 this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {

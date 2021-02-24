@@ -227,7 +227,8 @@
             <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [value]="default_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
           </div>
           <div class="col-sm-3">
-            <div class="[ form-group ]">
+            <span [class]="'dmp-badge status-' + new_project.dmp_status">{{new_project.dmp_status}}</span>
+            <!-- <div class="[ form-group ]">
               <input type="checkbox" name="fancy-checkbox-default-custom-icons" id="fancy-checkbox-default-custom-icons" autocomplete="off" />
               <div class="[ btn-group ]">
                   <label for="fancy-checkbox-default-custom-icons" class="[ btn btn-default ]">
@@ -235,10 +236,10 @@
                       <span class="[ glyphicon glyphicon-minus ]"></span>
                   </label>
                   <label for="fancy-checkbox-default-custom-icons" class="[ btn btn-default active ]">
-                      Default Checkbox
+                    
                   </label>
-              </div>
-          </div>
+              </div> -->
+            <!-- </div> -->
 
           </div>
         </div>
