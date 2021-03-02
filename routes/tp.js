@@ -200,7 +200,7 @@ var delete_tp_user = function(user, admin_id){
                 return fwebs.delete_webs(user);
             // eslint-disable-next-line no-unused-vars
             }).then(function(web_res){
-                return fusers.delete_user(user, admin_id);
+                return usrsrv.delete_user(user, admin_id);
             }).then(function(){
                 resolve(true);
             });
