@@ -30,8 +30,8 @@ let day_time = 1000 * 60 * 60 * 24;
 let duration_list = conf.get_conf().duration;
 //const runningEnv = process.env.NODE_ENV || 'prod';
 
-const grpsrv = require('../core/group.service.js')
-const usrsrv = require('../core/user.service.js')
+const grpsrv = require('../core/group.service.js');
+const usrsrv = require('../core/user.service.js');
 
 
 router.get('/user/:id/apikey', async function(req, res){

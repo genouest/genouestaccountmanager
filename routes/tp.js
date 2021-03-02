@@ -12,8 +12,8 @@ var GENERAL_CONFIG = CONFIG.general;
 
 var fdbs = require('../routes/database.js');
 var fwebs = require('../routes/web.js');
-var fusers = require('../routes/users.js');
-const grpsrv = require('../core/group.service.js');
+// var fusers = require('../routes/users.js');
+// const grpsrv = require('../core/group.service.js');
 const usrsrv = require('../core/user.service.js');
 
 const goldap = require('../core/goldap.js');
