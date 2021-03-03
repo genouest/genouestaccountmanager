@@ -10,7 +10,7 @@ exports.is_admin = is_admin;
 
 async function is_admin(uid) {
     let isadmin = false;
-    if (CONFIG.general.indexOf(uid) >= 0)
+    if (CONFIG.general.admin.indexOf(uid) >= 0)
     {
         isadmin = true;
     }
