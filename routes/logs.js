@@ -5,18 +5,29 @@ var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 const utils = require('../core/utils.js');
+const rgtsrv = require('../core/right.service.js');
 
 router.get('/log', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -45,13 +56,23 @@ router.post('/log/user/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
 
     if(!session_user){
         res.status(404).send({message: 'Session user not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -81,13 +102,23 @@ router.get('/log/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
 
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
