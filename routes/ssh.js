@@ -3,8 +3,6 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-var CONFIG = require('config');
-
 const filer = require('../core/file.js');
 const utils = require('../core/utils.js');
 const rgtsrv = require('../core/right.service.js');

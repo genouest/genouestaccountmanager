@@ -6,7 +6,6 @@ var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
-var GENERAL_CONFIG = CONFIG.general;
 
 // var cookieParser = require('cookie-parser')
 

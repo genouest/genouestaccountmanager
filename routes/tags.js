@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var CONFIG = require('config');
 
 var utils = require('../core/utils.js');
 const rgtsrv = require('../core/right.service.js');

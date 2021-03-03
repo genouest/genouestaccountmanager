@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var CONFIG = require('config');
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
