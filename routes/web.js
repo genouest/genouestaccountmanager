@@ -1,12 +1,11 @@
 var express = require('express');
 var router = express.Router();
-var CONFIG = require('config');
 var Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 const utils = require('../core/utils.js');
-
+const rolsrv = require('../core/role.service.js');
 
 /**
  * Change owner
@@ -21,17 +20,25 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+    session_user.is_admin = isadmin;
+
     if(!session_user.is_admin) {
         res.status(401).send({message: 'Not authorized'});
         return;
@@ -47,17 +54,25 @@ router.get('/web', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+
+    session_user.is_admin = isadmin;
+
     let filter = {};
     if(!session_user.is_admin) {
         filter = {owner: session_user.uid};
@@ -76,17 +91,24 @@ router.get('/web/owner/:owner', async function(req, res) {
         return;
     }
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+    session_user.is_admin = isadmin;
+
     let filter = {owner: req.params.owner};
     let webs = await utils.mongo_web().find(filter).toArray();
     res.send(webs);
@@ -102,17 +124,24 @@ router.post('/web/:id', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+
+    session_user.is_admin = isadmin;
 
     let owner = session_user.uid;
     if(req.body.owner !== undefined && session_user.is_admin) {
@@ -140,17 +169,25 @@ router.delete('/web/:id', async function(req, res) {
         return;
     }
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+
+    session_user.is_admin = isadmin;
+
     let filter = {name: req.params.id};
     if(!session_user.is_admin) {
         filter['owner'] = session_user.uid;
