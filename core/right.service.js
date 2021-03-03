@@ -8,7 +8,7 @@ const CONFIG = require('config')
 
 exports.is_admin = is_admin;
 
-function is_admin(uid) {
+async function is_admin(uid) {
     let isadmin = false;
     if (CONFIG.general.indexOf(uid) >= 0)
     {
