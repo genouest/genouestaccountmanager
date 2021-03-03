@@ -89,7 +89,7 @@ export class ProjectComponent implements OnInit {
             resp => {this.dmp = resp.yaml},
             err => console.log('dmperr')
         );
-            
+        // console.log(this.dmp)
 
     }
 
