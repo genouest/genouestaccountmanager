@@ -848,7 +848,7 @@ router.post('/dmp/:id', async function (req, res) {
             }
         ]
     }
-    yaml_data = yaml.load(required_data.toString());
+    yaml_data = yaml.load(required_data.toString()).toString;
     if ( test == true ) {
         res.send({ message: 'Dmp found', data: required_data, yaml:yaml_data})
 
