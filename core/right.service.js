@@ -1,6 +1,6 @@
-const Promise = require('promise');
-const winston = require('winston');
-const logger = winston.loggers.get('gomngr');
+//const Promise = require('promise');
+//const winston = require('winston');
+//const logger = winston.loggers.get('gomngr');
 const CONFIG = require('config')
 
 // This will allow to change the way admin right are checked without impact on other part of the code
