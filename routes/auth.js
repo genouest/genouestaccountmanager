@@ -26,7 +26,7 @@ var STATUS_EXPIRED = 'Expired';
 
 const notif = require('../core/notif_'+MAILER+'.js');
 const utils = require('../core/utils.js');
-const rgtsrv = require('../core/right.service.js');
+const rolsrv = require('../core/role.service.js');
 
 var attemps = {};
 
@@ -91,7 +91,7 @@ router.post('/mail/auth/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({uid: req.params.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -214,7 +214,7 @@ router.get('/auth', async function(req, res) {
         let isadmin = false;
         try {
             user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-            isadmin = await rgtsrv.is_admin(user.uid);
+            isadmin = await rolsrv.is_admin(user.uid);
         } catch(e) {
             logger.error(e);
             res.status(404).send({message: 'User session not found'});
@@ -266,7 +266,7 @@ router.post('/auth/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({uid: req.params.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});

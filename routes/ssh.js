@@ -5,7 +5,7 @@ const logger = winston.loggers.get('gomngr');
 
 const filer = require('../core/file.js');
 const utils = require('../core/utils.js');
-const rgtsrv = require('../core/right.service.js');
+const rolsrv = require('../core/role.service.js');
 
 router.get('/ssh/:id/putty', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
@@ -47,7 +47,7 @@ router.get('/ssh/:id/private', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({uid: req.params.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});

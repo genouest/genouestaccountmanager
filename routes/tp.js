@@ -18,7 +18,7 @@ const usrsrv = require('../core/user.service.js');
 const goldap = require('../core/goldap.js');
 const filer = require('../core/file.js');
 const utils = require('../core/utils.js');
-const rgtsrv = require('../core/right.service.js');
+const rolsrv = require('../core/role.service.js');
 
 var ObjectID = require('mongodb').ObjectID;
 
@@ -357,7 +357,7 @@ router.post('/tp', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -397,7 +397,7 @@ router.get('/tp/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -450,7 +450,7 @@ router.delete('/tp/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -517,7 +517,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -580,7 +580,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     let isadmin = false;
     try {
         user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rgtsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var utils = require('../core/utils.js');
-const rgtsrv = require('../core/right.service.js');
+const rolsrv = require('../core/role.service.js');
 
 router.get('/tags', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
@@ -36,7 +36,7 @@ router.post('/tags/:kind/:id', async function(req, res) {
     let isadmin = false;
     try {
         session_user= await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rgtsrv.is_admin(session_user.uid);
+        isadmin = await rolsrv.is_admin(session_user.uid);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
