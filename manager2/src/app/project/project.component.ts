@@ -196,7 +196,12 @@ export class ProjectComponent implements OnInit {
                     console.log(resp.data)
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;
-                    this.new_project = resp.data
+                    this.new_project = {
+                        'id': resp.data.project.title,
+                        'description': resp.data.researchOutput[0].researchOuputDescription.description,
+                        'orga': resp.data.project.funding.name};
+
+                                        
                     
                 },
                 err => {

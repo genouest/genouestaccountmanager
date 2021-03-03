@@ -118,6 +118,7 @@ router.post('/project', async function(req, res){
         'path': req.body.path,
         'orga': req.body.orga,
         'access': req.body.access,
+        'dmpid': req.body.dmpid,
         'dmp_linked': req.body.dmp_linked
     };
     await utils.mongo_projects().insertOne(new_project);
@@ -540,13 +541,313 @@ router.post('/dmp/:id', async function (req, res) {
     dmp_data = {}
     test = true;
     required_data = {
-        dmpid: req.params.id,
-        id: "test",
-        size: "300",
-        orga: "CNRS",
-        description: "TEST data"
-
+        "plan_id": 1676,
+        "project": {
+            "title": "Modélisation de l'impact climatique d’une maladie émergente, le dépérissement de l'aulne induit par Phytophthora alni",
+            "principalInvestigator": {
+                "person": {
+                    "lastName": "Marçais",
+                    "nameType": "Personne",
+                    "firstName": "Benoît",
+                    "mbox": "benoit.marcais@inist.fr",
+                    "personId": "https://orcid.org/0000-0002-8107-644X",
+                    "IdType": "ORCID",
+                    "affiliationName": "IAM Interactions Arbres/Micro-organismes",
+                    "affiliationId": "200117307M",
+                    "affiliationIdType": "RNSR"
+                },
+                "role": "Coordinateur du projet"
+            },
+            "experimentalPlan": {
+                "title": "Modeling climate impact on an emerging disease, the Phytophthora alni-induced alder decline. Aguayo J et al. Global Change Biology (2014) 20, 3209–3221",
+                "docIdentifier": " https://doi.org/10.1111/gcb.12601",
+                "idType": "DOI"
+            },
+            "funding": [
+                {
+                    "funder": {
+                        "label": {
+                            "en_GB": "French National Cancer Institute, INCa",
+                            "fr_FR": "Institut National Du Cancer, INCa"
+                        },
+                        "name": "Institut National Du Cancer",
+                        "funderId": "http://dx.doi.org/10.13039/501100006364",
+                        "idType": "FundRef",
+                        "dataPolicy": {
+                            "title": "Déclaration conjointe du réseau des agences de financement françaises en faveur de la science ouverte",
+                            "docIdentifier": "https://www.e-cancer.fr/content/download/291990/4158532/file/De%CC%81claration%20conjointe%20en%20faveur%20de%20la%20science%20ouverte%20-%20%2029%20juin.pdf",
+                            "idType": "URL"
+                        },
+                        "id": 312
+                    },
+                    "grantId": "hdjsqkg",
+                    "fundingStatus": "Rejeté"
+                },
+                {
+                    "funder": {
+                        "dataPolicy": {
+                            "title": "Plan données de la recherche du CNRS",
+                            "docIdentifier": "https://www.cnrs.fr/sites/default/files/pdf/Plaquette_PlanDDOR_Nov20.pdf",
+                            "idType": "URL"
+                        },
+                        "name": "Agence Nationale de la Recherche",
+                        "funderId": "http://dx.doi.org/10.13039/501100001665",
+                        "idType": "FundRef"
+                    },
+                    "grantId": "ANR-07-BDIV-0003",
+                    "fundingStatus": "Approuvé"
+                },
+                {
+                    "funder": {
+                        "dataPolicy": {
+                            "title": "Guidelines on FAIR data management in Horizon 2020",
+                            "docIdentifier": "https://ec.europa.eu/research/participants/data/ref/h2020/grants_manual/hi/oa_pilot/h2020-hi-oa-data-mgt_en.pdf",
+                            "idType": "URL"
+                        },
+                        "name": "European Commission",
+                        "funderId": "https://ror.org/00k4n6c32",
+                        "idType": "ROR ID"
+                    },
+                    "grantId": "Identifiant non retrouvé",
+                    "fundingStatus": "Approuvé"
+                }
+            ],
+            "acronym": "PHYTOCLIM",
+            "description": "<p>A partir des ann&eacute;es 1990, une nouvelle maladie est apparue sur les aulnes en bordure des cours d&rsquo;eau. Elle est caus&eacute;e par un microorganisme pathog&egrave;ne, <em>Phytophthora alni</em>, qui attaque les racines des arbres et provoque leur d&eacute;p&eacute;rissement. Ce pathog&egrave;ne est une esp&egrave;ce&nbsp; thermophile. Par ailleurs, l&rsquo;&eacute;mergence du d&eacute;p&eacute;rissement de l&rsquo;aulne est concomitante avec les ann&eacute;es particuli&egrave;rement chaudes des deux derni&egrave;res d&eacute;cennies.</p>\r\n<p>Les facteurs environnementaux, tels que la temp&eacute;rature moyenne du site et les caract&eacute;ristiques du sol jouent un r&ocirc;le important dans l'apparition de la maladie.</p>\r\n<p>L'objectif de ce projet est de mod&eacute;liser et de pr&eacute;voir l'effet de l'environnement sur la gravit&eacute; des &eacute;pid&eacute;mies dues &agrave; <em>Phytophthora alni</em> et de d&eacute;terminer si les r&eacute;cents changements climatiques pourraient expliquer l'&eacute;mergence de la maladie.</p>",
+            "startDate": "2007-01-01",
+            "endDate": "1995-12-01",
+            "partner": [
+                {
+                    "dataPolicy": {
+                        "title": null,
+                        "docIdentifier": null,
+                        "idType": null
+                    },
+                    "name": "Walloon Agricultural Research Centre",
+                    "rnsr": null,
+                    "orgId": "https://ror.org/016n74679",
+                    "idType": "ROR ID"
+                },
+                {
+                    "dataPolicy": {
+                        "title": null,
+                        "docIdentifier": null,
+                        "idType": null
+                    },
+                    "name": "Plant Protection Institute",
+                    "rnsr": null,
+                    "orgId": "https://ror.org/052t9a145",
+                    "idType": null
+                },
+                {
+                    "dataPolicy": {
+                        "title": "Charte pour le libre accès aux publications et aux données",
+                        "docIdentifier": "https://hal.inrae.fr/hal-02801732",
+                        "idType": "URL"
+                    },
+                    "name": "BIOGECO Biodiversité, Gènes et Communautés",
+                    "rnsr": "200317684N",
+                    "orgId": "https://ror.org/033ebya06",
+                    "idType": "ROR ID"
+                }
+            ]
+        },
+        "meta": {
+            "title": "DMP du projet PHYTOCLIM",
+            "creationDate": "2021-02-22",
+            "lastModifiedDate": "2021-02-22",
+            "dmpLanguage": "fra",
+            "contact": {
+                "person": {
+                    "lastName": "Aguayo",
+                    "nameType": "Personne",
+                    "firstName": "Jaime",
+                    "mbox": "toto@inist.fr",
+                    "personId": "https://orcid.org/0000-0002-7552-0655",
+                    "IdType": "ORCID",
+                    "affiliationName": "IAM Interactions Arbres/Micro-organismes",
+                    "affiliationId": "200117307M",
+                    "affiliationIdType": "RNSR"
+                },
+                "role": "Coordinateur du plan de gestion de données"
+            },
+            "license": null,
+            "description": "<p>Il s&rsquo;agit d&rsquo;un PGD destin&eacute; &agrave; &ecirc;tre utilis&eacute; &agrave; des fins p&eacute;dagogiques pour un projet de th&egrave;se fictif en &eacute;cologie (biologie v&eacute;g&eacute;tale) d&rsquo;apr&egrave;s Aguayo J, Elegbede F, Husson C, Saintonge FX, Mar&ccedil;ais B. Modeling climate impact on an emerging disease, the Phytophthora alni-induced alder decline. Glob Chang Biol. 2014;20:3209-21</p>",
+            "dmpId": null,
+            "idType": null,
+            "licenseStartDate": null
+        },
+        "researchOutput": [
+            {
+                "research_output_id": 1854,
+                "researchOutputDescription": {
+                    "title": "Etat sanitaire des aulnes",
+                    "contact": {
+                        "person": {
+                            "lastName": "Aguayo",
+                            "nameType": "Personne",
+                            "firstName": "Jaime",
+                            "mbox": "toto@inist.fr",
+                            "personId": "https://orcid.org/0000-0002-7552-0655",
+                            "IdType": "ORCID",
+                            "affiliationName": "IAM Interactions Arbres/Micro-organismes",
+                            "affiliationId": "200117307M",
+                            "affiliationIdType": "RNSR"
+                        }
+                    },
+                    "description": "<p>Sur 16 sites g&eacute;olocalis&eacute;s dans le Nord-Est (NE) de la France, l&rsquo;&eacute;tat sanitaire de 50 aulnes de cette r&eacute;gion est not&eacute; chaque ann&eacute;e en juin de 2007 &agrave; 2012 selon 2 bar&egrave;mes :</p>\r\n<ul>\r\n<li>Pr&eacute;sence ou absence de chancre &agrave; la base du tronc</li>\r\n<li>Niveau de d&eacute;p&eacute;rissement de la cime des arbres :\r\n<ul>\r\n<li>1 pas de sympt&ocirc;me</li>\r\n<li>2 moins de 50 % de d&eacute;p&eacute;rissement</li>\r\n<li>3 plus de 50 % de d&eacute;p&eacute;rissement</li>\r\n<li>4 Mort</li>\r\n</ul>\r\n</li>\r\n</ul>",
+                    "type": "Jeu de données",
+                    "workPackage": "pas de workpackage",
+                    "uncontrolledKeywords": [
+                        "Dépérissement",
+                        " Etat sanitaire"
+                    ],
+                    "language": "fra",
+                    "datasetId": null,
+                    "idType": null,
+                    "containsPersonalData": "Non",
+                    "containsSensitiveData": "Non",
+                    "hasEthicalIssues": "Non",
+                    "controlledKeyword": [
+                        {
+                            "keyword": "Environmental data",
+                            "keywordSchema": "GEMET - General Multilingual Environmental Thesaurus",
+                            "keywordUrl": "http://www.eionet.europa.eu/gemet/concept/2803 "
+                        },
+                        {
+                            "keyword": "Invasion biologique",
+                            "keywordSchema": "Thésaurus de la biodiversité",
+                            "keywordUrl": "http://data.loterre.fr/ark:/67375/BLH-TN6ZS5W6-J "
+                        }
+                    ]
+                }
+            },
+            {
+                "research_output_id": 1859,
+                "researchOutputDescription": {
+                    "title": "Caractéristiques du sol",
+                    "contact": {
+                        "person": {
+                            "lastName": "Aguayo",
+                            "nameType": "Personne",
+                            "firstName": "Jaime",
+                            "mbox": "toto@inist.fr",
+                            "personId": "https://orcid.org/0000-0002-7552-0655",
+                            "IdType": "ORCID",
+                            "affiliationName": "IAM Interactions Arbres/Micro-organismes",
+                            "affiliationId": "200117307M",
+                            "affiliationIdType": "RNSR"
+                        }
+                    },
+                    "description": "<p>Mesure des caract&eacute;ristiques du sol une fois au d&eacute;but le projet : pH, texture du sol, concentration en carbon (C) et azote total (N) dans des &eacute;chantillons de sol pr&eacute;lev&eacute;s au pied de quelques arbres</p>",
+                    "type": "Jeu de données",
+                    "workPackage": "pas de workpackage",
+                    "uncontrolledKeywords": [
+                        "Ripisylve"
+                    ],
+                    "language": "fra",
+                    "datasetId": null,
+                    "idType": null,
+                    "containsPersonalData": "Non",
+                    "containsSensitiveData": "Non",
+                    "hasEthicalIssues": "Non",
+                    "controlledKeyword": [
+                        {
+                            "keyword": "Chemistry soil",
+                            "keywordSchema": "GEMET - General Multilingual Environmental Thesaurus",
+                            "keywordUrl": "https://www.eionet.europa.eu/gemet/en/concept/7849 "
+                        }
+                    ]
+                }
+            },
+            {
+                "research_output_id": 1860,
+                "researchOutputDescription": {
+                    "title": "Estimation quantitative du microorganisme Phytophthora alni",
+                    "contact": {
+                        "person": {
+                            "lastName": "Cosserat",
+                            "firstName": "Francoise",
+                            "mbox": "francoise.cosserat@inist.fr"
+                        }
+                    },
+                    "description": "<p>Estimation quantitative du microorganisme <em>Phytophthora alni</em> (pluriannuelle) par technique PCR en temps r&eacute;el dans les &eacute;chantillons de sol au pied des aulnes</p>",
+                    "type": "Jeu de données",
+                    "workPackage": "pas de workpackage",
+                    "uncontrolledKeywords": [
+                        "Piégeage par rhododendron"
+                    ],
+                    "language": null,
+                    "datasetId": null,
+                    "idType": null,
+                    "containsPersonalData": "Non",
+                    "containsSensitiveData": "Non",
+                    "hasEthicalIssues": "Non",
+                    "controlledKeyword": [
+                        {
+                            "keyword": "Phytophthora alni",
+                            "keywordSchema": "Index Fungorum",
+                            "keywordUrl": "http://www.indexfungorum.org/names/NamesRecord.asp?RecordID=488625 "
+                        },
+                        {
+                            "keyword": "Réaction de polymérisation en chaîne",
+                            "keywordSchema": "Thésaurus MeSH bilingue français-anglais",
+                            "keywordUrl": "http://data.loterre.fr/ark:/67375/JVR/M0024634 "
+                        }
+                    ]
+                }
+            },
+            {
+                "research_output_id": 1861,
+                "researchOutputDescription": {
+                    "title": "Modèle mathématique type SIS ",
+                    "contact": {
+                        "person": {
+                            "lastName": "Aguayo",
+                            "nameType": "Personne",
+                            "firstName": "Jaime",
+                            "mbox": "toto@inist.fr",
+                            "personId": "https://orcid.org/0000-0002-7552-0655",
+                            "IdType": "ORCID",
+                            "affiliationName": "IAM Interactions Arbres/Micro-organismes",
+                            "affiliationId": "200117307M",
+                            "affiliationIdType": "RNSR"
+                        }
+                    },
+                    "description": "<p>Mod&egrave;le math&eacute;matique type SIS (susceptible-infected-susceptible) d&eacute;fini &agrave; partir des donn&eacute;es observationnelles et exp&eacute;rimentales de la r&eacute;gion Nord Est, r&eacute;alis&eacute; sous R.</p>",
+                    "type": "Modèle",
+                    "workPackage": "pas de workpackage",
+                    "uncontrolledKeywords": [
+                        "Modèle SIS"
+                    ],
+                    "language": "fra",
+                    "datasetId": null,
+                    "idType": null,
+                    "containsPersonalData": "Non",
+                    "containsSensitiveData": "Non",
+                    "hasEthicalIssues": "Non",
+                    "controlledKeyword": [
+                        {
+                            "keyword": "Model",
+                            "keywordSchema": "GEMET – General Multilingual Environmental Thesaurus",
+                            "keywordUrl": "https://www.eionet.europa.eu/gemet/en/concept/5325 "
+                        },
+                        {
+                            "keyword": "Climatic change",
+                            "keywordSchema": "GEMET - General Multilingual Environmental Thesaurus",
+                            "keywordUrl": "https://www.eionet.europa.eu/gemet/en/concept/1471 "
+                        },
+                        {
+                            "keyword": "Phytopathologiy",
+                            "keywordSchema": "GEMET - General Multilingual Environmental Thesaurus",
+                            "keywordUrl": "https://www.eionet.europa.eu/gemet/en/concept/6244 "
+                        }
+                    ]
+                }
+            }
+        ]
     }
+    
     if ( test == true ) {
         res.send({ message: 'Dmp found', data: required_data})
 

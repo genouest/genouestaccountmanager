@@ -1,0 +1,18 @@
+.dmp-badge {
+    border-radius:2px;
+    padding:.25em .5rem;
+    text-transform:uppercase;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.3px
+   }
+
+.dmp-badge.status-Linked {
+background:#c8e6c9;
+color:#256029
+}
+
+.dmp-badge.status-Legacy {
+background:#ffcdd2;
+color:#c63737
+}
