@@ -6,7 +6,6 @@ import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
-
 @Component({
     selector: 'app-project',
     templateUrl: './project.component.html',
@@ -24,6 +23,7 @@ export class ProjectComponent implements OnInit {
     prj_msg: string
     oldGroup: string
 
+    dmp: any
     dmp_visible:boolean
 
     new_user_admin: string = ''
@@ -85,6 +85,12 @@ export class ProjectComponent implements OnInit {
             err => console.log('failed to get config')
         );
         this.dmp_visible = false;
+        this.projectsService.fetch_dmp(this.project.dmpid).subscribe(
+            resp => {this.dmp = yaml.load(resp.data)},
+            err => console.log('dmperr')
+        );
+            
+
     }
 
     show_project_users(projectId) {
@@ -200,5 +206,6 @@ export class ProjectComponent implements OnInit {
         }
         return res;
     }
+
 
 }

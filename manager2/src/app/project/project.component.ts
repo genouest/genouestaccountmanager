@@ -193,16 +193,15 @@ export class ProjectComponent implements OnInit {
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
             this.projectsService.fetch_dmp(dmpid).subscribe(
                 resp => {
-                    console.log(resp.data)
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;
                     this.new_project = {
-                        'id': resp.data.project.title,
-                        'description': resp.data.researchOutput[0].researchOuputDescription.description,
-                        'orga': resp.data.project.funding.name};
+                        'id': resp.data.project.acronym,
+                        'description': resp.data.researchOutput[0].researchOutputDescription.description,
+                        'orga': resp.data.project.funding[0].name,
+                        'dmpid': this.new_project.dmpid,
+                    };
 
-                                        
-                    
                 },
                 err => {
                     this.dmp_err_msg = err.error.message

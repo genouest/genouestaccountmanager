@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const yaml = require('js-yaml');
 
 const conf = require('../routes/conf.js');
 var CONFIG = conf.get_conf();
@@ -847,7 +848,7 @@ router.post('/dmp/:id', async function (req, res) {
             }
         ]
     }
-    
+    required_data = yaml.load(required_data.toString());
     if ( test == true ) {
         res.send({ message: 'Dmp found', data: required_data})
 
