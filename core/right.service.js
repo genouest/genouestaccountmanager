@@ -10,7 +10,7 @@ exports.is_admin = is_admin;
 
 function is_admin(uid) {
     let isadmin = false;
-    if (CONFIG.general.indexOf(session_user.uid) >= 0)
+    if (CONFIG.general.indexOf(uid) >= 0)
     {
         isadmin = true;
     }
