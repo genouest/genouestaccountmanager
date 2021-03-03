@@ -4,11 +4,13 @@ var CONFIG = require('config');
 var Promise = require('promise');
 
 const utils = require('../core/utils.js');
+const rgtsrv = require('../core/right.service.js');
 
 var mysql = require('mysql');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 // const request = require('request');
+
 
 var pool = null;
 if(CONFIG.mysql.host) {
@@ -94,13 +96,20 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
     }
-    else {
-        session_user.is_admin = false;
-    }
+
+    session_user.is_admin = isadmin;
+
     if(!session_user.is_admin) {
         res.status(401).send({message: 'Not authorized'});
         return;
@@ -118,14 +127,20 @@ router.get('/database', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
 
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+    session_user.is_admin = isadmin;
+
     let filter = {};
     if(!session_user.is_admin) {
         filter = {owner: session_user.uid};
@@ -145,14 +160,20 @@ router.get('/database/owner/:owner', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
 
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+    session_user.is_admin = isadmin;
+
     let filter = {owner: req.params.owner};
     let databases = await utils.mongo_databases().find(filter).toArray();
     res.send(databases);
@@ -168,18 +189,25 @@ router.post('/database/:id', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if (!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+    session_user.is_admin = isadmin;
+
 
     if (req.body.owner!=undefined && req.body.owner!='' && req.body.owner != session_user.uid && ! session_user.is_admin){
         res.status(401).send({message: 'Not authorized, cant declare a database for a different user'});
@@ -300,17 +328,25 @@ router.delete('/database/:id', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(session_user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+
+    session_user.is_admin = isadmin;
+
     let filter = {name: req.params.id};
     if(!session_user.is_admin) {
         filter['owner'] = session_user.uid;
