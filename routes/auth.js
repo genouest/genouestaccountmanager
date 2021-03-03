@@ -26,6 +26,7 @@ var STATUS_EXPIRED = 'Expired';
 
 const notif = require('../core/notif_'+MAILER+'.js');
 const utils = require('../core/utils.js');
+const rgtsrv = require('../core/right.service.js');
 
 var attemps = {};
 
@@ -86,7 +87,18 @@ router.post('/mail/auth/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged){
         return res.status(401).send({message: 'You need to login first'});
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await utils.mongo_users().findOne({uid: req.params.id});
+        isadmin = await rgtsrv.is_admin(user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user) {
         return res.status(404).send({message: 'User not found'});
     }
@@ -103,12 +115,8 @@ router.post('/mail/auth/:id', async function(req, res) {
     sess.gomngr = sess.mail_token['user'];
     sess.mail_token = null;
 
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
-        user.is_admin = true;
-    }
-    else {
-        user.is_admin = false;
-    }
+    user.is_admin = isadmin;
+
     res.send({user: user, token: usertoken});
     res.end();
     return;
@@ -202,7 +210,18 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 router.get('/auth', async function(req, res) {
     if(req.locals.logInfo.id) {
-        let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+          let user = null;
+        let isadmin = false;
+        try {
+            user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+            isadmin = await rgtsrv.is_admin(user.uid);
+        } catch(e) {
+            logger.error(e);
+            res.status(404).send({message: 'User session not found'});
+            res.end();
+            return;
+        }
+
         if(!user) {
             res.send({user: null, message: 'user not found'});
             return;
@@ -214,12 +233,8 @@ router.get('/auth', async function(req, res) {
         );
         if(user.u2f) {user.u2f.keyHankdle = null;}
 
-        if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
-            user.is_admin = true;
-        }
-        else {
-            user.is_admin = false;
-        }
+        user.is_admin = isadmin;
+
         if(user.status == STATUS_PENDING_EMAIL){
             res.send({token: token, user: user, message: 'Your account is waiting for email approval, check your mail inbox'});
             return;
@@ -247,7 +262,18 @@ router.post('/auth/:id', async function(req, res) {
             return;
         }
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await utils.mongo_users().findOne({uid: req.params.id});
+        isadmin = await rgtsrv.is_admin(user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(! user) {
         res.status(404).send({message: 'User not found'});
         return;
@@ -259,10 +285,7 @@ router.post('/auth/:id', async function(req, res) {
     );
     let sess = req.session;
     if (apikey !== '' && apikey === user.apikey) {
-        user.is_admin = false;
-        if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
-            user.is_admin = true;
-        }
+        user.is_admin = isadmin;
         sess.gomngr = user._id;
         sess.apikey = true;
         res.send({token: usertoken, user: user, message: '', double_auth: false});
@@ -283,8 +306,8 @@ router.post('/auth/:id', async function(req, res) {
     sess.is_logged = true;
     let need_double_auth = false;
 
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) >= 0) {
-        user.is_admin = true;
+    user.is_admin = isadmin;
+    if(isadmin) {
         if(CONFIG.general.double_authentication_for_admin){
             need_double_auth = true;
         }
@@ -293,7 +316,6 @@ router.post('/auth/:id', async function(req, res) {
         }
     }
     else {
-        user.is_admin = false;
         sess.gomngr = user._id;
     }
 
