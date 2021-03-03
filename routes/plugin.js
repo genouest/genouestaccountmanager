@@ -4,7 +4,7 @@ var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 const utils = require('../core/utils.js');
-
+const rgtsrv = require('../core/right.service.js');
 
 /**
    Plugins must provide functions:
@@ -56,17 +56,24 @@ router.get('/plugin/:id/:user', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        user.is_admin = false;
-    }
-    else {
-        user.is_admin = true;
-    }
+
+    user.is_admin = isadmin;
+
     let plugins_modules = utils.plugins_modules();
     plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
         res.send(result);
@@ -79,17 +86,25 @@ router.post('/plugin/:id/:user', async function(req, res) {
         return;
     }
 
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rgtsrv.is_admin(user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        user.is_admin = false;
-    }
-    else {
-        user.is_admin = true;
-    }
+
+    user.is_admin = isadmin;
+
     let plugins_modules = utils.plugins_modules();
     plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
         res.send(result);
