@@ -86,7 +86,8 @@ export class ProjectComponent implements OnInit {
         );
         this.dmp_visible = false;
         this.projectsService.fetch_dmp(this.project.dmpid).subscribe(
-            resp => {this.dmp = resp.yaml},
+            resp => {this.dmp = resp.yaml;
+            console.log(resp.yaml)},
             err => console.log('dmperr')
         );
         // console.log(this.dmp)
