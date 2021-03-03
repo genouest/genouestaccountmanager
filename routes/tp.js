@@ -19,6 +19,7 @@ const usrsrv = require('../core/user.service.js');
 const goldap = require('../core/goldap.js');
 const filer = require('../core/file.js');
 const utils = require('../core/utils.js');
+const rgtsrv = require('../core/right.service.js');
 
 var ObjectID = require('mongodb').ObjectID;
 

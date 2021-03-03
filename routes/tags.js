@@ -3,6 +3,7 @@ var router = express.Router();
 var CONFIG = require('config');
 
 var utils = require('../core/utils.js');
+const rgtsrv = require('../core/right.service.js');
 
 router.get('/tags', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
