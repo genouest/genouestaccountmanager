@@ -3,7 +3,7 @@ var fs = require('fs');
 //var http = require('http');
 var CONFIG = require('config');
 
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
 
 var Promise = require('promise');
 var path_to_script = CONFIG.general.plugin_script_dir + '/remove_galaxy_user.py';
@@ -70,9 +70,9 @@ var remove_user_from_galaxy = async function(userId, data, adminId) {
     };
     try {
         await create_script();
-        utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [data.uid+'.'+fid+'.galaxy']});
+        dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [data.uid+'.'+fid+'.galaxy']});
     } catch(err) {
-        utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [], 'status': 1});
+        dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [], 'status': 1});
         console.trace('[Galaxy][error] : remove user failed');
         return false;
     }
