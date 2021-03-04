@@ -25,7 +25,8 @@ var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
 const notif = require('../core/notif_'+MAILER+'.js');
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const maisrv = require('../core/mail.service.js');
 const rolsrv = require('../core/role.service.js');
 
 var attemps = {};
@@ -52,7 +53,7 @@ router.get('/mail/auth/:id', async function(req, res) {
         return res.status(403).send({message: 'No mail provider set : cannot send mail'});
     }
     let password = Math.random().toString(36).slice(-10);
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         return res.status(404).send({message: 'User not found'});
     }
@@ -67,7 +68,7 @@ router.get('/mail/auth/:id', async function(req, res) {
     );
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name': 'mail_token',
             'destinations': [user.email],
             'subject': 'Authentication mail token request'
@@ -90,7 +91,7 @@ router.post('/mail/auth/:id', async function(req, res) {
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({uid: req.params.id});
+        user = await dbsrv.mongo_users().findOne({uid: req.params.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -128,7 +129,7 @@ router.get('/u2f/auth/:id', async function(req, res) {
         return res.status(401).send({message: 'You need to login first'});
     }
     req.session.u2f = null;
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
@@ -144,7 +145,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged){
         return res.status(401).send({message: 'You need to login first'});
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
@@ -176,7 +177,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
 });
 
 router.get('/u2f/register/:id', async function(req, res) {
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
@@ -192,7 +193,7 @@ router.get('/u2f/register/:id', async function(req, res) {
 });
 
 router.post('/u2f/register/:id', async function(req, res) {
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
         return res.status(401).send({message: 'You need to login first'});
     }
@@ -200,7 +201,7 @@ router.post('/u2f/register/:id', async function(req, res) {
     const registrationResponse = req.bodyregistrationResponse;
     const result = u2f.checkRegistration(registrationRequest, registrationResponse);
     if (result.successful) {
-        await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
+        await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
         return res.send({publicKey: result.publicKey});
     }
     else{
@@ -213,7 +214,7 @@ router.get('/auth', async function(req, res) {
         let user = null;
         let isadmin = false;
         try {
-            user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+            user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
             isadmin = await rolsrv.is_admin(user.uid);
         } catch(e) {
             logger.error(e);
@@ -265,7 +266,7 @@ router.post('/auth/:id', async function(req, res) {
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({uid: req.params.id});
+        user = await dbsrv.mongo_users().findOne({uid: req.params.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -348,7 +349,7 @@ router.post('/auth/:id', async function(req, res) {
             if (!user.apikey) {
                 let apikey = Math.random().toString(36).slice(-10);
                 user.apikey = apikey;
-                await utils.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
+                await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
                 res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
                 res.end();
                 return;

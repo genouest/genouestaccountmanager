@@ -4,7 +4,8 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 const filer = require('../core/file.js');
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 
 router.get('/ssh/:id/putty', async function(req, res) {
@@ -12,11 +13,11 @@ router.get('/ssh/:id/putty', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
@@ -39,14 +40,14 @@ router.get('/ssh/:id/private', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({uid: req.params.id});
+        user = await dbsrv.mongo_users().findOne({uid: req.params.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -82,11 +83,11 @@ router.get('/ssh/:id/public', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
 
     if(!user) {
         res.send({message: 'User does not exist'});
@@ -110,11 +111,11 @@ router.get('/ssh/:id', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
 
     if(!user) {
         res.send({message: 'User does not exist'});
@@ -137,7 +138,7 @@ router.get('/ssh/:id', async function(req, res) {
         return;
     }
 
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']});
+    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'Generate new ssh key' , 'logs': [user.uid + '.' + fid + '.update']});
     res.send({message: 'SSH key will be generated, refresh page in a minute to download your key'});
     res.end();
 });
