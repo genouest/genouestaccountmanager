@@ -1,3 +1,6 @@
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
+
 var express = require('express');
 var router = express.Router();
 

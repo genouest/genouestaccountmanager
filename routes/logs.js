@@ -4,6 +4,9 @@ var fs = require('fs');
 var CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
+
 const utils = require('../core/utils.js');
 const rolsrv = require('../core/role.service.js');
 
