@@ -6,7 +6,8 @@ const program = require('commander');
 
 var CONFIG = require('config');
 
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -33,7 +34,7 @@ program
     .arguments('<uid>')
     .action(function (uid) {
         let filter = {'$or': [{email: uid}, {uid: uid}]};
-        utils.mongo_users().findOne(filter).then(function(user){
+        dbsrv.mongo_users().findOne(filter).then(function(user){
             console.table(user);
             process.exit(0);
         });
@@ -48,7 +49,7 @@ program
         if (args.filter !== 'All'){
             filter = {'status': args.status};
         }
-        let users = await utils.mongo_users().find(filter).toArray();
+        let users = await dbsrv.mongo_users().find(filter).toArray();
         let displayRes = [];
         for(let i=0;i<users.length;i++){
             let res = users[i];
@@ -95,8 +96,8 @@ program
         });
     });
 
-utils.init_db().then(() => {
-    utils.load_plugins();
+dbsrv.init_db().then(() => {
+    plgsrv.load_plugins();
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });
