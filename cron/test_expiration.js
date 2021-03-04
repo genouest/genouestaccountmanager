@@ -10,10 +10,11 @@ var STATUS_ACTIVE = 'Active';
 // eslint-disable-next-line no-unused-vars
 var STATUS_EXPIRED = 'Expired';
 
-
 var CONFIG = require('config');
 
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const maisrv = require('../core/mail.service.js');
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
@@ -33,9 +34,9 @@ function timeConverter(tsp){
     return time;
 }
 
-utils.init_db().then(async ()=>{
-    utils.load_plugins();
-    let users = await utils.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
+dbsrv.init_db().then(async ()=>{
+    plgsrv.load_plugins();
+    let users = await dbsrv.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
     // Find users expiring in less then 2 month
     let mail_sent = 0;
     if (! notif.mailSet()){
@@ -49,7 +50,7 @@ utils.init_db().then(async ()=>{
             var link = CONFIG.general.url +
                 encodeURI('/user/'+user.uid+'/renew/'+user.regkey);
             try {
-                await utils.send_notif_mail({
+                await maisrv.send_notif_mail({
                     'name': 'expiration',
                     'destinations': [user.email],
                     'subject': 'account expiration ' + user.uid

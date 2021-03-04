@@ -18,7 +18,9 @@ const filer = require('../core/file.js');
 
 var Promise = require('promise');
 
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const maisrv = require('../core/mail.service.js');
 
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
@@ -40,9 +42,9 @@ function timeConverter(tsp){
 }
 */
 
-utils.init_db().then(async () => {
-    utils.load_plugins();
-    let users = await utils.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}).toArray();
+dbsrv.init_db().then(async () => {
+    plgsrv.load_plugins();
+    let users = await dbsrv.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}).toArray();
     // Find users expiring
     var mail_sent = 0;
     if (! notif.mailSet()){
@@ -54,7 +56,7 @@ utils.init_db().then(async () => {
             let user = users[index];
             console.log('User: ' + user.uid + ' has expired');
             try {
-                await utils.send_notif_mail({
+                await maisrv.send_notif_mail({
                     'name': 'expired',
                     destinations: [CONFIG.general.support],
                     subject: 'account expiration: ' + user.uid
@@ -76,7 +78,7 @@ utils.init_db().then(async () => {
 
             }
             user.history.push({'action': 'expire', date: new Date().getTime()});
-            await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
+            await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
             try {
                 let created_file = await filer.user_expire_user(user, fid);
                 console.log('File Created: ', created_file);
@@ -85,12 +87,12 @@ utils.init_db().then(async () => {
                 return;
             }
 
-            await utils.mongo_events().insertOne({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []});
+            await dbsrv.mongo_events().insertOne({'owner': 'cron', 'date': new Date().getTime(), 'action': 'user ' + user.uid + ' deactivated by cron', 'logs': []});
 
             let plugin_call = function(plugin_info, user){
                 // eslint-disable-next-line no-unused-vars
                 return new Promise(function (resolve, reject){
-                    let plugins_modules = utils.plugins_modules();
+                    let plugins_modules = plgsrv.plugins_modules();
                     plugins_modules[plugin_info.name].deactivate(user).then(function(){
                         resolve(true);
                     });
@@ -98,7 +100,7 @@ utils.init_db().then(async () => {
                 });
             };
             // console.log('call plugins');
-            let plugins_info = utils.plugins_info();
+            let plugins_info = plgsrv.plugins_info();
             Promise.all(plugins_info.map(function(plugin_info){
                 return plugin_call(plugin_info, user.uid);
             // eslint-disable-next-line no-unused-vars
