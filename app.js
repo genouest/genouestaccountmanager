@@ -32,7 +32,9 @@ const wlogger = winston.loggers.add('gomngr', {
 
 const promBundle = require('express-prom-bundle');
 
-const utils = require('./core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const idsrv = require('../core/id.service.js');
+const plgsrv = require('../core/plugin.service.js');
 const usrsrv = require('./core/user.service.js');
 
 var routes = require('./routes/index');
@@ -206,7 +208,7 @@ app.all('*', async function(req, res, next){
                 logInfo.u2f = jwtToken.u2f;
             }
             if(jwtToken.user) {
-                let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
+                let session_user = await dbsrv.mongo_users().findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
                 if(!session_user){
                     return res.status(401).send('Invalid token').end();
                 }
@@ -231,7 +233,7 @@ app.all('*', async function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            let session_user = await utils.mongo_users().findOne({'apikey': token});
+            let session_user = await dbsrv.mongo_users().findOne({'apikey': token});
             if(!session_user){
                 return res.status(401).send('Invalid token').end();
             }
@@ -264,7 +266,7 @@ app.all('*', async function(req, res, next){
             logInfo.u2f =req.session.u2f;
         }
         if(req.session.gomngr) {
-            let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
+            let session_user = await dbsrv.mongo_users().findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
             if(session_user){
                 logInfo.session_user = session_user;
             }
@@ -426,9 +428,9 @@ else {
 module.exports = app;
 
 
-utils.init_db().then(async () => {
-    await utils.loadAvailableIds();
-    utils.load_plugins();
+dbsrv.init_db().then(async () => {
+    await idsrv.loadAvailableIds();
+    plgsrv.load_plugins();
     if(MY_ADMIN_USER !== null){
         wlogger.info('Create admin user');
         await usrsrv.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
