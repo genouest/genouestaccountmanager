@@ -4,7 +4,7 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../core/file.js');
 
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
 
 function get_group_dn(group) {
     return new Promise( function (resolve, reject) {
@@ -51,7 +51,7 @@ function get_group_dn(group) {
                 if (group_dn_list.length > 1) {
                     logger.error('more than one entry have been found', group_dn_list);
                     logger.warn('switch to default value, you should check your ldap database and scripts logs results...');
-                    utils.mongo_events().insertOne({'owner': CONFIG.general.admin[0] , 'date': new Date().getTime(), 'action': '[error] find duplicate group dn for ' + group, 'status' : -1});
+                    dbsrv.mongo_events().insertOne({'owner': CONFIG.general.admin[0] , 'date': new Date().getTime(), 'action': '[error] find duplicate group dn for ' + group, 'status' : -1});
                     // resolve with default value, or reject ?
                     resolve(default_dn);
                     return;
@@ -267,7 +267,7 @@ module.exports = {
         let group = null;
         if (!CONFIG.general.disable_user_group) {
             try {
-                group = await utils.mongo_groups().findOne({'name': user.group});
+                group = await dbsrv.mongo_groups().findOne({'name': user.group});
             } catch(e) {
                 logger.error(e);
                 throw e;

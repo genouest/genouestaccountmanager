@@ -4,7 +4,7 @@ const logger = winston.loggers.get('gomngr');
 // const request = require('request');
 const nodemailer = require('nodemailer');
 
-const utils= require('../core/utils.js');
+const dbsrv= require('../core/db.service.js');
 
 var mail_set = false;
 var mail_verified = false;
@@ -48,7 +48,7 @@ module.exports = {
 
     subscribed: async function(email, callback) {
         if (CONFIG.nodemailer.list) {
-            let user = await utils.mongo_users().findOne({email: email});
+            let user = await dbsrv.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
                 callback(false);
@@ -78,7 +78,7 @@ module.exports = {
                 callback();
                 return;
             }
-            let user = await utils.mongo_users().findOne({email: email});
+            let user = await dbsrv.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
                 callback();
@@ -91,8 +91,8 @@ module.exports = {
             });
             logger.info('user added to ' + CONFIG.nodemailer.list.address, email);
 
-            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
-            await utils.mongo_users().updateOne({email: email}, {'$set':{'subscribed': true}});
+            await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
+            await dbsrv.mongo_users().updateOne({email: email}, {'$set':{'subscribed': true}});
         }
         callback();
         return;
@@ -111,7 +111,7 @@ module.exports = {
                 callback();
                 return;
             }
-            let user = await utils.mongo_users().findOne({email: email});
+            let user = await dbsrv.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
                 callback();
@@ -123,8 +123,8 @@ module.exports = {
                 subject: CONFIG.nodemailer.list.cmd_del + ' ' + CONFIG.nodemailer.list.address + ' ' + email
             });
             logger.warn('user deleted from ' + CONFIG.nodemailer.list.address, email);
-            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
-            await utils.mongo_users().updateOne({email: email}, {'$set':{'subscribed': false}});
+            await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
+            await dbsrv.mongo_users().updateOne({email: email}, {'$set':{'subscribed': false}});
         }
         callback();
         return;

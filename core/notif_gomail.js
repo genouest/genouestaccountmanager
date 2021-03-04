@@ -4,7 +4,7 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const request = require('request');
 
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
 
 var mail_set = false;
 
@@ -119,13 +119,13 @@ module.exports = {
         // eslint-disable-next-line no-unused-vars
         baseRequest.put(options, async function(err, res, body) {
             if(err || res.statusCode !== 200){
-                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error ' + email + ' to mailing list' , 'logs': []});
+                await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error ' + email + ' to mailing list' , 'logs': []});
                 logger.error('Failed to add ' + email + ' to mailing list');
                 logger.error(res);
                 callback();
                 return;
             }
-            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + ' to mailing list' , 'logs': []});
+            await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + ' to mailing list' , 'logs': []});
             callback();
         });
     },
@@ -147,7 +147,7 @@ module.exports = {
                 callback();
                 return;
             }
-            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'create list ' + name , 'logs': []});
+            await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'create list ' + name , 'logs': []});
             callback();
         });
     },
@@ -170,12 +170,12 @@ module.exports = {
         // eslint-disable-next-line no-unused-vars
         baseRequest.delete(options, async function(err, res, body) {
             if(err || res.statusCode !== 200){
-                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + email + 'in mailing list' , 'logs': []});
+                await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + email + 'in mailing list' , 'logs': []});
                 logger.error('Failed to remove ' + email + ' from mailing list');
                 callback();
                 return;
             }
-            await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
+            await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
             callback();
         });
 
@@ -205,13 +205,13 @@ module.exports = {
         // eslint-disable-next-line no-unused-vars
         baseRequest.put(options, async function(err, res, body) {
             if(err){
-                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []});
+                await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []});
                 logger.error('Failed to add ' + newemail + ' to mailing list : ' + err );
                 callback();
                 return;
             }
             if(res.statusCode !== 200){
-                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []});
+                await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription error with ' + newemail + 'in mailing list' , 'logs': []});
                 logger.error('Failed to add ' + newemail + ' to mailing list : error code ' + res.statusCode);
                 callback();
                 return;
@@ -220,18 +220,18 @@ module.exports = {
             // eslint-disable-next-line no-unused-vars
             baseRequest.delete(options, async function(err, res, body) {
                 if(err){
-                    await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []});
+                    await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []});
                     logger.error('Failed to unsubscribe ' + oldemail + ': ' + err);
                     callback();
                     return;
                 }
                 if(res.statusCode !== 200){
-                    await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []});
+                    await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + oldemail + 'in mailing list' , 'logs': []});
                     logger.error('Failed to unsubscribe ' + oldemail + ': error code ' + res.statusCode);
                     callback();
                     return;
                 }
-                await utils.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'update ' + newemail + 'in mailing list' , 'logs': []});
+                await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'update ' + newemail + 'in mailing list' , 'logs': []});
                 logger.info(oldemail+' unsubscribed');
                 callback();
             });

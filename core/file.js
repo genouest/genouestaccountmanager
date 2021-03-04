@@ -6,9 +6,6 @@ const fs = require('fs');
 const templates_dir = 'templates/' + CONFIG.general.templates;
 const templates_dir_default = 'templates/default';
 
-// Todo: move utils function which manage file content here
-// var utils = require('../routes/utils.js');
-
 // Todo: Manage mail template with nunjuck
 
 nunjucks.configure(
