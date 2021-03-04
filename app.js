@@ -32,9 +32,9 @@ const wlogger = winston.loggers.add('gomngr', {
 
 const promBundle = require('express-prom-bundle');
 
-const dbsrv = require('../core/db.service.js');
-const idsrv = require('../core/id.service.js');
-const plgsrv = require('../core/plugin.service.js');
+const dbsrv = require('./core/db.service.js');
+const idsrv = require('./core/id.service.js');
+const plgsrv = require('./core/plugin.service.js');
 const usrsrv = require('./core/user.service.js');
 
 var routes = require('./routes/index');
