@@ -1,5 +1,3 @@
-/* TODO : SHOULD SPLIT THIS FILE, one for mongo, one for redis, on for mail ..... */
-
 // const Promise = require('promise');
 // const winston = require('winston');
 // const logger = winston.loggers.get('gomngr');
