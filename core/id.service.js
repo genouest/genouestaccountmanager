@@ -4,6 +4,7 @@ const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
+const dbsrv = require('../core/db.service.js');
 
 var redis = require('redis');
 var redis_client = null;
@@ -91,7 +92,7 @@ async function _loadAvailableIds () {
     }
 
     logger.info('Loading available ids....');
-    let users = await mongo_users.find().toArray();
+    let users = await dbsrv.mongo_users.find().toArray();
     logger.info('Check existing users');
     let usedIds = [];
     let maxUsedId = CONFIG.general.minuid;
@@ -118,7 +119,7 @@ async function _loadAvailableIds () {
     } else {
         redis_client.set('my:ids:user', maxUsedId);
     }
-    let groups = await mongo_groups.find().toArray();
+    let groups = await dbsrv.mongo_groups.find().toArray();
     logger.info('Check existing groups');
     let usedGIds = [];
     let maxUsedGId = CONFIG.general.mingid;
@@ -168,7 +169,7 @@ exports.getGroupAvailableId = function () {
 
 async function _getUsersMaxId(minID) {
     let minUserID = minID;
-    let data = await mongo_users.find({}, {limit: 1 , sort: {uidnumber: -1}}).toArray();
+    let data = await dbsrv.mongo_users.find({}, {limit: 1 , sort: {uidnumber: -1}}).toArray();
     if (!data)  {
         return minUserID;
     }
@@ -184,7 +185,7 @@ async function _getUsersMaxId(minID) {
 
 async function _getGroupsMaxId(minID) {
     let minGroupID = minID;
-    let data = await mongo_groups.find({}, {limit: 1 , sort: {gid: -1}}).toArray();
+    let data = await dbsrv.mongo_groups.find({}, {limit: 1 , sort: {gid: -1}}).toArray();
     if (!data)  {
         return minGroupID;
     }
