@@ -1,6 +1,6 @@
 /* TODO : SHOULD SPLIT THIS FILE, one for mongo, one for redis, on for mail ..... */
 
-var Promise = require('promise');
+const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');

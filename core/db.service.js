@@ -1,4 +1,4 @@
-var Promise = require('promise');
+// const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
