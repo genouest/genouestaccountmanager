@@ -1,8 +1,12 @@
 var express = require('express');
 var router = express.Router();
 
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
+
 const utils = require('../core/utils.js');
 const rolsrv = require('../core/role.service.js');
+
 
 /**
    Plugins must provide functions:

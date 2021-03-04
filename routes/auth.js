@@ -210,7 +210,7 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 router.get('/auth', async function(req, res) {
     if(req.locals.logInfo.id) {
-          let user = null;
+        let user = null;
         let isadmin = false;
         try {
             user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
