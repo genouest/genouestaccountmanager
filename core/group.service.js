@@ -1,7 +1,7 @@
-const Promise = require('promise');
+// const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config')
+const CONFIG = require('config');
 
 const goldap = require('../core/goldap.js');
 const utils = require('../core/utils.js');
@@ -49,7 +49,7 @@ async function create_group(group_name, owner_name){
 
     return group;
 
-};
+}
 
 
 async function delete_group(group, admin_user_id){
@@ -67,7 +67,7 @@ async function delete_group(group, admin_user_id){
     await utils.mongo_events().insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
     await utils.freeGroupId(group.gid);
     return true;
-};
+}
 
 
 async function clear_user_groups(user, admin_user_id){
@@ -84,4 +84,4 @@ async function clear_user_groups(user, admin_user_id){
             }
         }
     }
-};
+}
