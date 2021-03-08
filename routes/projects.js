@@ -1,6 +1,6 @@
 /* TODO : create a core/project.service.js and move all method in it */
 
-var express = require('express');
+const express = require('express');
 var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
@@ -9,8 +9,8 @@ const conf = require('../routes/conf.js');
 var CONFIG = conf.get_conf();
 var GENERAL_CONFIG = CONFIG.general;
 
-// var cookieParser = require('cookie-parser');
-// var goldap = require('../routes/goldap.js');
+// const cookieParser = require('cookie-parser');
+// const goldap = require('../routes/goldap.js');
 
 const filer = require('../core/file.js');
 const dbsrv = require('../core/db.service.js');

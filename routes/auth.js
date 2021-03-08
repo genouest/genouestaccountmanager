@@ -1,18 +1,18 @@
 /* eslint-disable require-atomic-updates */
 /*jslint es6 */
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-// var cookieParser = require('cookie-parser');
-// var session = require('express-session');
+// const cookieParser = require('cookie-parser');
+// const session = require('express-session');
 const goldap = require('../core/goldap.js');
-// var Promise = require('promise');
+// const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 const u2f = require('u2f');
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
-var CONFIG = require('config');
+const CONFIG = require('config');
 const APP_ID= CONFIG.general.url;
 var GENERAL_CONFIG = CONFIG.general;
 

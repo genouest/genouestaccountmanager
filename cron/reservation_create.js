@@ -1,13 +1,13 @@
-var Promise = require('promise');
+const Promise = require('promise');
 
-//var CONFIG = require('config');
+//const CONFIG = require('config');
 
-var tps = require('../routes/tp.js');
+const tps = require('../routes/tp.js');
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
 
-var winston = require('winston');
+const winston = require('winston');
 const myconsole = new (winston.transports.Console)({
     timestamp: true,
     level: 'info'

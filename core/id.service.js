@@ -1,10 +1,10 @@
 const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-var CONFIG = require('config');
+const CONFIG = require('config');
 const dbsrv = require('../core/db.service.js');
 
-var redis = require('redis');
+const redis = require('redis');
 var redis_client = null;
 
 if (process.env.MY_REDIS_HOST) {

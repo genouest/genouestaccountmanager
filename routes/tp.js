@@ -1,17 +1,17 @@
 /* TODO : create a core/tps.service.js and move all method in it */
 
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var Promise = require('promise');
+const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-var CONFIG = require('config');
+const CONFIG = require('config');
 
-// var cookieParser = require('cookie-parser')
+// const cookieParser = require('cookie-parser')
 
-var fdbs = require('../routes/database.js');
-var fwebs = require('../routes/web.js');
-// var fusers = require('../routes/users.js');
+const fdbs = require('../routes/database.js');
+const fwebs = require('../routes/web.js');
+// const fusers = require('../routes/users.js');
 // const grpsrv = require('../core/group.service.js');
 const usrsrv = require('../core/user.service.js');
 
@@ -24,7 +24,7 @@ const plgsrv = require('../core/plugin.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 
-var ObjectID = require('mongodb').ObjectID;
+const ObjectID = require('mongodb').ObjectID;
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';

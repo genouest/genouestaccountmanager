@@ -1,10 +1,10 @@
 
-var CONFIG = require('config');
-var monk = require('monk'),
+const CONFIG = require('config');
+const monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users');
 
-var Promise = require('promise');
+const Promise = require('promise');
 
 // eslint-disable-next-line no-unused-vars
 var activate_user = function(user, data){

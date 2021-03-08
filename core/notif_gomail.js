@@ -1,4 +1,4 @@
-var CONFIG = require('config');
+const CONFIG = require('config');
 
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');

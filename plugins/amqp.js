@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-var CONFIG = require('config');
-var Promise = require('promise');
-var amqp = require('amqplib');
+const CONFIG = require('config');
+const Promise = require('promise');
+const amqp = require('amqplib');
 
 
 // eslint-disable-next-line no-unused-vars

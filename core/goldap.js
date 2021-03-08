@@ -1,5 +1,5 @@
-var CONFIG = require('config');
-var myldap = require('ldapjs');
+const CONFIG = require('config');
+const myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const filer = require('../core/file.js');
