@@ -4,7 +4,8 @@ const logger = winston.loggers.get('gomngr');
 var express = require('express');
 var router = express.Router();
 
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 
 router.get('/tags', async function(req, res) {
@@ -12,7 +13,7 @@ router.get('/tags', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let tags = await utils.mongo_tags().find({}).toArray();
+    let tags = await dbsrv.mongo_tags().find({}).toArray();
     let tagList = [];
     if (!tags) {
         return {'tags': tagList};
@@ -30,7 +31,7 @@ router.post('/tags/:kind/:id', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
@@ -38,7 +39,7 @@ router.post('/tags/:kind/:id', async function(req, res) {
     let session_user = null;
     let isadmin = false;
     try {
-        session_user= await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user= await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(session_user.uid);
     } catch(e) {
         logger.error(e);
@@ -59,16 +60,16 @@ router.post('/tags/:kind/:id', async function(req, res) {
     }
 
     tags.forEach(tag => {
-        utils.mongo_tags().updateOne({'name': tag}, {'name': tag}, {upsert: true});
+        dbsrv.mongo_tags().updateOne({'name': tag}, {'name': tag}, {upsert: true});
     });
 
     if(req.params.kind == 'group') {
-        await utils.mongo_groups().updateOne({'name': req.params.id} , {'$set': {'tags': tags}});
+        await dbsrv.mongo_groups().updateOne({'name': req.params.id} , {'$set': {'tags': tags}});
         res.send({message: 'tags updated'});
         return;
     }
     if(req.params.kind == 'user') {
-        await utils.mongo_users().updateOne({'uid': req.params.id} , {'$set': {'tags': tags}});
+        await dbsrv.mongo_users().updateOne({'uid': req.params.id} , {'$set': {'tags': tags}});
         res.send({message: 'tags updated'});
         return;
     }

@@ -6,7 +6,7 @@ var router = express.Router();
 // const logger = winston.loggers.get('gomngr');
 var CONFIG = require('config');
 var MAIL_CONFIG = CONFIG.gomail;
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
 
 //var monk = require('monk');
 //var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
@@ -88,7 +88,7 @@ router.get('/conf', async function(req, res){
 
     // should be check on each call
     if (CONFIG.general.max_account && CONFIG.general.max_account > 0) {
-        let count = await utils.mongo_users().count({status: 'Active'});
+        let count = await dbsrv.mongo_users().count({status: 'Active'});
         if(count >= CONFIG.general.max_account) {
             config.max_account = true;
         }

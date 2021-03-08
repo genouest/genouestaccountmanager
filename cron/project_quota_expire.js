@@ -6,7 +6,9 @@
 
 var CONFIG = require('config');
 
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const maisrv = require('../core/mail.service.js');
 
 const MAILER = CONFIG.general.mailer;
 // const MAIL_CONFIG = CONFIG[MAILER];
@@ -28,9 +30,9 @@ function timeConverter(tsp){
 }
 */
 
-utils.init_db().then(async () => {
-    utils.load_plugins();
-    let projects = await utils.mongo_projects().find({}).toArray();
+dbsrv.init_db().then(async () => {
+    plgsrv.load_plugins();
+    let projects = await dbsrv.mongo_projects().find({}).toArray();
     // Find project expiring in less then 2 month
     let notifs = [];
     for(let i=0;i<projects.length;i++){
@@ -46,7 +48,7 @@ utils.init_db().then(async () => {
         console.log('Project will expire: '+project.id);
 
         try {
-            await utils.send_notif_mail({
+            await maisrv.send_notif_mail({
                 'name': 'project_expiration',
                 'destinations': [CONFIG.general.support], // maybe add owner mail too ...
                 'subject': 'Project expiration ' + project.id

@@ -4,7 +4,8 @@ const logger = winston.loggers.get('gomngr');
 const CONFIG = require('config');
 
 const goldap = require('../core/goldap.js');
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const idsrv = require('../core/id.service.js');
 const filer = require('../core/file.js');
 
 
@@ -26,11 +27,11 @@ function get_group_home(user) {
 
 
 async function create_group(group_name, owner_name){
-    let mingid = await utils.getGroupAvailableId();
+    let mingid = await idsrv.getGroupAvailableId();
     let fid = new Date().getTime();
     let group = {name: group_name, gid: mingid, owner: owner_name};
     try {
-        await utils.mongo_groups().insertOne(group);
+        await dbsrv.mongo_groups().insertOne(group);
         await goldap.add_group(group, fid);
     }
     catch(e) {
@@ -45,7 +46,7 @@ async function create_group(group_name, owner_name){
         throw 'group creation failed';
     }
 
-    await utils.mongo_events().insertOne({'owner': owner_name, 'date': new Date().getTime(), 'action': 'create group ' + group_name , 'logs': [group_name + '.' + fid + '.update']});
+    await dbsrv.mongo_events().insertOne({'owner': owner_name, 'date': new Date().getTime(), 'action': 'create group ' + group_name , 'logs': [group_name + '.' + fid + '.update']});
 
     return group;
 
@@ -53,7 +54,7 @@ async function create_group(group_name, owner_name){
 
 
 async function delete_group(group, admin_user_id){
-    await utils.mongo_groups().deleteOne({'name': group.name});
+    await dbsrv.mongo_groups().deleteOne({'name': group.name});
     let fid = new Date().getTime();
     await goldap.delete_group(group, fid);
     try {
@@ -64,8 +65,8 @@ async function delete_group(group, admin_user_id){
         return false;
     }
 
-    await utils.mongo_events().insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
-    await utils.freeGroupId(group.gid);
+    await dbsrv.mongo_events().insertOne({'owner': admin_user_id, 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update']});
+    await idsrv.freeGroupId(group.gid);
     return true;
 }
 
@@ -76,9 +77,9 @@ async function clear_user_groups(user, admin_user_id){
         allgroups.push(user.group);
     }
     for(let i=0;i < allgroups.length;i++){
-        let group = await utils.mongo_groups().findOne({name: allgroups[i]});
+        let group = await dbsrv.mongo_groups().findOne({name: allgroups[i]});
         if(group){
-            let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]}).toArray();
+            let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': group.name}, {'group': group.name}]}).toArray();
             if(users_in_group && users_in_group.length == 0){
                 delete_group(group, admin_user_id);
             }

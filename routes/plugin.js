@@ -1,10 +1,12 @@
 var express = require('express');
 var router = express.Router();
 
+
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
 const rolsrv = require('../core/role.service.js');
 
 
@@ -29,8 +31,8 @@ const rolsrv = require('../core/role.service.js');
 
 router.get('/plugin', function(req, res) {
 
-    let plugins_info = utils.plugins_info();
-    let plugins_modules = utils.plugins_modules();
+    let plugins_info = plgsrv.plugins_info();
+    let plugins_modules = plgsrv.plugins_modules();
 
     let plugin_list = [];
     for(let i=0;i<plugins_info.length;i++){
@@ -48,7 +50,7 @@ router.get('/plugin', function(req, res) {
 
 
 router.get('/plugin/:id', function(req, res) {
-    let plugins_modules = utils.plugins_modules();
+    let plugins_modules = plgsrv.plugins_modules();
     let template = plugins_modules[req.params.id].template();
     res.send(template);
 });
@@ -61,7 +63,7 @@ router.get('/plugin/:id/:user', async function(req, res) {
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -76,7 +78,7 @@ router.get('/plugin/:id/:user', async function(req, res) {
 
     user.is_admin = isadmin;
 
-    let plugins_modules = utils.plugins_modules();
+    let plugins_modules = plgsrv.plugins_modules();
     plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
         res.send(result);
     });
@@ -91,7 +93,7 @@ router.post('/plugin/:id/:user', async function(req, res) {
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -107,7 +109,7 @@ router.post('/plugin/:id/:user', async function(req, res) {
 
     user.is_admin = isadmin;
 
-    let plugins_modules = utils.plugins_modules();
+    let plugins_modules = plgsrv.plugins_modules();
     plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
         res.send(result);
     }, function(err){

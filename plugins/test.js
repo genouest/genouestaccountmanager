@@ -6,7 +6,7 @@ var monk = require('monk'),
     users_db = db.get('users');
 */
 //var Promise = require('promise');
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
 
 // eslint-disable-next-line no-unused-vars
 var remove_user = async function(userId, data, adminId){
@@ -16,7 +16,7 @@ var remove_user = async function(userId, data, adminId){
 
 // eslint-disable-next-line no-unused-vars
 var activate_user = async function(userId, data, adminId){
-    let user = await utils.mongo_users().findOne({'uid': userId});
+    let user = await dbsrv.mongo_users().findOne({'uid': userId});
     if(!user){
         console.trace('Error finding user', userId);
         return false;
@@ -28,7 +28,7 @@ var activate_user = async function(userId, data, adminId){
 
 // eslint-disable-next-line no-unused-vars
 var deactivate_user = async function(userId, data, adminId){
-    let user = utils.mongo_users().findOne({'uid': userId});
+    let user = dbsrv.mongo_users().findOne({'uid': userId});
     if(!user){
         console.trace('Error finding user');
         throw 'user not found';
@@ -39,7 +39,7 @@ var deactivate_user = async function(userId, data, adminId){
 
 // eslint-disable-next-line no-unused-vars
 var get_user_info = async function(userId, adminId){
-    let user = await utils.mongo_users().findOne({'uid': userId});
+    let user = await dbsrv.mongo_users().findOne({'uid': userId});
     if(!user){
         console.trace('Error finding user');
         throw 'user not found';
@@ -50,7 +50,7 @@ var get_user_info = async function(userId, adminId){
 // eslint-disable-next-line no-unused-vars
 var set_user_info = async function(userId, data, adminId){
     console.log('should do something to update');
-    let user = await utils.mongo_users().findOne({'uid': userId});
+    let user = await dbsrv.mongo_users().findOne({'uid': userId});
     if(!user){
         console.trace('Error finding user');
         throw 'user not found';

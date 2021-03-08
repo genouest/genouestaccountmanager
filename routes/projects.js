@@ -13,7 +13,9 @@ var GENERAL_CONFIG = CONFIG.general;
 // var goldap = require('../routes/goldap.js');
 
 const filer = require('../core/file.js');
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const maisrv = require('../core/mail.service.js');
+const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 
 let day_time = 1000 * 60 * 60 * 24;
@@ -27,7 +29,7 @@ router.get('/project', async function(req, res){
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -45,13 +47,13 @@ router.get('/project', async function(req, res){
             res.send([]);
             return;
         } else {
-            let projects = await utils.mongo_projects().find({id: {$in : user.projects}}).toArray();
+            let projects = await dbsrv.mongo_projects().find({id: {$in : user.projects}}).toArray();
             res.send(projects);
             return;
         }
     } else {
         if (req.query.all === 'true'){
-            let projects = await utils.mongo_projects().find({}).toArray();
+            let projects = await dbsrv.mongo_projects().find({}).toArray();
             res.send(projects);
             return;
         } else {
@@ -59,7 +61,7 @@ router.get('/project', async function(req, res){
                 res.send([]);
                 return;
             } else {
-                let projects = await utils.mongo_projects().find({id: {$in : user.projects}}).toArray();
+                let projects = await dbsrv.mongo_projects().find({id: {$in : user.projects}}).toArray();
                 res.send(projects);
                 return;
             }
@@ -72,14 +74,14 @@ router.get('/project/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -96,7 +98,7 @@ router.get('/project/:id', async function(req, res){
         res.status(401).send({message: 'Admin only'});
         return;
     }
-    let project = await utils.mongo_projects().findOne({'id': req.params.id});
+    let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
 
     if (! project){
         logger.error('failed to get project', req.params.id);
@@ -111,14 +113,14 @@ router.post('/project', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.body.id])) {
+    if(! sansrv.sanitizeAll([req.body.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -134,12 +136,12 @@ router.post('/project', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let owner = await utils.mongo_users().findOne({'uid': req.body.owner});
+    let owner = await dbsrv.mongo_users().findOne({'uid': req.body.owner});
     if(!owner){
         res.status(404).send({message: 'Owner not found'});
         return;
     }
-    let project = await utils.mongo_projects().findOne({'id': req.body.id});
+    let project = await dbsrv.mongo_projects().findOne({'id': req.body.id});
     if(project){
         res.status(403).send({message: 'Not authorized or project already exists'});
         return;
@@ -156,7 +158,7 @@ router.post('/project', async function(req, res){
         'orga': req.body.orga,
         'access': req.body.access
     };
-    await utils.mongo_projects().insertOne(new_project);
+    await dbsrv.mongo_projects().insertOne(new_project);
     let fid = new Date().getTime();
     try {
         let created_file = await filer.project_add_project(new_project, fid);
@@ -167,8 +169,8 @@ router.post('/project', async function(req, res){
         return;
     }
 
-    await utils.mongo_pending_projects().deleteOne({ uuid: req.body.uuid });
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
+    await dbsrv.mongo_pending_projects().deleteOne({ uuid: req.body.uuid });
+    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
     res.send({message: 'Project created'});
     return;
 });
@@ -178,14 +180,14 @@ router.delete('/project/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -202,7 +204,7 @@ router.delete('/project/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    await utils.mongo_projects().deleteOne({'id': req.params.id});
+    await dbsrv.mongo_projects().deleteOne({'id': req.params.id});
     let fid = new Date().getTime();
     try {
         let created_file = await filer.project_delete_project({'id': req.params.id}, fid);
@@ -213,7 +215,7 @@ router.delete('/project/:id', async function(req, res){
         return;
     }
 
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.params.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.params.id , 'logs': []});
 
     res.send({message: 'Project deleted'});
 
@@ -224,14 +226,14 @@ router.post('/project/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -248,7 +250,7 @@ router.post('/project/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let project = await utils.mongo_projects().findOne({'id': req.params.id});
+    let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
     if(!project){
         res.status(401).send({message: 'Not authorized or project not found'});
         return;
@@ -263,7 +265,7 @@ router.post('/project/:id', async function(req, res){
         'orga': req.body.orga,
         'path': req.body.path
     }};
-    await utils.mongo_projects().updateOne({'id': req.params.id}, new_project);
+    await dbsrv.mongo_projects().updateOne({'id': req.params.id}, new_project);
     let fid = new Date().getTime();
     new_project.id =  req.params.id;
     try {
@@ -275,7 +277,7 @@ router.post('/project/:id', async function(req, res){
         return;
     }
 
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.params.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.params.id , 'logs': []});
     res.send({message: 'Project updated'});
 });
 
@@ -284,16 +286,16 @@ router.post('/project/:id/request', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    let project = await utils.mongo_projects().findOne({'id': req.params.id});
+    let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
     if(!project){
         res.status(404).send({message: 'Project ' + req.params.id + ' not found'});
         return;
@@ -303,7 +305,7 @@ router.post('/project/:id/request', async function(req, res){
         res.status(401).send({message: 'User ' + user.uid + ' is not project manager for project ' + project.id});
         return;
     }
-    let newuser = await utils.mongo_users().findOne({'uid': req.body.user});
+    let newuser = await dbsrv.mongo_users().findOne({'uid': req.body.user});
     if(!newuser){
         res.status(404).send({message: 'User ' + req.body.user + ' not found'});
         return;
@@ -332,11 +334,11 @@ router.post('/project/:id/request', async function(req, res){
         'add_requests': project.add_requests,
         'remove_requests': project.remove_requests
     }};
-    await utils.mongo_projects().updateOne({'id': req.params.id}, new_project);
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.body.request + ' for user ' + req.body.user + ' in project ' + project.id , 'logs': []});
+    await dbsrv.mongo_projects().updateOne({'id': req.params.id}, new_project);
+    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.body.request + ' for user ' + req.body.user + ' in project ' + project.id , 'logs': []});
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name': 'ask_project_user',
             'destinations': [GENERAL_CONFIG.accounts],
             'subject': 'Project ' + req.body.request + ' user request: ' + req.body.user
@@ -361,14 +363,14 @@ router.put('/project/:id/request', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -384,7 +386,7 @@ router.put('/project/:id/request', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let project = await utils.mongo_projects().findOne({'id': req.params.id});
+    let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
     if(!project){
         res.status(401).send({message: 'Not authorized or project not found'});
         return;
@@ -413,7 +415,7 @@ router.put('/project/:id/request', async function(req, res){
         'add_requests': project.add_requests,
         'remove_requests': project.remove_requests
     }};
-    await utils.mongo_projects().updateOne({'id': req.params.id}, new_project);
+    await dbsrv.mongo_projects().updateOne({'id': req.params.id}, new_project);
     res.send({message: 'Request removed'});
 });
 
@@ -423,14 +425,14 @@ router.get('/group/:id/projects', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -446,7 +448,7 @@ router.get('/group/:id/projects', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let projects_with_group = await utils.mongo_projects().find({'group': req.params.id}).toArray();
+    let projects_with_group = await dbsrv.mongo_projects().find({'group': req.params.id}).toArray();
     res.send(projects_with_group);
     res.end();
 });
@@ -456,7 +458,7 @@ router.post('/ask/project', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
@@ -483,8 +485,8 @@ router.post('/ask/project', async function(req, res){
         'description': req.body.description,
         'orga': req.body.orga,
     };
-    await utils.mongo_pending_projects().insertOne(new_project);
-    await utils.mongo_events().insertOne({
+    await dbsrv.mongo_pending_projects().insertOne(new_project);
+    await dbsrv.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),
         action: 'new pending project creation: ' + req.body.id,
@@ -494,7 +496,7 @@ router.post('/ask/project', async function(req, res){
     let msg_destinations =  [GENERAL_CONFIG.accounts, user.email];
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name': 'ask_project',
             'destinations': msg_destinations,
             'subject': 'Project creation request: ' + req.body.id
@@ -523,7 +525,7 @@ router.get('/pending/project', async function (req, res) {
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -541,13 +543,13 @@ router.get('/pending/project', async function (req, res) {
             res.send([]);
             return;
         } else {
-            let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
+            let pendings = await dbsrv.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
             res.send(pendings);
             return;
         }
     } else {
         if (req.query.all === 'true') {
-            let pendings = await utils.mongo_pending_projects().find({}).toArray();
+            let pendings = await dbsrv.mongo_pending_projects().find({}).toArray();
             res.send(pendings);
             return;
         } else {
@@ -555,7 +557,7 @@ router.get('/pending/project', async function (req, res) {
                 res.send([]);
                 return;
             } else {
-                let pendings = await utils.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
+                let pendings = await dbsrv.mongo_pending_projects().find({ id: { $in: user.pending } }).toArray();
                 res.send(pendings);
                 return;
             }
@@ -571,7 +573,7 @@ router.delete('/pending/project/:uuid', async function (req, res) {
     let user = null;
     let isadmin = false;
     try {
-        user = await utils.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user.uid);
     } catch(e) {
         logger.error(e);
@@ -588,9 +590,9 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    const result = await utils.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
+    const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
     if (result.deletedCount === 1) {
-        await utils.mongo_events().insertOne({
+        await dbsrv.mongo_events().insertOne({
             owner: user.uid,
             date: new Date().getTime(),
             action: 'remove Pending project ' + req.params.uuid,

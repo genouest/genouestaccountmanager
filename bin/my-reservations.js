@@ -8,7 +8,8 @@ var CONFIG = require('config');
 
 var ObjectID = require('mongodb').ObjectID;
 
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
 
 var winston = require('winston');
 const myconsole = new (winston.transports.Console)({
@@ -43,7 +44,7 @@ var processReservation = function(reservation){
         logger.info('create user for reservation ', reservation);
         tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug('set reservation as done', res);
-            utils.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
+            dbsrv.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
             });
         });
@@ -69,7 +70,7 @@ function createReservations(rid) {
             'over': false
         };
     }
-    utils.mongo_reservations().find(filter).toArray().then(function(reservations){
+    dbsrv.mongo_reservations().find(filter).toArray().then(function(reservations){
         if(reservations === undefined || reservations.length == 0){
             logger.info('No pending reservation');
             process.exit(0);
@@ -101,7 +102,7 @@ function removeReservations(rid) {
         };
     }
     logger.info('[INFO] Check for ending reservations');
-    utils.mongo_reservations().find(filter).toArray().then(function(reservations){
+    dbsrv.mongo_reservations().find(filter).toArray().then(function(reservations){
         if(reservations === undefined || reservations.length == 0){
             console.log('[INFO] No pending reservation');
             process.exit(0);
@@ -110,13 +111,13 @@ function removeReservations(rid) {
             console.log('[INFO] Delete accounts for reservation', reservation);
             console.log('[INFO] Reservation expired at ', new Date(reservation.to));
             Promise.all(reservation.accounts.map(function(user){
-                return utils.mongo_users().findOne({'uid': user});
+                return dbsrv.mongo_users().findOne({'uid': user});
             })).then(function(users){
                 return tps.delete_tp_users(users, reservation.group, 'auto');
             }).then(function(){
                 console.log('[INFO] close reservation', reservations);
                 Promise.all(reservations.map(function(reservation){
-                    return utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
+                    return dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
                 })).then(function(){
                     process.exit(0);
                 });
@@ -142,7 +143,7 @@ program
         if (args.id) {
             filter['_id'] = ObjectID.createFromHexString(args.id);
         }
-        utils.mongo_reservations().find(filter).toArray().then(function(reservations){
+        dbsrv.mongo_reservations().find(filter).toArray().then(function(reservations){
             let displayRes = [];
             for(let i=0;i<reservations.length;i++){
                 let res = reservations[i];
@@ -173,8 +174,8 @@ program
         createReservations(args.id);
     });
 
-utils.init_db().then(() => {
-    utils.load_plugins();
+dbsrv.init_db().then(() => {
+    plgsrv.load_plugins();
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });

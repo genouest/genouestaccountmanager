@@ -3,7 +3,7 @@ var fs = require('fs');
 var CONFIG = require('config');
 
 var Promise = require('promise');
-var utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
 
 var activate_user = async function(userId, _data, adminId){
     console.log('[Slurm] : Creating slurm cron file.. ' + userId );
@@ -30,10 +30,10 @@ var activate_user = async function(userId, _data, adminId){
     };
     try {
         await create_script();
-        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']});
+        await dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']});
         console.log('[slurm] : done');
     } catch (err) {
-        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [], 'status': 1});
+        await dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Create slurm user account ' + userId , 'logs': [], 'status': 1});
         console.log('[slurm]: failed');
     }
     return true;
@@ -63,10 +63,10 @@ var deactivate_user = async function(userId, _data, adminId){
     };
     try {
         await create_script();
-        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']}, function(){});
+        await dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [userId+'.'+fid+'.slurm.update']}, function(){});
         console.log('[slurm] : done');
     } catch(err) {
-        await utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [], 'status': 1});
+        await dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'Delete slurm user account ' + userId , 'logs': [], 'status': 1});
         console.log('[slurm] : failed');
     }
 };
