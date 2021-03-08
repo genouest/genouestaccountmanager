@@ -4,14 +4,14 @@
  */
 const program = require('commander');
 
-var CONFIG = require('config');
+const CONFIG = require('config');
 
-var ObjectID = require('mongodb').ObjectID;
+const ObjectID = require('mongodb').ObjectID;
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
 
-var winston = require('winston');
+const winston = require('winston');
 const myconsole = new (winston.transports.Console)({
     timestamp: true,
     level: 'info'
@@ -22,7 +22,7 @@ winston.loggers.add('gomngr', {
 
 const logger = winston.loggers.get('gomngr');
 
-var tps = require('../routes/tp.js');
+const tps = require('../routes/tp.js');
 
 if (!console.table){
     require('console.table');

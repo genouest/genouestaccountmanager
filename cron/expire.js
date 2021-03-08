@@ -12,11 +12,11 @@ var STATUS_EXPIRED = 'Expired';
 
 const process = require('process');
 
-var CONFIG = require('config');
-var goldap = require('../core/goldap.js');
+const CONFIG = require('config');
+const goldap = require('../core/goldap.js');
 const filer = require('../core/file.js');
 
-var Promise = require('promise');
+const Promise = require('promise');
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
@@ -25,7 +25,7 @@ const maisrv = require('../core/mail.service.js');
 const MAILER = CONFIG.general.mailer;
 const MAIL_CONFIG = CONFIG[MAILER];
 
-var notif = require('../core/notif_'+MAILER+'.js');
+const notif = require('../core/notif_'+MAILER+'.js');
 
 /*
 function timeConverter(tsp){

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-var notif = require('../core/notif_gomail.js');
-var Promise = require('promise');
+const notif = require('../core/notif_gomail.js');
+const Promise = require('promise');
 
 // eslint-disable-next-line no-unused-vars
 var activate_user = function(userId, data, adminId){

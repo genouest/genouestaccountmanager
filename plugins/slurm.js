@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-var fs = require('fs');
-var CONFIG = require('config');
+const fs = require('fs');
+const CONFIG = require('config');
 
-var Promise = require('promise');
+const Promise = require('promise');
 const dbsrv = require('../core/db.service.js');
 
 var activate_user = async function(userId, _data, adminId){

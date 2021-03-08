@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-var CONFIG = require('config');
-var http = require('http');
+const CONFIG = require('config');
+const http = require('http');
 var GENERAL_CONFIG = CONFIG.general;
 
 
-var Promise = require('promise');
+const Promise = require('promise');
 
 
 var get_quota = function(quota) {

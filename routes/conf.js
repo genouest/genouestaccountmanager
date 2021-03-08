@@ -1,14 +1,14 @@
 /* TODO : create a core/conf.service.js and move all method in it */
 
-var express = require('express');
+const express = require('express');
 var router = express.Router();
 // const winston = require('winston');
 // const logger = winston.loggers.get('gomngr');
-var CONFIG = require('config');
+const CONFIG = require('config');
 var MAIL_CONFIG = CONFIG.gomail;
 const dbsrv = require('../core/db.service.js');
 
-//var monk = require('monk');
+//const monk = require('monk');
 //var db = monk(CONFIG.mongo.host + ':' + CONFIG.mongo.port + '/' + CONFIG.general.db);
 //var users_db = db.get('users');
 
@@ -63,7 +63,7 @@ function init () {
     }
 }
 
-// todo: should replace all {var CONFIG = require('config');} by a call to this function
+// todo: should replace all {const CONFIG = require('config');} by a call to this function
 function get_conf () {
     init();
     return conf;

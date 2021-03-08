@@ -1,8 +1,8 @@
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var http = require('http');
+const http = require('http');
 
-var CONFIG = require('config');
+const CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 router.get('/quota/:user/:id', function(req, res) {

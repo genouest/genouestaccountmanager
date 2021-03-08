@@ -1,7 +1,7 @@
 // const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-var CONFIG = require('config');
+const CONFIG = require('config');
 
 const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;

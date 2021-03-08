@@ -1,7 +1,7 @@
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var fs = require('fs');
-var CONFIG = require('config');
+const fs = require('fs');
+const CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 const winston = require('winston');

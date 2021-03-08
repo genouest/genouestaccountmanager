@@ -1,6 +1,6 @@
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var CONFIG = require('config');
+const CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 /* GET home page. */

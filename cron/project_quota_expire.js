@@ -4,7 +4,7 @@
  */
 
 
-var CONFIG = require('config');
+const CONFIG = require('config');
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
@@ -13,7 +13,7 @@ const maisrv = require('../core/mail.service.js');
 const MAILER = CONFIG.general.mailer;
 // const MAIL_CONFIG = CONFIG[MAILER];
 
-var notif = require('../core/notif_'+MAILER+'.js');
+const notif = require('../core/notif_'+MAILER+'.js');
 
 /*
 function timeConverter(tsp){

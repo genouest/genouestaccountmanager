@@ -1,17 +1,17 @@
 /* eslint-disable require-atomic-updates */
 /*jslint es6 */
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var markdown = require('markdown').markdown;
-var htmlToText = require('html-to-text');
-var validator = require('email-validator');
+const markdown = require('markdown').markdown;
+const htmlToText = require('html-to-text');
+const validator = require('email-validator');
 
-var Promise = require('promise');
+const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
 const conf = require('../routes/conf.js');
-var CONFIG = require('config');
+const CONFIG = require('config');
 var GENERAL_CONFIG = CONFIG.general;
 
 const goldap = require('../core/goldap.js');

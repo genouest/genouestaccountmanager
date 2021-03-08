@@ -1,14 +1,14 @@
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var CONFIG = require('config');
-var Promise = require('promise');
+const CONFIG = require('config');
+const Promise = require('promise');
 
 const dbsrv = require('../core/db.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const maisrv = require('../core/mail.service.js');
 const rolsrv = require('../core/role.service.js');
 
-var mysql = require('mysql');
+const mysql = require('mysql');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 // const request = require('request');

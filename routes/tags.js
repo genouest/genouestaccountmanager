@@ -1,7 +1,7 @@
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-var express = require('express');
+const express = require('express');
 var router = express.Router();
 
 const dbsrv = require('../core/db.service.js');
