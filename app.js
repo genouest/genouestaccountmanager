@@ -2,15 +2,15 @@
 /* eslint-disable no-console */
 'use strict';
 
-var express = require('express');
-var expressStaticGzip = require('express-static-gzip');
-var cors = require('cors');
-var path = require('path');
-// var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var http = require('http');
+const express = require('express');
+const expressStaticGzip = require('express-static-gzip');
+const cors = require('cors');
+const path = require('path');
+// const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const http = require('http');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
@@ -19,8 +19,8 @@ if (process.env.NODE_ENV == 'dev' || process.env.DEBUG) {
     log_level = 'debug';
 }
 
-var winston = require('winston');
-var jwt = require('jsonwebtoken');
+const winston = require('winston');
+const jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
     label: 'gomngr',
@@ -37,23 +37,23 @@ const idsrv = require('./core/id.service.js');
 const plgsrv = require('./core/plugin.service.js');
 const usrsrv = require('./core/user.service.js');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var ssh = require('./routes/ssh');
-var auth = require('./routes/auth');
-// var disks = require('./routes/disks');
-var database = require('./routes/database');
-var web = require('./routes/web');
-var logs = require('./routes/logs');
-var projects = require('./routes/projects');
-var quota = require('./routes/quota');
-var plugin = require('./routes/plugin');
-var tp = require('./routes/tp');
-var conf = require('./routes/conf');
-var tags = require('./routes/tags.js');
-var ObjectID = require('mongodb').ObjectID;
+const routes = require('./routes/index');
+const users = require('./routes/users');
+const ssh = require('./routes/ssh');
+const auth = require('./routes/auth');
+// const disks = require('./routes/disks');
+const database = require('./routes/database');
+const web = require('./routes/web');
+const logs = require('./routes/logs');
+const projects = require('./routes/projects');
+const quota = require('./routes/quota');
+const plugin = require('./routes/plugin');
+const tp = require('./routes/tp');
+const conf = require('./routes/conf');
+const tags = require('./routes/tags.js');
+const ObjectID = require('mongodb').ObjectID;
 
-var CONFIG = require('config');
+const CONFIG = require('config');
 
 const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
 const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
