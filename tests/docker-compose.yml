@@ -3,30 +3,36 @@ version: '3'
 services:
 
     mysql:
+        #image: mariadb
         image: mariadb
         environment:
             - MYSQL_ROOT_PASSWORD=my
 
     mongo:
-        image: mongo
+        #image: mongo
+        image: quay.io/osallou/mongo
 
     mailhog:
-        image: mailhog/mailhog
+        #image: mailhog/mailhog
+        image: quay.io/osallou/mailhog
         ports:
             - "8025:8025"
 
     gomail-rabbitmq:
-        image: rabbitmq
+        #image: rabbitmq
+        image: quay.io/osallou/rabbitmq
         hostname: gomail-rabbitmq
         environment:
             - RABBITMQ_DEFAULT_USER=gomail
             - RABBITMQ_DEFAULT_PASS=gomail
 
     gomail-redis:
-        image: redis
+        #image: redis
+        image: quay.io/osallou/redis
 
     gomail-web:
-        image: osallou/gomail
+        #image: osallou/gomail
+        image: quay.io/osallou/gomail
         environment:
             - RABBITMQ_URL=amqp://gomail:gomail@gomail-rabbitmq:5672/%2F
             - GOMAIL_HREF=http://gomail-web:6643
@@ -54,7 +60,8 @@ services:
         command: bash -c "sleep 10 && python3 gomail/executor.py"
 
     openldap:
-        image: dinkel/openldap
+        #image: dinkel/openldap
+        image: quay.io/osallou/openldap
         environment:
             - "SLAPD_PASSWORD=my"
             - "SLAPD_DOMAIN=my.org"
@@ -65,7 +72,8 @@ services:
             #- ${MYDIR}/openldap/data/lib:/var/lib/ldap
             - ./ldap-data:/etc/ldap/prepopulate:ro
     phpldapadmin:
-        image: dinkel/phpldapadmin
+        #image: dinkel/phpldapadmin
+        image: quay.io/osallou/phpldapadmin
         ports:
             - "8080:80"
         environment:
