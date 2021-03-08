@@ -1,19 +1,19 @@
 const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config')
+const CONFIG = require('config');
 
 const goldap = require('../core/goldap.js');
 const utils = require('../core/utils.js');
 const filer = require('../core/file.js');
 
-const grpsrv = require('../core/group.service.js')
+const grpsrv = require('../core/group.service.js');
 
 /* TODO : find somewhere smart to put this */
 const STATUS_PENDING_EMAIL = 'Waiting for email approval';
 const STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 const STATUS_ACTIVE = 'Active';
-const STATUS_EXPIRED = 'Expired';
+// const STATUS_EXPIRED = 'Expired';
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -117,7 +117,7 @@ async function create_extra_user(user_name, group, internal_user){
         logger.error('failed to create extra user', user, err);
     }
     return user;
-};
+}
 
 
 async function create_admin(default_admin, default_admin_group){
@@ -142,7 +142,7 @@ async function create_admin(default_admin, default_admin_group){
             logger.info('admin user created', user);
         }
     }
-};
+}
 
 
 async function add_user_to_group(uid, secgroup, action_owner) {
@@ -182,7 +182,7 @@ async function add_user_to_group(uid, secgroup, action_owner) {
     }
 
 
-};
+}
 
 
 async function add_user_to_project(newproject, uid, action_owner) {
@@ -251,7 +251,7 @@ async function add_user_to_project(newproject, uid, action_owner) {
             }
         }
     }
-};
+}
 
 async function delete_user(user, action_owner_id, message){
     let user_is_activ = true;
@@ -336,4 +336,4 @@ async function delete_user(user, action_owner_id, message){
 
     await utils.freeUserId(user.uidnumber);
     return true;
-};
+}

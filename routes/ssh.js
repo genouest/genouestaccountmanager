@@ -3,11 +3,9 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-var CONFIG = require('config');
-
 const filer = require('../core/file.js');
 const utils = require('../core/utils.js');
-
+const rolsrv = require('../core/role.service.js');
 
 router.get('/ssh/:id/putty', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
@@ -45,13 +43,25 @@ router.get('/ssh/:id/private', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await utils.mongo_users().findOne({uid: req.params.id});
+        isadmin = await rolsrv.is_admin(user.uid);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
-    if(CONFIG.general.admin.indexOf(user.uid) >= 0){
+    // todo maybe remove this a next if do the job, and it will allow admin to download it's own private key
+    if(isadmin){
         res.status(401).send({message: '[admin user] not authorized to download private key'});
         return;
     }
