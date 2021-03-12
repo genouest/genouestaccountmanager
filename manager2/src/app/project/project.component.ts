@@ -8,6 +8,7 @@ import { GroupsService} from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { data } from 'jquery';
 
 @Component({
     selector: 'app-project',
@@ -193,12 +194,24 @@ export class ProjectComponent implements OnInit {
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
             this.projectsService.fetch_dmp(dmpid).subscribe(
                 resp => {
+                    let funders = []
+
+                    let data = resp.data.project.funding
+                    console.log(data)
+                    for (data in resp.data.project.funding) {
+                        console.log(resp.data.project.funding[data])
+                        if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
+                            funders.push(resp.data.project.funding[data].funder.name)
+                        }
+                        
+
+                    }
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;
                     this.new_project = {
                         'id': resp.data.project.acronym,
                         'description': resp.data.researchOutput[0].researchOutputDescription.description,
-                        'orga': resp.data.project.funding[0].name,
+                        'orga': funders,
                         'dmpid': this.new_project.dmpid,
                     };
 

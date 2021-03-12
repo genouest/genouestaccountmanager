@@ -78,10 +78,7 @@
     <div *ngIf="project.dmp_linked" class="card bg-light">
       <div class="card-header" (click)="dmp_visible=!dmp_visible">Dmp data</div>
       <div *ngIf="dmp_visible"class="card-body">
-            <code>
-              <pre>{{dmp}}</pre>
-          </code>
-  
+        <ngx-json-viewer [json]="dmp" [expanded]="false"></ngx-json-viewer>
       </div>
 
     </div>
