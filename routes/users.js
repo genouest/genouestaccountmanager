@@ -193,7 +193,7 @@ router.put('/user/:id/subscribe', async function(req, res){
 
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
@@ -237,7 +237,7 @@ router.put('/user/:id/unsubscribe', async function(req, res){
 
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
