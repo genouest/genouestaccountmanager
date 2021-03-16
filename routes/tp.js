@@ -361,7 +361,7 @@ router.post('/tp', async function(req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -401,7 +401,7 @@ router.get('/tp/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -454,7 +454,7 @@ router.delete('/tp/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -521,7 +521,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -584,7 +584,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
