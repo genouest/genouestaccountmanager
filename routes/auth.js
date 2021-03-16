@@ -92,7 +92,7 @@ router.post('/mail/auth/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-        isadmin = await rolsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -215,7 +215,7 @@ router.get('/auth', async function(req, res) {
         let isadmin = false;
         try {
             user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-            isadmin = await rolsrv.is_admin(user.uid);
+            isadmin = await rolsrv.is_admin(user);
         } catch(e) {
             logger.error(e);
             res.status(404).send({message: 'User session not found'});
@@ -267,7 +267,7 @@ router.post('/auth/:id', async function(req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-        isadmin = await rolsrv.is_admin(user.uid);
+        isadmin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});

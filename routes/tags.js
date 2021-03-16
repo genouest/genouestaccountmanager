@@ -40,7 +40,7 @@ router.post('/tags/:kind/:id', async function(req, res) {
     let isadmin = false;
     try {
         session_user= await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user.uid);
+        isadmin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});

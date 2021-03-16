@@ -8,11 +8,25 @@ const CONFIG = require('config');
 
 exports.is_admin = is_admin;
 
-async function is_admin(uid) {
-    let isadmin = false;
-    if (CONFIG.general.admin.indexOf(uid) >= 0)
-    {
-        isadmin = true;
+async function is_admin(user) {
+    if (user.uid === undefined) { // backward compatibility with user = user.uid, just in case
+        if (CONFIG.general.admin.indexOf(user) >= 0)
+        {
+            return true;
+        }
+        return false;
     }
-    return isadmin;
+    if (CONFIG.general.admin.indexOf(user.uid) >= 0)
+    {
+        return true;
+    }
+    if (CONFIG.general.admin_group) {
+        if (user.group == CONFIG.general.admin_group) {
+            return true;
+        }
+        if (user.secondarygroups && user.secondarygroups.indexOf(CONFIG.general.admin_group) >= 0) {
+            return true;
+        }
+    } 
+    return false;
 }

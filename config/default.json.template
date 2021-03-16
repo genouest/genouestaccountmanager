@@ -15,6 +15,7 @@
     "db": "gomngr",
     "url": "http://localhost:3000",
     "admin": [""],
+    "admin_group": "",
     "support": "",
     "accounts": "",
     "secret": "",
