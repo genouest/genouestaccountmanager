@@ -66,7 +66,9 @@ export class ProjectComponent implements OnInit {
         this.projectsService.list(false).subscribe(
             resp => {
                 for(var i=0;i<resp.length;i++){
-                    resp[i].expire = new Date(resp[i].expire);
+                    if (!resp[i].expire) {
+                        resp[i].expire = new Date(resp[i].expire);
+                    }
                 }
                 this.projects = resp;
             },
@@ -156,8 +158,9 @@ export class ProjectComponent implements OnInit {
                     this.projectsService.list(false).subscribe(
                         resp => {
                             for(var i=0;i<resp.length;i++){
-                                resp[i].expire = new Date(resp[i].expire);
-                            }
+                                if (!resp[i].expire) {
+                                    resp[i].expire = new Date(resp[i].expire);
+                                }                            }
                             this.projects = resp;
                         },
                         err => console.log('failed to get projects')
@@ -167,6 +170,7 @@ export class ProjectComponent implements OnInit {
                     this.request_err_msg = err.error.message;
                 }
             )
+            return;
         }
         this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
             resp => this.request_msg = resp['message'],
