@@ -2082,7 +2082,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    if(!session_user || !isadmin){
+    if (!session_user || (!isadmin && session_user.uid !=  req.params.id)) {
         res.status(401).send({message: 'Not authorized'});
         res.end();
         return;
