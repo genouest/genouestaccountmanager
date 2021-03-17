@@ -72,6 +72,7 @@
                 <th>Size (Go)</th>
                 <th>Creation</th>
                 <th>Expiration</th>
+                <th></th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-project>
@@ -83,6 +84,7 @@
                 <td>{{project.size}}</td>
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
+                <td><button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button></td>
               </tr>
             </ng-template>
           </p-table>

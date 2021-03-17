@@ -66,7 +66,9 @@ export class ProjectComponent implements OnInit {
         this.projectsService.list(false).subscribe(
             resp => {
                 for(var i=0;i<resp.length;i++){
-                    resp[i].expire = new Date(resp[i].expire);
+                    if (!resp[i].expire) {
+                        resp[i].expire = new Date(resp[i].expire);
+                    }
                 }
                 this.projects = resp;
             },
@@ -144,10 +146,33 @@ export class ProjectComponent implements OnInit {
                 }
             }
         }
-        if (request_type === "remove" && this.selectedProject.owner === user_id){
+        if (request_type === "remove" && project.owner === user_id){
             this.request_err_msg = 'You cannot remove the project owner';
             return;
         }
+        if (request_type === "remove" && this.session_user.uid === user_id) {
+            // Self removal
+            this.userService.removeFromProject(user_id, project.id).subscribe(
+                resp => {
+                    this.request_msg = resp['message'];
+                    this.projectsService.list(false).subscribe(
+                        resp => {
+                            for(var i=0;i<resp.length;i++){
+                                if (!resp[i].expire) {
+                                    resp[i].expire = new Date(resp[i].expire);
+                                }                            }
+                            this.projects = resp;
+                        },
+                        err => console.log('failed to get projects')
+                    )
+                },
+                err => {
+                    this.request_err_msg = err.error.message;
+                }
+            )
+            return;
+        }
+
         this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
             resp => this.request_msg = resp['message'],
             err => this.request_err_msg = err.error.message
