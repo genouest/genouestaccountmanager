@@ -2131,12 +2131,14 @@ router.delete('/user/:id/project/:project', async function(req, res){
     }
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
 
-    try {
-        await grpsrv.remove_from_group(user.uid, project.group);
-    } catch(error) {
-        logger.error(`Removal of user from project ${oldproject} group ${project.group} failed`, error);
-        res.status(500).send({message: 'Remove from Project Failed'});
-        return;
+    if (project.group) {
+        try {
+            await grpsrv.remove_from_group(user.uid, project.group);
+        } catch(error) {
+            logger.error(`Removal of user from project ${oldproject} group ${project.group} failed`, error);
+            res.status(500).send({message: 'Remove from Project Failed'});
+            return;
+        }
     }
 
     res.send({message: 'User removed from project', fid: fid});
