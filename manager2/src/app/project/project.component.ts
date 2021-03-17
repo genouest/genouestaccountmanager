@@ -146,7 +146,7 @@ export class ProjectComponent implements OnInit {
                 }
             }
         }
-        if (request_type === "remove" && this.selectedProject.owner === user_id){
+        if (request_type === "remove" && project.owner === user_id){
             this.request_err_msg = 'You cannot remove the project owner';
             return;
         }
@@ -154,6 +154,7 @@ export class ProjectComponent implements OnInit {
             // Self removal
             this.userService.removeFromProject(user_id, project.id).subscribe(
                 resp => {
+                    console.log("USER removed from project")
                     this.request_msg = resp['message'];
                     this.projectsService.list(false).subscribe(
                         resp => {
@@ -167,11 +168,15 @@ export class ProjectComponent implements OnInit {
                     )
                 },
                 err => {
+                    console.error("USER removal error", err)
                     this.request_err_msg = err.error.message;
                 }
             )
             return;
         }
+        // TODO REMOVE
+        console.log("TO REMOVE")
+        return
         this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
             resp => this.request_msg = resp['message'],
             err => this.request_err_msg = err.error.message
