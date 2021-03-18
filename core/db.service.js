@@ -30,6 +30,7 @@ var mongo_connect = async function() {
     mongo_users = mongodb.collection('users');
     mongo_oldusers = mongodb.collection('old_users');
     mongo_groups = mongodb.collection('groups');
+    mongo_oldgroups = mongodb.collection('old_groups');
     mongo_events = mongodb.collection('events');
     mongo_reservations = mongodb.collection('reservations');
     mongo_databases = mongodb.collection('databases');
