@@ -475,6 +475,12 @@ router.post('/group/:id', async function(req, res){
         res.status(403).send({message: 'Group already exists'});
         return;
     }
+    let groupexisted = await dbsrv.mongo_oldgroups().findOne({name: req.params.id});
+    if(groupexisted){
+        logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
+        res.send({status: 1, message: 'Group name already used'});
+        return;
+    }
 
     try {
         group = await grpsrv.create_group(req.params.id , owner);
@@ -878,6 +884,12 @@ router.get('/user/:id/activate', async function(req, res) {
         let data = await dbsrv.mongo_groups().findOne({'name': user.group});
         if(!data) {
             if (CONFIG.general.auto_add_group) {
+                let groupexisted = await dbsrv.mongo_oldgroups().findOne({'name': user.group});
+                if(groupexisted){
+                    logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
+                    res.status(403).send({message: 'Group name already used in the past'});
+                    return;
+                }
                 try {
                     await grpsrv.create_group(user.group, user.uid);
                 } catch(error){
