@@ -283,6 +283,10 @@ async function delete_user(user, action_owner_id, message){
 
     try {
         await dbsrv.mongo_users().deleteOne({_id: user._id});
+        // Record user uid to prevent reuse
+        await dbsrv.mongo_oldusers().insertOne({
+            'uid': user.uid
+        });
     } catch(err) {
         return false;
     }

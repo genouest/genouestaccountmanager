@@ -1154,6 +1154,14 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
+    let userexisted = await dbsrv.mongo_oldusers().findOne({uid: req.params.id});
+    if(userexisted){
+        logger.error(`User uid ${req.params.id} already used in the past, preventing reuse`);
+        res.send({status: 1, message: 'User id already used'});
+        return;
+    }
+
+
     let regkey = Math.random().toString(36).substring(7);
     let default_main_group = GENERAL_CONFIG.default_main_group || '';
     let group = '';
