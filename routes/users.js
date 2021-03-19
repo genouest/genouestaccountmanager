@@ -2131,7 +2131,7 @@ router.delete('/user/:id/project/:project', async function(req, res){
     }
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
 
-    if (project.group) {
+    if (project.group && (CONFIG.project === undefined || CONFIG.project.enable_group)) {
         try {
             await grpsrv.remove_from_group(user.uid, project.group);
         } catch(error) {
