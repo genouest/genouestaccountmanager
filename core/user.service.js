@@ -1,6 +1,8 @@
 const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const crypto = require('crypto');
+
 const CONFIG = require('config');
 
 const goldap = require('../core/goldap.js');
@@ -284,9 +286,12 @@ async function delete_user(user, action_owner_id, message){
     try {
         await dbsrv.mongo_users().deleteOne({_id: user._id});
         // Record user uid to prevent reuse
-        await dbsrv.mongo_oldusers().insertOne({
-            'uid': user.uid
-        });
+        if (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse) {
+            let uidMd5 = crypto.createHash('md5').update(user.uid).digest('hex');
+            await dbsrv.mongo_oldusers().insertOne({
+                'uid': uidMd5
+            });
+        }
     } catch(err) {
         return false;
     }

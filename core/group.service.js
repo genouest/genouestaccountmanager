@@ -95,9 +95,11 @@ async function create_group(group_name, owner_name){
 
 async function delete_group(group, admin_user_id){
     await dbsrv.mongo_groups().deleteOne({'name': group.name});
-    await dbsrv.mongo_oldgroups().insertOne({
-        'name': group.name
-    });
+    if (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse) {
+        await dbsrv.mongo_oldgroups().insertOne({
+            'name': group.name
+        });
+    }
     let fid = new Date().getTime();
     await goldap.delete_group(group, fid);
     try {

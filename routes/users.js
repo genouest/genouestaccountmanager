@@ -5,7 +5,7 @@ var router = express.Router();
 const markdown = require('markdown').markdown;
 const htmlToText = require('html-to-text');
 const validator = require('email-validator');
-
+const crypto = require('crypto');
 const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
@@ -1166,7 +1166,8 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    let userexisted = await dbsrv.mongo_oldusers().findOne({uid: req.params.id});
+    let uidMd5 = crypto.createHash('md5').update(req.params.id).digest('hex');
+    let userexisted = await dbsrv.mongo_oldusers().findOne({uid: uidMd5});
     if(userexisted){
         logger.error(`User uid ${req.params.id} already used in the past, preventing reuse`);
         res.send({status: 1, message: 'User id already used'});
