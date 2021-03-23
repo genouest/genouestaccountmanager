@@ -153,6 +153,11 @@ async function create_admin(default_admin, default_admin_group){
 async function remove_user_from_group(uid, secgroup, action_owner) {
     logger.info('Remove user ' + uid + ' from group ' + secgroup);
     let user = await dbsrv.mongo_users().findOne({uid: uid});
+
+    if(! user) {
+        throw {code: 404, message: 'User ' + uid + ' not found'};
+    }
+
     if(secgroup == user.group) {
         throw {code: 403, message: 'Group is user main\'s group: '+user.group};
     }
