@@ -703,7 +703,7 @@ router.delete('/user/:id/group/:group', async function(req, res){
     let secgroup = req.params.group;
 
     try {
-        await usrsrv.remove_user_from_group(secgroup, uid, session_user.uid);
+        await usrsrv.remove_user_from_group(uid, secgroup, session_user.uid);
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
