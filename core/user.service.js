@@ -29,7 +29,8 @@ exports.create_admin = create_admin;
 exports.add_user_to_group = add_user_to_group;
 exports.add_user_to_project = add_user_to_project;
 exports.delete_user = delete_user;
-
+exports.remove_user_from_group = remove_user_from_group;
+exports.remove_user_from_project = remove_user_from_project;
 
 // module functions
 function get_user_home(user) {
@@ -149,6 +150,58 @@ async function create_admin(default_admin, default_admin_group){
     }
 }
 
+async function remove_user_from_group(uid, secgroup, action_owner) {
+    logger.info('Remove user ' + uid + ' from group ' + secgroup);
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
+    if(secgroup == user.group) {
+        throw {code: 403, message: 'Group is user main\'s group: '+user.group};
+    }
+    let present = false;
+    let newgroup = [];
+    for(let g=0;g < user.secondarygroups.length;g++){
+        if(secgroup == user.secondarygroups[g]) {
+            present = true;
+        }
+        else {
+            newgroup.push(user.secondarygroups[g]);
+        }
+    }
+    if(! present) {
+        throw {code: 404, message: 'group is not set'};
+    }
+    user.secondarygroups = newgroup;
+    let fid = new Date().getTime();
+    // Now add group
+    await goldap.change_user_groups(user, [], [secgroup], fid);
+    try {
+        await dbsrv.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+    } catch(err) {
+        throw {code: 403, message: 'Could not update user'};
+    }
+
+    try {
+        let created_file = await filer.user_change_group(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Group Change Failed for: ' + user.uid, error);
+        throw {code: 500, message: 'Change Group Failed'};
+    }
+
+    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove user ' + uid + ' from secondary  group ' + secgroup , 'logs': [user.uid + '.' + fid + '.update']});
+    let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}).toArray();
+
+
+    if(!users_in_group || users_in_group.length == 0) {
+        // If group is empty, delete it
+        let group = await dbsrv.mongo_groups().findOne({name: secgroup});
+        if(group) {
+            await grpsrv.delete_group(group, action_owner);
+            throw {code: 208, message: 'User removed from group. Empty group ' + secgroup + ' was deleted'};
+        }
+    }
+}
+
+
 
 async function add_user_to_group(uid, secgroup, action_owner) {
     logger.info('Adding user ' + uid + ' to group ' + secgroup);
@@ -187,6 +240,54 @@ async function add_user_to_group(uid, secgroup, action_owner) {
     }
 
 
+}
+
+async function remove_user_from_project(oldproject, uid, action_owner, force) {
+    logger.info('Adding user ' + uid + ' to project ' + oldproject);
+
+    let fid = new Date().getTime();
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
+    if(! user) {
+        throw {code: 404, message: 'User ' + uid + ' not found'};
+    }
+    let project = await dbsrv.mongo_projects().findOne({id:oldproject});
+    if(!project){
+        logger.info('project not found', oldproject);
+        throw {code: 500, message: 'Error, project not found'};
+    }
+    if(uid === project.owner && ! force){
+        throw {code: 403, message: 'Cannot remove project owner. Please change the owner before deletion'};
+    }
+    let tempprojects = [];
+    for(let g=0; g < user.projects.length; g++){
+        if(oldproject != user.projects[g]) {
+            tempprojects.push(user.projects[g]);
+        }
+    }
+    try {
+        await dbsrv.mongo_users().updateOne({_id: user._id}, {'$set': { projects: tempprojects}});
+    } catch(err) {
+        throw {code: 403, message: 'Could not update user'};
+    }
+    try {
+        let created_file = await filer.project_remove_user_from_project(project, user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Remove User from Project Failed for: ' + oldproject, error);
+        throw {code: 500, message: 'Remove from Project Failed'};
+
+    }
+    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove user ' + uid + ' from project ' + oldproject , 'logs': []});
+
+    if (project.group && (CONFIG.project === undefined || CONFIG.project.enable_group)) {
+        try {
+            await grpsrv.remove_from_group(user.uid, project.group);
+        } catch(error) {
+            logger.error(`Removal of user from project ${oldproject} group ${project.group} failed`, error);
+            throw {code: 500, message: 'Remove from Project Failed'};
+
+        }
+    }
 }
 
 
