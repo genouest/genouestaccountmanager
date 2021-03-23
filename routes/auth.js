@@ -232,7 +232,7 @@ router.get('/auth', async function(req, res) {
             CONFIG.general.secret,
             {expiresIn: '2 days'}
         );
-        if(user.u2f) {user.u2f.keyHankdle = null;}
+        if(user.u2f) {user.u2f.keyHandle = null;}
 
         user.is_admin = isadmin;
 
@@ -251,7 +251,7 @@ router.get('/auth', async function(req, res) {
         res.send({token: token, user: user, message: ''});
     }
     else {
-        res.send({user: null, message: 'User does not exist'});
+        res.send({user: null, message: 'User does not exist or not logged'});
     }
 });
 
