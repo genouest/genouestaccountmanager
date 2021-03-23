@@ -31,6 +31,7 @@ router.get('/ssh/:id/putty', async function(req, res) {
     res.download(sshDir + '/id_rsa.ppk', 'id_rsa.ppk', function (err) {
         if (err) {
             logger.error(err);
+            res.status(404).send('Key not found');
         }
     });
 });
@@ -63,7 +64,7 @@ router.get('/ssh/:id/private', async function(req, res) {
     }
     // todo maybe remove this a next if do the job, and it will allow admin to download it's own private key
     if(isadmin){
-        res.status(401).send({message: '[admin user] not authorized to download private key'});
+        res.status(403).send('[admin user] not authorized to download private key');
         return;
     }
     if(user._id.str != req.locals.logInfo.id.str){
@@ -74,6 +75,7 @@ router.get('/ssh/:id/private', async function(req, res) {
     res.download(sshDir + '/id_rsa', 'id_rsa', function (err) {
         if (err) {
             logger.error(err);
+            res.status(404).send('Key not found');
         }
     });
 });
@@ -102,6 +104,7 @@ router.get('/ssh/:id/public', async function(req, res) {
     res.download(sshDir + '/id_rsa.pub', 'id_rsa.pub', function (err) {
         if (err) {
             logger.error(err);
+            res.status(404).send('Key not found');
         }
     });
 });

@@ -434,6 +434,7 @@
                     <div class="alert alert-info" role="alert">
                         When generating a key, public key is automatically added to authorized keys, process takes one minute
                     </div>
+                    <div *ngIf="key_err" class="alert alert-warning alert-dismissible fade show" role="alert">{{key_err}}</div>
                     <div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
                     <button class="btn btn-outline-secondary" (click)="ssh_new_key()">Generate new key</button>
                     <hr/>
