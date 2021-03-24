@@ -476,7 +476,7 @@ router.post('/group/:id', async function(req, res){
         return;
     }
     let groupexisted = await dbsrv.mongo_oldgroups().findOne({name: req.params.id});
-    if(groupexisted){
+    if(groupexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
         logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
         res.send({status: 1, message: 'Group name already used'});
         return;
@@ -885,7 +885,7 @@ router.get('/user/:id/activate', async function(req, res) {
         if(!data) {
             if (CONFIG.general.auto_add_group) {
                 let groupexisted = await dbsrv.mongo_oldgroups().findOne({'name': user.group});
-                if(groupexisted){
+                if(groupexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
                     logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
                     res.status(403).send({message: 'Group name already used in the past'});
                     return;
@@ -1168,7 +1168,7 @@ router.post('/user/:id', async function(req, res) {
 
     let uidMd5 = crypto.createHash('md5').update(req.params.id).digest('hex');
     let userexisted = await dbsrv.mongo_oldusers().findOne({uid: uidMd5});
-    if(userexisted){
+    if(userexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
         logger.error(`User uid ${req.params.id} already used in the past, preventing reuse`);
         res.send({status: 1, message: 'User id already used'});
         return;
