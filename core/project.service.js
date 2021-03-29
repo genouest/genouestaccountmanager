@@ -16,6 +16,7 @@ exports.create_project_request = create_project_request;
 exports.remove_project_request = remove_project_request;
 
 async function create_project(new_project, uuid, action_owner) {
+    logger.info('Create Project ' + new_project.id + ' uuid ' + uuid);
     new_project.created_at = new Date().getTime();
     if (!new_project.expire) {
         new_project.expire = new Date().getTime() + CONFIG.project.default_expire * day_time;
@@ -35,6 +36,7 @@ async function create_project(new_project, uuid, action_owner) {
 }
 
 async function remove_project(id, action_owner) {
+    logger.info('Remove Project ' + id);
     await dbsrv.mongo_projects().deleteOne({'id': id});
     let fid = new Date().getTime();
     try {
@@ -50,6 +52,7 @@ async function remove_project(id, action_owner) {
 }
 
 async function update_project(id, project, action_owner) {
+    logger.info('Update Project ' + id);
     await dbsrv.mongo_projects().updateOne({'id': id},  {'$set': project});
     let fid = new Date().getTime();
     project.id =  id;
@@ -66,6 +69,7 @@ async function update_project(id, project, action_owner) {
 }
 
 async function create_project_request(asked_project, user) {
+    logger.info('Create Project Request' + asked_project.id + ' for ' + user.uid);
     asked_project.uuid = (new Date().getTime()).toString();
 
     await dbsrv.mongo_pending_projects().insertOne(asked_project);
@@ -97,6 +101,7 @@ async function create_project_request(asked_project, user) {
 
 
 async function remove_project_request(uuid, action_owner) {
+    logger.info('Remove Project Request' + uuid);
     const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
     if (result.deletedCount === 1) {
         await dbsrv.mongo_events().insertOne({
