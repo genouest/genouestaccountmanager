@@ -258,7 +258,7 @@ router.post('/project/:id', async function(req, res){
         return;
     }
     try {
-        await prjsrv.update_project({
+        await prjsrv.update_project(req.body.id, {
             'owner': req.body.owner,
             'group': req.body.group,
             'size': req.body.size,
