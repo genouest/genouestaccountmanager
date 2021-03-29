@@ -147,16 +147,17 @@ router.post('/project', async function(req, res){
     }
 
     try {
-        await prjsrv.create_project({ 'id': req.body.id,
-                                      'owner': req.body.owner,
-                                      'group': req.body.group,
-                                      'size': req.body.size,
-                                      'expire': req.body.expire,
-                                      'description': req.body.description,
-                                      'path': req.body.path,
-                                      'orga': req.body.orga,
-                                      'access': req.body.access
-                                    }, user.uid);
+        await prjsrv.create_project({
+            'id': req.body.id,
+            'owner': req.body.owner,
+            'group': req.body.group,
+            'size': req.body.size,
+            'expire': req.body.expire,
+            'description': req.body.description,
+            'path': req.body.path,
+            'orga': req.body.orga,
+            'access': req.body.access
+        }, user.uid);
     } catch(e) {
         logger.error(e);
         if (e.code && e.message) {
@@ -257,16 +258,17 @@ router.post('/project/:id', async function(req, res){
         return;
     }
     try {
-        await prjsrv.update_project({ 'owner': req.body.owner,
-                                      'group': req.body.group,
-                                      'size': req.body.size,
-                                      'expire': req.body.expire,
-                                      'description': req.body.description,
-                                      'access': req.body.access,
-                                      'orga': req.body.orga,
-                                      'path': req.body.path
-                                    }, user.uid);
-     } catch(e) {
+        await prjsrv.update_project({
+            'owner': req.body.owner,
+            'group': req.body.group,
+            'size': req.body.size,
+            'expire': req.body.expire,
+            'description': req.body.description,
+            'access': req.body.access,
+            'orga': req.body.orga,
+            'path': req.body.path
+        }, user.uid);
+    } catch(e) {
         logger.error(e);
         if (e.code && e.message) {
             res.status(e.code).send({message: e.message});

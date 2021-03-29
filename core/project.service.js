@@ -1,7 +1,5 @@
-const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const crypto = require('crypto');
 
 const CONFIG = require('config');
 
