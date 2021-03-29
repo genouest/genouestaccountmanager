@@ -5,17 +5,17 @@ const crypto = require('crypto');
 
 const CONFIG = require('config');
 
-const goldap = require('../core/goldap.js');
 const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
-
-const grpsrv = require('../core/group.service.js');
+const maisrv = require('../core/mail.service.js');
 
 let day_time = 1000 * 60 * 60 * 24;
 
 exports.create_project = create_project;
 exports.remove_project = remove_project;
 exports.update_project = update_project;
+exports.create_project_request = create_project_request;
+exports.remove_project_request = remove_project_request;
 
 async function create_project(new_project, uuid, action_owner) {
     new_project.created_at = new Date().getTime();
@@ -64,5 +64,52 @@ async function update_project(id, project, action_owner) {
     }
 
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
+
+}
+
+async function create_project_request(asked_project, user) {
+    asked_project.uuid = (new Date().getTime()).toString();
+
+    await dbsrv.mongo_pending_projects().insertOne(asked_project);
+    await dbsrv.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'new pending project creation: ' + asked_project.id,
+        logs: [],
+    });
+
+    let msg_destinations =  [CONFIG.general.accounts, user.email];
+
+    try {
+        await maisrv.send_notif_mail({
+            'name': 'ask_project',
+            'destinations': msg_destinations,
+            'subject': 'Project creation request: ' + asked_project.id
+        }, {
+            '#UID#':  user.uid,
+            '#NAME#': asked_project.id,
+            '#SIZE#': asked_project.size,
+            '#ORGA#': asked_project.orga,
+            '#DESC#': asked_project.description
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+}
+
+
+async function remove_project_request(uuid, action_owner) {
+    const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
+    if (result.deletedCount === 1) {
+        await dbsrv.mongo_events().insertOne({
+            owner: action_owner,
+            date: new Date().getTime(),
+            action: 'remove Pending project ' + uuid,
+            logs: [],
+        });
+    }
+    else {
+        throw {code: 404, message: 'No pending project found'};
+    }
 
 }
