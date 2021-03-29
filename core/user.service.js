@@ -201,7 +201,7 @@ async function remove_user_from_group(uid, secgroup, action_owner) {
         let group = await dbsrv.mongo_groups().findOne({name: secgroup});
         if(group) {
             await grpsrv.delete_group(group, action_owner);
-            throw {code: 208, message: 'User removed from group. Empty group ' + secgroup + ' was deleted'};
+            throw {code: 200, message: 'User removed from group. Empty group ' + secgroup + ' was deleted'};
         }
     }
 }
