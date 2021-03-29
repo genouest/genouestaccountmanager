@@ -248,7 +248,7 @@ async function add_user_to_group(uid, secgroup, action_owner) {
 }
 
 async function remove_user_from_project(oldproject, uid, action_owner, force) {
-    logger.info('Adding user ' + uid + ' to project ' + oldproject);
+    logger.info('Remove user ' + uid + ' from project ' + oldproject);
 
     let fid = new Date().getTime();
     let user = await dbsrv.mongo_users().findOne({uid: uid});
