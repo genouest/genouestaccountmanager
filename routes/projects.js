@@ -585,5 +585,25 @@ router.delete('/pending/project/:uuid', async function (req, res) {
 
 });
 
+router.get('/project/:id/users', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+    let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+    let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
+    res.send(users_in_project);
+    res.end();
+});
+
+
 router.post;
 module.exports = router;
