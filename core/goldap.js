@@ -1,7 +1,11 @@
-const CONFIG = require('config');
 const myldap = require('ldapjs');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
 const filer = require('../core/file.js');
 
 const dbsrv = require('../core/db.service.js');
