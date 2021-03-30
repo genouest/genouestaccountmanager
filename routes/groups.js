@@ -189,7 +189,7 @@ router.post('/group/:id', async function(req, res){
         res.end();
         return;
     }
-    let group = await dbsrv.mongo_groups().findOne({name: new RegExp('^' + req.params.id + '$', 'i')});
+    let group = await dbsrv.mongo_groups().findOne({name: req.params.id });
     if(group) {
         res.status(403).send({message: 'Group already exists'});
         return;
