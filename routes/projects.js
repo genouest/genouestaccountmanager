@@ -12,13 +12,12 @@ var GENERAL_CONFIG = CONFIG.general;
 // const cookieParser = require('cookie-parser');
 // const goldap = require('../routes/goldap.js');
 
-const filer = require('../core/file.js');
 const dbsrv = require('../core/db.service.js');
 const maisrv = require('../core/mail.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
+const prjsrv = require('../core/project.service.js');
 
-let day_time = 1000 * 60 * 60 * 24;
 
 router.get('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -146,31 +145,32 @@ router.post('/project', async function(req, res){
         res.status(403).send({message: 'Not authorized or project already exists'});
         return;
     }
-    let new_project = {
-        'id': req.body.id,
-        'owner': req.body.owner,
-        'group': req.body.group,
-        'size': req.body.size,
-        'created_at': new Date().getTime(),
-        'expire': (req.body.expire) ? req.body.expire : new Date().getTime() + CONFIG.project.default_expire * day_time,
-        'description': req.body.description,
-        'path': req.body.path,
-        'orga': req.body.orga,
-        'access': req.body.access
-    };
-    await dbsrv.mongo_projects().insertOne(new_project);
-    let fid = new Date().getTime();
+
     try {
-        let created_file = await filer.project_add_project(new_project, fid);
-        logger.debug('Created file', created_file);
-    } catch(error) {
-        logger.error('Add Project Failed for: ' + new_project.id, error);
-        res.status(500).send({message: 'Add Project Failed'});
-        return;
+        await prjsrv.create_project({
+            'id': req.body.id,
+            'owner': req.body.owner,
+            'group': req.body.group,
+            'size': req.body.size,
+            'expire': req.body.expire,
+            'description': req.body.description,
+            'path': req.body.path,
+            'orga': req.body.orga,
+            'access': req.body.access
+        }, req.body.uuid, user.uid);
+    } catch(e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
     }
 
-    await dbsrv.mongo_pending_projects().deleteOne({ uuid: req.body.uuid });
-    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'new project creation: ' + req.body.id , 'logs': []});
     res.send({message: 'Project created'});
     return;
 });
@@ -204,19 +204,21 @@ router.delete('/project/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    await dbsrv.mongo_projects().deleteOne({'id': req.params.id});
-    let fid = new Date().getTime();
+
     try {
-        let created_file = await filer.project_delete_project({'id': req.params.id}, fid);
-        logger.debug('Created file', created_file);
-    } catch(error){
-        logger.error('Delete Project Failed for: ' + req.params.id, error);
-        res.status(500).send({message: 'Delete Project Failed'});
-        return;
+        await prjsrv.remove_project(req.params.id, user.uid);
+    } catch(e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
     }
-
-    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'remove project ' + req.params.id , 'logs': []});
-
     res.send({message: 'Project deleted'});
 
 });
@@ -255,29 +257,29 @@ router.post('/project/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized or project not found'});
         return;
     }
-    let new_project = { '$set': {
-        'owner': req.body.owner,
-        'group': req.body.group,
-        'size': req.body.size,
-        'expire': (req.body.expire) ? req.body.expire : new Date().getTime() +  CONFIG.project.default_expire * day_time,
-        'description': req.body.description,
-        'access': req.body.access,
-        'orga': req.body.orga,
-        'path': req.body.path
-    }};
-    await dbsrv.mongo_projects().updateOne({'id': req.params.id}, new_project);
-    let fid = new Date().getTime();
-    new_project.id =  req.params.id;
     try {
-        let created_file = await filer.project_update_project(new_project, fid);
-        logger.debug('Created file', created_file);
-    } catch(error) {
-        logger.error('Update Project Failed for: ' + new_project.id, error);
-        res.status(500).send({message: 'Update Project Failed'});
-        return;
+        await prjsrv.update_project(req.params.id, {
+            'owner': req.body.owner,
+            'group': req.body.group,
+            'size': req.body.size,
+            'expire': req.body.expire,
+            'description': req.body.description,
+            'access': req.body.access,
+            'orga': req.body.orga,
+            'path': req.body.path
+        }, user.uid);
+    } catch(e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
     }
-
-    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'update project ' + req.params.id , 'logs': []});
     res.send({message: 'Project updated'});
 });
 
@@ -464,55 +466,28 @@ router.post('/ask/project', async function(req, res){
         return;
     }
 
-    /* // New Project Structure :
-    let new_project = {
-        'id': req.body.id,
-        'size': req.body.size,
-        'description': req.body.description,
-        'orga': req.body.orga,
-    };
-    */
-
-    // logger.info(new_project);
-
-    // todo: find a way to use cc
-    let new_project = {
-        'uuid': (new Date().getTime()).toString(),
-        'id': req.body.id,
-        'owner': user.uid,
-        'group': user.group,
-        'size': req.body.size,
-        'description': req.body.description,
-        'orga': req.body.orga,
-    };
-    await dbsrv.mongo_pending_projects().insertOne(new_project);
-    await dbsrv.mongo_events().insertOne({
-        owner: user.uid,
-        date: new Date().getTime(),
-        action: 'new pending project creation: ' + req.body.id,
-        logs: [],
-    });
-
-    let msg_destinations =  [GENERAL_CONFIG.accounts, user.email];
-
     try {
-        await maisrv.send_notif_mail({
-            'name': 'ask_project',
-            'destinations': msg_destinations,
-            'subject': 'Project creation request: ' + req.body.id
-        }, {
-            '#UID#':  user.uid,
-            '#NAME#': req.body.id,
-            '#SIZE#': req.body.size,
-            '#ORGA#': req.body.orga,
-            '#DESC#': req.body.description
-        });
-    } catch(error) {
-        logger.error(error);
+        await prjsrv.create_project_request({
+            'id': req.body.id,
+            'owner': user.uid,
+            'group': user.group,
+            'size': req.body.size,
+            'description': req.body.description,
+            'orga': req.body.orga
+        }, user.uid);
+    } catch(e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
     }
-
-
-    res.end();
+    res.send({ message: 'Pending Project created'});
     return;
 });
 
@@ -590,21 +565,22 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: req.params.uuid });
-    if (result.deletedCount === 1) {
-        await dbsrv.mongo_events().insertOne({
-            owner: user.uid,
-            date: new Date().getTime(),
-            action: 'remove Pending project ' + req.params.uuid,
-            logs: [],
-        });
 
-        res.send({ message: 'Pending Project deleted'});
+    try {
+        await prjsrv.remove_project_request(req.params.uuid, user.uid);
+    } catch(e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
     }
-    else {
-        res.status(404).send('No pending project found');
-    }
-
+    res.send({ message: 'Pending Project deleted'});
 
 });
 
