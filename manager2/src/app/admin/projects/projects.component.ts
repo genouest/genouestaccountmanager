@@ -24,18 +24,10 @@ export class ProjectsComponent implements OnInit {
 
     notification: string
     requests_visible: boolean
-    requests_number: number
     pending_number: number
-
-    request_mngt_msg: string
-    request_grp_msg: string
-    request_mngt_error_msg: string
 
     add_project_msg: string
     add_project_error_msg: string
-
-    add_requests: any[]
-    remove_requests: any[]
 
     pending_projects: any[]
     projects: any[]
@@ -75,12 +67,9 @@ export class ProjectsComponent implements OnInit {
                 };
             });
         this.pending_number = 0;
-        this.requests_number = 0;
         this.default_path = "";
         this.default_size = 0;
         this.requests_visible = false;
-        this.add_requests = [];
-        this.remove_requests = [];
         this.pending_projects = [];
         this.projects = [];
         this.groups = [];
@@ -130,50 +119,6 @@ export class ProjectsComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
-    }
-
-    validate_add_request(project, user_id) {
-        this.notification = "";
-        this.reset_msgs();
-        this.userService.addToProject(user_id, project.id).subscribe(
-            resp => {
-                this.request_mngt_msg = resp['message'];
-                this.projectService.removeRequest(project.id, {'request': 'add', 'user': user_id}).subscribe(
-                    resp => {
-                        this.project_list(true);
-                    },
-                    err => this.request_mngt_error_msg = err.error.message
-                )
-            },
-            err => this.request_mngt_error_msg = err.error.message
-        )
-    }
-
-    validate_remove_request(project, user_id) {
-        this.notification = "";
-        this.reset_msgs();
-        this.userService.removeFromProject(user_id, project.id).subscribe(
-            resp => {
-                this.request_mngt_msg = resp['message'];
-                this.projectService.removeRequest(project.id, {'request': 'remove', 'user': user_id}).subscribe(
-                    resp => this.project_list(true),
-                    err => this.request_mngt_error_msg = err.error.message
-                )
-            },
-            err => this.request_mngt_error_msg = err.error.message
-        )
-    }
-
-    remove_request(project, user_id, request_type) {
-        this.notification = "";
-        this.reset_msgs();
-        this.projectService.removeRequest(project.id, {'request': request_type, 'user': user_id}).subscribe(
-            resp => {
-                this.request_mngt_msg = resp['message'];
-                this.project_list(true);
-            },
-            err => this.request_mngt_error_msg = err.error.message
-        )
     }
 
 
@@ -243,29 +188,10 @@ export class ProjectsComponent implements OnInit {
                 if(resp.length == 0) {
                     return;
                 }
-                if(refresh_requests) {
-                    this.add_requests = [];
-                    this.remove_requests = [];
-                    this.requests_number = 0;
-                }
                 let data = resp;
                 for(var i=0;i<data.length;i++){
                     data[i].expire = new Date(data[i].expire);
-                    if (! refresh_requests){ continue;};
-                    if (data[i]["add_requests"]){
-                        for(var j=0;j<data[i]["add_requests"].length;j++){
-                            this.add_requests.push({'project': data[i], 'user': data[i]["add_requests"][j]});
-                        }
-                        this.requests_number += data[i]["add_requests"].length;
-                    }
-                    if (data[i]["remove_requests"]){
-                        for(var j=0;j<data[i]["remove_requests"].length;j++){
-                            this.remove_requests.push({'project': data[i], 'user': data[i]["remove_requests"][j]});
-                        }
-                        this.requests_number += data[i]["remove_requests"].length;
-                    }
                 }
-                if(this.requests_number > 0){this.requests_visible = true;};
                 this.projects = data;
             },
             err => console.log('failed to get projects')
@@ -331,9 +257,6 @@ export class ProjectsComponent implements OnInit {
     reset_msgs() {
         this.add_project_msg = "";
         this.add_project_error_msg = "";
-        this.request_grp_msg = "";
-        this.request_mngt_msg = "";
-        this.request_mngt_error_msg = "";
         this.pending_msg = "";
         this.pending_err_msg = "";
     }

@@ -31,7 +31,6 @@ export class ProjectComponent implements OnInit {
 
     manager_visible: boolean
 
-
     request_err_msg: string
     request_msg: string
 
