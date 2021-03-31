@@ -5,16 +5,7 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const cfgsrv = require('../core/config.service.js');
-let my_conf = cfgsrv.get_conf();
-var CONFIG = my_conf;
-var GENERAL_CONFIG = CONFIG.general;
-
-// const cookieParser = require('cookie-parser');
-// const goldap = require('../routes/goldap.js');
-
 const dbsrv = require('../core/db.service.js');
-const maisrv = require('../core/mail.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
