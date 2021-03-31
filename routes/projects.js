@@ -337,23 +337,7 @@ router.post('/project/:id/request', async function(req, res){
         }
     }
 
-    try {
-        await maisrv.send_notif_mail({
-            'name': 'ask_project_user',
-            'destinations': [GENERAL_CONFIG.accounts],
-            'subject': 'Project ' + req.body.request + ' user request: ' + req.body.user
-        }, {
-            '#UID#':  user.uid,
-            '#NAME#': project.id,
-            '#USER#': req.body.user,
-            '#REQUEST#': req.body.request
-
-        });
-    } catch(error) {
-        logger.error(error);
-    }
-
-    res.send({message: 'Request sent'});
+    res.send({message: req.body.request + ' ' + req.body.user + ' done'});
 });
 
 
