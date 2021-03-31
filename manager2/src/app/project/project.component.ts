@@ -171,13 +171,14 @@ export class ProjectComponent implements OnInit {
             )
             return;
         }
-
+        // Owner request
         this.projectsService.request(project.id, {'request': request_type, 'user': user_id}).subscribe(
-            resp => this.request_msg = resp['message'],
-            err => this.request_err_msg = err.error.message
-        )
-
-
+          resp => {
+            this.request_msg = resp['message']
+            this.show_project_users(project); // update user list
+          },
+          err => this.request_err_msg = err.error.message
+        );
     }
 
     date_convert = function timeConverter(tsp){
