@@ -422,39 +422,6 @@ router.put('/project/:id/request', async function(req, res){
     res.send({message: 'Request removed'});
 });
 
-//Return all projects using this group
-router.get('/group/:id/projects', async function(req, res){
-    if(! req.locals.logInfo.is_logged){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-    let user = null;
-    let isadmin = false;
-    try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
-        logger.error(e);
-        res.status(404).send({message: 'User session not found'});
-        res.end();
-        return;
-    }
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let projects_with_group = await dbsrv.mongo_projects().find({'group': req.params.id}).toArray();
-    res.send(projects_with_group);
-    res.end();
-});
 
 router.post('/ask/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {

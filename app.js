@@ -339,7 +339,7 @@ app.post('/user/:id/project/:project', users);
 app.delete('/user/:id/project/:project', users);
 app.get('/user/:id/usage', users);
 app.get('/project/:id/users', projects);
-app.get('/group/:id/projects', projects);
+app.get('/group/:id/projects', groups);
 app.get('/ssh/:id', ssh);
 app.get('/ssh/:id/public', ssh);
 app.get('/ssh/:id/putty', ssh);
