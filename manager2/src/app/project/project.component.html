@@ -92,14 +92,14 @@
   </div>
 </div>
 
-<div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
-<div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
 <hr *ngIf="selectedProject && ! session_user.is_admin">
 <div *ngIf="selectedProject && ! session_user.is_admin">
   <div class="well">
     <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
+  <div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
+  <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
   <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">
     <div class="card-header" (click)="manager_visible=!manager_visible" style="cursor: pointer;">
       <h2>Management console</h2>
@@ -129,6 +129,7 @@
       </form>
     </div>
   </div>
+
   <div class="card bg-light">
     <div class="card-header">
       <h3>Project overview</h3>
