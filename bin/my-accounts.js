@@ -4,10 +4,12 @@
  */
 const program = require('commander');
 
-const CONFIG = require('config');
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 const winston = require('winston');
 const myconsole = new (winston.transports.Console)({

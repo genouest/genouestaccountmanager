@@ -1,4 +1,7 @@
-const CONFIG = require('config');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
 const monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users'),
