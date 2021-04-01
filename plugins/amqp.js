@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
-const CONFIG = require('config');
 const Promise = require('promise');
 const amqp = require('amqplib');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 
 // eslint-disable-next-line no-unused-vars

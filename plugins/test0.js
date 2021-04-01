@@ -1,8 +1,11 @@
 
-const CONFIG = require('config');
-const monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users');
+const monk = require('monk');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
+const db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
+const users_db = db.get('users');
 
 const Promise = require('promise');
 

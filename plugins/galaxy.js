@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 const fs = require('fs');
-//const http = require('http');
-const CONFIG = require('config');
-
-const dbsrv = require('../core/db.service.js');
-
 const Promise = require('promise');
+const dbsrv = require('../core/db.service.js');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
 var path_to_script = CONFIG.general.plugin_script_dir + '/remove_galaxy_user.py';
 
 var apikey = '';

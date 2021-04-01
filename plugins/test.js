@@ -1,11 +1,4 @@
 /* eslint-disable no-console */
-//const CONFIG = require('config');
-/*
-const monk = require('monk'),
-    db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
-    users_db = db.get('users');
-*/
-//const Promise = require('promise');
 const dbsrv = require('../core/db.service.js');
 
 // eslint-disable-next-line no-unused-vars

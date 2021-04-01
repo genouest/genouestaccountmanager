@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 const fs = require('fs');
-const CONFIG = require('config');
-
 const Promise = require('promise');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 const dbsrv = require('../core/db.service.js');
 
 var activate_user = async function(userId, _data, adminId){
