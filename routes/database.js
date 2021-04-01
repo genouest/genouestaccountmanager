@@ -1,7 +1,11 @@
+
 const express = require('express');
 var router = express.Router();
-const CONFIG = require('config');
 const Promise = require('promise');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 const dbsrv = require('../core/db.service.js');
 const sansrv = require('../core/sanitize.service.js');

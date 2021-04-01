@@ -2,8 +2,12 @@
 const htmlToText = require('html-to-text');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
+
 const MAILER = CONFIG.general.mailer;
 const marked = require('marked');
 

@@ -12,7 +12,9 @@ const logger = winston.loggers.get('gomngr');
 const u2f = require('u2f');
 const jwt = require('jsonwebtoken');
 
-const CONFIG = require('config');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 const APP_ID= CONFIG.general.url;
 var GENERAL_CONFIG = CONFIG.general;
 

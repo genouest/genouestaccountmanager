@@ -1,7 +1,10 @@
 //const Promise = require('promise');
 //const winston = require('winston');
 //const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 // This will allow to change the way admin right are checked without impact on other part of the code
 // It will also be used to manage new role in future feature
@@ -27,6 +30,6 @@ async function is_admin(user) {
         if (user.secondarygroups && user.secondarygroups.indexOf(CONFIG.general.admin_group) >= 0) {
             return true;
         }
-    } 
+    }
     return false;
 }

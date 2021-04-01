@@ -5,8 +5,9 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const conf = require('../routes/conf.js');
-var CONFIG = conf.get_conf();
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+var CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
 
 // const cookieParser = require('cookie-parser');

@@ -10,8 +10,9 @@ const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const conf = require('../routes/conf.js');
-const CONFIG = require('config');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
 
 const goldap = require('../core/goldap.js');
@@ -31,7 +32,7 @@ var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
 let day_time = 1000 * 60 * 60 * 24;
-let duration_list = conf.get_conf().duration;
+let duration_list = CONFIG.duration;
 //const runningEnv = process.env.NODE_ENV || 'prod';
 
 const grpsrv = require('../core/group.service.js');

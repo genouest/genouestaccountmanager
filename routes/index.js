@@ -1,6 +1,9 @@
 const express = require('express');
 var router = express.Router();
-const CONFIG = require('config');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
 
 /* GET home page. */

@@ -3,8 +3,6 @@ const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const crypto = require('crypto');
 
-const CONFIG = require('config');
-
 const goldap = require('../core/goldap.js');
 const dbsrv = require('../core/db.service.js');
 const idsrv = require('../core/id.service.js');
@@ -13,6 +11,10 @@ const maisrv = require('../core/mail.service.js');
 const filer = require('../core/file.js');
 
 const grpsrv = require('../core/group.service.js');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 /* TODO : find somewhere smart to put this */
 const STATUS_PENDING_EMAIL = 'Waiting for email approval';

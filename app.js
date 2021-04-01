@@ -32,6 +32,10 @@ const wlogger = winston.loggers.add('gomngr', {
 
 const promBundle = require('express-prom-bundle');
 
+const cfgsrv = require('./core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
 const dbsrv = require('./core/db.service.js');
 const idsrv = require('./core/id.service.js');
 const plgsrv = require('./core/plugin.service.js');
@@ -52,8 +56,6 @@ const tp = require('./routes/tp');
 const conf = require('./routes/conf');
 const tags = require('./routes/tags.js');
 const ObjectID = require('mongodb').ObjectID;
-
-const CONFIG = require('config');
 
 const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
 const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';

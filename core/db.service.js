@@ -1,7 +1,10 @@
 // const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 const MongoClient = require('mongodb').MongoClient;
 var mongodb = null;
