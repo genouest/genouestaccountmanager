@@ -99,7 +99,9 @@ module.exports = {
     get_data: function(userId, adminId){
         return get_user_info(userId,adminId);
     },
+    // eslint-disable-next-line no-unused-vars
     set_data: function(userId, data, adminId){
+        // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
             console.log('[Galaxy] Nothing to do');
             resolve();
