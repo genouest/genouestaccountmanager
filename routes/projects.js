@@ -5,20 +5,11 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const cfgsrv = require('../core/config.service.js');
-let my_conf = cfgsrv.get_conf();
-var CONFIG = my_conf;
-var GENERAL_CONFIG = CONFIG.general;
-
-// const cookieParser = require('cookie-parser');
-// const goldap = require('../routes/goldap.js');
-
 const dbsrv = require('../core/db.service.js');
-const maisrv = require('../core/mail.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
-
+const usrsrv = require('../core/user.service.js');
 
 router.get('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -317,109 +308,27 @@ router.post('/project/:id/request', async function(req, res){
         res.status(403).send({message: 'User ' + req.body.user + ' is already in project : cannot add'});
         return;
     }
-    //Backward compatibility
-    if (! project.add_requests){
-        project.add_requests = [];
-    }
-    if (! project.remove_requests){
-        project.remove_requests = [];
-    }
-    if ( project.add_requests.indexOf(req.body.user) >= 0 || project.remove_requests.indexOf(req.body.user) >= 0){
-        res.status(403).send({message: 'User ' + req.body.user + 'is already in a request : aborting'});
-        return;
-    }
-    if (req.body.request === 'add'){
-        project.add_requests.push(req.body.user);
-    } else if (req.body.request === 'remove') {
-        project.remove_requests.push(req.body.user);
-    }
-    let new_project = { '$set': {
-        'add_requests': project.add_requests,
-        'remove_requests': project.remove_requests
-    }};
-    await dbsrv.mongo_projects().updateOne({'id': req.params.id}, new_project);
-    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'received request ' + req.body.request + ' for user ' + req.body.user + ' in project ' + project.id , 'logs': []});
 
     try {
-        await maisrv.send_notif_mail({
-            'name': 'ask_project_user',
-            'destinations': [GENERAL_CONFIG.accounts],
-            'subject': 'Project ' + req.body.request + ' user request: ' + req.body.user
-        }, {
-            '#UID#':  user.uid,
-            '#NAME#': project.id,
-            '#USER#': req.body.user,
-            '#REQUEST#': req.body.request
-
-        });
-    } catch(error) {
-        logger.error(error);
-    }
-
-
-    res.send({message: 'Request sent'});
-});
-
-//Admin only, remove request
-router.put('/project/:id/request', async function(req, res){
-    if(! req.locals.logInfo.is_logged){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-    let user = null;
-    let isadmin = false;
-    try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+        if (req.body.request === 'add'){
+            await usrsrv.add_user_to_project(project.id, req.body.user, user.uid);
+        } else if (req.body.request === 'remove') {
+            await usrsrv.remove_user_from_project(project.id, req.body.user, user.uid, false);
+        }
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
-        res.end();
-        return;
-    }
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
-    if(!project){
-        res.status(401).send({message: 'Not authorized or project not found'});
-        return;
-    }
-    if (! req.body.user || ! req.body.request){
-        res.status(403).send({message: 'User and request type are needed'});
-        return;
-    }
-    let temp_requests = [];
-    if(req.body.request === 'add' ){
-        for(let i=0;i<project.add_requests.length;i++){
-            if( project.add_requests[i] !== req.body.user ){
-                temp_requests.push(project.add_requests[i]);
-            }
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
         }
-        project.add_requests = temp_requests;
-    } else if (req.body.request === 'remove' ){
-        for(let i=0;i<project.remove_requests.length;i++){
-            if( project.remove_requests[i] !== req.body.user){
-                temp_requests.push(project.remove_requests[i]);
-            }
-        }
-        project.remove_requests = temp_requests;
     }
-    let new_project = { '$set': {
-        'add_requests': project.add_requests,
-        'remove_requests': project.remove_requests
-    }};
-    await dbsrv.mongo_projects().updateOne({'id': req.params.id}, new_project);
-    res.send({message: 'Request removed'});
+
+    res.send({message: req.body.request + ' ' + req.body.user + ' done'});
 });
 
 
