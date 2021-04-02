@@ -23,7 +23,7 @@ const plgsrv = require('../core/plugin.service.js');
 const maisrv = require('../core/mail.service.js');
 
 const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
+//const MAIL_CONFIG = CONFIG[MAILER];
 
 const notif = require('../core/notif_'+MAILER+'.js');
 

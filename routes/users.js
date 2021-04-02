@@ -1733,7 +1733,7 @@ router.put('/user/:id', async function(req, res) {
             await notif.remove(user.email);
         } 
         res.send(user);
-        return
+        return;
     }
     else {
         await dbsrv.mongo_users().replaceOne({_id: user._id}, user);
@@ -1881,7 +1881,7 @@ router.get('/list/:list', async function(req, res){
     }
     let list_name = req.params.list;
     let members = await notif.getMembers(list_name);
-    return members,
+    return members;
 });
 
 
