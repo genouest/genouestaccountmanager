@@ -5,6 +5,8 @@
 const program = require('commander');
 
 
+const goldap = require('../core/goldap.js');
+const filer = require('../core/file.js');
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const cfgsrv = require('../core/config.service.js');
@@ -38,6 +40,46 @@ program
         let filter = {'$or': [{email: uid}, {uid: uid}]};
         dbsrv.mongo_users().findOne(filter).then(function(user){
             console.table(user);
+            process.exit(0);
+        });
+    });
+
+program
+    .command('password') // sub-command name
+    .description('Force fake user password reset (outputs password)') // command description
+    .arguments('<uid>')
+    .action(function (uid) {
+        let filter = {'$or': [{email: uid}, {uid: uid}]};
+        dbsrv.mongo_users().findOne(filter).then(async function(user){
+            if (!user) {
+                console.log('user not found', uid);
+                process.exit(1);
+            }
+            if (!user.is_fake) {
+                console.log('not a fake user, not allowed', uid);
+                process.exit(1);                
+            }
+
+            let new_password = Math.random().toString(36).slice(-10);
+            user.password = new_password;
+            let fid = new Date().getTime();
+            try {
+                await goldap.reset_password(user, fid);
+            } catch(err) {
+                console.error('failed to update password');
+                process.exit(1);
+            }
+            user.history.push({'action': 'password reset', date: new Date().getTime()});
+            await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {history: user.history}});
+
+            try {
+                let created_file = await filer.user_reset_password(user, fid);
+                console.debug('File Created: ', created_file);
+            } catch(error){
+                console.error('Reset Password Failed for: ' + user.uid, error);
+                process.exit(1);
+            }
+            console.log(`Password reset: ${new_password}`);
             process.exit(0);
         });
     });

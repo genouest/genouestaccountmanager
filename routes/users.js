@@ -214,7 +214,7 @@ router.put('/user/:id/subscribe', async function(req, res){
         res.end();
         return;
     }
-    if(user.email == undefined || user.email == ''){
+    if(user.email == undefined || user.email == '' || user.is_fake){
         res.send({subscribed: false});
         res.end();
     } else {
@@ -258,7 +258,7 @@ router.put('/user/:id/unsubscribe', async function(req, res){
         res.end();
         return;
     }
-    if(user.email == undefined || user.email == ''){
+    if(user.email == undefined || user.email == '' || user.is_fake){
         res.send({unsubscribed: false});
         res.end();
     } else {
@@ -286,7 +286,7 @@ router.get('/user/:id/subscribed', async function(req, res){
         res.end();
         return;
     }
-    if(user.email == undefined || user.email == ''){
+    if(user.email == undefined || user.email == '' || user.is_fake){
         res.send({subscribed: false});
         res.end();
     } else {
@@ -684,15 +684,25 @@ router.get('/user/:id/activate', async function(req, res) {
         return plugin_call(plugin_info, user.uid, user, session_user.uid);
         // eslint-disable-next-line no-unused-vars
     })).then(function(results){
+        if(user.is_fake) {
+            res.send({message: 'Activation in progress', fid: fid, error: []});
+            res.end();
+            return;      
+        } 
         notif.add(user.email, function() {
             res.send({message: 'Activation in progress', fid: fid, error: []});
             res.end();
         });
         return;
     }, function(err){
+        if(user.is_fake) {
+            res.send({message: 'Activation error', fid: fid, error: err});
+            res.end();
+            return;      
+        } 
         notif.add(user.email, function() {
             logger.error('[notif][error=add][mail=' + user.email + ']');
-            res.send({message: 'Failed to add to mailing list', fid: fid, error: err});
+            res.send({message: 'Activation error', fid: fid, error: err});
             res.end();
         });
         return;
@@ -1390,12 +1400,22 @@ router.get('/user/:id/renew', async function(req, res){
             return plugin_call(plugin_info, user.uid, user, session_user.uid);
             // eslint-disable-next-line no-unused-vars
         })).then(function(results){
+            if(user.is_fake) {
+                res.send({message: 'Activation in progress', fid: fid, error: []});
+                res.end();
+                return;      
+            }
             notif.add(user.email, function() {
                 res.send({message: 'Activation in progress', fid: fid, error: []});
                 res.end();
             });
             return;
         }, function(err){
+            if(user.is_fake) {
+                res.send({message: 'Activation Error', fid: fid, error: err});
+                res.end();
+                return;      
+            }
             notif.add(user.email, function() {
                 res.send({message: 'Activation Error', fid: fid, error: err});
                 res.end();
