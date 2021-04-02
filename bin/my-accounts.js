@@ -110,7 +110,7 @@ program
     .arguments('<email>')
     // eslint-disable-next-line no-unused-vars
     .action(function (email, args) {
-        notif.add(email, function() {
+        notif.add(email).then(() => {
             console.log('User ' + email + 'add to mailing list');
             process.exit(0);
         });
@@ -122,7 +122,7 @@ program
     .arguments('<email>')
     // eslint-disable-next-line no-unused-vars
     .action(function (email, args) {
-        notif.remove(email, function() {
+        notif.remove(email).then(() => {
             console.log('User ' + email + 'removed from mailing list');
             process.exit(0);
         });
@@ -134,7 +134,7 @@ program
     .arguments('<email>')
     // eslint-disable-next-line no-unused-vars
     .action(function (email, args) {
-        notif.subscribed(email, function(subscribed) {
+        notif.subscribed(email).then((subscribed) => {
             console.log('User ' + email + ' mailing list subscription status: ' + subscribed);
             process.exit(0);
         });

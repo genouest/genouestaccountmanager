@@ -218,10 +218,9 @@ router.put('/user/:id/subscribe', async function(req, res){
         res.send({subscribed: false});
         res.end();
     } else {
-        notif.add(user.email, function() {
-            res.send({subscribed: true});
-            res.end();
-        });
+        await notif.add(user.email);
+        res.send({subscribed: true});
+        res.end();
     }
 
 });
@@ -262,10 +261,9 @@ router.put('/user/:id/unsubscribe', async function(req, res){
         res.send({unsubscribed: false});
         res.end();
     } else {
-        notif.remove(user.email, function() {
-            res.send({unsubscribed: true});
-            res.end();
-        });
+        await notif.remove(user.email);
+        res.send({unsubscribed: true});
+        res.end();        
     }
 
 });
@@ -290,10 +288,9 @@ router.get('/user/:id/subscribed', async function(req, res){
         res.send({subscribed: false});
         res.end();
     } else {
-        notif.subscribed(user.email, function(is_subscribed) {
-            res.send({subscribed: is_subscribed});
-            res.end();
-        });
+        let is_subscribed = await notif.subscribed(user.email);
+        res.send({subscribed: is_subscribed});
+        res.end();
     }
 });
 
@@ -353,11 +350,9 @@ router.post('/message', async function(req, res){
         message: message,
         html_message: html_message
     };
-    // eslint-disable-next-line no-unused-vars
-    notif.sendList(req.body.list, mailOptions, function(err, response) {
-        res.send({message: ''});
-        return;
-    });
+    await notif.sendList(req.body.list, mailOptions);
+    res.send({message: ''});
+    return;
 });
 
 // Get users listing - for admin
@@ -689,7 +684,7 @@ router.get('/user/:id/activate', async function(req, res) {
             res.end();
             return;      
         } 
-        notif.add(user.email, function() {
+        notif.add(user.email).then(() => {
             res.send({message: 'Activation in progress', fid: fid, error: []});
             res.end();
         });
@@ -700,7 +695,7 @@ router.get('/user/:id/activate', async function(req, res) {
             res.end();
             return;      
         } 
-        notif.add(user.email, function() {
+        notif.add(user.email).then(() => {
             logger.error('[notif][error=add][mail=' + user.email + ']');
             res.send({message: 'Activation error', fid: fid, error: err});
             res.end();
@@ -1051,28 +1046,27 @@ router.get('/user/:id/expire', async function(req, res){
         // Now remove from mailing list
         try {
             // eslint-disable-next-line no-unused-vars
-            notif.remove(user.email, function(err){
-                let plugin_call = function(plugin_info, userId, user, adminId){
-                    // eslint-disable-next-line no-unused-vars
-                    return new Promise(function (resolve, reject){
-                        let plugins_modules = plgsrv.plugins_modules();
-                        plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
-                            resolve(true);
-                        });
+            await notif.remove(user.email);
+            let plugin_call = function(plugin_info, userId, user, adminId){
+                // eslint-disable-next-line no-unused-vars
+                return new Promise(function (resolve, reject){
+                    let plugins_modules = plgsrv.plugins_modules();
+                    plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
+                        resolve(true);
                     });
-                };
-                let plugins_info = plgsrv.plugins_info();
-                Promise.all(plugins_info.map(function(plugin_info){
-                    return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                    // eslint-disable-next-line no-unused-vars
-                })).then(function(data){
-                    res.send({message: 'Operation in progress', fid: fid, error: []});
-                    res.end();
-                    return;
-                }, function(errs){
-                    res.send({message: 'Operation in progress', fid: fid, error: errs});
-                    res.end();
                 });
+            };
+            let plugins_info = plgsrv.plugins_info();
+            Promise.all(plugins_info.map(function(plugin_info){
+                return plugin_call(plugin_info, user.uid, user, session_user.uid);
+                // eslint-disable-next-line no-unused-vars
+            })).then(function(data){
+                res.send({message: 'Operation in progress', fid: fid, error: []});
+                res.end();
+                return;
+            }, function(errs){
+                res.send({message: 'Operation in progress', fid: fid, error: errs});
+                res.end();
             });
         }
         catch(error) {
@@ -1405,9 +1399,10 @@ router.get('/user/:id/renew', async function(req, res){
                 res.end();
                 return;      
             }
-            notif.add(user.email, function() {
+            notif.add(user.email).then(() => {
                 res.send({message: 'Activation in progress', fid: fid, error: []});
                 res.end();
+                return;
             });
             return;
         }, function(err){
@@ -1416,7 +1411,7 @@ router.get('/user/:id/renew', async function(req, res){
                 res.end();
                 return;      
             }
-            notif.add(user.email, function() {
+            notif.add(user.email).then(() => {
                 res.send({message: 'Activation Error', fid: fid, error: err});
                 res.end();
             });
@@ -1731,20 +1726,14 @@ router.put('/user/:id', async function(req, res) {
 
         user.fid = fid;
         if(user.oldemail!=user.email && !user.is_fake) {
-            notif.modify(user.oldemail, user.email, function() {
-                res.send(user);
-            });
+            await notif.modify(user.oldemail, user.email);
         } else if(userWasFake && !user.is_fake) {
-            notif.add(user.email, function() {
-                res.send(user);
-            });
+            await notif.add(user.email);
         }else if (!userWasFake && user.is_fake) {
-            notif.remove(user.email, function(){
-                res.send(user);
-            });
-        } else {
-            res.send(user);
-        }
+            await notif.remove(user.email);
+        } 
+        res.send(user);
+        return
     }
     else {
         await dbsrv.mongo_users().replaceOne({_id: user._id}, user);
@@ -1891,10 +1880,8 @@ router.get('/list/:list', async function(req, res){
         return;
     }
     let list_name = req.params.list;
-    notif.getMembers(list_name, function(members) {
-        res.send(members);
-        return;
-    });
+    let members = await notif.getMembers(list_name);
+    return members,
 });
 
 
@@ -1920,10 +1907,8 @@ router.get('/lists', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    notif.getLists(function(listOfLists) {
-        res.send(listOfLists);
-        return;
-    });
+    let listOfLists = await notif.getLists();
+    return listOfLists;
 });
 
 module.exports = router;
