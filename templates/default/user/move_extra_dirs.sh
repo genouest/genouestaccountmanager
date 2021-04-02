@@ -17,16 +17,16 @@ if [ -e $old_extra_dir ]; then
             mkdir -p "$extra_dir"
         fi
     fi
-fi
 
-{% if user.oldgidnumber %}
-old_gid_number="{{ user.oldgidnumber }}"
-gid_number="{{ user.gidnumber }}"
-if [ "$old_gid_number" != "$gid_number" ]
-then
-    chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$extra_dir"
+    {% if user.oldgidnumber %}
+    old_gid_number="{{ user.oldgidnumber }}"
+    gid_number="{{ user.gidnumber }}"
+    if [ "$old_gid_number" != "$gid_number" ]
+    then
+        chown -R {{ user.uidnumber }}:{{ user.gidnumber }} "$extra_dir"
+    fi
+    {% endif %}
 fi
-{% endif %}
 
 {% endfor %}
 
