@@ -294,8 +294,8 @@ router.post('/project/:id/request', async function(req, res){
         res.status(404).send({message: 'Project ' + req.params.id + ' not found'});
         return;
     }
-    //Add to request list
-    if(! user.uid === project.owner ){
+
+    if(user.uid != project.owner ){
         res.status(401).send({message: 'User ' + user.uid + ' is not project manager for project ' + project.id});
         return;
     }
