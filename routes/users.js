@@ -1761,12 +1761,16 @@ router.post('/user/:id/project/:project', async function(req, res){
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+    let newproject = req.params.project;
+    let uid = req.params.id;
 
     let session_user = null;
     let isadmin = false;
+    let project = null;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(session_user);
+        project = await dbsrv.mongo_projects().findOne({id:newproject});
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -1774,14 +1778,23 @@ router.post('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    if(!session_user || !isadmin){
-        res.status(401).send({message: 'Not authorized'});
+    if(!session_user) {
+        res.status(404).send({message: 'User session not found'});
         res.end();
         return;
     }
 
-    let newproject = req.params.project;
-    let uid = req.params.id;
+    if (!project) {
+        res.status(404).send({message: 'Project not found'});
+        res.end();
+        return;
+    }
+
+    if(!isadmin && session_user.uid != project.owner ) {
+        res.status(401).send({message: 'Not authorized'});
+        res.end();
+        return;
+    }
 
     try {
         await usrsrv.add_user_to_project(newproject, uid, session_user.uid);
@@ -1812,12 +1825,17 @@ router.delete('/user/:id/project/:project', async function(req, res){
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+    let oldproject = req.params.project;
+    let uid = req.params.id;
+    let force = (req.query.force) ? true : false;
 
     let session_user = null;
     let isadmin = false;
+    let project = null;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
         isadmin = await rolsrv.is_admin(session_user);
+        project = await dbsrv.mongo_projects().findOne({id:oldproject});
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -1825,15 +1843,24 @@ router.delete('/user/:id/project/:project', async function(req, res){
         return;
     }
 
-    if (!session_user || (!isadmin && session_user.uid !=  req.params.id)) {
+    if (!session_user) {
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if (!project) {
+        res.status(404).send({message: 'Project not found'});
+        res.end();
+        return;
+    }
+
+    if(!isadmin && session_user.uid != project.owner && session_user.uid != uid) {
         res.status(401).send({message: 'Not authorized'});
         res.end();
         return;
     }
 
-    let oldproject = req.params.project;
-    let uid = req.params.id;
-    let force = (req.query.force) ? true : false;
     try {
         await usrsrv.remove_user_from_project(oldproject, uid, session_user.uid, force);
     } catch (e) {
