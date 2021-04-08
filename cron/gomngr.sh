@@ -52,6 +52,7 @@ while read p; do
   filename=$(basename $p)
   if [ $EXITCODE -ne 0 ]; then
     echo "Got an error" >> $p.log
+    touch $p.err
     if [ "a$SENTRY_DSN" != "a" ]; then
       echo "Send sentry event" >> $p.log
       /usr/local/bin/sentry-cli send-event -m "$p execution failure" --logfile $p.log
