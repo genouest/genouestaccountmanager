@@ -1,5 +1,16 @@
 #!/bin/bash
 
+EXIT_REQUEST=0
+
+function catch_sig()
+{
+  echo "Received signal, exiting as soon as possible"
+  EXIT_REQUEST=1
+}
+
+trap catch_sig SIGINT SIGTERM
+
+
 if [ -e /root/.env ]; then
     . /root/.env
 fi
@@ -16,14 +27,9 @@ if [ "a$MYDIR" == "a" ]; then
    exit 1
 fi
 
-MYURL="http://localhost:3000"
+MYURL=""
 if [ "a$2" == "a" ]; then
- if [ -z $GOMNGRURL ]; then
    echo "Missing gomngr url (http://x.y.z) parameter"
-   exit 1
- else
-   MYURL=$GOMNGRURL
- fi
 else
   MYURL=$2
 fi
@@ -53,9 +59,19 @@ while read p; do
       echo "no sentry, skip..." >> $p.log
     fi
   fi
-  echo "send status code to $MYURL/log/status/$filename/$EXITCODE" >> $p.log
-  curl -m 10 --connect-timeout 2 -v "$MYURL/log/status/$filename/$EXITCODE"
+  if [ "a$MYURL" == "a" ]; then
+      echo "no my url available, skip status update call"
+  else
+      echo "send status code to $MYURL/log/status/$filename/$EXITCODE" >> $p.log
+      curl -m 10 --connect-timeout 2 -v "$MYURL/log/status/$filename/$EXITCODE"
+  fi
   mv $p $p.done
+  if [ $EXIT_REQUEST -eq 1 ]; then
+    rm /tmp/gomngr.lock
+    rm /tmp/gomngr.list
+    echo "Exit requested"
+    exit 0
+  fi
 done </tmp/gomngr.list
 
 rm /tmp/gomngr.lock

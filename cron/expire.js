@@ -23,7 +23,7 @@ const plgsrv = require('../core/plugin.service.js');
 const maisrv = require('../core/mail.service.js');
 
 const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
+//const MAIL_CONFIG = CONFIG[MAILER];
 
 const notif = require('../core/notif_'+MAILER+'.js');
 
@@ -104,16 +104,15 @@ dbsrv.init_db().then(async () => {
             Promise.all(plugins_info.map(function(plugin_info){
                 return plugin_call(plugin_info, user.uid);
             // eslint-disable-next-line no-unused-vars
-            })).then(function(results){
+            })).then(async function(results){
                 // console.log('after plugins');
                 // Now remove from mailing list
                 try {
-                    notif.remove(user.email, function(){
-                        mail_sent++;
-                        if(mail_sent == users.length) {
-                            process.exit(0);
-                        }
-                    });
+                    await notif.remove(user.email);
+                    mail_sent++;
+                    if(mail_sent == users.length) {
+                        process.exit(0);
+                    }
                 }
                 catch(err) {
                     mail_sent++;

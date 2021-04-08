@@ -49,42 +49,36 @@ module.exports = {
         return mail_set;
     },
 
-    subscribed: async function(email, callback) {
+    subscribed: async function(email) {
         if (CONFIG.nodemailer.list) {
             let user = await dbsrv.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
-                callback(false);
-                return;
+                return false;
             }
-            callback(user.subscribed);
-            return;
+            return user.subscribed;
         }
-        return;
+        return false;
     },
 
-    getMembers: function(list, callback) {
+    getMembers: async function(list) {
         logger.warn('getMembers: no mailing list configured', list);
-        callback(false);
-        return;
+        return false;
     },
 
-    getLists: function(callback){
+    getLists: async function(){
         logger.warn('getLists: no mailing list configured');
-        callback([]);
-        return;
+        return [];
     },
 
-    add: async function(email, callback) {
+    add: async function(email) {
         if (CONFIG.nodemailer.list) {
             if(email===undefined ||email===null || email=='' || ! mail_set) {
-                callback();
                 return;
             }
             let user = await dbsrv.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
-                callback();
                 return;
             }
             transporter.sendMail({
@@ -97,27 +91,23 @@ module.exports = {
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'add ' + email + 'to mailing list' , 'logs': []});
             await dbsrv.mongo_users().updateOne({email: email}, {'$set':{'subscribed': true}});
         }
-        callback();
         return;
     },
 
-    create: function(name, callback) {
+    create: async function(name) {
         logger.warn('create: no mailing list configured', name);
-        callback();
         return;
     },
 
     // todo: should be factorized with add, as there is only small difference
-    remove: async function(email, callback) {
+    remove: async function(email) {
         if (CONFIG.nodemailer.list) {
             if(email===undefined ||email===null || email=='' || ! mail_set) {
-                callback();
                 return;
             }
             let user = await dbsrv.mongo_users().findOne({email: email});
             if(!user) {
                 logger.error('User does not exist', email);
-                callback();
                 return;
             }
             transporter.sendMail({
@@ -129,19 +119,16 @@ module.exports = {
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
             await dbsrv.mongo_users().updateOne({email: email}, {'$set':{'subscribed': false}});
         }
-        callback();
         return;
     },
 
-    modify: function(oldemail, newemail, callback) {
+    modify: async function(oldemail, newemail) {
         logger.debug('Update email ' + oldemail + ' ==> ' + newemail);
         if (newemail===undefined ||newemail===null || newemail=='' || ! mail_set ) {
-            callback();
             return;
         }
-        this.add(newemail, function(){});
-        this.remove(oldemail, function(){});
-        callback();
+        await this.add(newemail);
+        await this.remove(oldemail);
         return;
     },
 
@@ -173,9 +160,8 @@ module.exports = {
         }
     },
 
-    sendList: function(mailing_list, mailOptions, callback) {
+    sendList: async function(mailing_list, mailOptions) {
         logger.warn('sendList: no mailing list configured', mailing_list, mailOptions);
-        callback('no mailing list configured', true);
-        return;
+        return ('no mailing list configured', true);
     }
 };
