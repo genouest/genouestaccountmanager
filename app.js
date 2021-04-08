@@ -147,7 +147,7 @@ const if_dev_execute_scripts = function(){
             reject({'err': 'cron script not defined'});
             return;
         }
-        let procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+        let procScript = spawn(cron_bin_script, [CONFIG.general.script_dir]);
         procScript.on('exit', function (code, signal) {
             wlogger.info(cron_bin_script + ' process exited with ' +
                         `code ${code} and signal ${signal}`);
