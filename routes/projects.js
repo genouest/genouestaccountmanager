@@ -489,6 +489,10 @@ router.get('/project/:id/users', async function(req, res){
         return;
     }
 
+    if (!user.projects) {
+        user.projects = [];
+    }
+
     if (user.projects.includes(req.params.id) || isadmin) {
 
         let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
