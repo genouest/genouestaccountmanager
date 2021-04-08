@@ -13,7 +13,7 @@ var mail_set = false;
 
 if(CONFIG.gomail.api_secret && CONFIG.gomail.host && CONFIG.gomail.host !== 'fake' && CONFIG.gomail.api_root && CONFIG.gomail.main_list && CONFIG.gomail.origin){
     mail_set = true;
-    axios.defaults.baseUrl = CONFIG.gomail.host + CONFIG.gomail.api_root;
+    axios.defaults.baseURL = CONFIG.gomail.host + CONFIG.gomail.api_root;
     axios.defaults.headers = {
         'Authorization': CONFIG.gomail.api_secret,
         'Accept': 'application/json',
