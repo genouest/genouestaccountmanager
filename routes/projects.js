@@ -294,8 +294,8 @@ router.post('/project/:id/request', async function(req, res){
         res.status(404).send({message: 'Project ' + req.params.id + ' not found'});
         return;
     }
-    //Add to request list
-    if(! user.uid === project.owner ){
+
+    if(user.uid != project.owner ){
         res.status(401).send({message: 'User ' + user.uid + ' is not project manager for project ' + project.id});
         return;
     }
@@ -470,14 +470,33 @@ router.get('/project/:id/users', async function(req, res){
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    let user = null;
+    let isadmin = false;
+
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
-    res.send(users_in_project);
-    res.end();
+
+    if (user.projects.includes(req.params.id) || isadmin) {
+
+        let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
+        res.send(users_in_project);
+        res.end();
+        return;
+    }
+    res.status(401).send({message: 'Not authorized'});
 });
 
 
