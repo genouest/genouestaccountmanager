@@ -75,4 +75,9 @@ while read p; do
   fi
 done </tmp/gomngr.list
 
+ARCHIVE="${GOMNGRARCHIVEDIR:-/opt/my/archive}"
+if [ -e $ARCHIVE ]; then
+  find "${MYDIR}" -type f -mtime +10 -exec mv {} "${ARCHIVE}" \;
+fi
+
 rm /tmp/gomngr.lock
