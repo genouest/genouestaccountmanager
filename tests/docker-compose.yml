@@ -4,7 +4,7 @@ services:
 
     mysql:
         #image: mariadb
-        image: mariadb
+        image: quay.io/osallou/mariadb
         environment:
             - MYSQL_ROOT_PASSWORD=my
 
@@ -48,7 +48,7 @@ services:
         command: gunicorn -c gunicorn_conf.py -b 0.0.0.0:6643 gomail.app:app
 
     gomail-executor:
-        image: osallou/gomail
+        image: quay.io/osallou/gomail
         depends_on:
             - gomail-rabbitmq
         environment:
