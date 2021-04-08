@@ -1,5 +1,16 @@
 #!/bin/bash
 
+EXIT_REQUEST=0
+
+function catch_sig()
+{
+  echo "Received signal, exiting as soon as possible"
+  EXIT_REQUEST=1
+}
+
+trap catch_sig SIGINT SIGTERM
+
+
 if [ -e /root/.env ]; then
     . /root/.env
 fi
@@ -56,6 +67,12 @@ while read p; do
   echo "send status code to $MYURL/log/status/$filename/$EXITCODE" >> $p.log
   curl -m 10 --connect-timeout 2 -v "$MYURL/log/status/$filename/$EXITCODE"
   mv $p $p.done
+  if [ $EXIT_REQUEST -eq 1 ]; then
+    rm /tmp/gomngr.lock
+    rm /tmp/gomngr.list
+    echo "Exit requested"
+    exit 0
+  fi
 done </tmp/gomngr.list
 
 rm /tmp/gomngr.lock
