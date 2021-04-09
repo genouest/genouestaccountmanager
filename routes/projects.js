@@ -351,7 +351,7 @@ router.post('/ask/project', async function(req, res){
             'size': req.body.size,
             'description': req.body.description,
             'orga': req.body.orga
-        }, user.uid);
+        }, user);
     } catch(e) {
         logger.error(e);
         if (e.code && e.message) {
