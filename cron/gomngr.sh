@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Env variables
+# GOMNGRSCRIPTDIR: [mandatory] directory to search for .update files
+# GOMNGRURL: [optional] my-app url to send script execution status
+# SENTRY_DSN: [optional] sentry url for script error execution reports
+# GOMNGRARCHIVEDIR : [optional] directory where .done and .log should be moved after 10 days
+
 EXIT_REQUEST=0
 
 function catch_sig()
