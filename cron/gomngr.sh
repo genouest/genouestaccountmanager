@@ -66,6 +66,8 @@ while true; do
 
   touch /tmp/gomngr.lock
 
+  ERRCODE=0
+
   ls $MYDIR/*.update | sort -n -t . -k 2 > /tmp/gomngr.list
   while read p; do
     ((NBFILES++))
@@ -74,6 +76,7 @@ while true; do
     echo "Exit code: $EXITCODE" >> $p.log
     filename=$(basename $p)
     if [ $EXITCODE -ne 0 ]; then
+      ERRCODE=$EXITCODE
       echo "Got an error" >> $p.log
       touch $p.err
       if [ "a$SENTRY_DSN" != "a" ]; then
@@ -87,7 +90,7 @@ while true; do
         echo "no my url available, skip status update call"
     else
         echo "send status code to $MYURL/log/status/$filename/$EXITCODE" >> $p.log
-        curl -m 10 --connect-timeout 2 -v "$MYURL/log/status/$filename/$EXITCODE"
+        curl -m 10 --connect-timeout 2 "$MYURL/log/status/$filename/$EXITCODE"
     fi
     mv $p $p.done
     if [ $EXIT_REQUEST -eq 1 ]; then
@@ -141,11 +144,16 @@ while true; do
     echo "Archive dir $ARCHIVE not found, skipping"
   fi
 
+  rm /tmp/gomngr.lock
+
+  if [ "a$RUNONCE" != "a" ]; then
+    # For tests, run only once on demand
+    exit $ERRCODE
+  fi
+
   if [ $NBFILES -eq 0 ]; then
     # nothing to do, sleep
     sleep 60
   fi
-
-  rm /tmp/gomngr.lock
 
 done
