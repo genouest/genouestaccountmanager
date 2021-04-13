@@ -368,7 +368,7 @@ router.post('/project/ask', async function(req, res){
     return;
 });
 
-router.get('/pending/project', async function (req, res) {
+router.get('/project/pending', async function (req, res) {
 
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
@@ -417,7 +417,7 @@ router.get('/pending/project', async function (req, res) {
     }
 });
 
-router.delete('/pending/project/:uuid', async function (req, res) {
+router.delete('/project/pending/:uuid', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;
