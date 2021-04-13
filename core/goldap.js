@@ -164,6 +164,7 @@ module.exports = {
                 if(err) {
                     logger.error('Failed to bind as admin to ldap', err);
                     reject(err);
+                    return;
                 }
                 let opts = {
                     filter: '(uid=' + uid + ')',
@@ -175,6 +176,7 @@ module.exports = {
                     if(err) {
                         logger.error('Could not find ' + uid, err);
                         reject(err);
+                        return;
                     }
                     let foundMatch = false;
                     res.on('searchEntry', function(entry) {
