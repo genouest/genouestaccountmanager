@@ -10,10 +10,10 @@ const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const maisrv = require('../core/mail.service.js');
 
-const MAILER = CONFIG.general.mailer;
+// const MAILER = CONFIG.general.mailer;
 // const MAIL_CONFIG = CONFIG[MAILER];
 
-const notif = require('../core/notif_'+MAILER+'.js');
+// const notif = require('../core/notif_'+MAILER+'.js');
 
 /*
 function timeConverter(tsp){
@@ -44,7 +44,7 @@ dbsrv.init_db().then(async () => {
         }
     }
     for(let i=0;i<notifs.length;i++){
-        let project = notif[i];
+        let project = notifs[i];
         console.log('Project will expire: '+project.id);
 
         try {
