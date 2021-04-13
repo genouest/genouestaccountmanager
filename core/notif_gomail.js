@@ -132,9 +132,11 @@ module.exports = {
             await axios.delete(
                 '/mail/opt/' + CONFIG.gomail.main_list,
                 {
-                    'email': [email],
-                    'message': CONFIG.gomail.optout_message,
-                    'message_html': CONFIG.gomail.optout_message_html
+                    data: {
+                        'email': [email],
+                        'message': CONFIG.gomail.optout_message,
+                        'message_html': CONFIG.gomail.optout_message_html
+                    }
                 }
             );
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe ' + email + ' from mailing list' , 'logs': []});
@@ -170,8 +172,10 @@ module.exports = {
             await axios.delete(
                 '/mail/opt/' + CONFIG.gomail.main_list,
                 {
-                    'email': [oldemail],
-                    'skip': true
+                    'data': {
+                        'email': [oldemail],
+                        'skip': true
+                    }
                 }
             );
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'remove ' + oldemail + 'from mailing list' , 'logs': []});
