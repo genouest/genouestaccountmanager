@@ -156,7 +156,7 @@ export class ProjectsService {
             params: params
         };
         return this.http.post(
-            environment.apiUrl + '/ask/project',
+            environment.apiUrl + '/project/ask',
             new_project,
             httpOptions
         );

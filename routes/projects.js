@@ -332,7 +332,7 @@ router.post('/project/:id/request', async function(req, res){
 });
 
 
-router.post('/ask/project', async function(req, res){
+router.post('/project/ask', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;

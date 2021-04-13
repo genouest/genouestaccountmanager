@@ -362,7 +362,7 @@ app.post('/project/:id', projects);
 app.post('/project/:id/request', projects);
 app.delete('/project/:id', projects);
 app.put('/project/:id/request', projects);
-app.post('/ask/project', projects);
+app.post('/project/ask', projects);
 app.get('/pending/project', projects);
 app.delete('/pending/project/:id', projects);
 app.get('/quota/:user/:id', quota);
