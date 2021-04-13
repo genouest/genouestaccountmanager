@@ -235,7 +235,6 @@ export class ProjectsService {
     fetch_dmp(dmpid: string): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;
-        console.log("getting dmp")
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey

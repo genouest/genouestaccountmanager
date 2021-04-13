@@ -85,11 +85,6 @@ export class ProjectComponent implements OnInit {
             err => console.log('failed to get config')
         );
         this.dmp_visible = false;
-        this.projectsService.fetch_dmp(this.project.dmpid).subscribe(
-            resp => {this.dmp = resp.data;
-            console.log(resp.data)},
-            err => console.log('dmperr')
-        );
         // console.log(this.dmp)
 
     }
@@ -206,6 +201,14 @@ export class ProjectComponent implements OnInit {
             res = '';
         }
         return res;
+    }
+
+    display_dmp_to_admin() {
+        this.dmp_visible = !this.dmp_visible;
+        this.projectsService.fetch_dmp(this.project.dmpid).subscribe(
+            resp => {this.dmp = resp.data;},
+            err => console.log('dmperr')
+        );
     }
 
 

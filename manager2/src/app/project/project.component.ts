@@ -30,9 +30,11 @@ export class ProjectComponent implements OnInit {
     new_user: any
     remove_user: any
     default_size: any
+    dmp: any
     dmp_err_msg: string;
     dmp_msg: string;
     dmp_available: boolean;
+    dmp_visible: boolean;
 
     manager_visible: boolean
 
@@ -66,6 +68,7 @@ export class ProjectComponent implements OnInit {
         this.new_project = {}
         this.groups = [];
         this.manager_visible = true;
+        this.dmp_visible = false;
         this.session_user = await this.authService.profile;
         this.users = [];
         this.projectsService.list(false).subscribe(
@@ -228,5 +231,13 @@ export class ProjectComponent implements OnInit {
         
     }
     
+    display_dmp_to_user() {
+        this.dmp_visible = !this.dmp_visible;
+        this.projectsService.fetch_dmp(this.selectedProject.dmpid).subscribe(
+            resp => {this.dmp = resp.data;
+            console.log(resp.data)},
+            err => console.log('dmperr')
+        );
+    }
 
 }
