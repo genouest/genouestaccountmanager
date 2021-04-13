@@ -199,21 +199,21 @@ export class ProjectComponent implements OnInit {
                 resp => {
                     let funders = []
 
-                    let data = resp.data.project.funding
+                    let data = resp.data.data.project.funding
                     console.log(data)
-                    for (data in resp.data.project.funding) {
-                        console.log(resp.data.project.funding[data])
-                        if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
-                            funders.push(resp.data.project.funding[data].funder.name)
+                    for (data in resp.data.data.project.funding) {
+                        console.log(resp.data.data.project.funding[data])
+                        if (resp.data.data.project.funding[data].fundingStatus == "Approuvé") {
+                            funders.push(resp.data.data.project.funding[data].funder.name)
                         }
                         
 
                     }
                     this.dmp_msg = resp.message;
-                    this.dmp_available = true;
+                    this.dmp_available = true;       
                     this.new_project = {
-                        'id': resp.data.project.acronym,
-                        'description': resp.data.researchOutput[0].researchOutputDescription.description,
+                        'id': resp.data.data.project.acronym,
+                        'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
                         'orga': funders,
                         'dmpid': this.new_project.dmpid,
                     };
@@ -238,6 +238,17 @@ export class ProjectComponent implements OnInit {
             console.log(resp.data)},
             err => console.log('dmperr')
         );
+    }
+    convertToPlain(html){
+
+        // Create a new div element
+        var tempDivElement = document.createElement("div");
+        
+        // Set the HTML content with the given value
+        tempDivElement.innerHTML = html;
+        
+        // Retrieve the text property of the element 
+        return tempDivElement.textContent || tempDivElement.innerText || "";
     }
 
 }
