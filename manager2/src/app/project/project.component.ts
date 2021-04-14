@@ -210,11 +210,12 @@ export class ProjectComponent implements OnInit {
 
                     }
                     this.dmp_msg = resp.message;
-                    this.dmp_available = true;       
+                    this.dmp_available = true;  
                     this.new_project = {
                         'id': resp.data.data.project.acronym,
                         'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
                         'orga': funders,
+                        'size': resp.data.data.researchOutput[0].dataStorage.totalVolume,
                         'dmpid': this.new_project.dmpid,
                     };
 
