@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+// import { HttpsClient, HttpsParams } from '@angular/common/https';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
 import { Observable } from 'rxjs';
@@ -244,6 +245,5 @@ export class ProjectsService {
             environment.apiUrl + '/dmp/' + dmpid,
             httpOptions
         );
-    }
-
+        }
 }

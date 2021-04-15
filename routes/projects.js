@@ -540,36 +540,33 @@ router.post('/dmp/:id', async function (req, res) {
     //
     //Keeps only the required data for the project
 
-    id = req
-    dmp_data = {}
-    let httpOptions=  {
-        hostname: 'https://madmp-preprod.inist.fr',
-        path: '/api/v0/madmp/plans/1704?research_output_id=18365',
-        method: "GET",
+    const options = {
+        host: "https://madmp-preprod.inist.fr",
+        path: "/api/v0/madmp/plans/1704?research_output_id=18365",
         headers: {
             accept: "application/json",
             Authorization:"Token token=lJbcVHG7Z2wA2mNii2vybA"
-            },
-        
-    }
-    https.request(httpOptions,
-        res => {
-            let dmp = ""
-            res.on("data", d => {
-              dmp += d
-            })
-            res.on("end", () => {
-              console.log(data)
-            })
-          })
-          .on("error", console.error)
-          .end(body);
+        }
+      };
+    
+      const httpReq = http.get(options, function(httpRes) {
+        //output status code to your console
+        console.log("statusCode: " + httpRes.statusCode);
+    
+        httpRes.on("data", function(chunk) {
+          // still nothing happens on client - this will also just print to server console
+          console.log("data", chunk);
+          // return some data for requested route
+          return res.send({ message: 'Dmp found', data: chunk});
+        });
+      });
+    
 
-    if (dmp['code'] != 200) {
-        res.status(404).send('Can\'t reach Opidor API');
-        return;
-    }
-    res.send({ message: 'Dmp found', data: dmp})
+    // if (dmp['code'] != 200) {
+    //     res.status(404).send('Can\'t reach Opidor API');
+    //     return;
+    // }
+    // res.send({ message: 'Dmp found', data: dmp})
     
     res.end();
 });
