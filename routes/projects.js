@@ -3,6 +3,7 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const yaml = require('js-yaml');
+const https = require("https")
 
 const conf = require('../routes/conf.js');
 var CONFIG = conf.get_conf();
@@ -542,14 +543,28 @@ router.post('/dmp/:id', async function (req, res) {
     id = req
     dmp_data = {}
     let httpOptions=  {
-        headers: new HttpHeaders({
+        hostname: 'https://madmp-preprod.inist.fr',
+        path: '/api/v0/madmp/plans/1704?research_output_id=18365',
+        method: "GET",
+        headers: {
             accept: "application/json",
             Authorization:"Token token=lJbcVHG7Z2wA2mNii2vybA"
-            }),
+            },
         
     }
-    let dmp = this.http.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/1704?research_output_id=18365', httpOptions
-    );
+    let dmp = this.https.request(httpOptions,
+        res => {
+            let dmp = ""
+            res.on("data", d => {
+              dmp += d
+            })
+            res.on("end", () => {
+              console.log(data)
+            })
+          })
+          .on("error", console.error)
+          .end(body);
+
     if (dmp['code'] != 200) {
         res.status(404).send('Can\'t reach Opidor API');
         return;
