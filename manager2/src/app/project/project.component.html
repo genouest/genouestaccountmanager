@@ -49,7 +49,7 @@
 
   </div>
 </div>
-<button *ngIf="session_user && ! session_user.is_admin" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
+<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -73,6 +73,7 @@
                 <th>Creation</th>
                 <th>Expiration</th>
                 <th></th>
+                <th></th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-project>
@@ -85,6 +86,7 @@
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
                 <td><button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button></td>
+                <td><a *ngIf="session_user.is_admin" routerLink="/admin/project/{{project.id}}"><span class="label label-primary">Admin</span></a></td>
               </tr>
             </ng-template>
           </p-table>
@@ -93,8 +95,8 @@
 </div>
 
 
-<hr *ngIf="selectedProject && ! session_user.is_admin">
-<div *ngIf="selectedProject && ! session_user.is_admin">
+<hr *ngIf="selectedProject">
+<div *ngIf="selectedProject">
   <div class="well">
     <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
