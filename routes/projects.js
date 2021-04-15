@@ -552,7 +552,7 @@ router.post('/dmp/:id', async function (req, res) {
             },
         
     }
-    let dmp = this.https.request(httpOptions,
+    https.request(httpOptions,
         res => {
             let dmp = ""
             res.on("data", d => {
