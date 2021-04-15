@@ -109,26 +109,21 @@ export class ProjectComponent implements OnInit {
         this.rm_prj_msg_ok = '';
         let project_name = project.id;
 
-        if (this.session_user.is_admin)
-        {
-            this.router.navigate(['/admin/project/' + project_name]);
-        }
-        else {
-            this.projectsService.getUsers(project_name).subscribe(
-                resp => {
-                    this.users = resp;
-                    this.selectedProject = project;
-                    this.oldGroup = project.group;
-                    for(let i = 0; i < resp.length;i++){
-                        if(resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0){
-                            this.users[i].access=true;
-                        }
+        this.projectsService.getUsers(project_name).subscribe(
+            resp => {
+                this.users = resp;
+                this.selectedProject = project;
+                this.oldGroup = project.group;
+                for(let i = 0; i < resp.length;i++){
+                    if(resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0){
+                        this.users[i].access=true;
                     }
-                },
-                err => console.log('failed to get project users')
-            )
-        }
+                }
+            },
+            err => console.log('failed to get project users')
+        )
     }
+
 
     request_user(project, user_id, request_type) {
         this.request_msg = '';
