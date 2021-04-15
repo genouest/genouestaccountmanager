@@ -25,7 +25,7 @@
 
           <div class="form-group row col-sm-8">
               <label for="new_project_cpu">Cpu (Hour)</label>
-              <input placeholder="project cpu in G" type="number" id="new_project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
+              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
               <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
@@ -181,7 +181,7 @@
             </tr>
             <tr>
                 <td><b>Cpu</b>&nbsp;
-                    <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                    <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
                 </td>
                 <td>{{selectedProject.cpu}} Hour</td>
             </tr>
