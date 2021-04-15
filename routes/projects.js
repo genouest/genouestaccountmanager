@@ -541,7 +541,7 @@ router.post('/dmp/:id', async function (req, res) {
     //Keeps only the required data for the project
 
     const options = {
-        host: "https://madmp-preprod.inist.fr",
+        host: "madmp-preprod.inist.fr",
         path: "/api/v0/madmp/plans/1704?research_output_id=18365",
         headers: {
             accept: "application/json",
