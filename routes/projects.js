@@ -549,7 +549,7 @@ router.post('/dmp/:id', async function (req, res) {
         }
       };
     
-      const httpReq = http.get(options, function(httpRes) {
+      const httpReq = this.http.get(options, function(httpRes) {
         //output status code to your console
         console.log("statusCode: " + httpRes.statusCode);
     
