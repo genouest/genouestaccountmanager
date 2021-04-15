@@ -542,8 +542,11 @@ router.post('/dmp/:id', async function (req, res) {
     id = req
     dmp_data = {}
     let httpOptions=  {
-        accept: application/json,
-        Authorization:Token token=lJbcVHG7Z2wA2mNii2vybA
+        headers: new HttpHeaders({
+            accept: "application/json",
+            Authorization:"Token token=lJbcVHG7Z2wA2mNii2vybA"
+            }),
+        
     }
     let dmp = this.http.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/1704?research_output_id=18365', httpOptions
     );
