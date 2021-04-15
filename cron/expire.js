@@ -101,6 +101,7 @@ dbsrv.init_db().then(async () => {
             };
             // console.log('call plugins');
             let plugins_info = plgsrv.plugins_info();
+
             Promise.all(plugins_info.map(function(plugin_info){
                 return plugin_call(plugin_info, user.uid);
             // eslint-disable-next-line no-unused-vars
@@ -115,12 +116,29 @@ dbsrv.init_db().then(async () => {
                     }
                 }
                 catch(err) {
+                    console.error('failed to remove user from mailing list', err);
                     mail_sent++;
                     if(mail_sent == users.length) {
                         process.exit(0);
                     }
                 }
 
+            }).catch(async function(err) {
+                console.error('something went wrong in plugins', err);
+                try {
+                    await notif.remove(user.email);
+                    mail_sent++;
+                    if(mail_sent == users.length) {
+                        process.exit(0);
+                    }
+                }
+                catch(err) {
+                    console.error('failed to remove user from mailing list', err);
+                    mail_sent++;
+                    if(mail_sent == users.length) {
+                        process.exit(0);
+                    }
+                }
             });
         }(i));
     }
