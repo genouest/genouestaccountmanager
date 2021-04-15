@@ -49,7 +49,7 @@ if [ -e /tmp/gomngr.lock ]; then
 fi
 
 TOMORROW=`date --date="1 day 05:00:00" +%s`
-NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00"`
+NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00" +%s`
 
 while true; do
 
@@ -104,7 +104,7 @@ while true; do
 
   if [ $NOW -gt $NEXTMONTH ]; then
     echo "${NOW}: time for monthly tasks"
-    NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00"`
+    NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00" +%s`
     echo "Check for account upcoming expiration"
     /opt/crontask.sh test_expiration
     if [ $EXIT_REQUEST -eq 1 ]; then
