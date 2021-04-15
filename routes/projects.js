@@ -559,6 +559,7 @@ router.post('/dmp/:id', async function (req, res) {
           // return some data for requested route
           return res.send({ message: 'Dmp found', data: chunk});
         });
+        res.end();
       });
     
 
@@ -568,7 +569,7 @@ router.post('/dmp/:id', async function (req, res) {
     // }
     // res.send({ message: 'Dmp found', data: dmp})
     
-    res.end();
+    
 });
 
 router.post;
