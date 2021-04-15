@@ -552,7 +552,7 @@ router.post('/dmp/:id', async function (req, res) {
       const httpReq = https.get(options, function(httpRes) {
         //output status code to your console
         console.log("statusCode: " + httpRes.statusCode);
-    
+        console.log(httpRes)
         // httpRes.on("data", function(chunk) {
         //   // still nothing happens on client - this will also just print to server console
         //   console.log("data", chunk);
