@@ -43,6 +43,7 @@ export class ProjectComponent implements OnInit {
             owner: '',
             group: '',
             size: 0,
+            cpu: 0,
             expire: '',
             orga: '',
             description: '',
@@ -165,6 +166,7 @@ export class ProjectComponent implements OnInit {
             project.id,
             {
                 'size': project.size,
+                'cpu': project.cpu,
                 'expire': new Date(project.expire).getTime(),
                 'owner': project.owner,
                 'group': this.config.project.enable_group ? project.group : '',
