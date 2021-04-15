@@ -6,7 +6,6 @@ const markdown = require('markdown').markdown;
 const htmlToText = require('html-to-text');
 const validator = require('email-validator');
 const crypto = require('crypto');
-const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
@@ -665,45 +664,30 @@ router.get('/user/:id/activate', async function(req, res) {
 
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
-    let plugin_call = function(plugin_info, userId, data, adminId){
-        // eslint-disable-next-line no-unused-vars
-        return new Promise(function (resolve, reject){
-            let plugins_modules = plgsrv.plugins_modules();
-            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                resolve(true);
-            });
-        });
-    };
-    let plugins_info = plgsrv.plugins_info();
-    Promise.all(plugins_info.map(function(plugin_info){
-        return plugin_call(plugin_info, user.uid, user, session_user.uid);
-        // eslint-disable-next-line no-unused-vars
-    })).then(function(results){
-        if(user.is_fake) {
-            res.send({message: 'Activation in progress', fid: fid, error: []});
-            res.end();
-            return;      
-        } 
-        notif.add(user.email).then(() => {
-            res.send({message: 'Activation in progress', fid: fid, error: []});
-            res.end();
-        });
-        return;
-    }, function(err){
-        if(user.is_fake) {
-            res.send({message: 'Activation error', fid: fid, error: err});
-            res.end();
-            return;      
-        } 
-        notif.add(user.email).then(() => {
+
+    let error = false;
+    try {
+        error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
+    } catch(err) {
+        logger.error('activation errors', err);
+        error = true;
+    }
+
+    if(!user.is_fake) {
+        try {
+            await notif.add(user.email);
+        } catch (err) {
             logger.error('[notif][error=add][mail=' + user.email + ']');
-            res.send({message: 'Activation error', fid: fid, error: err});
-            res.end();
-        });
-        return;
-    });
+        }
+    }
 
-
+    if (error) {
+        res.send({message: 'Activation error', fid: fid, error: []});
+        res.end();
+    } else {
+        res.send({message: 'Activation in progress', fid: fid, error: []});
+        res.end();
+    }
 });
 
 // Get user - for logged user or admin
@@ -1047,27 +1031,9 @@ router.get('/user/:id/expire', async function(req, res){
         try {
             // eslint-disable-next-line no-unused-vars
             await notif.remove(user.email);
-            let plugin_call = function(plugin_info, userId, user, adminId){
-                // eslint-disable-next-line no-unused-vars
-                return new Promise(function (resolve, reject){
-                    let plugins_modules = plgsrv.plugins_modules();
-                    plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
-                        resolve(true);
-                    });
-                });
-            };
-            let plugins_info = plgsrv.plugins_info();
-            Promise.all(plugins_info.map(function(plugin_info){
-                return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                // eslint-disable-next-line no-unused-vars
-            })).then(function(data){
-                res.send({message: 'Operation in progress', fid: fid, error: []});
-                res.end();
-                return;
-            }, function(errs){
-                res.send({message: 'Operation in progress', fid: fid, error: errs});
-                res.end();
-            });
+            await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
+            res.send({message: 'Operation in progress', fid: fid, error: []});
+            res.end();     
         }
         catch(error) {
             res.send({message: 'Operation in progress, user not in mailing list', fid: fid, error: error});
@@ -1380,44 +1346,29 @@ router.get('/user/:id/renew', async function(req, res){
             logger.error(error);
         }
 
-        let plugin_call = function(plugin_info, userId, data, adminId){
-            // eslint-disable-next-line no-unused-vars
-            return new Promise(function (resolve, reject){
-                let plugins_modules = plgsrv.plugins_modules();
-                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
-            });
-        };
-        let plugins_info = plgsrv.plugins_info();
-        Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-            // eslint-disable-next-line no-unused-vars
-        })).then(function(results){
-            if(user.is_fake) {
-                res.send({message: 'Activation in progress', fid: fid, error: []});
-                res.end();
-                return;      
+        let error = false;
+        try {
+            error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
+        } catch(err) {
+            logger.error('activation errors', err);
+            error = true;
+        }
+    
+        if(!user.is_fake) {
+            try {
+                await notif.add(user.email);
+            } catch (err) {
+                logger.error('[notif][error=add][mail=' + user.email + ']');
             }
-            notif.add(user.email).then(() => {
-                res.send({message: 'Activation in progress', fid: fid, error: []});
-                res.end();
-                return;
-            });
-            return;
-        }, function(err){
-            if(user.is_fake) {
-                res.send({message: 'Activation Error', fid: fid, error: err});
-                res.end();
-                return;      
-            }
-            notif.add(user.email).then(() => {
-                res.send({message: 'Activation Error', fid: fid, error: err});
-                res.end();
-            });
-            return;
-        });
+        }
 
+        if(error) {
+            res.send({message: 'Activation Error', fid: fid, error: []});
+            res.end();
+        } else {
+            res.send({message: 'Activation in progress', fid: fid, error: []});
+            res.end();
+        }
         return;
     }
     else {
@@ -1662,30 +1613,11 @@ router.put('/user/:id', async function(req, res) {
 
     }
 
-
-    let plugin_call = function(plugin_info, userId, data, adminId){
-        // eslint-disable-next-line no-unused-vars
-        return new Promise(function (resolve, reject){
-            let plugins_modules = plgsrv.plugins_modules();
-            if (plugins_modules[plugin_info.name].update !== undefined) {
-                plugins_modules[plugin_info.name].update(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
-            } else {
-                resolve(true);
-            }
-        });
-    };
-
     try {
-        let plugins_info = plgsrv.plugins_info();
-        await Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-        }));
+        await plgsrv.run_plugins('update', user.uid, user, session_user.uid);
     } catch(err) {
-        logger.error('failed to update user', user, err);
+        logger.error('update errors', err);
     }
-
 
     if(user.status == STATUS_ACTIVE){
         await dbsrv.mongo_users().replaceOne({_id: user._id}, user);

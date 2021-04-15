@@ -311,20 +311,11 @@ var activate_tp_user = async function(user, adminId){
         logger.error('Add User Failed for: ' + user.uid, error);
     }
 
-
-    let plugin_call = function(plugin_info, userId, data, adminId){
-        // eslint-disable-next-line no-unused-vars
-        return new Promise(function (resolve, reject){
-            let plugins_modules = plgsrv.plugins_modules();
-            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                resolve(true);
-            });
-        });
-    };
-    let plugins_info = plgsrv.plugins_info();
-    await Promise.all(plugins_info.map(function(plugin_info){
-        return plugin_call(plugin_info, user.uid, ldap_user, adminId);
-    }));
+    try {
+        await plgsrv.run_plugins('activate', user.uid, ldap_user, adminId);
+    } catch(err) {
+        logger.error('activation errors', err);
+    }
     return ldap_user;
 
 };
