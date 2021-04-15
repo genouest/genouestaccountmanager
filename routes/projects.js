@@ -553,12 +553,12 @@ router.post('/dmp/:id', async function (req, res) {
         //output status code to your console
         console.log("statusCode: " + httpRes.statusCode);
     
-        httpRes.on("data", function(chunk) {
-          // still nothing happens on client - this will also just print to server console
-          console.log("data", chunk);
-          // return some data for requested route
-          return res.send({ message: 'Dmp found', data: chunk});
-        });
+        // httpRes.on("data", function(chunk) {
+        //   // still nothing happens on client - this will also just print to server console
+        //   console.log("data", chunk);
+        //   // return some data for requested route
+        //   return res.send({ message: 'Dmp found', data: chunk});
+        // });
         res.end();
       });
     
