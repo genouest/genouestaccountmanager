@@ -17,7 +17,7 @@ const plgsrv = require('../core/plugin.service.js');
 const maisrv = require('../core/mail.service.js');
 
 const MAILER = CONFIG.general.mailer;
-const MAIL_CONFIG = CONFIG[MAILER];
+// const MAIL_CONFIG = CONFIG[MAILER];
 
 const notif = require('../core/notif_'+MAILER+'.js');
 
@@ -38,37 +38,36 @@ dbsrv.init_db().then(async ()=>{
     plgsrv.load_plugins();
     let users = await dbsrv.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
     // Find users expiring in less then 2 month
-    let mail_sent = 0;
+    let mail_error = 0;
     if (! notif.mailSet()){
         console.log('Error: mail is not set');
         process.exit(1);
     }
     for(let i=0;i<users.length;i++){
-        await (async function(index) {
-            var user = users[index];
-            console.log('User will expire: '+user.uid);
-            var link = CONFIG.general.url +
-                encodeURI('/user/'+user.uid+'/renew/'+user.regkey);
-            try {
-                await maisrv.send_notif_mail({
-                    'name': 'expiration',
-                    'destinations': [user.email],
-                    'subject': 'account expiration ' + user.uid
-                }, {
-                    '#LINK#': link,
-                    '#EXPIRE#': timeConverter(user.expiration)
-                });
+        let user = users[i];
+        console.log('User will expire: '+user.uid);
+        let link = CONFIG.general.url +
+            encodeURI('/user/'+user.uid+'/renew/'+user.regkey);
+        try {
+            await maisrv.send_notif_mail({
+                'name': 'expiration',
+                'destinations': [user.email],
+                'subject': 'account expiration ' + user.uid
+            }, {
+                '#LINK#': link,
+                '#EXPIRE#': timeConverter(user.expiration)
+            });
 
-            } catch(error) {
-                console.log(error);
-            }
-            mail_sent++;
-        }(i));
+        } catch(error) {
+            console.error('failed to send mail',error);
+            mail_error += 1;
+        }
+
     }
-    if(mail_sent == users.length) {
+    if(mail_error == 0) {
         process.exit(0);
     } else {
-        console.log('Error: mail not sent' + mail_sent + '/' + users.length);
+        console.log(`Error: mail errors ${mail_error} on ${users.length} users`);
         process.exit(1);
     }
 

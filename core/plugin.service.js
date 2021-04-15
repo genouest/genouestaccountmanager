@@ -1,6 +1,6 @@
 // const Promise = require('promise');
-// const winston = require('winston');
-// const logger = winston.loggers.get('gomngr');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
 
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
@@ -32,4 +32,25 @@ exports.plugins_info = () => {
 
 exports.plugins_modules = () => {
     return plugins_modules;
+};
+
+exports.run_plugins = async (method, userId, data, adminId) => {
+
+    let error = false;
+    for (let i=0; i < plugins_info.length; i++) {
+        let plugin_info = plugins_info[i];
+        try {
+            logger.info(`[plugins][plugin=${plugin_info.name}] run`);
+            if (plugins_modules[plugin_info.name][method] === undefined) {
+                logger.error(`[plugins][plugin=${plugin_info.name}] plugin has no function ${method}`);
+                continue;
+            }
+            await plugins_modules[plugin_info.name][method](userId, data, adminId);
+        }
+        catch (err) {
+            logger.error(`[plugins][plugin=${plugin_info.name}] error`, err);
+            error = true;
+        }
+    }
+    return error;
 };
