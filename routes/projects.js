@@ -548,7 +548,7 @@ router.post('/dmp/:id', async function (req, res) {
         }
       };
     let resp = await axios.get('madmp-preprod.inist.fr/api/v0/madmp/plans/1704?research_output_id=18365', options);
-
+    console.log(res)
     return res.send({ message: 'Dmp found', data: resp.data});
     res.end();
 
