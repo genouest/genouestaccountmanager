@@ -665,6 +665,32 @@ router.get('/user/:id/activate', async function(req, res) {
 
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
+
+    let error = false;
+    try {
+        error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
+    } catch(err) {
+        logger.error('activation errors', err);
+        error = true;
+    }
+
+    if(!user.is_fake) {
+        try {
+            await notif.add(user.email);
+        } catch (err) {
+            logger.error('[notif][error=add][mail=' + user.email + ']');
+        }
+    }
+
+    if (error) {
+        res.send({message: 'Activation error', fid: fid, error: []});
+        res.end();
+    } else {
+        res.send({message: 'Activation in progress', fid: fid, error: []});
+        res.end();
+    }
+
+    /*
     let plugin_call = function(plugin_info, userId, data, adminId){
         // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
@@ -702,6 +728,7 @@ router.get('/user/:id/activate', async function(req, res) {
         });
         return;
     });
+    */
 
 
 });
