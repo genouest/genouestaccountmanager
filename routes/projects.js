@@ -3,7 +3,7 @@ var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const yaml = require('js-yaml');
-const https = require("https")
+const axios = require('axios')
 
 const conf = require('../routes/conf.js');
 var CONFIG = conf.get_conf();
@@ -539,29 +539,18 @@ router.post('/dmp/:id', async function (req, res) {
     //request to DMP opidor API to get all of the DMP with a json format
     //
     //Keeps only the required data for the project
+ 
 
     const options = {
-        host: "madmp-preprod.inist.fr",
-        path: "/api/v0/madmp/plans/1704?research_output_id=18365",
         headers: {
             accept: "application/json",
             Authorization:"Token token=lJbcVHG7Z2wA2mNii2vybA"
         }
       };
-    
-      const httpReq = https.get(options, function(httpRes) {
-        //output status code to your console
-        console.log("statusCode: " + httpRes.statusCode);
-        httpRes.on("data", function(chunk) {
-          // still nothing happens on client - this will also just print to server console
-          console.log("data", chunk);
-          // return some data for requested route
-          
-        });
-        
-      });
-      return res.send({ message: 'Dmp found', data: chunk});
-      res.end();
+    let resp = await axios.get('madmp-preprod.inist.fr/api/v0/madmp/plans/1704?research_output_id=18365', options);
+
+    return res.send({ message: 'Dmp found', data: resp.data});
+    res.end();
 
     // if (dmp['code'] != 200) {
     //     res.status(404).send('Can\'t reach Opidor API');
