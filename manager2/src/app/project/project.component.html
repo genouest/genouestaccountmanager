@@ -49,7 +49,7 @@
 
   </div>
 </div>
-<button *ngIf="session_user && ! session_user.is_admin" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
+<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -72,6 +72,7 @@
                 <th>Size (Go)</th>
                 <th>Creation</th>
                 <th>Expiration</th>
+                <th></th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-project>
@@ -83,6 +84,10 @@
                 <td>{{project.size}}</td>
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
+                <td>
+                    <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
+                    <button *ngIf="session_user.is_admin" type="button" class="btn btn-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>
+                </td>
               </tr>
             </ng-template>
           </p-table>
@@ -93,8 +98,8 @@
 <div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
 <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
-<hr *ngIf="selectedProject && ! session_user.is_admin">
-<div *ngIf="selectedProject && ! session_user.is_admin">
+<hr *ngIf="selectedProject">
+<div *ngIf="selectedProject">
   <div class="well">
     <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
@@ -127,6 +132,7 @@
       </form>
     </div>
   </div>
+
   <div class="card bg-light">
     <div class="card-header">
       <h3>Project overview</h3>

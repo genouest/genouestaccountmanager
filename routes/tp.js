@@ -1,24 +1,33 @@
 /* TODO : create a core/tps.service.js and move all method in it */
 
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var Promise = require('promise');
+const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-var CONFIG = require('config');
-var GENERAL_CONFIG = CONFIG.general;
 
-// var cookieParser = require('cookie-parser')
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
-var fdbs = require('../routes/database.js');
-var fwebs = require('../routes/web.js');
-var fusers = require('../routes/users.js');
+// const cookieParser = require('cookie-parser')
+
+const fdbs = require('../routes/database.js');
+const fwebs = require('../routes/web.js');
+// const fusers = require('../routes/users.js');
+// const grpsrv = require('../core/group.service.js');
+const usrsrv = require('../core/user.service.js');
 
 const goldap = require('../core/goldap.js');
 const filer = require('../core/file.js');
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const idsrv = require('../core/id.service.js');
+const maisrv = require('../core/mail.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const sansrv = require('../core/sanitize.service.js');
+const rolsrv = require('../core/role.service.js');
 
-var ObjectID = require('mongodb').ObjectID;
+const ObjectID = require('mongodb').ObjectID;
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -28,10 +37,10 @@ var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
 var createExtraGroup = async function (ownerName) {
-    let mingid = await utils.getGroupAvailableId();
+    let mingid = await idsrv.getGroupAvailableId();
     let fid = new Date().getTime();
     let group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
-    await utils.mongo_groups().insertOne(group);
+    await dbsrv.mongo_groups().insertOne(group);
 
     await goldap.add_group(group, fid);
     try {
@@ -49,11 +58,11 @@ var deleteExtraGroup = async function (group) {
     if (group === undefined || group === null) {
         return false;
     }
-    let group_to_remove = await utils.mongo_groups().findOne({'name': group.name});
+    let group_to_remove = await dbsrv.mongo_groups().findOne({'name': group.name});
     if(!group_to_remove) {
         return false;
     }
-    await utils.mongo_groups().removeOne({ 'name': group.name });
+    await dbsrv.mongo_groups().removeOne({ 'name': group.name });
     let fid = new Date().getTime();
     await goldap.delete_group(group, fid);
     try {
@@ -63,8 +72,8 @@ var deleteExtraGroup = async function (group) {
         logger.error('Delete Group Failed for: ' + group.name, error);
     }
 
-    await utils.freeGroupId(group.gid);
-    await utils.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
+    await idsrv.freeGroupId(group.gid);
+    await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
     return true;
 };
 
@@ -103,7 +112,7 @@ var create_tp_users_db = function (owner, quantity, duration, end_date, userGrou
                 loginShell: '/bin/bash',
                 history: []
             };
-            user.home = fusers.user_home(user);
+            user.home = usrsrv.get_user_home(user);
             users.push(user);
             minuid++;
         }
@@ -123,13 +132,13 @@ var create_tp_user_db = async function (tp_user) {
     let user = {...tp_user};
     logger.debug('create_tp_user_db', user.uid);
     try {
-        let uid = await utils.getUserAvailableId();
+        let uid = await idsrv.getUserAvailableId();
         user.uid = CONFIG.tp.prefix + uid;
         user.lastname = uid;
         user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
         user.uidnumber = uid;
-        user.home = fusers.user_home(user);
-        await utils.mongo_users().insertOne(user);
+        user.home = usrsrv.get_user_home(user);
+        await dbsrv.mongo_users().insertOne(user);
         user.password = Math.random().toString(36).slice(-10);
         return user;
     }
@@ -151,9 +160,9 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
     }
     credentials_html += '</tbody></table>';
 
-    let user_owner = await utils.mongo_users().findOne({'uid': owner});
+    let user_owner = await dbsrv.mongo_users().findOne({'uid': owner});
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name': 'tps_password',
             'destinations': [user_owner.email, CONFIG.general.accounts],
             'subject': '[TP accounts reservation] ' + owner
@@ -161,7 +170,7 @@ var send_user_passwords = async function(owner, from_date, to_date, users){
             '#FROMDATE#':  from.toDateString(),
             '#TODATE#':  to.toDateString(),
             '#EXPIRATION#': CONFIG.tp.extra_expiration,
-            '#CREDENTIALS#': credentials_html, // should be converted by utils.send_notif_mail in plain text for text mail
+            '#CREDENTIALS#': credentials_html, // should be converted by maisrv.send_notif_mail in plain text for text mail
             '#GROUP#': group,
             '#URL#': CONFIG.general.url,
             '#SUPPORT#': CONFIG.general.support
@@ -198,7 +207,7 @@ var delete_tp_user = function(user, admin_id){
                 return fwebs.delete_webs(user);
             // eslint-disable-next-line no-unused-vars
             }).then(function(web_res){
-                return fusers.delete_user(user, admin_id);
+                return usrsrv.delete_user(user, admin_id);
             }).then(function(){
                 resolve(true);
             });
@@ -228,7 +237,7 @@ router.delete_tp_users = function(users, group, admin_id){
 
 router.exec_tp_reservation = async function(reservation_id){
     // Create users for reservation
-    let reservation = await utils.mongo_reservations().findOne({'_id': reservation_id});
+    let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
     logger.debug('create a reservation group', reservation._id);
     let newGroup = await createExtraGroup(reservation.owner);
     logger.debug('create reservation accounts', reservation._id);
@@ -244,9 +253,9 @@ router.exec_tp_reservation = async function(reservation_id){
     }
     try{
         await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users);
-        await utils.mongo_reservations().updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
+        await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
         logger.debug('reservation ', reservation);
-        await utils.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'create reservation for ' + reservation.owner , 'logs': [] });
+        await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'create reservation for ' + reservation.owner , 'logs': [] });
         return reservation;
     }
     catch(exception){
@@ -268,7 +277,7 @@ var tp_reservation = async function(userId, from_date, to_date, quantity, about)
         'over': false
     };
 
-    await utils.mongo_reservations().insertOne(reservation);
+    await dbsrv.mongo_reservations().insertOne(reservation);
     logger.debug('reservation ', reservation);
     return reservation;
 };
@@ -278,7 +287,7 @@ var insert_ldap_user = async function(user, fid){
     try {
         await goldap.add(user, fid);
         logger.debug('switch to ACTIVE');
-        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
         return user;
     } catch(err) {
         logger.error(err);
@@ -287,7 +296,7 @@ var insert_ldap_user = async function(user, fid){
 };
 
 var activate_tp_user = async function(user, adminId){
-    let db_user = await utils.mongo_users().findOne({'uid': user.uid});
+    let db_user = await dbsrv.mongo_users().findOne({'uid': user.uid});
     if(!db_user) {
         logger.error('failure:',user.uid);
         throw `user activation failed ${user.uid}`;
@@ -302,20 +311,11 @@ var activate_tp_user = async function(user, adminId){
         logger.error('Add User Failed for: ' + user.uid, error);
     }
 
-
-    let plugin_call = function(plugin_info, userId, data, adminId){
-        // eslint-disable-next-line no-unused-vars
-        return new Promise(function (resolve, reject){
-            let plugins_modules = utils.plugins_modules();
-            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                resolve(true);
-            });
-        });
-    };
-    let plugins_info = utils.plugins_info();
-    await Promise.all(plugins_info.map(function(plugin_info){
-        return plugin_call(plugin_info, user.uid, ldap_user, adminId);
-    }));
+    try {
+        await plgsrv.run_plugins('activate', user.uid, ldap_user, adminId);
+    } catch(err) {
+        logger.error('activation errors', err);
+    }
     return ldap_user;
 
 };
@@ -325,13 +325,13 @@ router.get('/tp', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+    let user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
-    let reservations = await utils.mongo_reservations().find({}).toArray();
+    let reservations = await dbsrv.mongo_reservations().find({}).toArray();
     res.send(reservations);
     res.end();
 });
@@ -350,14 +350,26 @@ router.post('/tp', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
-    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
@@ -374,18 +386,30 @@ router.get('/tp/:id', async function(req, res) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
-    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
@@ -401,7 +425,7 @@ router.get('/tp/:id', async function(req, res) {
     else{
         filter = {_id: reservation_id, owner: user.uid};
     }
-    let reservation = await utils.mongo_reservations().findOne(filter);
+    let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to get this reservation'});
         res.end();
@@ -416,18 +440,29 @@ router.delete('/tp/:id', async function(req, res) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
-    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
@@ -443,7 +478,7 @@ router.delete('/tp/:id', async function(req, res) {
     else{
         filter = {_id: reservation_id, owner: user.uid};
     }
-    let reservation = await utils.mongo_reservations().findOne(filter);
+    let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to delete this reservation'});
         res.end();
@@ -461,7 +496,7 @@ router.delete('/tp/:id', async function(req, res) {
         res.end();
         return;
     }
-    await utils.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
+    await dbsrv.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
     res.send({message: 'Reservation cancelled'});
     res.end();
     return;
@@ -472,18 +507,29 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
-    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
@@ -499,7 +545,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     else{
         filter = {_id: reservation_id, owner: user.uid};
     }
-    let reservation = await utils.mongo_reservations().findOne(filter);
+    let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to delete this reservation'});
         res.end();
@@ -507,14 +553,14 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     }
 
     let users = await reservation.accounts.map(function(user){
-        return utils.mongo_users().findOne({'uid': user});
+        return dbsrv.mongo_users().findOne({'uid': user});
     });
     if (users) {
         await router.delete_tp_users(users, reservation.group, 'auto');
     }
     logger.info('Close reservation', req.params.id);
-    await utils.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
-    await utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
+    await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
+    await dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
     res.send({message: 'Reservation closed'});
     res.end();
 });
@@ -524,18 +570,29 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({'_id': req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
 
-    let is_admin = GENERAL_CONFIG.admin.indexOf(user.uid) >= 0;
+    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
@@ -551,7 +608,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     else{
         filter = {_id: reservation_id, owner: user.uid};
     }
-    let reservation = await utils.mongo_reservations().findOne(filter);
+    let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to reserve now this reservation'});
         res.end();
@@ -560,7 +617,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
 
     let newresa = await router.exec_tp_reservation(reservation._id, 'auto');
     logger.debug('set reservation as done', newresa);
-    await utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'created': true}});
+    await dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'created': true}});
     newresa.created = true;
     res.send({reservation: newresa});
     res.end();

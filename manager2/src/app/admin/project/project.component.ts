@@ -179,7 +179,7 @@ export class ProjectComponent implements OnInit {
                 if(this.config.project.enable_group && project.group !== this.oldGroup) {
                     this.update_users_group(this.users, project.group);
                 }
-                this.show_project_users(project);
+                this.show_project_users(project.id);
             },
             err => this.prj_err_msg = err.error.message
         )

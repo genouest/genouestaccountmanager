@@ -1,19 +1,27 @@
-const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config')
+const crypto = require('crypto');
 
 const goldap = require('../core/goldap.js');
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const idsrv = require('../core/id.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const maisrv = require('../core/mail.service.js');
 const filer = require('../core/file.js');
 
-const grpsrv = require('../core/group.service.js')
+const grpsrv = require('../core/group.service.js');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 /* TODO : find somewhere smart to put this */
 const STATUS_PENDING_EMAIL = 'Waiting for email approval';
 const STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 const STATUS_ACTIVE = 'Active';
-const STATUS_EXPIRED = 'Expired';
+// const STATUS_EXPIRED = 'Expired';
+
+let day_time = 1000 * 60 * 60 * 24;
 
 // module exports
 exports.get_user_home = get_user_home;
@@ -22,7 +30,8 @@ exports.create_admin = create_admin;
 exports.add_user_to_group = add_user_to_group;
 exports.add_user_to_project = add_user_to_project;
 exports.delete_user = delete_user;
-
+exports.remove_user_from_group = remove_user_from_group;
+exports.remove_user_from_project = remove_user_from_project;
 
 // module functions
 function get_user_home(user) {
@@ -72,7 +81,7 @@ async function create_extra_user(user_name, group, internal_user){
         history: [],
         password: password
     };
-    let minuid = await utils.getUserAvailableId();
+    let minuid = await idsrv.getUserAvailableId();
     user.uidnumber = minuid;
     user.gidnumber = (CONFIG.general.disable_user_group) ? -1 : group.gid;
     user.home = get_user_home(user);
@@ -87,7 +96,7 @@ async function create_extra_user(user_name, group, internal_user){
 
     delete user.password;
     // eslint-disable-next-line no-unused-vars
-    await utils.mongo_users().insertOne(user);
+    await dbsrv.mongo_users().insertOne(user);
     try {
         let created_file = await filer.user_create_extra_user(user, fid);
         logger.info('File Created: ', created_file);
@@ -96,36 +105,25 @@ async function create_extra_user(user_name, group, internal_user){
         throw error;
     }
 
-    let plugin_call = function(plugin_info, userId, data, adminId){
-        // eslint-disable-next-line no-unused-vars
-        return new Promise(function (resolve, reject){
-            let plugins_modules = utils.plugins_modules();
-            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                resolve(true);
-            });
-        });
-    };
 
     try {
-        let plugins_info = utils.plugins_info();
-        await Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, 'auto');
-        }));
+        await plgsrv.run_plugins('activate', user.uid, user, 'auto');
     } catch(err) {
-        logger.error('failed to create extra user', user, err);
+        logger.error('activation errors', user, err);
     }
+
     return user;
-};
+}
 
 
 async function create_admin(default_admin, default_admin_group){
-    let user = await utils.mongo_users().findOne({'uid': default_admin});
+    let user = await dbsrv.mongo_users().findOne({'uid': default_admin});
     if(user){
         logger.info('admin already exists, skipping');
     }
     else {
         logger.info('should create admin');
-        let group = await utils.mongo_groups().findOne({name: default_admin_group});
+        let group = await dbsrv.mongo_groups().findOne({name: default_admin_group});
         if(group){
             logger.info('group already exists');
             // eslint-disable-next-line no-unused-vars
@@ -134,18 +132,75 @@ async function create_admin(default_admin, default_admin_group){
         }
         else {
             logger.info('need to create admin group');
-            let group = await create_group(default_admin_group, default_admin);
+            let group = await grpsrv.create_group(default_admin_group, default_admin);
             logger.info('admin group created', group);
             let user = await create_extra_user(default_admin, group, true);
             logger.info('admin user created', user);
         }
     }
-};
+}
+
+async function remove_user_from_group(uid, secgroup, action_owner) {
+    logger.info('Remove user ' + uid + ' from group ' + secgroup);
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
+
+    if(! user) {
+        throw {code: 404, message: 'User ' + uid + ' not found'};
+    }
+
+    if(secgroup == user.group) {
+        throw {code: 403, message: 'Group is user main\'s group: '+user.group};
+    }
+    let present = false;
+    let newgroup = [];
+    for(let g=0;g < user.secondarygroups.length;g++){
+        if(secgroup == user.secondarygroups[g]) {
+            present = true;
+        }
+        else {
+            newgroup.push(user.secondarygroups[g]);
+        }
+    }
+    if(! present) {
+        throw {code: 404, message: 'group is not set'};
+    }
+    user.secondarygroups = newgroup;
+    let fid = new Date().getTime();
+    // Now add group
+    await goldap.change_user_groups(user, [], [secgroup], fid);
+    try {
+        await dbsrv.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+    } catch(err) {
+        throw {code: 403, message: 'Could not update user'};
+    }
+
+    try {
+        let created_file = await filer.user_change_group(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Group Change Failed for: ' + user.uid, error);
+        throw {code: 500, message: 'Change Group Failed'};
+    }
+
+    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove user ' + uid + ' from secondary  group ' + secgroup , 'logs': [user.uid + '.' + fid + '.update']});
+    let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}).toArray();
+
+
+    if(!users_in_group || users_in_group.length == 0) {
+        // If group is empty, delete it
+        let group = await dbsrv.mongo_groups().findOne({name: secgroup});
+        if(group) {
+            await grpsrv.delete_group(group, action_owner);
+            throw {code: 200, message: 'User removed from group. Empty group ' + secgroup + ' was deleted'};
+        }
+    }
+}
+
 
 
 async function add_user_to_group(uid, secgroup, action_owner) {
     logger.info('Adding user ' + uid + ' to group ' + secgroup);
-    let user = await utils.mongo_users().findOne({uid: uid});
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
     if(!user){
         throw {code: 404, message:'User not found'};
     }
@@ -165,7 +220,7 @@ async function add_user_to_group(uid, secgroup, action_owner) {
     // Now add group
     await goldap.change_user_groups(user, [secgroup], [], fid);
     try {
-        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
+        await dbsrv.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
     } catch(err) {
         throw {code: 500, message: 'Could not update user'};
     }
@@ -173,21 +228,69 @@ async function add_user_to_group(uid, secgroup, action_owner) {
     try {
         let created_file = await filer.user_change_group(user, fid);
         logger.info('File Created: ', created_file);
-        await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to secondary  group ' + secgroup , 'logs': [created_file]});
+        await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to secondary  group ' + secgroup , 'logs': [created_file]});
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
         throw {code: 500, message:'Change Group Failed'};
     }
 
 
-};
+}
+
+async function remove_user_from_project(oldproject, uid, action_owner, force) {
+    logger.info('Remove user ' + uid + ' from project ' + oldproject);
+
+    let fid = new Date().getTime();
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
+    if(! user) {
+        throw {code: 404, message: 'User ' + uid + ' not found'};
+    }
+    let project = await dbsrv.mongo_projects().findOne({id:oldproject});
+    if(!project){
+        logger.info('project not found', oldproject);
+        throw {code: 500, message: 'Error, project not found'};
+    }
+    if(uid === project.owner && ! force){
+        throw {code: 403, message: 'Cannot remove project owner. Please change the owner before deletion'};
+    }
+    let tempprojects = [];
+    for(let g=0; g < user.projects.length; g++){
+        if(oldproject != user.projects[g]) {
+            tempprojects.push(user.projects[g]);
+        }
+    }
+    try {
+        await dbsrv.mongo_users().updateOne({_id: user._id}, {'$set': { projects: tempprojects}});
+    } catch(err) {
+        throw {code: 403, message: 'Could not update user'};
+    }
+    try {
+        let created_file = await filer.project_remove_user_from_project(project, user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Remove User from Project Failed for: ' + oldproject, error);
+        throw {code: 500, message: 'Remove from Project Failed'};
+
+    }
+    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove user ' + uid + ' from project ' + oldproject , 'logs': []});
+
+    if (project.group && (CONFIG.project === undefined || CONFIG.project.enable_group)) {
+        try {
+            await grpsrv.remove_from_group(user.uid, project.group);
+        } catch(error) {
+            logger.error(`Removal of user from project ${oldproject} group ${project.group} failed`, error);
+            throw {code: 500, message: 'Remove from Project Failed'};
+
+        }
+    }
+}
 
 
 async function add_user_to_project(newproject, uid, action_owner) {
     logger.info('Adding user ' + uid + ' to project ' + newproject);
 
     let fid = new Date().getTime();
-    let user = await utils.mongo_users().findOne({uid: uid});
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
     if(!user) {
         throw {code: 404, message: 'User does not exist'};
     }
@@ -201,7 +304,7 @@ async function add_user_to_project(newproject, uid, action_owner) {
     }
     user.projects.push(newproject);
     try {
-        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
+        await dbsrv.mongo_users().updateOne({_id: user._id}, {'$set': { projects: user.projects}});
     } catch(err) {
         throw {code: 500, message: 'Could not update user'};
     }
@@ -209,21 +312,21 @@ async function add_user_to_project(newproject, uid, action_owner) {
     try {
         let created_file = await filer.project_add_user_to_project({id: newproject}, user, fid);
         logger.info('File Created: ', created_file);
-        await utils.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to project ' + newproject , 'logs': [created_file]});
+        await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to project ' + newproject , 'logs': [created_file]});
     } catch(error){
         logger.error(error);
         throw {code: 500, message:'Add User to Project Failed for: ' + newproject};
     }
 
-    let project = await utils.mongo_projects().findOne({id:newproject});
+    let project = await dbsrv.mongo_projects().findOne({id:newproject});
     let msg_destinations = [user.email];
-    let owner = await utils.mongo_users().findOne({uid:project.owner});
+    let owner = await dbsrv.mongo_users().findOne({uid:project.owner});
     if (owner) {
         msg_destinations.push(owner.email);
     }
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name': 'add_to_project',
             'destinations': msg_destinations,
             'subject': 'account ' + user.uid + ' added to project : ' + project.id
@@ -249,7 +352,7 @@ async function add_user_to_project(newproject, uid, action_owner) {
             }
         }
     }
-};
+}
 
 async function delete_user(user, action_owner_id, message){
     let user_is_activ = true;
@@ -277,14 +380,21 @@ async function delete_user(user, action_owner_id, message){
     }
 
     try {
-        await utils.mongo_users().deleteOne({_id: user._id});
+        await dbsrv.mongo_users().deleteOne({_id: user._id});
+        // Record user uid to prevent reuse
+        if (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse) {
+            let uidMd5 = crypto.createHash('md5').update(user.uid).digest('hex');
+            await dbsrv.mongo_oldusers().insertOne({
+                'uid': uidMd5
+            });
+        }
     } catch(err) {
         return false;
     }
 
     grpsrv.clear_user_groups(user, action_owner_id);
 
-    await utils.mongo_events().insertOne({
+    await dbsrv.mongo_events().insertOne({
         'owner': action_owner_id,
         'date': new Date().getTime(),
         'action': 'delete user ' + user.uid ,
@@ -299,7 +409,7 @@ async function delete_user(user, action_owner_id, message){
     }
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name': 'user_deletion',
             'destinations': msg_destinations,
             'subject': 'account deletion: ' + user.uid
@@ -313,25 +423,13 @@ async function delete_user(user, action_owner_id, message){
     }
 
     if(user_is_activ){
-        // Call remove method of plugins if defined
-        let plugin_call = function(plugin_info, userId, user, adminId){
-            // eslint-disable-next-line no-unused-vars
-            return new Promise(function (resolve, reject){
-                let plugins_modules = utils.plugins_modules();
-                if(plugins_modules[plugin_info.name].remove === undefined) {
-                    resolve(true);
-                }
-                plugins_modules[plugin_info.name].remove(userId, user, adminId).then(function(){
-                    resolve(true);
-                });
-            });
-        };
-        let plugins_info = utils.plugins_info();
-        await Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, action_owner_id);
-        }));
+        try {
+            await plgsrv.run_plugins('remove', user.uid, user, action_owner_id);
+        } catch(err) {
+            logger.error('remove errors', err);
+        }
     }
 
-    await utils.freeUserId(user.uidnumber);
+    await idsrv.freeUserId(user.uidnumber);
     return true;
-};
+}

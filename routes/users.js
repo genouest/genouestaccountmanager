@@ -1,21 +1,25 @@
 /* eslint-disable require-atomic-updates */
 /*jslint es6 */
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var markdown = require('markdown').markdown;
-var htmlToText = require('html-to-text');
-var validator = require('email-validator');
-
-var Promise = require('promise');
+const markdown = require('markdown').markdown;
+const htmlToText = require('html-to-text');
+const validator = require('email-validator');
+const crypto = require('crypto');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const conf = require('../routes/conf.js');
-var CONFIG = require('config');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
 
 const goldap = require('../core/goldap.js');
-const utils = require('../core/utils.js');
+const dbsrv = require('../core/db.service.js');
+const idsrv = require('../core/id.service.js');
+const maisrv = require('../core/mail.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const sansrv = require('../core/sanitize.service.js');
 const filer = require('../core/file.js');
 
 const MAILER = CONFIG.general.mailer;
@@ -27,39 +31,41 @@ var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
 let day_time = 1000 * 60 * 60 * 24;
-let duration_list = conf.get_conf().duration;
+let duration_list = CONFIG.duration;
 //const runningEnv = process.env.NODE_ENV || 'prod';
 
-const grpsrv = require('../core/group.service.js')
-const usrsrv = require('../core/user.service.js')
-
+const grpsrv = require('../core/group.service.js');
+const usrsrv = require('../core/user.service.js');
+const rolsrv = require('../core/role.service.js');
 
 router.get('/user/:id/apikey', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
     let session_user = null;
+    let isadmin = false;
     try {
-        session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
-        res.status(404).send({message: 'not found'});
+        res.status(404).send({message: 'User session not found'});
         res.end();
         return;
     }
 
-    if(session_user.uid !== req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    if(session_user.uid !== req.params.id && !isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
-    let user= await utils.mongo_users().findOne({uid: req.params.id});
+    let user= await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
@@ -83,17 +89,30 @@ router.post('/user/:id/notify', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
@@ -103,7 +122,7 @@ router.post('/user/:id/notify', async function(req, res){
     let subject = req.body.subject;
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name': null,
             'destinations': [user.email],
             'subject': subject,
@@ -115,7 +134,7 @@ router.post('/user/:id/notify', async function(req, res){
         res.end();
         return;
     }
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'message: ' + subject , 'logs': []});
+    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'message: ' + subject , 'logs': []});
 
     res.send({message: 'message sent'});
     res.end();
@@ -126,17 +145,29 @@ router.post('/user/:id/apikey', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(session_user.uid !== req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(session_user.uid !== req.params.id && !isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
@@ -144,7 +175,7 @@ router.post('/user/:id/apikey', async function(req, res){
     }
 
     let apikey = Math.random().toString(36).slice(-10);
-    await utils.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
+    await dbsrv.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
     res.send({apikey: apikey});
     res.end();
 });
@@ -155,29 +186,40 @@ router.put('/user/:id/subscribe', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
+    let isadmin = false;
+    try {
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    if (req.locals.logInfo.id !== req.params.id && !isadmin) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
-    if(user.email == undefined || user.email == ''){
+    if(user.email == undefined || user.email == '' || user.is_fake){
         res.send({subscribed: false});
         res.end();
     } else {
-        notif.add(user.email, function() {
-            res.send({subscribed: true});
-            res.end();
-        });
+        await notif.add(user.email);
+        res.send({subscribed: true});
+        res.end();
     }
 
 });
@@ -187,29 +229,40 @@ router.put('/user/:id/unsubscribe', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
+    let isadmin = false;
+    try {
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && GENERAL_CONFIG.admin.indexOf(req.locals.logInfo.id) < 0) {
+    if (req.locals.logInfo.id !== req.params.id && !isadmin) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
-    if(user.email == undefined || user.email == ''){
+    if(user.email == undefined || user.email == '' || user.is_fake){
         res.send({unsubscribed: false});
         res.end();
     } else {
-        notif.remove(user.email, function() {
-            res.send({unsubscribed: true});
-            res.end();
-        });
+        await notif.remove(user.email);
+        res.send({unsubscribed: true});
+        res.end();        
     }
 
 });
@@ -220,170 +273,24 @@ router.get('/user/:id/subscribed', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.send({message: 'User does not exist'});
         res.end();
         return;
     }
-    if(user.email == undefined || user.email == ''){
+    if(user.email == undefined || user.email == '' || user.is_fake){
         res.send({subscribed: false});
         res.end();
     } else {
-        notif.subscribed(user.email, function(is_subscribed) {
-            res.send({subscribed: is_subscribed});
-            res.end();
-        });
-    }
-});
-
-router.get('/group/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
-    res.send(users_in_group);
-    res.end();
-});
-
-
-
-router.delete('/group/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let group = await utils.mongo_groups().findOne({name: req.params.id});
-    if(!group) {
-        res.status(403).send({message: 'Group does not exist'});
-        return;
-    }
-    let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
-    if(users_in_group && users_in_group.length > 0){
-        res.status(403).send({message: 'Group has some users, cannot delete it'});
-        return;
-    }
-    grpsrv.delete_group(group, user.uid).then(function(){
-        res.send({message: 'group ' + req.params.id + ' deleted'});
+        let is_subscribed = await notif.subscribed(user.email);
+        res.send({subscribed: is_subscribed});
         res.end();
-    });
-});
-
-
-router.put('/group/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!session_user){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let owner = req.body.owner;
-    let user = await utils.mongo_users().findOne({uid: owner});
-    if(!user) {
-        res.status(404).send({message: 'User does not exist'});
-        res.end();
-        return;
-    }
-    let group = await utils.mongo_groups().findOne({name: req.params.id});
-    if(! group) {
-        res.status(404).send({message: 'Group does not exist'});
-        return;
-    }
-    await utils.mongo_events().insertOne({
-        'owner': user.uid,
-        'date': new Date().getTime(),
-        'action': 'group owner modification ' + group.name + ' to ' +owner,
-        'logs': []});
-
-    let data = await utils.mongo_groups().updateOne({name: group.name}, {'$set':{'owner': owner}});
-    res.send(data);
-    res.end();
-});
-
-router.post('/group/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(session_user == null){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let owner = req.body.owner;
-    let user = await utils.mongo_users().findOne({uid: owner});
-    if(!user) {
-        res.status(404).send({message: 'Owner user does not exist'});
-        res.end();
-        return;
-    }
-    let group = await utils.mongo_groups().findOne({name: new RegExp('^' + req.params.id + '$', 'i')});
-    if(group) {
-        res.status(403).send({message: 'Group already exists'});
-        return;
-    }
-
-    try {
-        group = await grpsrv.create_group(req.params.id , owner);
-    } catch(error){
-        logger.error('Add Group Failed for: ' + req.params.id, error);
-        res.status(500).send({message: 'Add Group Failed'});
-        return;
-    }
-
-    res.send(group);
-    res.end();
-    return;
 });
 
 router.get('/ip', function(req, res) {
@@ -393,25 +300,6 @@ router.get('/ip', function(req, res) {
         req.connection.socket.remoteAddress;
 
     res.json({ip: ip});
-});
-
-router.get('/group', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    let groups = await utils.mongo_groups().find().toArray();
-    res.send(groups);
-    return;
 });
 
 router.post('/message', async function(req, res){
@@ -424,13 +312,24 @@ router.post('/message', async function(req, res){
         res.status(403).send({message: 'Mail provider is not set'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
 
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -450,11 +349,9 @@ router.post('/message', async function(req, res){
         message: message,
         html_message: html_message
     };
-    // eslint-disable-next-line no-unused-vars
-    notif.sendList(req.body.list, mailOptions, function(err, response) {
-        res.send({message: ''});
-        return;
-    });
+    await notif.sendList(req.body.list, mailOptions);
+    res.send({message: ''});
+    return;
 });
 
 // Get users listing - for admin
@@ -463,16 +360,28 @@ router.get('/user', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let users = await utils.mongo_users().find({}).toArray();
+    let users = await dbsrv.mongo_users().find({}).toArray();
     res.json(users);
 });
 
@@ -482,17 +391,28 @@ router.post('/user/:id/group/:group', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id, req.params.group])) {
+    if(! sansrv.sanitizeAll([req.params.id, req.params.group])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user){
         res.status(401).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -525,78 +445,48 @@ router.delete('/user/:id/group/:group', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id, req.params.group])) {
+    if(! sansrv.sanitizeAll([req.params.id, req.params.group])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(! session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!session_user || !isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
     let uid = req.params.id;
     let secgroup = req.params.group;
-    let user = await utils.mongo_users().findOne({uid: uid});
-    if(secgroup == user.group) {
-        res.send({message: 'Group is user main\'s group: '+user.group});
-        res.end();
-        return;
-    }
-    let present = false;
-    let newgroup = [];
-    for(let g=0;g < user.secondarygroups.length;g++){
-        if(secgroup == user.secondarygroups[g]) {
-            present = true;
-        }
-        else {
-            newgroup.push(user.secondarygroups[g]);
-        }
-    }
-    if(! present) {
-        res.send({message: 'group is not set'});
-        res.end();
-        return;
-    }
-    user.secondarygroups = newgroup;
-    let fid = new Date().getTime();
-    // Now add group
-    await goldap.change_user_groups(user, [], [secgroup], fid);
-    try {
-        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { secondarygroups: user.secondarygroups}});
-    } catch(err) {
-        res.send({message: 'Could not update user'});
-        res.end();
-        return;
-    }
 
     try {
-        let created_file = await filer.user_change_group(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch(error){
-        logger.error('Group Change Failed for: ' + user.uid, error);
-        res.status(500).send({message: 'Change Group Failed'});
-        return;
+        await usrsrv.remove_user_from_group(uid, secgroup, session_user.uid);
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
     }
 
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from secondary  group ' + req.params.group , 'logs': [user.uid + '.' + fid + '.update']});
-    let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': secgroup}, {'group': secgroup}]}).toArray();
-    if(users_in_group && users_in_group.length > 0){
-        res.send({message: 'User removed from group', fid: fid});
-        res.end();
-        return;
-    }
-    // If group is empty, delete it
-    let group = await utils.mongo_groups().findOne({name: secgroup});
-    if(!group) {
-        res.send({message: 'User removed from group', fid: fid});
-        res.end();
-        return;
-    }
-    grpsrv.delete_group(group, session_user.uid).then(function(){
-        res.send({message: 'User removed from group. Empty group ' + secgroup + ' was deleted'});
-        res.end();
-        return;
-    });
+    res.send({message: 'User removed from Group'});
+    res.end();
+
+
 });
 
 
@@ -605,13 +495,24 @@ router.delete('/user/:id', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!session_user || !isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -622,7 +523,7 @@ router.delete('/user/:id', async function(req, res){
         mail_message = req.body.message;
     }
 
-    let user = await utils.mongo_users().findOne({uid: uid});
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
     if(!user) {
         res.send({message: 'User not found ' + uid});
         res.end();
@@ -639,13 +540,13 @@ router.delete('/user/:id', async function(req, res){
     else {
         // Must check if user has databases and sites
         // Do not remove in this case, owners must be changed before
-        let databases = await utils.mongo_databases().find({owner: uid}).toArray();
+        let databases = await dbsrv.mongo_databases().find({owner: uid}).toArray();
         if(databases && databases.length>0) {
             res.send({message: 'User owns some databases, please change owner first!'});
             res.end();
             return;
         }
-        let websites = await utils.mongo_web().find({owner: uid}).toArray();
+        let websites = await dbsrv.mongo_web().find({owner: uid}).toArray();
         if(websites && websites.length>0) {
             res.send({message: 'User owns some web sites, please change owner first!'});
             res.end();
@@ -665,20 +566,31 @@ router.get('/user/:id/activate', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!session_user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(403).send({message: 'User does not exist'});
         res.end();
@@ -690,13 +602,19 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }
     user.password = Math.random().toString(36).slice(-10);
-    let minuid = await utils.getUserAvailableId();
+    let minuid = await idsrv.getUserAvailableId();
     user.uidnumber = minuid;
     user.gidnumber = -1;
     if (!CONFIG.general.disable_user_group) {
-        let data = await utils.mongo_groups().findOne({'name': user.group});
+        let data = await dbsrv.mongo_groups().findOne({'name': user.group});
         if(!data) {
             if (CONFIG.general.auto_add_group) {
+                let groupexisted = await dbsrv.mongo_oldgroups().findOne({'name': user.group});
+                if(groupexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
+                    logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
+                    res.status(403).send({message: 'Group name already used in the past'});
+                    return;
+                }
                 try {
                     await grpsrv.create_group(user.group, user.uid);
                 } catch(error){
@@ -705,7 +623,7 @@ router.get('/user/:id/activate', async function(req, res) {
                     return;
                 }
 
-                data = await utils.mongo_groups().findOne({'name': user.group});
+                data = await dbsrv.mongo_groups().findOne({'name': user.group});
             } else {
 
                 res.status(403).send({message: 'Group ' + user.group + ' does not exist, please create it first'});
@@ -728,10 +646,10 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }
 
-    await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name' : 'activation',
             'destinations': [user.email],
             'subject': 'account activation'
@@ -744,37 +662,32 @@ router.get('/user/:id/activate', async function(req, res) {
         logger.error(error);
     }
 
-    await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+    await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
-    let plugin_call = function(plugin_info, userId, data, adminId){
-        // eslint-disable-next-line no-unused-vars
-        return new Promise(function (resolve, reject){
-            let plugins_modules = utils.plugins_modules();
-            plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                resolve(true);
-            });
-        });
-    };
-    let plugins_info = utils.plugins_info();
-    Promise.all(plugins_info.map(function(plugin_info){
-        return plugin_call(plugin_info, user.uid, user, session_user.uid);
-        // eslint-disable-next-line no-unused-vars
-    })).then(function(results){
-        notif.add(user.email, function() {
-            res.send({message: 'Activation in progress', fid: fid, error: []});
-            res.end();
-        });
-        return;
-    }, function(err){
-        notif.add(user.email, function() {
+
+    let error = false;
+    try {
+        error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
+    } catch(err) {
+        logger.error('activation errors', err);
+        error = true;
+    }
+
+    if(!user.is_fake) {
+        try {
+            await notif.add(user.email);
+        } catch (err) {
             logger.error('[notif][error=add][mail=' + user.email + ']');
-            res.send({message: 'Failed to add to mailing list', fid: fid, error: err});
-            res.end();
-        });
-        return;
-    });
+        }
+    }
 
-
+    if (error) {
+        res.send({message: 'Activation error', fid: fid, error: []});
+        res.end();
+    } else {
+        res.send({message: 'Activation in progress', fid: fid, error: []});
+        res.end();
+    }
 });
 
 // Get user - for logged user or admin
@@ -783,12 +696,25 @@ router.get('/user/:id', async function(req, res) {
         res.status(401).send({message: 'Not authorized, need to login first'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
+
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
@@ -796,18 +722,21 @@ router.get('/user/:id', async function(req, res) {
     if(user.is_fake===undefined) {
         user.is_fake = false;
     }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
+
+    // This should be removed as session_user may not be the user requested to get
+    /* if(indexOf(session_user.uid) >= 0) {
         user.is_admin = true;
     }
     else {
         user.is_admin = false;
-    }
+    } */
+
     user.quota = [];
     for(let k in GENERAL_CONFIG.quota) {
         user.quota.push(k);
     }
 
-    if(session_user._id.str == user._id.str || GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0){
+    if(session_user._id.str == user._id.str || isadmin){
         res.json(user);
         return;
     }
@@ -821,11 +750,11 @@ router.get('/user/:id', async function(req, res) {
 router.get('/user/:id/confirm', async function(req, res) {
     let uid = req.params.id;
     let regkey = req.query.regkey;
-    if(! utils.sanitizeAll([uid])) {
+    if(! sansrv.sanitizeAll([uid])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: uid});
+    let user = await dbsrv.mongo_users().findOne({uid: uid});
     if(! user) {
         res.status(401).send({message: 'Invalid user'});
         return;
@@ -840,7 +769,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 return;
             }
             let account_event = {action: 'email_confirm', date: new Date().getTime()};
-            await utils.mongo_users().updateOne(
+            await dbsrv.mongo_users().updateOne(
                 { _id: user._id},
                 {
                     $set: {status: STATUS_PENDING_APPROVAL},
@@ -849,7 +778,7 @@ router.get('/user/:id/confirm', async function(req, res) {
 
             let link = GENERAL_CONFIG.url + encodeURI('/manager2/user/'+user.uid);
             try {
-                await utils.send_notif_mail({
+                await maisrv.send_notif_mail({
                     'name': 'registration',
                     'destinations': [GENERAL_CONFIG.accounts],
                     'subject': 'account registration: '+uid
@@ -861,7 +790,7 @@ router.get('/user/:id/confirm', async function(req, res) {
                 logger.error(error);
             }
 
-            await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
+            await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user confirmed email:' + req.params.id , 'logs': []});
             res.redirect(GENERAL_CONFIG.url+'/manager2/pending');
             res.end();
         }
@@ -877,7 +806,7 @@ router.get('/user/:id/confirm', async function(req, res) {
 // Register
 router.post('/user/:id', async function(req, res) {
     logger.info('New register request for '+req.params.id);
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
@@ -946,16 +875,25 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    let user_email = await utils.mongo_users().findOne({email: req.body.email, is_fake: false});
+    let user_email = await dbsrv.mongo_users().findOne({email: req.body.email, is_fake: false});
     if(user_email){
         res.send({status: 1, message: 'User email already exists'});
         return;
     }
-    let userexists = await utils.mongo_users().findOne({uid: req.params.id});
+    let userexists = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(userexists){
         res.send({status: 1, message: 'User id already exists'});
         return;
     }
+
+    let uidMd5 = crypto.createHash('md5').update(req.params.id).digest('hex');
+    let userexisted = await dbsrv.mongo_oldusers().findOne({uid: uidMd5});
+    if(userexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
+        logger.error(`User uid ${req.params.id} already used in the past, preventing reuse`);
+        res.send({status: 1, message: 'User id already used'});
+        return;
+    }
+
 
     let regkey = Math.random().toString(36).substring(7);
     let default_main_group = GENERAL_CONFIG.default_main_group || '';
@@ -1005,14 +943,14 @@ router.post('/user/:id', async function(req, res) {
     // user[CONFIG.general.internal_flag] = false,
     user.home = usrsrv.get_user_home(user);
 
-    await utils.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
 
 
-    await utils.mongo_users().insertOne(user);
+    await dbsrv.mongo_users().insertOne(user);
     let uid = req.params.id;
     let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name' : 'confirmation',
             'destinations': [user.email],
             'subject': 'account confirmation'
@@ -1035,29 +973,35 @@ router.get('/user/:id/expire', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if (!session_user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if (!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
 
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
-        // eslint-disable-next-line require-atomic-updates
-        session_user.is_admin = true;
-    }
-    else {
-        // eslint-disable-next-line require-atomic-updates
-        session_user.is_admin = false;
-    }
+    session_user.is_admin = isadmin;
+
     if(session_user.is_admin){
         let new_password = Math.random().toString(36).slice(-10);
         user.password = new_password;
@@ -1070,7 +1014,7 @@ router.get('/user/:id/expire', async function(req, res){
         }
         user.history.push({'action': 'expire', date: new Date().getTime()});
         // eslint-disable-next-line no-unused-vars
-        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history}});
 
         try {
             let created_file = await filer.user_expire_user(user, fid);
@@ -1081,34 +1025,15 @@ router.get('/user/:id/expire', async function(req, res){
             return;
         }
 
-        await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
         // Now remove from mailing list
         try {
             // eslint-disable-next-line no-unused-vars
-            notif.remove(user.email, function(err){
-                let plugin_call = function(plugin_info, userId, user, adminId){
-                    // eslint-disable-next-line no-unused-vars
-                    return new Promise(function (resolve, reject){
-                        let plugins_modules = utils.plugins_modules();
-                        plugins_modules[plugin_info.name].deactivate(userId, user, adminId).then(function(){
-                            resolve(true);
-                        });
-                    });
-                };
-                let plugins_info = utils.plugins_info();
-                Promise.all(plugins_info.map(function(plugin_info){
-                    return plugin_call(plugin_info, user.uid, user, session_user.uid);
-                    // eslint-disable-next-line no-unused-vars
-                })).then(function(data){
-                    res.send({message: 'Operation in progress', fid: fid, error: []});
-                    res.end();
-                    return;
-                }, function(errs){
-                    res.send({message: 'Operation in progress', fid: fid, error: errs});
-                    res.end();
-                });
-            });
+            await notif.remove(user.email);
+            await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
+            res.send({message: 'Operation in progress', fid: fid, error: []});
+            res.end();     
         }
         catch(error) {
             res.send({message: 'Operation in progress, user not in mailing list', fid: fid, error: error});
@@ -1130,17 +1055,28 @@ router.post('/user/:id/passwordreset', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!session_user || session_user.uid != req.params.id && GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0) {
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!session_user || session_user.uid != req.params.id && !isadmin) {
         res.send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(404).send({message: 'User does not exist:'+req.params.id});
         res.end();
@@ -1152,7 +1088,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
         return;
     }
     user.password=req.body.password;
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
+    await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
     let fid = new Date().getTime();
     try {
         await goldap.reset_password(user, fid);
@@ -1178,12 +1114,12 @@ router.post('/user/:id/passwordreset', async function(req, res){
 //app.get('/user/:id/passwordreset', users);
 router.get('/user/:id/passwordreset', async function(req, res){
     let key = Math.random().toString(36).substring(7);
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
         res.end();
@@ -1196,7 +1132,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     }
 
     try {
-        await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: key}});
+        await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: key}});
     } catch(err) {
         res.status(404).send({message: 'User cannot be updated'});
         res.end();
@@ -1208,7 +1144,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
     let link = CONFIG.general.url + encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
 
     try {
-        await utils.send_notif_mail({
+        await maisrv.send_notif_mail({
             'name' : 'password_reset_request',
             'destinations': [user.email],
             'subject': 'account password reset request'
@@ -1220,7 +1156,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
         logger.error(error);
     }
 
-    await utils.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
+    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password reset request', 'logs': []});
 
     if(notif.mailSet()) {
         res.send({message: 'Password reset requested, check your inbox for instructions to reset your password.'});
@@ -1231,12 +1167,12 @@ router.get('/user/:id/passwordreset', async function(req, res){
 });
 
 router.get('/user/:id/passwordreset/:key', async function(req, res){
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
         res.end();
@@ -1254,7 +1190,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             return;
         }
         user.history.push({'action': 'password reset', date: new Date().getTime()});
-        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {history: user.history}});
 
         // Todo: find if we need another template (or not)
         try {
@@ -1268,11 +1204,11 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
 
         // disable previous link sent
         let new_key = Math.random().toString(36).substring(7);
-        await utils.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
+        await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
 
         // Now send email
         try {
-            await utils.send_notif_mail({
+            await maisrv.send_notif_mail({
                 'name' : 'password_reset',
                 'destinations': [user.email],
                 'subject': 'account password reset'
@@ -1284,7 +1220,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
             logger.error(error);
         }
 
-        await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
+        await dbsrv.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user password ' + req.params.id + ' reset confirmation', 'logs': [user.uid + '.' + fid + '.update']});
 
         if(notif.mailSet()) {
             res.redirect(GENERAL_CONFIG.url+'/manager2/passwordresetconfirm');
@@ -1305,11 +1241,11 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
  * Extend validity period if active
  */
 router.get('/user/:id/renew/:regkey', async function(req, res){
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
@@ -1322,8 +1258,8 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
         let expiration = new Date().getTime() + day_time*duration_list[user.duration];
-        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
-        await utils.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
+        await dbsrv.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
         if(accept == 'json') {
             res.send({message: 'validity period extended', expiration: expiration});
@@ -1346,23 +1282,31 @@ router.get('/user/:id/renew', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
+
+    session_user.is_admin = isadmin;
+
     if(session_user.is_admin){
         let new_password = Math.random().toString(36).slice(-10);
         user.password = new_password;
@@ -1374,7 +1318,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await utils.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + day_time*duration_list[user.duration]), history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + day_time*duration_list[user.duration]), history: user.history}});
 
         try {
             let created_file = await filer.user_renew_user(user, fid);
@@ -1385,11 +1329,11 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
 
-        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
 
 
         try {
-            await utils.send_notif_mail({
+            await maisrv.send_notif_mail({
                 'name' : 'reactivation',
                 'destinations': [user.email],
                 'subject': 'account reactivation'
@@ -1402,33 +1346,29 @@ router.get('/user/:id/renew', async function(req, res){
             logger.error(error);
         }
 
-        let plugin_call = function(plugin_info, userId, data, adminId){
-            // eslint-disable-next-line no-unused-vars
-            return new Promise(function (resolve, reject){
-                let plugins_modules = utils.plugins_modules();
-                plugins_modules[plugin_info.name].activate(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
-            });
-        };
-        let plugins_info = utils.plugins_info();
-        Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-            // eslint-disable-next-line no-unused-vars
-        })).then(function(results){
-            notif.add(user.email, function() {
-                res.send({message: 'Activation in progress', fid: fid, error: []});
-                res.end();
-            });
-            return;
-        }, function(err){
-            notif.add(user.email, function() {
-                res.send({message: 'Activation Error', fid: fid, error: err});
-                res.end();
-            });
-            return;
-        });
+        let error = false;
+        try {
+            error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
+        } catch(err) {
+            logger.error('activation errors', err);
+            error = true;
+        }
+    
+        if(!user.is_fake) {
+            try {
+                await notif.add(user.email);
+            } catch (err) {
+                logger.error('[notif][error=add][mail=' + user.email + ']');
+            }
+        }
 
+        if(error) {
+            res.send({message: 'Activation Error', fid: fid, error: []});
+            res.end();
+        } else {
+            res.send({message: 'Activation in progress', fid: fid, error: []});
+            res.end();
+        }
         return;
     }
     else {
@@ -1443,18 +1383,25 @@ router.put('/user/:id/ssh', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
     }
-    else {
-        session_user.is_admin = false;
-    }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+
+    session_user.is_admin = isadmin;
+
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     // If not admin nor logged user
     if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
         res.status(401).send({message: 'Not authorized'});
@@ -1464,16 +1411,16 @@ router.put('/user/:id/ssh', async function(req, res) {
     // Remove carriage returns if any
     // Escape some special chars for security
     user.ssh = key.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
-    if (utils.sanitizeSSHKey(user.ssh) === undefined) {
+    if (sansrv.sanitizeSSHKey(user.ssh) === undefined) {
         res.status(403).send({message: 'Invalid SSH Key'});
         return;
     }
-    if (utils.sanitizePath(user.home) === undefined) {
+    if (sansrv.sanitizePath(user.home) === undefined) {
         res.status(403).send({message: 'Invalid home directory'});
         return;
     }
     // Update SSH Key
-    await utils.mongo_users().updateOne({_id: user._id}, {'$set': {ssh: key}});
+    await dbsrv.mongo_users().updateOne({_id: user._id}, {'$set': {ssh: key}});
     let fid = new Date().getTime();
     // user.ssh = escapeshellarg(req.body.ssh);
     try {
@@ -1485,7 +1432,7 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
 
-    await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.params.id , 'logs': [ user.uid + '.' + fid + '.update']});
+    await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'SSH key update: ' + req.params.id , 'logs': [ user.uid + '.' + fid + '.update']});
 
     user.fid = fid;
     res.send(user);
@@ -1499,7 +1446,7 @@ router.get('/user/:id/usage', function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
@@ -1517,7 +1464,7 @@ router.get('/user/:id/usage', function(req, res){
 // Update user info
 router.put('/user/:id', async function(req, res) {
 
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
@@ -1526,18 +1473,27 @@ router.put('/user/:id', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if (!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
-    }
-    else {
-        session_user.is_admin = false;
-    }
-    let user = await utils.mongo_users().findOne({uid: req.params.id});
+
+    session_user.is_admin = isadmin;
+
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
 
     if(!user){
         res.status(401).send({message: 'Not authorized'});
@@ -1627,7 +1583,7 @@ router.put('/user/:id', async function(req, res) {
         user.group = '';
         user.gidnumber = -1;
         if ( !CONFIG.general.disable_user_group) {
-            let group = await utils.mongo_groups().findOne({'name': req.body.group});
+            let group = await dbsrv.mongo_groups().findOne({'name': req.body.group});
 
             if(!group) {
                 res.status(403).send({message: 'Group ' + req.body.group + ' does not exist, please create it first'});
@@ -1657,33 +1613,14 @@ router.put('/user/:id', async function(req, res) {
 
     }
 
-
-    let plugin_call = function(plugin_info, userId, data, adminId){
-        // eslint-disable-next-line no-unused-vars
-        return new Promise(function (resolve, reject){
-            let plugins_modules = utils.plugins_modules();
-            if (plugins_modules[plugin_info.name].update !== undefined) {
-                plugins_modules[plugin_info.name].update(userId, data, adminId).then(function(){
-                    resolve(true);
-                });
-            } else {
-                resolve(true);
-            }
-        });
-    };
-
     try {
-        let plugins_info = utils.plugins_info();
-        await Promise.all(plugins_info.map(function(plugin_info){
-            return plugin_call(plugin_info, user.uid, user, session_user.uid);
-        }));
+        await plgsrv.run_plugins('update', user.uid, user, session_user.uid);
     } catch(err) {
-        logger.error('failed to update user', user, err);
+        logger.error('update errors', err);
     }
 
-
     if(user.status == STATUS_ACTIVE){
-        await utils.mongo_users().replaceOne({_id: user._id}, user);
+        await dbsrv.mongo_users().replaceOne({_id: user._id}, user);
         if(session_user.is_admin) {
             user.is_admin = true;
         }
@@ -1706,14 +1643,14 @@ router.put('/user/:id', async function(req, res) {
         if(session_user.is_admin && CONFIG.general.use_group_in_path) {
             if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                 // If group modification, change home location
-                await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []});
+                await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []});
             }
         }
 
-        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-        let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
+        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'User info modification: ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
         if(users_in_group && users_in_group.length == 0){
-            let oldgroup = await utils.mongo_groups().findOne({name: user.oldgroup});
+            let oldgroup = await dbsrv.mongo_groups().findOne({name: user.oldgroup});
             if(oldgroup){
                 grpsrv.delete_group(oldgroup, session_user.uid);
             }
@@ -1721,27 +1658,21 @@ router.put('/user/:id', async function(req, res) {
 
         user.fid = fid;
         if(user.oldemail!=user.email && !user.is_fake) {
-            notif.modify(user.oldemail, user.email, function() {
-                res.send(user);
-            });
+            await notif.modify(user.oldemail, user.email);
         } else if(userWasFake && !user.is_fake) {
-            notif.add(user.email, function() {
-                res.send(user);
-            });
+            await notif.add(user.email);
         }else if (!userWasFake && user.is_fake) {
-            notif.remove(user.email, function(){
-                res.send(user);
-            });
-        } else {
-            res.send(user);
-        }
+            await notif.remove(user.email);
+        } 
+        res.send(user);
+        return;
     }
     else {
-        await utils.mongo_users().replaceOne({_id: user._id}, user);
-        await utils.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
-        let users_in_group = await utils.mongo_users().find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
+        await dbsrv.mongo_users().replaceOne({_id: user._id}, user);
+        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Update user info ' + req.params.id , 'logs': []});
+        let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': user.oldgroup}, {'group': user.oldgroup}]}).toArray();
         if(users_in_group && users_in_group.length == 0){
-            let oldgroup = await utils.mongo_groups().findOne({name: user.oldgroup});
+            let oldgroup = await dbsrv.mongo_groups().findOne({name: user.oldgroup});
             if(oldgroup){
                 await grpsrv.delete_group(oldgroup, session_user.uid);
             }
@@ -1751,24 +1682,6 @@ router.put('/user/:id', async function(req, res) {
     }
 });
 
-router.get('/project/:id/users', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
-    }
-    if(! utils.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
-    }
-    let users_in_project = await utils.mongo_users().find({'projects': req.params.id}).toArray();
-    res.send(users_in_project);
-    res.end();
-});
 
 
 router.post('/user/:id/project/:project', async function(req, res){
@@ -1776,20 +1689,44 @@ router.post('/user/:id/project/:project', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
+    if(! sansrv.sanitizeAll([req.params.id, req.params.project])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+    let newproject = req.params.project;
+    let uid = req.params.id;
 
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send({message: 'Not authorized'});
+    let session_user = null;
+    let isadmin = false;
+    let project = null;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+        project = await dbsrv.mongo_projects().findOne({id:newproject});
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
         res.end();
         return;
     }
 
-    let newproject = req.params.project;
-    let uid = req.params.id;
+    if(!session_user) {
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if (!project) {
+        res.status(404).send({message: 'Project not found'});
+        res.end();
+        return;
+    }
+
+    if(!isadmin && session_user.uid != project.owner ) {
+        res.status(401).send({message: 'Not authorized'});
+        res.end();
+        return;
+    }
 
     try {
         await usrsrv.add_user_to_project(newproject, uid, session_user.uid);
@@ -1816,63 +1753,62 @@ router.delete('/user/:id/project/:project', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id, req.params.project])) {
+    if(! sansrv.sanitizeAll([req.params.id, req.params.project])) {
         res.status(403).send({message: 'Invalid parameters'});
-        return;
-    }
-
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-
-    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
-        res.status(401).send({message: 'Not authorized'});
-        res.end();
         return;
     }
     let oldproject = req.params.project;
     let uid = req.params.id;
-    let fid = new Date().getTime();
-    let user = await utils.mongo_users().findOne({uid: uid});
-    if(! user) {
-        res.status(404).send({message: 'User ' + uid + ' not found'});
-        res.end();
-        return;
-    }
-    let project = await utils.mongo_projects().findOne({id:oldproject});
-    if(!project){
-        logger.info('project not found', oldproject);
-        res.status(500).send({message: 'Error, project not found'});
-        res.end();
-        return;
-    }
-    if(uid === project.owner && ! req.query.force){
-        res.status(403).send({message: 'Cannot remove project owner. Please change the owner before deletion'});
-        res.end();
-        return;
-    }
-    let tempprojects = [];
-    for(let g=0; g < user.projects.length; g++){
-        if(oldproject != user.projects[g]) {
-            tempprojects.push(user.projects[g]);
-        }
-    }
+    let force = (req.query.force) ? true : false;
+
+    let session_user = null;
+    let isadmin = false;
+    let project = null;
     try {
-        await utils.mongo_users().updateOne({_id: user._id}, {'$set': { projects: tempprojects}});
-    } catch(err) {
-        res.status(403).send({message: 'Could not update user'});
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+        project = await dbsrv.mongo_projects().findOne({id:oldproject});
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
         res.end();
-        return;
-    }
-    try {
-        let created_file = await filer.project_remove_user_from_project(project, user, fid);
-        logger.info('File Created: ', created_file);
-    } catch(error){
-        logger.error('Remove User from Project Failed for: ' + oldproject, error);
-        res.status(500).send({message: 'Remove from Project Failed'});
         return;
     }
 
-    await utils.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'remove user ' + req.params.id + ' from project ' + oldproject , 'logs': []});
-    res.send({message: 'User removed from project', fid: fid});
+    if (!session_user) {
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if (!project) {
+        res.status(404).send({message: 'Project not found'});
+        res.end();
+        return;
+    }
+
+    if(!isadmin && session_user.uid != project.owner && session_user.uid != uid) {
+        res.status(401).send({message: 'Not authorized'});
+        res.end();
+        return;
+    }
+
+    try {
+        await usrsrv.remove_user_from_project(oldproject, uid, session_user.uid, force);
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
+    }
+
+    res.send({message: 'User removed from project'});
     res.end();
 });
 
@@ -1881,21 +1817,30 @@ router.get('/list/:list', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.list])) {
+    if(! sansrv.sanitizeAll([req.params.list])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
-    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!session_user || !isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
     let list_name = req.params.list;
-    notif.getMembers(list_name, function(members) {
-        res.send(members);
-        return;
-    });
+    let members = await notif.getMembers(list_name);
+    return members;
 });
 
 
@@ -1904,16 +1849,25 @@ router.get('/lists', async function(req, res){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let session_user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
 
-    if(!session_user || GENERAL_CONFIG.admin.indexOf(session_user.uid) < 0){
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!session_user || !isadmin){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    notif.getLists(function(listOfLists) {
-        res.send(listOfLists);
-        return;
-    });
+    let listOfLists = await notif.getLists();
+    return listOfLists;
 });
 
 module.exports = router;

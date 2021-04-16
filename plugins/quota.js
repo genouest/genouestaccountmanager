@@ -1,10 +1,12 @@
 /* eslint-disable no-console */
-var CONFIG = require('config');
-var http = require('http');
+const http = require('http');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
 
 
-var Promise = require('promise');
+const Promise = require('promise');
 
 
 var get_quota = function(quota) {
