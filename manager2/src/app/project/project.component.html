@@ -18,9 +18,15 @@
           </div>
 
           <div class="form-group row col-sm-8">
-            <label for="new_project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
-            <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+              <label for="new_project_size">Size (GB)</label>
+              <input placeholder="project size in GB" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+              <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+          </div>
+
+          <div class="form-group row col-sm-8">
+              <label for="new_project_cpu">Cpu (Hour)</label>
+              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
+              <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
           <div class="form-group row col-sm-8">
@@ -69,7 +75,8 @@
                 <th>Owner</th>
                 <th *ngIf="!config.project || config.project.enable_group">Group</th>
                 <th>Path</th>
-                <th>Size (Go)</th>
+                <th>Size (GB)</th>
+                <th>Cpu (Hour)</th>
                 <th>Creation</th>
                 <th>Expiration</th>
                 <th></th>
@@ -82,6 +89,7 @@
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
                 <td>{{project.size}}</td>
+                <td>{{project.cpu}}</td>
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
                 <td>
@@ -166,10 +174,16 @@
               <td>{{selectedProject.path}}</td>
             </tr>
             <tr>
-              <td><b>Size</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
-              </td>
-              <td>{{selectedProject.size}} Gb</td>
+                <td><b>Size</b>&nbsp;
+                    <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                </td>
+                <td>{{selectedProject.size}} GB</td>
+            </tr>
+            <tr>
+                <td><b>Cpu</b>&nbsp;
+                    <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
+                </td>
+                <td>{{selectedProject.cpu}} Hour</td>
             </tr>
             <tr>
               <td><b>Creation</b>&nbsp;
