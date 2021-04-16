@@ -9,6 +9,17 @@
 
         <div class="modal-body">
           <div class="form-group row col-sm-8">
+            <label for="new_project_dmpid">DmpID&nbsp;
+              <span style="color:blue">(Optional)&nbsp;</span>
+            </label>
+            <input placeholder="insert key" type="text" id="new_project_dmpid" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.dmpid" class="form-control"/>
+            <small id="nameHelp" class="form-text text-muted">Allows us to link your project to your DMP hosted by <a href="https://dmp.opidor.fr/" target="_blank">DMP OPIDoR</a></small>
+            <button type="button" class="btn btn-outline-primary" (click)="get_dmp(new_project.dmpid)">GetDMP</button>
+            <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
+            <div *ngIf="dmp_msg" class="alert alert-info">{{dmp_msg}}</div>
+          </div>
+
+          <div class="form-group row col-sm-8">
             <label for="new_project_id">Name&nbsp;
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
@@ -28,7 +39,7 @@
               <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
             </label>
             <input placeholder="Ex : CNRS" type="text" id="new_project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
-            <small id="orgaHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+            <small id="orgaHelp" class="form-text text-muted"><i>Optional, for information only. If several organisms are financing your project, please separate the names with a comma (Example: CNRS,INRAE,INSERM)</i></small>
           </div>
 
           <div class="form-group row col-sm-12">
@@ -205,6 +216,13 @@
         </table>
       </div>
     </div>
+  </div>
+  <div *ngIf="selectedProject.dmp_linked" class="card bg-light">
+    <div class="card-header" (click)="display_dmp_to_user()">Dmp data</div>
+    <div *ngIf="dmp_visible"class="card-body">
+      <ngx-json-viewer [json]="dmp" [expanded]="false"></ngx-json-viewer>
+    </div>
+
   </div>
   <div class="card bg-light">
     <div class="card-header">

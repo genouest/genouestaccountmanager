@@ -239,3 +239,44 @@ button {
     background-color: #d9edf7;
     border-color: #bce8f1;
 }
+
+.dmp-badge {
+    border-radius:2px;
+    padding:.25em .5rem;
+    text-transform:uppercase;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.3px
+   }
+
+.dmp-badge.status-Linked {
+background:#c8e6c9;
+color:#256029
+}
+
+.dmp-badge.status-Legacy {
+background:#ffcdd2;
+color:#c63737
+}
+
+.form-group input[type="checkbox"] {
+    display: none;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span {
+    width: 20px;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span:first-child {
+    display: none;
+}
+.form-group input[type="checkbox"] + .btn-group > label span:last-child {
+    display: inline-block;   
+}
+
+.form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
+    display: inline-block;
+}
+.form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
+    display: none;   
+}

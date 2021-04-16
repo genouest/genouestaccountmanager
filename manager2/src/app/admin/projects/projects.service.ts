@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+// import { HttpsClient, HttpsParams } from '@angular/common/https';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
 import { Observable } from 'rxjs';
@@ -201,4 +202,31 @@ export class ProjectsService {
         );
     }
 
+    pingDmpDatabase(): Observable<any> {
+        // let user = this.authService.profile;
+        console.log("pinging")
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/dmp/ping/',
+            httpOptions
+        );
+    }
+
+    fetch_dmp(dmpid: string): Observable<any> {
+        //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
+        // let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/dmp/' + dmpid,
+            httpOptions
+        );
+        }
 }

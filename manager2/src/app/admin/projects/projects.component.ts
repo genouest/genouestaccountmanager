@@ -30,6 +30,7 @@ export class ProjectsComponent implements OnInit {
     add_project_error_msg: string
 
     pending_projects: any[]
+    dmp_statuses: any[]
     projects: any[]
     groups: any[]
     all_users: any[]
@@ -85,6 +86,12 @@ export class ProjectsComponent implements OnInit {
             access: 'Group',
             path: ''
         }
+        
+        this.dmp_statuses = [
+            {name: 'Linked', value: 'linked'},
+            {name: 'Legacy', value: 'legacy'},
+        ]
+            
 
         this.project_list(true);
         this.pending_list(true);
@@ -157,6 +164,8 @@ export class ProjectsComponent implements OnInit {
             'access': this.new_project.access,
             'orga': this.new_project.orga,
             'path': this.new_project.path,
+            'dmpid': this.new_project.dmpid,
+            'dmp_linked': (this.new_project.dmp_status=="Linked"),
             'expire': new Date(this.new_project.expire).getTime()}
                                ).subscribe(
                                    resp => {
