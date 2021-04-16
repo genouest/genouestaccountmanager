@@ -12,6 +12,7 @@ before_install:
 
 script:
   - eslint routes
+  - eslint core
   - npm install -g mocha
   - docker build -t osallou/my .
   - cd $TRAVIS_BUILD_DIR/cron && docker build -f Dockerfile-cron -t osallou/mycron .

@@ -1,10 +1,13 @@
-var CONFIG = require('config');
-var monk = require('monk'),
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
+const monk = require('monk'),
     db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db),
     users_db = db.get('users'),
     events_db = db.get('events');
 
-var Promise = require('promise');
+const Promise = require('promise');
 
 
 var volumes = [];
