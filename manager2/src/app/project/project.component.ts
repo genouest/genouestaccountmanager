@@ -215,7 +215,7 @@ export class ProjectComponent implements OnInit {
                         'id': resp.data.data.project.acronym,
                         'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
                         'orga': funders,
-                        'size': resp.data.data.researchOutput[0].dataStorage.totalVolume,
+                        'size': resp.data.data.researchOutput[0].dataStorage.estimatedVolume,
                         'dmpid': this.new_project.dmpid,
                     };
 
