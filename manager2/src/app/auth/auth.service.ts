@@ -81,7 +81,7 @@ export class AuthService {
                         this.handleLoginCallback(resp.body['user']);
                         this.authenticated = true;
                         this.$authStatus.next(true);
-                        resolve();
+                        resolve(true);
                         this.router.navigate(['/user/' + resp.body['user']['uid']]);
                     },
                     err => {

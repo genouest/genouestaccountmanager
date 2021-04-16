@@ -24,7 +24,7 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input placeholder="project name" type="text" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <input placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat several projects, it is quite possible for you to request more project spaces.</i></small>
           </div>
 
@@ -60,7 +60,7 @@
 
   </div>
 </div>
-<button *ngIf="session_user && ! session_user.is_admin" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
+<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -71,7 +71,7 @@
           <p-table #dtp [value]="projects"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">
@@ -81,7 +81,9 @@
                 <th *ngIf="!config.project || config.project.enable_group">Group</th>
                 <th>Path</th>
                 <th>Size (Go)</th>
+                <th>Creation</th>
                 <th>Expiration</th>
+                <th></th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-project>
@@ -91,7 +93,12 @@
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
                 <td>{{project.size}}</td>
+                <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
+                <td>
+                    <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
+                    <button *ngIf="session_user.is_admin" type="button" class="btn btn-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>
+                </td>
               </tr>
             </ng-template>
           </p-table>
@@ -102,8 +109,8 @@
 <div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
 <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
-<hr *ngIf="selectedProject && ! session_user.is_admin">
-<div *ngIf="selectedProject && ! session_user.is_admin">
+<hr *ngIf="selectedProject">
+<div *ngIf="selectedProject">
   <div class="well">
     <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
@@ -136,6 +143,7 @@
       </form>
     </div>
   </div>
+
   <div class="card bg-light">
     <div class="card-header">
       <h3>Project overview</h3>
@@ -173,6 +181,12 @@
                 <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
               </td>
               <td>{{selectedProject.size}} Gb</td>
+            </tr>
+            <tr>
+              <td><b>Creation</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Creation date" tooltip></span>
+              </td>
+              <td>{{selectedProject.created_at | date}}</td>
             </tr>
             <tr>
               <td><b>Expiration</b>&nbsp;
@@ -219,7 +233,7 @@
           <p-table #dtu [value]="users"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">

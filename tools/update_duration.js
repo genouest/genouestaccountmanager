@@ -1,5 +1,5 @@
 const conf = require('../routes/conf.js');
-const utils = require('../routes/utils.js');
+const utils = require('../core/utils.js');
 
 
 async function update_duration () {

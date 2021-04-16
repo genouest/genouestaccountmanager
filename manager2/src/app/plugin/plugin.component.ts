@@ -31,7 +31,7 @@ export class GomailPluginComponent extends BasePluginComponent implements OnInit
     template: `
 <div *ngIf="data">
 <div *ngIf="loading">Loading...</div>
-<div class="alert alert-info">Using this button, you can set your home, omaha-beach and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
+<div class="alert alert-info">Using this button, you can set your home and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
 = "blank" >data-access </a> for easy access</div>
 
 <div style="text-align:center;"><button (click)="sendData()" type="button"  class="btn btn-primary">Update</button></div><br>
