@@ -1840,7 +1840,8 @@ router.get('/list/:list', async function(req, res){
     }
     let list_name = req.params.list;
     let members = await notif.getMembers(list_name);
-    return members;
+    res.send(members);
+    res.end();
 });
 
 
@@ -1867,7 +1868,8 @@ router.get('/lists', async function(req, res){
         return;
     }
     let listOfLists = await notif.getLists();
-    return listOfLists;
+    res.send(listOfLists);
+    res.end();
 });
 
 module.exports = router;
