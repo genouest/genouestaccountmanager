@@ -334,6 +334,7 @@ async function add_user_to_project(newproject, uid, action_owner) {
             '#UID#': user.uid,
             '#NAME#': project.id,
             '#SIZE#': project.size,
+            '#CPU#': project.cpu,
             '#DESC#': project.description,
             '#PATH#': project.path
         });

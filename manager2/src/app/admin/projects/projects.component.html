@@ -35,8 +35,12 @@
           </select>
         </div>
         <div class="col-sm-2">
-          <label for="project_size">Size (GB)</label>
-          <input placeholder="project size in G" type="number" id="project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+            <label for="project_size">Size (GB)</label>
+            <input placeholder="project size in GB" type="number" id="project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+            <label for="project_cpu">Cpu (Hour)</label>
+            <input placeholder="project cpu in Hour" type="number" id="project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
         </div>
         <div class="col-sm-2">
           <label for="project_expire">Expiration date</label>
@@ -105,7 +109,8 @@
                 <tr>
                   <th>Project</th>
                   <th>User</th>
-                  <th>Size (Go)</th>
+                  <th>Size (GB)</th>
+                  <th>Cpu (Hour)</th>
                   <th>orga</th>
                   <th>Action</th>
                   <th></th>
@@ -116,6 +121,7 @@
                   <td>{{pending.id}}</td>
                   <td>{{pending.owner}}</td>
                   <td>{{pending.size}}</td>
+                  <td>{{pending.cpu}}</td>
                   <td>{{pending.orga}}</td>
                   <td>
                     <div class="btn-group">
@@ -164,7 +170,7 @@
           <th>Owner</th>
           <th *ngIf="!config.project || config.project.enable_group">Group</th>
           <th>Path</th>
-          <th>Size (Go)</th>
+          <th>Size (GB)</th>
           <th>Creation</th>
           <th>Expiration</th>
         </tr>

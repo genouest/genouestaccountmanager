@@ -144,6 +144,7 @@ router.post('/project', async function(req, res){
             'owner': req.body.owner,
             'group': req.body.group,
             'size': req.body.size,
+            'cpu': req.body.cpu,
             'expire': req.body.expire,
             'description': req.body.description,
             'path': req.body.path,
@@ -254,6 +255,7 @@ router.post('/project/:id', async function(req, res){
             'owner': req.body.owner,
             'group': req.body.group,
             'size': req.body.size,
+            'cpu': req.body.cpu,
             'expire': req.body.expire,
             'description': req.body.description,
             'access': req.body.access,
@@ -349,6 +351,7 @@ router.post('/ask/project', async function(req, res){
             'owner': user.uid,
             'group': user.group,
             'size': req.body.size,
+            'cpu': req.body.cpu,
             'description': req.body.description,
             'orga': req.body.orga
         }, user);

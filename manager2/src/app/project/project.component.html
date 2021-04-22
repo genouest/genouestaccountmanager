@@ -18,9 +18,15 @@
           </div>
 
           <div class="form-group row col-sm-8">
-            <label for="new_project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
-            <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+              <label for="new_project_size">Size (GB)</label>
+              <input placeholder="project size in GB" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+              <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+          </div>
+
+          <div class="form-group row col-sm-8">
+              <label for="new_project_cpu">Cpu (Hour)</label>
+              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
+              <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
           <div class="form-group row col-sm-8">
@@ -49,7 +55,7 @@
 
   </div>
 </div>
-<button *ngIf="session_user && ! session_user.is_admin" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
+<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -69,7 +75,8 @@
                 <th>Owner</th>
                 <th *ngIf="!config.project || config.project.enable_group">Group</th>
                 <th>Path</th>
-                <th>Size (Go)</th>
+                <th>Size (GB)</th>
+                <th>Cpu (Hour)</th>
                 <th>Creation</th>
                 <th>Expiration</th>
                 <th></th>
@@ -82,9 +89,13 @@
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
                 <td>{{project.size}}</td>
+                <td>{{project.cpu}}</td>
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
-                <td><button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button></td>
+                <td>
+                    <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
+                    <button *ngIf="session_user.is_admin" type="button" class="btn btn-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>
+                </td>
               </tr>
             </ng-template>
           </p-table>
@@ -92,14 +103,14 @@
   </div>
 </div>
 
+<div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
+<div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
-<hr *ngIf="selectedProject && ! session_user.is_admin">
-<div *ngIf="selectedProject && ! session_user.is_admin">
+<hr *ngIf="selectedProject">
+<div *ngIf="selectedProject">
   <div class="well">
     <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
-  <div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
-  <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
   <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">
     <div class="card-header" (click)="manager_visible=!manager_visible" style="cursor: pointer;">
       <h2>Management console</h2>
@@ -163,10 +174,16 @@
               <td>{{selectedProject.path}}</td>
             </tr>
             <tr>
-              <td><b>Size</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
-              </td>
-              <td>{{selectedProject.size}} Gb</td>
+                <td><b>Size</b>&nbsp;
+                    <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                </td>
+                <td>{{selectedProject.size}} GB</td>
+            </tr>
+            <tr>
+                <td><b>Cpu</b>&nbsp;
+                    <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
+                </td>
+                <td>{{selectedProject.cpu}} Hour</td>
             </tr>
             <tr>
               <td><b>Creation</b>&nbsp;
