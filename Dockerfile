@@ -3,6 +3,8 @@ COPY manager2 /root/genouestaccountmanager/manager2
 RUN npm install -g @angular/cli@10.2.0
 ARG APIURL
 ARG SENTRY
+ARG UITHEME=cerulean
+RUN cd /root/genouestaccountmanager/manager2/src/assets/css && cp ${UITHEME}.min.css theme.css
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
 RUN cd /root/genouestaccountmanager/manager2 && npm ci && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules && rm -f dist/my-ui/*.gz &&  npm run compress || true
