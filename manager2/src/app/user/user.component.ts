@@ -60,13 +60,12 @@ export class UserExtraComponent implements OnInit {
                 for(let i=0;i<extras.length;i++) {
                     extras[i].value = extras[i].choices[0][0];
                     if (extras[i].multiple) {
-                        extras[i].value = [extras[i].choices[0]][0];
+                        extras[i].value = [extras[i].choices[0][0]];
                     }
                     if(user_extras[extras[i].title]) {
                         extras[i].value = user_extras[extras[i].title];
                     }
                 }
-
                 this.extras = extras;
                 console.log('extras', this.extras);
             },
@@ -74,8 +73,35 @@ export class UserExtraComponent implements OnInit {
         )
     }
 
+
     extraChange(title, data) {
-        console.debug('extras changed', title, data);
+        console.debug('event', data.target.checked, data.target.value)
+        for(let i=0;i<this.extras.length;i++) {
+            let extra = this.extras[i];
+            if(extra.title == title) {
+                if(extra.multiple) {
+                    let cur_values = [...extra.value];
+                    let index = cur_values.indexOf(data.target.value);
+                    if(data.target.checked) {
+                        // add
+                        if (index < 0) {
+                            cur_values.push(data.target.value);
+                        }
+                    } else {
+                        // remove
+                        if (index >= 0) {
+                            cur_values.splice(index, 1)
+                        }
+                    }
+                    this.extras[i].value = cur_values;
+                } else {
+                    extra.value = data.target.value;
+                }
+                break;
+            }
+        }
+
+        console.debug('extras changed', title, this.extras);
         this.extraValues.emit(this.extras);
     }
 }
