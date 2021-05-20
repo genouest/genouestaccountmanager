@@ -113,6 +113,13 @@
          "cmd_address": ""
      }
   },
+  "listmonk": {
+         "host": "https://lists.genouest.org",
+         "user": "listmonk",
+         "password": "XXXXXXX",
+         "optin": ["genouest-com", "genouest-system"]
+         "optout": ["genouest-com"]
+  },
   "gomail": {
     "host": "",
     "api_root": "",

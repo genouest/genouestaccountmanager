@@ -71,7 +71,8 @@ module.exports = {
         return [];
     },
 
-    add: async function(email) {
+    // eslint-disable-next-line no-unused-vars
+    add: async function(email, uid) {
         if (CONFIG.nodemailer.list) {
             if(email===undefined ||email===null || email=='' || ! mail_set) {
                 return;
@@ -122,7 +123,8 @@ module.exports = {
         return;
     },
 
-    modify: async function(oldemail, newemail) {
+    // eslint-disable-next-line no-unused-vars
+    modify: async function(oldemail, newemail, uid) {
         logger.debug('Update email ' + oldemail + ' ==> ' + newemail);
         if (newemail===undefined ||newemail===null || newemail=='' || ! mail_set ) {
             return;
