@@ -1,6 +1,5 @@
 
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { Pipe, PipeTransform } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/user/user.service';
 
 @Component({

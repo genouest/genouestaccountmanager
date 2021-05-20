@@ -1,10 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/user/user.service';
 import { ConfigService } from 'src/app/config.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import * as latinize from 'latinize'
-import { UserExtraComponent } from 'src/app/user/user.component';
 
 @Component({
     selector: 'app-register',
