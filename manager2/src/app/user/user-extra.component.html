@@ -1,0 +1,14 @@
+<div *ngFor="let extra of extras">
+    <div *ngIf="!extra.multiple" class="form-group">
+        <label>{{extra.description || extra.title}}</label>
+        <select [ngModelOptions]="{standalone: true}" [(ngModel)]="extra.value" (ngModelChange)="extraChange(extra.title, $event)" class="form-control" required>
+            <option *ngFor="let extra of extra.choices" [value]=extra[0]>{{extra[1]}}</option>
+        </select>
+    </div>
+    <div *ngIf="extra.multiple" class="form-group">
+        <label>{{extra.description || extra.title}}</label>
+        <select multiple  [ngModelOptions]="{standalone: true}" [(ngModel)]="extra.value" (ngModelChange)="extraChange(extra.title, $event)" class="form-control" required>
+            <option *ngFor="let extra_option of extra.choices" [value]="extra_option[0]">{{extra_option[1]}}</option>
+        </select>
+    </div>
+</div>

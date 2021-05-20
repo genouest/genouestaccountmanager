@@ -53,6 +53,7 @@
     "plugin_script_dir": "/tmp/scripts",
     "user_extra_dirs": []
   },
+  "registration": [],
   "enable_ui": {
     "messages": true,
     "databases": true,

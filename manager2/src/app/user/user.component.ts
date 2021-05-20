@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { UserService } from './user.service'
 import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
@@ -25,6 +25,60 @@ import { FlashMessagesService } from '../utils/flash/flash.component';
   }
   }
 */
+
+@Component({
+    selector: 'app-user-extra',
+    templateUrl: './user-extra.component.html',
+    styleUrls: ['./user-extra.component.css']
+})
+export class UserExtraComponent implements OnInit {
+    @Input() user: any
+    @Output() extraValues = new EventEmitter<any>();
+    config: any
+    //@ViewChild('extras') extras: any
+    extras: any
+
+    constructor(
+        private configService: ConfigService,
+    ) {
+        this.config = {}
+        this.extras = []
+    }
+    ngOnInit() {
+        this.extraChange = this.extraChange.bind(this);
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                let extras =resp.registration || [];
+                let user_extras = {};
+                if (this.user && this.user.extra_info) {
+                    for(let i=0;i<this.user.extra_info.length;i++) {
+                        let extra_info = this.user.extra_info[i];
+                        user_extras[extra_info.title] = extra_info.value;
+                    }
+                }
+                for(let i=0;i<extras.length;i++) {
+                    extras[i].value = extras[i].choices[0][0];
+                    if (extras[i].multiple) {
+                        extras[i].value = [extras[i].choices[0]][0];
+                    }
+                    if(user_extras[extras[i].title]) {
+                        extras[i].value = user_extras[extras[i].title];
+                    }
+                }
+
+                this.extras = extras;
+                console.log('extras', this.extras);
+            },
+            err => console.log('failed to get config')
+        )
+    }
+
+    extraChange(title, data) {
+        console.debug('extras changed', title, data);
+        this.extraValues.emit(this.extras);
+    }
+}
 
 
 @Component({
@@ -163,6 +217,16 @@ export class UserComponent implements OnInit {
         return res;
     }
 
+    onExtraValue(extras: any) {
+        console.debug('extras updated', extras);
+        let new_extra = [];
+        for(let i=0;i<extras.length;i++){
+            let extra = extras[i];
+            new_extra.push({'title': extra.title, 'value': extra.value})
+        }
+        this.user.extra_info = new_extra;
+    }
+
     initUser = function() {
         this.sub = this.route.params.subscribe(params => {
             this.pluginService.list().subscribe(
@@ -196,6 +260,7 @@ export class UserComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.onExtraValue = this.onExtraValue.bind(this);
         this.web_delete = this.web_delete.bind(this);
         this.delete_secondary_group = this.delete_secondary_group.bind(this);
         this.db_delete = this.db_delete.bind(this);
