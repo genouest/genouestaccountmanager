@@ -1,15 +1,19 @@
-var express = require('express');
-var router = express.Router();
-var CONFIG = require('config');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
 
-var utils = require('./utils');
+const express = require('express');
+var router = express.Router();
+
+const dbsrv = require('../core/db.service.js');
+const sansrv = require('../core/sanitize.service.js');
+const rolsrv = require('../core/role.service.js');
 
 router.get('/tags', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let tags = await utils.mongo_tags().find({}).toArray();
+    let tags = await dbsrv.mongo_tags().find({}).toArray();
     let tagList = [];
     if (!tags) {
         return {'tags': tagList};
@@ -27,18 +31,24 @@ router.post('/tags/:kind/:id', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    if(! utils.sanitizeAll([req.params.id])) {
+    if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
     let tags = req.body.tags;
-    let session_user= await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
-    if(CONFIG.general.admin.indexOf(session_user.uid) >= 0) {
-        session_user.is_admin = true;
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user= await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
     }
-    else {
-        session_user.is_admin = false;
-    }
+    session_user.is_admin = isadmin;
+
     if(req.params.kind != 'group' && req.params.kind != 'user') {
         res.status(404).send({message: 'Not found'});
         return;
@@ -50,16 +60,16 @@ router.post('/tags/:kind/:id', async function(req, res) {
     }
 
     tags.forEach(tag => {
-        utils.mongo_tags().updateOne({'name': tag}, {'name': tag}, {upsert: true});
+        dbsrv.mongo_tags().updateOne({'name': tag}, {'name': tag}, {upsert: true});
     });
 
     if(req.params.kind == 'group') {
-        await utils.mongo_groups().updateOne({'name': req.params.id} , {'$set': {'tags': tags}});
+        await dbsrv.mongo_groups().updateOne({'name': req.params.id} , {'$set': {'tags': tags}});
         res.send({message: 'tags updated'});
         return;
     }
     if(req.params.kind == 'user') {
-        await utils.mongo_users().updateOne({'uid': req.params.id} , {'$set': {'tags': tags}});
+        await dbsrv.mongo_users().updateOne({'uid': req.params.id} , {'$set': {'tags': tags}});
         res.send({message: 'tags updated'});
         return;
     }

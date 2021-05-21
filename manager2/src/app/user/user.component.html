@@ -207,7 +207,7 @@
               </div>
               <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
               <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
-              <button type="button" class="btn btn-outline-secondary pull-right" (click)="update_info()">Update info</button>
+              <button type="button" class="btn btn-primary pull-right" (click)="update_info()">Update info</button>
           </div>
 
       </div>
@@ -235,7 +235,7 @@
                 </textarea>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-outline-secondary" (click)="add_note()">Add note</button>
+                <button type="button" class="btn btn-primary" (click)="add_note()">Add note</button>
             </div>
         </div>
     </div>
@@ -246,7 +246,7 @@
         </div>
         <div class="card-body">
             <span *ngIf="user.u2f.publicKey" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> U2F</span>
-            <button *ngIf="! user.u2f.publicKey" class="btn btn-outline-secondary" (click)="register_u2f()">Register U2F key</button>
+            <button *ngIf="! user.u2f.publicKey" class="btn btn-primary" (click)="register_u2f()">Register U2F key</button>
             <span *ngIf="u2f">{{u2f}}</span>
         </div>
     </div>
@@ -256,7 +256,7 @@
         </div>
         <div class="card-body">
             <span>{{user.apikey}}</span>
-            <button style="margin-left: 10px;" class="btn btn-outline-secondary" (click)="generate_apikey(user.uid)">Generate</button>
+            <button style="margin-left: 10px;" class="btn btn-primary" (click)="generate_apikey(user.uid)">Generate</button>
         </div>
     </div>
     <div class="card bg-light">
@@ -291,7 +291,7 @@
                         <input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
                     </div>
                 </div>
-                <button type="button" class="btn btn-outline-secondary" (click)="update_password()">Change password</button>
+                <button type="button" class="btn btn-primary" (click)="update_password()">Change password</button>
             </form>
         </div>
     </div>
@@ -321,7 +321,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-outline-secondary" (click)="add_secondary_group()">Add to group</button>
+                <button type="button" class="btn btn-primary" (click)="add_secondary_group()">Add to group</button>
             </div>
             <hr/>
             <div class="table-responsive">
@@ -379,7 +379,7 @@
                       </div>
                     </div>
                     <div class="form-group">
-                        <button type="button" class="btn btn-outline-secondary" (click)="db_add()">Create</button>
+                        <button type="button" class="btn btn-primary" (click)="db_add()">Create</button>
                     </div>
 
                 <div class="table-responsive">
@@ -417,7 +417,7 @@
                                 <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-outline-secondary" (click)="update_ssh()">Add</button>
+                                <button type="button" class="btn btn-primary" (click)="update_ssh()">Add</button>
                             </div>
                         </form>
                     </div>
@@ -434,13 +434,14 @@
                     <div class="alert alert-info" role="alert">
                         When generating a key, public key is automatically added to authorized keys, process takes one minute
                     </div>
+                    <div *ngIf="key_err" class="alert alert-warning alert-dismissible fade show" role="alert">{{key_err}}</div>
                     <div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
-                    <button class="btn btn-outline-secondary" (click)="ssh_new_key()">Generate new key</button>
+                    <button class="btn btn-primary" (click)="ssh_new_key()">Generate new key</button>
                     <hr/>
                     <h4 style="font-weight: normal;">Download</h4>
-                    <button (click)="get_key(user.uid, 'private')" class="btn btn-outline-secondary">private rsa key</button>
-                    <button (click)="get_key(user.uid, 'putty')" class="btn btn-outline-secondary">putty private key</button>
-                    <button (click)="get_key(user.uid, 'public')" class="btn btn-outline-secondary">public key</button>
+                    <button (click)="get_key(user.uid, 'private')" class="btn btn-primary">private rsa key</button>
+                    <button (click)="get_key(user.uid, 'putty')" class="btn btn-primary">putty private key</button>
+                    <button (click)="get_key(user.uid, 'public')" class="btn btn-primary">public key</button>
                 </div>
             </div>
   </div>
@@ -477,7 +478,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-outline-secondary" (click)="web_add()">Declare owned site</button>
+                                <button type="button" class="btn btn-primary" (click)="web_add()">Declare owned site</button>
                             </div>
                         </div>
                         <div>
@@ -541,7 +542,7 @@
                 </textarea>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-outline-secondary" (click)="sendmail()">Send mail</button>
+                <button type="button" class="btn btn-primary" (click)="sendmail()">Send mail</button>
             </div>
 
 

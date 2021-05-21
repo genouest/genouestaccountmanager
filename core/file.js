@@ -1,13 +1,14 @@
 const nunjucks = require('nunjucks');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
 const fs = require('fs');
 const templates_dir = 'templates/' + CONFIG.general.templates;
 const templates_dir_default = 'templates/default';
-
-// Todo: move utils function which manage file content here
-// var utils = require('../routes/utils.js');
 
 // Todo: Manage mail template with nunjuck
 

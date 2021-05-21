@@ -13,61 +13,41 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input placeholder="project name" type="text" id="new_project_id" [ngModelOptions]="{standalone: true}"
-              [(ngModel)]="new_project.id" class="form-control" />
-            <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your
-              name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat
-                several projects, it is quite possible for you to request more project spaces.</i></small>
+            <input placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat several projects, it is quite possible for you to request more project spaces.</i></small>
           </div>
 
           <div class="form-group row col-sm-8">
-            <div class="row col-sm-8"><label for="new_project_dmp">DMP access key </label></div>
-            <div class="row">
-              <div class="col-sm-8">
-                <input placeholder="Paste key" type="string" id="DMP_key" [ngModelOptions]="{standalone: true}"
-                  [(ngModel)]="new_project.dmp_key" class="form-control" />
-                <small id="nameHelp" class="form-text text-muted"><i>Optional, but highly recommended: <a
-                      href="https://dmp.opidor.fr/" target="_blank">Create one</a></i></small></div>
-              <div class="col"><button type="button" class="btn btn-outline-primary"
-                  (click)="ping_dmp_data()">Ping</button></div>
-              <div class="col-sm-8">
-                  <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
-                  <div *ngIf="dmp_msg" class="alert alert-success">{{dmp_msg}}</div>
-                </div>
-            </div>
-
-
+              <label for="new_project_size">Size (GB)</label>
+              <input placeholder="project size in GB" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+              <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
           <div class="form-group row col-sm-8">
-            <label for="new_project_size">Size (GB)</label>
-            <input placeholder="project size in G" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
-            <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+              <label for="new_project_cpu">Cpu (Hour)</label>
+              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
+              <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
           <div class="form-group row col-sm-8">
             <label for="new_project_org">Financing&nbsp;
               <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
             </label>
-            <input placeholder="Ex : CNRS" type="text" id="new_project_org" [ngModelOptions]="{standalone: true}"
-              [(ngModel)]="new_project.orga" class="form-control" />
+            <input placeholder="Ex : CNRS" type="text" id="new_project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
             <small id="orgaHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
           <div class="form-group row col-sm-12">
             <label for="new_project_description">Description</label>
-            <textarea placeholder="A short description for the project" rows="2" id="new_project_description"
-              [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description"
-              class="form-control"></textarea>
+            <textarea placeholder="A short description for the project" rows="2" id="new_project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
           </div>
 
         </div>
 
         <div class="modal-footer">
           <div class="form-group row col-sm-12">
-            <button type="button" class="btn btn-outline-primary" (click)="ask_for_project()" data-dismiss="modal">Ask
-              Admin</button>
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="ask_for_project()" data-dismiss="modal">Ask Admin</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
           </div>
         </div>
       </form>
@@ -75,8 +55,7 @@
 
   </div>
 </div>
-<button *ngIf="session_user && !session_user.is_admin" type="button" class="btn btn-primary" data-toggle="modal"
-  data-target="#ask_project">Request A New Project</button>
+<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -87,7 +66,7 @@
           <p-table #dtp [value]="projects"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">
@@ -96,8 +75,11 @@
                 <th>Owner</th>
                 <th *ngIf="!config.project || config.project.enable_group">Group</th>
                 <th>Path</th>
-                <th>Size (Go)</th>
+                <th>Size (GB)</th>
+                <th>Cpu (Hour)</th>
+                <th>Creation</th>
                 <th>Expiration</th>
+                <th></th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-project>
@@ -107,7 +89,13 @@
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
                 <td>{{project.size}}</td>
+                <td>{{project.cpu}}</td>
+                <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
+                <td>
+                    <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
+                    <button *ngIf="session_user.is_admin" type="button" class="btn btn-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>
+                </td>
               </tr>
             </ng-template>
           </p-table>
@@ -118,8 +106,8 @@
 <div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
 <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
-<hr *ngIf="selectedProject && ! session_user.is_admin">
-<div *ngIf="selectedProject && ! session_user.is_admin">
+<hr *ngIf="selectedProject">
+<div *ngIf="selectedProject">
   <div class="well">
     <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
@@ -129,33 +117,30 @@
     </div>
     <div class="card-body" *ngIf="manager_visible">
       <form role="form" class="user-form form-horizontal">
-        <div class="form-group">
+        <div class="form-group row">
           <div class="col-sm-3">
             <label for="new_user">New project member</label>
-            <input placeholder="User id" id="new_user" type="text" [ngModelOptions]="{standalone: true}"
-              [(ngModel)]="new_user" class="form-control" />
+            <input placeholder="User id" id="new_user" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_user" class="form-control"/>
           </div>
           <div class="col-sm-3">
             <label style="opacity: 0;">Request member</label>
-            <button type="button" class="btn btn-outline-secondary"
-              (click)="request_user(selectedProject, new_user, 'add')">Request member</button>
+            <button type="button" class="btn btn-primary" (click)="request_user(selectedProject, new_user, 'add')">Request member</button>
           </div>
           <div class="col-sm-2">
             <label for="remove_user">Remove project member</label>
-            <select id="remove_user" [ngModelOptions]="{standalone: true}" [(ngModel)]="remove_user"
-              class="form-control">
+            <select id="remove_user"  [ngModelOptions]="{standalone: true}" [(ngModel)]="remove_user" class="form-control">
               <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
             </select>
           </div>
           <div class="col-sm-3">
             <label style="opacity: 0;">Request member removal</label>
-            <button type="button" class="btn btn-outline-secondary"
-              (click)="request_user(selectedProject,remove_user,'remove')">Request member removal </button>
+            <button type="button" class="btn btn-warning"(click)="request_user(selectedProject,remove_user,'remove')">Request member removal </button>
           </div>
         </div>
       </form>
     </div>
   </div>
+
   <div class="card bg-light">
     <div class="card-header">
       <h3>Project overview</h3>
@@ -189,10 +174,22 @@
               <td>{{selectedProject.path}}</td>
             </tr>
             <tr>
-              <td><b>Size</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                <td><b>Size</b>&nbsp;
+                    <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                </td>
+                <td>{{selectedProject.size}} GB</td>
+            </tr>
+            <tr>
+                <td><b>Cpu</b>&nbsp;
+                    <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
+                </td>
+                <td>{{selectedProject.cpu}} Hour</td>
+            </tr>
+            <tr>
+              <td><b>Creation</b>&nbsp;
+                <span class="glyphicon glyphicon-question-sign" title="Creation date" tooltip></span>
               </td>
-              <td>{{selectedProject.size}} Gb</td>
+              <td>{{selectedProject.created_at | date}}</td>
             </tr>
             <tr>
               <td><b>Expiration</b>&nbsp;
@@ -208,8 +205,7 @@
             </tr>
             <tr>
               <td><b>Write permissions</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" data-html="true"
-                  title="Write access<br>Group : all members<br>Data manager : owner" tooltip></span>
+                <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip></span>
               </td>
               <td>{{selectedProject.access}}</td>
             </tr>
@@ -233,7 +229,7 @@
           <p-table #dtu [value]="users"
                       [paginator]="true"
                       [rows]="10"
-                      [showCurrentPageReport]="true" 
+                      [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">

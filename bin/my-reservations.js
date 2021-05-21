@@ -4,13 +4,15 @@
  */
 const program = require('commander');
 
-var CONFIG = require('config');
+const ObjectID = require('mongodb').ObjectID;
 
-var ObjectID = require('mongodb').ObjectID;
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
-var utils = require('../routes/utils');
-
-var winston = require('winston');
+const winston = require('winston');
 const myconsole = new (winston.transports.Console)({
     timestamp: true,
     level: 'info'
@@ -21,7 +23,7 @@ winston.loggers.add('gomngr', {
 
 const logger = winston.loggers.get('gomngr');
 
-var tps = require('../routes/tp.js');
+const tps = require('../routes/tp.js');
 
 if (!console.table){
     require('console.table');
@@ -43,7 +45,7 @@ var processReservation = function(reservation){
         logger.info('create user for reservation ', reservation);
         tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug('set reservation as done', res);
-            utils.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
+            dbsrv.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
             });
         });
@@ -69,7 +71,7 @@ function createReservations(rid) {
             'over': false
         };
     }
-    utils.mongo_reservations().find(filter).toArray().then(function(reservations){
+    dbsrv.mongo_reservations().find(filter).toArray().then(function(reservations){
         if(reservations === undefined || reservations.length == 0){
             logger.info('No pending reservation');
             process.exit(0);
@@ -101,7 +103,7 @@ function removeReservations(rid) {
         };
     }
     logger.info('[INFO] Check for ending reservations');
-    utils.mongo_reservations().find(filter).toArray().then(function(reservations){
+    dbsrv.mongo_reservations().find(filter).toArray().then(function(reservations){
         if(reservations === undefined || reservations.length == 0){
             console.log('[INFO] No pending reservation');
             process.exit(0);
@@ -110,19 +112,19 @@ function removeReservations(rid) {
             console.log('[INFO] Delete accounts for reservation', reservation);
             console.log('[INFO] Reservation expired at ', new Date(reservation.to));
             Promise.all(reservation.accounts.map(function(user){
-                return utils.mongo_users().findOne({'uid': user});
+                return dbsrv.mongo_users().findOne({'uid': user});
             })).then(function(users){
                 return tps.delete_tp_users(users, reservation.group, 'auto');
             }).then(function(){
                 console.log('[INFO] close reservation', reservations);
                 Promise.all(reservations.map(function(reservation){
-                    return utils.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
+                    return dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
                 })).then(function(){
                     process.exit(0);
                 });
             });
         })).then(
-            (result) => { 
+            (result) => {
                 console.debug('something went wrong...', result);
                 process.exit(1);
             }
@@ -142,7 +144,7 @@ program
         if (args.id) {
             filter['_id'] = ObjectID.createFromHexString(args.id);
         }
-        utils.mongo_reservations().find(filter).toArray().then(function(reservations){
+        dbsrv.mongo_reservations().find(filter).toArray().then(function(reservations){
             let displayRes = [];
             for(let i=0;i<reservations.length;i++){
                 let res = reservations[i];
@@ -173,8 +175,8 @@ program
         createReservations(args.id);
     });
 
-utils.init_db().then(() => {
-    utils.load_plugins();
+dbsrv.init_db().then(() => {
+    plgsrv.load_plugins();
     // allow commander to parse `process.argv`
     program.parse(process.argv);
 });

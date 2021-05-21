@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-var notif = require('../routes/notif_gomail.js');
-var Promise = require('promise');
+const notif = require('../core/notif_gomail.js');
+const Promise = require('promise');
 
 // eslint-disable-next-line no-unused-vars
 var activate_user = function(userId, data, adminId){
@@ -21,27 +21,17 @@ var deactivate_user = function(userId, data, adminId){
 };
 
 // eslint-disable-next-line no-unused-vars
-var get_user_info = function(userId, adminId){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        notif.getLists(function(listOfLists) {
-            resolve({'lists': listOfLists, 'newlist': ''});
-            return;
-        });
-    });
+var get_user_info = async function(userId, adminId){
+    let listOfLists = await notif.getLists();
+    return {'lists': listOfLists, 'newlist': ''};
+
 };
 
 // eslint-disable-next-line no-unused-vars
-var set_user_info = function(userId, data, adminId){
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject){
-        notif.create(data.newlist, function() {
-            notif.getLists(function(listOfLists) {
-                resolve({'lists': listOfLists, 'newlist': ''});
-                return;
-            });
-        });
-    });
+var set_user_info = async function(userId, data, adminId){
+    await notif.create(data.newlist);
+    let listOfLists = await  notif.getLists();
+    return {'lists': listOfLists, 'newlist': ''};
 };
 
 

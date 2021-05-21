@@ -109,6 +109,8 @@ export class UserComponent implements OnInit {
     notify_message: string
     notify_err: string
 
+    key_err: string
+
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
@@ -145,6 +147,7 @@ export class UserComponent implements OnInit {
         this.notify_subject = ''
         this.notify_message = ''
         this.notify_err = ''
+        this.key_err = ''
 
     }
 
@@ -370,6 +373,7 @@ export class UserComponent implements OnInit {
         console.log("get key " + key + " for " + user_id)
         this.userService.getSSHKey(user_id, key).subscribe(
             resp => {
+                this.key_err = '';
                 console.log("key = ", resp)
                 let keyName = "id_rsa.pub"
                 if(key == "private") {
@@ -404,7 +408,8 @@ export class UserComponent implements OnInit {
                 }
             },
             err => {
-                console.log("failed to get ssh key", err)
+                console.log("failed to get ssh key", err);
+                this.key_err = err.error;
             }
         )
     }
