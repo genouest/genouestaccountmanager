@@ -44,6 +44,7 @@ export class UserExtraComponent implements OnInit {
         this.config = {}
         this.extras = []
     }
+
     ngOnInit() {
         this.extraChange = this.extraChange.bind(this);
         this.configService.config.subscribe(
