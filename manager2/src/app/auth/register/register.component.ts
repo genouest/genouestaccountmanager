@@ -11,7 +11,7 @@ import * as latinize from 'latinize'
     styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-
+    //@ViewChild('extras') extras: UserExtraComponent
     msg: string
     msgstatus: number = 0
 
@@ -29,6 +29,7 @@ export class RegisterComponent implements OnInit {
     email: string
     ip: string
     why: string
+    extra_info: any[]
 
     agree: boolean
 
@@ -40,6 +41,7 @@ export class RegisterComponent implements OnInit {
     ) { }
 
     ngOnInit() {
+        this.onExtraValue = this.onExtraValue.bind(this)
         this.configService.config.subscribe(
             resp => {
                 this.config = resp ;
@@ -54,6 +56,16 @@ export class RegisterComponent implements OnInit {
             resp => this.ip = resp['ip'],
             err => this.ip = '127.0.0.1'
         )
+    }
+
+    onExtraValue(extras: any) {
+        console.debug('extras updated', extras);
+        let new_extra = [];
+        for(let i=0;i<extras.length;i++){
+            let extra = extras[i];
+            new_extra.push({'title': extra.title, 'value': extra.value})
+        }
+        this.extra_info = new_extra;
     }
 
     update_userid(event, origin) {
@@ -102,7 +114,8 @@ export class RegisterComponent implements OnInit {
             email: this.email,
             ip: this.ip,
             duration: this.duration,
-            why: this.why
+            why: this.why,
+            extra_info: this.extra_info
         }).subscribe(
             resp => {
                 this.msg = resp['message'];

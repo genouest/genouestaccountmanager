@@ -25,6 +25,7 @@ router.get('/conf', async function(req, res){
         'enable_ui': my_conf.enable_ui,
         'duration': Object.keys(my_conf.duration),
         'project': my_conf.project,
+        'registration': my_conf.registration || [],
     };
 
     // should be check on each call

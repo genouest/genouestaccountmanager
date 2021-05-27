@@ -211,6 +211,15 @@
           </div>
 
       </div>
+      <div class="card bg-light" *ngIf="user && user.extra_info">
+      <div class="card-header"><h4>Extra information</h4></div>
+      <div class="card-body">
+        <app-user-extra [user]="user" (extraValues)="onExtraValue($event)"></app-user-extra>
+                      <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
+              <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
+              <button type="button" class="btn btn-primary pull-right" (click)="update_info()">Update info</button>
+      </div>
+      </div>
   </div>
 
   <div class="col-sm-6"*ngIf="panel == 0">
