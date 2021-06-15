@@ -532,8 +532,8 @@ router.post('/dmp/:id', async function (req, res) {
 
     const options = {
         headers: {
-            accept: 'application/json',
-            Authorization: 'Token token=lJbcVHG7Z2wA2mNii2vybA'
+            accept: "application/json",
+            Authorization: "Token token=lJbcVHG7Z2wA2mNii2vybA"
         }
     };
     let resp = await axios.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/1704?research_output_id=18365', options);
