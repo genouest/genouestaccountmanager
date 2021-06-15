@@ -35,6 +35,7 @@ export class ProjectComponent implements OnInit {
     dmp_msg: string;
     dmp_available: boolean;
     dmp_visible: boolean;
+    default_cpu: any
 
     manager_visible: boolean
 
@@ -57,6 +58,7 @@ export class ProjectComponent implements OnInit {
     ) {
         this.config = {}
         this.default_size = 0
+        this.default_cpu = 0
     }
 
     ngOnDestroy(): void {
@@ -85,10 +87,16 @@ export class ProjectComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                if (this.config.project && this.config.project.default_size) {
-                    this.default_size = this.config.project.default_size;
-                    this.new_project.size = this.default_size
+                if (this.config.project) {
+                    if( this.config.project.default_size) {
+                        this.default_size = this.config.project.default_size;
+                    }
+                    if( this.config.project.default_cpu) {
+                        this.default_cpu = this.config.project.default_cpu;
+                    }
                 }
+                this.new_project.size = this.default_size
+                this.new_project.cpu = this.default_cpu
             },
             err => console.log('failed to get config')
         )
