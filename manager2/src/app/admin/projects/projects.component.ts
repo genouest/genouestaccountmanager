@@ -178,7 +178,7 @@ export class ProjectsComponent implements OnInit {
             'orga': this.new_project.orga,
             'path': this.new_project.path,
             'dmpid': this.new_project.dmpid,
-            'dmp_linked': (this.new_project.dmp_status=="Linked"),
+            'dmp_linked': (this.new_project.dmpid != null),
             'expire': new Date(this.new_project.expire).getTime()}
                                ).subscribe(
                                    resp => {
