@@ -543,9 +543,9 @@ router.post('/dmp/outputs/:id', async function (req, res) {
     console.log(resp);
 
 
-    let research_outputs = [];
-    for (r_o in resp.data.data.researchOutput)
-    research_outputs = resp.data
+    // let research_outputs = [];
+    // for (r_o in resp.data.data.researchOutput)
+    // research_outputs = resp.data
     return res.send({ message: 'Dmp found', data: resp.data });
 });
 
