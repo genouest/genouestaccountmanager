@@ -219,11 +219,52 @@ export class ProjectComponent implements OnInit {
         
       }
 
-    get_dmp(dmpid) {
+    get_dmp_research_outputs(dmpid) {
         this.dmp_err_msg = ""
         this.dmp_msg = ""
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
-            this.projectsService.fetch_dmp(dmpid).subscribe(
+            this.projectsService.fetch_dmp_research_outputs(dmpid).subscribe(
+                resp => {
+                    let funders = []
+
+                    let data = resp.data.data.project.funding
+                    console.log(data)
+                    for (data in resp.data.data.project.funding) {
+                        console.log(resp.data.data.project.funding[data])
+                        if (resp.data.data.project.funding[data].fundingStatus == "Approuvé") {
+                            funders.push(resp.data.data.project.funding[data].funder.name)
+                        }
+                        
+
+                    }
+                    this.dmp_msg = resp.message;
+                    this.dmp_available = true;  
+                    this.new_project = {
+                        'id': resp.data.data.project.acronym,
+                        'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
+                        'orga': funders,
+                        'size': resp.data.data.researchOutput[0].dataStorage.estimatedVolume,
+                        'dmpid': this.new_project.dmpid,
+                    };
+
+                },
+                err => {
+                    this.dmp_err_msg = err.error.message
+                    this.dmp_available = false;
+                }
+            )
+        }
+        else {
+            this.dmp_err_msg = "Please enter a valid ID"
+        }
+        
+    }
+
+    get_dmp_fragment(dmpid) {
+        this.dmp_err_msg = ""
+        this.dmp_msg = ""
+        if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
+            this.projectsService.fetch_dmp_fragment(dmpid).subscribe(
                 resp => {
                     let funders = []
 
@@ -262,7 +303,7 @@ export class ProjectComponent implements OnInit {
     
     display_dmp_to_user() {
         this.dmp_visible = !this.dmp_visible;
-        this.projectsService.fetch_dmp(this.selectedProject.dmpid).subscribe(
+        this.projectsService.fetch_dmp_fragment(this.selectedProject.dmpid).subscribe(
             resp => {this.dmp = resp.data;
             console.log(resp.data)},
             err => console.log('dmperr')

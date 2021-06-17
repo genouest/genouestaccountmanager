@@ -509,20 +509,6 @@ router.get('/project/:id/users', async function(req, res){
 
 });
 
-//checks if the DMP OPIDoR API is online
-// router.get('/dmp/ping', async function (req, res) {
-//     let online = this.http.get(GENERAL_CONFIG.dmp.url + '/heartbeat');
-//     if (online['code'] != 200) {
-//         res.status(404).send('Can\'t reach Opidor API');
-//         return;
-//     }
-
-//     let DMP_data = { error: '', ping: true };
-
-//     res.send(DMP_data);
-//     res.end();
-// });
-
 //fetchs a dmp based on his ID, using the dmp OPIDoR API
 router.post('/dmp/:id', async function (req, res) {
     //request to DMP opidor API to get all of the DMP with a json format
@@ -536,26 +522,31 @@ router.post('/dmp/:id', async function (req, res) {
             Authorization: "Token token=lJbcVHG7Z2wA2mNii2vybA"
         }
     };
-    let resp = await axios.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/1704?research_output_id=18365', options);
+    let resp = await axios.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/'+req.params.id + '?research_output_id=18365', options);
     console.log(resp);
     return res.send({ message: 'Dmp found', data: resp.data });
-    // res.end();
+});
 
-    // // if (dmp['code'] != 200) {
-    // //     res.status(404).send('Can\'t reach Opidor API');
-    // //     return;
-    // // }
-    // // res.send({ message: 'Dmp found', data: dmp})
+router.post('/dmp/outputs/:id', async function (req, res) {
+    //request to DMP opidor API to get all of the DMP with a json format
+    //
+    //Keeps only the required data for the project
 
 
-    // if (user.projects.includes(req.params.id) || isadmin) {
+    const options = {
+        headers: {
+            accept: "application/json",
+            Authorization: "Token token=lJbcVHG7Z2wA2mNii2vybA"
+        }
+    };
+    let resp = await axios.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/'+req.params.id + '?research_output_id=18365', options);
+    console.log(resp);
 
-    //     let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
-    //     res.send(users_in_project);
-    //     res.end();
-    //     return;
-    // }
-    // res.status(401).send({message: 'Not authorized'});
+
+    let research_outputs = [];
+    for (r_o in resp.data.data.researchOutput)
+    research_outputs = resp.data
+    return res.send({ message: 'Dmp found', data: resp.data });
 });
 
 
