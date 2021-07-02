@@ -506,6 +506,14 @@ router.get('/project/:id/users', async function(req, res){
         user.projects = [];
     }
 
+    if (user.projects.includes(req.params.id) || isadmin) {
+
+        let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
+        res.send(users_in_project);
+        res.end();
+        return;
+    }
+    res.status(401).send({message: 'Not authorized'});
 
 });
 

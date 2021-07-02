@@ -267,7 +267,7 @@ export class ProjectComponent implements OnInit {
             this.projectsService.fetch_dmp_fragment(dmpid).subscribe(
                 resp => {
                     let funders = []
-
+                    let dmpid = this.new_project.dmpid
                     let data = resp.data.data.project.funding
                     console.log(data)
                     for (data in resp.data.data.project.funding) {
@@ -285,7 +285,7 @@ export class ProjectComponent implements OnInit {
                         'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
                         'orga': funders,
                         'size': resp.data.data.researchOutput[0].dataStorage.estimatedVolume,
-                        'dmpid': this.new_project.dmpid,
+                        'dmpid': dmpid,
                     };
 
                 },
@@ -309,6 +309,7 @@ export class ProjectComponent implements OnInit {
             err => console.log('dmperr')
         );
     }
+    
     convertToPlain(html){
 
         // Create a new div element
