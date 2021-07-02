@@ -87,8 +87,6 @@ export class ProjectComponent implements OnInit {
             err => console.log('failed to get config')
         );
         this.dmp_visible = false;
-        this.dmp_linked = false;
-        if (this.project.dmpid != null) {  this.dmp_linked = true };
         // console.log(this.dmp)
 
     }
@@ -98,6 +96,8 @@ export class ProjectComponent implements OnInit {
             resp => {
                 this.project = resp;
                 console.log(this.project)
+                this.dmp_linked = false;
+                if (this.project.dmpid != null) {  this.dmp_linked = true };
                 this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
