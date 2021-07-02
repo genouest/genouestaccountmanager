@@ -361,7 +361,8 @@ router.post('/ask/project', async function(req, res){
             'size': req.body.size,
             'cpu': req.body.cpu,
             'description': req.body.description,
-            'orga': req.body.orga
+            'orga': req.body.orga,
+            'dmpid': req.body.dmpid,
         }, user);
     } catch(e) {
         logger.error(e);

@@ -105,6 +105,7 @@ export class ProjectComponent implements OnInit {
 
     ask_for_project() {
         // todo: should rename it project_msg
+        console.log(this.new_project)
         this.request_msg = '';
         this.request_err_msg = '';
         this.projectsService.askNew(this.new_project).subscribe(
