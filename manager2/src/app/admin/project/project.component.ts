@@ -25,6 +25,7 @@ export class ProjectComponent implements OnInit {
 
     dmp: any
     dmp_visible:boolean
+    dmp_linked:boolean
 
     new_user_admin: string = ''
     remove_user_admin: string = ''
@@ -51,12 +52,12 @@ export class ProjectComponent implements OnInit {
             description: '',
             access: 'Group',
             path: '',
-            dmp_linked: Boolean,
         }
         this.users = [];
         this.groups = [];
         this.all_users = [];
         this.config = {};
+        
     }
 
     ngOnDestroy(): void {
@@ -86,6 +87,8 @@ export class ProjectComponent implements OnInit {
             err => console.log('failed to get config')
         );
         this.dmp_visible = false;
+        this.dmp_linked = false;
+        if (this.project.dmpid != null) {  this.dmp_linked = true };
         // console.log(this.dmp)
 
     }
