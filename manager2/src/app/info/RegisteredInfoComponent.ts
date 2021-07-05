@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 @Component({
     selector: 'app-info',
     template: `<p>Your account creation has been taken into account.</p>
+<br>
 <p>You will receive an email soon to <b>confirm your email address</b>.</p>
+<p style='color: red'><b> Please check your email and your spam folder ! </b></p>
 <br>
 <p>Once confirmed, administrators will <b>manually validate</b> your account.</p>
 `,
