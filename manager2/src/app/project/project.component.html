@@ -90,6 +90,7 @@
                 <th>Cpu (Hour)</th>
                 <th>Creation</th>
                 <th>Expiration</th>
+                <th>Status</th>
                 <th></th>
               </tr>
             </ng-template>
@@ -103,6 +104,12 @@
                 <td>{{project.cpu}}</td>
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
+                <td><div *ngIf="project.dmpid != null">
+                  <span [class]="'dmp-badge status-linked'">Linked</span>
+                </div>
+                <div *ngIf="project.dmpid == null">
+                  <span [class]="'dmp-badge status-legacy'">Legacy</span>
+                </div></td>
                 <td>
                     <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
                     <button *ngIf="session_user.is_admin" type="button" class="btn btn-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>

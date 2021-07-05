@@ -249,12 +249,12 @@ button {
     letter-spacing:.3px
    }
 
-.dmp-badge.status-Linked {
+.dmp-badge.status-linked {
 background:#c8e6c9;
 color:#256029
 }
 
-.dmp-badge.status-Legacy {
+.dmp-badge.status-legacy {
 background:#ffcdd2;
 color:#c63737
 }
