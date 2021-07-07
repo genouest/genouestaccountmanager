@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -xe
+echo "Start update_project.sh in $0 ..."
 
-/usr/local/bin/num create-project {{ project.id }}
+set -e
 
 /usr/local/bin/num set-quota -sq {{ project.size }}GB {{ project.path }}
 
-# add_project.sh
+echo "End update_project.sh in $0 ..."
