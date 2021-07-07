@@ -1,0 +1,245 @@
+<div class="modal" style="z-index: 1500;" id="ask_bill" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Request a new bill creation</h3>
+            </div>
+
+            <form role="form" class="user-form form-horizonal">
+
+                <div class="modal-body">
+                    <div class="form-group row col-sm-8">
+                        <label for="new_bill_id">Name&nbsp;
+                            <span style="color:red">(required)&nbsp;</span>
+                            <span class="glyphicon glyphicon-question-sign" title="Unique name for the bill" tooltip></span>
+                        </label>
+                        <input placeholder="bill name" type="text" maxlength="42" id="new_bill_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.name" class="form-control"/>
+                        <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a bill name that matches your cluster research project</b>. <i>If you treat several billing, it is quite possible for you to request more bill spaces.</i></small>
+                    </div>
+
+                    <div class="form-group row col-sm-8">
+                        <label for="bill_price">Price&nbsp;
+                            <span style="color:red">(required)&nbsp;</span>
+                            <span class="glyphicon glyphicon-question-sign" title="Price" tooltip> </span>
+                        </label>
+                        <select id="bill_price" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.price" class="form-control">
+                            <option *ngFor="let price of enable_prices" [value]="price.uuid">{{price.label}}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group row col-sm-8">
+                        <label for="new_bill_org">Financing&nbsp;
+                            <span style="color:red">(required)&nbsp;</span>
+                            <span class="glyphicon glyphicon-question-sign" title="Entity financing the bill" tooltip> </span>
+                        </label>
+                        <input placeholder="Ex : CNRS" type="text" id="new_bill_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.orga" class="form-control"/>
+                        <small id="orgaHelp" class="form-text text-muted"><i>Mandatory</i></small>
+                    </div>
+
+                    <div class="form-group row col-sm-12">
+                        <label for="new_bill_description">Description</label>
+                        <textarea placeholder="A short description for the bill" rows="2" id="new_bill_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.description" class="form-control"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-group row col-sm-12">
+                        <button type="button" class="btn btn-primary" (click)="ask_for_bill()" data-dismiss="modal">Ask Admin</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_bill">Request A New Bill</button>
+
+<div class="card bg-light">
+    <div class="card-header">
+        <h3>Billing</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <p-table #dtb [value]="bills"
+                [paginator]="true"
+                [rows]="10"
+                [showCurrentPageReport]="true"
+                [rowsPerPageOptions]="[10,25,50]"
+            >
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Name</th>
+                        <th>Financing</th>
+                        <th>Expiration</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-bill>
+                    <tr>
+                        <td>{{bill.name}}</td>
+                        <td>{{bill.orga}}</td>
+                        <td>{{date_convert(bill.expire_at)}}</td>
+                        <td>{{bill.status}}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary" (click)="show_bill_projects(bill)">Show</button>
+                            <button *ngIf="session_user.is_admin" type="button" class="btn btn-danger" (click)="router.navigate(['/admin/bill/' + bill.uuid])">Admin</button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
+
+<hr *ngIf="selectedBill">
+<div *ngIf="selectedBill">
+    <div class="well">
+        <h4>Bill <b>{{selectedBill.name}}</b></h4>
+    </div>
+
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3>Bill overview</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <td><b>Name</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Bill name" tooltip> </span>
+                            </td>
+                            <td>{{selectedBill.name}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Owner</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Owner uid" tooltip> </span>
+                            </td>
+                            <td>{{selectedBill.owner}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Size</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                            </td>
+                            <td>{{selectedBill.size}} Gb</td>
+                        </tr>
+                        <tr>
+                            <td><b>Cpu</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                            </td>
+                            <td>{{selectedBill.cpu}} Hour</td>
+                        </tr>
+                        <tr>
+                            <td><b>Creation</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Creation date" tooltip></span>
+                            </td>
+                            <td>{{date_convert(selectedBill.created_at)}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Validation</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Validation date" tooltip></span>
+                            </td>
+                            <td>{{date_convert(selectedBill.validate_at)}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Expiration</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Creation date" tooltip></span>
+                            </td>
+                            <td>{{date_convert(selectedBill.expire_at) | date}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Expiration</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Expiration date" tooltip></span>
+                            </td>
+                            <td>{{selectedBill.expire_at | date}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Financing</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Organism financing the bill" tooltip></span>
+                            </td>
+                            <td>{{selectedBill.orga}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Description</b>&nbsp;
+                                <span class="glyphicon glyphicon-question-sign" title="Short bill description" tooltip></span>
+                            </td>
+                            <td>{{selectedBill.description}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
+    <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
+
+    <div class="card bg-light" *ngIf="session_user.uid === selectedBill.owner">
+        <div class="card-header">
+            <h3>Bill project Management</h3>
+        </div>
+        <div class="card-body">
+            <form role="form" class="user-form form-horizontal">
+                <div class="form-group row">
+                    <div class="col-sm-3">
+                        <select id="new_project"  [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project" class="form-control">
+                            <option *ngFor="let project of user_projects" [value]="project.id">{{project.id}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <button type="button" class="btn btn-primary" (click)="add_project()">Add Project</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <select id="old_project"  [ngModelOptions]="{standalone: true}" [(ngModel)]="old_project" class="form-control">
+                            <option *ngFor="let project of bill_projects" [value]="project.id">{{project.id}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <button type="button" class="btn btn-warning" (click)="remove_project()">Remove Project</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card bg-light">
+        <div class="card-header">
+            <h3>Bill Projects</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive table-striped">
+                <p-table #dtp [value]="bill_projects">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Project</th>
+                            <th>Size</th>
+                            <th>Cpu</th>
+                            <th>Owner</th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-prj>
+                        <tr>
+                            <td>{{prj.id}}</td>
+                            <td>{{prj.size}} GB</td>
+                            <td>{{prj.cpu}} Hour</td>
+                            <td>{{prj.owner}}</td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="footer">
+                        <tr>
+                            <td></td>
+                            <td>{{projects_size}}/{{selectedBill.size}}</td>
+                            <td>{{projects_cpu}}/{{selectedBill.cpu}}</td>
+                            <td></td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </div>
+</div>

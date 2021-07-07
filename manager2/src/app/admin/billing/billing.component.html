@@ -1,0 +1,238 @@
+<div class="card-header">
+    <ul class="nav nav-pills card-header-pills">
+        <li class="nav-item" (click)="switchTo(0)">
+            <button class="btn btn-outline-primary nav-link">Bills</button>
+        </li>
+        <li class="nav-item" (click)="switchTo(1)">
+            <button class="btn btn-outline-primary nav-link">Prices</button>
+        </li>
+    </ul>
+</div>
+
+<div class="card bg-light" *ngIf="panel == 1">
+    <div class="card-header">
+        <h3>Price creation</h3>
+    </div>
+    <div class="card-body">
+        <div *ngIf="add_price_msg" class="alert alert-success">{{add_price_msg}}</div>
+        <div *ngIf="add_price_error_msg" class="alert alert-danger">{{add_price_error_msg}}</div>
+        <form role="form" class="user-form form-horizonal">
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    <label for="price_label">Package Label&nbsp;
+                        <span style="color:red">(required)&nbsp;</span>
+                        <span class="glyphicon glyphicon-question-sign" title="Price Package Label" tooltip></span>
+                    </label>
+                    <input placeholder="package label" type="text" id="price_label" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_price.label" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <label for="price_size">Size (GB)&nbsp;</label>
+                    <input placeholder="Storage" type="text" id="price_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_price.size" class="form-control"/>
+                </div>
+
+                <div class="col-sm-2">
+                    <label for="price_cpu">Cpu (Hour)</label>
+                    <input placeholder="Cpu Time" type="text" id="price_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_price.cpu" class="form-control"/>
+                </div>
+
+                <div class="col-sm-2">
+                    <label for="price_cpu">Period (Day)</label>
+                    <input placeholder="Period" type="text" id="price_period" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_price.period" class="form-control"/>
+                </div>
+
+                <div class="col-sm-2">
+                    <label for="price_value">Price (Euros)</label>
+                    <input placeholder="Price" type="text" id="price_value" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_price.value" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <label style="opacity: 0;">Create</label>
+                    <button type="button" class="btn btn-success" (click)="add_price()">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="card bg-light" *ngIf="panel == 1">
+    <div class="card-header">
+        <h3>All Prices</h3>
+    </div>
+    <div class="card-body">
+        <div *ngIf="update_price_msg" class="alert alert-success">{{update_price_msg}}</div>
+        <div *ngIf="update_price_error_msg" class="alert alert-danger">{{update_price_error_msg}}</div>
+        <p-table #dtp [value]="all_prices"
+            [paginator]="true"
+            [rows]="10"
+            [showCurrentPageReport]="true"
+
+            [rowsPerPageOptions]="[10,25,50]"
+            [globalFilterFields]="['label', 'status']"
+            [filterDelay]="0"
+        >
+            <ng-template pTemplate="caption">
+                <div class="table-header">
+                    List of Prices
+                    <span class="p-input-icon-right">
+                        <i class="pi pi-search"></i>
+                        <input pInputText id="search_prices" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Label</th>
+                    <th>Size (GB)</th>
+                    <th>Cpu (Hour)</th>
+                    <th>Period (Day)</th>
+                    <th>Price (Euros)</th>
+                    <th>Enable</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-price>
+                <tr [ngClass]="{'table-success': price.enable, 'table-warning' : !price.enable }">
+                    <td>{{price.label}}</td>
+                    <td>{{price.size}}</td>
+                    <td>{{price.cpu}}</td>
+                    <td>{{price.period}}</td>
+                    <td>{{price.value}}</td>
+                    <td>{{price.enable}}</td>
+                    <td>
+                        <button *ngIf="price.enable" type="button" class="btn btn-warning" (click)="update_price(price.uuid, !price.enable)">Disable</button>
+                        <button *ngIf="!price.enable" type="button" class="btn btn-success" (click)="update_price(price.uuid, !price.enable)">Enable</button>
+                        <button *ngIf="!price.enable" type="button" class="btn btn-danger" (click)="delete_price(price.uuid)">Delete</button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+
+
+<div class="card bg-light" *ngIf="panel == 0">
+    <div class="card-header">
+        <h3>Bill creation</h3>
+    </div>
+    <div class="card-body">
+        <div *ngIf="add_bill_msg" class="alert alert-success">{{add_bill_msg}}</div>
+        <div *ngIf="add_bill_error_msg" class="alert alert-danger">{{add_bill_error_msg}}</div>
+        <form role="form" class="user-form form-horizonal">
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    <label for="bill_price">Price&nbsp;
+                        <span style="color:red">(required)&nbsp;</span>
+                        <span class="glyphicon glyphicon-question-sign" title="Price" tooltip> </span>
+                    </label>
+                    <select id="bill_price" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.price" class="form-control">
+                        <option *ngFor="let price of enable_prices" [value]="price.uuid">{{price.label}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <label for="bill_id">Name&nbsp;
+                        <span style="color:red">(required)&nbsp;</span>
+                        <span class="glyphicon glyphicon-question-sign" title="Unique name for the bill" tooltip></span>
+                    </label>
+                    <input placeholder="bill name" type="text" id="bill_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.name" class="form-control"/>
+                </div>
+                <div class="col-sm-2">
+                    <label for="bill_owner">Owner&nbsp;
+                        <span style="color:red">(required)&nbsp;</span>
+                        <span class="glyphicon glyphicon-question-sign" title="Owner" tooltip> </span>
+                    </label>
+                    <input list="users" id="bill_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.owner" class="form-control">
+                    <datalist id="users">
+                        <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
+                    </datalist>
+                </div>
+                <div class="col-sm-2">
+                    <label for="bill_org">Financing&nbsp;
+                        <span style="color:red">(required)&nbsp;</span>
+                        <span class="glyphicon glyphicon-question-sign" title="Entity financing the bill" tooltip> </span>
+                    </label>
+                    <input placeholder="Ex : CNRS" type="text" id="bill_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.orga" class="form-control"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <label for="bill_description">Description</label>
+                    <textarea placeholder="A short description for the bill" rows="2" id="bill_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_bill.description" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <label style="opacity: 0;">Create</label>
+                    <button type="button" class="btn btn-success" (click)="add_bill()">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="card bg-light" *ngIf="panel == 0">
+    <div class="card-header">
+        <h3>All bills</h3>
+    </div>
+    <div class="card-body">
+        <p-table #dtb [value]="all_bills"
+            [paginator]="true"
+            [rows]="10"
+            [showCurrentPageReport]="true"
+
+            [rowsPerPageOptions]="[10,25,50]"
+            [globalFilterFields]="['name','owner', 'orga', 'status']"
+            [filterDelay]="0"
+        >
+            <ng-template pTemplate="caption">
+                <div class="table-header">
+                    List of Bills
+                    <span class="p-input-icon-right">
+                        <i class="pi pi-search"></i>
+                        <input pInputText id="search_bills" type="text" (input)="dtb.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Name</th>
+                    <th>Owner</th>
+                    <th>Financing</th>
+                    <th>Creation</th>
+                    <th>Validation</th>
+                    <th>Expiration</th>
+                    <th>Size</th>
+                    <th>Cpu</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-bill>
+                <tr [ngClass]="{'table-success': bill.status == 'Valid', 'table-info' :  bill.status == 'Wip'}">
+                    <td>{{bill.name}}</td>
+                    <td>{{bill.owner}}</td>
+                    <td>{{bill.orga}}</td>
+                    <td>{{date_convert(bill.created_at)}}</td>
+                    <td>{{date_convert(bill.validate_at)}}</td>
+                    <td>{{date_convert(bill.expire_at)}}</td>
+                    <td>{{bill.size}}</td>
+                    <td>{{bill.cpu}}</td>
+                    <td>{{bill.status}}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger" (click)="delete_bill(bill.uuid)">Delete</button>
+                        <button type="button" class="btn btn-primary" (click)="router.navigate(['/admin/bill/' + bill.uuid])">Edit</button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>

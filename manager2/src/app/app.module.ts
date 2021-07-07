@@ -18,6 +18,9 @@ import { AdminStatComponent} from './admin/stats/stats.component';
 import { GroupsComponent } from './admin/groups/groups.component';
 import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/projects.component';
 import { ProjectComponent as AdminProjectComponent} from './admin/project/project.component';
+import { BillingComponent as AdminBillingComponent} from './admin/billing/billing.component';
+import { BillComponent as AdminBillComponent} from './admin/bill/bill.component';
+import { BillComponent as UserBillComponent} from './bill/bill.component';
 import { MessagesComponent } from './admin/messages/messages.component';
 import { DatabasesComponent } from './admin/databases/databases.component';
 import { WebsitesComponent } from './admin/websites/websites.component';
@@ -80,6 +83,9 @@ export class SentryErrorHandler implements ErrorHandler {
         GroupsComponent,
         AdminProjectsComponent,
         AdminProjectComponent,
+        AdminBillingComponent,
+        AdminBillComponent,
+        UserBillComponent,
         UserProjectsComponent,
         MessagesComponent,
         DatabasesComponent,

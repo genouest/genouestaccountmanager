@@ -15,6 +15,9 @@ import { LogsComponent as AdminLogComponent} from './admin/logs/logs.component';
 import { MessagesComponent as AdminMessageComponent} from './admin/messages/messages.component';
 import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/projects.component';
 import { ProjectComponent as AdminProjectComponent} from './admin/project/project.component';
+import { BillingComponent as AdminBillingComponent} from './admin/billing/billing.component';
+import { BillComponent as AdminBillComponent} from './admin/bill/bill.component';
+import { BillComponent as UserBillComponent} from './bill/bill.component';
 import { UsersComponent as AdminUserComponent} from './admin/users/users.component';
 import { WebsitesComponent as AdminWebsiteComponent} from './admin/websites/websites.component';
 import { RegisteredInfoComponent } from "./info/RegisteredInfoComponent";
@@ -43,11 +46,18 @@ const routes: Routes = [
         ]
     },
     {
-        path: 'project',
-        component: ProjectComponent,
-        canActivate: [
-            AuthGuard
-        ]
+      path: 'project',
+      component: ProjectComponent,
+      canActivate: [
+        AuthGuard
+      ]
+    },
+    {
+      path: 'bill',
+      component: UserBillComponent,
+      canActivate: [
+        AuthGuard
+      ]
     },
     {
         path: 'admin/user',
@@ -83,6 +93,20 @@ const routes: Routes = [
         canActivate: [
             AdminAuthGuard
         ]
+    },
+    {
+      path: 'admin/billing',
+      component: AdminBillingComponent,
+      canActivate: [
+        AdminAuthGuard
+      ]
+    },
+    {
+      path: 'admin/bill/:id',
+      component: AdminBillComponent,
+      canActivate: [
+        AdminAuthGuard
+      ]
     },
     {
         path: 'admin/message',

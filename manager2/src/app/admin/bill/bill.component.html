@@ -1,0 +1,149 @@
+<div class="row col-sm-8">
+    <h4>Bill <b>{{bill.name}}</b></h4>
+</div>
+<div class="row col-sm-8" >
+    <button *ngIf="bill.status != 'Valid'" class="btn btn-danger" (click)="delete_bill(bill.uuid)">Delete</button>
+    <button *ngIf="bill.status != 'Wip'" class="btn btn-primary" (click)="wip_bill()">Allow Update</button>
+    <button *ngIf="bill.status == 'Wip'" class="btn btn-success" (click)="activate_bill()">Activate</button>
+</div>
+<div class="card bg-light">
+    <div class="card-header">Update bill</div>
+    <div class="card-body">
+        <div class="alert alert-danger" *ngIf="bill_err_msg">{{bill_err_msg}}</div>
+        <div class="alert alert-info" *ngIf="bill_msg">{{bill_msg}}</div>
+        <form role="form" class="user-form form-horizontal">
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    <label for="bill_price">Price</label>
+                    <select id="bill_price" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.price" (ngModelChange)="update_price_on_event($event)" class="form-control">
+                        <option *ngFor="let price of enable_prices" [value]="price.uuid">{{price.label}}</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <label for="update_bill_size">Size (GB)</label>
+                    <input id="update_bill_size" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.size" class="form-control"/>
+                </div>
+                <div class="col-sm-2">
+                    <label for="update_bill_cpu">Cpu (Hour)</label>
+                    <input id="update_bill_cpu" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.cpu" class="form-control"/>
+                </div>
+
+                <div class="col-sm-2">
+                    <label for="update_bill_period">Period (Day)</label>
+                    <input id="update_bill_period" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.period" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <label for="update_bill_name">Name</label>
+                    <input id="update_bill_name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.name" class="form-control"/>
+                </div>
+                <div class="col-sm-2">
+                    <label for="update_bill_owner">Owner</label>
+                    <input list="users" id="update_bill_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.owner" class="form-control">
+                    <datalist id="users">
+                        <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
+                    </datalist>
+                </div>
+                <div class="col-sm-2">
+                    <label>Financing</label>
+                    <input type="text" id="update_bill_orga" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.orga" class="form-control"/>
+                </div>
+                <div class="col-sm-2">
+                    <label for="bill_date">Creation Date</label>
+                    <input type="date" id="bill_date" value="{{ date_convert(bill.created_at) }}" class="form-control" readonly/>
+                </div>
+                <div class="col-sm-2">
+                    <label for="bill_date">Validation Date</label>
+                    <input type="date" id="bill_date" value="{{ date_convert(bill.validate_at) }}" class="form-control" readonly/>
+                </div>
+                <div class="col-sm-2">
+                    <label for="update_bill_exp">Expiration Date</label>
+                    <input type="date" id="update_bill_exp" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.expired_at" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <label for="bill_description">Description</label>
+                    <textarea rows="2" id="bill_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="bill.description" class="form-control"></textarea>
+                </div>
+            </div>
+            <div *ngIf="bill.status == 'Wip'" class="form-group row">
+                <div class="col-sm-2">
+                    <label style="opacity: 0;">Update bill</label>
+                    <button type="button" class="btn btn-success" (click)="update_bill()">Update bill</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="card bg-light">
+    <div class="card-header">
+        <h3>Project management</h3>
+    </div>
+    <div class="card-body">
+        <form role="form" class="user-form form-horizontal form-register">
+            <div *ngIf="bill_msg" class="alert alert-success">{{bill_msg}}</div>
+            <div *ngIf="bill_err_msg" class="alert alert-danger">{{bill_err_msg}}</div>
+            <div class="form-group row">
+                <div class="col-sm-3">
+
+                    <input list="projects" id="new_project" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project" class="form-control">
+                    <datalist id="projects">
+                        <option *ngFor="let prj of all_projects" [ngValue]="prj.id">{{prj.id}}</option>
+                    </datalist>
+                </div>
+                <div class="col-sm-3">
+                    <button type="button" class="btn btn-success" (click)="add_project()">Add Project</button>
+                </div>
+                <div class="col-sm-3">
+                    <select id="old_project"  [ngModelOptions]="{standalone: true}" [(ngModel)]="old_project" class="form-control">
+                        <option *ngFor="let prj of bill_projects" [ngValue]="prj.id">{{prj.id}}</option>
+                    </select>
+
+                </div>
+                <div class="col-sm-3">
+                    <button type="button" class="btn btn-danger" (click)="remove_project()">Remove Project</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive table-striped">
+            <p-table #dtp [value]="bill_projects">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Project</th>
+                        <th>Size</th>
+                        <th>Cpu</th>
+                        <th>Owner</th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-prj>
+                    <tr>
+                        <td>{{prj.id}}</td>
+                        <td>{{prj.size}} GB</td>
+                        <td>{{prj.cpu}} Hour</td>
+                        <td>{{prj.owner}}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary" (click)="router.navigate(['/admin/project/' + prj.id])">Edit</button>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="footer">
+                    <tr>
+                        <td></td>
+                        <td>{{projects_size}}/{{bill.size}}</td>
+                        <td>{{projects_cpu}}/{{bill.cpu}}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>

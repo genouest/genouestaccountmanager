@@ -19,6 +19,8 @@ var mongo_web = null;
 var mongo_projects = null;
 var mongo_tags = null;
 var mongo_pending_projects = null;
+var mongo_bills = null;
+var mongo_prices = null;
 
 var mongo_connect = async function() {
     let url = CONFIG.mongo.url;
@@ -41,6 +43,8 @@ var mongo_connect = async function() {
     mongo_projects = mongodb.collection('projects');
     mongo_tags = mongodb.collection('tags');
     mongo_pending_projects = mongodb.collection('pending_projects');
+    mongo_bills = mongodb.collection('bills');
+    mongo_prices = mongodb.collection('prices');
 };
 // mongo_connect();
 
@@ -70,3 +74,5 @@ exports.mongo_tags = function() {return mongo_tags;};
 exports.mongo_pending_projects = function() {return mongo_pending_projects;};
 exports.mongo_oldusers = function() {return mongo_oldusers;};
 exports.mongo_oldgroups = function() {return mongo_oldgroups;};
+exports.mongo_bills = function() {return mongo_bills;};
+exports.mongo_prices = function() {return mongo_prices;};

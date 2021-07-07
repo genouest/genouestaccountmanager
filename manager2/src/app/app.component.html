@@ -35,6 +35,12 @@
               My projects
             </a>
           </li>
+          <li *ngIf="isLogged" class="nav-item">
+            <a class="nav-link" routerLink="/bill">
+              <i class="glyphicon glyphicon-briefcase"></i>
+              My bills
+            </a>
+          </li>
 
           <li *ngIf="user && user.is_admin" class="nav-item dropdown">
             <a href="" id="dropdownMenu1" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-cog"></i> Admin</a>
@@ -42,6 +48,7 @@
               <li><a class="dropdown-item" routerLink="/admin/user">Users</a></li>
               <li><a class="dropdown-item" routerLink="/admin/group">Groups</a></li>
               <li><a class="dropdown-item" routerLink="/admin/project">Projects</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/billing">Billing</a></li>
               <li *ngIf="config.enable_ui && config.enable_ui.messages"><a class="dropdown-item" routerLink="/admin/message">Send message</a></li>
               <li *ngIf="config.enable_ui && config.enable_ui.databases" ><a class="dropdown-item" routerLink="/admin/database">Databases</a></li>
               <li *ngIf="config.enable_ui && config.enable_ui.websites" ><a class="dropdown-item" routerLink="/admin/web">Web sites</a></li>
