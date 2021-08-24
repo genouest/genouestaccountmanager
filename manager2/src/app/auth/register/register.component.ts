@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/user/user.service';
 import { ConfigService } from 'src/app/config.service';
+import { AuthService } from 'src/app/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import * as latinize from 'latinize'
@@ -33,7 +34,10 @@ export class RegisterComponent implements OnInit {
 
     agree: boolean
 
+    session_user: any
+
     constructor(
+        private authService: AuthService,
         private userService: UserService,
         private configService: ConfigService,
         private http: HttpClient,
@@ -41,6 +45,7 @@ export class RegisterComponent implements OnInit {
     ) { }
 
     ngOnInit() {
+        this.session_user = await this.authService.profile;
         this.onExtraValue = this.onExtraValue.bind(this)
         this.configService.config.subscribe(
             resp => {
