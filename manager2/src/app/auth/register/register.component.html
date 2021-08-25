@@ -29,7 +29,8 @@
                 <small id="emailHelp" class="form-text text-muted">Please provide a professional email address (please avoid gmail, yahoo, etc.).</small>
             </div>
             <div *ngIf="session_user && session_user.is_admin" class="checkbox">
-                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="copy_to_admin" checked>Send a Copy of all mail to admin (include mail with password)</label>
+                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="email_does_not_exist" checked>Email does not exist </label>
+                <small id="emailexistHelp" class="form-text text-muted">send a Copy of all mail to admin (include mail with password)</small>
             </div>
             <br>
             <span class="glyphicon glyphicon-home" aria-hidden="true"></span>

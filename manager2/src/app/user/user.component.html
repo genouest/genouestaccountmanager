@@ -179,11 +179,18 @@
                               </label>
                           </div>
                           <div class="form-check row">
-                                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
                               <label class="col-6 form-check-label">
                                   Trainer account
                               </label>
                           </div>
+                          <div class="form-check row">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.email_does_not_exist" type="checkbox" class="form-check-input">
+                              <label class="col-6 form-check-label">
+                                  Email does not exist
+                              </label>
+                          </div>
+
                       </div>
 
                       <div *ngIf="! session_user.is_admin">

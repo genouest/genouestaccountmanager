@@ -34,7 +34,7 @@ export class RegisterComponent implements OnInit {
 
     agree: boolean
 
-    copy_to_admin: boolean
+    email_does_not_exist: boolean
 
     session_user: any
 

@@ -262,7 +262,7 @@ router.put('/user/:id/unsubscribe', async function(req, res){
     } else {
         await notif.remove(user.email);
         res.send({unsubscribed: true});
-        res.end();        
+        res.end();
     }
 
 });
@@ -919,6 +919,7 @@ router.post('/user/:id', async function(req, res) {
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         email: req.body.email,
+        email_does_not_exist: req.body.email_does_not_exist,
         address: req.body.address,
         lab: req.body.lab,
         responsible: req.body.responsible,
@@ -1034,7 +1035,7 @@ router.get('/user/:id/expire', async function(req, res){
             await notif.remove(user.email);
             await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
             res.send({message: 'Operation in progress', fid: fid, error: []});
-            res.end();     
+            res.end();
         }
         catch(error) {
             res.send({message: 'Operation in progress, user not in mailing list', fid: fid, error: error});
@@ -1354,7 +1355,7 @@ router.get('/user/:id/renew', async function(req, res){
             logger.error('activation errors', err);
             error = true;
         }
-    
+
         if(!user.is_fake) {
             try {
                 await notif.add(user.email);
@@ -1530,6 +1531,9 @@ router.put('/user/:id', async function(req, res) {
         if(req.body.is_trainer !== undefined ){
             user.is_trainer = req.body.is_trainer;
         }
+        if(req.body.email_does_not_exist !== undefined ){
+            user.email_does_not_exist = req.body.email_does_not_exist;
+        }
     }
 
     if(user.email == '' || user.firstname == '' || user.lastname == '') {
@@ -1667,7 +1671,7 @@ router.put('/user/:id', async function(req, res) {
             await notif.add(user.email);
         }else if (!userWasFake && user.is_fake) {
             await notif.remove(user.email);
-        } 
+        }
         res.send(user);
         return;
     }
