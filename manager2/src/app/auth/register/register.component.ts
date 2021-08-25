@@ -45,7 +45,7 @@ export class RegisterComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.session_user = await this.authService.profile;
+        this.session_user = this.authService.profile;
         this.onExtraValue = this.onExtraValue.bind(this)
         this.configService.config.subscribe(
             resp => {
