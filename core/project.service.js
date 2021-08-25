@@ -83,6 +83,9 @@ async function create_project_request(asked_project, user) {
     });
 
     let msg_destinations =  [CONFIG.general.accounts, user.email];
+    if (user.email_does_not_exist) {
+        msg_destinations.push(CONFIG.general.support);
+    }
 
     try {
         await maisrv.send_notif_mail({

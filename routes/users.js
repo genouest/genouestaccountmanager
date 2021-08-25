@@ -120,11 +120,16 @@ router.post('/user/:id/notify', async function(req, res){
     }
     let message = req.body.message;
     let subject = req.body.subject;
+    let msg_destinations = [user.email];
+    if (user.email_does_not_exist) {
+        msg_destinations.push(CONFIG.general.support);
+    }
+
 
     try {
         await maisrv.send_notif_mail({
             'name': null,
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': subject,
             'markdown': message,
         }, {});
@@ -649,9 +654,14 @@ router.get('/user/:id/activate', async function(req, res) {
     await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     try {
+        let msg_destinations = [user.email];
+        if (user.email_does_not_exist) {
+            msg_destinations.push(CONFIG.general.support);
+        }
+
         await maisrv.send_notif_mail({
             'name' : 'activation',
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': 'account activation'
         }, {
             '#UID#':  user.uid,
@@ -952,9 +962,13 @@ router.post('/user/:id', async function(req, res) {
     let uid = req.params.id;
     let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     try {
+        let msg_destinations = [user.email];
+        if (user.email_does_not_exist) {
+            msg_destinations.push(CONFIG.general.support);
+        }
         await maisrv.send_notif_mail({
             'name' : 'confirmation',
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': 'account confirmation'
         }, {
             '#UID#':  user.uid,
@@ -1146,9 +1160,13 @@ router.get('/user/:id/passwordreset', async function(req, res){
     let link = CONFIG.general.url + encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
 
     try {
+        let msg_destinations = [user.email];
+        if (user.email_does_not_exist) {
+            msg_destinations.push(CONFIG.general.support);
+        }
         await maisrv.send_notif_mail({
             'name' : 'password_reset_request',
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': 'account password reset request'
         }, {
             '#UID#':  user.uid,
@@ -1210,9 +1228,13 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
 
         // Now send email
         try {
+            let msg_destinations = [user.email];
+            if (user.email_does_not_exist) {
+                msg_destinations.push(CONFIG.general.support);
+            }
             await maisrv.send_notif_mail({
                 'name' : 'password_reset',
-                'destinations': [user.email],
+                'destinations': msg_destinations,
                 'subject': 'account password reset'
             }, {
                 '#UID#':  user.uid,
@@ -1335,9 +1357,13 @@ router.get('/user/:id/renew', async function(req, res){
 
 
         try {
+            let msg_destinations = [user.email];
+            if (user.email_does_not_exist) {
+                msg_destinations.push(CONFIG.general.support);
+            }
             await maisrv.send_notif_mail({
                 'name' : 'reactivation',
-                'destinations': [user.email],
+                'destinations': msg_destinations,
                 'subject': 'account reactivation'
             }, {
                 '#UID#':  user.uid,
