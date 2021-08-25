@@ -119,6 +119,7 @@ export class RegisterComponent implements OnInit {
             responsible: this.responsible,
             team: this.team,
             email: this.email,
+            email_does_not_exist: this.email_does_not_exist,
             ip: this.ip,
             duration: this.duration,
             why: this.why,
