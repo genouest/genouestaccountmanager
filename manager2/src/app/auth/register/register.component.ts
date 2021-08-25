@@ -34,6 +34,8 @@ export class RegisterComponent implements OnInit {
 
     agree: boolean
 
+    copy_to_admin: boolean
+
     session_user: any
 
     constructor(
