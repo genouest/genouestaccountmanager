@@ -14,8 +14,8 @@ then
 fi
 
 {% if user.email_does_not_exist %}
-echo "should create mailbox"
-echo "should create aliases"
+mel create-user-aliases "{{ user.uid }}"
+mel create-mailbox "{{ user.uid }}"
 {% endif %}
 
 {% include "user/add_readme.sh" %}
