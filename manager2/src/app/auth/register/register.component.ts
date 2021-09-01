@@ -34,7 +34,7 @@ export class RegisterComponent implements OnInit {
 
     agree: boolean
 
-    email_does_not_exist: boolean
+    send_copy_to_support: boolean
 
     session_user: any
 
@@ -119,7 +119,7 @@ export class RegisterComponent implements OnInit {
             responsible: this.responsible,
             team: this.team,
             email: this.email,
-            email_does_not_exist: this.email_does_not_exist,
+            send_copy_to_support: this.send_copy_to_support,
             ip: this.ip,
             duration: this.duration,
             why: this.why,

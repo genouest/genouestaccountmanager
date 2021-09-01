@@ -83,7 +83,7 @@ async function create_project_request(asked_project, user) {
     });
 
     let msg_destinations =  [CONFIG.general.accounts, user.email];
-    if (user.email_does_not_exist) {
+    if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
 

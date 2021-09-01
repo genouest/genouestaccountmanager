@@ -121,7 +121,7 @@ router.post('/user/:id/notify', async function(req, res){
     let message = req.body.message;
     let subject = req.body.subject;
     let msg_destinations = [user.email];
-    if (user.email_does_not_exist) {
+    if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
 
@@ -655,7 +655,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     try {
         let msg_destinations = [user.email];
-        if (user.email_does_not_exist) {
+        if (user.send_copy_to_support) {
             msg_destinations.push(CONFIG.general.support);
         }
 
@@ -929,7 +929,7 @@ router.post('/user/:id', async function(req, res) {
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         email: req.body.email,
-        email_does_not_exist: req.body.email_does_not_exist,
+        send_copy_to_support: req.body.send_copy_to_support,
         address: req.body.address,
         lab: req.body.lab,
         responsible: req.body.responsible,
@@ -963,7 +963,7 @@ router.post('/user/:id', async function(req, res) {
     let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     try {
         let msg_destinations = [user.email];
-        if (user.email_does_not_exist) {
+        if (user.send_copy_to_support) {
             msg_destinations.push(CONFIG.general.support);
         }
         await maisrv.send_notif_mail({
@@ -1161,7 +1161,7 @@ router.get('/user/:id/passwordreset', async function(req, res){
 
     try {
         let msg_destinations = [user.email];
-        if (user.email_does_not_exist) {
+        if (user.send_copy_to_support) {
             msg_destinations.push(CONFIG.general.support);
         }
         await maisrv.send_notif_mail({
@@ -1229,7 +1229,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         // Now send email
         try {
             let msg_destinations = [user.email];
-            if (user.email_does_not_exist) {
+            if (user.send_copy_to_support) {
                 msg_destinations.push(CONFIG.general.support);
             }
             await maisrv.send_notif_mail({
@@ -1358,7 +1358,7 @@ router.get('/user/:id/renew', async function(req, res){
 
         try {
             let msg_destinations = [user.email];
-            if (user.email_does_not_exist) {
+            if (user.send_copy_to_support) {
                 msg_destinations.push(CONFIG.general.support);
             }
             await maisrv.send_notif_mail({
@@ -1557,8 +1557,8 @@ router.put('/user/:id', async function(req, res) {
         if(req.body.is_trainer !== undefined ){
             user.is_trainer = req.body.is_trainer;
         }
-        if(req.body.email_does_not_exist !== undefined ){
-            user.email_does_not_exist = req.body.email_does_not_exist;
+        if(req.body.send_copy_to_support !== undefined ){
+            user.send_copy_to_support = req.body.send_copy_to_support;
         }
     }
 
