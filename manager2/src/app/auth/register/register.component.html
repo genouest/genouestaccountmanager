@@ -28,9 +28,16 @@
                 <input autocomplete="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="email" type="email" id="email" class="form-control" required autofocus>
                 <small id="emailHelp" class="form-text text-muted">Please provide a professional email address (please avoid gmail, yahoo, etc.).</small>
             </div>
-            <div *ngIf="session_user && session_user.is_admin" class="checkbox">
-                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="send_copy_to_support"> Email does not exist </label>
-                <small id="emailexistHelp" class="form-text text-muted">Send a Copy of all mail to admin (include mail with password)</small>
+            <div *ngIf="session_user && session_user.is_admin" class="form-group">
+                <div class="checkbox">
+                    <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="send_copy_to_support"> Send a Copy of all mail to Support Team (include mail with password)</label>
+                </div>
+                <div class="checkbox">
+                    <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="create_imap_mailbox"> Create Imap Mailbox</label>
+                </div>
+                <div class="checkbox">
+                    <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="is_fake"> Flag as Fake Account (Applicative account)</label>
+                </div
             </div>
             <br>
             <span class="glyphicon glyphicon-home" aria-hidden="true"></span>

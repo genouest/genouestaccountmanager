@@ -874,9 +874,17 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    if(!validator.validate(req.body.email)) {
-        res.send({status: 1, message: 'Invalid email format'});
-        return;
+    if (!req.body.is_fake) {
+        if(!validator.validate(req.body.email)) {
+            res.send({status: 1, message: 'Invalid email format'});
+            return;
+        }
+
+        let user_email = await dbsrv.mongo_users().findOne({email: req.body.email, is_fake: false});
+        if(user_email){
+            res.send({status: 1, message: 'User email already exists'});
+            return;
+        }
     }
 
     if (!(req.body.duration in duration_list))
@@ -885,11 +893,6 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    let user_email = await dbsrv.mongo_users().findOne({email: req.body.email, is_fake: false});
-    if(user_email){
-        res.send({status: 1, message: 'User email already exists'});
-        return;
-    }
     let userexists = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(userexists){
         res.send({status: 1, message: 'User id already exists'});
@@ -903,7 +906,6 @@ router.post('/user/:id', async function(req, res) {
         res.send({status: 1, message: 'User id already used'});
         return;
     }
-
 
     let regkey = Math.random().toString(36).substring(7);
     let default_main_group = GENERAL_CONFIG.default_main_group || '';
@@ -930,6 +932,7 @@ router.post('/user/:id', async function(req, res) {
         lastname: req.body.lastname,
         email: req.body.email,
         send_copy_to_support: req.body.send_copy_to_support,
+        create_imap_mailbox: req.body.create_imap_mailbox,
         address: req.body.address,
         lab: req.body.lab,
         responsible: req.body.responsible,
@@ -942,7 +945,7 @@ router.post('/user/:id', async function(req, res) {
         ip: req.body.ip,
         regkey: regkey,
         is_internal: false,
-        is_fake: false,
+        is_fake: req.body.is_fake,
         uidnumber: -1,
         gidnumber: -1,
         cloud: false,
