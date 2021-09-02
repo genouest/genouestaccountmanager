@@ -874,12 +874,12 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    if (!req.body.is_fake) {
-        if(!validator.validate(req.body.email)) {
-            res.send({status: 1, message: 'Invalid email format'});
-            return;
-        }
+    if(!validator.validate(req.body.email)) {
+        res.send({status: 1, message: 'Invalid email format'});
+        return;
+    }
 
+    if (!req.body.is_fake) {
         let user_email = await dbsrv.mongo_users().findOne({email: req.body.email, is_fake: false});
         if(user_email){
             res.send({status: 1, message: 'User email already exists'});
