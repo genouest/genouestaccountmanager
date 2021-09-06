@@ -2,7 +2,7 @@
 
 set -xe
 
-/usr/local/bin/num create-user --firstname="{{ user.firstname }}" --lastname="{{ user.lastname }}" --email="{{ user.email }}" --username="{{ user.uid }}" {% if user.home %}--home_dir="{{ user.home }}"{% endif %} {% if user.password %}--password="{{ user.password }}"{% endif %}
+/usr/local/bin/num create-user --firstname="{{ user.firstname }}" --lastname="{{ user.lastname }}" --email="{{ user.email }}" --username="{{ user.uid }}" {% if user.home %}--home_dir="{{ user.home }}"{% endif %} {% if user.password %}--password="{{ user.password }}"{% endif %} {% if user.is_fake %}--service{% endif %}
 
 # warning: disable ldap as it should have been done by num, but we don't know what is the dn created yet
 
@@ -24,8 +24,9 @@ chown -R {{ user.uid }}:{{ user.uid }} "{{ user.home }}"
 
 {% include "user/add_extra_dirs.sh" %}
 
-
-
-
+{% if user.create_imap_mailbox %}
+mel create-user-aliases "{{ user.uid }}"
+mel create-mailbox "{{ user.uid }}"
+{% endif %}
 
 # add_user.sh

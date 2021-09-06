@@ -120,11 +120,16 @@ router.post('/user/:id/notify', async function(req, res){
     }
     let message = req.body.message;
     let subject = req.body.subject;
+    let msg_destinations = [user.email];
+    if (user.send_copy_to_support) {
+        msg_destinations.push(CONFIG.general.support);
+    }
+
 
     try {
         await maisrv.send_notif_mail({
             'name': null,
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': subject,
             'markdown': message,
         }, {});
@@ -262,7 +267,7 @@ router.put('/user/:id/unsubscribe', async function(req, res){
     } else {
         await notif.remove(user.email);
         res.send({unsubscribed: true});
-        res.end();        
+        res.end();
     }
 
 });
@@ -649,9 +654,14 @@ router.get('/user/:id/activate', async function(req, res) {
     await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     try {
+        let msg_destinations = [user.email];
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
+
         await maisrv.send_notif_mail({
             'name' : 'activation',
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': 'account activation'
         }, {
             '#UID#':  user.uid,
@@ -869,17 +879,20 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
+    if (!req.body.is_fake) {
+        let user_email = await dbsrv.mongo_users().findOne({email: req.body.email, is_fake: false});
+        if(user_email){
+            res.send({status: 1, message: 'User email already exists'});
+            return;
+        }
+    }
+
     if (!(req.body.duration in duration_list))
     {
         res.send({status: 1, message: 'Invalid duration format'});
         return;
     }
 
-    let user_email = await dbsrv.mongo_users().findOne({email: req.body.email, is_fake: false});
-    if(user_email){
-        res.send({status: 1, message: 'User email already exists'});
-        return;
-    }
     let userexists = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(userexists){
         res.send({status: 1, message: 'User id already exists'});
@@ -893,7 +906,6 @@ router.post('/user/:id', async function(req, res) {
         res.send({status: 1, message: 'User id already used'});
         return;
     }
-
 
     let regkey = Math.random().toString(36).substring(7);
     let default_main_group = GENERAL_CONFIG.default_main_group || '';
@@ -919,6 +931,8 @@ router.post('/user/:id', async function(req, res) {
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         email: req.body.email,
+        send_copy_to_support: req.body.send_copy_to_support,
+        create_imap_mailbox: req.body.create_imap_mailbox,
         address: req.body.address,
         lab: req.body.lab,
         responsible: req.body.responsible,
@@ -931,7 +945,7 @@ router.post('/user/:id', async function(req, res) {
         ip: req.body.ip,
         regkey: regkey,
         is_internal: false,
-        is_fake: false,
+        is_fake: req.body.is_fake,
         uidnumber: -1,
         gidnumber: -1,
         cloud: false,
@@ -951,9 +965,13 @@ router.post('/user/:id', async function(req, res) {
     let uid = req.params.id;
     let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
     try {
+        let msg_destinations = [user.email];
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
         await maisrv.send_notif_mail({
             'name' : 'confirmation',
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': 'account confirmation'
         }, {
             '#UID#':  user.uid,
@@ -1034,7 +1052,7 @@ router.get('/user/:id/expire', async function(req, res){
             await notif.remove(user.email);
             await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
             res.send({message: 'Operation in progress', fid: fid, error: []});
-            res.end();     
+            res.end();
         }
         catch(error) {
             res.send({message: 'Operation in progress, user not in mailing list', fid: fid, error: error});
@@ -1145,9 +1163,13 @@ router.get('/user/:id/passwordreset', async function(req, res){
     let link = CONFIG.general.url + encodeURI('/user/'+req.params.id+'/passwordreset/'+key);
 
     try {
+        let msg_destinations = [user.email];
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
         await maisrv.send_notif_mail({
             'name' : 'password_reset_request',
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': 'account password reset request'
         }, {
             '#UID#':  user.uid,
@@ -1209,9 +1231,13 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
 
         // Now send email
         try {
+            let msg_destinations = [user.email];
+            if (user.send_copy_to_support) {
+                msg_destinations.push(CONFIG.general.support);
+            }
             await maisrv.send_notif_mail({
                 'name' : 'password_reset',
-                'destinations': [user.email],
+                'destinations': msg_destinations,
                 'subject': 'account password reset'
             }, {
                 '#UID#':  user.uid,
@@ -1334,9 +1360,13 @@ router.get('/user/:id/renew', async function(req, res){
 
 
         try {
+            let msg_destinations = [user.email];
+            if (user.send_copy_to_support) {
+                msg_destinations.push(CONFIG.general.support);
+            }
             await maisrv.send_notif_mail({
                 'name' : 'reactivation',
-                'destinations': [user.email],
+                'destinations': msg_destinations,
                 'subject': 'account reactivation'
             }, {
                 '#UID#':  user.uid,
@@ -1354,7 +1384,7 @@ router.get('/user/:id/renew', async function(req, res){
             logger.error('activation errors', err);
             error = true;
         }
-    
+
         if(!user.is_fake) {
             try {
                 await notif.add(user.email);
@@ -1530,6 +1560,9 @@ router.put('/user/:id', async function(req, res) {
         if(req.body.is_trainer !== undefined ){
             user.is_trainer = req.body.is_trainer;
         }
+        if(req.body.send_copy_to_support !== undefined ){
+            user.send_copy_to_support = req.body.send_copy_to_support;
+        }
     }
 
     if(user.email == '' || user.firstname == '' || user.lastname == '') {
@@ -1667,7 +1700,7 @@ router.put('/user/:id', async function(req, res) {
             await notif.add(user.email);
         }else if (!userWasFake && user.is_fake) {
             await notif.remove(user.email);
-        } 
+        }
         res.send(user);
         return;
     }

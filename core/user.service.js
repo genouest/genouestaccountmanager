@@ -324,6 +324,9 @@ async function add_user_to_project(newproject, uid, action_owner) {
     if (owner) {
         msg_destinations.push(owner.email);
     }
+    if (user.send_copy_to_support) {
+        msg_destinations.push(CONFIG.general.support);
+    }
 
     try {
         await maisrv.send_notif_mail({
@@ -407,6 +410,10 @@ async function delete_user(user, action_owner_id, message){
     if (message && message.length > 1) {
         mail_message = message;
         msg_destinations.push(user.email);
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
+
     }
 
     try {

@@ -70,9 +70,13 @@ router.get('/mail/auth/:id', async function(req, res) {
     );
 
     try {
+        let msg_destinations = [user.email];
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
         await maisrv.send_notif_mail({
             'name': 'mail_token',
-            'destinations': [user.email],
+            'destinations': msg_destinations,
             'subject': 'Authentication mail token request'
         }, {
             '#TOKEN#': password
