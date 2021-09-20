@@ -29,4 +29,8 @@ mel create-user-aliases "{{ user.uid }}"
 mel create-mailbox "{{ user.uid }}"
 {% endif %}
 
+{% if user.password %}
+mel add-samba "{{ user.uid }}" --password "{{ user.password }}"
+{% endif %}
+
 # add_user.sh

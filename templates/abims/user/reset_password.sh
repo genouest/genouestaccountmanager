@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Start modify_user.sh in $0 ..."
+echo "Start reset_password.sh in $0 ..."
 
 set -e
 
@@ -10,4 +10,4 @@ ldapmodify -h {{ CONFIG.ldap.host }} -cx -w {{ CONFIG.ldap.admin_password }} -D 
 mel add-samba "{{ user.uid }}" --password "{{ user.password }}"
 {% endif %}
 
-echo "End modify_user.sh in $0 ..."
+echo "End reset_password.sh in $0 ..."
