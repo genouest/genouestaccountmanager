@@ -651,7 +651,18 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }
 
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{
+        '$set': {
+            status: STATUS_ACTIVE,
+            uidnumber: minuid,
+            gidnumber: user.gidnumber,
+            expiration: new Date().getTime() + day_time*duration_list[user.duration],
+            expiration_notif: 0
+        },
+        '$push': {
+            history: {action: 'validation', date: new Date().getTime()}
+        }
+    });
 
     try {
         let msg_destinations = [user.email];
