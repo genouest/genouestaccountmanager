@@ -619,7 +619,6 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }
 
-
     try {
         let msg_destinations = [user.email];
         if (user.send_copy_to_support) {
