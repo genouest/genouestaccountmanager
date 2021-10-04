@@ -9,6 +9,7 @@ export class MyDeleteConfirmComponent implements OnInit {
 
     isDeleting: boolean
     message: string
+    sendmail: boolean
 
     @Input()
     onConfirm: any
@@ -22,6 +23,7 @@ export class MyDeleteConfirmComponent implements OnInit {
     constructor() { }
 
     ngOnInit() {
+        this.sendmail =  true;
     }
 
     startDelete(){
