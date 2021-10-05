@@ -34,7 +34,7 @@ export class MyDeleteConfirmComponent implements OnInit {
         this.message = "";
     }
     confirm() {
-        if (this.message) {
+        if (this.explainMessage) {
             this.onConfirm(this.message, this.sendmail);
         } else {
             this.onConfirm(this.data);
