@@ -524,8 +524,12 @@ router.delete('/user/:id', async function(req, res){
 
     let uid = req.params.id;
     let mail_message = '';
+    let mail_send = false;
     if (req.body.message) {
         mail_message = req.body.message;
+    }
+    if (req.body.sendmail) {
+        mail_send = req.body.sendmail;
     }
 
     let user = await dbsrv.mongo_users().findOne({uid: uid});
@@ -535,7 +539,7 @@ router.delete('/user/:id', async function(req, res){
         return;
     }
     if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
-        usrsrv.delete_user(user, session_user.uid, mail_message).then(function(){
+        usrsrv.delete_user(user, session_user.uid, mail_message, mail_send).then(function(){
             res.send({message: 'User deleted'});
             res.end();
             return;
@@ -557,7 +561,7 @@ router.delete('/user/:id', async function(req, res){
             res.end();
             return;
         }
-        usrsrv.delete_user(user, session_user.uid, mail_message).then(function(){
+        usrsrv.delete_user(user, session_user.uid, mail_message, mail_send).then(function(){
             res.send({message: 'User deleted'});
             res.end();
             return;

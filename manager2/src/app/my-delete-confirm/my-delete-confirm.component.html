@@ -4,12 +4,18 @@
   </div>
   <div *ngIf="isDeleting">
     <div *ngIf="explainMessage">
-      <label for="message" class="col-4 col-form-label"><b>Please Explain Why:</b></label>
-      <br/>
-      <textarea id="message" [ngModelOptions]="{standalone: true}" [(ngModel)]="message"></textarea>
-      <br/>
+      <div class="form-group row">
+	<label for="message" class="col-form-label"><b>Please Explain Why: </b></label>
+	<textarea type="text" id="message" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="message"> </textarea>
+      </div>
+      <div class="form-check row" style="float:right">
+	<input id="sendmail" type="checkbox" class="form-check-input" [ngModelOptions]="{standalone: true}" [(ngModel)]="sendmail">
+	<label for="sendmail" class="form-check-label"><b>Send Mail </b></label>
+      </div>
     </div>
-    <button type="button" class="btn btn-secondary btn-xs" (click)="cancel()">Abort deletion</button>
-    <button type="button" class="btn btn-danger btn-xs"  (click)="confirm(message)"><i class="fa fa-trash-o"></i>Confirm</button>
+    <div class="form-group row">
+      <button type="button" class="btn btn-secondary btn-xs" (click)="cancel()">Abort deletion</button>
+      <button type="button" class="btn btn-danger btn-xs"  (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
+    </div>
   </div>
 </div>

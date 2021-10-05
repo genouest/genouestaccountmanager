@@ -67,7 +67,7 @@ export class UserService {
             httpOptions)
     }
 
-    delete(userId: string, message: string) {
+    delete(userId: string, message: string, sendmail: boolean) {
         // console.log(userId, message);
         let httpOptions = {
             headers: new HttpHeaders({
@@ -75,7 +75,9 @@ export class UserService {
                 //  'x-api-key': localStorage.getItem('my-api-key')
             }),
             body: {
-                message: message
+                message: message,
+                sendmail: sendmail
+
             },
         };
         return this.http.delete(
