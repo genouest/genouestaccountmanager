@@ -33,13 +33,11 @@ export class MyDeleteConfirmComponent implements OnInit {
         this.isDeleting = false;
         this.message = "";
     }
-    confirm(message: string) {
-        if (message && !this.data) {
-           this.data = message;
+    confirm() {
+        if (this.message) {
+            this.onConfirm(this.message, this.sendmail);
+        } else {
+            this.onConfirm(this.data);
         }
-        // console.log('app-my-delete-confirm', this.isDeleting, message, this.data);
-
-        this.onConfirm(this.data);
     }
-
 }
