@@ -773,9 +773,9 @@ export class UserComponent implements OnInit {
         )
     }
 
-    delete(message: string) {
+    delete(message: string, sendmail: boolean) {
         // console.log(this.user.uid, message);
-        this.userService.delete(this.user.uid, message).subscribe(
+        this.userService.delete(this.user.uid, message, sendmail).subscribe(
             resp => {
                 this._flashMessagesService.show(resp['message'], { cssClass: 'alert-success', timeout: 5000 });
                 this.router.navigate(['/admin/user']);
