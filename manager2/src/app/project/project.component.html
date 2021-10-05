@@ -68,7 +68,15 @@
                       [rows]="10"
                       [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
+                      [globalFilterFields]="['id','owner']"
+                      [filterDelay]="0"
           >
+              <ng-template pTemplate="caption">
+                  <span class="p-input-icon-right">
+                      <i class="pi pi-search"></i>
+                      <input pInputText id="search_projects" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Search" />
+                  </span>
+              </ng-template>
             <ng-template pTemplate="header">
               <tr>
                 <th>Project</th>
