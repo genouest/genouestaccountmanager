@@ -358,7 +358,7 @@ async function add_user_to_project(newproject, uid, action_owner) {
     }
 }
 
-async function delete_user(user, action_owner_id, message){
+async function delete_user(user, action_owner_id, message = '', sendmail = false){
     let user_is_activ = true;
 
     if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
@@ -405,27 +405,27 @@ async function delete_user(user, action_owner_id, message){
         'logs': [user.uid + '.' + fid + '.update']
     });
 
-    let msg_destinations =  [CONFIG.general.accounts];
+    let msg_destinations =  [CONFIG.general.accounts, user.email];
     let mail_message=  'no explaination provided !';
-    if (message && message.length > 1) {
+    if (message) {
         mail_message = message;
-        msg_destinations.push(user.email);
-        if (user.send_copy_to_support) {
-            msg_destinations.push(CONFIG.general.support);
-        }
-
+    }
+    if (user.send_copy_to_support) {
+        msg_destinations.push(CONFIG.general.support);
     }
 
     try {
-        await maisrv.send_notif_mail({
-            'name': 'user_deletion',
-            'destinations': msg_destinations,
-            'subject': 'account deletion: ' + user.uid
-        }, {
-            '#UID#': user.uid,
-            '#USER#': action_owner_id,
-            '#MSG#': mail_message
-        });
+        if (sendmail) {
+            await maisrv.send_notif_mail({
+                'name': 'user_deletion',
+                'destinations': msg_destinations,
+                'subject': 'account deletion: ' + user.uid
+            }, {
+                '#UID#': user.uid,
+                '#USER#': action_owner_id,
+                '#MSG#': mail_message
+            });
+        }
     } catch(error) {
         logger.error(error);
     }
