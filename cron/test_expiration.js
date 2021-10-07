@@ -66,8 +66,12 @@ dbsrv.init_db().then(async ()=>{
             continue;
         }
         console.log(`User will expire, send notication number ${user.expiration_notif} to ${user.uid}`);
+
         let link = CONFIG.general.url +
             encodeURI('/user/'+user.uid+'/renew/'+user.regkey);
+        if (CONFIG.general.allow_extend === false) {
+            link = CONFIG.general.support;
+        }
         try {
             await maisrv.send_notif_mail({
                 'name': 'expiration',

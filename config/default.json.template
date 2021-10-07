@@ -9,6 +9,7 @@
         "source_folder" : "/folder/with/readme2/"
       }
     ],
+    "allow_extend": true,
     "prevent_reuse": true,
     "terms_of_use": "/doc/terms_of_use.txt",
     "web_home" : "user",

@@ -1283,6 +1283,26 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
+    if (GENERAL_CONFIG.allow_extend === false) {
+        let session_user = null;
+        let isadmin = false;
+        try {
+            session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+            isadmin = await rolsrv.is_admin(session_user);
+            if(!isadmin) {
+                res.status(403).send({message: 'not allowed'});
+                res.end();
+                return;
+            }
+        } catch(e) {
+            logger.error(e);
+            res.status(403).send({message: 'not allowed'});
+            res.end();
+            return;
+        }
+    }
+
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
