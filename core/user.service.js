@@ -34,6 +34,7 @@ exports.add_user_to_project = add_user_to_project;
 exports.delete_user = delete_user;
 exports.remove_user_from_group = remove_user_from_group;
 exports.remove_user_from_project = remove_user_from_project;
+exports.activate_user = activate_user;
 
 // module functions
 function get_user_home(user) {
@@ -46,13 +47,62 @@ function get_user_home(user) {
 }
 
 
+async function activate_user(user) {
+    if (!user.password) {
+        user.password = Math.random().toString(36).slice(-10);
+    }
+    let minuid = await idsrv.getUserAvailableId();
+    user.uidnumber = minuid;
+    user.gidnumber = -1;
+    if (!CONFIG.general.disable_user_group) {
+        let data = await dbsrv.mongo_groups().findOne({'name': user.group});
+        if(!data) {
+            if (CONFIG.general.auto_add_group) {
+                let groupexisted = await dbsrv.mongo_oldgroups().findOne({'name': user.group});
+                if(groupexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
+                    logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
+                    throw {code: 403, message: 'Group name already used in the past'};
+                }
+                try {
+                    await grpsrv.create_group(user.group, user.uid);
+                } catch(error){
+                    logger.error('Add Group Failed for: ' + user.group, error);
+                    throw {code: 500, message: 'Add Group Failed'};
+                }
+
+                data = await dbsrv.mongo_groups().findOne({'name': user.group});
+            } else {
+                throw {code: 403, message: 'Group ' + user.group + ' does not exist, please create it first'};
+
+            }
+        }
+        user.gidnumber = data.gid;
+    }
+
+    user.home = usrsrv.get_user_home(user);
+    let fid = new Date().getTime();
+    try {
+        await goldap.add(user, fid);
+        let created_file = await filer.user_add_user(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch(error){
+        logger.error('Add User Failed for: ' + user.uid, error);
+        throw {code: 500,message: 'Add User Failed'};
+    }
+
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+
+    return user;
+}
+
+
 async function create_user(user) {
     user.status = STATUS_PENDING_EMAIL;
 
     let regkey = Math.random().toString(36).substring(7);
     user.regkey = regkey;
 
-    let default_main_group = GENERAL_CONFIG.default_main_group || '';
+    let default_main_group = CONFIG.general.default_main_group || '';
     user.maingroup = default_main_group;
     if (!user.group) {
         let group = '';
@@ -134,31 +184,12 @@ async function create_extra_user(user_name, group, internal_user){
     };
     user = await create_user(user);
     user.password = password;
-    # todo create activate method
 
-    let minuid = await idsrv.getUserAvailableId();
-    user.uidnumber = minuid;
-    user.gidnumber = (CONFIG.general.disable_user_group) ? -1 : group.gid;
-    user.home = get_user_home(user);
-    let fid = new Date().getTime();
-    try {
-        await goldap.add(user, fid);
-    } catch(err) {
-        logger.error('Failed to create extra user', user, err);
-        throw err;
-    }
-    logger.debug('user added to ldap');
+    user = await activate_user(user);
+
 
     delete user.password;
 
-
-    try {
-        let created_file = await filer.user_create_extra_user(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch(error){
-        logger.error('Create User Failed for: ' + user.uid, error);
-        throw error;
-    }
 
 
     try {
