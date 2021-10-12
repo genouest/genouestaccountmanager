@@ -16,7 +16,6 @@ var GENERAL_CONFIG = CONFIG.general;
 
 const goldap = require('../core/goldap.js');
 const dbsrv = require('../core/db.service.js');
-const idsrv = require('../core/id.service.js');
 const maisrv = require('../core/mail.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const sansrv = require('../core/sanitize.service.js');
