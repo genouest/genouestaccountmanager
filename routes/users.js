@@ -911,26 +911,7 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    let regkey = Math.random().toString(36).substring(7);
-    let default_main_group = GENERAL_CONFIG.default_main_group || '';
-    let group = '';
-    if (!CONFIG.general.disable_user_group) {
-        switch (CONFIG.general.registration_group) {
-        case 'username':
-            group = req.params.id;
-            break;
-        case 'main':
-            group = default_main_group;
-            break;
-        case 'team': // use the team by default for retro-compatibility
-        default:
-            group = req.body.team;
-            break;
-        }
-    }
-
     let user = {
-        status: STATUS_PENDING_EMAIL,
         uid: req.params.id,
         firstname: req.body.firstname,
         lastname: req.body.lastname,
@@ -941,33 +922,23 @@ router.post('/user/:id', async function(req, res) {
         lab: req.body.lab,
         responsible: req.body.responsible,
         team: req.body.team,
-        group: group,
-        secondarygroups: [],
-        maingroup: default_main_group,
-        home: '',
         why: req.body.why,
         ip: req.body.ip,
-        regkey: regkey,
-        is_internal: false,
         is_fake: req.body.is_fake,
-        uidnumber: -1,
-        gidnumber: -1,
-        cloud: false,
         duration: req.body.duration,
-        expiration: new Date().getTime() + day_time*duration_list[req.body.duration],
-        loginShell: '/bin/bash',
         history: [{action: 'register', date: new Date().getTime()}],
         extra_info: req.body.extra_info || []
     };
-    // user[CONFIG.general.internal_flag] = false,
-    user.home = usrsrv.get_user_home(user);
 
     await dbsrv.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
 
+    try {
+        user = await usrsrv.create_user(user);
+    } catch (error) {
+        logger.error(error);
+    }
 
-    await dbsrv.mongo_users().insertOne(user);
-    let uid = req.params.id;
-    let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
+    let link = GENERAL_CONFIG.url + encodeURI('/user/' + user.uid + '/confirm?regkey=' + user.regkey);
     try {
         let msg_destinations = [user.email];
         if (user.send_copy_to_support) {

@@ -22,9 +22,11 @@ const STATUS_ACTIVE = 'Active';
 // const STATUS_EXPIRED = 'Expired';
 
 let day_time = 1000 * 60 * 60 * 24;
+let duration_list = CONFIG.duration;
 
 // module exports
 exports.get_user_home = get_user_home;
+exports.create_user = create_user;
 // exports.create_extra_user = create_extra_user; // todo check exports is needed
 exports.create_admin = create_admin;
 exports.add_user_to_group = add_user_to_group;
@@ -44,6 +46,63 @@ function get_user_home(user) {
 }
 
 
+async function create_user(user) {
+    user.status = STATUS_PENDING_EMAIL;
+
+    let regkey = Math.random().toString(36).substring(7);
+    user.regkey = regkey;
+
+    let default_main_group = GENERAL_CONFIG.default_main_group || '';
+    user.maingroup = default_main_group;
+    if (!user.group) {
+        let group = '';
+        if (!CONFIG.general.disable_user_group) {
+            switch (CONFIG.general.registration_group) {
+            case 'username':
+                group = user.uid;
+                break;
+            case 'main':
+                group = default_main_group;
+                break;
+            case 'team': // use the team by default for retro-compatibility
+            default:
+                group = user.team;
+                break;
+            }
+        }
+        user.group = group;
+    }
+    user.secondarygroups = [];
+    user.uidnumber = -1;
+    user.gidnumber = -1;
+
+    user.home = get_user_home(user);
+
+    if (!user.is_internal) {
+        user.is_internal = false;
+    }
+
+    user.cloud = false;
+
+    if (user.duration) {
+        user.expiration = new Date().getTime() + day_time*duration_list[user.duration];
+    }
+    else {
+        user.expiration = new Date().getTime() + day_time*360;
+    }
+
+    user.loginShell = '/bin/bash';
+
+    // create from script as ui add a register action in history
+    if (!user.history) {
+        user.history = [{action: 'create', date: new Date().getTime()}];
+    }
+
+    await dbsrv.mongo_users().insertOne(user);
+
+    return user;
+}
+
 // todo should be factorysed with "normal" user creation
 async function create_extra_user(user_name, group, internal_user){
     let password = Math.random().toString(36).slice(-10);
@@ -55,7 +114,6 @@ async function create_extra_user(user_name, group, internal_user){
     }
 
     let user = {
-        status: STATUS_ACTIVE,
         uid: user_name,
         firstname: user_name,
         lastname: user_name,
@@ -64,23 +122,20 @@ async function create_extra_user(user_name, group, internal_user){
         lab: '',
         responsible: '',
         group: (CONFIG.general.disable_user_group) ? '' : group.name,
-        secondarygroups: [],
-        maingroup: '',
+        team: '',
         home: '',
         why: '',
         ip: '',
-        regkey: Math.random().toString(36).slice(-10),
         is_internal: internal_user,
         is_fake: false,
-        uidnumber: -1,
-        gidnumber: -1,
-        cloud: false,
         duration: '1 year',
         expiration: new Date().getTime() + day_time*360,
-        loginShell: '/bin/bash',
-        history: [],
-        password: password
+        extra_info: []
     };
+
+    user.password = password;
+    # todo create activate method
+
     let minuid = await idsrv.getUserAvailableId();
     user.uidnumber = minuid;
     user.gidnumber = (CONFIG.general.disable_user_group) ? -1 : group.gid;
