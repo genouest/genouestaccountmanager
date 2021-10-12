@@ -56,6 +56,8 @@ const plugin = require('./routes/plugin');
 const tp = require('./routes/tp');
 const conf = require('./routes/conf');
 const tags = require('./routes/tags.js');
+const bills = require('./routes/bill.js');
+
 const ObjectID = require('mongodb').ObjectID;
 
 const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
@@ -173,6 +175,7 @@ const if_dev_execute_scripts = function(){
 };
 
 app.all('*', async function(req, res, next){
+    wlogger.info('Route: %s %s', req.method, req.originalUrl);
     if (runningEnv === 'test'){
         res.on('finish', function() {
             wlogger.debug('*test* env, on finish execute cron script');
@@ -391,6 +394,19 @@ app.get('/logout', auth);
 
 app.get('/tags', tags);
 app.post('/tags/:kind/:id', tags);
+
+app.get('/price/', bills);
+app.post('/price/', bills);
+app.post('/price/:uuid/:state', bills);
+app.delete('/price/:uuid', bills);
+app.get('/bill/:uuid', bills);
+app.get('/bill/', bills);
+app.post('/bill/', bills);
+app.post('/bill/:uuid', bills);
+app.delete('/bill/:uuid', bills);
+app.post('/bill/:uuid/project/:project', bills);
+app.delete('/bill/:uuid/project/:project', bills);
+app.get('/bill/:uuid/projects', bills);
 
 app.get('/robots.txt', function (request, response) {
     response.sendFile(path.resolve(__dirname, 'robots.txt'));
