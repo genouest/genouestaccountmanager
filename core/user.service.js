@@ -132,7 +132,7 @@ async function create_extra_user(user_name, group, internal_user){
         expiration: new Date().getTime() + day_time*360,
         extra_info: []
     };
-
+    user = await create_user(user);
     user.password = password;
     # todo create activate method
 
@@ -150,8 +150,8 @@ async function create_extra_user(user_name, group, internal_user){
     logger.debug('user added to ldap');
 
     delete user.password;
-    // eslint-disable-next-line no-unused-vars
-    await dbsrv.mongo_users().insertOne(user);
+
+
     try {
         let created_file = await filer.user_create_extra_user(user, fid);
         logger.info('File Created: ', created_file);
