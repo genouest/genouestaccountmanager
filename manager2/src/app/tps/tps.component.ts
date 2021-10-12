@@ -27,6 +27,8 @@ export class TpsComponent implements OnInit {
     about: string
     authorized: boolean
 
+    group_or_project: string
+
     refresh: Subject<any> = new Subject();
 
     activeDayIsOpen: boolean = true;
@@ -73,6 +75,7 @@ export class TpsComponent implements OnInit {
         this.quantity = 1;
         this.events = [];
         this.authorized = (this.authService.profile.is_trainer || this.authService.profile.is_admin);
+        this.group_or_project = 'group';
         this.listEvents();
     }
 
@@ -106,8 +109,10 @@ export class TpsComponent implements OnInit {
             quantity: this.quantity,
             from: new Date(this.fromDate).getTime(),
             to: new Date(this.toDate).getTime(),
-            about: this.about
+            about: this.about,
+            group_or_project: this.group_or_project
         }
+        console.log(reservation);
         this.tpService.reserve(reservation).subscribe(
             resp => {
                 this.msg = resp['message'];

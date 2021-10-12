@@ -93,7 +93,7 @@
 <div *ngIf="authorized" class="row">
     <div class="col-md-8">
         <div class="card bg-light">
-            <div class="panel-header">
+            <div class="card-header">
                 <h3>New reservation</h3>
             </div>
             <div class="card-body">
@@ -116,6 +116,23 @@
                 <div class="form-group">
                     <label for="about">About</label>
                     <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
+                </div>
+                <div class="form-group row">
+                    <div class="col-4">
+                        <p>Associate account to:</p>
+                    </div>
+                    <div class="col-2">
+                        <input id="group" type="radio" class="form-check-input" name="project_or_group"  value="group" [(ngModel)]="group_or_project">
+                        <label for="group" class="form-check-label">
+                            Group
+                        </label>
+                    </div>
+                    <div class="col-2">
+                        <input id="project" type="radio" class="form-check-input" name="project_or_group" value="project" [(ngModel)]="group_or_project">
+                        <label for="project" class="form-check-label">
+                            Project
+                        </label>
+                    </div>
                 </div>
                 <button class="btn btn-secondary" (click)="reserve()">Reserve</button>
                 <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
