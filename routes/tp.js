@@ -264,7 +264,7 @@ router.exec_tp_reservation = async function(reservation_id){
     }
 };
 
-var tp_reservation = async function(userId, from_date, to_date, quantity, about){
+var tp_reservation = async function(userId, from_date, to_date, quantity, about, group_or_project){
     // Create a reservation
     let reservation = {
         'owner': userId,
@@ -274,7 +274,8 @@ var tp_reservation = async function(userId, from_date, to_date, quantity, about)
         'accounts': [],
         'about': about,
         'created': false,
-        'over': false
+        'over': false,
+        'group_or_project': group_or_project
     };
 
     await dbsrv.mongo_reservations().insertOne(reservation);
@@ -374,7 +375,7 @@ router.post('/tp', async function(req, res) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
-    tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about).then(function(reservation){
+    tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about, req.body.group_or_project).then(function(reservation){
         res.send({reservation: reservation, message: 'Reservation done'});
         res.end();
         return;
