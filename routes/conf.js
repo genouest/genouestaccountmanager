@@ -26,6 +26,7 @@ router.get('/conf', async function(req, res){
         'duration': Object.keys(my_conf.duration),
         'project': my_conf.project,
         'registration': my_conf.registration || [],
+        'allow_extend': my_conf.general.allow_extend===false?  my_conf.general.allow_extend: true
     };
 
     // should be check on each call

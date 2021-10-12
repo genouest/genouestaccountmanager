@@ -655,7 +655,18 @@ router.get('/user/:id/activate', async function(req, res) {
         return;
     }
 
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{
+        '$set': {
+            status: STATUS_ACTIVE,
+            uidnumber: minuid,
+            gidnumber: user.gidnumber,
+            expiration: new Date().getTime() + day_time*duration_list[user.duration],
+            expiration_notif: 0
+        },
+        '$push': {
+            history: {action: 'validation', date: new Date().getTime()}
+        }
+    });
 
     try {
         let msg_destinations = [user.email];
@@ -1276,6 +1287,26 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
+    if (GENERAL_CONFIG.allow_extend === false) {
+        let session_user = null;
+        let isadmin = false;
+        try {
+            session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+            isadmin = await rolsrv.is_admin(session_user);
+            if(!isadmin) {
+                res.status(403).send({message: 'not allowed'});
+                res.end();
+                return;
+            }
+        } catch(e) {
+            logger.error(e);
+            res.status(403).send({message: 'not allowed'});
+            res.end();
+            return;
+        }
+    }
+
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
