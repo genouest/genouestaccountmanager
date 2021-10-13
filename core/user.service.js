@@ -60,7 +60,7 @@ async function activate_user(user) {
             if (CONFIG.general.auto_add_group) {
                 let groupexisted = await dbsrv.mongo_oldgroups().findOne({'name': user.group});
                 if(groupexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
-                    logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
+                    logger.error(`Group name ${user.uid} already used in the past, preventing reuse`);
                     throw {code: 403, message: 'Group name already used in the past'};
                 }
                 try {
@@ -79,7 +79,7 @@ async function activate_user(user) {
         user.gidnumber = data.gid;
     }
 
-    user.home = usrsrv.get_user_home(user);
+    user.home = get_user_home(user);
     let fid = new Date().getTime();
     try {
         await goldap.add(user, fid);
@@ -90,7 +90,7 @@ async function activate_user(user) {
         throw {code: 500,message: 'Add User Failed'};
     }
 
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     return user;
 }
