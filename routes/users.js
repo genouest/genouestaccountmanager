@@ -656,10 +656,10 @@ router.get('/user/:id/activate', async function(req, res) {
     }
 
     if (error) {
-        res.send({message: 'Activation error', fid: fid, error: []});
+        res.send({message: 'Activation error', error: []});
         res.end();
     } else {
-        res.send({message: 'Activation in progress', fid: fid, error: []});
+        res.send({message: 'Activation in progress', error: []});
         res.end();
     }
 });
