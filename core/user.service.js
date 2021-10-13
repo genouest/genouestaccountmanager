@@ -47,7 +47,7 @@ function get_user_home(user) {
 }
 
 
-async function activate_user(user, action_owner) {
+async function activate_user(user, action_owner = 'auto') {
     if (!user.password) {
         user.password = Math.random().toString(36).slice(-10);
     }
@@ -98,7 +98,7 @@ async function activate_user(user, action_owner) {
 }
 
 
-async function create_user(user, action_owner) {
+async function create_user(user, action_owner = 'auto') {
     user.status = STATUS_PENDING_EMAIL;
 
     let regkey = Math.random().toString(36).substring(7);
@@ -232,7 +232,7 @@ async function create_admin(default_admin, default_admin_group){
     }
 }
 
-async function remove_user_from_group(uid, secgroup, action_owner) {
+async function remove_user_from_group(uid, secgroup, action_owner = 'auto') {
     logger.info('Remove user ' + uid + ' from group ' + secgroup);
     let user = await dbsrv.mongo_users().findOne({uid: uid});
 
@@ -290,7 +290,7 @@ async function remove_user_from_group(uid, secgroup, action_owner) {
 
 
 
-async function add_user_to_group(uid, secgroup, action_owner) {
+async function add_user_to_group(uid, secgroup, action_owner = 'auto') {
     logger.info('Adding user ' + uid + ' to group ' + secgroup);
     let user = await dbsrv.mongo_users().findOne({uid: uid});
     if(!user){
@@ -329,7 +329,7 @@ async function add_user_to_group(uid, secgroup, action_owner) {
 
 }
 
-async function remove_user_from_project(oldproject, uid, action_owner, force) {
+async function remove_user_from_project(oldproject, uid, action_owner = 'auto', force = false) {
     logger.info('Remove user ' + uid + ' from project ' + oldproject);
 
     let fid = new Date().getTime();
@@ -378,7 +378,7 @@ async function remove_user_from_project(oldproject, uid, action_owner, force) {
 }
 
 
-async function add_user_to_project(newproject, uid, action_owner) {
+async function add_user_to_project(newproject, uid, action_owner = 'auto') {
     logger.info('Adding user ' + uid + ' to project ' + newproject);
 
     let fid = new Date().getTime();
@@ -450,7 +450,7 @@ async function add_user_to_project(newproject, uid, action_owner) {
     }
 }
 
-async function delete_user(user, action_owner_id, message = '', sendmail = false){
+async function delete_user(user, action_owner = 'auto', message = '', sendmail = false){
     let user_is_activ = true;
 
     if(user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL){
@@ -488,10 +488,10 @@ async function delete_user(user, action_owner_id, message = '', sendmail = false
         return false;
     }
 
-    grpsrv.clear_user_groups(user, action_owner_id);
+    grpsrv.clear_user_groups(user, action_owner);
 
     await dbsrv.mongo_events().insertOne({
-        'owner': action_owner_id,
+        'owner': action_owner,
         'date': new Date().getTime(),
         'action': 'delete user ' + user.uid ,
         'logs': [user.uid + '.' + fid + '.update']
@@ -514,7 +514,7 @@ async function delete_user(user, action_owner_id, message = '', sendmail = false
                 'subject': 'account deletion: ' + user.uid
             }, {
                 '#UID#': user.uid,
-                '#USER#': action_owner_id,
+                '#USER#': action_owner,
                 '#MSG#': mail_message
             });
         }
@@ -524,7 +524,7 @@ async function delete_user(user, action_owner_id, message = '', sendmail = false
 
     if(user_is_activ){
         try {
-            await plgsrv.run_plugins('remove', user.uid, user, action_owner_id);
+            await plgsrv.run_plugins('remove', user.uid, user, action_owner);
         } catch(err) {
             logger.error('remove errors', err);
         }

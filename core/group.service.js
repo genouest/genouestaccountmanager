@@ -69,7 +69,7 @@ function get_group_home(user) {
 }
 
 
-async function create_group(group_name, owner_name, action_owner) {
+async function create_group(group_name, owner_name, action_owner = 'auto') {
     let mingid = await idsrv.getGroupAvailableId();
     let fid = new Date().getTime();
     let group = {name: group_name, gid: mingid, owner: owner_name};
@@ -96,7 +96,7 @@ async function create_group(group_name, owner_name, action_owner) {
 }
 
 
-async function delete_group(group, action_owner) {
+async function delete_group(group, action_owner = 'auto') {
     await dbsrv.mongo_groups().deleteOne({'name': group.name});
     if (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse) {
         await dbsrv.mongo_oldgroups().insertOne({
@@ -119,7 +119,7 @@ async function delete_group(group, action_owner) {
 }
 
 
-async function clear_user_groups(user, action_owner) {
+async function clear_user_groups(user, action_owner = 'auto') {
     let allgroups = user.secondarygroups;
     if (user.group && user.group != '') {
         allgroups.push(user.group);
