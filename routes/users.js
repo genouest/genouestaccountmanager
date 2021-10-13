@@ -895,7 +895,9 @@ router.post('/user/:id', async function(req, res) {
     if (req.locals.logInfo) {
         try {
             let session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-            action_owner = session_user.uid;
+            if (session_user) {
+                action_owner = session_user.uid;
+            }
         } catch(e) {
             logger.error(e);
         }
