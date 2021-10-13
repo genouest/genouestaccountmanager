@@ -26,6 +26,7 @@ const maisrv = require('../core/mail.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
+const grpsrv = require('../core/group.service.js');
 
 const ObjectID = require('mongodb').ObjectID;
 
@@ -36,20 +37,11 @@ var STATUS_ACTIVE = 'Active';
 // eslint-disable-next-line no-unused-vars
 var STATUS_EXPIRED = 'Expired';
 
-var createExtraGroup = async function (ownerName) {
-    let mingid = await idsrv.getGroupAvailableId();
-    let fid = new Date().getTime();
-    let group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
-    await dbsrv.mongo_groups().insertOne(group);
 
-    await goldap.add_group(group, fid);
-    try {
-        let created_file = await filer.user_add_group(group, fid);
-        logger.debug('Created file', created_file);
-    } catch(error) {
-        logger.error('Add Group Failed for: ' + group.name, error);
-    }
-    group.fid = fid;
+
+var createExtraGroup = async function (ownerName) {
+    // let group = { name: 'tp' + mingid, gid: mingid, owner: ownerName };
+    let group = await grpsrv.create_group('tp' + mingid, ownerName);
     return group;
 };
 
@@ -62,20 +54,10 @@ var deleteExtraGroup = async function (group) {
     if(!group_to_remove) {
         return false;
     }
-    await dbsrv.mongo_groups().removeOne({ 'name': group.name });
-    let fid = new Date().getTime();
-    await goldap.delete_group(group, fid);
-    try {
-        let created_file = await  filer.user_delete_group(group, fid);
-        logger.debug('Created file', created_file);
-    } catch(error) {
-        logger.error('Delete Group Failed for: ' + group.name, error);
-    }
-
-    await idsrv.freeGroupId(group.gid);
-    await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'delete group ' + group.name , 'logs': [group.name + '.' + fid + '.update'] });
-    return true;
+    let res = await grpsrv.delete_group(group);
+    return res;
 };
+
 
 var create_tp_users_db = function (owner, quantity, duration, end_date, userGroup) {
     // Duration in days
