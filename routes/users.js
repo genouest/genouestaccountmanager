@@ -611,7 +611,7 @@ router.get('/user/:id/activate', async function(req, res) {
     }
 
     try {
-        user = await usrsrv.activate_user(user);
+        user = await usrsrv.activate_user(user, session_user.uid);
     } catch(error) {
         logger.error(error);
         res.status(error.code).send({message: error.message});
@@ -638,9 +638,6 @@ router.get('/user/:id/activate', async function(req, res) {
     } catch(error) {
         logger.error(error);
     }
-
-    await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-
 
     let error = false;
     try {
@@ -893,10 +890,19 @@ router.post('/user/:id', async function(req, res) {
         extra_info: req.body.extra_info || []
     };
 
-    await dbsrv.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
+    // check if register user is done by admin or by anonymouse user
+    let action_owner = user.uid;
+    if (req.locals.logInfo) {
+        try {
+            let session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+            action_owner = session_user.uid;
+        } catch(e) {
+            logger.error(e);
+        }
+    }
 
     try {
-        user = await usrsrv.create_user(user);
+        user = await usrsrv.create_user(user, action_owner);
     } catch (error) {
         logger.error(error);
     }

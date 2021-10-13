@@ -47,7 +47,7 @@ function get_user_home(user) {
 }
 
 
-async function activate_user(user) {
+async function activate_user(user, action_owner) {
     if (!user.password) {
         user.password = Math.random().toString(36).slice(-10);
     }
@@ -92,11 +92,13 @@ async function activate_user(user) {
 
     await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
+    await dbsrv.mongo_events().insertOne({'owner': action_owner,'date': new Date().getTime(), 'action': 'activate user ' + user.uid, 'logs': [user.uid + '.' + fid + '.update']});
+
     return user;
 }
 
 
-async function create_user(user) {
+async function create_user(user, action_owner) {
     user.status = STATUS_PENDING_EMAIL;
 
     let regkey = Math.random().toString(36).substring(7);
@@ -150,6 +152,8 @@ async function create_user(user) {
 
     await dbsrv.mongo_users().insertOne(user);
 
+    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'user registration ' + user.uid , 'logs': []});
+
     return user;
 }
 
@@ -182,11 +186,13 @@ async function create_extra_user(user_name, group, internal_user){
         expiration: new Date().getTime() + day_time*360,
         extra_info: []
     };
-    user = await create_user(user);
+
+    // as it is auto created on startup we considere action_owner to be current admin user
+    let action_owner = user.uid;
+    user = await create_user(user, action_owner);
     user.password = password;
 
-    user = await activate_user(user);
-
+    user = await activate_user(user, action_owner);
 
     delete user.password;
 
