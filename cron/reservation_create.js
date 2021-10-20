@@ -2,7 +2,7 @@ const Promise = require('promise');
 
 //const CONFIG = require('config');
 
-const tps = require('../routes/tp.js');
+const tpssrv = require('../core/tps.service.js');
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
@@ -39,7 +39,7 @@ var processReservation = function(reservation){
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
         logger.info('create user for reservation ', reservation);
-        tps.exec_tp_reservation(reservation._id, 'auto').then(function(res){
+        tpssrv.exec_tp_reservation(reservation._id, 'auto').then(function(res){
             logger.debug('set reservation as done', res);
             dbsrv.mongo_reservations().updateOne({'_id': res._id},{'$set': {'created': true}}).then(function(){
                 resolve(res);
