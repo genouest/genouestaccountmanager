@@ -16,7 +16,6 @@ var GENERAL_CONFIG = CONFIG.general;
 
 const goldap = require('../core/goldap.js');
 const dbsrv = require('../core/db.service.js');
-const idsrv = require('../core/id.service.js');
 const maisrv = require('../core/mail.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const sansrv = require('../core/sanitize.service.js');
@@ -610,52 +609,16 @@ router.get('/user/:id/activate', async function(req, res) {
         res.end();
         return;
     }
-    user.password = Math.random().toString(36).slice(-10);
-    let minuid = await idsrv.getUserAvailableId();
-    user.uidnumber = minuid;
-    user.gidnumber = -1;
-    if (!CONFIG.general.disable_user_group) {
-        let data = await dbsrv.mongo_groups().findOne({'name': user.group});
-        if(!data) {
-            if (CONFIG.general.auto_add_group) {
-                let groupexisted = await dbsrv.mongo_oldgroups().findOne({'name': user.group});
-                if(groupexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
-                    logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
-                    res.status(403).send({message: 'Group name already used in the past'});
-                    return;
-                }
-                try {
-                    await grpsrv.create_group(user.group, user.uid);
-                } catch(error){
-                    logger.error('Add Group Failed for: ' + user.group, error);
-                    res.status(500).send({message: 'Add Group Failed'});
-                    return;
-                }
 
-                data = await dbsrv.mongo_groups().findOne({'name': user.group});
-            } else {
-
-                res.status(403).send({message: 'Group ' + user.group + ' does not exist, please create it first'});
-                res.end();
-                return;
-            }
-        }
-        user.gidnumber = data.gid;
-    }
-
-    user.home = usrsrv.get_user_home(user);
-    let fid = new Date().getTime();
     try {
-        await goldap.add(user, fid);
-        let created_file = await filer.user_add_user(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch(error){
-        logger.error('Add User Failed for: ' + user.uid, error);
-        res.status(500).send({message: 'Add User Failed'});
+        user = await usrsrv.activate_user(user, session_user.uid);
+    } catch(error) {
+        logger.error(error);
+        res.status(error.code).send({message: error.message});
+        res.end();
         return;
     }
 
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     try {
         let msg_destinations = [user.email];
@@ -676,9 +639,6 @@ router.get('/user/:id/activate', async function(req, res) {
         logger.error(error);
     }
 
-    await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'activate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
-
-
     let error = false;
     try {
         error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
@@ -696,10 +656,10 @@ router.get('/user/:id/activate', async function(req, res) {
     }
 
     if (error) {
-        res.send({message: 'Activation error', fid: fid, error: []});
+        res.send({message: 'Activation error', error: []});
         res.end();
     } else {
-        res.send({message: 'Activation in progress', fid: fid, error: []});
+        res.send({message: 'Activation in progress', error: []});
         res.end();
     }
 });
@@ -911,26 +871,7 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
 
-    let regkey = Math.random().toString(36).substring(7);
-    let default_main_group = GENERAL_CONFIG.default_main_group || '';
-    let group = '';
-    if (!CONFIG.general.disable_user_group) {
-        switch (CONFIG.general.registration_group) {
-        case 'username':
-            group = req.params.id;
-            break;
-        case 'main':
-            group = default_main_group;
-            break;
-        case 'team': // use the team by default for retro-compatibility
-        default:
-            group = req.body.team;
-            break;
-        }
-    }
-
     let user = {
-        status: STATUS_PENDING_EMAIL,
         uid: req.params.id,
         firstname: req.body.firstname,
         lastname: req.body.lastname,
@@ -941,33 +882,34 @@ router.post('/user/:id', async function(req, res) {
         lab: req.body.lab,
         responsible: req.body.responsible,
         team: req.body.team,
-        group: group,
-        secondarygroups: [],
-        maingroup: default_main_group,
-        home: '',
         why: req.body.why,
         ip: req.body.ip,
-        regkey: regkey,
-        is_internal: false,
         is_fake: req.body.is_fake,
-        uidnumber: -1,
-        gidnumber: -1,
-        cloud: false,
         duration: req.body.duration,
-        expiration: new Date().getTime() + day_time*duration_list[req.body.duration],
-        loginShell: '/bin/bash',
         history: [{action: 'register', date: new Date().getTime()}],
         extra_info: req.body.extra_info || []
     };
-    // user[CONFIG.general.internal_flag] = false,
-    user.home = usrsrv.get_user_home(user);
 
-    await dbsrv.mongo_events().insertOne({'owner': req.params.id, 'date': new Date().getTime(), 'action': 'user registration ' + req.params.id , 'logs': []});
+    // check if register user is done by admin or by anonymouse user
+    let action_owner = user.uid;
+    if (req.locals.logInfo) {
+        try {
+            let session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+            if (session_user) {
+                action_owner = session_user.uid;
+            }
+        } catch(e) {
+            logger.error(e);
+        }
+    }
 
+    try {
+        user = await usrsrv.create_user(user, action_owner);
+    } catch (error) {
+        logger.error(error);
+    }
 
-    await dbsrv.mongo_users().insertOne(user);
-    let uid = req.params.id;
-    let link = GENERAL_CONFIG.url + encodeURI('/user/'+uid+'/confirm?regkey='+regkey);
+    let link = GENERAL_CONFIG.url + encodeURI('/user/' + user.uid + '/confirm?regkey=' + user.regkey);
     try {
         let msg_destinations = [user.email];
         if (user.send_copy_to_support) {

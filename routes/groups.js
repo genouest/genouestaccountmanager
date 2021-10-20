@@ -202,7 +202,7 @@ router.post('/group/:id', async function(req, res){
     }
 
     try {
-        group = await grpsrv.create_group(req.params.id , owner);
+        group = await grpsrv.create_group(req.params.id , owner, session_user.uid);
     } catch(error){
         logger.error('Add Group Failed for: ' + req.params.id, error);
         res.status(500).send({message: 'Add Group Failed'});
