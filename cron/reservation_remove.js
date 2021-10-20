@@ -3,7 +3,7 @@ const Promise = require('promise');
 
 const CONFIG = require('config');
 
-const tps = require('../routes/tp.js');
+const tpssrv = require('../core/tps.service.js');
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
@@ -42,7 +42,7 @@ dbsrv.init_db().then(()=>{
             Promise.all(reservation.accounts.map(function(user){
                 return dbsrv.mongo_users().findOne({'uid': user});
             })).then(function(users){
-                return tps.delete_tp_users(users, reservation.group, 'auto');
+                return tpssrv.delete_tp_users(users, reservation.group, 'auto');
             }).then(function(){
                 console.log('[INFO] close reservation', reservations);
                 Promise.all(reservations.map(function(reservation){
