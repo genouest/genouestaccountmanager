@@ -267,7 +267,7 @@ async function remove_user_from_group(uid, secgroup, action_owner = 'auto') {
     }
 
     try {
-        let created_file = await filer.user_change_group(user, fid);
+        let created_file = await filer.user_change_group(user, [], [secgroup], fid);
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
@@ -318,7 +318,7 @@ async function add_user_to_group(uid, secgroup, action_owner = 'auto') {
     }
 
     try {
-        let created_file = await filer.user_change_group(user, fid);
+        let created_file = await filer.user_change_group(user, [secgroup], [], fid);
         logger.info('File Created: ', created_file);
         await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'add user ' + uid + ' to secondary  group ' + secgroup , 'logs': [created_file]});
     } catch(error){
