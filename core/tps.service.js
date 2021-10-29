@@ -142,7 +142,7 @@ async function delete_tp_users(users, group, admin_id) {
     for (user in users) {
         await delete_tp_users(user, admin_id);
     }
-    await deleteExtraGroup(group).then(function() {
+    await deleteExtraGroup(group);
 }
 
 
