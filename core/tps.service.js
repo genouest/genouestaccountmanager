@@ -31,6 +31,7 @@ exports.tp_reservation = tp_reservation;
 exports.exec_tp_reservation = exec_tp_reservation;
 exports.delete_tp_users = delete_tp_users;
 
+
 async function createExtraGroup(ownerName) {
     let mingid = await idsrv.getGroupAvailableId();
     let group = await grpsrv.create_group('tp' + mingid, ownerName);
@@ -53,74 +54,40 @@ async function deleteExtraGroup(group) {
 
 async function create_tp_users_db (owner, quantity, duration, end_date, userGroup) {
     // Duration in days
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
-        logger.debug('create_tp_users ', owner, quantity, duration);
-        let minuid = 1000;
+    logger.debug('create_tp_users ', owner, quantity, duration);
+    let startnbr = await idsrv.getUserAvailableId();
 
-        let users = [];
+    let users = [];
+    try {
         for(let i=0;i<quantity;i++) {
-            logger.debug('create user ', CONFIG.tp.prefix + minuid);
+            logger.debug('create user ', CONFIG.tp.prefix + startnbr);
             let user = {
-                status: STATUS_PENDING_APPROVAL,
-                uid: CONFIG.tp.prefix + minuid,
+                uid: CONFIG.tp.prefix + startnbr,
                 firstname: CONFIG.tp.prefix,
-                lastname: minuid,
-                email: CONFIG.tp.prefix + minuid + '@fake.' + CONFIG.tp.fake_mail_domain,
-                address: '',
-                lab: '',
+                lastname: startnbr,
+                email: CONFIG.tp.prefix + startnbr + '@fake.' + CONFIG.tp.fake_mail_domain,
                 responsible: owner,
                 group: (CONFIG.general.disable_user_group) ? '' : userGroup.name,
                 secondarygroups: (CONFIG.general.disable_user_group) ? [userGroup.name] : [],
-                maingroup: CONFIG.general.default_main_group,
-                home: '',
                 why: 'TP/Training',
-                ip: '',
-                regkey: '',
                 is_internal: false,
                 is_fake: true,
-                uidnumber: minuid,
-                gidnumber: (CONFIG.general.disable_user_group) ? -1 : userGroup.gid,
                 duration: duration,
                 expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
-                loginShell: '/bin/bash',
-                history: []
             };
-            user.home = usrsrv.get_user_home(user);
+            user = await usrsrv.create_user(user);
+            user.password = Math.random().toString(36).slice(-10);
+            await usrsrv.activate_user(user);
             users.push(user);
-            minuid++;
+            startnbr++;
         }
-        Promise.all(users.map(function(user) {
-            logger.debug('map users to create_tp_user_db ', user);
-            return create_tp_user_db(user);
-        })).then(function(results) {
-            logger.debug('now activate users');
-            return activate_tp_users(owner, results);
-        }).then(function(activated_users) {
-            resolve(activated_users);
-        });
-    });
+    }
+    catch (error) {
+        logger.error(error);
+    }
+    return users;
 }
 
-async function create_tp_user_db (tp_user) {
-    let user = {...tp_user};
-    logger.debug('create_tp_user_db', user.uid);
-    try {
-        let uid = await idsrv.getUserAvailableId();
-        user.uid = CONFIG.tp.prefix + uid;
-        user.lastname = uid;
-        user.email = CONFIG.tp.prefix + uid + '@fake.' + CONFIG.tp.fake_mail_domain;
-        user.uidnumber = uid;
-        user.home = usrsrv.get_user_home(user);
-        await dbsrv.mongo_users().insertOne(user);
-        user.password = Math.random().toString(36).slice(-10);
-        return user;
-    }
-    catch(exception) {
-        logger.error(exception);
-        throw exception;
-    }
-}
 
 async function send_user_passwords(owner, from_date, to_date, users) {
     logger.debug('send_user_passwords');
@@ -157,57 +124,27 @@ async function send_user_passwords(owner, from_date, to_date, users) {
     return users;
 }
 
-function activate_tp_users(owner, users) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
-        Promise.all(users.map(function(user) {
-            return activate_tp_user(user, owner);
-        })).then(function(users) {
-            // logger.debug("activate_tp_users", users);
-            resolve(users);
-        });
-    });
+
+async function delete_tp_user(user, admin_id) {
+
+    logger.debug('delete_tp_user', user.uid);
+    try{
+        await fdbs.delete_dbs(user);
+        await fwebs.delete_webs(user);
+        await usrsrv.delete_user(user, admin_id);
+    }
+    catch(exception) {
+        logger.error(exception);
+    }
 }
 
-function delete_tp_user(user, admin_id) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
-        logger.debug('delete_tp_user', user.uid);
-        try{
-            fdbs.delete_dbs(user).then(function(db_res) {
-                return db_res;
-                // eslint-disable-next-line no-unused-vars
-            }).then(function(db_res) {
-                return fwebs.delete_webs(user);
-                // eslint-disable-next-line no-unused-vars
-            }).then(function(web_res) {
-                return usrsrv.delete_user(user, admin_id);
-            }).then(function() {
-                resolve(true);
-            });
-
-        }
-        catch(exception) {
-            logger.error(exception);
-            resolve(false);
-        }
-    });
+async function delete_tp_users(users, group, admin_id) {
+    for (user in users) {
+        await delete_tp_users(user, admin_id);
+    }
+    await deleteExtraGroup(group).then(function() {
 }
 
-function delete_tp_users(users, group, admin_id) {
-    // eslint-disable-next-line no-unused-vars
-    return new Promise(function (resolve, reject) {
-        Promise.all(users.map(function(user) {
-            return delete_tp_user(user, admin_id);
-        })).then(function(users) {
-            logger.debug('deleted tp_users');
-            deleteExtraGroup(group).then(function() {
-                resolve(users);
-            });
-        });
-    });
-
-}
 
 async function exec_tp_reservation(reservation_id) {
     // Create users for reservation
@@ -255,42 +192,4 @@ async function tp_reservation(userId, from_date, to_date, quantity, about, group
     await dbsrv.mongo_reservations().insertOne(reservation);
     logger.debug('reservation ', reservation);
     return reservation;
-}
-
-async function insert_ldap_user(user, fid) {
-    logger.debug('prepare ldap scripts');
-    try {
-        await goldap.add(user, fid);
-        logger.debug('switch to ACTIVE');
-        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE}});
-        return user;
-    } catch(err) {
-        logger.error(err);
-        throw user;
-    }
-}
-
-async function activate_tp_user(user, adminId) {
-    let db_user = await dbsrv.mongo_users().findOne({'uid': user.uid});
-    if(!db_user) {
-        logger.error('failure:',user.uid);
-        throw `user activation failed ${user.uid}`;
-    }
-    logger.debug('activate', user.uid);
-    let fid = new Date().getTime();
-    let ldap_user = await insert_ldap_user(user, fid);
-    try {
-        let created_file = await filer.user_add_user(ldap_user, fid);
-        logger.debug('Created file', created_file);
-    } catch(error) {
-        logger.error('Add User Failed for: ' + user.uid, error);
-    }
-
-    try {
-        await plgsrv.run_plugins('activate', user.uid, ldap_user, adminId);
-    } catch(err) {
-        logger.error('activation errors', err);
-    }
-    return ldap_user;
-
 }
