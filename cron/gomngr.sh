@@ -121,6 +121,14 @@ while true; do
       echo "Exit requested"
       exit 0
     fi
+    echo "Check for project expiration"
+    /opt/crontask.sh project_quota_expire
+    if [ $EXIT_REQUEST -eq 1 ]; then
+      rm /tmp/gomngr.lock
+      rm /tmp/gomngr.list
+      echo "Exit requested"
+      exit 0
+    fi
   fi
   if [ $NOW -gt $TOMORROW ]; then
     echo "Check for reservation removal"

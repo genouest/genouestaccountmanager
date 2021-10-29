@@ -62,5 +62,5 @@ dbsrv.init_db().then(async () => {
         }
 
     }
-
+    process.exit(0);
 });
