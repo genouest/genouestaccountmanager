@@ -51,7 +51,7 @@ async function remove_from_group(uid, secgroup) {
     }
 
     try {
-        let created_file = await filer.user_change_group(user, fid);
+        let created_file = await filer.user_change_group(user, [], [secgroup], fid);
         logger.info('File Created: ', created_file);
     } catch(error){
         logger.error('Group Change Failed for: ' + user.uid, error);
