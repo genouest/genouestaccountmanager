@@ -28,6 +28,7 @@ export class TpsComponent implements OnInit {
     authorized: boolean
 
     group_or_project: string
+    name: string
 
     refresh: Subject<any> = new Subject();
 
@@ -38,14 +39,14 @@ export class TpsComponent implements OnInit {
         private tpService: TpserviceService
     ) { }
 
-    private listEvents(){
+    private listEvents() {
         this.tpService.list().subscribe(
             resp => {
                 let events = [];
-                for(var i = 0;i < resp.length;i++){
+                for (var i = 0; i < resp.length; i++) {
                     let event = resp[i];
                     events.push({
-                        'title': event.owner+', '+ event.quantity+' students',
+                        'title': event.owner + ', ' + event.quantity + ' students',
                         'start': new Date(event.from),
                         'end': new Date(event.to),
                         'allDay': false,
@@ -76,6 +77,7 @@ export class TpsComponent implements OnInit {
         this.events = [];
         this.authorized = (this.authService.profile.is_trainer || this.authService.profile.is_admin);
         this.group_or_project = 'group';
+        this.name = 'tps';
         this.listEvents();
     }
 
@@ -94,14 +96,14 @@ export class TpsComponent implements OnInit {
         this.refresh.next();
     }
 
-    reserve(){
+    reserve() {
         this.msg = '';
         this.errmsg = '';
         if (this.quantity <= 0) {
             this.reserrmsg = 'Quantity must be > 0';
             return;
         }
-        if(this.fromDate > this.toDate) {
+        if (this.fromDate > this.toDate) {
             this.reserrmsg = 'Final date must be superior to start date';
             return;
         }
@@ -110,7 +112,8 @@ export class TpsComponent implements OnInit {
             from: new Date(this.fromDate).getTime(),
             to: new Date(this.toDate).getTime(),
             about: this.about,
-            group_or_project: this.group_or_project
+            group_or_project: this.group_or_project,
+            name: this.name
         }
         console.log(reservation);
         this.tpService.reserve(reservation).subscribe(
@@ -122,7 +125,7 @@ export class TpsComponent implements OnInit {
         )
     }
 
-    cancel_reservation(){
+    cancel_reservation() {
         this.msg = '';
         this.errmsg = '';
         this.tpService.cancel(this.selectedEvent.id).subscribe(
@@ -138,7 +141,7 @@ export class TpsComponent implements OnInit {
         this.selectedEvent.title = event.title;
         this.selectedEvent.start = event.start;
         this.selectedEvent.end = event.end;
-        if (! event.meta.group) {
+        if (!event.meta.group) {
             this.selectedEvent.group = {}
         }
     }
@@ -154,7 +157,7 @@ export class TpsComponent implements OnInit {
     }
 
     get_status(over) {
-        if(over) {
+        if (over) {
             return "panel panel-danger";
         }
         else {
