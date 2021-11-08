@@ -23,6 +23,12 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     if (!new_project.expire) {
         new_project.expire = new Date().getTime() + CONFIG.project.default_expire * day_time;
     }
+    if (!new_project.size) {
+        new_project.size = CONFIG.project.default_size;
+    }
+    if (!new_project.path) {
+        new_project.path = CONFIG.project.default_path + '/' + new_project.id;
+    }
     await dbsrv.mongo_projects().insertOne(new_project);
     let fid = new Date().getTime();
     try {
@@ -33,8 +39,11 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
         throw {code: 500, message: 'Add Project Failed'};
     }
 
-    await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
+    if (uuid) {
+        await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
+    }
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
+    return new_project.id;
 }
 
 async function remove_project(id, action_owner = 'auto') {
