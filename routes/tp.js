@@ -323,7 +323,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         return;
     }
 
-    let newresa = await tpsrsv.exec_tp_reservation(reservation._id, 'auto');
+    let newresa = await tpssrv.exec_tp_reservation(reservation._id, 'auto');
     logger.debug('set reservation as done', newresa);
     await dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'created': true}});
     newresa.created = true;
