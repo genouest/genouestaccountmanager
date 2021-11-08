@@ -113,6 +113,12 @@
                         <input [ngModelOptions]="{standalone: true}" [(ngModel)]="toDate" type="date" class="form-control" />
                     </div>
                 </form>
+                <div class="form-group row">
+                    <div class="col-md-8">
+                        <label for="name" class="control-label">Training Name</label>
+                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="name" type="text" class="form-control"/>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="about">About</label>
                     <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>

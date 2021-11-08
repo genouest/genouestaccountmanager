@@ -175,7 +175,7 @@ async function exec_tp_reservation(reservation_id) {
     }
 }
 
-async function tp_reservation(userId, from_date, to_date, quantity, about, group_or_project) {
+async function tp_reservation(userId, from_date, to_date, quantity, about, group_or_project, name) {
     // Create a reservation
     let reservation = {
         'owner': userId,
@@ -186,7 +186,8 @@ async function tp_reservation(userId, from_date, to_date, quantity, about, group
         'about': about,
         'created': false,
         'over': false,
-        'group_or_project': group_or_project
+        'group_or_project': group_or_project,
+        'name': name
     };
 
     await dbsrv.mongo_reservations().insertOne(reservation);

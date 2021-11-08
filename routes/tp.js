@@ -74,7 +74,15 @@ router.post('/tp', async function(req, res) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
-    tpssrv.tp_reservation(user.uid, req.body.from, req.body.to, req.body.quantity, req.body.about, req.body.group_or_project).then(function(reservation){
+    tpssrv.tp_reservation(
+        user.uid,
+        req.body.from,
+        req.body.to,
+        req.body.quantity,
+        req.body.about,
+        req.body.group_or_project,
+        req.body.name
+    ).then(function(reservation){
         res.send({reservation: reservation, message: 'Reservation done'});
         res.end();
         return;
