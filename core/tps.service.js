@@ -1,7 +1,6 @@
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-
-const Promise = require('promise');
+const latinize = require('latinize');
 
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
@@ -13,12 +12,10 @@ const fwebs = require('../routes/web.js');
 
 const dbsrv = require('../core/db.service.js');
 const usrsrv = require('../core/user.service.js');
-const goldap = require('../core/goldap.js');
-const filer = require('../core/file.js');
 const idsrv = require('../core/id.service.js');
 const maisrv = require('../core/mail.service.js');
-const plgsrv = require('../core/plugin.service.js');
 const grpsrv = require('../core/group.service.js');
+const prjsrv = require('../core/project.service.js');
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -32,10 +29,19 @@ exports.exec_tp_reservation = exec_tp_reservation;
 exports.delete_tp_users = delete_tp_users;
 
 
-async function createExtraGroup(ownerName) {
+async function createExtraGroup(trainingName, ownerName) {
     let mingid = await idsrv.getGroupAvailableId();
-    let group = await grpsrv.create_group('tp' + mingid, ownerName);
+    let group = await grpsrv.create_group(trainingName + '_' + mingid, ownerName);
     return group;
+}
+
+async function createExtraProject(trainingName, ownerName) {
+    let mingid = await idsrv.getGroupAvailableId();
+    let project = await prjsrv.create_project({
+        'id': trainingName + '_' + mingid,
+        'owner': ownerName
+    });
+    return project;
 }
 
 
@@ -51,8 +57,20 @@ async function deleteExtraGroup(group) {
     return res;
 }
 
+async function deleteExtraProject(project) {
+    if (project === undefined || project === null) {
+        return false;
+    }
+    let project_to_remove = await dbsrv.mongo_projects().findOne({'name': project.id});
+    if(!project_to_remove) {
+        return false;
+    }
+    let res = await grpsrv.delete_project(project.id);
+    return res;
+}
 
-async function create_tp_users_db (owner, quantity, duration, end_date, userGroup) {
+
+async function create_tp_users_db (owner, quantity, duration, end_date, userGroup, userProject) {
     // Duration in days
     logger.debug('create_tp_users ', owner, quantity, duration);
     let startnbr = await idsrv.getUserAvailableId();
@@ -139,8 +157,8 @@ async function delete_tp_user(user, admin_id) {
 }
 
 async function delete_tp_users(users, group, admin_id) {
-    for (user in users) {
-        await delete_tp_users(user, admin_id);
+    for (let user in users) {
+        await delete_tp_user(user, admin_id);
     }
     await deleteExtraGroup(group);
 }
@@ -149,14 +167,27 @@ async function delete_tp_users(users, group, admin_id) {
 async function exec_tp_reservation(reservation_id) {
     // Create users for reservation
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
+    let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
+
     logger.debug('create a reservation group', reservation._id);
-    let newGroup = await createExtraGroup(reservation.owner);
+    let newGroup = '';
+    if (reservation.group_or_project == 'group') {
+        newGroup = await createExtraGroup(trainingName, reservation.owner);
+    }
+
+    logger.debug('create a reservation project', reservation._id);
+    let newProject = '';
+    if (reservation.group_or_project == 'project') {
+        newProject = await createExtraProject(trainingName, reservation.owner);
+    }
+
+
     logger.debug('create reservation accounts', reservation._id);
     let activated_users = await create_tp_users_db(
         reservation.owner,
         reservation.quantity,
         Math.ceil((reservation.to-reservation.from)/(1000*3600*24)),
-        reservation.to, newGroup
+        reservation.to, newGroup, newProject
     );
     for(let i=0;i<activated_users.length;i++) {
         logger.debug('activated user ', activated_users[i].uid);
