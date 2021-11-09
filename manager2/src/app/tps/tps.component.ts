@@ -17,6 +17,8 @@ export class TpsComponent implements OnInit {
     resmsg: string
     reserrmsg: string
 
+    session_user: any
+
     viewDate: Date
     events: any
     selectedEvent: any
@@ -75,7 +77,8 @@ export class TpsComponent implements OnInit {
         this.viewDate = new Date();
         this.quantity = 1;
         this.events = [];
-        this.authorized = (this.authService.profile.is_trainer || this.authService.profile.is_admin);
+        this.session_user = this.authService.profile;
+        this.authorized = (this.session_user.is_trainer || this.session_user.is_admin);
         this.group_or_project = 'group';
         this.name = 'tps';
         this.listEvents();
@@ -134,6 +137,23 @@ export class TpsComponent implements OnInit {
         )
     }
 
+    create_reservation() {
+        this.msg = '';
+        this.errmsg = '';
+        this.tpService.create(this.selectedEvent.id).subscribe(
+            resp => this.msg = resp['message'],
+            err => this.errmsg = err.error.message
+        )
+    }
+
+    remove_reservation() {
+        this.msg = '';
+        this.errmsg = '';
+        this.tpService.remove(this.selectedEvent.id).subscribe(
+            resp => this.msg = resp['message'],
+            err => this.errmsg = err.error.message
+        )
+    }
 
     eventClicked(clickedEvent) {
         let event = clickedEvent.event;
