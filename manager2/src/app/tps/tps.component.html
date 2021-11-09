@@ -58,11 +58,11 @@
                             </tr>
                             <tr>
                                 <th>Group</th>
-                                <td>{{selectedEvent.group.name}}</td>
+                                <td><span *ngIf="selectedEvent.group && selectedEvent.group.name">{{selectedEvent.group.name}}</span></td>
                             </tr>
                             <tr>
                                 <th>Project</th>
-                                <td>{{selectedEvent.project.id}}</td>
+                                <td><span *ngIf="selectedEvent.project && selectedEvent.project.id" >{{selectedEvent.project.id}}</span></td>
                             </tr>
                             <tr>
                                 <th>Status</th>
