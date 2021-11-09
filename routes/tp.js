@@ -260,15 +260,15 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
         return;
     }
 
-    let users = await reservation.accounts.map(function(user){
-        return dbsrv.mongo_users().findOne({'uid': user});
-    });
-    if (users) {
-        await tpssrv.delete_tp_users(users, reservation.group, 'auto');
+    try {
+        tpssrv.remove_tp_reservation(reservation_id);
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send({message: 'Error will removing tp reservation'});
+        res.end();
+        return;
     }
-    logger.info('Close reservation', req.params.id);
-    await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
-    await dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
+
     res.send({message: 'Reservation closed'});
     res.end();
 });
@@ -323,9 +323,17 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         return;
     }
 
-    let newresa = await tpssrv.exec_tp_reservation(reservation._id, 'auto');
+    let newresa;
+    try {
+        newresa = await tpssrv.create_tp_reservation(reservation_id, 'auto');
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send({message: 'Error will creating tp reservation'});
+        res.end();
+        return;
+    }
+
     logger.debug('set reservation as done', newresa);
-    await dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'created': true}});
     newresa.created = true;
     res.send({reservation: newresa});
     res.end();
