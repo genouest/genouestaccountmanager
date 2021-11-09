@@ -38,7 +38,7 @@
                         <tbody>
                             <tr>
                                 <th>Owner</th>
-                                <td><a routerLink="/user/{{selectedEvent.owner}">{{selectedEvent.owner}}</a></td>
+                                <td><a routerLink="/user/{{selectedEvent.owner}}">{{selectedEvent.owner}}</a></td>
                             </tr>
                             <tr>
                                 <th>From</th>
@@ -83,7 +83,7 @@
                         </thead>
                         <tbody>
                             <tr *ngFor="let account of selectedEvent.students">
-                                <td><a routerLink="/user/{{account}">{{account}}</a></td>
+                                <td><a routerLink="/user/{{account}}">{{account}}</a></td>
                             </tr>
                         </tbody>
                     </table>
