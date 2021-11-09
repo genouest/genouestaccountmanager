@@ -8,6 +8,7 @@ const CONFIG = my_conf;
 const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
+const usrsrv = require('../core/user.service.js');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -43,6 +44,15 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
         await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
     }
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
+
+    try {
+        if (new_project.owner) {
+            await usrsrv.add_user_to_project(new_project.id, new_project.owner);
+        }
+    }
+    catch(error) {
+        logger.error(error);
+    }
     return new_project.id;
 }
 
