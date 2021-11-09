@@ -267,28 +267,37 @@ export class ProjectComponent implements OnInit {
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
             this.projectsService.fetch_dmp_fragment(dmpid).subscribe(
                 resp => {
-                 console.log(resp.data.project.title);
+
                     let funders = []
                     let dmpid = this.new_project.dmpid
-                    let data = resp.data.project.funding
-                    for (data in resp.data.data.project.funding) {
-                        console.log(resp.data.data.project.funding[data])
-                        if (resp.data.data.project.funding[data].fundingStatus == "Approuvé") {
-                            funders.push(resp.data.data.project.funding[data].funder.name)
+                    for (var data of resp.data.project.funding) {
+                        console.log(data)
+                        if (data.fundingStatus == "Granted" || data.fundingStatus == "Approuvé") {
+                            funders.push(data.funder.name)
                         }
                         
 
                     }
+                    console.log(funders)
+                    let research_output = null
+                    for (var elem of resp.data.researchOutputs){
+                        console.log("here")
+                        if (elem.research_output_id == "2126") {
+                            research_output = elem
+                            break
+                        }
+                    }
+                    console.log(research_output)
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
                     this.new_project = {
                         'id': resp.data.project.title,
-                        'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
+                        'description': this.convertToPlain(resp.data.project.description),
                         'orga': funders,
-                        'size': resp.data.data.researchOutput[0].dataStorage.estimatedVolume,
+                        'size': research_output.dataStorage.estimatedVolume || 0,
                         'dmpid': dmpid,
                     };
-
+                    console.log(this.new_project.id);
                 },
                 err => {
                     this.dmp_err_msg = err.error.message

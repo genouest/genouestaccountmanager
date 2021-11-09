@@ -532,7 +532,7 @@ router.post('/dmp/:id', async function (req, res) {
             Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzNjUzNjMwNH0.44fYka-sunTRZXjWNbzJVHOt5g35XFhIH8iuBSn9ZLc"
         }
     };
-    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2126', options);
+    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2127', options);
     console.log(resp);
     return res.send({ message: 'Dmp found', data: resp.data });
 });
@@ -549,7 +549,7 @@ router.post('/dmp/outputs/:id', async function (req, res) {
             Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzNjUzNjMwNH0.44fYka-sunTRZXjWNbzJVHOt5g35XFhIH8iuBSn9ZLc"
         }
     };
-    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id=2126', options);
+    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2127', options);
     console.log(resp);
 
 
