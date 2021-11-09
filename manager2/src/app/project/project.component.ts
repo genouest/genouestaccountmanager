@@ -267,10 +267,10 @@ export class ProjectComponent implements OnInit {
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
             this.projectsService.fetch_dmp_fragment(dmpid).subscribe(
                 resp => {
+                 console.log(resp.data.project.title);
                     let funders = []
                     let dmpid = this.new_project.dmpid
-                    let data = resp.data.data.project.funding
-                    console.log(data)
+                    let data = resp.data.project.funding
                     for (data in resp.data.data.project.funding) {
                         console.log(resp.data.data.project.funding[data])
                         if (resp.data.data.project.funding[data].fundingStatus == "Approuvé") {
@@ -282,7 +282,7 @@ export class ProjectComponent implements OnInit {
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
                     this.new_project = {
-                        'id': resp.data.data.project.acronym,
+                        'id': resp.data.project.title,
                         'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
                         'orga': funders,
                         'size': resp.data.data.researchOutput[0].dataStorage.estimatedVolume,
