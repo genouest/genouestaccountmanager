@@ -53,7 +53,7 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     catch(error) {
         logger.error(error);
     }
-    return new_project.id;
+    return new_project;
 }
 
 async function remove_project(id, action_owner = 'auto') {
