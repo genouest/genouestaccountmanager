@@ -167,6 +167,11 @@ async function delete_tp_users(users, group, admin_id) {
 async function exec_tp_reservation(reservation_id) {
     // Create users for reservation
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
+
+    if (!reservation.name) {
+        reservation.name = 'tp';
+    }
+
     let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
 
     logger.debug('create a reservation group', reservation._id);
