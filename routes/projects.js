@@ -528,11 +528,11 @@ router.post('/dmp/:id', async function (req, res) {
 
     const options = {
         headers: {
-            accept: "application/json",
-            Authorization: "Token token=lJbcVHG7Z2wA2mNii2vybA"
+            'content-Type': "application/json",
+            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzNjUzNjMwNH0.44fYka-sunTRZXjWNbzJVHOt5g35XFhIH8iuBSn9ZLc"
         }
     };
-    let resp = await axios.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/'+req.params.id + '?research_output_id=18365', options);
+    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id=2119', options);
     console.log(resp);
     return res.send({ message: 'Dmp found', data: resp.data });
 });
@@ -545,11 +545,11 @@ router.post('/dmp/outputs/:id', async function (req, res) {
 
     const options = {
         headers: {
-            accept: "application/json",
-            Authorization: "Token token=lJbcVHG7Z2wA2mNii2vybA"
+            'content-Type': "application/json",
+            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzNjUzNjMwNH0.44fYka-sunTRZXjWNbzJVHOt5g35XFhIH8iuBSn9ZLc"
         }
     };
-    let resp = await axios.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/'+req.params.id + '?research_output_id=18365', options);
+    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id=2119', options);
     console.log(resp);
 
 
