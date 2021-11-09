@@ -65,7 +65,7 @@ async function deleteExtraProject(project) {
     if(!project_to_remove) {
         return false;
     }
-    let res = await grpsrv.delete_project(project.id);
+    let res = await prjsrv.delete_project(project.id);
     return res;
 }
 
@@ -98,6 +98,17 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             await usrsrv.activate_user(user);
             users.push(user);
             startnbr++;
+
+
+            // TODO: find if we need to check the switch flag or if it is better to check the var
+            if (userGroup && userGroup != '') {
+                usrsrv.add_user_to_group(user.uid, userGroup);
+            }
+
+            if (userProject && userProject != '') {
+                usrsrv.add_user_to_project(userProject, user.uid);
+            }
+
         }
     }
     catch (error) {
@@ -200,7 +211,13 @@ async function exec_tp_reservation(reservation_id) {
     }
     try{
         await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users);
-        await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {'$set': {'accounts': reservation.accounts, 'group': newGroup}});
+        await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {
+            '$set': {
+                'accounts': reservation.accounts,
+                'group': newGroup,
+                'project': newProject
+            }
+        });
         logger.debug('reservation ', reservation);
         await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'create reservation for ' + reservation.owner , 'logs': [] });
         return reservation;
