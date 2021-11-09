@@ -25,8 +25,8 @@ var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
 exports.tp_reservation = tp_reservation;
-exports.exec_tp_reservation = exec_tp_reservation;
-exports.delete_tp_users = delete_tp_users;
+exports.create_tp_reservation = create_tp_reservation;
+exports.remove_tp_reservation = remove_tp_reservation;
 
 
 async function createExtraGroup(trainingName, ownerName) {
@@ -101,11 +101,11 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
 
 
             // TODO: find if we need to check the switch flag or if it is better to check the var
-            if (userGroup && userGroup != '') {
+            if (userGroup && userGroup.name && userGroup.name != '') {
                 usrsrv.add_user_to_group(user.uid, userGroup.name);
             }
 
-            if (userProject && userProject != '') {
+            if (userProject && userProject.id && userProject.id != '') {
                 usrsrv.add_user_to_project(userProject.id, user.uid);
             }
 
@@ -167,15 +167,54 @@ async function delete_tp_user(user, admin_id) {
     }
 }
 
-async function delete_tp_users(users, group, admin_id) {
+async function delete_tp_users(users, admin_id) {
     for (let user in users) {
         await delete_tp_user(user, admin_id);
     }
-    await deleteExtraGroup(group);
+
 }
 
 
-async function exec_tp_reservation(reservation_id) {
+async function remove_tp_reservation(reservation_id) {
+
+    logger.info('Close reservation', reservation_id);
+
+    let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
+
+    if (reservation.accounts)
+    {
+        logger.debug('delete account for reservation', reservation.accounts);
+        await delete_tp_users(reservation.accounts);
+    }
+
+    if (reservation.group && reservation.group.name && reservation.group.name != '') {
+        logger.debug('delete reservation group', reservation.group);
+        await deleteExtraGroup(reservation.group.name);
+    }
+
+    if (reservation.project && reservation.project.id && reservation.project.id != '') {
+        logger.debug('delete reservation project', reservation.project);
+        await deleteExtraProject(reservation.project.id);
+    }
+
+    try {
+        await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {
+            '$set': {
+                'over': true
+            }
+        });
+        await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
+
+    } catch (error) {
+        logger.error(error);
+    }
+
+}
+
+async function create_tp_reservation(reservation_id) {
+
+    logger.info('Create reservation', reservation_id);
+
     // Create users for reservation
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
 
@@ -186,13 +225,13 @@ async function exec_tp_reservation(reservation_id) {
     let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
 
     logger.debug('create a reservation group', reservation._id);
-    let newGroup = '';
+    let newGroup;
     if (reservation.group_or_project == 'group') {
         newGroup = await createExtraGroup(trainingName, reservation.owner);
     }
 
     logger.debug('create a reservation project', reservation._id);
-    let newProject = '';
+    let newProject;
     if (reservation.group_or_project == 'project') {
         newProject = await createExtraProject(trainingName, reservation.owner);
     }
@@ -215,7 +254,8 @@ async function exec_tp_reservation(reservation_id) {
             '$set': {
                 'accounts': reservation.accounts,
                 'group': newGroup,
-                'project': newProject
+                'project': newProject,
+                'created': true
             }
         });
         logger.debug('reservation ', reservation);
