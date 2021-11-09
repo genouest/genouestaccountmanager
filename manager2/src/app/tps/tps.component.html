@@ -38,7 +38,7 @@
                         <tbody>
                             <tr>
                                 <th>Owner</th>
-                                <td>{{selectedEvent.owner}}</td>
+                                <td><a routerLink="/user/{{selectedEvent.owner}">{{selectedEvent.owner}}</a></td>
                             </tr>
                             <tr>
                                 <th>From</th>
@@ -61,6 +61,10 @@
                                 <td>{{selectedEvent.group.name}}</td>
                             </tr>
                             <tr>
+                                <th>Project</th>
+                                <td>{{selectedEvent.project.id}}</td>
+                            </tr>
+                            <tr>
                                 <th>Status</th>
                                 <td *ngIf="!selectedEvent.created && !selectedEvent.over">Pending</td>
                                 <td *ngIf="selectedEvent.created && selectedEvent.over">Over</td>
@@ -79,7 +83,7 @@
                         </thead>
                         <tbody>
                             <tr *ngFor="let account of selectedEvent.students">
-                                <td>{{account}}</td>
+                                <td><a routerLink="/user/{{account}">{{account}}</a></td>
                             </tr>
                         </tbody>
                     </table>
