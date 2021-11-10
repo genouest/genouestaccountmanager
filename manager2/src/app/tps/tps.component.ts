@@ -58,13 +58,16 @@ export class TpsComponent implements OnInit {
                             'quantity': event.quantity,
                             'students': event.accounts,
                             'created': event.created,
+                            'name': event.name,
                             'about': event.about,
                             'over': event.over,
                             'group': event.group,
+                            'project': event.project
                         }
                     });
                 }
                 this.events = events;
+                this.selectedEvent = {}; // as value for over and created may have changed
                 this.refresh.next();
             },
             err => console.log('failed to log tp reservations')
@@ -77,6 +80,7 @@ export class TpsComponent implements OnInit {
         this.viewDate = new Date();
         this.quantity = 1;
         this.events = [];
+        this.selectedEvent = {};
         this.session_user = this.authService.profile;
         this.authorized = (this.session_user.is_trainer || this.session_user.is_admin);
         this.group_or_project = 'group';
@@ -144,6 +148,7 @@ export class TpsComponent implements OnInit {
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
+        this.listEvents();
     }
 
     remove_reservation() {
@@ -153,6 +158,7 @@ export class TpsComponent implements OnInit {
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
+        this.listEvents();
     }
 
     eventClicked(clickedEvent) {
