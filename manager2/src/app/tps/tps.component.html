@@ -94,7 +94,7 @@
                 </div>
                 <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-secondary" (click)="cancel_reservation()">Cancel</button>
                 <button *ngIf="!selectedEvent.created && session_user.is_admin" class="btn btn-primary" (click)="create_reservation()">Create</button>
-                <button *ngIf="selectedEvent.created  && session_user.is_admin" class="btn btn-warning" (click)="remove_reservation()">Remove</button>
+                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="btn btn-warning" (click)="remove_reservation()">Remove</button>
             </div>
         </div>
     </div>
