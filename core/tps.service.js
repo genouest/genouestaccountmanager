@@ -75,6 +75,17 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
     logger.debug('create_tp_users ', owner, quantity, duration);
     let startnbr = await idsrv.getUserAvailableId();
 
+    groupName = '';
+    projectName = '';
+
+    if (userGroup?.name) {
+        groupName = userGroup.name;
+    }
+
+    if (userProject?.id) {
+        projectName = userProject.id;
+    }
+
     let users = [];
     try {
         for(let i=0;i<quantity;i++) {
@@ -85,8 +96,8 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
                 lastname: startnbr,
                 email: CONFIG.tp.prefix + startnbr + '@fake.' + CONFIG.tp.fake_mail_domain,
                 responsible: owner,
-                group: (CONFIG.general.disable_user_group) ? '' : userGroup.name,
-                secondarygroups: (CONFIG.general.disable_user_group) ? [userGroup.name] : [],
+                group: (CONFIG.general.disable_user_group) ? '' : groupName,
+                secondarygroups: (!CONFIG.general.disable_user_group && groupName != '') ? [userGroup.name] : [],
                 why: 'TP/Training',
                 is_internal: false,
                 is_fake: true,
@@ -99,13 +110,12 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             users.push(user);
             startnbr++;
 
-
             // TODO: find if we need to check the switch flag or if it is better to check the var
-            if (userGroup && userGroup.name && userGroup.name != '') {
+            if (groupName != '') {
                 usrsrv.add_user_to_group(user.uid, userGroup.name);
             }
 
-            if (userProject && userProject.id && userProject.id != '') {
+            if (projectName != '') {
                 usrsrv.add_user_to_project(userProject.id, user.uid);
             }
 
@@ -118,9 +128,8 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
 }
 
 
-async function send_user_passwords(owner, from_date, to_date, users) {
+async function send_user_passwords(owner, from_date, to_date, users, group) {
     logger.debug('send_user_passwords');
-    let group = (CONFIG.general.disable_user_group) ? users[0].secondarygroups[0] : users[0].group;
     let from = new Date(from_date);
     let to = new Date(to_date);
 
@@ -225,17 +234,21 @@ async function create_tp_reservation(reservation_id) {
     let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
 
     logger.debug('create a reservation group', reservation._id);
+
+    gpname = '';
+
     let newGroup;
     if (reservation.group_or_project == 'group') {
         newGroup = await createExtraGroup(trainingName, reservation.owner);
+        gpname = newGroup.name;
     }
 
     logger.debug('create a reservation project', reservation._id);
     let newProject;
     if (reservation.group_or_project == 'project') {
         newProject = await createExtraProject(trainingName, reservation.owner);
+        gpname = newProject.id;
     }
-
 
     logger.debug('create reservation accounts', reservation._id);
     let activated_users = await create_tp_users_db(
@@ -249,7 +262,7 @@ async function create_tp_reservation(reservation_id) {
         reservation.accounts.push(activated_users[i].uid);
     }
     try{
-        await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users);
+        await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users, gpname);
         await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {
             '$set': {
                 'accounts': reservation.accounts,
