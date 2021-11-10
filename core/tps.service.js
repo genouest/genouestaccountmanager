@@ -97,7 +97,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
                 email: CONFIG.tp.prefix + startnbr + '@fake.' + CONFIG.tp.fake_mail_domain,
                 responsible: owner,
                 group: (CONFIG.general.disable_user_group) ? '' : groupName,
-                secondarygroups: (!CONFIG.general.disable_user_group && groupName != '') ? [userGroup.name] : [],
+                secondarygroups: (!CONFIG.general.disable_user_group && groupName != '') ? [groupName] : [],
                 why: 'TP/Training',
                 is_internal: false,
                 is_fake: true,
