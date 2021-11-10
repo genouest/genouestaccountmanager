@@ -490,7 +490,7 @@ async function delete_user(user, action_owner = 'auto', message = '', sendmail =
 
     let fid = new Date().getTime();
     // Remove user from groups
-    let allgroups = user.secondarygroups;
+    let allgroups = user.secondarygroups ?? [];
     if (user.group && user.group != '') {
         allgroups.push(user.group);
     }
