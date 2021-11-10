@@ -67,7 +67,7 @@ export class TpsComponent implements OnInit {
                     });
                 }
                 this.events = events;
-                this.selectedEvent = {}; // as value for over and created may have changed
+                this.selectedEvent = undefined; // as value for over and created may have changed
                 this.refresh.next();
             },
             err => console.log('failed to log tp reservations')
@@ -80,7 +80,6 @@ export class TpsComponent implements OnInit {
         this.viewDate = new Date();
         this.quantity = 1;
         this.events = [];
-        this.selectedEvent = {};
         this.session_user = this.authService.profile;
         this.authorized = (this.session_user.is_trainer || this.session_user.is_admin);
         this.group_or_project = 'group';
