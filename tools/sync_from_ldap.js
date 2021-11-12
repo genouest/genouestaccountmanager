@@ -208,10 +208,10 @@ async function record_user(user){
     */
 
     let go_user = {};
-    let cur_uid = parseInt(group.uidNumber);
-    let cur_gid = parseInt(group.gidNumber);
-    let create_time = await get_time_from_ldap(group.createTimestamp);
-    let update_time = await get_time_from_ldap(group.modifyTimestamp);
+    let cur_uid = parseInt(user.uidNumber);
+    let cur_gid = parseInt(user.gidNumber);
+    let create_time = await get_time_from_ldap(user.createTimestamp);
+    let update_time = await get_time_from_ldap(user.modifyTimestamp);
     let cur_user = await users_db.findOne({'uid': user.uid});
     if (cur_user) {
         console.debug('[UPDATE] User :' + user.uid + ' as it already exist');
