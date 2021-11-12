@@ -295,9 +295,9 @@ async function import_groups() {
 }
 
 async function get_time_from_ldap(ldap_timestamp) {
-    return new Date(ldap_timestamp.slice(0,3) + '-'
-                    + ldap_timestamp.slice(3,5) + '-'
-                    + ldap_timestamp.slice(5,7) + '-'
+    return new Date(ldap_timestamp.slice(0,4) + '-'
+                    + ldap_timestamp.slice(4,6) + '-'
+                    + ldap_timestamp.slice(6,8)
                    ).getTime();
 }
 
@@ -328,8 +328,9 @@ async function record_group(group) {
     let update_time = await get_time_from_ldap(group.modifyTimestamp);
 
     if (group.dn.includes('ou=projects')) {
-        let cur_project = await projects_db.findOne({'id': group.cn});
         let go_project = {};
+
+        let cur_project = await projects_db.findOne({'id': group.cn});
         if (cur_project) {
             console.debug('[UPDATE] Project :' + group.cn + ' as it already exist');
 
