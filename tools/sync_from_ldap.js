@@ -216,31 +216,31 @@ async function record_user(user){
     if (cur_user) {
         console.debug('[UPDATE] User :' + user.uid + ' as it already exist');
 
-        if (cur_user?.home != user.homeDirectory) {
+        if (cur_user.home != user.homeDirectory) {
             go_user.home = user.homeDirectory;
         }
-        if (cur_user?.loginShell != user.loginShell) {
+        if (cur_user.loginShell != user.loginShell) {
             go_user.loginShell = user.loginShell;
         }
-        if (cur_user?.email != user.mail) {
+        if (cur_user.email != user.mail) {
             go_user.email = user.mail;
         }
-        if(cur_user?.firstname != user.givenName) {
+        if (cur_user.firstname != user.givenName) {
             go_user.firstname = user.givenName;
         }
-        if (cur_user?.lastname !=  user.sn) {
+        if (cur_user.lastname !=  user.sn) {
             go_user.lastname = user.sn;
         }
-        if (cur_user?.uidNumber != cur_uid) {
+        if (cur_user.uidNumber != cur_uid) {
             go_user.uidNumber = cur_uid;
         }
-        if (cur_user?.gidNumber != cur_gid) {
+        if (cur_user.gidNumber != cur_gid) {
             go_user.gidNumber = cur_gid;
         }
-        if (cur_user?.created_at != create_time) {
+        if (cur_user.created_at != create_time) {
             go_user.created_at = create_time;
         }
-        if (!cur_user?.updated_at) {
+        if (!cur_user.updated_at) {
             go_user.updated_at = update_time;
         }
     } else {
@@ -365,16 +365,16 @@ async function record_group(group) {
         let cur_project = await projects_db.findOne({'id': group.cn});
         if (cur_project) {
             console.debug('[UPDATE] Project :' + group.cn + ' as it already exist');
-            if (cur_project?.gid != cur_gid) {
+            if (cur_project.gid != cur_gid) {
                 go_project.gid = cur_gid;
             }
-            if (cur_project?.owner == '' && group?.memberUid?.length > 0) {
+            if (cur_project.owner == '' && group?.memberUid?.length > 0) {
                 go_project.owner = group.memberUid[0];
             }
-            if (cur_project?.created_at != create_time) {
+            if (cur_project.created_at != create_time) {
                 go_project.created_at = create_time;
             }
-            if (!cur_project?.updated_at) {
+            if (!cur_project.updated_at) {
                 go_project.updated_at = update_time;
             }
         } else {
@@ -396,16 +396,16 @@ async function record_group(group) {
         if (cur_group) {
             console.debug('[UPDATE] Group :' + group.cn + ' as it already exist');
 
-            if (cur_group?.gid != cur_gid) {
+            if (cur_group.gid != cur_gid) {
                 go_group.gid = cur_gid;
             }
-            if (cur_group?.owner == '' && group?.memberUid?.length > 0) {
+            if (cur_group.owner == '' && group?.memberUid?.length > 0) {
                 go_group.owner = group.memberUid[0];
             }
-            if (cur_group?.created_at != create_time) {
+            if (cur_group.created_at != create_time) {
                 go_group.created_at = create_time;
             }
-            if (!cur_group?.updated_at) {
+            if (!cur_group.updated_at) {
                 go_group.updated_at = update_time;
             }
         } else {
