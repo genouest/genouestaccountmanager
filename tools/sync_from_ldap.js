@@ -295,9 +295,9 @@ async function import_groups() {
 }
 
 async function get_time_from_ldap(ldap_timestamp) {
-    return new Date(group.createTimestamp.slice(0,3) + '-'
-                    + group.createTimestamp.slice(3,5) + '-'
-                    + group.createTimestamp.slice(5,7) + '-'
+    return new Date(ldap_timestamp.slice(0,3) + '-'
+                    + ldap_timestamp.slice(3,5) + '-'
+                    + ldap_timestamp.slice(5,7) + '-'
                    ).getTime();
 }
 
