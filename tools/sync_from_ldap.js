@@ -342,7 +342,7 @@ async function record_group(group) {
             }
 
             if (cur_project?.created_at != create_time) {
-                cur_project?.created_at = create_time;
+                cur_project.created_at = create_time;
             }
 
             if (!cur_project?.updated_at) {
@@ -379,7 +379,7 @@ async function record_group(group) {
             }
 
             if (cur_group?.created_at != create_time) {
-                cur_group?.created_at = create_time;
+                cur_group.created_at = create_time;
             }
 
             if (!cur_group?.updated_at) {
