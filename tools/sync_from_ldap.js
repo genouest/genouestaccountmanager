@@ -207,65 +207,97 @@ async function record_user(user){
     }
     */
 
+    let go_user = {};
+    let cur_uid = parseInt(group.uidNumber);
+    let cur_gid = parseInt(group.gidNumber);
+    let create_time = await get_time_from_ldap(group.createTimestamp);
+    let update_time = await get_time_from_ldap(group.modifyTimestamp);
     let cur_user = await users_db.findOne({'uid': user.uid});
     if (cur_user) {
-        console.debug('[SKIP] User :' + user.uid + ' as it already exist');
-        return;
-    }
+        console.debug('[UPDATE] User :' + user.uid + ' as it already exist');
 
-    let is_fake = false;
-    if(! user.mail || user.mail == ''){
-        console.warn('User ', user.uid, ' has not email declared, tagging user as a fake/service user');
-        is_fake = true;
-    }
-
-    let default_main_group = CONFIG.general.default_main_group || '';
-    let group = '';
-    if (!CONFIG.general.disable_user_group) {
-        switch (CONFIG.general.registration_group) {
-        case 'username':
-            group = req.params.id;
-            break;
-        case 'main':
-            group = default_main_group;
-            break;
-        case 'team':
-        default:
-            group = ''; // as we don't have the team in ldap
-            break;
+        if (cur_user?.home != user.homeDirectory) {
+            go_user.home = user.homeDirectory;
         }
+        if (cur_user?.loginShell != user.loginShell) {
+            go_user.loginShell = user.loginShell;
+        }
+        if (cur_user?.email != user.mail) {
+            go_user.email = user.mail;
+        }
+        if(cur_user?.firstname != user.givenName) {
+            go_user.firstname = user.givenName;
+        }
+        if (cur_user?.lastname !=  user.sn) {
+            go_user.lastname = user.sn;
+        }
+        if (cur_user?.uidNumber != cur_uid) {
+            go_user.uidNumber = cur_uid;
+        }
+        if (cur_user?.gidNumber != cur_gid) {
+            go_user.gidNumber = cur_gid;
+        }
+        if (cur_user?.created_at != create_time) {
+            go_user.created_at = create_time;
+        }
+        if (!cur_user?.updated_at) {
+            go_user.updated_at = update_time;
+        }
+    } else {
+
+        let is_fake = false;
+        if(! user.mail || user.mail == ''){
+            console.warn('User ', user.uid, ' has not email declared, tagging user as a fake/service user');
+            is_fake = true;
+        }
+
+        let default_main_group = CONFIG.general.default_main_group || '';
+        let group = '';
+        if (!CONFIG.general.disable_user_group) {
+            switch (CONFIG.general.registration_group) {
+            case 'username':
+                group = req.params.id;
+                break;
+            case 'main':
+                group = default_main_group;
+                break;
+            case 'team':
+            default:
+                group = ''; // as we don't have the team in ldap
+                break;
+            }
+        }
+
+        console.info('[ADD] user :' + user.uid);
+        go_user = {
+            status: 'Active',
+            uid: user.uid,
+            firstname: user.givenName,
+            lastname: user.sn,
+            email: user.mail,
+            address: '',
+            lab: '',
+            responsible: '',
+            group: group,
+            secondarygroups: [],
+            projects: [],
+            home: user.homeDirectory,
+            maingroup: default_main_group,
+            why: '',
+            ip: '',
+            regkey: Math.random().toString(36).substring(7),
+            is_internal: false,
+            is_fake: is_fake,
+            uidnumber: cur_uid,
+            gidnumber: cur_gid,
+            duration: '1 year',
+            expiration: new Date().getTime() + 1000*3600*24*365,
+            loginShell: user.loginShell,
+            history: [{action: 'import', date: new Date().getTime()}]
+        };
     }
-
-    console.info('[ADD] user :' + user.uid);
-    var go_user = {
-        status: 'Active',
-        uid: user.uid,
-        firstname: user.givenName,
-        lastname: user.sn,
-        email: user.mail,
-        address: '',
-        lab: '',
-        responsible: '',
-        group: group,
-        secondarygroups: [],
-        projects: [],
-        home: user.homeDirectory,
-        maingroup: default_main_group,
-        why: '',
-        ip: '',
-        regkey: Math.random().toString(36).substring(7),
-        is_internal: false,
-        is_fake: is_fake,
-        uidnumber: parseInt(user.uidNumber),
-        gidnumber: parseInt(user.gidNumber),
-        duration: '1 year',
-        expiration: new Date().getTime() + 1000*3600*24*365,
-        loginShell: user.loginShell,
-        history: [{action: 'import', date: new Date().getTime()}]
-    };
-
-    if (commands.import) {
-        await users_db.update({uid: go_user.uid}, {'$set': go_user}, {upsert: true});
+    if (commands.import && Object.keys(go_user).length > 0) {
+        await users_db.update({uid: user.uid}, {'$set': go_user}, {upsert: true});
         nb_user_added++;
     }
 }
@@ -333,38 +365,31 @@ async function record_group(group) {
         let cur_project = await projects_db.findOne({'id': group.cn});
         if (cur_project) {
             console.debug('[UPDATE] Project :' + group.cn + ' as it already exist');
-
             if (cur_project?.gid != cur_gid) {
                 go_project.gid = cur_gid;
             }
-
             if (cur_project?.owner == '' && group?.memberUid?.length > 0) {
                 go_project.owner = group.memberUid[0];
             }
-
             if (cur_project?.created_at != create_time) {
                 go_project.created_at = create_time;
             }
-
             if (!cur_project?.updated_at) {
                 go_project.updated_at = update_time;
             }
-
         } else {
-        console.info('[ADD] Project :' + group.cn);
-        go_project = {
-            id: group.cn,
-            gid: cur_gid,
-            owner: ''
-        };
-}
-        if (commands.import  && Object.keys(go_project).length > 0) {
+            console.info('[ADD] Project :' + group.cn);
+            go_project = {
+                id: group.cn,
+                gid: cur_gid,
+                owner: ''
+            };
+        }
+        if (commands.import && Object.keys(go_project).length > 0) {
             await projects_db.update({name: group.cn}, {'$set': go_project}, {upsert: true});
             nb_project_added++;
         }
-    }
-    else
-    {
+    } else {
         let go_group = {};
 
         let cur_group = await groups_db.findOne({'name': group.cn});
@@ -374,19 +399,15 @@ async function record_group(group) {
             if (cur_group?.gid != cur_gid) {
                 go_group.gid = cur_gid;
             }
-
             if (cur_group?.owner == '' && group?.memberUid?.length > 0) {
                 go_group.owner = group.memberUid[0];
             }
-
             if (cur_group?.created_at != create_time) {
                 go_group.created_at = create_time;
             }
-
             if (!cur_group?.updated_at) {
                 go_group.updated_at = update_time;
             }
-
         } else {
             console.info('[ADD] Group :' + group.cn);
             go_group = {
