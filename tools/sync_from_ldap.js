@@ -44,7 +44,8 @@ let client = myldap.createClient({
 });
 
 let cliopts = {
-    scope: 'sub'
+    scope: 'sub',
+    attributes: ['*','+']
 };
 
 let nb_group_added = 0;
@@ -87,7 +88,7 @@ async function import_links() {
                     memberArray = [group.memberUid];
                 }
             }
-            if (group.dn.includes("ou=projects"))
+            if (group.dn.includes('ou=projects'))
             {
                 for (var j=0;j<memberArray.length;j++) {
                     if (user_projects[memberArray[j]] === undefined) {
@@ -98,7 +99,7 @@ async function import_links() {
                         user_projects[memberArray[j]].push(group.cn);
                     }
                 }
-            } else { // if (!group.dn.includes("ou=projects")) {
+            } else { // if (!group.dn.includes('ou=projects')) {
                 for (var i=0;i<memberArray.length;i++) {
                     if (user_groups[memberArray[i]] === undefined) {
                         user_groups[memberArray[i]]=[];
@@ -121,7 +122,7 @@ async function import_links() {
                 }
 
                 if (JSON.stringify(cur_user.secondarygroups) !== JSON.stringify(ldap_groups)) {
-                    console.info("Update Group for user :" + user.uid);
+                    console.info('Update Group for user :' + user.uid);
                     // console.log('Ldap', ldap_groups);
                     // console.log('Mongo', cur_user.secondarygroups);
                     if (commands.import) {
@@ -135,7 +136,7 @@ async function import_links() {
                     ldap_projects = user_projects[cur_user.uid];
                 }
                 if (JSON.stringify(cur_user.projects) !== JSON.stringify(ldap_projects)) {
-                    console.info("Update Project for user :" + user.uid);
+                    console.info('Update Project for user :' + user.uid);
                     // console.log('Ldap', ldap_projects);
                     // console.log('Mongo', cur_user.projects);
                     if (commands.import) {
@@ -165,7 +166,7 @@ async function import_links() {
 
 
 async function import_users() {
-    console.log("Search for users");
+    console.log('Search for users');
     let nb_entry = 0;
     let results = {};
 
@@ -189,30 +190,32 @@ async function import_users() {
 
 
 async function record_user(user){
-    if(! user.uid || user.uid == ""){
-        // console.debug("[SKIP] User : " + user.dn + " as it don't have an uid");
+    if(! user.uid || user.uid == ''){
+        console.debug('[SKIP] User : ' + user.dn + ' as it dont have an uid');
         return;
     }
 
-    if(user.objectClass.indexOf("posixAccount") == -1 ) {
-        // console.debug("[SKIP] User :" + user.dn + " as it is not posix");
+    if(user.objectClass.indexOf('posixAccount') == -1 ) {
+        console.debug('[SKIP] User :' + user.dn + ' as it is not posix');
         return;
     }
 
+    /*
     if(! user.homeDirectory || ! user.homeDirectory.startsWith(CONFIG.general.home)) {
-        // console.debug("[SKIP] ", user.uid, " invalid home dir");
+        console.debug('[SKIP] ', user.uid, ' invalid home dir');
         return;
     }
+    */
 
     let cur_user = await users_db.findOne({'uid': user.uid});
     if (cur_user) {
-        // console.debug("[SKIP] User :" + user.uid + " as it already exist");
+        console.debug('[SKIP] User :' + user.uid + ' as it already exist');
         return;
     }
 
     let is_fake = false;
-    if(! user.mail || user.mail == ""){
-        console.warn("User ", user.uid, " has not email declared, tagging user as a fake/service user");
+    if(! user.mail || user.mail == ''){
+        console.warn('User ', user.uid, ' has not email declared, tagging user as a fake/service user');
         is_fake = true;
     }
 
@@ -233,23 +236,23 @@ async function record_user(user){
         }
     }
 
-    console.info("[ADD] user :" + user.uid);
+    console.info('[ADD] user :' + user.uid);
     var go_user = {
-        status: "Active",
+        status: 'Active',
         uid: user.uid,
         firstname: user.givenName,
         lastname: user.sn,
         email: user.mail,
-        address: "",
-        lab: "",
-        responsible: "",
+        address: '',
+        lab: '',
+        responsible: '',
         group: group,
         secondarygroups: [],
         projects: [],
         home: user.homeDirectory,
         maingroup: default_main_group,
-        why: "",
-        ip: "",
+        why: '',
+        ip: '',
         regkey: Math.random().toString(36).substring(7),
         is_internal: false,
         is_fake: is_fake,
@@ -269,7 +272,7 @@ async function record_user(user){
 
 
 async function import_groups() {
-    console.log("Search for groups");
+    console.log('Search for groups');
     let nb_entry = 0;
     let result = {};
 
@@ -291,59 +294,107 @@ async function import_groups() {
     return results;
 }
 
+async function get_time_from_ldap(ldap_timestamp) {
+    return new Date(group.createTimestamp.slice(0,3) + '-'
+                    + group.createTimestamp.slice(3,5) + '-'
+                    + group.createTimestamp.slice(5,7) + '-'
+                   ).getTime();
+}
 
-async function record_group(group){
-    if(!group.dn.startsWith("cn")) {
-        // console.debug("[SKIP] Group :" + group.dn + " as it don't start with cn");
+
+async function record_group(group) {
+    if(!group.dn.startsWith('cn')) {
+        console.debug('[SKIP] Group :' + group.dn + ' as it dont start with cn');
         return;
     }
 
-    if(group.objectClass.indexOf("posixGroup") == -1 ) {
-        // console.debug("[SKIP] Group :" + group.dn + " as it is not posix");
+    if(group.objectClass.indexOf('posixGroup') == -1 ) {
+        console.debug('[SKIP] Group :' + group.dn + ' as it is not posix');
         return;
     }
 
     if (group.dn.includes('ou=user-groups')) {
-        // console.debug("[SKIP] Group :" + group.cn + " as it is a user-groups");
+        console.debug('[SKIP] Group :' + group.cn + ' as it is a user-groups');
         return;
     }
 
     if(group.memberUid === undefined) { // this work only on posix group
-        // console.debug("[SKIP] Group :" + group.cn + " as it don't have any member");
+        console.debug('[SKIP] Group :' + group.cn + ' as it dont have any member');
         return;
     }
 
-    if (group.dn.includes("ou=projects")) {
+    let cur_gid = parseInt(group.gidNumber);
+    let create_time = await get_time_from_ldap(group.createTimestamp);
+    let update_time = await get_time_from_ldap(group.updateTimestamp);
+
+    if (group.dn.includes('ou=projects')) {
         let cur_project = await projects_db.findOne({'id': group.cn});
+        let go_project = {};
         if (cur_project) {
-            // console.debug("[SKIP] Project :" + group.cn + " as it already exist");
-            return;
-        }
-        console.info("[ADD] Project :" + group.cn);
-        var go_project = {
+            console.debug('[UPDATE] Project :' + group.cn + ' as it already exist');
+
+            if (cur_project?.gid != cur_gid) {
+                go_project.gid = cur_gid;
+            }
+
+            if (cur_project?.owner == '' && group?.memberUid?.length > 0) {
+                go_project.owner = group.memberUid[0];
+            }
+
+            if (cur_project?.created_at != create_time) {
+                cur_project?.created_at = create_time;
+            }
+
+            if (!cur_project?.updated_at) {
+                cur_project.updated_at = update_time;
+            }
+
+        } else {
+        console.info('[ADD] Project :' + group.cn);
+        go_project = {
             id: group.cn,
-            owner: ""
+            gid: cur_gid,
+            owner: ''
         };
-        if (commands.import) {
+}
+        if (commands.import  && Object.keys(go_project).length > 0) {
             await projects_db.update({name: go_project.id}, {'$set': go_project}, {upsert: true});
             nb_project_added++;
         }
     }
     else
     {
+        let go_group = {};
 
         let cur_group = await groups_db.findOne({'name': group.cn});
         if (cur_group) {
-            // console.debug("[SKIP] Group :" + group.cn + " as it already exist");
-            return;
+            console.debug('[UPDATE] Group :' + group.cn + ' as it already exist');
+
+            if (cur_group?.gid != cur_gid) {
+                go_group.gid = cur_gid;
+            }
+
+            if (cur_group?.owner == '' && group?.memberUid?.length > 0) {
+                go_group.owner = group.memberUid[0];
+            }
+
+            if (cur_group?.created_at != create_time) {
+                cur_group?.created_at = create_time;
+            }
+
+            if (!cur_group?.updated_at) {
+                cur_group.updated_at = update_time;
+            }
+
+        } else {
+            console.info('[ADD] Group :' + group.cn);
+            go_group = {
+                name: group.cn,
+                gid: cur_gid,
+                owner: ''
+            };
         }
-        console.info("[ADD] Group :" + group.cn);
-        let go_group = {
-            name: group.cn,
-            gid: parseInt(group.gidNumber),
-            owner: ""
-        };
-        if (commands.import) {
+        if (commands.import && Object.keys(go_group).length > 0) {
             await groups_db.update({name: go_group.name}, {'$set': go_group}, {upsert: true});
             nb_group_added++;
         }
