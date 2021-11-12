@@ -325,7 +325,7 @@ async function record_group(group) {
 
     let cur_gid = parseInt(group.gidNumber);
     let create_time = await get_time_from_ldap(group.createTimestamp);
-    let update_time = await get_time_from_ldap(group.updateTimestamp);
+    let update_time = await get_time_from_ldap(group.modifyTimestamp);
 
     if (group.dn.includes('ou=projects')) {
         let cur_project = await projects_db.findOne({'id': group.cn});
@@ -342,11 +342,11 @@ async function record_group(group) {
             }
 
             if (cur_project?.created_at != create_time) {
-                cur_project.created_at = create_time;
+                go_project.created_at = create_time;
             }
 
             if (!cur_project?.updated_at) {
-                cur_project.updated_at = update_time;
+                go_project.updated_at = update_time;
             }
 
         } else {
@@ -358,7 +358,7 @@ async function record_group(group) {
         };
 }
         if (commands.import  && Object.keys(go_project).length > 0) {
-            await projects_db.update({name: go_project.id}, {'$set': go_project}, {upsert: true});
+            await projects_db.update({name: group.cn}, {'$set': go_project}, {upsert: true});
             nb_project_added++;
         }
     }
@@ -379,11 +379,11 @@ async function record_group(group) {
             }
 
             if (cur_group?.created_at != create_time) {
-                cur_group.created_at = create_time;
+                go_group.created_at = create_time;
             }
 
             if (!cur_group?.updated_at) {
-                cur_group.updated_at = update_time;
+                go_group.updated_at = update_time;
             }
 
         } else {
@@ -395,7 +395,7 @@ async function record_group(group) {
             };
         }
         if (commands.import && Object.keys(go_group).length > 0) {
-            await groups_db.update({name: go_group.name}, {'$set': go_group}, {upsert: true});
+            await groups_db.update({name: group.cn}, {'$set': go_group}, {upsert: true});
             nb_group_added++;
         }
     }
