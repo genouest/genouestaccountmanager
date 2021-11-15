@@ -368,9 +368,14 @@ async function record_group(group) {
             if (cur_project.gid != cur_gid) {
                 go_project.gid = cur_gid;
             }
-            if (cur_project.owner == '' && group?.memberUid?.length > 0) {
-                go_project.owner = group.memberUid[0];
+            if (group.memberUid && (!cur_project.owner || cur_project.owner == '')) {
+                if (Array.isArray(group.memberUid)) {
+                    go_project.owner = group.memberUid[0];
+                } else {
+                    go_project.owner = group.memberUid;
+                }
             }
+
             if (cur_project.created_at != create_time) {
                 go_project.created_at = create_time;
             }
@@ -399,8 +404,13 @@ async function record_group(group) {
             if (cur_group.gid != cur_gid) {
                 go_group.gid = cur_gid;
             }
-            if (cur_group.owner == '' && group?.memberUid?.length > 0) {
-                go_group.owner = group.memberUid[0];
+
+            if (group.memberUid && (!cur_group.owner || cur_group.owner == '')) {
+                if (Array.isArray(group.memberUid)) {
+                    go_group.owner = group.memberUid[0];
+                } else {
+                    go_group.owner = group.memberUid;
+                }
             }
             if (cur_group.created_at != create_time) {
                 go_group.created_at = create_time;
