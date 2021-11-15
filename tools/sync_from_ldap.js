@@ -386,7 +386,7 @@ async function record_group(group) {
             };
         }
         if (commands.import && Object.keys(go_project).length > 0) {
-            await projects_db.update({name: group.cn}, {'$set': go_project}, {upsert: true});
+            await projects_db.update({id: group.cn}, {'$set': go_project}, {upsert: true});
             nb_project_added++;
         }
     } else {
