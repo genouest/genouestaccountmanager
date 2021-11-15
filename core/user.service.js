@@ -94,7 +94,15 @@ async function activate_user(user, action_owner = 'auto') {
         throw {code: 500,message: 'Add User Failed'};
     }
 
-    await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, uidnumber: minuid, gidnumber: user.gidnumber, expiration: new Date().getTime() + day_time*duration_list[user.duration]}, '$push': { history: {action: 'validation', date: new Date().getTime()}} });
+    await dbsrv.mongo_users().updateOne({uid: user.uid},{
+        '$set': {
+            status: STATUS_ACTIVE,
+            uidnumber: minuid,
+            gidnumber: user.gidnumber,
+            expiration: new Date().getTime() + day_time*duration_list[user.duration],
+            created_at: user.created_at
+        },
+        '$push': { history: {action: 'validation', date: new Date().getTime()}} });
 
     await dbsrv.mongo_events().insertOne({'owner': action_owner,'date': new Date().getTime(), 'action': 'activate user ' + user.uid, 'logs': [user.uid + '.' + fid + '.update']});
 
