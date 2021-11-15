@@ -52,7 +52,7 @@ async function activate_user(user, action_owner = 'auto') {
         user.password = Math.random().toString(36).slice(-10);
     }
     if (!user.created_at) {
-        user.create_at = new Date().getTime();
+        user.created_at = new Date().getTime();
     }
 
     let minuid = await idsrv.getUserAvailableId();
