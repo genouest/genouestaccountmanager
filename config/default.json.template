@@ -51,6 +51,7 @@
         }
     },
     "send_expiration_notif_to_admin": true,
+    "disable_auto_expiration": false,
     "plugin_script_dir": "/tmp/scripts",
     "user_extra_dirs": []
   },
