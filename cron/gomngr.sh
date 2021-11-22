@@ -105,14 +105,14 @@ while true; do
   if [ $NOW -gt $NEXTMONTH ]; then
     echo "${NOW}: time for monthly tasks"
     NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00" +%s`
-    echo "Check for account upcoming expiration"
-    /opt/crontask.sh test_expiration
-    if [ $EXIT_REQUEST -eq 1 ]; then
-      rm /tmp/gomngr.lock
-      rm /tmp/gomngr.list
-      echo "Exit requested"
-      exit 0
-    fi
+    #echo "Check for account upcoming expiration"
+    #/opt/crontask.sh test_expiration
+    #if [ $EXIT_REQUEST -eq 1 ]; then
+    #  rm /tmp/gomngr.lock
+    #  rm /tmp/gomngr.list
+    #  echo "Exit requested"
+    #  exit 0
+    #fi
     echo "Check for account expiration"
     /opt/crontask.sh expire
     if [ $EXIT_REQUEST -eq 1 ]; then
@@ -131,8 +131,10 @@ while true; do
     fi
   fi
   if [ $NOW -gt $TOMORROW ]; then
-    echo "Check for reservation removal"
+    echo "${NOW}: time for daily tasks"
     TOMORROW=`date --date="1 day 05:00:00" +%s`
+
+    echo "Check for reservation removal"
     /opt/crontask.sh reservation_remove
     if [ $EXIT_REQUEST -eq 1 ]; then
       rm /tmp/gomngr.lock
@@ -142,6 +144,14 @@ while true; do
     fi
     echo "Check for reservation creation"
     /opt/crontask.sh reservation_create
+    if [ $EXIT_REQUEST -eq 1 ]; then
+      rm /tmp/gomngr.lock
+      rm /tmp/gomngr.list
+      echo "Exit requested"
+      exit 0
+    fi
+    echo "Check for account upcoming expiration"
+    /opt/crontask.sh test_expiration
     if [ $EXIT_REQUEST -eq 1 ]; then
       rm /tmp/gomngr.lock
       rm /tmp/gomngr.list

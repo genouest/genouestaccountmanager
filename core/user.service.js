@@ -100,6 +100,7 @@ async function activate_user(user, action_owner = 'auto') {
             uidnumber: minuid,
             gidnumber: user.gidnumber,
             expiration: new Date().getTime() + day_time*duration_list[user.duration],
+            expiration_notif: 0,
             created_at: user.created_at
         },
         '$push': { history: {action: 'validation', date: new Date().getTime()}} });
