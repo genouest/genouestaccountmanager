@@ -10,7 +10,9 @@ var STATUS_ACTIVE = 'Active';
 // eslint-disable-next-line no-unused-vars
 var STATUS_EXPIRED = 'Expired';
 
-const CONFIG = require('config');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
@@ -69,9 +71,13 @@ dbsrv.init_db().then(async ()=>{
         let link = CONFIG.general.url +
             encodeURI('/user/'+user.uid+'/renew/'+user.regkey);
         try {
+            let dest_mail = [user.email];
+            if (CONFIG.general.send_expiration_notif_to_admin) {
+                dest_mail.push(CONFIG.general.support);
+            }
             await maisrv.send_notif_mail({
                 'name': 'expiration',
-                'destinations': [user.email],
+                'destinations': dest_mail,
                 'subject': 'account expiration ' + user.uid
             }, {
                 '#LINK#': link,
