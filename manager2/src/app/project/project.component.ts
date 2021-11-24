@@ -99,6 +99,10 @@ export class ProjectComponent implements OnInit {
         // todo: should rename it project_msg
         this.request_msg = '';
         this.request_err_msg = '';
+        if (!this.new_project.id) {
+            this.request_err_msg = 'Project name is mandatory';
+            return;
+        }
         this.projectsService.askNew(this.new_project).subscribe(
             resp => {
                 this.request_msg = 'An email have been sent to admin';
