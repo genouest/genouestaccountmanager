@@ -24,6 +24,7 @@ export class LoginComponent implements OnInit {
     userId: string
     password: string
     mail_token: string
+    otp_token: string
     double_auth: boolean
     msg: string
     error_msg: string
@@ -37,6 +38,23 @@ export class LoginComponent implements OnInit {
     ngOnInit() {
         this.double_auth = false;
         this.userId = '';
+    }
+
+    manageOTP() {
+        let ctx = this;
+        this.authService.otpCheck(this.userId, this.otp_token).subscribe(
+            resp => {
+                ctx.authService.handleLoginCallback(this.userData);
+                ctx.authService.authenticated = true;
+                ctx.authService.$authStatus.next(true);
+                this.ngZone.run(() => { ctx.router.navigate(['/user/' + this.userData['uid']]); });
+            },
+            err => {
+                console.error('otp challenge error', err);
+                ctx.msg = 'Failed to authenticate with OTP';
+                ctx.msgstatus = LoginComponent.ERROR;
+            }
+        )
     }
 
     _manageU2F(userData: any) {
@@ -103,6 +121,7 @@ export class LoginComponent implements OnInit {
                         this.userData = userData;
                         console.log('double authentication needed');
                         this.double_auth = true;
+                        
                         this._manageU2F(userData);
                     } else {
                         this.router.navigate(['/']); // as home will redirect us in the right page

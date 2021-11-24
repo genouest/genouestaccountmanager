@@ -33,10 +33,25 @@
                     <div class="alert alert-warning">Double authentication is needed for admin access!!</div>
                     <hr>
                     <div class="alert alert-info"><div class="glyphicon glyphicon-save"></div> Insert your u2f device and press device</div>
-                    <h4 class="text-center login-title"><b>or</b></h4>
-                    <div class="alert alert-info"><div class="glyphicon glyphicon-envelope"></div> Request a temporary email token</div>
                     <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
                     <div class="alert alert-danger" *ngIf="error_msg">{{error_msg}}</div>
+                    <div class="row" *ngIf="userData && userData.otp.secret">
+                        <div class="col-md-12">
+                            <h4 class="text-center login-title"><b>or</b></h4>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <input autocomplete="one-time-code" [ngModelOptions]="{standalone: true}" [(ngModel)]="otp_token" type="text" class="form-control" placeholder="OTP token" autofocus/>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                                <button type="button" class="btn btn-primary btn-sm" (click)="manageOTP()">Check OTP token</button>
+                        </div>
+                    </div>
+                    <h4 class="text-center login-title"><b>or</b></h4>
+
+                    <div class="alert alert-info"><div class="glyphicon glyphicon-envelope"></div> Request a temporary email token</div>
+
                     <div class="row">
                         <div class="col-md-4">
                                 <button type="button" class="btn btn-primary" (click)="request_email_token()">Request</button>

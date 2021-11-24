@@ -7,6 +7,7 @@ const {
     parseLoginRequest,
     verifyAuthenticatorAssertion,
 } = require('@webauthn/server');
+const { authenticator } = require('otplib');
 
 const express = require('express');
 var router = express.Router();
@@ -148,6 +149,10 @@ router.get('/u2f/auth/:id', async function(req, res) {
         res.status(404).send({message: 'User not found'});
         return;
     }
+    if(!user.u2f || !user.u2f.key) {
+        res.status(404).send({message: 'no webauthn key declared'});
+        return;
+    }
     const assertionChallenge = generateLoginChallenge(user.u2f.key);
     await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {'u2f.challenge': assertionChallenge.challenge}});
     res.send(assertionChallenge);
@@ -170,6 +175,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
         res.status(404).send({message: 'User not found'});
         return;
     }
+
     if(!req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
         res.status(401).send({message: 'U2F not challenged or invalid user'});
         return;
@@ -183,7 +189,6 @@ router.post('/u2f/auth/:id', async function(req, res) {
         return res.sendStatus(400);
     }
     const loggedIn = verifyAuthenticatorAssertion(req.body, user.u2f.key);
-    console.error('OSALLOU CHECK U2F', loggedIn);
     let sess = req.session;
     if (loggedIn) {
         // Success!
@@ -193,6 +198,8 @@ router.post('/u2f/auth/:id', async function(req, res) {
             CONFIG.general.secret,
             {expiresIn: '2 days'}
         );
+        user.is_admin = await rolsrv.is_admin(user);
+        user.u2f.key = true;
         sess.gomngr = sess.u2f;
         sess.u2f = null;
         return res.send({token: usertoken, user: user});
@@ -249,6 +256,47 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 });
 
+router.post('/otp/register/:id', async function(req, res) {
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if(!user || !req.locals.logInfo.u2f || req.locals.logInfo.u2f.str != user._id.str){
+        return res.status(401).send({message: 'You need to login first'});
+    }
+
+    const secret = authenticator.generateSecret();
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp.secret': secret}});
+    //const token = authenticator.generate(secret);
+    //res.send({token});
+    res.send({secret});
+});
+
+router.post('/otp/check/:id', async function(req, res) {
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if(!user || !req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
+        return res.status(401).send({message: 'You need to login first'});
+    }
+    const token = req.body.token;
+    try {
+        const isValid = authenticator.verify({ token: token, secret: user.otp.secret });
+        if(!isValid) {
+            res.sendStatus(403);
+            return;
+        }
+    }catch(err) {
+        res.sendStatus(403);
+    }
+    let usertoken = jwt.sign(
+        { user: user._id, isLogged: true },
+        CONFIG.general.secret,
+        {expiresIn: '2 days'}
+    );
+    user.is_admin = await rolsrv.is_admin(user);
+    user.otp.secret = true;
+    let sess = req.session;
+    sess.gomngr = sess.u2f;
+    sess.u2f = null;
+    return res.send({token: usertoken, user: user});
+});
+
 router.delete('/u2f/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
@@ -281,7 +329,8 @@ router.get('/auth', async function(req, res) {
             CONFIG.general.secret,
             {expiresIn: '2 days'}
         );
-        if(user.u2f) {user.u2f.keyHandle = null;}
+        if(user.u2f) {user.u2f.key = null;}
+        if(user.otp) {user.otp.secret=null;}
 
         user.is_admin = isadmin;
 
@@ -355,8 +404,13 @@ router.post('/auth/:id', async function(req, res) {
     // Check bind with ldap
     sess.is_logged = true;
     let need_double_auth = false;
-    if (user.u2f.key) {
+    if (user.u2f && user.u2f.key) {
         need_double_auth = true;
+        user.u2f.key = true; // hide
+    }
+    if (user.otp && user.otp.secret) {
+        need_double_auth = true;
+        user.otp.secret = true; // hide
     }
 
     user.is_admin = isadmin;

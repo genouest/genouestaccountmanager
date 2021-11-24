@@ -718,6 +718,17 @@ export class UserComponent implements OnInit {
         )
     }
 
+    register_otp() {
+        this.userService.otpRegister(this.user.uid).subscribe(
+            resp => {
+                this.u2f = "Secret: " + resp["secret"];
+            },
+            err => {
+                console.error(err)
+            }
+        )
+    }
+
     add_to_project() {
         this.add_to_project_msg = '';
         this.add_to_project_error_msg = '';
