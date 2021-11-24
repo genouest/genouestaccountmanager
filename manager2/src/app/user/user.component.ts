@@ -12,6 +12,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { WindowWrapper } from '../windowWrapper.module';
 import { FlashMessagesService } from '../utils/flash/flash.component';
 
+import { 
+    solveRegistrationChallenge,
+    solveLoginChallenge
+} from '@webauthn/client';
+
 /*
   function _window() : any {
   // return the global native browser window object
@@ -696,38 +701,18 @@ export class UserComponent implements OnInit {
     }
 
     register_u2f() {
-        if (this.window['u2f'] === undefined) {
-            this.u2f = "U2F authentication not supported by this browser";
-            return;
-        }
-        this.userService.u2fGet(this.user.uid).subscribe(
-            resp => {
-                let registrationRequest = resp['registrationRequest'];
-                this.u2f = "Please insert your key and press button";
-                //this.timeoutId = setTimeout(function(){
-                let ctx =this;
-                this.window['u2f'].register(
-                    registrationRequest.appId, [registrationRequest], [], registrationResponse => {
-                        if(registrationResponse.errorCode) {
-                            console.log("Association failed");
-                            ctx.u2f = "Assocation failed";
-                            return;
-                        }
-                        // Send this registration response to the registration verification server endpoint
-                        let data = {
-                            registrationRequest: registrationRequest,
-                            registrationResponse: registrationResponse
-                        }
-                        ctx.userService.u2fSet(this.user.uid, data).subscribe(
-                            resp => {
-                                ctx.u2f = null;
-                                ctx.user.u2f = {'publicKey': resp['publicKey']};
-                            },
-                            err => console.log('failed to register device')
-                        )
-                    }, 5000)
 
-                //}, 5000);
+        this.userService.u2fGet(this.user.uid).subscribe( 
+            resp => {
+                let challenge = resp;
+                let ctx =this;
+                this.u2f = "Please insert your key and press button";
+                solveRegistrationChallenge(challenge).then((credentials) => {
+                    this.userService.u2fSet(this.user.uid, credentials).subscribe( () => {
+                        ctx.u2f = null;
+                        ctx.user.u2f = {'challenge': challenge};
+                    })
+                }).catch(err => { console.error(err); ctx.u2f = "registration error"});
             },
             err => console.log('failed to get u2f devices')
         )

@@ -262,8 +262,8 @@
             <h4>Authentication</h4>
         </div>
         <div class="card-body">
-            <span *ngIf="user.u2f.publicKey" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> U2F</span>
-            <button *ngIf="! user.u2f.publicKey" class="btn btn-primary" (click)="register_u2f()">Register U2F key</button>
+            <span *ngIf="user.u2f.key" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
+            <button class="btn btn-primary btn-sm" (click)="register_u2f()">Register new key</button>
             <span *ngIf="u2f">{{u2f}}</span>
         </div>
     </div>

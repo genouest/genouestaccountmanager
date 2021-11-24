@@ -2,7 +2,7 @@ import { Component, OnInit, NgZone } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
-
+import { solveLoginChallenge } from '@webauthn/client';
 
 @Component({
     selector: 'app-login',
@@ -43,29 +43,12 @@ export class LoginComponent implements OnInit {
         this.authService.u2f(userData['uid']).subscribe(
             resp => {
                 console.log('u2f', resp);
-                this.u2f = resp['authRequest'];
-                //setTimeout(function() {
+                let challenge = resp;
                 let ctx = this;
-                window['u2f'].sign(this.u2f.appId, this.u2f.challenge, [this.u2f], authResponse => {
-                    if(authResponse.errorCode) {
-                        console.log('Failed to sign challenge with device', authResponse);
-                        ctx.msg = 'Failed to authenticate with device';
-                        ctx.msgstatus = LoginComponent.ERROR
-                        return
-                    }
+                solveLoginChallenge(challenge).then(credentials => {
 
-                    let data = {
-                        'authRequest': ctx.u2f,
-                        'authResponse': authResponse
-                    }
-                    ctx.authService.u2fCheck(userData['uid'], data).subscribe(
+                    ctx.authService.u2fCheck(userData['uid'], credentials).subscribe(
                         resp => {
-                            if(resp['errorCode']) {
-                                console.log('Failed to validate token with device');
-                                ctx.msg = 'Failed to authenticate with device';
-                                ctx.msgstatus = LoginComponent.ERROR;
-                                return
-                            }
                             if(resp['token']) {
                                 userData['token'] = resp['token'];
                             }
@@ -75,16 +58,21 @@ export class LoginComponent implements OnInit {
                             ctx.authService.$authStatus.next(true);
 
                             this.ngZone.run(() => { ctx.router.navigate(['/user/' + userData['uid']]); });
-                        },
-                        err => {
+                        }, err =>{
                             console.log('Failed to validate token with device');
                             ctx.msg = 'Failed to authenticate with device';
                             ctx.msgstatus = LoginComponent.ERROR;
+                            return 
                         }
-                    )
-                }, 5000)
+                    );
 
-                //}, 5000)
+                    
+                }).catch(err => {
+                    console.error('webauthn challenge error', err);
+                    ctx.msg = 'Failed to authenticate with device';
+                    ctx.msgstatus = LoginComponent.ERROR
+                    return;
+                });
             },
             err => console.log('failed to get u2f info')
         )
@@ -116,8 +104,6 @@ export class LoginComponent implements OnInit {
                         console.log('double authentication needed');
                         this.double_auth = true;
                         this._manageU2F(userData);
-                        //this.authService.handleLoginCallback(userData);
-                        //this.router.navigate(['/user/' + userData['uid']]);
                     } else {
                         this.router.navigate(['/']); // as home will redirect us in the right page
                     }

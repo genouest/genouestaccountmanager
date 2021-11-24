@@ -1,5 +1,13 @@
 /* eslint-disable require-atomic-updates */
 /*jslint es6 */
+const {
+    generateRegistrationChallenge,
+    parseRegisterRequest,
+    generateLoginChallenge,
+    parseLoginRequest,
+    verifyAuthenticatorAssertion,
+} = require('@webauthn/server');
+
 const express = require('express');
 var router = express.Router();
 // const cookieParser = require('cookie-parser');
@@ -9,7 +17,7 @@ const goldap = require('../core/goldap.js');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-const u2f = require('u2f');
+//const u2f = require('u2f');
 const jwt = require('jsonwebtoken');
 
 const cfgsrv = require('../core/config.service.js');
@@ -140,12 +148,18 @@ router.get('/u2f/auth/:id', async function(req, res) {
         res.status(404).send({message: 'User not found'});
         return;
     }
+    const assertionChallenge = generateLoginChallenge(user.u2f.key);
+    await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {'u2f.challenge': assertionChallenge.challenge}});
+    res.send(assertionChallenge);
+    /*
     let keyHandle = user.u2f.keyHandler;
     const authRequest = u2f.request(APP_ID, keyHandle);
     req.session.u2f = user._id;
     return res.send({authRequest: authRequest});
+    */
 
 });
+
 
 router.post('/u2f/auth/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged){
@@ -158,12 +172,20 @@ router.post('/u2f/auth/:id', async function(req, res) {
     }
     if(!req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
         res.status(401).send({message: 'U2F not challenged or invalid user'});
+        return;
     }
-    let publicKey = user.u2f.publicKey;
-    const result = u2f.checkSignature(req.body.authRequest, req.body.authResponse, publicKey);
 
+    const { challenge, keyId } = parseLoginRequest(req.body);
+    if (!challenge) {
+        return res.sendStatus(400);
+    }
+    if (!user.u2f || !user.u2f.key || user.u2f.key.credID !== keyId) {
+        return res.sendStatus(400);
+    }
+    const loggedIn = verifyAuthenticatorAssertion(req.body, user.u2f.key);
+    console.error('OSALLOU CHECK U2F', loggedIn);
     let sess = req.session;
-    if (result.successful) {
+    if (loggedIn) {
         // Success!
         // User is authenticated.
         let usertoken = jwt.sign(
@@ -178,7 +200,7 @@ router.post('/u2f/auth/:id', async function(req, res) {
     else {
         sess.gomngr = null;
         sess.u2f = null;
-        return res.send(result);
+        return res.sendStatus(403);
     }
 });
 
@@ -191,11 +213,20 @@ router.get('/u2f/register/:id', async function(req, res) {
     if(!req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
         return res.status(401).send({message: 'You need to login first'});
     }
-    if(user.u2f !== undefined && user.u2f.keyHandle!=null){
-        res.status(403).send({message: 'A key is already defined'});
+
+    try {
+        const challengeResponse = generateRegistrationChallenge({
+            relyingParty: { name: APP_ID },
+            user: { id: user.uid, name: user.email }
+        });
+        await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.challenge': challengeResponse.challenge}});
+        res.send(challengeResponse);
+    } catch(err) {
+        logger.error('u2f registration request error', err);
+        res.sendStatus(400);
+        return;
     }
-    const registrationRequest = u2f.request(APP_ID);
-    return res.send({registrationRequest: registrationRequest});
+
 });
 
 router.post('/u2f/register/:id', async function(req, res) {
@@ -203,16 +234,28 @@ router.post('/u2f/register/:id', async function(req, res) {
     if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
         return res.status(401).send({message: 'You need to login first'});
     }
-    const registrationRequest = req.body.registrationRequest;
-    const registrationResponse = req.bodyregistrationResponse;
-    const result = u2f.checkRegistration(registrationRequest, registrationResponse);
-    if (result.successful) {
-        await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.keyHandler': result.keyHandle, 'u2f.publicKey': result.publicKey}});
-        return res.send({publicKey: result.publicKey});
+
+    try {
+        const { key, challenge } = parseRegisterRequest(req.body);
+
+        if (user.u2f && user.u2f.challenge === challenge) {
+            await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': key, 'u2f.challenge': null}});
+            return res.send({key: key});    
+        }
+    } catch(err) {
+        logger.error('u2f registration error');
+        res.sendStatus(400);
     }
-    else{
-        return res.send(result);
+
+});
+
+router.delete('/u2f/register/:id', async function(req, res) {
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
+        return res.status(401).send({message: 'You need to login first'});
     }
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': null, 'u2f.challenge': null}});
+    return res.sendStatus(200);    
 });
 
 router.get('/auth', async function(req, res) {
@@ -312,6 +355,9 @@ router.post('/auth/:id', async function(req, res) {
     // Check bind with ldap
     sess.is_logged = true;
     let need_double_auth = false;
+    if (user.u2f.key) {
+        need_double_auth = true;
+    }
 
     user.is_admin = isadmin;
     if(isadmin) {
