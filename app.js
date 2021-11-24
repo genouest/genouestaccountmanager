@@ -385,6 +385,8 @@ app.get('/u2f/register/:id', auth);
 app.post('/u2f/register/:id', auth);
 app.get('/u2f/auth/:id', auth);
 app.post('/u2f/auth/:id', auth);
+app.post('/otp/register/:id', auth);
+app.post('/otp/check/:id', auth);
 app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);
