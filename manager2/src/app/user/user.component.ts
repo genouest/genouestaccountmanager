@@ -197,6 +197,8 @@ export class UserComponent implements OnInit {
 
     key_err: string
 
+    otp: string
+
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
@@ -234,6 +236,7 @@ export class UserComponent implements OnInit {
         this.notify_message = ''
         this.notify_err = ''
         this.key_err = ''
+        this.otp = null
 
     }
 
@@ -721,7 +724,7 @@ export class UserComponent implements OnInit {
     register_otp() {
         this.userService.otpRegister(this.user.uid).subscribe(
             resp => {
-                this.u2f = "Secret: " + resp["secret"];
+                this.otp = resp['imageUrl'];
             },
             err => {
                 console.error(err)

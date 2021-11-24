@@ -47,6 +47,7 @@
     "primeng": "^11.3.1",
     "prom-client": "^11.5.3",
     "promise": "^8.1.0",
+    "qrcode": "^1.5.0",
     "redis": "^3.1.2",
     "serve-favicon": "^2.5.0",
     "u2f": "^0.1.3",

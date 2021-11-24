@@ -8,6 +8,7 @@ const {
     verifyAuthenticatorAssertion,
 } = require('@webauthn/server');
 const { authenticator } = require('otplib');
+const qrcode = require('qrcode');
 
 const express = require('express');
 var router = express.Router();
@@ -258,7 +259,7 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 router.post('/otp/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.u2f || req.locals.logInfo.u2f.str != user._id.str){
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str != user._id.str){
         return res.status(401).send({message: 'You need to login first'});
     }
 
@@ -266,7 +267,17 @@ router.post('/otp/register/:id', async function(req, res) {
     await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp.secret': secret}});
     //const token = authenticator.generate(secret);
     //res.send({token});
-    res.send({secret});
+    const service = 'My';
+    const otpauth = authenticator.keyuri(user.uid, service, secret);
+    qrcode.toDataURL(otpauth, (err, imageUrl) => {
+        if (err) {
+            console.debug('Error with QR');
+            res.send({secret});
+            return;
+        }
+        res.send({secret,imageUrl});
+    });
+    
 });
 
 router.post('/otp/check/:id', async function(req, res) {

@@ -262,10 +262,17 @@
             <h4>Authentication</h4>
         </div>
         <div class="card-body">
-            <span *ngIf="user.u2f.key" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
-            <button class="btn btn-primary btn-sm" (click)="register_u2f()">Register new key</button>
-            <span *ngIf="u2f">{{u2f}}</span>
-            <button class="btn btn-primary btn-sm" (click)="register_otp()">Register OTP</button>
+            <div class="row">
+                <div class="col-sm-12" style="margin-bottom: 10px">
+                    <span *ngIf="user.u2f.key" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
+                    <button class="btn btn-primary btn-sm" (click)="register_u2f()">Register new key</button>
+                    <span *ngIf="u2f">{{u2f}}</span>
+                </div>
+                <div class="col-sm-12">
+                    <button class="btn btn-primary btn-sm" (click)="register_otp()">Register OTP</button>
+                    <img alt={{secret}} *ngIf="otp" src={{otp}}/>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card bg-light">
