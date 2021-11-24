@@ -13,8 +13,7 @@ import { WindowWrapper } from '../windowWrapper.module';
 import { FlashMessagesService } from '../utils/flash/flash.component';
 
 import { 
-    solveRegistrationChallenge,
-    solveLoginChallenge
+    solveRegistrationChallenge
 } from '@webauthn/client';
 
 /*

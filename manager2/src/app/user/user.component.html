@@ -1,7 +1,7 @@
 <div class="well">
   <div class="row">
       <div class="col-sm-6">
-          <h2><b>{{user.uid}}</b>
+          <h2><strong>{{user.uid}}</strong>
           <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
           -
@@ -65,7 +65,7 @@
           </div>
           <div class="card-body">
               <div class="user-information">
-                  <form role="form" class="user-form form-horizontal form-register">
+                  <form aria-label="user information" role="form" class="user-form form-horizontal form-register">
                       <div class="form-group row">
                           <label for="firstname" class="col-4 col-form-label">First name</label>
                           <div class="col-6">
@@ -350,9 +350,9 @@
             </div>
             <hr/>
             <div class="table-responsive">
-                <table *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
+                <table aria-label="secondary groups" *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
                     <thead>
-                        <th>Name</th><th></th>
+                        <th scope="col">Name</th><th scope="col"></th>
                     </thead>
                     <tbody>
                         <tr *ngFor="let secondarygroup of user.secondarygroups">
@@ -408,9 +408,9 @@
                     </div>
 
                 <div class="table-responsive">
-                    <table *ngIf="databases && databases.length > 0" class="table table-striped">
+                    <table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
                         <thead>
-                            <th>Name</th><th></th>
+                            <th scope="col">Name</th><th scope="col"></th>
                         </thead>
                         <tbody>
                             <tr *ngFor="let db of databases">
@@ -437,7 +437,7 @@
                         </button>
                     </div>
                     <div>
-                        <form role="form" class="user-form form-inline">
+                        <form aria-label="ssh key" role="form" class="user-form form-inline">
                             <div class="form-group">
                                 <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
                             </div>
@@ -509,9 +509,9 @@
                         <div>
                             <hr/>
                             <div class="table-responsive">
-                                <table *ngIf="websites && websites.length > 0" class="table table-striped">
+                                <table aria-label="web sites" *ngIf="websites && websites.length > 0" class="table table-striped">
                                     <thead>
-                                        <th>Name</th><th>Url</th><th>Description</th><th></th>
+                                        <th scope="col">Name</th><th scope="col">Url</th><th scope="col">Description</th><th scope="col"></th>
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let site of websites">

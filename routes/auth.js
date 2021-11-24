@@ -12,14 +12,10 @@ const qrcode = require('qrcode');
 
 const express = require('express');
 var router = express.Router();
-// const cookieParser = require('cookie-parser');
-// const session = require('express-session');
 const goldap = require('../core/goldap.js');
-// const Promise = require('promise');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 
-//const u2f = require('u2f');
 const jwt = require('jsonwebtoken');
 
 const cfgsrv = require('../core/config.service.js');
@@ -52,7 +48,6 @@ if(CONFIG.general.bansec) {
 router.get('/logout', function(req, res) {
     req.session.destroy();
     res.send({});
-    //res.cookie('gomngr',null, { maxAge: 900000, httpOnly: true });
 });
 
 router.get('/mail/auth/:id', async function(req, res) {
@@ -136,7 +131,6 @@ router.post('/mail/auth/:id', async function(req, res) {
 
     res.send({user: user, token: usertoken});
     res.end();
-    return;
 });
 
 router.get('/u2f/auth/:id', async function(req, res) {
@@ -157,13 +151,6 @@ router.get('/u2f/auth/:id', async function(req, res) {
     const assertionChallenge = generateLoginChallenge(user.u2f.key);
     await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {'u2f.challenge': assertionChallenge.challenge}});
     res.send(assertionChallenge);
-    /*
-    let keyHandle = user.u2f.keyHandler;
-    const authRequest = u2f.request(APP_ID, keyHandle);
-    req.session.u2f = user._id;
-    return res.send({authRequest: authRequest});
-    */
-
 });
 
 
@@ -265,8 +252,7 @@ router.post('/otp/register/:id', async function(req, res) {
 
     const secret = authenticator.generateSecret();
     await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp.secret': secret}});
-    //const token = authenticator.generate(secret);
-    //res.send({token});
+
     const service = 'My';
     const otpauth = authenticator.keyuri(user.uid, service, secret);
     qrcode.toDataURL(otpauth, (err, imageUrl) => {
@@ -453,7 +439,6 @@ router.post('/auth/:id', async function(req, res) {
         // Skip auth
         res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
         res.end();
-        return;
     }
     else {
         if(attemps[user.uid] == undefined) {
@@ -464,9 +449,9 @@ router.post('/auth/:id', async function(req, res) {
             user['token'] = token;
             attemps[user.uid]['attemps'] = 0;
             if (!user.apikey) {
-                let apikey = Math.random().toString(36).slice(-10);
-                user.apikey = apikey;
-                await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': apikey}});
+                let newApikey = Math.random().toString(36).slice(-10);
+                user.apikey = newApikey;
+                await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': newApikey}});
                 res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
                 res.end();
                 return;
