@@ -2,6 +2,10 @@
 /**
  * Test expiration date of user, if lower than 2 month, send an email to user
  */
+
+const { promisify } = require('util');
+const sleep = promisify(setTimeout);
+
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 // eslint-disable-next-line no-unused-vars
@@ -84,6 +88,10 @@ dbsrv.init_db().then(async ()=>{
                 '#EXPIRE#': timeConverter(user.expiration)
             });
 
+            if (CONFIG.general.limit_expire_mail) {
+                let nb_mls = Math.round((60 * 1000) / CONFIG.general.limit_expire_mail); // mail per min
+                await sleep(nb_mls);
+            }
         } catch(error) {
             console.error('failed to send mail',error);
             mail_error += 1;

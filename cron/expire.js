@@ -3,6 +3,10 @@
 /**
  * Test expiration date of user, if expired, expire the user
  */
+
+const { promisify } = require('util');
+const sleep = promisify(setTimeout);
+
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 // eslint-disable-next-line no-unused-vars
@@ -63,6 +67,10 @@ dbsrv.init_db().then(async () => {
             }, {
                 '#UID#': user.uid
             });
+            if (CONFIG.general.limit_expire_mail) {
+                let nb_mls = Math.round((60 * 1000) / CONFIG.general.limit_expire_mail); // mail per min
+                await sleep(nb_mls);
+            }
 
         } catch(error) {
             console.log(error);
@@ -76,7 +84,6 @@ dbsrv.init_db().then(async () => {
                 await goldap.reset_password(user, fid);
             } catch(err) {
                 console.log(user.uid + ': failed to reset password');
-
             }
             user.history.push({'action': 'expire', date: new Date().getTime()});
             await dbsrv.mongo_users().updateOne(

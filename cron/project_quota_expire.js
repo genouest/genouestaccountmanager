@@ -3,6 +3,8 @@
  * Test expiration date of project, if lower than 2 month, send an email to admins
  */
 
+const { promisify } = require('util');
+const sleep = promisify(setTimeout);
 
 const CONFIG = require('config');
 
@@ -57,6 +59,10 @@ dbsrv.init_db().then(async () => {
                 '#DATE#': new Date(project.expire)
             });
 
+            if (CONFIG.general.limit_expire_mail) {
+                let nb_mls = Math.round((60 * 1000) / CONFIG.general.limit_expire_mail); // mail per min
+                await sleep(nb_mls);
+            }
         } catch(error) {
             console.log(error);
         }
