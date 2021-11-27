@@ -67,6 +67,18 @@ export class UserService {
             httpOptions)
     }
 
+    otpRegister(userId: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/otp/register/' + userId,
+            {},
+            httpOptions)       
+    }
+
     delete(userId: string, message: string, sendmail: boolean) {
         // console.log(userId, message);
         let httpOptions = {

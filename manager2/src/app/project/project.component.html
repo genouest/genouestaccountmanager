@@ -5,7 +5,7 @@
         <h3>Request a new project creation</h3>
       </div>
 
-      <form role="form" class="user-form form-horizonal">
+      <form aria-label="project creation request form" role="form" class="user-form form-horizonal">
 
         <div class="modal-body">
           <div class="form-group row col-sm-8">
@@ -13,7 +13,7 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat several projects, it is quite possible for you to request more project spaces.</i></small>
           </div>
 
@@ -34,12 +34,12 @@
               <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
             </label>
             <input placeholder="Ex : CNRS" type="text" id="new_project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
-            <small id="orgaHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+            <small id="orgaHelp" class="form-text text-muted"><em>Optional, for information only</em></small>
           </div>
 
           <div class="form-group row col-sm-12">
             <label for="new_project_description">Description</label>
-            <textarea placeholder="A short description for the project" rows="2" id="new_project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
+            <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
           </div>
 
         </div>

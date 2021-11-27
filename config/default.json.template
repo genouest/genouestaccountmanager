@@ -52,6 +52,7 @@
     },
     "send_expiration_notif_to_admin": true,
     "disable_auto_expiration": false,
+    "limit_expire_mail": 3,
     "plugin_script_dir": "/tmp/scripts",
     "user_extra_dirs": []
   },
@@ -316,7 +317,7 @@
       "<p>Cpu needed: #CPU# Hour</p>",
       "<p>Entity: #ORGA#</p>",
       "<p>Description: #DESC#</p>",
-      "<p>Please review it, and keep #UID# inform</p>"
+      "<p>Please review it, and keep #UID# informed</p>"
     ],
     "ask_project_user": [
       "#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My"

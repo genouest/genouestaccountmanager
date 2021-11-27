@@ -3,12 +3,9 @@
             <img class="profile-img" src="assets/images/logo-login.png" alt=""/>
     </div>
     <div class="row justify-content-center">
-            <h1 class="text-center login-title"><b>Sign in to access your account</b></h1>
+            <h1 class="text-center login-title"><strong>Sign in to access your account</strong></h1>
     </div>
     <div class="row justify-content-center">
-            <!-- <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
-            alt="">
-        -->
         <div *ngIf="! double_auth">
             <form class="form-signin form-group">
                 <div class="form-group">
@@ -33,10 +30,25 @@
                     <div class="alert alert-warning">Double authentication is needed for admin access!!</div>
                     <hr>
                     <div class="alert alert-info"><div class="glyphicon glyphicon-save"></div> Insert your u2f device and press device</div>
-                    <h4 class="text-center login-title"><b>or</b></h4>
-                    <div class="alert alert-info"><div class="glyphicon glyphicon-envelope"></div> Request a temporary email token</div>
                     <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
                     <div class="alert alert-danger" *ngIf="error_msg">{{error_msg}}</div>
+                    <div class="row" *ngIf="userData && userData.otp.secret">
+                        <div class="col-md-12">
+                            <h4 class="text-center login-title"><strong>or</strong></h4>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <input autocomplete="one-time-code" [ngModelOptions]="{standalone: true}" [(ngModel)]="otp_token" type="text" class="form-control" placeholder="OTP token" autofocus/>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                                <button type="button" class="btn btn-primary btn-sm" (click)="manageOTP()">Check OTP token</button>
+                        </div>
+                    </div>
+                    <h4 class="text-center login-title"><strong>or</strong></h4>
+
+                    <div class="alert alert-info"><div class="glyphicon glyphicon-envelope"></div> Request a temporary email token</div>
+
                     <div class="row">
                         <div class="col-md-4">
                                 <button type="button" class="btn btn-primary" (click)="request_email_token()">Request</button>
@@ -56,7 +68,7 @@
         <hr>
     </div>
     <div *ngIf="! double_auth" class="row justify-content-center">
-            <h1 class="text-center login-title"><b>or</b></h1>
+            <h1 class="text-center login-title"><strong>or</strong></h1>
     </div>
     <div class="row justify-content-center">
             <form class="form-signin">
