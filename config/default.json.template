@@ -317,7 +317,7 @@
       "<p>Cpu needed: #CPU# Hour</p>",
       "<p>Entity: #ORGA#</p>",
       "<p>Description: #DESC#</p>",
-      "<p>Please review it, and keep #UID# inform</p>"
+      "<p>Please review it, and keep #UID# informed</p>"
     ],
     "ask_project_user": [
       "#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My"
