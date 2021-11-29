@@ -53,6 +53,7 @@ async function deleteExtraGroup(group) {
     if(!group_to_remove) {
         return false;
     }
+    await usrsrv.remove_user_from_group(group.owner, group.name);
     let res = await grpsrv.delete_group(group);
     return res;
 }
@@ -65,6 +66,7 @@ async function deleteExtraProject(project) {
     if(!project_to_remove) {
         return false;
     }
+    await usrsrv.remove_user_from_project(project.id, project.owner, force=true);
     let res = await prjsrv.delete_project(project.id);
     return res;
 }
