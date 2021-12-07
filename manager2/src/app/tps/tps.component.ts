@@ -67,7 +67,6 @@ export class TpsComponent implements OnInit {
                     });
                 }
                 this.events = events;
-                this.selectedEvent = undefined; // as value for over and created may have changed
                 this.refresh.next();
             },
             err => console.log('failed to log tp reservations')
@@ -138,6 +137,8 @@ export class TpsComponent implements OnInit {
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
+        this.selectedEvent.over = true;
+        this.listEvents();
     }
 
     create_reservation() {
@@ -147,6 +148,7 @@ export class TpsComponent implements OnInit {
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
+        this.selectedEvent.created = true;
         this.listEvents();
     }
 
@@ -157,6 +159,7 @@ export class TpsComponent implements OnInit {
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
+        this.selectedEvent.over = true;
         this.listEvents();
     }
 
