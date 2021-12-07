@@ -25,6 +25,7 @@
     "usage_directory": "/tmp",
     "home": "/home",
     "use_group_in_path": true,
+    "never_update_user_home": false,
     "main_groups": [""],
     "default_main_group": "",
     "mailer" : "gomail",
