@@ -38,12 +38,20 @@ exports.activate_user = activate_user;
 
 // module functions
 function get_user_home(user) {
-    // todo check  or not if user.uid exist
-    let user_home = CONFIG.general.home + '/' + user.uid;
-    if(CONFIG.general.use_group_in_path) {
-        user_home = grpsrv.get_group_home(user) + '/' + user.uid;
+    if (!user.uid || user.uid.length <= 1) {
+        logger.error('User uid not valid! Cannot build home path');
+        throw {code: 500, message: 'User uid not valid! Cannot build home path'};
     }
-    return user_home.replace(/\/+/g, '/');
+    let new_home = CONFIG.general.home + '/' + user.uid;
+    if(CONFIG.general.use_group_in_path) {
+        new_home = grpsrv.get_group_home(user) + '/' + user.uid;
+    }
+    new_home = new_home.replace(/\/+/g, '/');
+    // if home already set and config is set too, never return other value
+    if (CONFIG.general.never_update_user_home && user.home && user.home.length > user.uid.length && user.home != new_home) {
+        new_home = user.home;
+    }
+    return new_home;
 }
 
 
