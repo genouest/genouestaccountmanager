@@ -64,24 +64,34 @@ dbsrv.init_db().then(async ()=>{
             continue;
         }
         console.log(`Project will expire, send notication number ${project.expiration_notif} to ${project.id}`);
-        let user = await dbsrv.mongo_users().findOne({uid: project.owner});
+
         try {
-            let dest_mail = [user.email];
+            let dest_mail = [];
+            if (project.owner) {
+                let user = await dbsrv.mongo_users().findOne({uid: project.owner});
+                if (user && user.email) {
+                    dest_mail = [user.email];
+                }
+            }
+
             if (CONFIG.general.send_expiration_notif_to_admin) {
                 dest_mail.push(CONFIG.general.support);
             }
-            await maisrv.send_notif_mail({
-                'name': 'project_expiration',
-                'destinations': dest_mail,
-                'subject': 'Project expiration ' + project.id
-            }, {
-                '#NAME#': project.id,
-                '#DATE#': timeConverter(project.expire)
-            });
 
-            if (CONFIG.general.limit_expire_mail) {
-                let nb_mls = Math.round((60 * 1000) / CONFIG.general.limit_expire_mail); // mail per min
-                await sleep(nb_mls);
+            if (dest_mail.length > 0) {
+                await maisrv.send_notif_mail({
+                    'name': 'project_expiration',
+                    'destinations': dest_mail,
+                    'subject': 'Project expiration ' + project.id
+                }, {
+                    '#NAME#': project.id,
+                    '#DATE#': timeConverter(project.expire)
+                });
+
+                if (CONFIG.general.limit_expire_mail) {
+                    let nb_mls = Math.round((60 * 1000) / CONFIG.general.limit_expire_mail); // mail per min
+                    await sleep(nb_mls);
+                }
             }
         } catch(error) {
             console.error('failed to send mail',error);
