@@ -55,6 +55,7 @@ async function remove_project(id, action_owner = 'auto') {
 
 async function update_project(id, project, action_owner = 'auto') {
     logger.info('Update Project ' + id);
+    project.expiration_notif = 0;
     await dbsrv.mongo_projects().updateOne({'id': id},  {'$set': project});
     let fid = new Date().getTime();
     project.id =  id;
