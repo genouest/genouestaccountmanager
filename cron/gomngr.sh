@@ -150,7 +150,7 @@ while true; do
         echo "Exit requested"
         exit 0
     fi
-    echo "Check for account upcoming expiration"
+    echo "Check for project upcoming expiration"
     /opt/crontask.sh test_projects
     if [ $EXIT_REQUEST -eq 1 ]; then
         rm /tmp/gomngr.lock
