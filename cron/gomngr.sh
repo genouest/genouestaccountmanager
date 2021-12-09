@@ -24,7 +24,7 @@ fi
 MYDIR=""
 if [ -z $GOMNGRSCRIPTDIR ]; then
     MYDIR="/opt/my/scripts"
-    echo "No GOMNGRSCRIPTDIR given, using default $MYDIR" 
+    echo "No GOMNGRSCRIPTDIR given, using default $MYDIR"
 else
     MYDIR=$GOMNGRSCRIPTDIR
 fi
@@ -121,14 +121,6 @@ while true; do
       echo "Exit requested"
       exit 0
     fi
-    echo "Check for project expiration"
-    /opt/crontask.sh project_quota_expire
-    if [ $EXIT_REQUEST -eq 1 ]; then
-      rm /tmp/gomngr.lock
-      rm /tmp/gomngr.list
-      echo "Exit requested"
-      exit 0
-    fi
   fi
   if [ $NOW -gt $TOMORROW ]; then
     echo "${NOW}: time for daily tasks"
@@ -153,13 +145,21 @@ while true; do
     echo "Check for account upcoming expiration"
     /opt/crontask.sh test_expiration
     if [ $EXIT_REQUEST -eq 1 ]; then
-      rm /tmp/gomngr.lock
-      rm /tmp/gomngr.list
-      echo "Exit requested"
-      exit 0
+        rm /tmp/gomngr.lock
+        rm /tmp/gomngr.list
+        echo "Exit requested"
+        exit 0
+    fi
+    echo "Check for project upcoming expiration"
+    /opt/crontask.sh test_projects
+    if [ $EXIT_REQUEST -eq 1 ]; then
+        rm /tmp/gomngr.lock
+        rm /tmp/gomngr.list
+        echo "Exit requested"
+        exit 0
     fi
   fi
-  
+
   ARCHIVE="${GOMNGRARCHIVEDIR:-/opt/my/archive}"
   echo "Archive old script to $ARCHIVE"
 
