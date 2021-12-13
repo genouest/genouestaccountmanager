@@ -11,6 +11,7 @@ const dbsrv = require('../core/db.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const maisrv = require('../core/mail.service.js');
 const rolsrv = require('../core/role.service.js');
+const usrsrv = require('../core/user.service.js');
 
 const mysql = require('mysql');
 const winston = require('winston');
@@ -276,7 +277,8 @@ router.post('/database/:id', async function(req, res) {
                 res.end();
                 return;
             }
-            let password = Math.random().toString(36).slice(-10);
+            //let password = Math.random().toString(36).slice(-10);
+            let password = usrsrv.new_password(10);
             let createuser = `CREATE USER '${req.params.id}'@'%' IDENTIFIED BY '${password}';\n`;
             try {
                 await querydb(createuser);

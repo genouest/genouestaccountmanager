@@ -1,7 +1,7 @@
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const crypto = require('crypto');
-
+//const bcrypt = require('bcryptjs');
 const goldap = require('../core/goldap.js');
 const dbsrv = require('../core/db.service.js');
 const idsrv = require('../core/id.service.js');
@@ -35,6 +35,13 @@ exports.delete_user = delete_user;
 exports.remove_user_from_group = remove_user_from_group;
 exports.remove_user_from_project = remove_user_from_project;
 exports.activate_user = activate_user;
+exports.new_password = new_password;
+
+
+
+function new_password(len=16) {
+    return crypto.randomBytes(32).toString('hex').slice(0,len);
+}
 
 // module functions
 function get_user_home(user) {
@@ -57,7 +64,8 @@ function get_user_home(user) {
 
 async function activate_user(user, action_owner = 'auto') {
     if (!user.password) {
-        user.password = Math.random().toString(36).slice(-10);
+        user.password = new_password(10);
+        //user.password = Math.random().toString(36).slice(-10);
     }
     if (!user.created_at) {
         user.created_at = new Date().getTime();
@@ -122,7 +130,8 @@ async function activate_user(user, action_owner = 'auto') {
 async function create_user(user, action_owner = 'auto') {
     user.status = STATUS_PENDING_EMAIL;
 
-    let regkey = Math.random().toString(36).substring(7);
+    //let regkey = Math.random().toString(36).substring(7);
+    let regkey = new_password(7);
     user.regkey = regkey;
 
     let default_main_group = CONFIG.general.default_main_group || '';
@@ -180,7 +189,8 @@ async function create_user(user, action_owner = 'auto') {
 
 // todo should be factorysed with "normal" user creation
 async function create_extra_user(user_name, group, internal_user){
-    let password = Math.random().toString(36).slice(-10);
+    //let password = Math.random().toString(36).slice(-10);
+    let password = new_password(10);
     if(process.env.MY_ADMIN_PASSWORD){
         password = process.env.MY_ADMIN_PASSWORD;
     }
