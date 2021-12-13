@@ -26,6 +26,7 @@ const filer = require('../core/file.js');
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const maisrv = require('../core/mail.service.js');
+const usrsrv = require('../core/user.service.js');
 
 const MAILER = CONFIG.general.mailer;
 //const MAIL_CONFIG = CONFIG[MAILER];
@@ -78,7 +79,8 @@ dbsrv.init_db().then(async () => {
 
         if (!CONFIG.general.disable_auto_expiration) {
             let fid = new Date().getTime();
-            let new_password = Math.random().toString(36).slice(-10);
+            //let new_password = Math.random().toString(36).slice(-10);
+            let new_password = usrsrv.new_password(8);
             user.password = new_password;
             try {
                 await goldap.reset_password(user, fid);

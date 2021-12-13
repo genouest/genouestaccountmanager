@@ -19,6 +19,8 @@ const logger = winston.loggers.get('gomngr');
 const jwt = require('jsonwebtoken');
 
 const cfgsrv = require('../core/config.service.js');
+const usrsrv = require('../core/user.service.js');
+
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
 const APP_ID= CONFIG.general.url;
@@ -59,7 +61,8 @@ router.get('/mail/auth/:id', async function(req, res) {
     if(! notif.mailSet()){
         return res.status(403).send({message: 'No mail provider set : cannot send mail'});
     }
-    let password = Math.random().toString(36).slice(-10);
+    //let password = Math.random().toString(36).slice(-10);
+    let password = usrsrv.new_password(10);
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
         return res.status(404).send({message: 'User not found'});
@@ -449,7 +452,8 @@ router.post('/auth/:id', async function(req, res) {
             user['token'] = token;
             attemps[user.uid]['attemps'] = 0;
             if (!user.apikey) {
-                let newApikey = Math.random().toString(36).slice(-10);
+                // let newApikey = Math.random().toString(36).slice(-10);
+                let newApikey = usrsrv.new_password(10);
                 user.apikey = newApikey;
                 await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': newApikey}});
                 res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});

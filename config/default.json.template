@@ -95,6 +95,7 @@
     "port": 27017
   },
   "ldap": {
+    "crypt": false,
     "host": "localhost",
     "dn": "dc=nodomain",
     "admin_cn": "cn=admin",

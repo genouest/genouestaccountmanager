@@ -139,7 +139,7 @@ var create_tp_user_db = async function (tp_user) {
         user.uidnumber = uid;
         user.home = usrsrv.get_user_home(user);
         await dbsrv.mongo_users().insertOne(user);
-        user.password = Math.random().toString(36).slice(-10);
+        user.password = usrsrv.new_password(10);
         return user;
     }
     catch(exception){

@@ -178,7 +178,8 @@ router.post('/user/:id/apikey', async function(req, res){
         return;
     }
 
-    let apikey = Math.random().toString(36).slice(-10);
+    //let apikey = Math.random().toString(36).slice(-10);
+    let apikey = usrsrv.new_password(10);
     await dbsrv.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
     res.send({apikey: apikey});
     res.end();
@@ -967,7 +968,8 @@ router.get('/user/:id/expire', async function(req, res){
     session_user.is_admin = isadmin;
 
     if(session_user.is_admin){
-        let new_password = Math.random().toString(36).slice(-10);
+        //let new_password = Math.random().toString(36).slice(-10);
+        let new_password = usrsrv.new_password(10);
         user.password = new_password;
         let fid = new Date().getTime();
         try {
@@ -1077,7 +1079,8 @@ router.post('/user/:id/passwordreset', async function(req, res){
 
 //app.get('/user/:id/passwordreset', users);
 router.get('/user/:id/passwordreset', async function(req, res){
-    let key = Math.random().toString(36).substring(7);
+    //let key = Math.random().toString(36).substring(7);
+    let key = usrsrv.new_password(7);
     if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
@@ -1148,7 +1151,8 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
     }
     if(req.params.key == user.regkey) {
         // reset the password
-        let new_password = Math.random().toString(36).slice(-10);
+        //let new_password = Math.random().toString(36).slice(-10);
+        let new_password = usrsrv.new_password(10);
         user.password = new_password;
         let fid = new Date().getTime();
         try {
@@ -1171,7 +1175,8 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
         }
 
         // disable previous link sent
-        let new_key = Math.random().toString(36).substring(7);
+        //let new_key = Math.random().toString(36).substring(7);
+        let new_key = usrsrv.new_password(7);
         await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
 
         // Now send email
@@ -1280,7 +1285,8 @@ router.get('/user/:id/renew', async function(req, res){
     session_user.is_admin = isadmin;
 
     if(session_user.is_admin){
-        let new_password = Math.random().toString(36).slice(-10);
+        //let new_password = Math.random().toString(36).slice(-10);
+        let new_password = usrsrv.new_password(10);
         user.password = new_password;
         let fid = new Date().getTime();
         try {

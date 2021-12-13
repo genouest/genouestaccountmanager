@@ -1,7 +1,8 @@
 const myldap = require('ldapjs');
 const winston = require('winston');
+const crypto = require('crypto');
 const logger = winston.loggers.get('gomngr');
-
+const b64_sha512crypt = require('sha512crypt-node').b64_sha512crypt;
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
@@ -9,6 +10,13 @@ const CONFIG = my_conf;
 const filer = require('../core/file.js');
 
 const dbsrv = require('../core/db.service.js');
+//const { config } = require('chai');
+
+function crypt_password(password) {
+    let salt = crypto.randomBytes(32).toString('hex').slice(0,16);
+    let hash = b64_sha512crypt(password, salt);
+    return `{crypt}${hash}`;
+}
 
 function get_group_dn(group) {
     return new Promise( function (resolve, reject) {
@@ -136,8 +144,12 @@ function get_user_dn(user) {
 
 module.exports = {
 
-    reset_password: function(user, fid){
+    reset_password: function(updated_user, fid){
+        let user = {...updated_user};
         return new Promise(function(resolve, reject){
+            if(CONFIG.ldap.crypt) {
+                user.password = crypt_password(user.password);
+            }
             get_user_dn(user)
                 .then(
                     user_dn => { // resolve()
@@ -269,7 +281,8 @@ module.exports = {
         });
     },
 
-    add: async function(user, fid) {
+    add: async function(new_user, fid) {
+        let user = {...new_user};
         let group = null;
         if (!CONFIG.general.disable_user_group) {
             try {
@@ -278,6 +291,9 @@ module.exports = {
                 logger.error(e);
                 throw e;
             }
+        }
+        if(CONFIG.ldap.crypt) {
+            user.password = crypt_password(user.password);
         }
         try {
             let created_file = await filer.ldap_add_user(user, group, fid);
