@@ -204,9 +204,6 @@ export class ProjectsComponent implements OnInit {
                 }
                 let data = resp;
                 for (var i = 0; i < data.length; i++) {
-                    if (!data[i].expire) {
-                        data[i].expire = new Date(data[i].expire);
-                    }
                     if (data[i].size && data[i].current_size) {
                         data[i].low_size = data[i].size / 3;
                         data[i].high_size = 2 * data[i].size / 3;

@@ -90,9 +90,6 @@ export class ProjectComponent implements OnInit {
         this.projectsService.list(false).subscribe(
             resp => {
                 for (var i = 0; i < resp.length; i++) {
-                    if (!resp[i].expire) {
-                        resp[i].expire = new Date(resp[i].expire);
-                    }
                     if (resp[i].size && resp[i].current_size) {
                         resp[i].low_size = resp[i].size / 3;
                         resp[i].high_size = 2 * resp[i].size / 3;
