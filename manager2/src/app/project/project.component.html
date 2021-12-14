@@ -96,14 +96,14 @@
                 <td>{{project.owner}}</td>
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
-                <td><span *ngIf="project.current_size">{{project.current_size}}&sol;</span>{{project.size}}
+                <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
                     <meter *ngIf="project.current_size"
                         min="0" max="{{project.size}}"
                         optimum="0" low="{{project.low_size}}" high="{{project.high_size}}"
                         value="{{project.current_size}}">
                     </meter>
                 </td>
-                <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&sol;</span>{{project.cpu}}
+                <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&#47;</span>{{project.cpu}}
                     <meter *ngIf="project.current_cpu"
                         min="0" max="{{project.cpu}}"
                         optimum="0" low="{{project.low_cpu}}" high="{{project.high_cpu}}"
@@ -197,7 +197,7 @@
                 <td><b>Size</b>&nbsp;
                     <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
                 </td>
-                <td><span *ngIf="selectedProject.current_size">{{selectedProject.current_size}}&sol;</span>{{selectedProject.size}} GB
+                <td><span *ngIf="selectedProject.current_size">{{selectedProject.current_size}}&#47;</span>{{selectedProject.size}} GB
                     <meter *ngIf="selectedProject.current_size"
                         min="0" max="{{selectedProject.size}}"
                         optimum="0" low="{{selectedProject.low_size}}" high="{{selectedProject.high_size}}"
@@ -209,7 +209,7 @@
                 <td><b>Cpu</b>&nbsp;
                     <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
                 </td>
-                <td><span *ngIf="selectedProject.current_cpu">{{selectedProject.current_cpu}}&sol;</span>{{selectedProject.cpu}} Hour
+                <td><span *ngIf="selectedProject.current_cpu">{{selectedProject.current_cpu}}&#47;</span>{{selectedProject.cpu}} Hour
                     <meter *ngIf="selectedProject.current_cpu"
                         min="0" max="{{selectedProject.cpu}}"
                         optimum="0" low="{{selectedProject.low_cpu}}" high="{{selectedProject.high_cpu}}"

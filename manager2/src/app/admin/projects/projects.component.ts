@@ -226,7 +226,7 @@ export class ProjectsComponent implements OnInit {
     pending_list(refresh_requests = false) {
         this.pending_projects = [];
         this.projectService.list_pending(true).subscribe(
-            data => {
+            resp => {
                 if (resp.length == 0) {
                     this.pending_number = 0;
                     return;
