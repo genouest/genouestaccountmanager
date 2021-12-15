@@ -191,8 +191,8 @@ async function delete_tp_user(user) {
 }
 
 async function delete_tp_users(users) {
-    for (let uid in users) {
-        let user = await dbsrv.mongo_users().findOne({'uid': uid});
+    for(let i=0;i<users.length;i++) {
+        let user = await dbsrv.mongo_users().findOne({'uid': users[i]});
         if (user && user.uid) {
             await delete_tp_user(user);
         }
