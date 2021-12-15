@@ -75,7 +75,7 @@ async function deleteExtraProject(project) {
     }
     try {
         await usrsrv.remove_user_from_project(project_to_remove.id, project_to_remove.owner, 'auto', true);
-        let res = await prjsrv.delete_project(project_to_remove.id);
+        let res = await prjsrv.remove_project(project_to_remove.id);
         return res;
     } catch(error) {
         logger.error(error);
