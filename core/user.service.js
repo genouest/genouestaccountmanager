@@ -409,7 +409,7 @@ async function remove_user_from_project(oldproject, uid, action_owner = 'auto', 
 }
 
 
-async function add_user_to_project(newproject, uid, action_owner = 'auto') {
+async function add_user_to_project(newproject, uid, action_owner = 'auto', sendmail=true) {
     logger.info('Adding user ' + uid + ' to project ' + newproject);
 
     let fid = new Date().getTime();
@@ -442,30 +442,33 @@ async function add_user_to_project(newproject, uid, action_owner = 'auto') {
     }
 
     let project = await dbsrv.mongo_projects().findOne({id:newproject});
-    let msg_destinations = [user.email];
-    let owner = await dbsrv.mongo_users().findOne({uid:project.owner});
-    if (owner) {
-        msg_destinations.push(owner.email);
-    }
-    if (user.send_copy_to_support) {
-        msg_destinations.push(CONFIG.general.support);
-    }
 
-    try {
-        await maisrv.send_notif_mail({
-            'name': 'add_to_project',
-            'destinations': msg_destinations,
-            'subject': 'account ' + user.uid + ' added to project : ' + project.id
-        }, {
-            '#UID#': user.uid,
-            '#NAME#': project.id,
-            '#SIZE#': project.size,
-            '#CPU#': project.cpu,
-            '#DESC#': project.description,
-            '#PATH#': project.path
-        });
-    } catch(error) {
-        logger.error(error);
+    if (sendmail) {
+        let msg_destinations = [user.email];
+        let owner = await dbsrv.mongo_users().findOne({uid:project.owner});
+        if (owner) {
+            msg_destinations.push(owner.email);
+        }
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
+
+        try {
+            await maisrv.send_notif_mail({
+                'name': 'add_to_project',
+                'destinations': msg_destinations,
+                'subject': 'account ' + user.uid + ' added to project : ' + project.id
+            }, {
+                '#UID#': user.uid,
+                '#NAME#': project.id,
+                '#SIZE#': project.size,
+                '#CPU#': project.cpu,
+                '#DESC#': project.description,
+                '#PATH#': project.path
+            });
+        } catch(error) {
+            logger.error(error);
+        }
     }
 
     if (CONFIG.project === undefined || CONFIG.project.enable_group) {
