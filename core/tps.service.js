@@ -130,7 +130,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             }
 
             if (projectName != '') {
-                usrsrv.add_user_to_project(userProject.id, user.uid, sendmail=false);
+                usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
             }
 
         }
