@@ -68,7 +68,7 @@ async function deleteExtraProject(project) {
     if (project === undefined || project === null) {
         return false;
     }
-    let project_to_remove = await dbsrv.mongo_projects().findOne({'name': project});
+    let project_to_remove = await dbsrv.mongo_projects().findOne({'id': project});
     if(!project_to_remove) {
         logger.error('Cant find project to remove ' +  project);
         return false;
@@ -130,7 +130,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             }
 
             if (projectName != '') {
-                usrsrv.add_user_to_project(userProject.id, user.uid,  sendmail=false);
+                usrsrv.add_user_to_project(userProject.id, user.uid, sendmail=false);
             }
 
         }
