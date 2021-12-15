@@ -182,7 +182,9 @@ async function delete_tp_user(user) {
 async function delete_tp_users(users) {
     for (let uid in users) {
         let user = await dbsrv.mongo_users().findOne({'uid': uid});
-        await delete_tp_user(user);
+        if (user && user.uid) {
+            await delete_tp_user(user);
+        }
     }
 
 }
@@ -196,7 +198,7 @@ async function remove_tp_reservation(reservation_id) {
 
     if (reservation.accounts)
     {
-        logger.debug('delete account for reservation ', reservation.accounts);
+        logger.debug('delete reservation account ', reservation.accounts);
         await delete_tp_users(reservation.accounts);
     }
 
