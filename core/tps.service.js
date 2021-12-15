@@ -49,13 +49,14 @@ async function deleteExtraGroup(group) {
     if (group === undefined || group === null) {
         return false;
     }
-    let group_to_remove = await dbsrv.mongo_groups().findOne({'name': group.name});
+    let group_to_remove = await dbsrv.mongo_groups().findOne({'name': group});
     if(!group_to_remove) {
+        logger.error('Cant find group to remove ' +  group);
         return false;
     }
     try {
-        await usrsrv.remove_user_from_group(group.owner, group.name);
-        let res = await grpsrv.delete_group(group);
+        await usrsrv.remove_user_from_group(group_to_remove.owner, group_to_remove.name);
+        let res = await grpsrv.delete_group(group_to_remove);
         return res;
     } catch(error) {
         logger.error(error);
@@ -67,14 +68,14 @@ async function deleteExtraProject(project) {
     if (project === undefined || project === null) {
         return false;
     }
-    let project_to_remove = await dbsrv.mongo_projects().findOne({'name': project.id});
+    let project_to_remove = await dbsrv.mongo_projects().findOne({'name': project});
     if(!project_to_remove) {
-        logger.error('Cant find project to remove ' +  project.id);
+        logger.error('Cant find project to remove ' +  project);
         return false;
     }
     try {
-        await usrsrv.remove_user_from_project(project.id, project.owner, force=true);
-        let res = await prjsrv.delete_project(project.id);
+        await usrsrv.remove_user_from_project(project_to_remove.id, project_to_remove.owner, force=true);
+        let res = await prjsrv.delete_project(project_to_remove.id);
         return res;
     } catch(error) {
         logger.error(error);
