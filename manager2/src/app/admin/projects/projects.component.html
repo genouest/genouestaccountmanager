@@ -171,6 +171,7 @@
           <th *ngIf="!config.project || config.project.enable_group">Group</th>
           <th>Path</th>
           <th>Size (GB)</th>
+          <th>Cpu (Hour)</th>
           <th>Creation</th>
           <th>Expiration</th>
         </tr>
@@ -181,7 +182,20 @@
           <td>{{project.owner}}</td>
           <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
           <td>{{project.path}}</td>
-          <td>{{project.size}}</td>
+          <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
+              <meter *ngIf="project.current_size"
+                  min="0" max="{{project.size}}"
+                  optimum="0" low="{{project.low_size}}" high="{{project.high_size}}"
+                  value="{{project.current_size}}">
+              </meter>
+          </td>
+          <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&#47;</span>{{project.cpu}}
+              <meter *ngIf="project.current_cpu"
+                  min="0" max="{{project.cpu}}"
+                  optimum="0" low="{{project.low_cpu}}" high="{{project.high_cpu}}"
+                  value="{{project.current_cpu}}">
+              </meter>
+          </td>
           <td>{{date_convert(project.created_at)}}</td>
           <td>{{date_convert(project.expire)}}</td>
         </tr>
