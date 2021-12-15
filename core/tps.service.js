@@ -166,22 +166,23 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
 }
 
 
-async function delete_tp_user(user, admin_id) {
+async function delete_tp_user(user) {
 
     logger.debug('delete_tp_user', user.uid);
     try{
         await fdbs.delete_dbs(user);
         await fwebs.delete_webs(user);
-        await usrsrv.delete_user(user, admin_id);
+        await usrsrv.delete_user(user);
     }
     catch(exception) {
         logger.error(exception);
     }
 }
 
-async function delete_tp_users(users, admin_id) {
-    for (let user in users) {
-        await delete_tp_user(user, admin_id);
+async function delete_tp_users(users) {
+    for (let uid in users) {
+        let user = await dbsrv.mongo_users().findOne({'uid': uid});
+        await delete_tp_user(user);
     }
 
 }
@@ -195,17 +196,17 @@ async function remove_tp_reservation(reservation_id) {
 
     if (reservation.accounts)
     {
-        logger.debug('delete account for reservation', reservation.accounts);
+        logger.debug('delete account for reservation ', reservation.accounts);
         await delete_tp_users(reservation.accounts);
     }
 
     if (reservation.group && reservation.group.name && reservation.group.name != '') {
-        logger.debug('delete reservation group', reservation.group);
+        logger.debug('delete reservation group ', reservation.group.name);
         await deleteExtraGroup(reservation.group.name);
     }
 
     if (reservation.project && reservation.project.id && reservation.project.id != '') {
-        logger.debug('delete reservation project', reservation.project);
+        logger.debug('delete reservation project ', reservation.project.id);
         await deleteExtraProject(reservation.project.id);
     }
 
