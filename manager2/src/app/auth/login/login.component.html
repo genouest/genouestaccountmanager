@@ -32,7 +32,7 @@
                     <div class="alert alert-info"><div class="glyphicon glyphicon-save"></div> Insert your u2f device and press device</div>
                     <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
                     <div class="alert alert-danger" *ngIf="error_msg">{{error_msg}}</div>
-                    <div class="row" *ngIf="userData && userData.otp.secret">
+                    <div class="row" *ngIf="userData && userData.otp && userData.otp.secret">
                         <div class="col-md-12">
                             <h4 class="text-center login-title"><strong>or</strong></h4>
                         </div>
