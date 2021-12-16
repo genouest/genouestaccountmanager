@@ -529,10 +529,10 @@ router.post('/dmp/:id', async function (req, res) {
     const options = {
         headers: {
             'content-Type': "application/json",
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzNjUzNjMwNH0.44fYka-sunTRZXjWNbzJVHOt5g35XFhIH8iuBSn9ZLc"
+            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzOTczNDU0Mn0.8wLsX4ytSiq64jBKuzTp_8iW4b44lcUbVoUsKUMEc2s"
         }
     };
-    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2120', options);
+    let resp = await axios.get('https://opidor-preprod.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2100', options);
     console.log(resp);
     return res.send({ message: 'Dmp found', data: resp.data });
 });
@@ -546,10 +546,10 @@ router.post('/dmp/outputs/:id', async function (req, res) {
     const options = {
         headers: {
             'content-Type': "application/json",
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzNjUzNjMwNH0.44fYka-sunTRZXjWNbzJVHOt5g35XFhIH8iuBSn9ZLc"
+            Authorization: "eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzOTczNDU0Mn0.8wLsX4ytSiq64jBKuzTp_8iW4b44lcUbVoUsKUMEc2s"
         }
     };
-    let resp = await axios.get('https://madmp-test.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2120', options);
+    let resp = await axios.get('https://opidor-preprod.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2100', options);
     console.log(resp);
 
 
