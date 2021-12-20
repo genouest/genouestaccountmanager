@@ -206,20 +206,21 @@ async function remove_tp_reservation(reservation_id) {
     logger.info('Close reservation', reservation_id);
 
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
+    logger.debug('Close reservation', reservation);
 
     if (reservation.accounts)
     {
-        logger.debug('delete reservation account ', reservation.accounts);
+        logger.info('Delete Account', reservation.accounts);
         await delete_tp_users(reservation.accounts);
     }
 
     if (reservation.group && reservation.group.name && reservation.group.name != '') {
-        logger.debug('delete reservation group ', reservation.group.name);
+        logger.info('Delete Group', reservation.group.name);
         await deleteExtraGroup(reservation.group.name);
     }
 
     if (reservation.project && reservation.project.id && reservation.project.id != '') {
-        logger.debug('delete reservation project ', reservation.project.id);
+        logger.info('Delete Project', reservation.project.id);
         await deleteExtraProject(reservation.project.id);
     }
 
@@ -243,31 +244,30 @@ async function create_tp_reservation(reservation_id) {
 
     // Create users for reservation
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
+    logger.debug('create reservation', reservation);
 
     if (!reservation.name) {
         reservation.name = 'tp';
     }
 
     let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
-
-    logger.debug('create a reservation group', reservation._id);
-
-    gpname = '';
-
+    let gpname = '';
     let newGroup;
     if (reservation.group_or_project == 'group') {
+        logger.info('Create Group', trainingName);
         newGroup = await createExtraGroup(trainingName, reservation.owner);
         gpname = newGroup.name;
     }
 
-    logger.debug('create a reservation project', reservation._id);
+
     let newProject;
     if (reservation.group_or_project == 'project') {
+        logger.info('Create Project', trainingName);
         newProject = await createExtraProject(trainingName, reservation.owner);
         gpname = newProject.id;
     }
 
-    logger.debug('create reservation accounts', reservation._id);
+    logger.info('Create Accounts', trainingName);
     let activated_users = await create_tp_users_db(
         reservation.owner,
         reservation.quantity,
@@ -279,6 +279,7 @@ async function create_tp_reservation(reservation_id) {
         reservation.accounts.push(activated_users[i].uid);
     }
     try{
+        logger.info('Send Password', trainingName);
         await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users, gpname);
         await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {
             '$set': {
