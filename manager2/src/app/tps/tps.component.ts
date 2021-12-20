@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
+import { ConfigService } from '../config.service'
 import { TpserviceService } from './tpservice.service';
 import { CalendarEventTimesChangedEvent } from 'angular-calendar';
 import { Subject } from 'rxjs';
@@ -11,6 +12,8 @@ import { Subject } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TpsComponent implements OnInit {
+
+    config: any
 
     msg: string
     errmsg: string
@@ -38,6 +41,7 @@ export class TpsComponent implements OnInit {
 
     constructor(
         private authService: AuthService,
+        private configService: ConfigService,
         private tpService: TpserviceService
     ) { }
 
@@ -74,6 +78,14 @@ export class TpsComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                this.group_or_project = this.config.reservation.group_or_project;
+
+            },
+            err => console.log('failed to get config')
+        );
         this.fromDate = new Date();
         this.toDate = new Date();
         this.viewDate = new Date();
@@ -81,7 +93,6 @@ export class TpsComponent implements OnInit {
         this.events = [];
         this.session_user = this.authService.profile;
         this.authorized = (this.session_user.is_trainer || this.session_user.is_admin);
-        this.group_or_project = 'group';
         this.name = 'tps';
         this.listEvents();
     }

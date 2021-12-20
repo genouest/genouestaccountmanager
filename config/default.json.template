@@ -74,6 +74,10 @@
      "default_path": "/opt/project",
      "default_expire": 360
   },
+  "reservation": {
+      "group_or_project": "group",
+      "show_choice_in_ui": false
+  },
   "rabbitmq": {
     "url": "amqp://localhost",
     "exchange": "gomngr"
