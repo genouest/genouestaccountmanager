@@ -171,12 +171,12 @@ export class ProjectsComponent implements OnInit {
             'orga': this.new_project.orga,
             'path': this.new_project.path,
             'expire': new Date(this.new_project.expire).getTime()
-        }
-        ).subscribe(
+        }).subscribe(
             resp => {
                 this.add_project_msg = resp.message;
                 this.project_list();
                 this.pending_list(true);
+
                 this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
                     resp => {
                         this.new_project = {};
@@ -186,7 +186,6 @@ export class ProjectsComponent implements OnInit {
                         this.add_project_error_msg = err.error.message;
                     }
                 )
-
             },
             err => {
                 console.log('failed to add project', this.new_project);

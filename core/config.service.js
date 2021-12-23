@@ -49,6 +49,12 @@ function init () {
             };
         }
 
+        if (!conf.reservation) {
+            conf.reservation = {
+                'group_or_project': 'group',
+                'show_choice_in_ui': false
+            };
+        }
 
         is_init = true;
     }

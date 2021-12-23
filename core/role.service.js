@@ -12,6 +12,10 @@ const CONFIG = my_conf;
 exports.is_admin = is_admin;
 
 async function is_admin(user) {
+    if (!user) {
+        return false;
+    }
+
     if (user.uid === undefined) { // backward compatibility with user = user.uid, just in case
         if (CONFIG.general.admin.indexOf(user) >= 0)
         {

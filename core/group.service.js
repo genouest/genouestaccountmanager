@@ -10,7 +10,7 @@ const goldap = require('../core/goldap.js');
 const dbsrv = require('../core/db.service.js');
 const idsrv = require('../core/id.service.js');
 const filer = require('../core/file.js');
-
+const usrsrv = require('../core/user.service.js');
 
 // module exports
 exports.get_group_home = get_group_home; // todo : move this one in users.services ? or not
@@ -91,6 +91,13 @@ async function create_group(group_name, owner_name, action_owner = 'auto') {
 
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'create group ' + group_name , 'logs': [group_name + '.' + fid + '.update']});
 
+    try {
+        if (group.owner) {
+            await usrsrv.add_user_to_group(group.owner, group.name);
+        }
+    } catch(error) {
+        logger.error(error);
+    }
     return group;
 
 }
@@ -120,7 +127,7 @@ async function delete_group(group, action_owner = 'auto') {
 
 
 async function clear_user_groups(user, action_owner = 'auto') {
-    let allgroups = user.secondarygroups;
+    let allgroups = user.secondarygroups ?? [];
     if (user.group && user.group != '') {
         allgroups.push(user.group);
     }
