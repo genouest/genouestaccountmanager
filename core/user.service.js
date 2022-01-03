@@ -417,6 +417,11 @@ async function add_user_to_project(newproject, uid, action_owner = 'auto') {
     if(!user) {
         throw {code: 404, message: 'User does not exist'};
     }
+
+    if(user.status !== STATUS_ACTIVE) {
+        throw {code: 403, message: 'User ' + uid + ' account is not active'};
+    }
+
     if (!user.projects){
         user.projects = [];
     }
