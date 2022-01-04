@@ -11,6 +11,8 @@ const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
 const usrsrv = require('../core/user.service.js');
 
+var STATUS_ACTIVE = 'Active';
+
 router.get('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
@@ -311,6 +313,11 @@ router.post('/project/:id/request', async function(req, res){
         return;
     }
 
+    if (req.body.request === 'add' && newuser.status != STATUS_ACTIVE){
+        res.status(403).send({message: 'User ' + req.body.user + ' is not active : cannot add'});
+        return;
+    }
+
     try {
         if (req.body.request === 'add'){
             await usrsrv.add_user_to_project(project.id, req.body.user, user.uid);
@@ -354,7 +361,7 @@ router.post('/ask/project', async function(req, res){
         res.status(403).send({'message': 'Project already exists'});
         return;
     }
-   
+
 
     try {
         await prjsrv.create_project_request({
