@@ -1,11 +1,11 @@
 <div class="well">
   <div class="row">
       <div class="col-sm-6">
-          <h2><b>{{user.uid}}</b>
+          <h2>{{user.uid}}</h2>
           <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
-           -
-           <small>Expires: {{date_convert(user.expiration)}}</small></h2>
+          <div *ngIf="user && user.created_at"><small>Created at : {{date_convert(user.created_at)}}</small></div>
+          <div><small>Expires: {{date_convert(user.expiration)}}</small></div>
           <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
       </div>
       <div class="col-sm-6">
@@ -64,7 +64,7 @@
           </div>
           <div class="card-body">
               <div class="user-information">
-                  <form role="form" class="user-form form-horizontal form-register">
+                  <form aria-label="user information" role="form" class="user-form form-horizontal form-register">
                       <div class="form-group row">
                           <label for="firstname" class="col-4 col-form-label">First name</label>
                           <div class="col-6">
@@ -175,15 +175,22 @@
                           <div class="form-check row">
                                 <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
                               <label class="col-6 form-check-label">
-                                  Fake/internal account
+                                  Fake/App account
                               </label>
                           </div>
                           <div class="form-check row">
-                                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
                               <label class="col-6 form-check-label">
                                   Trainer account
                               </label>
                           </div>
+                          <div class="form-check row">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.send_copy_to_support" type="checkbox" class="form-check-input">
+                              <label class="col-6 form-check-label">
+                                  Copy mail to Support Team
+                              </label>
+                          </div>
+
                       </div>
 
                       <div *ngIf="! session_user.is_admin">
@@ -207,9 +214,18 @@
               </div>
               <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
               <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
-              <button type="button" class="btn btn-outline-secondary pull-right" (click)="update_info()">Update info</button>
+              <button type="button" class="btn btn-primary pull-right" (click)="update_info()">Update info</button>
           </div>
 
+      </div>
+      <div class="card bg-light" *ngIf="user && user.extra_info">
+      <div class="card-header"><h4>Extra information</h4></div>
+      <div class="card-body">
+        <app-user-extra [user]="user" (extraValues)="onExtraValue($event)"></app-user-extra>
+                      <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
+              <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
+              <button type="button" class="btn btn-primary pull-right" (click)="update_info()">Update info</button>
+      </div>
       </div>
   </div>
 
@@ -235,7 +251,7 @@
                 </textarea>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-outline-secondary" (click)="add_note()">Add note</button>
+                <button type="button" class="btn btn-primary" (click)="add_note()">Add note</button>
             </div>
         </div>
     </div>
@@ -245,9 +261,17 @@
             <h4>Authentication</h4>
         </div>
         <div class="card-body">
-            <span *ngIf="user.u2f.publicKey" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> U2F</span>
-            <button *ngIf="! user.u2f.publicKey" class="btn btn-outline-secondary" (click)="register_u2f()">Register U2F key</button>
-            <span *ngIf="u2f">{{u2f}}</span>
+            <div class="row">
+                <div class="col-sm-12" style="margin-bottom: 10px">
+                    <span *ngIf="user.u2f.key" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
+                    <button class="btn btn-primary btn-sm" (click)="register_u2f()">Register new key</button>
+                    <span *ngIf="u2f">{{u2f}}</span>
+                </div>
+                <div class="col-sm-12">
+                    <button class="btn btn-primary btn-sm" (click)="register_otp()">Register OTP</button>
+                    <img alt={{secret}} *ngIf="otp" src={{otp}}/>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card bg-light">
@@ -256,7 +280,7 @@
         </div>
         <div class="card-body">
             <span>{{user.apikey}}</span>
-            <button style="margin-left: 10px;" class="btn btn-outline-secondary" (click)="generate_apikey(user.uid)">Generate</button>
+            <button style="margin-left: 10px;" class="btn btn-primary" (click)="generate_apikey(user.uid)">Generate</button>
         </div>
     </div>
     <div class="card bg-light">
@@ -291,7 +315,7 @@
                         <input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
                     </div>
                 </div>
-                <button type="button" class="btn btn-outline-secondary" (click)="update_password()">Change password</button>
+                <button type="button" class="btn btn-primary" (click)="update_password()">Change password</button>
             </form>
         </div>
     </div>
@@ -321,13 +345,13 @@
                 </div>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-outline-secondary" (click)="add_secondary_group()">Add to group</button>
+                <button type="button" class="btn btn-primary" (click)="add_secondary_group()">Add to group</button>
             </div>
             <hr/>
             <div class="table-responsive">
-                <table *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
+                <table aria-label="secondary groups" *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
                     <thead>
-                        <th>Name</th><th></th>
+                        <th scope="col">Name</th><th scope="col"></th>
                     </thead>
                     <tbody>
                         <tr *ngFor="let secondarygroup of user.secondarygroups">
@@ -379,13 +403,13 @@
                       </div>
                     </div>
                     <div class="form-group">
-                        <button type="button" class="btn btn-outline-secondary" (click)="db_add()">Create</button>
+                        <button type="button" class="btn btn-primary" (click)="db_add()">Create</button>
                     </div>
 
                 <div class="table-responsive">
-                    <table *ngIf="databases && databases.length > 0" class="table table-striped">
+                    <table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
                         <thead>
-                            <th>Name</th><th></th>
+                            <th scope="col">Name</th><th scope="col"></th>
                         </thead>
                         <tbody>
                             <tr *ngFor="let db of databases">
@@ -412,12 +436,12 @@
                         </button>
                     </div>
                     <div>
-                        <form role="form" class="user-form form-inline">
+                        <form aria-label="ssh key" role="form" class="user-form form-inline">
                             <div class="form-group">
                                 <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-outline-secondary" (click)="update_ssh()">Add</button>
+                                <button type="button" class="btn btn-primary" (click)="update_ssh()">Add</button>
                             </div>
                         </form>
                     </div>
@@ -436,12 +460,12 @@
                     </div>
                     <div *ngIf="key_err" class="alert alert-warning alert-dismissible fade show" role="alert">{{key_err}}</div>
                     <div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
-                    <button class="btn btn-outline-secondary" (click)="ssh_new_key()">Generate new key</button>
+                    <button class="btn btn-primary" (click)="ssh_new_key()">Generate new key</button>
                     <hr/>
                     <h4 style="font-weight: normal;">Download</h4>
-                    <button (click)="get_key(user.uid, 'private')" class="btn btn-outline-secondary">private rsa key</button>
-                    <button (click)="get_key(user.uid, 'putty')" class="btn btn-outline-secondary">putty private key</button>
-                    <button (click)="get_key(user.uid, 'public')" class="btn btn-outline-secondary">public key</button>
+                    <button (click)="get_key(user.uid, 'private')" class="btn btn-primary">private rsa key</button>
+                    <button (click)="get_key(user.uid, 'putty')" class="btn btn-primary">putty private key</button>
+                    <button (click)="get_key(user.uid, 'public')" class="btn btn-primary">public key</button>
                 </div>
             </div>
   </div>
@@ -478,15 +502,15 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-outline-secondary" (click)="web_add()">Declare owned site</button>
+                                <button type="button" class="btn btn-primary" (click)="web_add()">Declare owned site</button>
                             </div>
                         </div>
                         <div>
                             <hr/>
                             <div class="table-responsive">
-                                <table *ngIf="websites && websites.length > 0" class="table table-striped">
+                                <table aria-label="web sites" *ngIf="websites && websites.length > 0" class="table table-striped">
                                     <thead>
-                                        <th>Name</th><th>Url</th><th>Description</th><th></th>
+                                        <th scope="col">Name</th><th scope="col">Url</th><th scope="col">Description</th><th scope="col"></th>
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let site of websites">
@@ -542,7 +566,7 @@
                 </textarea>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-outline-secondary" (click)="sendmail()">Send mail</button>
+                <button type="button" class="btn btn-primary" (click)="sendmail()">Send mail</button>
             </div>
 
 

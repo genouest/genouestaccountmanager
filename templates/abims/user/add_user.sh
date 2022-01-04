@@ -2,16 +2,8 @@
 
 set -xe
 
-/usr/local/bin/num create-user --firstname="{{ user.firstname }}" --lastname="{{ user.lastname }}" --email="{{ user.email }}" --username="{{ user.uid }}" {% if user.home %}--home_dir="{{ user.home }}"{% endif %} {% if user.password %}--password="{{ user.password }}"{% endif %}
+/usr/local/bin/num create-user --firstname="{{ user.firstname }}" --lastname="{{ user.lastname }}" --email="{{ user.email }}" --username="{{ user.uid }}" {% if user.home %}--home_dir="{{ user.home }}"{% endif %} {% if user.password %}--password="{{ user.password }}"{% endif %} {% if user.is_fake %}--service{% endif %}
 
-# warning: disable ldap as it should have been done by num, but we don't know what is the dn created yet
-
-#ldapadd -h {{ CONFIG.ldap.host }} -cx -w {{ CONFIG.ldap.admin_password }} -D {{ CONFIG.ldap.admin_cn }},{{ CONFIG.ldap.admin_dn }} -f "{{ CONFIG.general.script_dir }}/{{ user.uid }}.{{ fid }}.ldif"
-
-if [ -e "{{ CONFIG.general.script_dir }}/group_{{ user.group }}_{{ user.uid }}.{{ fid }}.ldif" ]
-then
-    ldapmodify -h {{ CONFIG.ldap.host }} -cx -w {{ CONFIG.ldap.admin_password }} -D {{ CONFIG.ldap.admin_cn }},{{ CONFIG.ldap.admin_dn }} -f "{{ CONFIG.general.script_dir }}/group_{{ user.group }}_{{ user.uid }}.{{ fid }}.ldif"
-fi
 
 {% include "user/add_readme.sh" %}
 
@@ -24,8 +16,13 @@ chown -R {{ user.uid }}:{{ user.uid }} "{{ user.home }}"
 
 {% include "user/add_extra_dirs.sh" %}
 
+{% if user.create_imap_mailbox %}
+mel create-user-aliases "{{ user.uid }}"
+mel create-mailbox "{{ user.uid }}"
+{% endif %}
 
-
-
+{% if user.password %}
+mel add-samba "{{ user.uid }}" --password "{{ user.password }}"
+{% endif %}
 
 # add_user.sh

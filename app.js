@@ -6,10 +6,8 @@ const express = require('express');
 const expressStaticGzip = require('express-static-gzip');
 const cors = require('cors');
 const path = require('path');
-// const favicon = require('serve-favicon');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
 const http = require('http');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
@@ -46,7 +44,6 @@ const users = require('./routes/users');
 const groups = require('./routes/groups');
 const ssh = require('./routes/ssh');
 const auth = require('./routes/auth');
-// const disks = require('./routes/disks');
 const database = require('./routes/database');
 const web = require('./routes/web');
 const logs = require('./routes/logs');
@@ -79,11 +76,8 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hjs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
-//app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieParser());
 
 var mongoURL = CONFIG.mongo.url;
@@ -102,7 +96,6 @@ app.use(session({
     cookie: { maxAge: 3600*1000},
     store: mongoStoreClient
 }));
-// app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -173,7 +166,7 @@ app.all('*', async function(req, res, next){
     if (runningEnv === 'test'){
         res.on('finish', function() {
             wlogger.debug('*test* env, on finish execute cron script');
-            if_dev_execute_scripts().then(function(){});
+            if_dev_execute_scripts().then(function(){ return; });
         });
     }
 
@@ -317,7 +310,6 @@ app.post('/web/:id', web);
 app.put('/web/:id/owner/:old/:new', web);
 app.delete('/web/:id', web);
 app.post('/user/:id', users);
-// app.get('/disk/:id', disks);
 app.put('/user/:id', users);
 app.put('/user/:id/ssh', users);
 app.get('/user/:id', users);
@@ -330,8 +322,8 @@ app.get('/user/:id/passwordreset', users);
 app.get('/user/:id/apikey', users);
 app.post('/user/:id/apikey', users);
 app.post('/user/:id/notify', users);
-app.get('/lists', users),
-app.get('/list/:list', users),
+app.get('/lists', users);
+app.get('/list/:list', users);
 app.post('/user/:id/passwordreset', users);
 app.get('/user/:id/passwordreset/:key', users);
 app.post('/user/:id/cloud', users);
@@ -382,6 +374,8 @@ app.get('/u2f/register/:id', auth);
 app.post('/u2f/register/:id', auth);
 app.get('/u2f/auth/:id', auth);
 app.post('/u2f/auth/:id', auth);
+app.post('/otp/register/:id', auth);
+app.post('/otp/check/:id', auth);
 app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);

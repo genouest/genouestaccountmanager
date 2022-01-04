@@ -143,9 +143,8 @@ module.exports = {
         return create_file('user_add_group', { group: group, fid: fid });
     },
 
-    // Todo: maybe add the group list in this method (it is not needed now as it is done in ldap)
-    user_change_group: function (user, fid) {
-        return create_file('user_change_group', { user: user, fid: fid });
+    user_change_group: function (user, group_add, group_remove, fid) {
+        return create_file('user_change_group', { user: user, group_add: group_add, group_remove: group_remove, fid: fid });
     },
 
     user_delete_user: function (user, fid) {

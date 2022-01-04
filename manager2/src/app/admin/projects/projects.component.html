@@ -35,8 +35,12 @@
           </select>
         </div>
         <div class="col-sm-2">
-          <label for="project_size">Size (GB)</label>
-          <input placeholder="project size in G" type="number" id="project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+            <label for="project_size">Size (GB)</label>
+            <input placeholder="project size in GB" type="number" id="project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+            <label for="project_cpu">Cpu (Hour)</label>
+            <input placeholder="project cpu in Hour" type="number" id="project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
         </div>
         <div class="col-sm-2">
           <label for="project_expire">Expiration date</label>
@@ -105,7 +109,8 @@
                 <tr>
                   <th>Project</th>
                   <th>User</th>
-                  <th>Size (Go)</th>
+                  <th>Size (GB)</th>
+                  <th>Cpu (Hour)</th>
                   <th>orga</th>
                   <th>Action</th>
                   <th></th>
@@ -116,6 +121,7 @@
                   <td>{{pending.id}}</td>
                   <td>{{pending.owner}}</td>
                   <td>{{pending.size}}</td>
+                  <td>{{pending.cpu}}</td>
                   <td>{{pending.orga}}</td>
                   <td>
                     <div class="btn-group">
@@ -164,7 +170,8 @@
           <th>Owner</th>
           <th *ngIf="!config.project || config.project.enable_group">Group</th>
           <th>Path</th>
-          <th>Size (Go)</th>
+          <th>Size (GB)</th>
+          <th>Cpu (Hour)</th>
           <th>Creation</th>
           <th>Expiration</th>
         </tr>
@@ -175,7 +182,20 @@
           <td>{{project.owner}}</td>
           <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
           <td>{{project.path}}</td>
-          <td>{{project.size}}</td>
+          <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
+              <meter *ngIf="project.current_size"
+                  min="0" max="{{project.size}}"
+                  optimum="0" low="{{project.low_size}}" high="{{project.high_size}}"
+                  value="{{project.current_size}}">
+              </meter>
+          </td>
+          <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&#47;</span>{{project.cpu}}
+              <meter *ngIf="project.current_cpu"
+                  min="0" max="{{project.cpu}}"
+                  optimum="0" low="{{project.low_cpu}}" high="{{project.high_cpu}}"
+                  value="{{project.current_cpu}}">
+              </meter>
+          </td>
           <td>{{date_convert(project.created_at)}}</td>
           <td>{{date_convert(project.expire)}}</td>
         </tr>
