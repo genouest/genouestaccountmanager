@@ -362,7 +362,6 @@ router.post('/ask/project', async function(req, res){
         return;
     }
 
-
     try {
         await prjsrv.create_project_request({
             'id': req.body.id,
