@@ -285,7 +285,7 @@ export class ProjectComponent implements OnInit {
                     let research_output = null
                     for (var elem of resp.data.researchOutputs){
                         console.log(elem.research_output_id)
-                        if (elem.research_output_id == "2120") {
+                        if (elem.research_output_id == "2100") {
                             research_output = elem
                             break
                         }
@@ -299,7 +299,9 @@ export class ProjectComponent implements OnInit {
                         'orga': funders,
                         'size': research_output.dataStorage.estimatedVolume,
                         'dmpid': dmpid,
+
                     };
+                    console.log(resp.data.project)
                     console.log(this.new_project.id);
                 },
                 err => {
