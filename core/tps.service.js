@@ -89,14 +89,14 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
     logger.debug('create_tp_users ', owner, quantity, duration);
     let startnbr = await idsrv.getUserAvailableId();
 
-    groupName = '';
-    projectName = '';
+    let groupName = '';
+    let projectName = '';
 
-    if (userGroup?.name) {
+    if (userGroup.name) {
         groupName = userGroup.name;
     }
 
-    if (userProject?.id) {
+    if (userProject.id) {
         projectName = userProject.id;
     }
 
