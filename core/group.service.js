@@ -127,7 +127,7 @@ async function delete_group(group, action_owner = 'auto') {
 
 
 async function clear_user_groups(user, action_owner = 'auto') {
-    let allgroups = user.secondarygroups ?? [];
+    let allgroups = user.secondarygroups ? user.secondarygroups : [];
     if (user.group && user.group != '') {
         allgroups.push(user.group);
     }
