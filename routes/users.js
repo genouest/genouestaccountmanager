@@ -1607,9 +1607,17 @@ router.put('/user/:id', async function(req, res) {
         logger.error('update errors', err);
     }
 
-    if(user.status == STATUS_ACTIVE){
+    let is_admin = false;
+    if(session_user.is_admin) {
+        is_admin = true;
+    }
+    let admin_update_expired = false;
+    if(user.status == STATUS_EXPIRED && is_admin) {
+        admin_update_expired = true;
+    }
+    if(user.status == STATUS_ACTIVE || admin_update_expired){
         await dbsrv.mongo_users().replaceOne({_id: user._id}, user);
-        if(session_user.is_admin) {
+        if(is_admin) {
             user.is_admin = true;
         }
         let fid = new Date().getTime();
@@ -1628,7 +1636,7 @@ router.put('/user/:id', async function(req, res) {
 
         }
 
-        if(session_user.is_admin && CONFIG.general.use_group_in_path) {
+        if(is_admin && CONFIG.general.use_group_in_path) {
             if(user.oldgroup != user.group || user.oldmaingroup != user.maingroup) {
                 // If group modification, change home location
                 await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'change group from ' + user.oldmaingroup + '/' + user.oldgroup + ' to ' + user.maingroup + '/' + user.group , 'logs': []});
@@ -1645,15 +1653,18 @@ router.put('/user/:id', async function(req, res) {
         }
 
         user.fid = fid;
-        if(user.oldemail!=user.email && !user.is_fake) {
-            await notif.modify(user.oldemail, user.email);
-        } else if(userWasFake && !user.is_fake) {
-            await notif.add(user.email);
-        }else if (!userWasFake && user.is_fake) {
-            await notif.remove(user.email);
+        // Change mail registration only when user is active
+        // as expired users are removed from mailing list
+        if(user.status == STATUS_ACTIVE) {
+            if(user.oldemail!=user.email && !user.is_fake) {
+                await notif.modify(user.oldemail, user.email);
+            } else if(userWasFake && !user.is_fake) {
+                await notif.add(user.email);
+            }else if (!userWasFake && user.is_fake) {
+                await notif.remove(user.email);
+            }
         }
         res.send(user);
-        return;
     }
     else {
         await dbsrv.mongo_users().replaceOne({_id: user._id}, user);
