@@ -260,7 +260,7 @@ router.post('/otp/register/:id', async function(req, res) {
     const otpauth = authenticator.keyuri(user.uid, service, secret);
     qrcode.toDataURL(otpauth, (err, imageUrl) => {
         if (err) {
-            console.debug('Error with QR');
+            //console.debug('Error with QR');
             res.send({secret});
             return;
         }

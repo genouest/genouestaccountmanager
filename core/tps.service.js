@@ -19,8 +19,8 @@ const prjsrv = require('../core/project.service.js');
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
-var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
-var STATUS_ACTIVE = 'Active';
+//var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
+//var STATUS_ACTIVE = 'Active';
 // eslint-disable-next-line no-unused-vars
 var STATUS_EXPIRED = 'Expired';
 
