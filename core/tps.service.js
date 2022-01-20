@@ -96,7 +96,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
         groupName = userGroup.name;
     }
 
-    if (userProject.id) {
+    if (userProject && userProject.id) {
         projectName = userProject.id;
     }
 
