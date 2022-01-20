@@ -96,7 +96,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
         groupName = userGroup.name;
     }
 
-    if (userProject.id) {
+    if (userProject && userProject.id) {
         projectName = userProject.id;
     }
 
@@ -244,7 +244,9 @@ async function create_tp_reservation(reservation_id) {
 
     // Create users for reservation
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
-    logger.debug('create reservation', reservation);
+    if(!reservation) {
+        throw {code: 404, message: 'Reservation not found'};
+    }
 
     if (!reservation.name) {
         reservation.name = 'tp';
