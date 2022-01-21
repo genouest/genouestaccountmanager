@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Build the Docker image
       run: |
-        echo "Path: ${GITHUB_WORKSPACE}""
+        echo "Path: ${GITHUB_WORKSPACE}"
         mkdir -p manager2/dist
         npm install
         eslint routes
