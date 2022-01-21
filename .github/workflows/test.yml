@@ -13,6 +13,8 @@ jobs:
     - name: Run unit tests
       run: |
         echo "Path: ${GITHUB_WORKSPACE}"
+        cd $GITHUB_WORKSPACE && sudo rm -rf manager2/dist
+        cd $GITHUB_WORKSPACE && sudo rm -rf tests/home_dir tests/cron
         mkdir -p manager2/dist
         npm install
         eslint routes
