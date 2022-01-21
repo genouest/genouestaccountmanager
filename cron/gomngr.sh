@@ -53,6 +53,11 @@ NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00" +%s`
 
 while true; do
 
+  if [ -e $MYDIR/gomngr.exit ]; then
+    echo "Found $MYDIR/gomngr.exit, exiting on user request"
+    exit 1
+  fi
+
   NBFILES=0
   NOW=`date +%s`
 
