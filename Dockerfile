@@ -1,4 +1,5 @@
-FROM quay.io/osallou/node:12-bullseye
+#FROM quay.io/osallou/node:12-bullseye
+FROM quay.io/osallou/node:16.13-buster
 COPY manager2 /root/genouestaccountmanager/manager2
 RUN npm install -g @angular/cli@10.2.0
 ARG APIURL
