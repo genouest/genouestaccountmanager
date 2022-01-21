@@ -10,7 +10,7 @@ jobs:
  
     steps:
     - uses: actions/checkout@v1
-    - name: Build the Docker image
+    - name: Run unit tests
       run: |
         echo "Path: ${GITHUB_WORKSPACE}"
         mkdir -p manager2/dist
@@ -20,7 +20,7 @@ jobs:
         sudo docker build -t osallou/my .
         cd $GITHUB_WORKSPACE/cron && sudo docker build -f Dockerfile-cron -t osallou/mycron .
         cd $GITHUB_WORKSPACE/tests && sudo docker-compose up -d
-        cd $GITHUB_WORKSPACE/tests && for i in {10..0}; do echo Try $i; sleep 30; sudo docker-compose logs my-app | grep "Server listening on port 3000"; if [ $? -eq 0 ] ; then  echo Server is started; nb_done=$(sudo docker-compose exec my-app ls -l /opt/my/scripts/ | grep admin | grep 'update.done' | wc -l); if [ $nb_done -eq 2 ] ; then echo Admin user created; break; fi; fi;  if [ $i -eq 0 ]; then echo Server does not start; exit 1; fi; done
+        cd $GITHUB_WORKSPACE/tests && for i in {10..0}; do echo Try $i; sleep 30; sudo docker-compose logs my-app | grep "Server listening on port 3000"; if [ $? -eq 0 ] ; then  echo Server is started; nb_done=$(sudo docker-compose exec -T my-app ls -l /opt/my/scripts/ | grep admin | grep 'update.done' | wc -l); if [ $nb_done -eq 2 ] ; then echo Admin user created; break; fi; fi;  if [ $i -eq 0 ]; then echo Server does not start; exit 1; fi; done
         cd $GITHUB_WORKSPACE && sudo docker ps && mocha -b -t 20000 --full-trace
         cd $GITHUB_WORKSPACE/tests && sudo docker-compose logs my-app
         cd $GITHUB_WORKSPACE/tests && sudo docker-compose down
