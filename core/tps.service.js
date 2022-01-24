@@ -19,8 +19,8 @@ const prjsrv = require('../core/project.service.js');
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
-var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
-var STATUS_ACTIVE = 'Active';
+//var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
+//var STATUS_ACTIVE = 'Active';
 // eslint-disable-next-line no-unused-vars
 var STATUS_EXPIRED = 'Expired';
 
@@ -244,7 +244,9 @@ async function create_tp_reservation(reservation_id) {
 
     // Create users for reservation
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
-    logger.debug('create reservation', reservation);
+    if(!reservation) {
+        throw {code: 404, message: 'Reservation not found'};
+    }
 
     if (!reservation.name) {
         reservation.name = 'tp';
