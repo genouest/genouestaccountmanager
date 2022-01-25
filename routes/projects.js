@@ -13,7 +13,6 @@ const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
 const usrsrv = require('../core/user.service.js');
-const authopidor = require('../tools/auth_from_opidor');
 
 router.get('/project', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
@@ -527,7 +526,7 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     //request to DMP opidor API to get all of the DMP with a json format
     //
     //Keeps only the required data for the project
-    let token = authopidor.opidor_token_refresh();
+    let token = prjsrv.opidor_token_refresh();
 
     const options = {
         headers: {
