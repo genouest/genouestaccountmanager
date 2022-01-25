@@ -1,7 +1,4 @@
-
 const axios = require('axios');
-const { response } = require('express');
-const { token } = require('morgan');
 const idsrv = require('../core/id.service.js');
 
 
@@ -13,7 +10,7 @@ async function auth_from_opidor () {
         data: "{\"grant_type\":\"client_credentials\",\"client_id\":\"b00dadbf-f8c8-422f-9a81-ae798c527613\",\"client_secret\":\"12bc248b-5875-4cb6-9fe9-ec083cfda000\"}"
     };
     let resp = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options);
-    return resp.data
+    return resp.data;
 }
 
 exports.opidor_token_refresh = function () {

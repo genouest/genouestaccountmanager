@@ -13,7 +13,7 @@ const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
 const usrsrv = require('../core/user.service.js');
-const authopidor = require('../tools/auth_from_opidor.js');
+const authopidor = require('../tools/auth_from_opidor');
 
 router.get('/project', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
