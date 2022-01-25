@@ -688,6 +688,11 @@ router.get('/user/:id', async function(req, res) {
         return;
     }
 
+    if(!session_user) {
+        res.status(401).send({message: 'Not authorized, need to login first'});
+        return; 
+    }
+
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user){
         res.status(404).send({message: 'User not found'});
@@ -697,13 +702,6 @@ router.get('/user/:id', async function(req, res) {
         user.is_fake = false;
     }
 
-    // This should be removed as session_user may not be the user requested to get
-    /* if(indexOf(session_user.uid) >= 0) {
-        user.is_admin = true;
-    }
-    else {
-        user.is_admin = false;
-    } */
 
     user.quota = [];
     for(let k in GENERAL_CONFIG.quota) {
@@ -712,11 +710,9 @@ router.get('/user/:id', async function(req, res) {
 
     if(session_user._id.str == user._id.str || isadmin){
         res.json(user);
-        return;
     }
     else {
         res.status(401).send({message: 'Not authorized to access this user info'});
-        return;
     }
 });
 
