@@ -1,6 +1,6 @@
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-// const axios = require('axios');
+const axios = require('axios');
 
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
@@ -9,7 +9,7 @@ const CONFIG = my_conf;
 const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
-// const idsrv = require('../core/id.service.js');
+const idsrv = require('../core/id.service.js');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -18,8 +18,8 @@ exports.remove_project = remove_project;
 exports.update_project = update_project;
 exports.create_project_request = create_project_request;
 exports.remove_project_request = remove_project_request;
-// exports.auth_from_opidor = auth_from_opidor;
-// exports.opidor_token_refresh = opidor_token_refresh;
+exports.auth_from_opidor = auth_from_opidor;
+exports.opidor_token_refresh = opidor_token_refresh;
 
 async function create_project(new_project, uuid, action_owner) {
     logger.info('Create Project ' + new_project.id + ' uuid ' + uuid);
@@ -122,36 +122,36 @@ async function remove_project_request(uuid, action_owner) {
     }
 
 }
-// async function auth_from_opidor () {
-//     const options = {
-//         headers: {
-//             accept: "application/json",
-//         },
-//         data: "{\"grant_type\":\"client_credentials\",\"client_id\":\"b00dadbf-f8c8-422f-9a81-ae798c527613\",\"client_secret\":\"12bc248b-5875-4cb6-9fe9-ec083cfda000\"}"
-//     };
-//     let resp = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options);
-//     return resp.data;
-// }
+async function auth_from_opidor () {
+    const options = {
+        headers: {
+            accept: "application/json",
+        },
+        data: "{\"grant_type\":\"client_credentials\",\"client_id\":\"b00dadbf-f8c8-422f-9a81-ae798c527613\",\"client_secret\":\"12bc248b-5875-4cb6-9fe9-ec083cfda000\"}"
+    };
+    let resp = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options);
+    return resp.data;
+}
 
-// async function opidor_token_refresh() {
-//     let redis_client = idsrv.redis();
-//     console.log(redis_client);
-//     let current_time = Math.floor((new Date()).getTime() / 1000);
-//     let token = null;
-//     await redis_client.mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
-//         if (!reply[0] && reply[1] > current_time) {
-//             console.log(reply);
-//             token = reply[0];
-//         }
-//         else {
-//             let response = auth_from_opidor();
-//             token = response.access_token;
-//             console.log(response);
-//             redis_client.set('my:dmp:token', response.access_token);
-//             redis_client.set('my:dmp:expiration', response.expires_in);
-//         }
+async function opidor_token_refresh() {
+    let redis_client = idsrv.redis();
+    console.log(redis_client);
+    let current_time = Math.floor((new Date()).getTime() / 1000);
+    let token = null;
+    await redis_client.mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
+        if (!reply[0] && reply[1] > current_time) {
+            console.log(reply);
+            token = reply[0];
+        }
+        else {
+            let response = auth_from_opidor();
+            token = response.access_token;
+            console.log(response);
+            redis_client.set('my:dmp:token', response.access_token);
+            redis_client.set('my:dmp:expiration', response.expires_in);
+        }
     
-//     });
-//     return token;
-// }
+    });
+    return token;
+}
 
