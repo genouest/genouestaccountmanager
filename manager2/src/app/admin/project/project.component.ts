@@ -210,8 +210,8 @@ export class ProjectComponent implements OnInit {
 
     display_dmp_to_admin() {
         this.dmp_visible = !this.dmp_visible;
-        this.projectsService.fetch_dmp_fragment(this.project.dmpid).subscribe(
-            resp => {this.dmp = resp.data;},
+        this.projectsService.fetch_dmp(this.project.dmpid, this.project.researchoutputid).subscribe(
+            resp => {this.dmp = resp.data.data;},
             err => console.log('dmperr')
         );
     }

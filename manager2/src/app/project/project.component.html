@@ -9,12 +9,18 @@
 
         <div class="modal-body">
           <div class="form-group row col-sm-8">
-            <label for="new_project_dmpid">DmpID&nbsp;
+            <label for="new_project_dmpid">Plan ID&nbsp;
               <span style="color:blue">(Optional)&nbsp;</span>
             </label>
             <input placeholder="insert key" type="text" id="new_project_dmpid" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.dmpid" class="form-control"/>
+
+            <label for="new_project_researchoutputid">Research Output ID&nbsp;
+              <span style="color:blue">(Optional)&nbsp;</span>
+            </label>
+            <input placeholder="insert key" type="text" id="new_project_researchoutputid" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.researchoutputid" class="form-control"/>
+            
             <small id="nameHelp" class="form-text text-muted">Allows us to link your project to your DMP hosted by <a href="https://dmp.opidor.fr/" target="_blank">DMP OPIDoR</a></small>
-            <button type="button" class="btn btn-outline-primary" (click)="get_dmp_fragment(new_project.dmpid)">GetDMP</button>
+            <button type="button" class="btn btn-outline-primary" (click)="get_dmp(new_project.dmpid, new_project.researchoutputid)">GetDMP</button>
             <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
             <div *ngIf="dmp_msg" class="alert alert-info">{{dmp_msg}}</div>
           </div>

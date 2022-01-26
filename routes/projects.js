@@ -14,7 +14,6 @@ const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
 const usrsrv = require('../core/user.service.js');
 
-
 router.get('/project', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send({ message: 'Not authorized' });
@@ -509,7 +508,6 @@ router.get('/project/:id/users', async function(req, res){
     }
 
     if (user.projects.includes(req.params.id) || isadmin) {
-
         let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
         res.send(users_in_project);
         res.end();
@@ -520,42 +518,22 @@ router.get('/project/:id/users', async function(req, res){
 });
 
 //fetchs a dmp based on his ID, using the dmp OPIDoR API
-router.post('/dmp/:id', async function (req, res) {
+router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
+    let plan_id = req.params.planid;
+    let research_output_id = req.params.researchoutputid;
     //request to DMP opidor API to get all of the DMP with a json format
     //
     //Keeps only the required data for the project
-
-
-    const options = {
-        headers: {
-            'content-Type': "application/json",
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzOTczNDU0Mn0.8wLsX4ytSiq64jBKuzTp_8iW4b44lcUbVoUsKUMEc2s"
-        }
-    };
-    let resp = await axios.get('https://opidor-preprod.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2100', options);
-    console.log(resp);
-    return res.send({ message: 'Dmp found', data: resp.data });
-});
-
-router.post('/dmp/outputs/:id', async function (req, res) {
-    //request to DMP opidor API to get all of the DMP with a json format
-    //
-    //Keeps only the required data for the project
-
+    // let token = prjsrv.opidor_token_refresh();
+    let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTY0MzI3MjY0OX0.v5Wk3V3qexN0ZMPplwI1AAdWGIFMgETl_Y6t_pV2e_s'
 
     const options = {
         headers: {
-            'content-Type': "application/json",
-            Authorization: "eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTYzOTczNDU0Mn0.8wLsX4ytSiq64jBKuzTp_8iW4b44lcUbVoUsKUMEc2s"
+            accept: "application/json",
+            Authorization: `Bearer ${token}`
         }
     };
-    let resp = await axios.get('https://opidor-preprod.inist.fr/api/v1/madmp/plans/'+req.params.id + '?research_output_id[]=2100', options);
-    console.log(resp);
-
-
-    // let research_outputs = [];
-    // for (r_o in resp.data.data.researchOutput)
-    // research_outputs = resp.data
+    let resp = await axios.get(`https://madmp-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
     return res.send({ message: 'Dmp found', data: resp.data });
 });
 

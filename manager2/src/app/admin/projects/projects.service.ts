@@ -216,7 +216,7 @@ export class ProjectsService {
         );
     }
 
-    fetch_dmp_research_outputs(dmpid: string): Observable<any> {
+    fetch_dmp(dmpid: string, researchoutputid: string): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;
         let httpOptions = {
@@ -224,22 +224,10 @@ export class ProjectsService {
             //  'x-api-key': user.apikey
             //}),
         };
+        console.log(dmpid)
+        console.log(researchoutputid)
         return this.http.post(
-            environment.apiUrl + '/dmp/outputs/' + dmpid,
-            httpOptions
-        );
-        }
-
-    fetch_dmp_fragment(dmpid: string): Observable<any> {
-        //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
-        // let user = this.authService.profile;
-        let httpOptions = {
-            //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
-            //}),
-        };
-        return this.http.post(
-            environment.apiUrl + '/dmp/' + dmpid,
+            environment.apiUrl + '/dmp/' + dmpid + '/' + researchoutputid,
             httpOptions
         );
         }
