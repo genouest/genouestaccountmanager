@@ -262,60 +262,60 @@ export class ProjectComponent implements OnInit {
         
     }
 
-    get_dmp_fragment(dmpid) {
-        this.dmp_err_msg = ""
-        this.dmp_msg = ""
-        if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
-            this.projectsService.fetch_dmp_fragment(dmpid).subscribe(
-                resp => {
-                    let funders = []
-                    let dmpid = this.new_project.dmpid
-                    let data = null
-                    try {
-                    for (data of resp.data.project.funding) {
-                        console.log(data)
-                        if (data.fundingStatus == "Granted" || data.fundingStatus == "Approuvé") {
-                            funders.push(data.funder.name)
-                        }
+    // get_dmp_fragment(dmpid) {
+    //     this.dmp_err_msg = ""
+    //     this.dmp_msg = ""
+    //     if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
+    //         this.projectsService.fetch_dmp_fragment(dmpid).subscribe(
+    //             resp => {
+    //                 let funders = []
+    //                 let dmpid = this.new_project.dmpid
+    //                 let data = null
+    //                 try {
+    //                 for (data of resp.data.project.funding) {
+    //                     console.log(data)
+    //                     if (data.fundingStatus == "Granted" || data.fundingStatus == "Approuvé") {
+    //                         funders.push(data.funder.name)
+    //                     }
                         
 
-                    }
-                }
-                catch (error){}
-                    console.log(funders )
-                    let research_output = null
-                    for (var elem of resp.data.researchOutputs){
-                        console.log(elem.research_output_id)
-                        if (elem.research_output_id == "2100") {
-                            research_output = elem
-                            break
-                        }
-                    }
-                    console.log(research_output.dataStorage.estimatedVolume)
-                    this.dmp_msg = resp.message;
-                    this.dmp_available = true;  
-                    this.new_project = {
-                        'id': resp.data.project.title,
-                        'description': this.convertToPlain(resp.data.project.description),
-                        'orga': funders,
-                        'size': research_output.dataStorage.estimatedVolume,
-                        'dmpid': dmpid,
+    //                 }
+    //             }
+    //             catch (error){}
+    //                 console.log(funders )
+    //                 let research_output = null
+    //                 for (var elem of resp.data.researchOutputs){
+    //                     console.log(elem.research_output_id)
+    //                     if (elem.research_output_id == "2100") {
+    //                         research_output = elem
+    //                         break
+    //                     }
+    //                 }
+    //                 console.log(research_output.dataStorage.estimatedVolume)
+    //                 this.dmp_msg = resp.message;
+    //                 this.dmp_available = true;  
+    //                 this.new_project = {
+    //                     'id': resp.data.project.title,
+    //                     'description': this.convertToPlain(resp.data.project.description),
+    //                     'orga': funders,
+    //                     'size': research_output.dataStorage.estimatedVolume,
+    //                     'dmpid': dmpid,
 
-                    };
-                    console.log(resp.data.project)
-                    console.log(this.new_project.id);
-                },
-                err => {
-                    this.dmp_err_msg = err.error.message
-                    this.dmp_available = false;
-                }
-            )
-        }
-        else {
-            this.dmp_err_msg = "Please enter a valid ID"
-        }
+    //                 };
+    //                 console.log(resp.data.project)
+    //                 console.log(this.new_project.id);
+    //             },
+    //             err => {
+    //                 this.dmp_err_msg = err.error.message
+    //                 this.dmp_available = false;
+    //             }
+    //         )
+    //     }
+    //     else {
+    //         this.dmp_err_msg = "Please enter a valid ID"
+    //     }
         
-    }
+    // }
     
     display_dmp_to_user() {
         this.dmp_visible = !this.dmp_visible;
