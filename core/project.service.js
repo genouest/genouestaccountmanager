@@ -144,8 +144,8 @@ async function opidor_token_refresh() {
         else {
             let response = auth_from_opidor();
             token = response.access_token;
-            idsrv.redis_client.set('my:dmp:token', response.access_token);
-            idsrv.redis_client.set('my:dmp:expiration', response.expires_in);
+            idsrv.redis().set('my:dmp:token', response.access_token);
+            idsrv.redis().set('my:dmp:expiration', response.expires_in);
         }
     
     });
