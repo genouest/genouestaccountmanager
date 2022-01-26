@@ -525,7 +525,7 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     //
     //Keeps only the required data for the project
     // let token = prjsrv.opidor_token_refresh();
-    let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTY0MzI3MjY0OX0.v5Wk3V3qexN0ZMPplwI1AAdWGIFMgETl_Y6t_pV2e_s'
+    let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTY0MzI3MjY0OX0.v5Wk3V3qexN0ZMPplwI1AAdWGIFMgETl_Y6t_pV2e_s';
 
     const options = {
         headers: {
@@ -533,7 +533,7 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
             Authorization: `Bearer ${token}`
         }
     };
-    let resp = await axios.get(`https://madmp-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
+    let resp = await axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
     return res.send({ message: 'Dmp found', data: resp.data });
 });
 

@@ -37,7 +37,7 @@ var idsLoaded = false;
 // redis_client.set('my:dmp:token', 'xxx');
 // redis_client.set('my:dmp:expiration', '0');
 
-exports.redis = function () { return redis_client;};
+// exports.redis = function () { return redis_client;};
 
 exports.isInitOver = function () {
     // eslint-disable-next-line no-unused-vars
