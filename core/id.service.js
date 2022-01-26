@@ -38,6 +38,7 @@ if (redis_client != null) {
     redis_client.set('my:dmp:token', '');
     redis_client.set('my:dmp:expiration', '0');
 }
+console.log(redis_client);
 exports.redis = function () { return redis_client;};
 
 exports.isInitOver = function () {

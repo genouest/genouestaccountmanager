@@ -134,9 +134,11 @@ async function auth_from_opidor () {
 }
 
 async function opidor_token_refresh() {
+    let redis_client = idsrv.redis();
+    console.log(redis_client);
     let current_time = Math.floor((new Date()).getTime() / 1000);
     let token = null;
-    idsrv.redis().mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
+    redis_client.mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
         if (!reply[0] && reply[1] > current_time) {
             console.log(reply);
             token = reply[0];
@@ -144,8 +146,9 @@ async function opidor_token_refresh() {
         else {
             let response = auth_from_opidor();
             token = response.access_token;
-            idsrv.redis().set('my:dmp:token', response.access_token);
-            idsrv.redis().set('my:dmp:expiration', response.expires_in);
+            console.log(response);
+            redis_client.set('my:dmp:token', response.access_token);
+            redis_client.set('my:dmp:expiration', response.expires_in);
         }
     
     });
