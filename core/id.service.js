@@ -22,8 +22,6 @@ if (CONFIG.redis !== undefined && CONFIG.redis.host !== undefined && CONFIG.redi
     let redis_cfg = {host: CONFIG.redis.host, port: (CONFIG.redis.port || 6379)};
     logger.info('Using Redis', redis_cfg);
     redis_client = redis.createClient(redis_cfg);
-    // redis_client.set('my:dmp:token', 'xxx');
-    // redis_client.set('my:dmp:expiration', '0');
 } else {
     logger.warn('Using db id mngt, may create issue in case of multi-process!!!');
 }
@@ -36,7 +34,8 @@ var ID_STRATEGY = ID_STRATEGY_INCR;
 var userIds = [];
 var groupIds = [];
 var idsLoaded = false;
-
+// redis_client.set('my:dmp:token', 'xxx');
+// redis_client.set('my:dmp:expiration', '0');
 
 exports.redis = function () { return redis_client;};
 
