@@ -211,11 +211,11 @@ export class ProjectComponent implements OnInit {
         
       }
 
-    get_dmp(dmpid) {
+    get_dmp(dmpid, researchoutputid) {
         this.dmp_err_msg = ""
         this.dmp_msg = ""
-        if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
-            this.projectsService.fetch_dmp(dmpid).subscribe(
+        if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "") && !(this.new_project.researchoutputid == null) && !(this.new_project.researchoutputid == "")) {
+            this.projectsService.fetch_dmp(dmpid, researchoutputid).subscribe(
                 resp => {
                     let funders = []
 
@@ -237,6 +237,7 @@ export class ProjectComponent implements OnInit {
                         'orga': funders,
                         'size': resp.data.data.researchOutput[0].dataStorage.estimatedVolume,
                         'dmpid': this.new_project.dmpid,
+                        'researchoutputid': this.new_project.researchoutputid
                     };
 
                 },
@@ -254,7 +255,7 @@ export class ProjectComponent implements OnInit {
     
     display_dmp_to_user() {
         this.dmp_visible = !this.dmp_visible;
-        this.projectsService.fetch_dmp(this.selectedProject.dmpid).subscribe(
+        this.projectsService.fetch_dmp(this.selectedProject.dmpid, this.selectedProject.researchoutputid).subscribe(
             resp => {this.dmp = resp.data;
             console.log(resp.data)},
             err => console.log('dmperr')
