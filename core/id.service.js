@@ -34,11 +34,10 @@ var ID_STRATEGY = ID_STRATEGY_INCR;
 var userIds = [];
 var groupIds = [];
 var idsLoaded = false;
-if (redis_client != null) {
-    redis_client.set('my:dmp:token', '');
-    redis_client.set('my:dmp:expiration', '0');
-}
-console.log(redis_client);
+
+redis_client.set('my:dmp:token', '');
+redis_client.set('my:dmp:expiration', '0');
+
 exports.redis = function () { return redis_client;};
 
 exports.isInitOver = function () {
