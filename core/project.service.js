@@ -144,7 +144,7 @@ async function opidor_token_refresh() {
             console.log(reply);
             token = reply[0];
         }
-        else {
+        else if (err) {
             let response = auth_from_opidor();
             token = response.access_token;
             console.log(response);

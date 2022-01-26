@@ -205,49 +205,44 @@ export class ProjectComponent implements OnInit {
         return res;
     }
 
-    ping_dmp() {
-        console.log("pinging Dmp db...");
-        this.projectsService.pingDmpDatabase().subscribe(
-            resp => {
-                this.dmp_msg = resp['message'];
-                this.dmp_available = true;
-            },
-            err => {
-                this.dmp_err_msg = err.error.message
-                this.dmp_available = false;
-            }
-        )
-        
-      }
-
     get_dmp(dmpid, researchoutputid) {
         this.dmp_err_msg = ""
         this.dmp_msg = ""
+        
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "") && !(this.new_project.researchoutputid == null) && !(this.new_project.researchoutputid == "")) {
             this.projectsService.fetch_dmp(dmpid, researchoutputid).subscribe(
                 resp => {
                     let funders = []
-
-                    let data = resp.data.data.project.funding
+                    let data = resp.data.project.funding
                     console.log(data)
-                    for (data in resp.data.data.project.funding) {
-                        console.log(resp.data.data.project.funding[data])
-                        if (resp.data.data.project.funding[data].fundingStatus == "Approuvé") {
-                            funders.push(resp.data.data.project.funding[data].funder.name)
+                    for (data in resp.data.project.funding) {
+                        console.log(resp.data.project.funding[data])
+                        if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
+                            funders.push(resp.data.project.funding[data].funder.name)
                         }
                         
 
                     }
+                    let research_output = null
+                    for (var elem of resp.data.researchOutputs){
+                        if (elem.research_output_id == this.new_project.researchoutputid) {
+                            research_output = elem
+                            break
+                        }
+                    }
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
+                    console.log("ici")
+                    console.log
                     this.new_project = {
-                        'id': resp.data.data.project.acronym,
-                        'description': this.convertToPlain(resp.data.data.researchOutput[0].researchOutputDescription.description),
+                        'id': resp.data.project.acronym,
+                        'description': this.convertToPlain(research_output.researchOutputDescription.description),
                         'orga': funders,
-                        'size': resp.data.data.researchOutput[0].dataStorage.estimatedVolume,
+                        'size': research_output.dataStorage.estimatedVolume,
                         'dmpid': this.new_project.dmpid,
                         'researchoutputid': this.new_project.researchoutputid
                     };
+                    console.log(this.new_project)
 
                 },
                 err => {
