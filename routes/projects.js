@@ -148,11 +148,13 @@ router.post('/project', async function (req, res) {
             'owner': req.body.owner,
             'group': req.body.group,
             'size': req.body.size,
+            'cpu': req.body.cpu,
             'expire': req.body.expire,
             'description': req.body.description,
             'path': req.body.path,
             'orga': req.body.orga,
-            'access': req.body.access
+            'access': req.body.access,
+            'dmpid': req.body.dmpid
         }, req.body.uuid, user.uid);
     } catch(e) {
         logger.error(e);
@@ -259,6 +261,7 @@ router.post('/project/:id', async function (req, res) {
             'owner': req.body.owner,
             'group': req.body.group,
             'size': req.body.size,
+            'cpu': req.body.cpu,
             'expire': req.body.expire,
             'description': req.body.description,
             'access': req.body.access,
@@ -355,8 +358,10 @@ router.post('/ask/project', async function(req, res){
             'owner': user.uid,
             'group': user.group,
             'size': req.body.size,
+            'cpu': req.body.cpu,
             'description': req.body.description,
-            'orga': req.body.orga
+            'orga': req.body.orga,
+            'dmpid': req.body.dmpid,
         }, user);
     } catch(e) {
         logger.error(e);
@@ -502,22 +507,15 @@ router.get('/project/:id/users', async function(req, res){
         user.projects = [];
     }
 
+    if (user.projects.includes(req.params.id) || isadmin) {
+        let users_in_project = await dbsrv.mongo_users().find({'projects': req.params.id}).toArray();
+        res.send(users_in_project);
+        res.end();
+        return;
+    }
+    res.status(401).send({message: 'Not authorized'});
 
 });
-
-//checks if the DMP OPIDoR API is online
-// router.get('/dmp/ping', async function (req, res) {
-//     let online = this.http.get(GENERAL_CONFIG.dmp.url + '/heartbeat');
-//     if (online['code'] != 200) {
-//         res.status(404).send('Can\'t reach Opidor API');
-//         return;
-//     }
-
-//     let DMP_data = { error: '', ping: true };
-
-//     res.send(DMP_data);
-//     res.end();
-// });
 
 //fetchs a dmp based on his ID, using the dmp OPIDoR API
 router.post('/dmp/:planid/:researchoutputid', async function (req, res) {

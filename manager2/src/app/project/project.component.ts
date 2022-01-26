@@ -35,6 +35,7 @@ export class ProjectComponent implements OnInit {
     dmp_msg: string;
     dmp_available: boolean;
     dmp_visible: boolean;
+    default_cpu: any
 
     manager_visible: boolean
 
@@ -57,6 +58,7 @@ export class ProjectComponent implements OnInit {
     ) {
         this.config = {}
         this.default_size = 0
+        this.default_cpu = 0
     }
 
     ngOnDestroy(): void {
@@ -85,10 +87,16 @@ export class ProjectComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                if (this.config.project && this.config.project.default_size) {
-                    this.default_size = this.config.project.default_size;
-                    this.new_project.size = this.default_size
+                if (this.config.project) {
+                    if( this.config.project.default_size) {
+                        this.default_size = this.config.project.default_size;
+                    }
+                    if( this.config.project.default_cpu) {
+                        this.default_cpu = this.config.project.default_cpu;
+                    }
                 }
+                this.new_project.size = this.default_size
+                this.new_project.cpu = this.default_cpu
             },
             err => console.log('failed to get config')
         )
@@ -97,6 +105,7 @@ export class ProjectComponent implements OnInit {
 
     ask_for_project() {
         // todo: should rename it project_msg
+        console.log(this.new_project)
         this.request_msg = '';
         this.request_err_msg = '';
         this.projectsService.askNew(this.new_project).subscribe(
@@ -252,15 +261,72 @@ export class ProjectComponent implements OnInit {
         }
         
     }
+
+    get_dmp_fragment(dmpid) {
+        this.dmp_err_msg = ""
+        this.dmp_msg = ""
+        if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "")) {
+            this.projectsService.fetch_dmp_fragment(dmpid).subscribe(
+                resp => {
+                    let funders = []
+                    let dmpid = this.new_project.dmpid
+                    let data = null
+                    try {
+                    for (data of resp.data.project.funding) {
+                        console.log(data)
+                        if (data.fundingStatus == "Granted" || data.fundingStatus == "Approuvé") {
+                            funders.push(data.funder.name)
+                        }
+                        
+
+                    }
+                }
+                catch (error){}
+                    console.log(funders )
+                    let research_output = null
+                    for (var elem of resp.data.researchOutputs){
+                        console.log(elem.research_output_id)
+                        if (elem.research_output_id == "2100") {
+                            research_output = elem
+                            break
+                        }
+                    }
+                    console.log(research_output.dataStorage.estimatedVolume)
+                    this.dmp_msg = resp.message;
+                    this.dmp_available = true;  
+                    this.new_project = {
+                        'id': resp.data.project.title,
+                        'description': this.convertToPlain(resp.data.project.description),
+                        'orga': funders,
+                        'size': research_output.dataStorage.estimatedVolume,
+                        'dmpid': dmpid,
+
+                    };
+                    console.log(resp.data.project)
+                    console.log(this.new_project.id);
+                },
+                err => {
+                    this.dmp_err_msg = err.error.message
+                    this.dmp_available = false;
+                }
+            )
+        }
+        else {
+            this.dmp_err_msg = "Please enter a valid ID"
+        }
+        
+    }
     
     display_dmp_to_user() {
         this.dmp_visible = !this.dmp_visible;
+
         this.projectsService.fetch_dmp(this.selectedProject.dmpid, this.selectedProject.researchoutputid).subscribe(
             resp => {this.dmp = resp.data;
             console.log(resp.data)},
             err => console.log('dmperr')
         );
     }
+    
     convertToPlain(html){
 
         // Create a new div element

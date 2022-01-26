@@ -30,7 +30,6 @@ export class ProjectsComponent implements OnInit {
     add_project_error_msg: string
 
     pending_projects: any[]
-    dmp_statuses: any[]
     projects: any[]
     groups: any[]
     all_users: any[]
@@ -43,6 +42,7 @@ export class ProjectsComponent implements OnInit {
 
     default_path: any
     default_size: any
+    default_cpu: any
 
     constructor(
         private route: ActivatedRoute,
@@ -70,6 +70,7 @@ export class ProjectsComponent implements OnInit {
         this.pending_number = 0;
         this.default_path = "";
         this.default_size = 0;
+        this.default_cpu = 0;
         this.requests_visible = false;
         this.pending_projects = [];
         this.projects = [];
@@ -80,17 +81,15 @@ export class ProjectsComponent implements OnInit {
             owner: '',
             group: '',
             size: 0,
+            cpu: 0,
             expire: '',
             orga: '',
             description: '',
             access: 'Group',
-            path: ''
+            path: '',
+            dmpid: null
         }
         
-        this.dmp_statuses = [
-            {name: 'Linked', value: 'linked'},
-            {name: 'Legacy', value: 'legacy'},
-        ]
             
 
         this.project_list(true);
@@ -113,11 +112,16 @@ export class ProjectsComponent implements OnInit {
             resp => {
                 this.config = resp;
                 this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
-                if (this.config.project && this.config.project.default_path) {
-                    this.default_path = this.config.project.default_path;
-                }
-                if (this.config.project && this.config.project.default_size) {
-                    this.default_size = this.config.project.default_size;
+                if (this.config.project) {
+                    if (this.config.project.default_path) {
+                        this.default_path = this.config.project.default_path;
+                    }
+                    if (this.config.project.default_size) {
+                        this.default_size = this.config.project.default_size;
+                    }
+                    if (this.config.project.default_cpu) {
+                        this.default_cpu = this.config.project.default_cpu;
+                    }
                 }
             },
             err => console.log('failed to get config')
@@ -143,6 +147,10 @@ export class ProjectsComponent implements OnInit {
         if (!this.new_project.size || this.new_project.size == 0) {
             this.new_project.size = this.default_size;
         }
+
+        if (!this.new_project.cpu || this.new_project.cpu == 0) {
+            this.new_project.cpu = this.default_cpu;
+        }
     }
 
 
@@ -160,6 +168,7 @@ export class ProjectsComponent implements OnInit {
             'owner': this.new_project.owner,
             'group': this.config.project.enable_group ? this.new_project.group : '',
             'size': this.new_project.size,
+            'cpu': this.new_project.cpu,
             'description': this.new_project.description,
             'access': this.new_project.access,
             'orga': this.new_project.orga,

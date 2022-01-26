@@ -3,7 +3,7 @@
       <div class="row">
         <div class="col-sm-9">
           <h4>Project <b>{{project.id}}</b></h4>
-          <div *ngIf="project.dmp_linked" class="dmp-badge status-Linked">Project linked to DMP</div>
+          <div *ngIf="dmp_linked" class="dmp-badge status-linked">Project linked to DMP</div>
         </div>
         <div class="col-sm-3" >
           <button class="btn btn-danger" (click)="delete_project(project, users)">Delete project</button>
@@ -32,8 +32,12 @@
 
             </div>
             <div class="col-sm-2">
-              <label for="update_project_size">Size (GB)</label>
-              <input id="update_project_size" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.size" class="form-control"/>
+                <label for="update_project_size">Size (GB)</label>
+                <input id="update_project_size" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.size" class="form-control"/>
+            </div>
+            <div class="col-sm-2">
+                <label for="update_project_cpu">Cpu (Hour)</label>
+                <input id="update_project_cpu" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.cpu" class="form-control"/>
             </div>
             <div class="col-sm-2">
               <label for="project_date">Creation date</label>
@@ -79,7 +83,7 @@
       </div>
     </div>
     
-    <div *ngIf="project.dmp_linked" class="card bg-light">
+    <div *ngIf="dmp_linked" class="card bg-light">
       <div class="card-header" (click)="display_dmp_to_admin()">Dmp data</div>
       <div *ngIf="dmp_visible"class="card-body">
         <ngx-json-viewer [json]="dmp" [expanded]="false"></ngx-json-viewer>

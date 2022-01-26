@@ -938,7 +938,8 @@ router.post('/user/:id', async function(req, res) {
         duration: req.body.duration,
         expiration: new Date().getTime() + day_time*duration_list[req.body.duration],
         loginShell: '/bin/bash',
-        history: [{action: 'register', date: new Date().getTime()}]
+        history: [{action: 'register', date: new Date().getTime()}],
+        extra_info: req.body.extra_info || []
     };
     // user[CONFIG.general.internal_flag] = false,
     user.home = usrsrv.get_user_home(user);
@@ -1570,6 +1571,9 @@ router.put('/user/:id', async function(req, res) {
     if(req.body.team) {
         user.team = req.body.team;
     }
+    if(req.body.extra_info) {
+        user.extra_info = req.body.extra_info;
+    }
 
     user.history.push({'action': 'update info', date: new Date().getTime()});
 
@@ -1840,7 +1844,8 @@ router.get('/list/:list', async function(req, res){
     }
     let list_name = req.params.list;
     let members = await notif.getMembers(list_name);
-    return members;
+    res.send(members);
+    res.end();
 });
 
 
@@ -1867,7 +1872,8 @@ router.get('/lists', async function(req, res){
         return;
     }
     let listOfLists = await notif.getLists();
-    return listOfLists;
+    res.send(listOfLists);
+    res.end();
 });
 
 module.exports = router;

@@ -25,6 +25,7 @@ export class ProjectComponent implements OnInit {
 
     dmp: any
     dmp_visible:boolean
+    dmp_linked:boolean
 
     new_user_admin: string = ''
     remove_user_admin: string = ''
@@ -45,17 +46,18 @@ export class ProjectComponent implements OnInit {
             owner: '',
             group: '',
             size: 0,
+            cpu: 0,
             expire: '',
             orga: '',
             description: '',
             access: 'Group',
             path: '',
-            dmp_linked: Boolean,
         }
         this.users = [];
         this.groups = [];
         this.all_users = [];
         this.config = {};
+        
     }
 
     ngOnDestroy(): void {
@@ -94,6 +96,8 @@ export class ProjectComponent implements OnInit {
             resp => {
                 this.project = resp;
                 console.log(this.project)
+                this.dmp_linked = false;
+                if (this.project.dmpid != null) {  this.dmp_linked = true };
                 this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
@@ -171,6 +175,7 @@ export class ProjectComponent implements OnInit {
             project.id,
             {
                 'size': project.size,
+                'cpu': project.cpu,
                 'expire': new Date(project.expire).getTime(),
                 'owner': project.owner,
                 'group': this.config.project.enable_group ? project.group : '',
