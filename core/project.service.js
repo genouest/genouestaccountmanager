@@ -126,7 +126,7 @@ async function remove_project_request(uuid, action_owner) {
 async function auth_from_opidor() {
     const options = {
         headers: {
-            "Content-Type": "aplication/x-www-form-urlencoded;charset=UTF-8",
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
             accept: "application/json",
         },
         data: {
