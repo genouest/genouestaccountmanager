@@ -187,8 +187,8 @@ async function opidor_token_refresh() {
             token = resp.access_token;
             console.log(token);
             console.log(resp.expires_in);
-            redis_client.set('my:dmp:token', token);
-            redis_client.set('my:dmp:expiration', resp.expires_in);
+            // redis_client.set('my:dmp:token', token);
+            // redis_client.set('my:dmp:expiration', resp.expires_in);
         })
             .catch(error => {
                 console.log('ERROR');
