@@ -526,7 +526,7 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     //Keeps only the required data for the project
     // console.log(prjsrv.auth_from_opidor());
     let token = null;
-    prjsrv.opidor_token_refresh().then((response) => {
+    prjsrv.opidor_token_refresh().then(response => {
         console.log(response);
         token = response;
 
