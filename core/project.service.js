@@ -183,7 +183,7 @@ async function opidor_token_refresh() {
     }
     else {
         console.log('tokens were not valid');
-        let response = auth_from_opidor();
+        let response = await auth_from_opidor();
         console.log("------------");
         console.log(response);
         console.log("--------------");
