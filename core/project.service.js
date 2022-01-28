@@ -154,7 +154,7 @@ async function opidor_token_refresh() {
     console.log('get tokens');
     let current_time = Math.floor((new Date()).getTime() / 1000);
     let token = null;
-    let reply = redis_client.mget(['my:dmp:token', 'my:dmp:expiration']);
+    let reply = await redis_client.mget(['my:dmp:token', 'my:dmp:expiration']);
     console.log("---");
     console.log(reply);
     if (!reply[0] && reply[1] > current_time) {
@@ -174,6 +174,4 @@ async function opidor_token_refresh() {
         }, (error) => {
             console.log('ERROR');
             return error;
-        });
-    }
-}
+        });}}
