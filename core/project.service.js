@@ -126,7 +126,7 @@ async function remove_project_request(uuid, action_owner) {
 async function auth_from_opidor() {
     const options = {
         headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "aplication/x-www-form-urlencoded;charset=UTF-8",
             accept: "application/json",
         },
         data: {
@@ -137,7 +137,7 @@ async function auth_from_opidor() {
         
             "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000"
         
-          }
+        }
     };
     await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options).then((response) => {
         console.log('SUCCESS');
