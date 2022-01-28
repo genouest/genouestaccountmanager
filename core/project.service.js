@@ -183,8 +183,9 @@ async function opidor_token_refresh() {
         console.log('tokens were not valid');
         auth_from_opidor().then(response => {
             let resp = response;
+            console.log(resp);
             token = resp.access_token;
-            console.log(resp.access_token);
+            console.log(token);
             console.log(redis_client.set(['my:dmp:token', resp.access_token]));
             redis_client.set(['my:dmp:expiration', resp.expires_in]);
         })
