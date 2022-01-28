@@ -138,6 +138,7 @@ async function auth_from_opidor () {
 async function opidor_token_refresh() {
     let redis_client = idsrv.redis();
     console.log(redis_client);
+    console.log("here");
     let current_time = Math.floor((new Date()).getTime() / 1000);
     let token = null;
     await redis_client.mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
@@ -145,7 +146,7 @@ async function opidor_token_refresh() {
             console.log(reply);
             token = reply[0];
         }
-        else if (err) {
+        else {
             let response = auth_from_opidor();
             token = response.access_token;
             console.log(response);
