@@ -524,8 +524,8 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     //request to DMP opidor API to get all of the DMP with a json format
     //
     //Keeps only the required data for the project
-    console.log(prjsrv.auth_from_opidor());
-    // console.log(prjsrv.opidor_token_refresh());
+    // console.log(prjsrv.auth_from_opidor());
+    console.log(prjsrv.opidor_token_refresh());
     let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJiMDBkYWRiZi1mOGM4LTQyMmYtOWE4MS1hZTc5OGM1Mjc2MTMiLCJleHAiOjE2NDM0NDc1Nzd9.pcKrQwCek8vDfcZbINZbWkJyx-27i4lztHrvMSUg0zw';
 
     const options = {
