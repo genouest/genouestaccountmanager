@@ -32,45 +32,45 @@ async function create_project(new_project, uuid, action_owner) {
     try {
         let created_file = await filer.project_add_project(new_project, fid);
         logger.debug('Created file', created_file);
-    } catch(error) {
+    } catch (error) {
         logger.error('Add Project Failed for: ' + new_project.id, error);
-        throw {code: 500, message: 'Add Project Failed'};
+        throw { code: 500, message: 'Add Project Failed' };
     }
 
     await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({ 'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id, 'logs': [] });
 }
 
 async function remove_project(id, action_owner) {
     logger.info('Remove Project ' + id);
-    await dbsrv.mongo_projects().deleteOne({'id': id});
+    await dbsrv.mongo_projects().deleteOne({ 'id': id });
     let fid = new Date().getTime();
     try {
-        let created_file = await filer.project_delete_project({'id': id}, fid);
+        let created_file = await filer.project_delete_project({ 'id': id }, fid);
         logger.debug('Created file', created_file);
-    } catch(error){
+    } catch (error) {
         logger.error('Delete Project Failed for: ' + id, error);
-        throw {code: 500, message: 'Delete Project Failed'};
+        throw { code: 500, message: 'Delete Project Failed' };
     }
 
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove project ' + id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({ 'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove project ' + id, 'logs': [] });
 
 }
 
 async function update_project(id, project, action_owner) {
     logger.info('Update Project ' + id);
-    await dbsrv.mongo_projects().updateOne({'id': id},  {'$set': project});
+    await dbsrv.mongo_projects().updateOne({ 'id': id }, { '$set': project });
     let fid = new Date().getTime();
-    project.id =  id;
+    project.id = id;
     try {
         let created_file = await filer.project_update_project(project, fid);
         logger.debug('Created file', created_file);
-    } catch(error) {
+    } catch (error) {
         logger.error('Update Project Failed for: ' + project.id, error);
-        throw {code: 500, message: 'Update Project Failed'};
+        throw { code: 500, message: 'Update Project Failed' };
     }
 
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({ 'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id, 'logs': [] });
 
 }
 
@@ -86,7 +86,7 @@ async function create_project_request(asked_project, user) {
         logs: [],
     });
 
-    let msg_destinations =  [CONFIG.general.accounts, user.email];
+    let msg_destinations = [CONFIG.general.accounts, user.email];
 
     try {
         await maisrv.send_notif_mail({
@@ -94,14 +94,14 @@ async function create_project_request(asked_project, user) {
             'destinations': msg_destinations,
             'subject': 'Project creation request: ' + asked_project.id
         }, {
-            '#UID#':  user.uid,
+            '#UID#': user.uid,
             '#NAME#': asked_project.id,
             '#SIZE#': asked_project.size,
             '#CPU#': asked_project.cpu,
             '#ORGA#': asked_project.orga,
             '#DESC#': asked_project.description
         });
-    } catch(error) {
+    } catch (error) {
         logger.error(error);
     }
 }
@@ -119,7 +119,7 @@ async function remove_project_request(uuid, action_owner) {
         });
     }
     else {
-        throw {code: 404, message: 'No pending project found'};
+        throw { code: 404, message: 'No pending project found' };
     }
 
 }
@@ -127,11 +127,11 @@ async function auth_from_opidor() {
     const data = {
 
         "grant_type": "client_credentials",
-    
+
         "client_id": "b00dadbf-f8c8-422f-9a81-ae798c527613",
-    
+
         "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000"
-    
+
     };
 
     const options = {
@@ -154,32 +154,26 @@ async function opidor_token_refresh() {
     console.log('get tokens');
     let current_time = Math.floor((new Date()).getTime() / 1000);
     let token = null;
-    redis_client.mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
-        if (!reply[0] && reply[1] > current_time) {
-            console.log('tokens were found!');
-            console.log(reply);
-            token = reply[0];
-        }
-        else {
-            console.log('tokens were not valid');
-            auth_from_opidor().then((response) => {
+    let reply = redis_client.mget(['my:dmp:token', 'my:dmp:expiration']);
+    console.log("---");
+    console.log(reply);
+    if (!reply[0] && reply[1] > current_time) {
+        console.log('tokens were found!');
+        console.log(reply);
+        token = reply[0];
+    }
+    else {
+        console.log('tokens were not valid');
+        auth_from_opidor().then((response) => {
             token = response.access_token;
             console.log(response.access_token);
             console.log('trying to set tokens');
             redis_client.set(['my:dmp:token', response.access_token]);
             redis_client.set(['my:dmp:expiration', response.expires_in]);
-            }, (error) => {
-                console.log('ERROR');
-                return error;
-            }
-            
-
-            
-            
-            
-        }
-    
-    });
-    return token;
+            return token;
+        }, (error) => {
+            console.log('ERROR');
+            return error;
+        });
+    }
 }
-
