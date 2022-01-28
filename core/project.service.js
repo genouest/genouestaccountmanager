@@ -143,11 +143,8 @@ async function auth_from_opidor() {
     };
     let response_data = null;
     await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then((response) => {
-        console.log('SUCCESS');
         response_data = response.data;
-        console.log(response_data);
     }, (error) => {
-        console.log('ERROR');
         return error;
     });
     return response_data;
@@ -181,24 +178,21 @@ async function opidor_token_refresh() {
     if (token != null && expiration != null && expiration > current_time) {
         console.log('tokens were found!');
         console.log(expiration);
-        return token;
     }
     else {
         console.log('tokens were not valid');
         auth_from_opidor().then(response => {
             let resp = response;
-            console.log("------------")
-            console.log(resp);
-            console.log("--------------")
             token = resp.access_token;
             console.log(resp.access_token);
-            console.log('trying to set tokens');
-            redis_client.set(['my:dmp:token', resp.access_token]);
+            console.log(redis_client.set(['my:dmp:token', resp.access_token]));
             redis_client.set(['my:dmp:expiration', resp.expires_in]);
-            return token;
         })
             .catch(error => {
                 console.log('ERROR');
                 console.log(error);
                 return error;
-            });}}
+            });
+    }
+    return token;
+}
