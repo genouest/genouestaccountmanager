@@ -124,22 +124,23 @@ async function remove_project_request(uuid, action_owner) {
 
 }
 async function auth_from_opidor() {
+    const data = {
+
+        "grant_type": "client_credentials",
+    
+        "client_id": "b00dadbf-f8c8-422f-9a81-ae798c527613",
+    
+        "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000"
+    
+    };
+
     const options = {
         headers: {
             "Content-Type": "application/json",
             accept: "application/json",
-        },
-        data: {
-
-            "grant_type": "client_credentials",
-        
-            "client_id": "b00dadbf-f8c8-422f-9a81-ae798c527613",
-        
-            "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000"
-        
         }
     };
-    await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options).then((response) => {
+    await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then((response) => {
         console.log('SUCCESS');
         console.log(response);
         return response;
