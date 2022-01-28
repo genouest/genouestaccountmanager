@@ -149,7 +149,7 @@ async function opidor_token_refresh() {
         }
         else {
             console.log('tokens were not valid');
-            auth_from_opidor().subscribe(
+            this.auth_from_opidor().subscribe(
                 resp => {
                     token = resp.access_token;
                     console.log(resp);
