@@ -123,26 +123,16 @@ async function remove_project_request(uuid, action_owner) {
     }
 
 }
-function auth_from_opidor () {
+async function auth_from_opidor () {
     const options = {
         headers: {
             accept: "application/json",
         },
         data: "{\"grant_type\":\"client_credentials\",\"client_id\":\"b00dadbf-f8c8-422f-9a81-ae798c527613\",\"client_secret\":\"12bc248b-5875-4cb6-9fe9-ec083cfda000\"}"
     };
-    axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options).subscribe(
-        resp => {
-            console.log(resp);
-            return resp.data;
-
-        },
-        err => {
-            console.log(err);
-            return err;
-
-        }
-    );
-    
+    let resp = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options);
+    console.log(resp);
+    return resp.data;
 }
 
 async function opidor_token_refresh() {
@@ -159,12 +149,22 @@ async function opidor_token_refresh() {
         }
         else {
             console.log('tokens were not valid');
-            let response = auth_from_opidor();
-            token = response.access_token;
-            console.log(response);
-            console.log('trying to set tokens');
-            redis_client.set(['my:dmp:token', response.access_token]);
-            redis_client.set(['my:dmp:expiration', response.expires_in]);
+            auth_from_opidor().subscribe(
+                resp => {
+                    token = resp.access_token;
+                    console.log(resp);
+                    console.log('trying to set tokens');
+                    redis_client.set(['my:dmp:token', resp.access_token]);
+                    redis_client.set(['my:dmp:expiration', resp.expires_in]);
+
+                },
+                err => {
+                    console.log(err);
+                    token = err;
+                }
+            );
+            
+            
         }
     
     });
