@@ -526,7 +526,7 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     //Keeps only the required data for the project
     console.log(prjsrv.auth_from_opidor());
     // console.log(prjsrv.opidor_token_refresh());
-    let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJpbmZvLW9waWRvckBpbmlzdC5mciIsImV4cCI6MTY0MzI3MjY0OX0.v5Wk3V3qexN0ZMPplwI1AAdWGIFMgETl_Y6t_pV2e_s';
+    let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJiMDBkYWRiZi1mOGM4LTQyMmYtOWE4MS1hZTc5OGM1Mjc2MTMiLCJleHAiOjE2NDM0NDc1Nzd9.pcKrQwCek8vDfcZbINZbWkJyx-27i4lztHrvMSUg0zw';
 
     const options = {
         headers: {
