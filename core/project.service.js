@@ -19,7 +19,7 @@ exports.update_project = update_project;
 exports.create_project_request = create_project_request;
 exports.remove_project_request = remove_project_request;
 exports.auth_from_opidor = auth_from_opidor;
-exports.opidor_token_refresh = opidor_token_refresh;
+// exports.opidor_token_refresh = opidor_token_refresh;
 
 async function create_project(new_project, uuid, action_owner) {
     logger.info('Create Project ' + new_project.id + ' uuid ' + uuid);
