@@ -183,17 +183,14 @@ async function opidor_token_refresh() {
     }
     else {
         console.log('tokens were not valid');
-        auth_from_opidor().then((response) => {
-            console.log("------------")
-            console.log(response);
-            console.log("--------------")
-            token = response.access_token;
-            console.log(response.access_token);
-            console.log('trying to set tokens');
-            redis_client.set(['my:dmp:token', response.access_token]);
-            redis_client.set(['my:dmp:expiration', response.expires_in]);
-            return token;
-        }, (error) => {
-            console.log('ERROR');
-            return error;
-        });}}
+        let response = auth_from_opidor();
+        console.log("------------");
+        console.log(response);
+        console.log("--------------");
+        token = response.access_token;
+        console.log(response.access_token);
+        console.log('trying to set tokens');
+        redis_client.set(['my:dmp:token', response.access_token]);
+        redis_client.set(['my:dmp:expiration', response.expires_in]);
+        return token;
+    }}
