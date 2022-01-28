@@ -143,8 +143,9 @@ async function auth_from_opidor() {
     };
     await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then((response) => {
         console.log('SUCCESS');
-        console.log(response.data);
-        return response.data;
+        let data = response.data;
+        console.log(data);
+        return data;
     }, (error) => {
         console.log('ERROR');
         return error;
