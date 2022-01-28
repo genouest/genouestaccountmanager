@@ -123,16 +123,26 @@ async function remove_project_request(uuid, action_owner) {
     }
 
 }
-async function auth_from_opidor () {
+function auth_from_opidor () {
     const options = {
         headers: {
             accept: "application/json",
         },
         data: "{\"grant_type\":\"client_credentials\",\"client_id\":\"b00dadbf-f8c8-422f-9a81-ae798c527613\",\"client_secret\":\"12bc248b-5875-4cb6-9fe9-ec083cfda000\"}"
     };
-    let resp = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options);
-    console.log(resp);
-    return resp.data;
+    axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options).subscribe(
+        resp => {
+            console.log(resp);
+            return resp.data;
+
+        },
+        err => {
+            console.log(err);
+            return err;
+
+        }
+    );
+    
 }
 
 async function opidor_token_refresh() {
