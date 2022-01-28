@@ -10,6 +10,7 @@ const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
 const idsrv = require('../core/id.service.js');
+const { token } = require('morgan');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -152,15 +153,32 @@ async function auth_from_opidor() {
 async function opidor_token_refresh() {
     let redis_client = idsrv.redis();
     console.log('get tokens');
-    let current_time = Math.floor((new Date()).getTime() / 1000);
     let token = null;
-    let reply = await redis_client.mget(['my:dmp:token', 'my:dmp:expiration']);
+    let expiration = null;
+    let current_time = Math.floor((new Date()).getTime() / 1000);
+    redis_client.get('my:dmp:token', function (err, value){
+        if (err) {
+            token = null;
+        }
+        else {
+            token = value;
+        }
+    });
+
+    redis_client.get('my:dmp:expiration', function (err, value){
+        if (err) {
+            expiration = null;
+        }
+        else {
+            expiration = value;
+        }
+    });
     console.log("---");
-    console.log(reply);
-    if (!reply[0] && reply[1] > current_time) {
+    console.log(token);
+    if (token != null && expiration != null && expiration > current_time) {
         console.log('tokens were found!');
-        console.log(reply);
-        token = reply[0];
+        console.log(expiration);
+        return token;
     }
     else {
         console.log('tokens were not valid');
