@@ -131,7 +131,7 @@ async function auth_from_opidor() {
         data: {"grant_type":"client_credentials","client_id":"b00dadbf-f8c8-422f-9a81-ae798c527613","client_secret":"12bc248b-5875-4cb6-9fe9-ec083cfda000"}
     };
     let resp = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', options);
-    console.log(resp);
+    resp.then(console.log(resp));
     return resp.data;
 }
 
