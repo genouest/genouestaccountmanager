@@ -197,5 +197,6 @@ async function opidor_token_refresh() {
         })
             .catch(error => {
                 console.log('ERROR');
+                console.log(error);
                 return error;
             });}}
