@@ -123,7 +123,7 @@ async function remove_project_request(uuid, action_owner) {
     }
 
 }
-async function auth_from_opidor () {
+async function auth_from_opidor() {
     const options = {
         headers: {
             accept: "application/json",
@@ -135,39 +135,35 @@ async function auth_from_opidor () {
     return resp.data;
 }
 
-async function opidor_token_refresh() {
-    let redis_client = idsrv.redis();
-    console.log(redis_client);
-    console.log('get tokens');
-    let current_time = Math.floor((new Date()).getTime() / 1000);
-    let token = null;
-    redis_client.mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
-        if (!reply[0] && reply[1] > current_time) {
-            console.log('tokens were found!');
-            console.log(reply);
-            token = reply[0];
-        }
-        else {
-            console.log('tokens were not valid');
-            this.auth_from_opidor().subscribe(
-                resp => {
-                    token = resp.access_token;
-                    console.log(resp);
-                    console.log('trying to set tokens');
-                    redis_client.set(['my:dmp:token', resp.access_token]);
-                    redis_client.set(['my:dmp:expiration', resp.expires_in]);
+// async function opidor_token_refresh() {
+//     let redis_client = idsrv.redis();
+//     console.log(redis_client);
+//     console.log('get tokens');
+//     let current_time = Math.floor((new Date()).getTime() / 1000);
+//     let token = null;
+//     redis_client.mget(['my:dmp:token','my:dmp:expiration'], function(err, reply) {
+//         if (!reply[0] && reply[1] > current_time) {
+//             console.log('tokens were found!');
+//             console.log(reply);
+//             token = reply[0];
+//         }
+//         else {
+//             console.log('tokens were not valid');
+//             let resp = auth_from_opidor();
+//             resp.then(
+                
+//                 token = resp.access_token
+//                 console.log(resp)
+//                 console.log('trying to set tokens')
+//                 redis_client.set(['my:dmp:token', resp.access_token]);
+//                 redis_client.set(['my:dmp:expiration', resp.expires_in]);
 
-                },
-                err => {
-                    console.log(err);
-                    token = err;
-                }
-            );
+//             );
             
             
-        }
+//         }
     
-    });
+//     });
     return token;
 }
 
