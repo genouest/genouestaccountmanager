@@ -158,7 +158,9 @@ async function opidor_token_refresh() {
     let token = null;
     let expiration = null;
     let current_time = Math.floor((new Date()).getTime() / 1000);
-    redis_client.get('my:dmp:token', function (err, value){
+    await redis_client.get('my:dmp:token', function (err, value){
+        console.log(value);
+        console.log(err);
         if (err) {
             console.log("no token saved")
             token = null;
@@ -169,7 +171,7 @@ async function opidor_token_refresh() {
         }
     });
 
-    redis_client.get('my:dmp:expiration', function (err, value){
+    await redis_client.get('my:dmp:expiration', function (err, value){
         if (err) {
             expiration = null;
         }
