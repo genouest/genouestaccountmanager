@@ -155,57 +155,44 @@ async function auth_from_opidor() {
 async function opidor_token_refresh() {
     let redis_client = idsrv.redis();
     console.log('get tokens');
-    let token = null;
+    let token = '';
     let expiration = null;
-    let current_time = Math.floor((new Date()).getTime() / 1000);
-    await redis_client.get('my:dmp:token', function (err, value){
+
+    redis_client.get('my:dmp:token', function (err, value) {
         console.log(value);
         console.log(err);
         if (err) {
-            console.log("no token saved")
-            token = null;
+            console.log('no token saved');
+            auth_from_opidor().then(response => {
+                let resp = response;
+                console.log('auth:');
+                console.log(resp);
+                token = resp.access_token;
+                expiration = resp.expires_in;
+
+                let current_time = Math.floor((new Date()).getTime() / 1000);
+                let expiration_time = current_time - expiration;
+                redis_client.set('my:dmp:token', token, function (err, reply) {
+                    console.log(reply);
+                    redis_client.expire('my:dmp:token', expiration_time);
+                });
+
+            })
+                .catch(error => {
+                    console.log('ERROR');
+                    console.log(error);
+                    return error;
+                });
         }
         else {
-            console.log("token saved!")
+            console.log("token found!")
             token = value;
         }
     });
 
-    await redis_client.get('my:dmp:expiration', function (err, value){
-        if (err) {
-            expiration = null;
-        }
-        else {
-            expiration = value;
-        }
-    });
-    console.log("---");
+
+    
+    console.log('RETURNING TOKEN:');
     console.log(token);
-    console.log(expiration);
-    if (token != null && expiration != null && expiration > current_time) {
-        console.log('tokens were found!');
-        console.log(expiration);
-    }
-    else {
-        console.log('tokens were not valid');
-        auth_from_opidor().then(response => {
-            let resp = response;
-            console.log(resp);
-            token = resp.access_token;
-            expiration = resp.expires_in;
-            console.log("token:")
-            console.log(token);
-            console.log("expires:")
-            console.log(resp.expires_in);
-            
-        })
-            .catch(error => {
-                console.log('ERROR');
-                console.log(error);
-                return error;
-            });
-    }
-    await redis_client.set('my:dmp:token', token);
-    await redis_client.set('my:dmp:expiration', expiration);
     return token;
 }
