@@ -11,6 +11,7 @@ const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
 const idsrv = require('../core/id.service.js');
 const { token } = require('morgan');
+const { response } = require('express');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -147,6 +148,7 @@ async function auth_from_opidor() {
     }, (error) => {
         return error;
     });
+    console.log(response_data);
     return response_data;
 }
 
@@ -158,9 +160,11 @@ async function opidor_token_refresh() {
     let current_time = Math.floor((new Date()).getTime() / 1000);
     redis_client.get('my:dmp:token', function (err, value){
         if (err) {
+            console.log("no token saved")
             token = null;
         }
         else {
+            console.log("token saved!")
             token = value;
         }
     });
@@ -185,7 +189,9 @@ async function opidor_token_refresh() {
             let resp = response;
             console.log(resp);
             token = resp.access_token;
+            console.log("token:")
             console.log(token);
+            console.log("expires:")
             console.log(resp.expires_in);
             // redis_client.set('my:dmp:token', token);
             // redis_client.set('my:dmp:expiration', resp.expires_in);

@@ -527,24 +527,26 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     // console.log(prjsrv.auth_from_opidor());
     let token = null;
     prjsrv.opidor_token_refresh().then(response => {
+        console.log("RETURN:");
         console.log(response);
         token = response;
+        const options = {
+            headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        };
+        let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
+        return res.send({ message: 'Dmp found', data: resp.data });
 
     })
-        .catch((error) => {
-            return error;
+        .catch(error => {
+            return res.send({message: 'ERROR', data: error});
 
         });
     // let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJiMDBkYWRiZi1mOGM4LTQyMmYtOWE4MS1hZTc5OGM1Mjc2MTMiLCJleHAiOjE2NDM0NDc1Nzd9.pcKrQwCek8vDfcZbINZbWkJyx-27i4lztHrvMSUg0zw';
 
-    const options = {
-        headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${token}`
-        }
-    };
-    let resp = await axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
-    return res.send({ message: 'Dmp found', data: resp.data });
+    
 });
 
 
