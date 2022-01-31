@@ -181,6 +181,7 @@ async function opidor_token_refresh() {
     });
     console.log("---");
     console.log(token);
+    console.log(expiration);
     if (token != null && expiration != null && expiration > current_time) {
         console.log('tokens were found!');
         console.log(expiration);
@@ -191,12 +192,12 @@ async function opidor_token_refresh() {
             let resp = response;
             console.log(resp);
             token = resp.access_token;
+            expiration = resp.expires_in;
             console.log("token:")
             console.log(token);
             console.log("expires:")
             console.log(resp.expires_in);
-            // redis_client.set('my:dmp:token', token);
-            // redis_client.set('my:dmp:expiration', resp.expires_in);
+            
         })
             .catch(error => {
                 console.log('ERROR');
@@ -204,5 +205,7 @@ async function opidor_token_refresh() {
                 return error;
             });
     }
+    await redis_client.set('my:dmp:token', token);
+    await redis_client.set('my:dmp:expiration', expiration);
     return token;
 }
