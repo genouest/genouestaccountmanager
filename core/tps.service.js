@@ -126,17 +126,17 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
 
             // TODO: find if we need to check the switch flag or if it is better to check the var
             if (groupName != '') {
-                usrsrv.add_user_to_group(user.uid, userGroup.name);
+                await usrsrv.add_user_to_group(user.uid, userGroup.name);
             }
 
             if (projectName != '') {
-                usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
+                await usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
             }
 
         }
     }
     catch (error) {
-        logger.error(error);
+        logger.error('Error', error);
     }
     return users;
 }
@@ -291,6 +291,7 @@ async function create_tp_reservation(reservation_id) {
                 'created': true
             }
         });
+
         logger.debug('reservation ', reservation);
         await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'create reservation for ' + reservation.owner , 'logs': [] });
         return reservation;
