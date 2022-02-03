@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { UserService } from '../user.service';
+import { ProjectsService } from 'src/app/admin/projects/projects.service';
 
 @Component({
     selector: 'app-user-projects',
@@ -18,12 +19,15 @@ export class ProjectsComponent implements OnInit {
     remove_from_project_error_msg: string
     request_mngt_error_msg: string
 
+
     project: any
 
-    constructor(private userService: UserService) { }
+    constructor(private userService: UserService,
+                private projectsService: ProjectsService) { }
 
     ngOnInit() {
         this.remove_from_project = this.remove_from_project.bind(this);
+        
     }
 
     add_to_project(){

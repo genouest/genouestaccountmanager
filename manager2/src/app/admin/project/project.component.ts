@@ -6,7 +6,6 @@ import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
-
 @Component({
     selector: 'app-project',
     templateUrl: './project.component.html',
@@ -23,6 +22,9 @@ export class ProjectComponent implements OnInit {
     prj_err_msg: string
     prj_msg: string
     oldGroup: string
+
+    dmp: any
+    dmp_visible:boolean
 
     new_user_admin: string = ''
     remove_user_admin: string = ''
@@ -48,7 +50,8 @@ export class ProjectComponent implements OnInit {
             orga: '',
             description: '',
             access: 'Group',
-            path: ''
+            path: '',
+            dmp_linked: Boolean,
         }
         this.users = [];
         this.groups = [];
@@ -82,6 +85,8 @@ export class ProjectComponent implements OnInit {
             },
             err => console.log('failed to get config')
         );
+        this.dmp_visible = false;
+        // console.log(this.dmp)
 
     }
 
@@ -89,6 +94,7 @@ export class ProjectComponent implements OnInit {
         this.projectsService.get(projectId).subscribe(
             resp => {
                 this.project = resp;
+                console.log(this.project)
                 this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
@@ -198,5 +204,14 @@ export class ProjectComponent implements OnInit {
         }
         return res;
     }
+
+    display_dmp_to_admin() {
+        this.dmp_visible = !this.dmp_visible;
+        this.projectsService.fetch_dmp(this.project.dmpid).subscribe(
+            resp => {this.dmp = resp.data.data;},
+            err => console.log('dmperr')
+        );
+    }
+
 
 }

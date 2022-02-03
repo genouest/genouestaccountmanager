@@ -1,14 +1,14 @@
-<<<<<<< HEAD
 import { environment } from '../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-=======
->>>>>>> genouest-master
 /* TODO : create a core/project.service.js and move all method in it */
 
 const express = require('express');
 var router = express.Router();
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const yaml = require('js-yaml');
+const axios = require('axios')
+
 
 const dbsrv = require('../core/db.service.js');
 const sansrv = require('../core/sanitize.service.js');
@@ -16,9 +16,10 @@ const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
 const usrsrv = require('../core/user.service.js');
 
-router.get('/project', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+
+router.get('/project', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
 
@@ -48,8 +49,10 @@ router.get('/project', async function(req, res){
             return;
         }
     } else {
+
         if (req.query.all === 'true'){
             let projects = await dbsrv.mongo_projects().find({}).toArray();
+
             res.send(projects);
             return;
         } else {
@@ -65,9 +68,9 @@ router.get('/project', async function(req, res){
     }
 });
 
-router.get('/project/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.get('/project/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
@@ -95,18 +98,17 @@ router.get('/project/:id', async function(req, res){
         return;
     }
     let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
-
     if (!project) {
         logger.error('failed to get project', req.params.id);
-        res.status(404).send({message: 'Project ' + req.params.id + ' not found'});
+        res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
         return;
     }
     res.send(project);
 });
 
-router.post('/project', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.post('/project', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(! sansrv.sanitizeAll([req.body.id])) {
@@ -173,11 +175,12 @@ router.post('/project', async function(req, res){
     return;
 });
 
-router.delete('/project/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.delete('/project/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
+
     if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
@@ -221,9 +224,9 @@ router.delete('/project/:id', async function(req, res){
 
 });
 
-router.post('/project/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.post('/project/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
@@ -282,9 +285,9 @@ router.post('/project/:id', async function(req, res){
     res.send({message: 'Project updated'});
 });
 
-router.post('/project/:id/request', async function(req, res){
-    if(! req.locals.logInfo.is_logged){
-        res.status(401).send({message: 'Not authorized'});
+router.post('/project/:id/request', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
@@ -311,10 +314,11 @@ router.post('/project/:id/request', async function(req, res){
         res.status(404).send({message: 'User ' + req.body.user + ' not found'});
         return;
     }
-    if(newuser.projects && newuser.projects.indexOf(project.id) >= 0 && req.body.request === 'add'){
-        res.status(403).send({message: 'User ' + req.body.user + ' is already in project : cannot add'});
+    if (newuser.projects && newuser.projects.indexOf(project.id) >= 0 && req.body.request === 'add') {
+        res.status(403).send({ message: 'User ' + req.body.user + ' is already in project : cannot add' });
         return;
     }
+
 
     try {
         if (req.body.request === 'add'){
@@ -384,9 +388,11 @@ router.post('/ask/project', async function(req, res){
         }
     }
     res.send({ message: 'Pending Project created'});
+
     return;
 });
 
+//gets all the projects waiting the Admin approval
 router.get('/pending/project', async function (req, res) {
 
     if (!req.locals.logInfo.is_logged) {
@@ -436,6 +442,7 @@ router.get('/pending/project', async function (req, res) {
     }
 });
 
+//once the new project is approved by the admin it is removed from the pending projects 
 router.delete('/pending/project/:uuid', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
@@ -512,6 +519,48 @@ router.get('/project/:id/users', async function(req, res){
     if (!user.projects) {
         user.projects = [];
     }
+
+
+});
+
+//checks if the DMP OPIDoR API is online
+router.get('/dmp/ping', async function (req, res) {
+    let online = this.http.get(GENERAL_CONFIG.dmp.url + '/heartbeat');
+    if (online['code'] != 200) {
+        res.status(404).send('Can\'t reach Opidor API');
+        return;
+    }
+
+    let DMP_data = { error: '', ping: true };
+
+    res.send(DMP_data);
+    res.end();
+});
+
+//fetchs a dmp based on his ID, using the dmp OPIDoR API
+router.post('/dmp/:id', async function (req, res) {
+    //request to DMP opidor API to get all of the DMP with a json format
+    //
+    //Keeps only the required data for the project
+
+
+    const options = {
+        headers: {
+            accept: "application/json",
+            Authorization: "Token token=lJbcVHG7Z2wA2mNii2vybA"
+        }
+    };
+    let resp = await axios.get('https://madmp-preprod.inist.fr/api/v0/madmp/plans/1704?research_output_id=18365', options);
+    console.log(resp)
+    return res.send({ message: 'Dmp found', data: resp.data });
+    res.end();
+
+    // if (dmp['code'] != 200) {
+    //     res.status(404).send('Can\'t reach Opidor API');
+    //     return;
+    // }
+    // res.send({ message: 'Dmp found', data: dmp})
+
 
     if (user.projects.includes(req.params.id) || isadmin) {
 

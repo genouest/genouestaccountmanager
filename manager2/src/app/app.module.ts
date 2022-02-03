@@ -47,7 +47,7 @@ import { UserLogsComponent } from './user/userlogs.component';
 import {TableModule} from 'primeng/table';
 import { environment } from '../environments/environment';
 import * as Sentry from "@sentry/browser";
-
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 if (environment.sentry) {
     Sentry.init({
         dsn: environment.sentry
@@ -115,6 +115,7 @@ export class SentryErrorHandler implements ErrorHandler {
     imports: [
         BrowserModule,
         NgbModule,
+        NgxJsonViewerModule,
         HttpClientModule,
         AppRoutingModule,
         FormsModule,
