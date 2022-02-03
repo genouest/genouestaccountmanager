@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 import { ConfigService } from './config.service'
 import { UserService } from './user/user.service';
 import { PluginService } from './plugin/plugin.service';
-import { CoreEnvironment } from '@angular/core/src/render3/jit/compiler_facade_interface';
 
 @Component({
     selector: 'app-root',
@@ -19,6 +18,7 @@ export class AppComponent {
     usages: any = []
     plugins: any = []
     config: any
+
     private loginSubscription: Subscription;
 
     ngOnInit() {

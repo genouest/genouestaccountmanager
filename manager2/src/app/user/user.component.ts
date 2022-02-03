@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
 import { UserService } from './user.service'
 import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
@@ -11,6 +11,10 @@ import { ProjectsService } from '../admin/projects/projects.service'
 import { ActivatedRoute, Router } from '@angular/router';
 import { WindowWrapper } from '../windowWrapper.module';
 import { FlashMessagesService } from '../utils/flash/flash.component';
+
+import { 
+    solveRegistrationChallenge
+} from '@webauthn/client';
 
 /*
   function _window() : any {
@@ -25,6 +29,87 @@ import { FlashMessagesService } from '../utils/flash/flash.component';
   }
   }
 */
+
+@Component({
+    selector: 'app-user-extra',
+    templateUrl: './user-extra.component.html',
+    styleUrls: ['./user-extra.component.css']
+})
+export class UserExtraComponent implements OnInit {
+    @Input() user: any
+    @Output() extraValues = new EventEmitter<any>();
+    config: any
+    //@ViewChild('extras') extras: any
+    extras: any
+
+    constructor(
+        private configService: ConfigService,
+    ) {
+        this.config = {}
+        this.extras = []
+    }
+
+    ngOnInit() {
+        this.extraChange = this.extraChange.bind(this);
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                let extras =resp.registration || [];
+                let user_extras = {};
+                if (this.user && this.user.extra_info) {
+                    for(let i=0;i<this.user.extra_info.length;i++) {
+                        let extra_info = this.user.extra_info[i];
+                        user_extras[extra_info.title] = extra_info.value;
+                    }
+                }
+                for(let i=0;i<extras.length;i++) {
+                    extras[i].value = extras[i].choices[0][0];
+                    if (extras[i].multiple) {
+                        extras[i].value = [extras[i].choices[0][0]];
+                    }
+                    if(user_extras[extras[i].title]) {
+                        extras[i].value = user_extras[extras[i].title];
+                    }
+                }
+                this.extras = extras;
+                console.log('extras', this.extras);
+            },
+            err => console.log('failed to get config')
+        )
+    }
+
+
+    extraChange(title, data) {
+        console.debug('event', data.target.checked, data.target.value)
+        for(let i=0;i<this.extras.length;i++) {
+            let extra = this.extras[i];
+            if(extra.title == title) {
+                if(extra.multiple) {
+                    let cur_values = [...extra.value];
+                    let index = cur_values.indexOf(data.target.value);
+                    if(data.target.checked) {
+                        // add
+                        if (index < 0) {
+                            cur_values.push(data.target.value);
+                        }
+                    } else {
+                        // remove
+                        if (index >= 0) {
+                            cur_values.splice(index, 1)
+                        }
+                    }
+                    this.extras[i].value = cur_values;
+                } else {
+                    extra.value = data.target.value;
+                }
+                break;
+            }
+        }
+
+        console.debug('extras changed', title, this.extras);
+        this.extraValues.emit(this.extras);
+    }
+}
 
 
 @Component({
@@ -109,6 +194,10 @@ export class UserComponent implements OnInit {
     notify_message: string
     notify_err: string
 
+    key_err: string
+
+    otp: string
+
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
@@ -145,6 +234,8 @@ export class UserComponent implements OnInit {
         this.notify_subject = ''
         this.notify_message = ''
         this.notify_err = ''
+        this.key_err = ''
+        this.otp = null
 
     }
 
@@ -158,6 +249,16 @@ export class UserComponent implements OnInit {
             res = '';
         }
         return res;
+    }
+
+    onExtraValue(extras: any) {
+        console.debug('extras updated', extras);
+        let new_extra = [];
+        for(let i=0;i<extras.length;i++){
+            let extra = extras[i];
+            new_extra.push({'title': extra.title, 'value': extra.value})
+        }
+        this.user.extra_info = new_extra;
     }
 
     initUser = function() {
@@ -193,6 +294,7 @@ export class UserComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.onExtraValue = this.onExtraValue.bind(this);
         this.web_delete = this.web_delete.bind(this);
         this.delete_secondary_group = this.delete_secondary_group.bind(this);
         this.db_delete = this.db_delete.bind(this);
@@ -370,6 +472,7 @@ export class UserComponent implements OnInit {
         console.log("get key " + key + " for " + user_id)
         this.userService.getSSHKey(user_id, key).subscribe(
             resp => {
+                this.key_err = '';
                 console.log("key = ", resp)
                 let keyName = "id_rsa.pub"
                 if(key == "private") {
@@ -404,7 +507,8 @@ export class UserComponent implements OnInit {
                 }
             },
             err => {
-                console.log("failed to get ssh key", err)
+                console.log("failed to get ssh key", err);
+                this.key_err = err.error;
             }
         )
     }
@@ -599,40 +703,31 @@ export class UserComponent implements OnInit {
     }
 
     register_u2f() {
-        if (this.window['u2f'] === undefined) {
-            this.u2f = "U2F authentication not supported by this browser";
-            return;
-        }
-        this.userService.u2fGet(this.user.uid).subscribe(
-            resp => {
-                let registrationRequest = resp['registrationRequest'];
-                this.u2f = "Please insert your key and press button";
-                //this.timeoutId = setTimeout(function(){
-                let ctx =this;
-                this.window['u2f'].register(
-                    registrationRequest.appId, [registrationRequest], [], registrationResponse => {
-                        if(registrationResponse.errorCode) {
-                            console.log("Association failed");
-                            ctx.u2f = "Assocation failed";
-                            return;
-                        }
-                        // Send this registration response to the registration verification server endpoint
-                        let data = {
-                            registrationRequest: registrationRequest,
-                            registrationResponse: registrationResponse
-                        }
-                        ctx.userService.u2fSet(this.user.uid, data).subscribe(
-                            resp => {
-                                ctx.u2f = null;
-                                ctx.user.u2f = {'publicKey': resp['publicKey']};
-                            },
-                            err => console.log('failed to register device')
-                        )
-                    }, 5000)
 
-                //}, 5000);
+        this.userService.u2fGet(this.user.uid).subscribe( 
+            resp => {
+                let challenge = resp;
+                let ctx =this;
+                this.u2f = "Please insert your key and press button";
+                solveRegistrationChallenge(challenge).then((credentials) => {
+                    this.userService.u2fSet(this.user.uid, credentials).subscribe( () => {
+                        ctx.u2f = null;
+                        ctx.user.u2f = {'challenge': challenge};
+                    })
+                }).catch(err => { console.error(err); ctx.u2f = "registration error"});
             },
             err => console.log('failed to get u2f devices')
+        )
+    }
+
+    register_otp() {
+        this.userService.otpRegister(this.user.uid).subscribe(
+            resp => {
+                this.otp = resp['imageUrl'];
+            },
+            err => {
+                console.error(err)
+            }
         )
     }
 
@@ -676,9 +771,9 @@ export class UserComponent implements OnInit {
         )
     }
 
-    delete(message: string) {
+    delete(message: string, sendmail: boolean) {
         // console.log(this.user.uid, message);
-        this.userService.delete(this.user.uid, message).subscribe(
+        this.userService.delete(this.user.uid, message, sendmail).subscribe(
             resp => {
                 this._flashMessagesService.show(resp['message'], { cssClass: 'alert-success', timeout: 5000 });
                 this.router.navigate(['/admin/user']);

@@ -14,6 +14,7 @@ fi
 {% include "user/add_readme.sh" %}
 
 mkdir -p "{{ user.home }}/.ssh"
+chmod 700 "{{ user.home }}"
 touch "{{ user.home }}/.ssh/authorized_keys"
 echo 'Host *' > "{{ user.home }}/.ssh/config"
 echo '  StrictHostKeyChecking no' >> "{{ user.home }}/.ssh/config"

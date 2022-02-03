@@ -1,13 +1,14 @@
 const nunjucks = require('nunjucks');
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
-const CONFIG = require('config');
+
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
 const fs = require('fs');
 const templates_dir = 'templates/' + CONFIG.general.templates;
 const templates_dir_default = 'templates/default';
-
-// Todo: move utils function which manage file content here
-// var utils = require('../routes/utils.js');
 
 // Todo: Manage mail template with nunjuck
 
@@ -142,9 +143,8 @@ module.exports = {
         return create_file('user_add_group', { group: group, fid: fid });
     },
 
-    // Todo: maybe add the group list in this method (it is not needed now as it is done in ldap)
-    user_change_group: function (user, fid) {
-        return create_file('user_change_group', { user: user, fid: fid });
+    user_change_group: function (user, group_add, group_remove, fid) {
+        return create_file('user_change_group', { user: user, group_add: group_add, group_remove: group_remove, fid: fid });
     },
 
     user_delete_user: function (user, fid) {

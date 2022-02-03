@@ -1,4 +1,4 @@
-import { Injectable, ɵConsole } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../auth/auth.service';
@@ -129,23 +129,6 @@ export class ProjectsService {
         );
     }
 
-    removeRequest(projectId: string, request: any): Observable<any> {
-        //let user = this.authService.profile;
-        let params = new HttpParams();
-
-        let httpOptions = {
-            //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
-            //}),
-            params: params
-        };
-        return this.http.put(
-            environment.apiUrl + '/project/' + projectId + '/request',
-            request,
-            httpOptions
-        );
-    }
-
     delete(projectId: string): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
@@ -179,6 +162,29 @@ export class ProjectsService {
         );
     }
 
+    list_pending(getAll: boolean): Observable<any[]> {
+        //let user = this.authService.profile;
+        let params = new HttpParams();
+        if (getAll) {
+            params = params.append("all", "true");
+        }
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.get(
+            environment.apiUrl + '/pending/project',
+            httpOptions
+        ).pipe(map((response: any[]) => {
+            return response.sort(function (a, b) {
+                return a.id.localeCompare(b.id);
+            });
+        }));
+    }
+
     pingDmpDatabase(new_project: any): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;
@@ -197,18 +203,34 @@ export class ProjectsService {
     askDmpData(new_project: any): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
         // let user = this.authService.profile;
+        let params = new HttpParams();
         console.log("asking")
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
             //}),
-
+            params: params
         };
-        return this.http.post(
-            environment.apiUrl + '/dmp/download',
-            new_project,
-            httpOptions
+    return this.http.post(
+        environment.apiUrl + '/dmp/download',
+        new_project,
+        httpOptions
         );
     }
+    delete_pending(projectUuid: string): Observable<any> {
+        //let user = this.authService.profile;
+        let params = new HttpParams();
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.delete(
+            environment.apiUrl + '/pending/project/' + projectUuid,
+            httpOptions
+        );
+            
 
 }

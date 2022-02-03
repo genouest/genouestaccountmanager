@@ -156,7 +156,7 @@ In *tests* directory, a docker-compose is available to setup whole infrastructur
 
 To start server
 
-    
+    node app.ps
 
 To build docker without sentry support
 

@@ -3,30 +3,36 @@ version: '3'
 services:
 
     mysql:
-        image: mariadb
+        #image: mariadb
+        image: quay.io/osallou/mariadb
         environment:
             - MYSQL_ROOT_PASSWORD=my
 
     mongo:
-        image: mongo
+        #image: mongo
+        image: quay.io/osallou/mongo
 
     mailhog:
-        image: mailhog/mailhog
+        #image: mailhog/mailhog
+        image: quay.io/osallou/mailhog
         ports:
             - "8025:8025"
 
     gomail-rabbitmq:
-        image: rabbitmq
+        #image: rabbitmq
+        image: quay.io/osallou/rabbitmq
         hostname: gomail-rabbitmq
         environment:
             - RABBITMQ_DEFAULT_USER=gomail
             - RABBITMQ_DEFAULT_PASS=gomail
 
     gomail-redis:
-        image: redis
+        #image: redis
+        image: quay.io/osallou/redis
 
     gomail-web:
-        image: osallou/gomail
+        #image: osallou/gomail
+        image: quay.io/osallou/gomail
         environment:
             - RABBITMQ_URL=amqp://gomail:gomail@gomail-rabbitmq:5672/%2F
             - GOMAIL_HREF=http://gomail-web:6643
@@ -42,7 +48,7 @@ services:
         command: gunicorn -c gunicorn_conf.py -b 0.0.0.0:6643 gomail.app:app
 
     gomail-executor:
-        image: osallou/gomail
+        image: quay.io/osallou/gomail
         depends_on:
             - gomail-rabbitmq
         environment:
@@ -54,7 +60,8 @@ services:
         command: bash -c "sleep 10 && python3 gomail/executor.py"
 
     openldap:
-        image: dinkel/openldap
+        #image: dinkel/openldap
+        image: quay.io/osallou/openldap
         environment:
             - "SLAPD_PASSWORD=my"
             - "SLAPD_DOMAIN=my.org"
@@ -65,7 +72,8 @@ services:
             #- ${MYDIR}/openldap/data/lib:/var/lib/ldap
             - ./ldap-data:/etc/ldap/prepopulate:ro
     phpldapadmin:
-        image: dinkel/phpldapadmin
+        #image: dinkel/phpldapadmin
+        image: quay.io/osallou/phpldapadmin
         ports:
             - "8080:80"
         environment:
@@ -74,7 +82,7 @@ services:
     my-app:
         image: osallou/my
         ports:
-            - "80:3000"
+            - "3000:3000"
         environment:
             - NODE_ENV=test
             - LDAP_SERVER_HOST=openldap
