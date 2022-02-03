@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 import { environment } from '../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
+=======
+>>>>>>> genouest-master
 /* TODO : create a core/project.service.js and move all method in it */
 
 const express = require('express');

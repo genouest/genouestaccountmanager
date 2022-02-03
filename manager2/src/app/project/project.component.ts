@@ -27,9 +27,6 @@ export class ProjectComponent implements OnInit {
     config: any
     new_user: any
     remove_user: any
-    
-    dmp_err_msg: string
-    dmp_msg: string
     default_size: any
     default_cpu: any
 

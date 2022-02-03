@@ -255,26 +255,6 @@ export class ProjectsComponent implements OnInit {
         return res;
     }
 
-    request_dmp_data() {
-        console.log(this.new_project.dmp_key)
-        this.dmp_msg = '';
-        this.dmp_err_msg = '';
-        if ([undefined, ""].includes(this.new_project.dmp_key)) {
-            this.dmp_err_msg = 'The DMP key field is empty';
-            return;
-        }
-        this.projectService.askDmpData(this.new_project).subscribe(
-            resp => {
-                this.dmp_msg = 'Successfuly loaded the DMP data';
-                console.log(resp.ping)
-
-            },
-            err => {
-                console.log('failed to reach the DMP database with your key', err);
-                this.dmp_err_msg = err.error;
-            }
-        )
-    }
     accept_project(project) {
         this.modify_project(project);
         this.add_project();

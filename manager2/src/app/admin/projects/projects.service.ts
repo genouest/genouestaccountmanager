@@ -185,38 +185,6 @@ export class ProjectsService {
         }));
     }
 
-    pingDmpDatabase(new_project: any): Observable<any> {
-        //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
-        // let user = this.authService.profile;
-        console.log("pinging")
-        let httpOptions = {
-            //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
-            //}),
-
-        };
-        return this.http.get(
-            environment.apiUrl + '/dmp/ping',
-            httpOptions
-        );
-    }
-    askDmpData(new_project: any): Observable<any> {
-        //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
-        // let user = this.authService.profile;
-        let params = new HttpParams();
-        console.log("asking")
-        let httpOptions = {
-            //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
-            //}),
-            params: params
-        };
-    return this.http.post(
-        environment.apiUrl + '/dmp/download',
-        new_project,
-        httpOptions
-        );
-    }
     delete_pending(projectUuid: string): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
