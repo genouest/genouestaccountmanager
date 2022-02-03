@@ -345,6 +345,17 @@ router.post('/ask/project', async function(req, res){
         return;
     }
 
+    if (!req.body.id) {
+        res.status(403).send({'message': 'Project name empty'});
+        return;
+    }
+    let p = await dbsrv.mongo_projects().findOne({id: req.body.id});
+    if(p) {
+        res.status(403).send({'message': 'Project already exists'});
+        return;
+    }
+   
+
     try {
         await prjsrv.create_project_request({
             'id': req.body.id,

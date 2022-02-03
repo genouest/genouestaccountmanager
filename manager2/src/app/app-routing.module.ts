@@ -25,6 +25,7 @@ import { RegisteredComponent } from './callback/registered/registered.component'
 import { PasswordResetConfirmComponent } from './callback/password-reset-confirm/password-reset-confirm.component';
 import { PendingAccountComponent } from './callback/pending-account/pending-account.component';
 import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
+import { AdminStatComponent } from './admin/stats/stats.component';
 
 const routes: Routes = [
     {
@@ -65,6 +66,13 @@ const routes: Routes = [
     {
         path: 'admin/project',
         component: AdminProjectsComponent,
+        canActivate: [
+            AdminAuthGuard
+        ]
+    },
+    {
+        path: 'admin/stats',
+        component: AdminStatComponent,
         canActivate: [
             AdminAuthGuard
         ]

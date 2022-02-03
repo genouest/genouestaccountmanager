@@ -8,6 +8,7 @@ const CONFIG = my_conf;
 const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
+const usrsrv = require('../core/user.service.js');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -17,11 +18,17 @@ exports.update_project = update_project;
 exports.create_project_request = create_project_request;
 exports.remove_project_request = remove_project_request;
 
-async function create_project(new_project, uuid, action_owner) {
+async function create_project(new_project, uuid, action_owner = 'auto') {
     logger.info('Create Project ' + new_project.id + ' uuid ' + uuid);
     new_project.created_at = new Date().getTime();
     if (!new_project.expire) {
         new_project.expire = new Date().getTime() + CONFIG.project.default_expire * day_time;
+    }
+    if (!new_project.size) {
+        new_project.size = CONFIG.project.default_size;
+    }
+    if (!new_project.path) {
+        new_project.path = CONFIG.project.default_path + '/' + new_project.id;
     }
     await dbsrv.mongo_projects().insertOne(new_project);
     let fid = new Date().getTime();
@@ -33,11 +40,23 @@ async function create_project(new_project, uuid, action_owner) {
         throw {code: 500, message: 'Add Project Failed'};
     }
 
-    await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
+    if (uuid) {
+        await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
+    }
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
+
+    try {
+        if (new_project.owner) {
+            await usrsrv.add_user_to_project(new_project.id, new_project.owner);
+        }
+    }
+    catch(error) {
+        logger.error(error);
+    }
+    return new_project;
 }
 
-async function remove_project(id, action_owner) {
+async function remove_project(id, action_owner = 'auto') {
     logger.info('Remove Project ' + id);
     await dbsrv.mongo_projects().deleteOne({'id': id});
     let fid = new Date().getTime();
@@ -53,8 +72,9 @@ async function remove_project(id, action_owner) {
 
 }
 
-async function update_project(id, project, action_owner) {
+async function update_project(id, project, action_owner = 'auto') {
     logger.info('Update Project ' + id);
+    project.expiration_notif = 0;
     await dbsrv.mongo_projects().updateOne({'id': id},  {'$set': project});
     let fid = new Date().getTime();
     project.id =  id;
@@ -83,6 +103,9 @@ async function create_project_request(asked_project, user) {
     });
 
     let msg_destinations =  [CONFIG.general.accounts, user.email];
+    if (user.send_copy_to_support) {
+        msg_destinations.push(CONFIG.general.support);
+    }
 
     try {
         await maisrv.send_notif_mail({
@@ -103,7 +126,7 @@ async function create_project_request(asked_project, user) {
 }
 
 
-async function remove_project_request(uuid, action_owner) {
+async function remove_project_request(uuid, action_owner = 'auto') {
     logger.info('Remove Project Request' + uuid);
     const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
     if (result.deletedCount === 1) {

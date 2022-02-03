@@ -63,6 +63,18 @@ export class AuthService {
         return this.http.post(environment.apiUrl + '/u2f/auth/' + userId, u2fData)
     }
 
+    otpCheck(userId: string, token: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.post(
+            environment.apiUrl + '/otp/check/' + userId,
+            {token: token},
+            httpOptions)       
+    }
+
     checkEmailToken(userId, data) {
         return new Promise((resolve, reject) => {
             this.http.post(
