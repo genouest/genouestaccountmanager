@@ -11,6 +11,7 @@ const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
 const idsrv = require('../core/id.service.js');
 const usrsrv = require('../core/user.service.js');
+const { resolve } = require('promise');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -167,11 +168,12 @@ async function auth_from_opidor() {
     let response_data = null;
     await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then((response) => {
         response_data = response.data;
+        console.log(response_data);
+        resolve(response_data);
     }, (error) => {
-        return error;
+        resolve(error);
     });
-    console.log(response_data);
-    return response_data;
+    
 }
 
 async function opidor_token_refresh() {
