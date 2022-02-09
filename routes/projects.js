@@ -353,15 +353,15 @@ router.post('/ask/project', async function (req, res) {
     }
 
     if (!req.body.id) {
-        res.status(403).send({'message': 'Project name empty'});
+        res.status(403).send({ 'message': 'Project name empty' });
         return;
     }
-    let p = await dbsrv.mongo_projects().findOne({id: req.body.id});
-    if(p) {
-        res.status(403).send({'message': 'Project already exists'});
+    let p = await dbsrv.mongo_projects().findOne({ id: req.body.id });
+    if (p) {
+        res.status(403).send({ 'message': 'Project already exists' });
         return;
     }
-   
+
 
     try {
         await prjsrv.create_project_request({
@@ -513,7 +513,7 @@ router.get('/project/:id/users', async function (req, res) {
         res.status(404).send({ message: 'User not found' });
         return;
     }
-    
+
 
     if (!user.projects) {
         user.projects = [];
@@ -538,30 +538,26 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     //Keeps only the required data for the project
     // console.log(prjsrv.auth_from_opidor());
     let token = null;
-    prjsrv.opidor_token_refresh().then(response => {
-        console.log("RETURN:");
-        console.log(response);
-        token = response;
-        const options = {
-            headers: {
-                accept: "application/json",
-                Authorization: `Bearer ${token}`
-            }
-        };
-        let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
-        return res.send({ message: 'Dmp found', data: resp.data });
+    let response = await prjsrv.opidor_token_refresh();
 
-    })
-        .catch(error => {
-            return res.send({message: 'ERROR', data: error});
+    console.log('RETURN:');
+    console.log(response);
+    token = response;
+    const options = {
+        headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`
+        }
+    };
+    let resp = { data: 'none' };
+    // let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
+    return res.send({ message: 'Dmp found', data: resp.data });
 
-        });
     // let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJiMDBkYWRiZi1mOGM4LTQyMmYtOWE4MS1hZTc5OGM1Mjc2MTMiLCJleHAiOjE2NDM0NDc1Nzd9.pcKrQwCek8vDfcZbINZbWkJyx-27i4lztHrvMSUg0zw';
 
-    
+
 });
 
 
 router.post;
 module.exports = router;
-"Jeu de données"

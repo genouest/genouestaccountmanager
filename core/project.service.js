@@ -182,6 +182,7 @@ async function opidor_token_refresh() {
     redis_client.get('my:dmp:token', function (err, value) {
         console.log('token found?');
         console.log(value);
+
         if (!value) {
             console.log('no token saved');
             auth_from_opidor().then(response => {
