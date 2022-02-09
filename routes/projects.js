@@ -1,5 +1,3 @@
-import { environment } from '../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
 /* TODO : create a core/project.service.js and move all method in it */
 
 const express = require('express');

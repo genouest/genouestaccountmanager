@@ -200,21 +200,7 @@ export class ProjectsService {
             environment.apiUrl + '/pending/project/' + projectUuid,
             httpOptions
         );
-            
-
-    pingDmpDatabase(): Observable<any> {
-        // let user = this.authService.profile;
-        console.log("pinging")
-        let httpOptions = {
-            //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
-            //}),
-        };
-        return this.http.get(
-            environment.apiUrl + '/dmp/ping/',
-            httpOptions
-        );
-    }
+        }
 
     fetch_dmp(dmpid: string, researchoutputid: string): Observable<any> {
         //Gets DMP data from DMP_Opidor then autofills some info( and will store the data in mongo)
