@@ -47,14 +47,14 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     if (uuid) {
         await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
     }
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({ 'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id, 'logs': [] });
 
     try {
         if (new_project.owner) {
             await usrsrv.add_user_to_project(new_project.id, new_project.owner);
         }
     }
-    catch(error) {
+    catch (error) {
         logger.error(error);
     }
     return new_project;
@@ -79,7 +79,7 @@ async function remove_project(id, action_owner = 'auto') {
 async function update_project(id, project, action_owner = 'auto') {
     logger.info('Update Project ' + id);
     project.expiration_notif = 0;
-    await dbsrv.mongo_projects().updateOne({'id': id},  {'$set': project});
+    await dbsrv.mongo_projects().updateOne({ 'id': id }, { '$set': project });
     let fid = new Date().getTime();
     project.id = id;
     try {
@@ -106,7 +106,7 @@ async function create_project_request(asked_project, user) {
         logs: [],
     });
 
-    let msg_destinations =  [CONFIG.general.accounts, user.email];
+    let msg_destinations = [CONFIG.general.accounts, user.email];
     if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
@@ -147,6 +147,7 @@ async function remove_project_request(uuid, action_owner = 'auto') {
 
 }
 async function auth_from_opidor() {
+    
     const data = {
 
         "grant_type": "client_credentials",
@@ -174,43 +175,47 @@ async function auth_from_opidor() {
 }
 
 async function opidor_token_refresh() {
-    let redis_client = idsrv.redis();
-    console.log('get tokens');
-    let token = '';
-    let expiration = null;
+    return new Promise((resolve) => {
+        let redis_client = idsrv.redis();
+        console.log('get tokens');
+        let token = '';
+        let expiration = null;
 
-    redis_client.get('my:dmp:token', function (err, value) {
-        console.log('token found?');
-        console.log(value);
+        redis_client.get('my:dmp:token', function (err, value) {
+            console.log('token found?');
+            console.log(value);
 
-        if (!value) {
-            console.log('no token saved');
-            auth_from_opidor().then(response => {
-                let resp = response;
-                console.log('auth:');
-                console.log(resp);
-                token = resp.access_token;
-                expiration = resp.expires_in;
+            if (!value) {
+                console.log('no token saved');
+                auth_from_opidor().then(response => {
+                    let resp = response;
+                    console.log('auth:');
+                    console.log(resp);
+                    token = resp.access_token;
+                    expiration = resp.expires_in;
 
-                let current_time = Math.floor((new Date()).getTime() / 1000);
-                let expiration_time = current_time - expiration;
-                redis_client.set('my:dmp:token', token, function (err, reply) {
-                    console.log(reply);
-                    redis_client.expire('my:dmp:token', expiration_time);
+                    let current_time = Math.floor((new Date()).getTime() / 1000);
+                    let expiration_time = current_time - expiration;
+                    redis_client.set('my:dmp:token', token, function (err, reply) {
+                        console.log(reply);
+                        redis_client.expire('my:dmp:token', expiration_time);
+                    });
+                    return token;
                 });
-                return token;
-            });
 
-        }
-        else {
-            console.log('token found!');
-            token = value;
-            return token;
-        }
-        console.log('RETURNING TOKEN:');
-        console.log(token);
-        
+            }
+            else {
+                console.log('token found!');
+                token = value;
+                return token;
+            }
+            console.log('RETURNING TOKEN:');
+            console.log(token);
+
+        });
+        resolve(token);
     });
+
 
 
 }
