@@ -182,8 +182,7 @@ async function opidor_token_refresh() {
     redis_client.get('my:dmp:token', function (err, value) {
         console.log('token found?');
         console.log(value);
-        console.log(err);
-        if (err) {
+        if (!value) {
             console.log('no token saved');
             auth_from_opidor().then(response => {
                 let resp = response;
@@ -198,17 +197,18 @@ async function opidor_token_refresh() {
                     console.log(reply);
                     redis_client.expire('my:dmp:token', expiration_time);
                 });
-
+                return token;
             });
 
         }
         else {
-            console.log("token found!")
+            console.log('token found!');
             token = value;
+            return token;
         }
         console.log('RETURNING TOKEN:');
         console.log(token);
-        return token;
+        
     });
 
 
