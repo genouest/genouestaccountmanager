@@ -70,3 +70,4 @@ exports.mongo_tags = function() {return mongo_tags;};
 exports.mongo_pending_projects = function() {return mongo_pending_projects;};
 exports.mongo_oldusers = function() {return mongo_oldusers;};
 exports.mongo_oldgroups = function() {return mongo_oldgroups;};
+exports.mongo_others = function(coll) { return mongodb.collection(coll);};

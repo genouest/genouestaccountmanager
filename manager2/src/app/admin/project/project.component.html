@@ -2,7 +2,7 @@
     <div class="well">
       <div class="row">
         <div class="col-sm-9">
-          <h4>Project <b>{{project.id}}</b></h4>
+          <h4>Project <strong>{{project.id}}</strong></h4>
           <div *ngIf="dmp_linked" class="dmp-badge status-linked">Project linked to DMP</div>
         </div>
         <div class="col-sm-3" >
@@ -16,7 +16,7 @@
       <div class="card-body">
         <div class="alert alert-danger" *ngIf="prj_err_msg">{{prj_err_msg}}</div>
         <div class="alert alert-info" *ngIf="prj_msg">{{prj_msg}}</div>
-        <form role="form" class="user-form form-horizontal form-register">
+        <form aria-label="project edition form" role="form" class="user-form form-horizontal form-register">
           <div class="form-group row">
             <div class="col-sm-2">
               <label for="update_project_owner">Owner</label>

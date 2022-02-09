@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
+import { ConfigService } from '../config.service'
 import { TpserviceService } from './tpservice.service';
 import { CalendarEventTimesChangedEvent } from 'angular-calendar';
 import { Subject } from 'rxjs';
@@ -12,10 +13,14 @@ import { Subject } from 'rxjs';
 })
 export class TpsComponent implements OnInit {
 
+    config: any
+
     msg: string
     errmsg: string
     resmsg: string
     reserrmsg: string
+
+    session_user: any
 
     viewDate: Date
     events: any
@@ -27,23 +32,27 @@ export class TpsComponent implements OnInit {
     about: string
     authorized: boolean
 
+    group_or_project: string
+    name: string
+
     refresh: Subject<any> = new Subject();
 
     activeDayIsOpen: boolean = true;
 
     constructor(
         private authService: AuthService,
+        private configService: ConfigService,
         private tpService: TpserviceService
     ) { }
 
-    private listEvents(){
+    private listEvents() {
         this.tpService.list().subscribe(
             resp => {
                 let events = [];
-                for(var i = 0;i < resp.length;i++){
+                for (var i = 0; i < resp.length; i++) {
                     let event = resp[i];
                     events.push({
-                        'title': event.owner+', '+ event.quantity+' students',
+                        'title': event.owner + ', ' + event.quantity + ' students',
                         'start': new Date(event.from),
                         'end': new Date(event.to),
                         'allDay': false,
@@ -53,9 +62,11 @@ export class TpsComponent implements OnInit {
                             'quantity': event.quantity,
                             'students': event.accounts,
                             'created': event.created,
+                            'name': event.name,
                             'about': event.about,
                             'over': event.over,
                             'group': event.group,
+                            'project': event.project
                         }
                     });
                 }
@@ -67,12 +78,22 @@ export class TpsComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.configService.config.subscribe(
+            resp => {
+                this.config = resp;
+                this.group_or_project = this.config.reservation.group_or_project;
+
+            },
+            err => console.log('failed to get config')
+        );
         this.fromDate = new Date();
         this.toDate = new Date();
         this.viewDate = new Date();
         this.quantity = 1;
         this.events = [];
-        this.authorized = (this.authService.profile.is_trainer || this.authService.profile.is_admin);
+        this.session_user = this.authService.profile;
+        this.authorized = (this.session_user.is_trainer || this.session_user.is_admin);
+        this.name = 'tps';
         this.listEvents();
     }
 
@@ -91,14 +112,14 @@ export class TpsComponent implements OnInit {
         this.refresh.next();
     }
 
-    reserve(){
+    reserve() {
         this.msg = '';
         this.errmsg = '';
         if (this.quantity <= 0) {
             this.reserrmsg = 'Quantity must be > 0';
             return;
         }
-        if(this.fromDate > this.toDate) {
+        if (this.fromDate > this.toDate) {
             this.reserrmsg = 'Final date must be superior to start date';
             return;
         }
@@ -106,8 +127,11 @@ export class TpsComponent implements OnInit {
             quantity: this.quantity,
             from: new Date(this.fromDate).getTime(),
             to: new Date(this.toDate).getTime(),
-            about: this.about
+            about: this.about,
+            group_or_project: this.group_or_project,
+            name: this.name
         }
+        console.log(reservation);
         this.tpService.reserve(reservation).subscribe(
             resp => {
                 this.msg = resp['message'];
@@ -117,15 +141,38 @@ export class TpsComponent implements OnInit {
         )
     }
 
-    cancel_reservation(){
+    cancel_reservation() {
         this.msg = '';
         this.errmsg = '';
         this.tpService.cancel(this.selectedEvent.id).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
+        this.selectedEvent.over = true;
+        this.listEvents();
     }
 
+    create_reservation() {
+        this.msg = '';
+        this.errmsg = '';
+        this.tpService.create(this.selectedEvent.id).subscribe(
+            resp => this.msg = resp['message'],
+            err => this.errmsg = err.error.message
+        )
+        this.selectedEvent.created = true;
+        this.listEvents();
+    }
+
+    remove_reservation() {
+        this.msg = '';
+        this.errmsg = '';
+        this.tpService.remove(this.selectedEvent.id).subscribe(
+            resp => this.msg = resp['message'],
+            err => this.errmsg = err.error.message
+        )
+        this.selectedEvent.over = true;
+        this.listEvents();
+    }
 
     eventClicked(clickedEvent) {
         let event = clickedEvent.event;
@@ -133,7 +180,7 @@ export class TpsComponent implements OnInit {
         this.selectedEvent.title = event.title;
         this.selectedEvent.start = event.start;
         this.selectedEvent.end = event.end;
-        if (! event.meta.group) {
+        if (!event.meta.group) {
             this.selectedEvent.group = {}
         }
     }
@@ -149,7 +196,7 @@ export class TpsComponent implements OnInit {
     }
 
     get_status(over) {
-        if(over) {
+        if (over) {
             return "panel panel-danger";
         }
         else {

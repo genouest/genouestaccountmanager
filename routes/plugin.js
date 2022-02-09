@@ -76,10 +76,15 @@ router.get('/plugin/:id/:user', async function(req, res) {
         return;
     }
 
+    if(req.params.user != user.uid && !user.is_admin) {
+        res.status(403).send({message: 'Not authorized to get an other user data if not admin...'});
+    }
+
     user.is_admin = isadmin;
 
     let plugins_modules = plgsrv.plugins_modules();
     plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
+        //res.set('Cache-control', 'public, max-age=300');
         res.send(result);
     });
 });
@@ -108,6 +113,9 @@ router.post('/plugin/:id/:user', async function(req, res) {
     }
 
     user.is_admin = isadmin;
+    if(req.params.user != user.uid && !user.is_admin) {
+        res.status(403).send({message: 'Not authorized to update an other user data if not admin...'});
+    }
 
     let plugins_modules = plgsrv.plugins_modules();
     plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){

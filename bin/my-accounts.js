@@ -10,6 +10,7 @@ const filer = require('../core/file.js');
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const cfgsrv = require('../core/config.service.js');
+const usrv = require('../core/user.service.js');
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
 
@@ -60,7 +61,7 @@ program
                 process.exit(1);                
             }
 
-            let new_password = Math.random().toString(36).slice(-10);
+            let new_password = usrv.new_password(8);
             user.password = new_password;
             let fid = new Date().getTime();
             try {

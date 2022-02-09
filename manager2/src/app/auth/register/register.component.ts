@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/user/user.service';
 import { ConfigService } from 'src/app/config.service';
+import { AuthService } from 'src/app/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import * as latinize from 'latinize'
@@ -33,7 +34,14 @@ export class RegisterComponent implements OnInit {
 
     agree: boolean
 
+    send_copy_to_support: boolean
+    create_imap_mailbox: boolean
+    is_fake: boolean
+
+    session_user: any
+
     constructor(
+        private authService: AuthService,
         private userService: UserService,
         private configService: ConfigService,
         private http: HttpClient,
@@ -41,6 +49,7 @@ export class RegisterComponent implements OnInit {
     ) { }
 
     ngOnInit() {
+        this.session_user = this.authService.profile;
         this.onExtraValue = this.onExtraValue.bind(this)
         this.configService.config.subscribe(
             resp => {
@@ -56,6 +65,9 @@ export class RegisterComponent implements OnInit {
             resp => this.ip = resp['ip'],
             err => this.ip = '127.0.0.1'
         )
+        this.send_copy_to_support = false;
+        this.create_imap_mailbox = false;
+        this.is_fake = false;
     }
 
     onExtraValue(extras: any) {
@@ -112,6 +124,9 @@ export class RegisterComponent implements OnInit {
             responsible: this.responsible,
             team: this.team,
             email: this.email,
+            send_copy_to_support: this.send_copy_to_support,
+            create_imap_mailbox: this.create_imap_mailbox,
+            is_fake: this.is_fake,
             ip: this.ip,
             duration: this.duration,
             why: this.why,

@@ -1,3 +1,5 @@
+import { environment } from '../environments/environment';
+import { HttpClient, HttpParams } from '@angular/common/http';
 /* TODO : create a core/project.service.js and move all method in it */
 
 const express = require('express');
@@ -352,6 +354,17 @@ router.post('/ask/project', async function (req, res) {
         return;
     }
 
+    if (!req.body.id) {
+        res.status(403).send({'message': 'Project name empty'});
+        return;
+    }
+    let p = await dbsrv.mongo_projects().findOne({id: req.body.id});
+    if(p) {
+        res.status(403).send({'message': 'Project already exists'});
+        return;
+    }
+   
+
     try {
         await prjsrv.create_project_request({
             'id': req.body.id,
@@ -502,6 +515,7 @@ router.get('/project/:id/users', async function (req, res) {
         res.status(404).send({ message: 'User not found' });
         return;
     }
+    
 
     if (!user.projects) {
         user.projects = [];

@@ -33,6 +33,24 @@
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
  },
+ "registration": [
+    {
+     "title": "first choice",
+     "description": "this is truc and bla bla bla",
+     "choices": [["c1","choice1"], ["c2", "choice2"], ["c3", "choice3"]],
+     "multiple": true
+    },
+    {
+    "title": "second choice",
+    "choices": [["c4", "choice4"], ["c5", "choice5"], ["c6", "choice6"]],
+    "multiple": false
+    },
+    {
+      "title": "extra data",
+      "choices": [["cc4", "choice4"], ["cc5", "choice5"], ["cc6", "choice6"]],
+      "multiple": false
+    }
+ ],
  "enable_ui": {
      "messages": true,
      "databases": true,
@@ -48,6 +66,10 @@
      "default_size": 500,
      "default_path": "/opt/project",
      "default_expire": 360
+ },
+ "reservation": {
+   "group_or_project": "group",
+   "show_choice_in_ui": false
  },
  "usage": [
  ],
@@ -92,6 +114,10 @@
     "admin_dn": "dc=my,dc=org",
     "admin_password": "my",
     "team" : "genouest"
+  },
+  "dmp": {
+    "client_id": "id",
+    "client_secret": "secret"
   },
   "mysql": {
     "host": "mysql",

@@ -1,11 +1,11 @@
 <div class="well">
   <div class="row">
       <div class="col-sm-6">
-          <h2><b>{{user.uid}}</b>
+          <h2>{{user.uid}}</h2>
           <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
-           -
-           <small>Expires: {{date_convert(user.expiration)}}</small></h2>
+          <div *ngIf="user && user.created_at"><small>Created at : {{date_convert(user.created_at)}}</small></div>
+          <div><small>Expires: {{date_convert(user.expiration)}}</small></div>
           <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
       </div>
       <div class="col-sm-6">
@@ -64,7 +64,7 @@
           </div>
           <div class="card-body">
               <div class="user-information">
-                  <form role="form" class="user-form form-horizontal form-register">
+                  <form aria-label="user information" role="form" class="user-form form-horizontal form-register">
                       <div class="form-group row">
                           <label for="firstname" class="col-4 col-form-label">First name</label>
                           <div class="col-6">
@@ -175,15 +175,22 @@
                           <div class="form-check row">
                                 <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
                               <label class="col-6 form-check-label">
-                                  Fake/internal account
+                                  Fake/App account
                               </label>
                           </div>
                           <div class="form-check row">
-                                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
                               <label class="col-6 form-check-label">
                                   Trainer account
                               </label>
                           </div>
+                          <div class="form-check row">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.send_copy_to_support" type="checkbox" class="form-check-input">
+                              <label class="col-6 form-check-label">
+                                  Copy mail to Support Team
+                              </label>
+                          </div>
+
                       </div>
 
                       <div *ngIf="! session_user.is_admin">
@@ -254,9 +261,17 @@
             <h4>Authentication</h4>
         </div>
         <div class="card-body">
-            <span *ngIf="user.u2f.publicKey" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> U2F</span>
-            <button *ngIf="! user.u2f.publicKey" class="btn btn-primary" (click)="register_u2f()">Register U2F key</button>
-            <span *ngIf="u2f">{{u2f}}</span>
+            <div class="row">
+                <div class="col-sm-12" style="margin-bottom: 10px">
+                    <span *ngIf="user.u2f.key" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
+                    <button class="btn btn-primary btn-sm" (click)="register_u2f()">Register new key</button>
+                    <span *ngIf="u2f">{{u2f}}</span>
+                </div>
+                <div class="col-sm-12">
+                    <button class="btn btn-primary btn-sm" (click)="register_otp()">Register OTP</button>
+                    <img alt={{secret}} *ngIf="otp" src={{otp}}/>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card bg-light">
@@ -334,9 +349,9 @@
             </div>
             <hr/>
             <div class="table-responsive">
-                <table *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
+                <table aria-label="secondary groups" *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
                     <thead>
-                        <th>Name</th><th></th>
+                        <th scope="col">Name</th><th scope="col"></th>
                     </thead>
                     <tbody>
                         <tr *ngFor="let secondarygroup of user.secondarygroups">
@@ -392,9 +407,9 @@
                     </div>
 
                 <div class="table-responsive">
-                    <table *ngIf="databases && databases.length > 0" class="table table-striped">
+                    <table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
                         <thead>
-                            <th>Name</th><th></th>
+                            <th scope="col">Name</th><th scope="col"></th>
                         </thead>
                         <tbody>
                             <tr *ngFor="let db of databases">
@@ -421,7 +436,7 @@
                         </button>
                     </div>
                     <div>
-                        <form role="form" class="user-form form-inline">
+                        <form aria-label="ssh key" role="form" class="user-form form-inline">
                             <div class="form-group">
                                 <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
                             </div>
@@ -493,9 +508,9 @@
                         <div>
                             <hr/>
                             <div class="table-responsive">
-                                <table *ngIf="websites && websites.length > 0" class="table table-striped">
+                                <table aria-label="web sites" *ngIf="websites && websites.length > 0" class="table table-striped">
                                     <thead>
-                                        <th>Name</th><th>Url</th><th>Description</th><th></th>
+                                        <th scope="col">Name</th><th scope="col">Url</th><th scope="col">Description</th><th scope="col"></th>
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let site of websites">

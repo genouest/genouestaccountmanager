@@ -3,7 +3,7 @@ const Promise = require('promise');
 
 const CONFIG = require('config');
 
-const tps = require('../routes/tp.js');
+const tpssrv = require('../core/tps.service.js');
 
 const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
@@ -39,19 +39,9 @@ dbsrv.init_db().then(()=>{
         Promise.all(reservations.map(function(reservation){
             console.log('[INFO] Delete accounts for reservation', reservation);
             console.log('[INFO] Reservation expired at ', new Date(reservation.to));
-            Promise.all(reservation.accounts.map(function(user){
-                return dbsrv.mongo_users().findOne({'uid': user});
-            })).then(function(users){
-                return tps.delete_tp_users(users, reservation.group, 'auto');
-            }).then(function(){
-                console.log('[INFO] close reservation', reservations);
-                Promise.all(reservations.map(function(reservation){
-                    dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
-                    return dbsrv.mongo_reservations().updateOne({'_id': reservation._id},{'$set': {'over': true}});
-                })).then(function(){
-                    process.exit(0);
-                });
-            });
-        }));
+            return tpssrv.remove_tp_reservation(reservation._id);
+        })).then(function(){
+            process.exit(0);
+        });
     });
 });

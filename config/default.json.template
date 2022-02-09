@@ -25,6 +25,7 @@
     "usage_directory": "/tmp",
     "home": "/home",
     "use_group_in_path": true,
+    "never_update_user_home": false,
     "main_groups": [""],
     "default_main_group": "",
     "mailer" : "gomail",
@@ -50,6 +51,9 @@
             "series": "goacct.fixed.disk.panasas-omaha.*.user.#USER#"
         }
     },
+    "send_expiration_notif_to_admin": true,
+    "disable_auto_expiration": false,
+    "limit_expire_mail": 3,
     "plugin_script_dir": "/tmp/scripts",
     "user_extra_dirs": []
   },
@@ -69,6 +73,10 @@
      "default_size": 500,
      "default_path": "/opt/project",
      "default_expire": 360
+  },
+  "reservation": {
+      "group_or_project": "group",
+      "show_choice_in_ui": false
   },
   "rabbitmq": {
     "url": "amqp://localhost",
@@ -91,6 +99,7 @@
     "port": 27017
   },
   "ldap": {
+    "crypt": false,
     "host": "localhost",
     "dn": "dc=nodomain",
     "admin_cn": "cn=admin",
@@ -314,7 +323,7 @@
       "<p>Cpu needed: #CPU# Hour</p>",
       "<p>Entity: #ORGA#</p>",
       "<p>Description: #DESC#</p>",
-      "<p>Please review it, and keep #UID# inform</p>"
+      "<p>Please review it, and keep #UID# informed</p>"
     ],
     "ask_project_user": [
       "#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My"

@@ -1,4 +1,5 @@
-FROM quay.io/osallou/node:12-buster
+#FROM quay.io/osallou/node:12-bullseye
+FROM quay.io/osallou/node:16.13-buster
 COPY manager2 /root/genouestaccountmanager/manager2
 RUN npm install -g @angular/cli@10.2.0
 ARG APIURL
@@ -10,7 +11,7 @@ RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentr
 RUN cd /root/genouestaccountmanager/manager2 && npm ci && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules && rm -f dist/my-ui/*.gz &&  npm run compress || true
 
 
-FROM quay.io/osallou/node:12-buster
+FROM quay.io/osallou/node:16.13-buster
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools
 COPY cron/gomngr.sh /opt/gomngr.sh
 

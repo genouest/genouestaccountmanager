@@ -200,7 +200,7 @@ export class ProjectsService {
             environment.apiUrl + '/pending/project/' + projectUuid,
             httpOptions
         );
-    }
+            
 
     pingDmpDatabase(): Observable<any> {
         // let user = this.authService.profile;
