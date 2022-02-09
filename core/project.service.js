@@ -200,20 +200,18 @@ async function opidor_token_refresh() {
                         console.log(reply);
                         redis_client.expire('my:dmp:token', expiration_time);
                     });
-                    return token;
                 });
-
+                resolve(token);
             }
             else {
                 console.log('token found!');
                 token = value;
-                return token;
+                resolve(token);
             }
             console.log('RETURNING TOKEN:');
             console.log(token);
 
         });
-        resolve(token);
     });
 
 
