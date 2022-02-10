@@ -33,7 +33,7 @@
             <ng-template pTemplate="body" let-web>
                   <tr>
                     <td><span class="label label-primary">{{web.name}}</span></td>
-                    <td><a [routerLink]="['/user', {id: web.owner}]"><span class="label label-primary">{{web.owner}}</span></a></td>
+                    <td><a routerLink="/user/{{web.owner}}"><span class="label label-primary">{{web.owner}}</span></a></td>
                     <td>{{web.url}}</td>
                     <td>{{web.description}}</td>
                     <td></td>
