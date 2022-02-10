@@ -218,7 +218,7 @@ async function opidor_token_refresh() {
     let token = await is_token_stored();
     await auth_from_opidor(token).then(answer => {
         save_token(answer.access_token, answer.expires_in);
-        return (answer);
+        resolve(answer);
 
     }
 
