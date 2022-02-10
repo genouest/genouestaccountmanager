@@ -148,7 +148,11 @@ async function remove_project_request(uuid, action_owner = 'auto') {
     }
 
 }
-async function auth_from_opidor() {
+async function auth_from_opidor(token) {
+    if (token != null) {
+        resolve(token)
+    }
+
     const data = {
 
         "grant_type": "client_credentials",
@@ -186,7 +190,7 @@ async function request_DMP(dmpid, research_output) {
         };
         resp = { data: 'none' };
         // let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
-        return res.send({ message: 'Dmp found', data: resp.data })
+        resolve(resp.data)
 });
 }
 async function is_token_stored() {
@@ -210,21 +214,17 @@ async function save_token(token, expiration) {
 
 }
 async function opidor_token_refresh() {
-    await is_token_stored().then(token => {
-        if (!token) {
-            await auth_from_opidor().then(answer => {
+
+    let token = await is_token_stored()
+    await auth_from_opidor(token).then(answer => {
                 save_token(answer.access_token, answer.expires_in)
                 return (answer);
 
-            });
         }
-        else {
-            return token;
+    
 
-        }
-
-    });
-
+    );
+}
 
 
     //     let redis_client = idsrv.redis();
