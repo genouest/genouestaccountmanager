@@ -113,6 +113,8 @@
     "password": "XXX"
   },
   "nodemailer": {
+     "host": "",
+     "port": "",
      "prefix": "",
      "origin": "",
      "smtp": "",
@@ -124,11 +126,12 @@
      }
   },
   "listmonk": {
-         "host": "https://lists.genouest.org",
-         "user": "listmonk",
-         "password": "XXXXXXX",
-         "optin": ["genouest-com", "genouest-system"]
-         "optout": ["genouest-com"]
+      "origin": "",
+      "host": "",
+      "user": "listmonk",
+      "password": "XXXXXXX",
+      "optin": ["listmandatory", "listopt"],
+      "optout": ["listopt"]
   },
   "gomail": {
     "host": "",

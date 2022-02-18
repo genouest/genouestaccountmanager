@@ -320,7 +320,7 @@ module.exports = {
         }
 
         
-        let ok = await quit_list(user, CONFIG.gomail.optout);
+        let ok = await quit_list(user, CONFIG.listmonk.optout);
         if (ok) {
             dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'remove ' + email + ' from mailing list ' + CONFIG.listmonk.optout.join(',') , 'logs': []});
         } else {
