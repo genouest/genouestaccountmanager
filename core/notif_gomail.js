@@ -198,7 +198,7 @@ module.exports = {
 
     sendList: async function(mailing_list, mailOptions) {
         try {
-            await axios.post('/mail/' + mailing_list), mailOptions;
+            await axios.post('/mail/' + mailing_list, mailOptions);
             return ('', true);
         } catch(err) {
             logger.error('Failed to send mail : ' + err);

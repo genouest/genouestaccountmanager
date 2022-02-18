@@ -108,8 +108,7 @@ module.exports = {
             }
             let user = await dbsrv.mongo_users().findOne({email: email});
             if(!user) {
-                logger.error('User does not exist', email);
-                return;
+                logger.warn('User does not exist', email);
             }
             transporter.sendMail({
                 from: CONFIG.nodemailer.origin,

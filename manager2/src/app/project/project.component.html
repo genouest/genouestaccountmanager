@@ -5,7 +5,7 @@
         <h3>Request a new project creation</h3>
       </div>
 
-      <form role="form" class="user-form form-horizonal">
+      <form aria-label="project creation request form" role="form" class="user-form form-horizonal">
 
         <div class="modal-body">
           <div class="form-group row col-sm-8">
@@ -13,7 +13,7 @@
               <span style="color:red">(required)&nbsp;</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat several projects, it is quite possible for you to request more project spaces.</i></small>
           </div>
 
@@ -34,12 +34,12 @@
               <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
             </label>
             <input placeholder="Ex : CNRS" type="text" id="new_project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
-            <small id="orgaHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+            <small id="orgaHelp" class="form-text text-muted"><em>Optional, for information only</em></small>
           </div>
 
           <div class="form-group row col-sm-12">
             <label for="new_project_description">Description</label>
-            <textarea placeholder="A short description for the project" rows="2" id="new_project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
+            <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
           </div>
 
         </div>
@@ -68,7 +68,15 @@
                       [rows]="10"
                       [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
+                      [globalFilterFields]="['id','owner']"
+                      [filterDelay]="0"
           >
+              <ng-template pTemplate="caption">
+                  <span class="p-input-icon-right">
+                      <i class="pi pi-search"></i>
+                      <input pInputText id="search_projects" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Search" />
+                  </span>
+              </ng-template>
             <ng-template pTemplate="header">
               <tr>
                 <th>Project</th>
@@ -88,8 +96,20 @@
                 <td>{{project.owner}}</td>
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
-                <td>{{project.size}}</td>
-                <td>{{project.cpu}}</td>
+                <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
+                    <meter *ngIf="project.current_size"
+                        min="0" max="{{project.size}}"
+                        optimum="0" low="{{project.low_size}}" high="{{project.high_size}}"
+                        value="{{project.current_size}}">
+                    </meter>
+                </td>
+                <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&#47;</span>{{project.cpu}}
+                    <meter *ngIf="project.current_cpu"
+                        min="0" max="{{project.cpu}}"
+                        optimum="0" low="{{project.low_cpu}}" high="{{project.high_cpu}}"
+                        value="{{project.current_cpu}}">
+                    </meter>
+                </td>
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
                 <td>
@@ -177,13 +197,25 @@
                 <td><b>Size</b>&nbsp;
                     <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
                 </td>
-                <td>{{selectedProject.size}} GB</td>
+                <td><span *ngIf="selectedProject.current_size">{{selectedProject.current_size}}&#47;</span>{{selectedProject.size}} GB
+                    <meter *ngIf="selectedProject.current_size"
+                        min="0" max="{{selectedProject.size}}"
+                        optimum="0" low="{{selectedProject.low_size}}" high="{{selectedProject.high_size}}"
+                        value="{{selectedProject.current_size}}">
+                    </meter>
+                </td>
             </tr>
             <tr>
                 <td><b>Cpu</b>&nbsp;
                     <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
                 </td>
-                <td>{{selectedProject.cpu}} Hour</td>
+                <td><span *ngIf="selectedProject.current_cpu">{{selectedProject.current_cpu}}&#47;</span>{{selectedProject.cpu}} Hour
+                    <meter *ngIf="selectedProject.current_cpu"
+                        min="0" max="{{selectedProject.cpu}}"
+                        optimum="0" low="{{selectedProject.low_cpu}}" high="{{selectedProject.high_cpu}}"
+                        value="{{selectedProject.current_cpu}}">
+                    </meter>
+                </td>
             </tr>
             <tr>
               <td><b>Creation</b>&nbsp;

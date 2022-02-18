@@ -112,7 +112,7 @@ export class PopulateHomePluginComponent extends BasePluginComponent implements 
 <div *ngIf="loading">Loading...</div>
 <table *ngIf="data" class="table table-striped ng-scope">
 <tr><th>Namespace</th><th>Used</th><th>Max</th></tr>
-<tr *ngFor="let quota of data.quotas">
+<tr [ngClass]="(data.error || data.warning) ? 'label label-warning': ''" *ngFor="let quota of data.quotas">
 <td>{{quota.name}}</td>
 <td>{{quota.value | number: '1.0-2'}} G</td>
 <td>{{quota.max | number: '1.0-2'}} G</td>

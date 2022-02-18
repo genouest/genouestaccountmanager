@@ -143,12 +143,18 @@ router.post('/web/:id', async function(req, res) {
         return;
     }
 
+    if(! sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Web site name must be alphanumeric only'});
+        return;
+    }
+
     session_user.is_admin = isadmin;
 
     let owner = session_user.uid;
     if(req.body.owner !== undefined && session_user.is_admin) {
         owner = req.body.owner;
     }
+
     let web = {
         owner: owner,
         name: req.params.id,

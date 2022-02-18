@@ -24,7 +24,7 @@ fi
 MYDIR=""
 if [ -z $GOMNGRSCRIPTDIR ]; then
     MYDIR="/opt/my/scripts"
-    echo "No GOMNGRSCRIPTDIR given, using default $MYDIR" 
+    echo "No GOMNGRSCRIPTDIR given, using default $MYDIR"
 else
     MYDIR=$GOMNGRSCRIPTDIR
 fi
@@ -52,6 +52,11 @@ TOMORROW=`date --date="1 day 05:00:00" +%s`
 NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00" +%s`
 
 while true; do
+
+  if [ -e $MYDIR/gomngr.exit ]; then
+    echo "Found $MYDIR/gomngr.exit, exiting on user request"
+    exit 1
+  fi
 
   NBFILES=0
   NOW=`date +%s`
@@ -105,14 +110,14 @@ while true; do
   if [ $NOW -gt $NEXTMONTH ]; then
     echo "${NOW}: time for monthly tasks"
     NEXTMONTH=`date --date="$(date +'%Y-%m-01') + 1 month 05:00:00" +%s`
-    echo "Check for account upcoming expiration"
-    /opt/crontask.sh test_expiration
-    if [ $EXIT_REQUEST -eq 1 ]; then
-      rm /tmp/gomngr.lock
-      rm /tmp/gomngr.list
-      echo "Exit requested"
-      exit 0
-    fi
+    #echo "Check for account upcoming expiration"
+    #/opt/crontask.sh test_expiration
+    #if [ $EXIT_REQUEST -eq 1 ]; then
+    #  rm /tmp/gomngr.lock
+    #  rm /tmp/gomngr.list
+    #  echo "Exit requested"
+    #  exit 0
+    #fi
     echo "Check for account expiration"
     /opt/crontask.sh expire
     if [ $EXIT_REQUEST -eq 1 ]; then
@@ -123,8 +128,10 @@ while true; do
     fi
   fi
   if [ $NOW -gt $TOMORROW ]; then
-    echo "Check for reservation removal"
+    echo "${NOW}: time for daily tasks"
     TOMORROW=`date --date="1 day 05:00:00" +%s`
+
+    echo "Check for reservation removal"
     /opt/crontask.sh reservation_remove
     if [ $EXIT_REQUEST -eq 1 ]; then
       rm /tmp/gomngr.lock
@@ -140,8 +147,24 @@ while true; do
       echo "Exit requested"
       exit 0
     fi
+    echo "Check for account upcoming expiration"
+    /opt/crontask.sh test_expiration
+    if [ $EXIT_REQUEST -eq 1 ]; then
+        rm /tmp/gomngr.lock
+        rm /tmp/gomngr.list
+        echo "Exit requested"
+        exit 0
+    fi
+    echo "Check for project upcoming expiration"
+    /opt/crontask.sh test_projects
+    if [ $EXIT_REQUEST -eq 1 ]; then
+        rm /tmp/gomngr.lock
+        rm /tmp/gomngr.list
+        echo "Exit requested"
+        exit 0
+    fi
   fi
-  
+
   ARCHIVE="${GOMNGRARCHIVEDIR:-/opt/my/archive}"
   echo "Archive old script to $ARCHIVE"
 
