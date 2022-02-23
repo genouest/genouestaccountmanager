@@ -987,7 +987,7 @@ router.get('/user/:id/expire', async function(req, res){
             return;
         }
 
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user expired by ' + session_user.uid , 'logs': [user.uid + '.' + fid + '.update']});
 
         // Now remove from mailing list
         try {
@@ -1303,7 +1303,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
 
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await dbsrv.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user reactivated by ' + session_user.uid , 'logs': [user.uid + '.' + fid + '.update']});
 
 
         try {
@@ -1386,6 +1386,10 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
     let key = req.body.ssh;
+    if(!key) {
+        res.status(403).send({message: 'Invalid SSH Key'});
+        return;
+    }
     // Remove carriage returns if any
     // Escape some special chars for security
     user.ssh = key.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
