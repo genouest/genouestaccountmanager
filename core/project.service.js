@@ -19,9 +19,9 @@ exports.create_project = create_project;
 exports.remove_project = remove_project;
 exports.update_project = update_project;
 exports.create_project_request = create_project_request;
-exports.remove_project_request = remove_project_request;
-exports.auth_from_opidor = auth_from_opidor;
-exports.opidor_token_refresh = opidor_token_refresh;
+// exports.remove_project_request = remove_project_request;
+// exports.auth_from_opidor = auth_from_opidor;
+// exports.opidor_token_refresh = opidor_token_refresh;
 exports.request_DMP = request_DMP;
 
 async function create_project(new_project, uuid, action_owner = 'auto') {
