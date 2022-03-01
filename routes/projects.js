@@ -533,7 +533,7 @@ router.get('/project/:id/users', async function (req, res) {
 router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     let plan_id = req.params.planid;
     let research_output_id = req.params.researchoutputid;
-    res.send({message:'DMP found', data: prjsrv.request_DMP(plan_id,research_output_id)});
+    res.send({message:'DMP found', data: await prjsrv.request_DMP(plan_id,research_output_id)});
     //request to DMP opidor API to get all of the DMP with a json format
     //
     //Keeps only the required data for the project
