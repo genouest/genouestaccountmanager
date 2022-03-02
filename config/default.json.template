@@ -391,7 +391,7 @@
       ]
   },
   "plugins": [
-    {"name": "test", "display_name": "for testing", "admin_only": false, "admin": false}
+    {"name": "test", "display_name": "for testing", "admin_only": false, "admin": false, "allow_fake": true}
   ],
   "plugin_config" : {
     "test": {
