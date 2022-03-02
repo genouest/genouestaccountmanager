@@ -39,6 +39,9 @@ exports.run_plugins = async (method, userId, data, adminId) => {
     let error = false;
     for (let i=0; i < plugins_info.length; i++) {
         let plugin_info = plugins_info[i];
+        if(plugin_info.allow_fake === false && data && data.is_fake) {
+            logger.info(`[plugins][plugin=${plugin_info.name}] skipping, user is fake and fake not allowed`);
+        }
         try {
             logger.info(`[plugins][plugin=${plugin_info.name}] run`);
             if (plugins_modules[plugin_info.name][method] === undefined) {

@@ -1049,6 +1049,13 @@ router.post('/user/:id/passwordreset', async function(req, res){
         res.end();
         return;
     }
+
+    if(user.is_fake){
+        res.status(403).send({message: 'Password reset not allowed for fake accounts'});
+        res.end();
+        return;
+    }
+
     user.password=req.body.password;
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
     let fid = new Date().getTime();
