@@ -1050,12 +1050,6 @@ router.post('/user/:id/passwordreset', async function(req, res){
         return;
     }
 
-    if(user.is_fake){
-        res.status(403).send({message: 'Password reset not allowed for fake accounts'});
-        res.end();
-        return;
-    }
-
     user.password=req.body.password;
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
     let fid = new Date().getTime();
@@ -1097,6 +1091,12 @@ router.get('/user/:id/passwordreset', async function(req, res){
     }
     if(user.status != STATUS_ACTIVE){
         res.status(401).send({message: 'Your account is not active'});
+        res.end();
+        return;
+    }
+
+    if(user.is_fake){
+        res.status(403).send({message: 'Password reset not allowed for fake accounts'});
         res.end();
         return;
     }

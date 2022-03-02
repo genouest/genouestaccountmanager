@@ -124,10 +124,10 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             users.push(user);
             startnbr++;
 
-            // TODO: find if we need to check the switch flag or if it is better to check the var
+            /*
             if (groupName != '') {
                 await usrsrv.add_user_to_group(user.uid, userGroup.name);
-            }
+            }*/
 
             if (projectName != '') {
                 await usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
