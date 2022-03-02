@@ -320,7 +320,7 @@
     ]
     },
     "plugins": [
-      {"name": "test", "display_name": "Test", "admin": false},
+      {"name": "test", "display_name": "Test", "admin": false, "allow_fake": true},
       {"name": "amqp", "display_name": "RabbitMQ", "admin": false}
     ],
     "plugin_config" : {
