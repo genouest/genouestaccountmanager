@@ -353,15 +353,15 @@ router.post('/ask/project', async function (req, res) {
     }
 
     if (!req.body.id) {
-        res.status(403).send({'message': 'Project name empty'});
+        res.status(403).send({ 'message': 'Project name empty' });
         return;
     }
-    let p = await dbsrv.mongo_projects().findOne({id: req.body.id});
-    if(p) {
-        res.status(403).send({'message': 'Project already exists'});
+    let p = await dbsrv.mongo_projects().findOne({ id: req.body.id });
+    if (p) {
+        res.status(403).send({ 'message': 'Project already exists' });
         return;
     }
-   
+
 
     try {
         await prjsrv.create_project_request({
@@ -513,7 +513,7 @@ router.get('/project/:id/users', async function (req, res) {
         res.status(404).send({ message: 'User not found' });
         return;
     }
-    
+
 
     if (!user.projects) {
         user.projects = [];
@@ -533,8 +533,11 @@ router.get('/project/:id/users', async function (req, res) {
 router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     let plan_id = req.params.planid;
     let research_output_id = req.params.researchoutputid;
-    let data = await prjsrv.request_DMP(plan_id,research_output_id);
-    res.send({message:'DMP found', data: data} );
+    prjsrv.request_DMP(plan_id, research_output_id).then(response => {
+        console.log('returning info:');
+        res.send({ message: 'DMP found', data: response });
+    });
+
     //request to DMP opidor API to get all of the DMP with a json format
     //
     //Keeps only the required data for the project
@@ -561,7 +564,7 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     //     });
     // // let token = 'eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOiJiMDBkYWRiZi1mOGM4LTQyMmYtOWE4MS1hZTc5OGM1Mjc2MTMiLCJleHAiOjE2NDM0NDc1Nzd9.pcKrQwCek8vDfcZbINZbWkJyx-27i4lztHrvMSUg0zw';
 
-    
+
 });
 
 
