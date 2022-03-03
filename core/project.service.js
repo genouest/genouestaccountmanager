@@ -184,10 +184,10 @@ async function request_DMP(dmpid, research_output) {
 
     let redis_client = idsrv.redis();
     console.log('get token');
-    let token = await redis_client.get('my:dmp:token', function (err, value) {
+    redis_client.get('my:dmp:token', function (err, value) {
         console.log(value);
         if (value != null) {
-            return token;
+            return value;
         }
 
         const data = {
@@ -211,7 +211,7 @@ async function request_DMP(dmpid, research_output) {
             response_data = response.data;
             console.log('auth answer:');
             console.log(response_data);
-            token = response_data.access_token;
+            let token = response_data.access_token;
             let expiration = response_data.expires_in;
 
             let current_time = Math.floor((new Date()).getTime() / 1000);
@@ -232,7 +232,7 @@ async function request_DMP(dmpid, research_output) {
             let resp = { data: 'none' };
             // let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
 
-            return resp;
+            resolve(resp);
 
         });
 
