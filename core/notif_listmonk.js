@@ -118,6 +118,10 @@ async function join_list(user, lists) {
         await axios.put(`/api/subscribers/${user.id}`, user, {
             auth: auth,
         });
+        // ask for optin
+        await axios.post(`/api/subscribers/${user.id}/optin`, {}, {
+            auth: auth,
+        });
     } catch(err) {
         console.error('[join_list] error', err.response.data);
         return false;   
