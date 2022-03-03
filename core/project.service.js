@@ -184,7 +184,7 @@ async function request_DMP(dmpid, research_output) {
 
     let redis_client = idsrv.redis();
     console.log('get token');
-    redis_client.get('my:dmp:token', function (err, value) {
+    let token = await redis_client.get('my:dmp:token', function (err, value) {
         console.log(value);
         if (value != null) {
             return value;
@@ -229,14 +229,15 @@ async function request_DMP(dmpid, research_output) {
                     Authorization: `Bearer ${token}`
                 }
             };
-            let resp = { data: 'none' };
+            
             // let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
 
-            resolve(resp);
+            return token;
 
         });
 
     });
+    return token;
 }
     // }).then(async function (token) {
     //     console.log(token);
