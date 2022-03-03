@@ -265,6 +265,7 @@ async function create_tp_reservation(reservation_id) {
     let gpname = '';
     let newGroup;
     if (reservation.group_or_project == 'group') {
+        trainingName = CONFIG.tp.prefix ? CONFIG.tp.prefix + '_' +  trainingName : trainingName;
         logger.info('Create Group', trainingName);
         newGroup = await createExtraGroup(trainingName, reservation.owner);
         gpname = newGroup.name;

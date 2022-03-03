@@ -15,6 +15,12 @@ then
 fi
 
 {% include "user/delete_extra_dirs.sh" %}
+
+# Check if parent dir is empty
+groupdir="$(dirname "{{ user.home }}")"
+# Delete group dir if empty
+find $groupdir -maxdepth 0 -empty -exec rmdir {} \;
+
 # delete_user.sh
 
 echo "End delete_user.sh in $0 ..."
