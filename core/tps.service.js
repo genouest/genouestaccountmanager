@@ -16,6 +16,8 @@ const idsrv = require('../core/id.service.js');
 const maisrv = require('../core/mail.service.js');
 const grpsrv = require('../core/group.service.js');
 const prjsrv = require('../core/project.service.js');
+const plgsrv = require('../core/plugin.service.js');
+
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -124,13 +126,20 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             users.push(user);
             startnbr++;
 
-            // TODO: find if we need to check the switch flag or if it is better to check the var
+            /*
             if (groupName != '') {
                 await usrsrv.add_user_to_group(user.uid, userGroup.name);
             }
+            */
 
             if (projectName != '') {
                 await usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
+            }
+
+            try {
+                await plgsrv.run_plugins('activate', user.uid, user, 'auto');
+            } catch(err) {
+                logger.error('activation errors', err);
             }
 
         }

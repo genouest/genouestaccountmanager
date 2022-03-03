@@ -987,7 +987,7 @@ router.get('/user/:id/expire', async function(req, res){
             return;
         }
 
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user expiration:' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'user expired by ' + session_user.uid , 'logs': [user.uid + '.' + fid + '.update']});
 
         // Now remove from mailing list
         try {
@@ -1049,6 +1049,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
         res.end();
         return;
     }
+
     user.password=req.body.password;
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'user ' + req.params.id + ' password update request', 'logs': []});
     let fid = new Date().getTime();
@@ -1090,6 +1091,12 @@ router.get('/user/:id/passwordreset', async function(req, res){
     }
     if(user.status != STATUS_ACTIVE){
         res.status(401).send({message: 'Your account is not active'});
+        res.end();
+        return;
+    }
+
+    if(user.is_fake){
+        res.status(403).send({message: 'Password reset not allowed for fake accounts'});
         res.end();
         return;
     }
@@ -1303,7 +1310,7 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
 
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'Reactivate user ' + req.params.id , 'logs': [user.uid + '.' + fid + '.update']});
+        await dbsrv.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'user reactivated by ' + session_user.uid , 'logs': [user.uid + '.' + fid + '.update']});
 
 
         try {
@@ -1386,6 +1393,10 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
     let key = req.body.ssh;
+    if(!key) {
+        res.status(403).send({message: 'Invalid SSH Key'});
+        return;
+    }
     // Remove carriage returns if any
     // Escape some special chars for security
     user.ssh = key.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g,'\\$1');
