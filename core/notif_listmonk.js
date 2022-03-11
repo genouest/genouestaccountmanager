@@ -9,10 +9,15 @@ let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
 
 const dbsrv = require('../core/db.service.js');
+const https = require('https');
 
 var mail_set = false;
 
 var transporter = null;
+
+const listMonkAgent = new https.Agent({  
+    rejectUnauthorized: CONFIG.listmonk.force_tls ? true : false
+});
 
 if(CONFIG.nodemailer){
     transporter = nodemailer.createTransport({
@@ -26,13 +31,6 @@ let auth = {};
 
 if(CONFIG.listmonk && CONFIG.listmonk.host && CONFIG.listmonk.host !== 'fake' && CONFIG.listmonk.optin){
     mail_set = true;
-    axios.defaults.baseURL = CONFIG.listmonk.host;
-    axios.defaults.headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-
-    };
-    axios.defaults.timeout = 1500;
     auth = {
         username: CONFIG.listmonk.user,
         password: CONFIG.listmonk.password
@@ -42,12 +40,17 @@ if(CONFIG.listmonk && CONFIG.listmonk.host && CONFIG.listmonk.host !== 'fake' &&
 
 async function create_user(user) {
     try {
-        let new_user = await axios.post('/api/subscribers', user, {
+        let new_user = await axios.post(CONFIG.listmonk.host+'/api/subscribers', user, {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
         return new_user.data.data;
     } catch (err) {
-        console.error('[create_user] error', err.response.data);
+        console.error('[create_user] error', err);
         return null;
     }
     
@@ -55,11 +58,16 @@ async function create_user(user) {
 
 async function delete_user(user) {
     try {
-        await axios.delete(`/api/subscribers/${user.id}`, {
+        await axios.delete(CONFIG.listmonk.host+`/api/subscribers/${user.id}`, {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
     } catch (err) {
-        console.error('[delete_user] error', err.response.data);
+        console.error('[delete_user] error', err);
         return null;
     }
     return user;
@@ -68,11 +76,16 @@ async function delete_user(user) {
 async function get_user(email) {
     let res = null;
     try {
-        res = await axios.get('/api/subscribers', {
+        res = await axios.get(CONFIG.listmonk.host+'/api/subscribers', {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
     } catch(err) {
-        console.error('[get_user] error', err.response.data);
+        console.error('[get_user] error', err);
         return null;   
     }
     let users = res.data.data.results;
@@ -115,15 +128,25 @@ async function join_list(user, lists) {
     }
 
     try {
-        await axios.put(`/api/subscribers/${user.id}`, user, {
+        await axios.put(CONFIG.listmonk.host+`/api/subscribers/${user.id}`, user, {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
         // ask for optin
-        await axios.post(`/api/subscribers/${user.id}/optin`, {}, {
+        await axios.post(CONFIG.listmonk.host+`/api/subscribers/${user.id}/optin`, {}, {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
     } catch(err) {
-        console.error('[join_list] error', err.response.data);
+        console.error('[join_list] error', err);
         return false;   
     }
     return true;
@@ -157,11 +180,16 @@ async function quit_list(user, lists) {
     user.lists = new_list;
 
     try {
-        await axios.put(`/api/subscribers/${user.id}`, user, {
+        await axios.put(CONFIG.listmonk.host+`/api/subscribers/${user.id}`, user, {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
     } catch(err) {
-        console.error('[quit_list] error', err.response.data);
+        console.error('[quit_list] error', err);
         return false;   
     }
     return true;
@@ -169,11 +197,16 @@ async function quit_list(user, lists) {
 
 async function update_user(user) {
     try {
-        await axios.put(`/api/subscribers/${user.id}`, user, {
+        await axios.put(CONFIG.listmonk.host+`/api/subscribers/${user.id}`, user, {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
     } catch(err) {
-        console.error('[update_user] error', err.response.data);
+        console.error('[update_user] error', err);
         return false;   
     }
     return true;
@@ -181,12 +214,17 @@ async function update_user(user) {
 
 async function get_lists() {
     try {
-        let lists = await axios.get('/api/lists', {
-            auth: auth
+        let lists = await axios.get(CONFIG.listmonk.host+'/api/lists', {
+            auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent
         });
         return lists.data.data.results;
     } catch(err) {
-        console.error('[get_lists] error', err.response.data);
+        console.error('[get_lists] error', err);
         return null;        
     }
 }
@@ -204,15 +242,20 @@ async function get_list(list_name) {
 
 async function get_list_members(list_id) {
     try {
-        let members = await axios.get('/api/subscribers', {
+        let members = await axios.get(CONFIG.listmonk.host+'/api/subscribers', {
             auth: auth,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            httpsAgent: listMonkAgent,
             params: {
                 list_id: list_id
             }
         });
         return members.data.data.results;
     } catch(err) {
-        console.error('[get_list_members] error', err.response.data);
+        console.error('[get_list_members] error', err);
         return []; 
     }
 }
