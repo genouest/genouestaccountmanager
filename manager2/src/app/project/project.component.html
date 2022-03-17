@@ -227,7 +227,7 @@
               <td><b>Expiration</b>&nbsp;
                 <span class="glyphicon glyphicon-question-sign" title="Expiration date" tooltip></span>
               </td>
-              <td>{{selectedProject.expire | date}} &nbsp; <button *ngIf="!config.project && config.project.allow_extend" class="btn btn-success" (click)="extend(selectedProject.id)">Extend validity</button></td>
+              <td>{{selectedProject.expire | date}} &nbsp; <button *ngIf="config.project && config.project.allow_extend" class="btn btn-success" (click)="extend(selectedProject)">Extend validity</button></td>
             </tr>
             <tr>
               <td><b>Financing</b>&nbsp;
