@@ -147,6 +147,19 @@ export class ProjectComponent implements OnInit {
         )
     }
 
+    extend(project) {
+        this.projectsService.extend(project.id).subscribe(
+            resp => {
+                this.request_msg = resp['message'];
+                this.project_list();
+                this.show_project_users(project); // update user list
+            },
+            err => {
+                this.request_err_msg = err.error.message;
+                console.log('failed to extend user', err)
+            }
+        )
+    }
 
     request_user(project, user_id, request_type) {
         this.request_msg = '';

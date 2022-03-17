@@ -45,7 +45,8 @@ function init () {
                 'enable_group': true,
                 'default_size': 500,
                 'default_path': '/opt/project',
-                'default_expire': 360
+                'default_expire': 360,
+                'allow_extend': false
             };
         }
 
