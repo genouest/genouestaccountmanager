@@ -152,7 +152,7 @@ export class ProjectComponent implements OnInit {
             resp => {
                 this.request_msg = resp['message'];
                 this.project_list();
-                this.show_project_users(project); // update user list
+                this.selectedProject = null; // to avoid multiple click on the extend button
             },
             err => {
                 this.request_err_msg = err.error.message;
