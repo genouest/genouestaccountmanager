@@ -114,10 +114,10 @@ export class ProjectsService {
 
     extend(projectId: string): Observable<any> {
         let httpOptions = {
-            headers: new HttpHeaders({
-                'Accept': 'application/json'
-            })
-        }
+            // headers: new HttpHeaders({
+            //    'Accept': 'application/json'
+            // })
+        };
         return this.http.get(
             environment.apiUrl + '/project/' + projectId + '/extend/', httpOptions
         )
