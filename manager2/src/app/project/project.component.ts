@@ -151,6 +151,7 @@ export class ProjectComponent implements OnInit {
         this.projectsService.extend(project_id).subscribe(
             resp => {
                 this.request_msg = resp['message'];
+                this.project_list();
                 this.show_project_users(project_id); // update user list
             },
             err => {
