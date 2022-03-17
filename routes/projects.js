@@ -11,6 +11,10 @@ const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
 const usrsrv = require('../core/user.service.js');
 
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
+
 router.get('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
@@ -354,7 +358,7 @@ router.post('/ask/project', async function(req, res){
         res.status(403).send({'message': 'Project already exists'});
         return;
     }
-   
+
 
     try {
         await prjsrv.create_project_request({
@@ -517,6 +521,57 @@ router.get('/project/:id/users', async function(req, res){
     res.status(401).send({message: 'Not authorized'});
 });
 
+
+router.get('/project/:id/extend', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+
+    let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
+    if (! project){
+        logger.error('failed to get project', req.params.id);
+        res.status(404).send({message: 'Project ' + req.params.id + ' not found'});
+        return;
+    }
+
+    if(!isadmin && user.uid != project.owner){
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+
+    if (CONFIG.project && CONFIG.project.allow_extend) {
+        let expiration = new Date().getTime() + 360 * 1000 * 60 * 60 * 24; // one year
+
+        await dbsrv.mongo_projects().updateOne({id: project.id},{'$set': {expire: expiration}});
+
+        res.send({message: 'validity period extended', expiration: expiration});
+        res.end();
+    }
+    return;
+
+
+});
 
 router.post;
 module.exports = router;

@@ -129,7 +129,8 @@
 <hr *ngIf="selectedProject">
 <div *ngIf="selectedProject">
   <div class="well">
-    <h4>Project <b>{{selectedProject.id}}</b></h4>
+      <h4>Project <b>{{selectedProject.id}}</b></h4>
+      <button *ngIf="!config.project || config.project.allow_extend" class="btn btn-success" (click)="extend(selectedProject.id)">Extend validity</button>
   </div>
   <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">
     <div class="card-header" (click)="manager_visible=!manager_visible" style="cursor: pointer;">

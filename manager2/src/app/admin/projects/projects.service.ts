@@ -16,7 +16,7 @@ export class ProjectsService {
     list(getAll: boolean): Observable<any[]> {
         //let user = this.authService.profile;
         let params = new HttpParams();
-        if(getAll) {
+        if (getAll) {
             params = params.append("all", "true");
         }
 
@@ -30,7 +30,7 @@ export class ProjectsService {
             environment.apiUrl + '/project',
             httpOptions
         ).pipe(map((response: any[]) => {
-            return response.sort(function (a,b) {
+            return response.sort(function(a, b) {
                 return a.id.localeCompare(b.id);
             });
         }));
@@ -112,6 +112,17 @@ export class ProjectsService {
         );
     }
 
+    extend(projectId: string): Observable<any> {
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Accept': 'application/json'
+            })
+        }
+        return this.http.get(
+            environment.apiUrl + '/project/' + projectId + '/extend/', httpOptions
+        )
+    }
+
     request(projectId: string, request: any): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
@@ -179,7 +190,7 @@ export class ProjectsService {
             environment.apiUrl + '/pending/project',
             httpOptions
         ).pipe(map((response: any[]) => {
-            return response.sort(function (a, b) {
+            return response.sort(function(a, b) {
                 return a.id.localeCompare(b.id);
             });
         }));
