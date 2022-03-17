@@ -10,6 +10,7 @@
       }
     ],
     "prevent_reuse": true,
+    "prevent_reuse_group": false
     "terms_of_use": "/doc/terms_of_use.txt",
     "web_home" : "user",
     "double_authentication_for_admin": true,
