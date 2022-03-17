@@ -94,7 +94,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
     let groupName = '';
     let projectName = '';
 
-    if (userGroup.name) {
+    if (userGroup && userGroup.name) {
         groupName = userGroup.name;
     }
 
