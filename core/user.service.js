@@ -50,7 +50,7 @@ function new_password(len=16) {
         uppercase: true,
         excludeSimilarCharacters: true,
         strict: true,
-        exclude: ';"/\'\\'
+        exclude: '&;"/\'\\'
     });
 
     return password;
