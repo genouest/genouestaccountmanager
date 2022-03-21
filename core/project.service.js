@@ -46,7 +46,7 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
 
     try {
-        if (new_project.owner && CONFIG.project.add_owner_to_group) {
+        if (new_project.owner) {
             await usrsrv.add_user_to_project(new_project.id, new_project.owner);
         }
     }

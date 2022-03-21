@@ -75,7 +75,6 @@
      "default_path": "/opt/project",
      "default_expire": 360,
      "allow_extend": false,
-     "add_owner_to_group": false
   },
   "reservation": {
       "group_or_project": "group",
