@@ -1,6 +1,8 @@
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
 const crypto = require('crypto');
+const generator = require('generate-password');
+
 //const bcrypt = require('bcryptjs');
 const goldap = require('../core/goldap.js');
 const dbsrv = require('../core/db.service.js');
@@ -40,7 +42,19 @@ exports.new_password = new_password;
 
 
 function new_password(len=16) {
-    return crypto.randomBytes(32).toString('hex').slice(0,len);
+    let password = generator.generate({
+        length: len,
+        numbers: true,
+        symbols: true,
+        lowercase: true,
+        uppercase: true,
+        excludeSimilarCharacters: true,
+        strict: true,
+        exclude: '<>&;"/\'\\'
+    });
+
+    return password;
+    //    return crypto.randomBytes(32).toString('hex').slice(0,len);
 }
 
 // module functions
