@@ -453,7 +453,7 @@ router.post('/auth/:id', async function(req, res) {
             attemps[user.uid]['attemps'] = 0;
             if (!user.apikey) {
                 // let newApikey = Math.random().toString(36).slice(-10);
-                let newApikey = usrsrv.new_password(10);
+                let newApikey = usrsrv.new_random(10);
                 user.apikey = newApikey;
                 await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': newApikey}});
                 res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
@@ -467,6 +467,7 @@ router.post('/auth/:id', async function(req, res) {
             }
 
         } catch(err) {
+            console.error('[auth] error', err);
             if(req.session !== undefined){
                 req.session.destroy();
             }

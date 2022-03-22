@@ -38,11 +38,14 @@ exports.remove_user_from_group = remove_user_from_group;
 exports.remove_user_from_project = remove_user_from_project;
 exports.activate_user = activate_user;
 exports.new_password = new_password;
+exports.new_random = new_random;
 
-
+function new_random(len=16) {
+    return crypto.randomBytes(32).toString('hex').slice(0,7);
+}
 
 function new_password(len=16) {
-    let password = generator.generate({
+    return generator.generate({
         length: len,
         numbers: true,
         symbols: true,
@@ -52,9 +55,6 @@ function new_password(len=16) {
         strict: true,
         exclude: '<>&;"/\'\\'
     });
-
-    return password;
-    //    return crypto.randomBytes(32).toString('hex').slice(0,len);
 }
 
 // module functions
@@ -145,7 +145,7 @@ async function create_user(user, action_owner = 'auto') {
     user.status = STATUS_PENDING_EMAIL;
 
     //let regkey = Math.random().toString(36).substring(7);
-    let regkey = new_password(7);
+    let regkey = new_random(7);
     user.regkey = regkey;
 
     let default_main_group = CONFIG.general.default_main_group || '';

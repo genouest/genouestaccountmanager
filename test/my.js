@@ -286,7 +286,7 @@ describe('My', () => {
                                             let mailIndex = raw.To.indexOf(test_user_id + '@my.org');
                                             if(mailIndex >= 0 && raw.Data.indexOf('Subject: my account activation') >= 0){
                                                 gotMail = true;
-                                                let password = raw.Data.match(/Password:\s(\w+)/);
+                                                let password = raw.Data.match(/Password:\s(.*)\s*$/m);
                                                 assert(password.length > 0);
                                                 user_test_password = password[1];
                                                 break;
