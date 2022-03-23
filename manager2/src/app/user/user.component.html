@@ -173,9 +173,15 @@
                               </label>
                           </div>
                           <div class="form-check row">
-                                <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
                               <label class="col-6 form-check-label">
                                   Fake/App account
+                              </label>
+                          </div>
+                          <div class="form-check row">
+                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.never_expire" type="checkbox" class="form-check-input">
+                              <label class="col-6 form-check-label">
+                                  Never expire
                               </label>
                           </div>
                           <div class="form-check row">

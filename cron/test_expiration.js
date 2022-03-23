@@ -40,7 +40,10 @@ function timeConverter(tsp){
 
 dbsrv.init_db().then(async ()=>{
     plgsrv.load_plugins();
-    let users = await dbsrv.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
+    let users = await dbsrv.mongo_users().find({'is_fake': {$ne: true},
+                                                'never_expire': {$ne: true},
+                                                status: STATUS_ACTIVE,
+                                                expiration: {$lt: (new Date().getTime() + 1000*3600*24*60)}},{uid: 1}).toArray();
     // Find users expiring in less then 2 month
     let mail_error = 0;
     if (! notif.mailSet()){
