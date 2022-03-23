@@ -701,6 +701,9 @@ router.get('/user/:id', async function(req, res) {
     if(user.is_fake===undefined) {
         user.is_fake = false;
     }
+    if(user.never_expire===undefined) {
+        user.never_expire = false;
+    }
 
 
     user.quota = [];
