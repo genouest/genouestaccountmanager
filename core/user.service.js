@@ -40,8 +40,8 @@ exports.activate_user = activate_user;
 exports.new_password = new_password;
 exports.new_random = new_random;
 
-function new_random(len=16) {
-    return crypto.randomBytes(32).toString('hex').slice(0,7);
+function new_random(len=16) {
+    return crypto.randomBytes(32).toString('hex').slice(0,len);
 }
 
 function new_password(len=16) {
