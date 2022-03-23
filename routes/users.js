@@ -690,7 +690,7 @@ router.get('/user/:id', async function(req, res) {
 
     if(!session_user) {
         res.status(401).send({message: 'Not authorized, need to login first'});
-        return; 
+        return;
     }
 
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
@@ -1514,6 +1514,9 @@ router.put('/user/:id', async function(req, res) {
     if(session_user.is_admin){
         if (req.body.is_fake !== undefined) {
             user.is_fake = req.body.is_fake;
+        }
+        if (req.body.never_expire !== undefined) {
+            user.never_expire = req.body.never_expire;
         }
         if(req.body.is_trainer !== undefined ){
             user.is_trainer = req.body.is_trainer;
