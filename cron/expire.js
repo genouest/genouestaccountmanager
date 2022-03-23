@@ -52,7 +52,10 @@ let count_errors = 0;
 dbsrv.init_db().then(async () => {
     plgsrv.load_plugins();
     // Find users expiring
-    let users = await dbsrv.mongo_users().find({'is_fake': {$ne: true}, status: STATUS_ACTIVE, expiration: {$lt: (new Date().getTime())}},{uid: 1}).toArray();
+    let users = await dbsrv.mongo_users().find({'is_fake': {$ne: true},
+                                                'never_expire': {$ne: true},
+                                                status: STATUS_ACTIVE,
+                                                expiration: {$lt: (new Date().getTime())}},{uid: 1}).toArray();
     if (! notif.mailSet()){
         console.log('Error: mail is not set');
         process.exit(1);
