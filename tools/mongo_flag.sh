@@ -7,11 +7,8 @@ FLAG=$2
 # true|false
 BOOL=$3
 
-mongo gomngr --quiet --eval 'db.users.find({"uid" : "'${LOGIN}'"}).forEach(
-    function (elm) {
-      db.users.update (
-             { _id: elm._id },
-             { $set: {'$FLAG': '${BOOL}' }}
-      );
-    }
+mongo gomngr --quiet --eval 'db.users.findOneAndUpdate(
+    {"uid" : "'${LOGIN}'"},
+    { $set: {'$FLAG': '${BOOL}' } },
+    { projection : { "_id" : 0, "uid" : 1, "'$FLAG'" : 1 } }
   )'
