@@ -184,7 +184,7 @@ async function request_DMP(dmpid, research_output) {
 
     let redis_client = idsrv.redis();
     console.log('get token');
-    let token = await redis_client.get('my:dmp:token', function (err, value) {
+    await redis_client.get('my:dmp:token', function (err, value) {
         console.log(value);
         if (value != null) {
             return value;
@@ -211,7 +211,9 @@ async function request_DMP(dmpid, research_output) {
             response_data = response.data;
             console.log('auth answer:');
             console.log(response_data);
+            console.log('token:');
             let token = response_data.access_token;
+            console.log(token);
             let expiration = response_data.expires_in;
 
             let current_time = Math.floor((new Date()).getTime() / 1000);
@@ -237,9 +239,8 @@ async function request_DMP(dmpid, research_output) {
         });
 
     });
-    return token;
 }
-    // }).then(async function (token) {
+// }).then(async function (token) {
     //     console.log(token);
     //     if (token != null) {
     //         return token;
