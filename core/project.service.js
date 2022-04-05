@@ -210,10 +210,9 @@ async function request_DMP(dmpid, research_output) {
         axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then(response => {
             response_data = response.data;
             console.log('auth answer:');
-            console.log(response_data);
-            console.log('token:');
+            console.log(response_data.access_token);
+
             let token = response_data.access_token;
-            console.log(token);
             let expiration = response_data.expires_in;
 
             let current_time = Math.floor((new Date()).getTime() / 1000);
