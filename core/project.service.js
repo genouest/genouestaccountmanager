@@ -211,14 +211,12 @@ async function request_DMP(dmpid, research_output) {
             response_data = response.data;
             console.log('auth answer:');
             console.log(response_data.access_token);
-
-            let token = response_data.access_token;
             let expiration = response_data.expires_in;
 
             let current_time = Math.floor((new Date()).getTime() / 1000);
             let expiration_time = current_time - expiration;
             let redis_client = idsrv.redis();
-            redis_client.set('my:dmp:token', token, function (err, reply) {
+            redis_client.set('my:dmp:token', response_data.access_token, function (err, reply) {
                 console.log('token set? :');
                 console.log(reply);
                 redis_client.expire('my:dmp:token', expiration_time);
@@ -227,13 +225,13 @@ async function request_DMP(dmpid, research_output) {
             const options = {
                 headers: {
                     accept: "application/json",
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${response_data.access_token}`
                 }
             };
             
             // let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
 
-            return token;
+            return response_data.access_token;
 
         });
 
