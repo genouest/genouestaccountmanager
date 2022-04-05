@@ -207,7 +207,7 @@ async function request_DMP(dmpid, research_output) {
             }
         };
         let response_data = null;
-        await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then(response => {
+        let token = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then(response => {
             response_data = response.data;
             console.log('auth answer:');
             console.log(response_data.access_token);
@@ -228,12 +228,13 @@ async function request_DMP(dmpid, research_output) {
                     Authorization: `Bearer ${response_data.access_token}`
                 }
             };
-            
-            return axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
+            console.log('axios:');
+            axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options).then(response => { return response; });
 
-        
+
 
         });
+        return token;
 
     });
 }
