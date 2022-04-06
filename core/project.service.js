@@ -233,7 +233,7 @@ async function request_DMP(dmpid, research_output) {
         };
         console.log('axios:');
         return axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
-    }).then(response => { return response; });
+    }).then(response => { return response.data; });
 
 
 
