@@ -184,11 +184,13 @@ async function request_DMP(dmpid, research_output) {
 
     let redis_client = idsrv.redis();
     console.log('get token');
-    let value = await redis_client.get('my:dmp:token');
-    console.log(value);
-    if (value != null) {
-        return value;
-    }
+    await redis_client.get('my:dmp:token', function (err, value) {
+        console.log(value);
+        if (value != null) {
+            return value;
+        }
+    });
+
 
     const data = {
 
