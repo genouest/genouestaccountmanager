@@ -533,7 +533,7 @@ router.get('/project/:id/users', async function (req, res) {
 router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     let plan_id = req.params.planid;
     let research_output_id = req.params.researchoutputid;
-    prjsrv.request_DMP(plan_id, research_output_id).then(response => {
+    await prjsrv.request_DMP(plan_id, research_output_id).then(response => {
         console.log('returning info:');
         console.log(response);
         res.send({ message: 'DMP found', data: response });
