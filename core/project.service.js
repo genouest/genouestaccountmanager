@@ -184,7 +184,7 @@ async function request_DMP(dmpid, research_output) {
 
     let redis_client = idsrv.redis();
     console.log('get token');
-    let resp = await redis_client.get('my:dmp:token', async function (err, value) {
+    let resp = await redis_client.get('my:dmp:token').then(value => {
         console.log(value);
         if (value != null) {
             return value;
@@ -206,39 +206,38 @@ async function request_DMP(dmpid, research_output) {
                 accept: "application/json",
             }
         };
+
+        return axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options);
+    }).then(response => {
         let response_data = null;
-        let token = await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then(response => {
-            response_data = response.data;
-            console.log('auth answer:');
-            console.log(response_data.access_token);
-            let expiration = response_data.expires_in;
+        response_data = response.data;
+        console.log('auth answer:');
+        console.log(response_data.access_token);
+        let expiration = response_data.expires_in;
 
-            let current_time = Math.floor((new Date()).getTime() / 1000);
-            let expiration_time = current_time - expiration;
-            let redis_client = idsrv.redis();
-            redis_client.set('my:dmp:token', response_data.access_token, function (err, reply) {
-                console.log('token set? :');
-                console.log(reply);
-                redis_client.expire('my:dmp:token', expiration_time);
-            });
-
-            const options = {
-                headers: {
-                    accept: "application/json",
-                    Authorization: `Bearer ${response_data.access_token}`
-                }
-            };
-            console.log('axios:');
-            axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options).then(response => { return response; });
-
-
-
+        let current_time = Math.floor((new Date()).getTime() / 1000);
+        let expiration_time = current_time - expiration;
+        let redis_client = idsrv.redis();
+        redis_client.set('my:dmp:token', response_data.access_token, function (err, reply) {
+            console.log('token set? :');
+            console.log(reply);
+            redis_client.expire('my:dmp:token', expiration_time);
         });
-        return token;
 
-    });
+        const options = {
+            headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${response_data.access_token}`
+            }
+        };
+        console.log('axios:');
+        return axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
+    }).then(response => { return response; });
     return resp;
+
+
 }
+
 // }).then(async function (token) {
     //     console.log(token);
     //     if (token != null) {
