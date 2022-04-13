@@ -220,26 +220,28 @@ export class ProjectComponent implements OnInit {
                 resp => {
                     let funders = []
                     let data = resp.data.project.funding
-                    console.log(data)
                     for (data in resp.data.project.funding) {
-                        console.log(resp.data.project.funding[data])
                         if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
                             funders.push(resp.data.project.funding[data].funder.name)
                         }
                         
 
                     }
+                    
+                    console.log(resp.data.researchOutputs)
                     let research_output = null
                     for (var elem of resp.data.researchOutputs){
                         if (elem.research_output_id == this.new_project.researchoutputid) {
-                            research_output = elem
+                            research_output = elem  
                             break
                         }
                     }
+                    if (research_output == null) {
+                        this.dmp_msg = ''
+                        this.dmp_err_msg = "No research output was found with this ID"
+                    }
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
-                    console.log("ici")
-                    console.log
                     this.new_project = {
                         'id': resp.data.project.acronym,
                         'description': this.convertToPlain(research_output.researchOutputDescription.description),

@@ -24,8 +24,8 @@ export class ProjectComponent implements OnInit {
     oldGroup: string
 
     dmp: any
-    dmp_visible:boolean
-    dmp_linked:boolean
+    dmp_visible: boolean
+    dmp_linked: boolean
 
     new_user_admin: string = ''
     remove_user_admin: string = ''
@@ -57,7 +57,7 @@ export class ProjectComponent implements OnInit {
         this.groups = [];
         this.all_users = [];
         this.config = {};
-        
+
     }
 
     ngOnDestroy(): void {
@@ -97,15 +97,15 @@ export class ProjectComponent implements OnInit {
                 this.project = resp;
                 console.log(this.project)
                 this.dmp_linked = false;
-                if (this.project.dmpid != null) {  this.dmp_linked = true };
+                if (this.project.dmpid != null) { this.dmp_linked = true };
                 this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
                         this.users = resp;
                         this.oldGroup = this.project.group;
-                        for(var i = 0; i<resp.length;i++){
-                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0){
-                                this.users[i].access=true;
+                        for (var i = 0; i < resp.length; i++) {
+                            if (resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0) {
+                                this.users[i].access = true;
                             }
                         }
                         this.remove_user_admin = '';
@@ -145,10 +145,10 @@ export class ProjectComponent implements OnInit {
     }
 
     // todo: maybe move this in backend too
-    update_users_group(usersList, newGroupId){
-        for(var i = 0; i< usersList.length; i++){
+    update_users_group(usersList, newGroupId) {
+        for (var i = 0; i < usersList.length; i++) {
             this.userService.addGroup(usersList[i].uid, newGroupId).subscribe(
-                resp => {},
+                resp => { },
                 err => this.prj_err_msg = err.error.message
             );
         };
@@ -156,15 +156,15 @@ export class ProjectComponent implements OnInit {
 
     delete_project(project, userList) {
         this.admin_user_err_msg = '';
-        for(var i = 0; i < userList.length; i++){
+        for (var i = 0; i < userList.length; i++) {
             this.userService.removeFromProject(userList[i].uid, project.id)
                 .subscribe(
-                    resp => {},
-                    err => this.prj_err_msg = err.error.message                                         );
+                    resp => { },
+                    err => this.prj_err_msg = err.error.message);
         }
         this.projectsService.delete(project.id).subscribe(
             resp => {
-                this.router.navigate(['/admin/project'], { queryParams: {'deleted': 'ok'}})
+                this.router.navigate(['/admin/project'], { queryParams: { 'deleted': 'ok' } })
             },
             err => this.admin_user_err_msg = err.error.message
         )
@@ -179,15 +179,15 @@ export class ProjectComponent implements OnInit {
                 'expire': new Date(project.expire).getTime(),
                 'owner': project.owner,
                 'group': this.config.project.enable_group ? project.group : '',
-                'description' : project.description,
-                'access' : project.access,
+                'description': project.description,
+                'access': project.access,
                 'path': project.path,
-                'orga':project.orga
+                'orga': project.orga
             }
         ).subscribe(
             resp => {
                 this.prj_msg = resp['message'];
-                if(this.config.project.enable_group && project.group !== this.oldGroup) {
+                if (this.config.project.enable_group && project.group !== this.oldGroup) {
                     this.update_users_group(this.users, project.group);
                 }
                 this.show_project_users(project.id);
@@ -196,7 +196,7 @@ export class ProjectComponent implements OnInit {
         )
     }
 
-    date_convert = function timeConverter(tsp){
+    date_convert = function timeConverter(tsp) {
         let res;
         try {
             var a = new Date(tsp);
@@ -211,7 +211,8 @@ export class ProjectComponent implements OnInit {
     display_dmp_to_admin() {
         this.dmp_visible = !this.dmp_visible;
         this.projectsService.fetch_dmp(this.project.dmpid, this.project.researchoutputid).subscribe(
-            resp => {this.dmp = resp.data.data;},
+            resp => { console.log(resp.data);
+                this.dmp = resp.data; },
             err => console.log('dmperr')
         );
     }

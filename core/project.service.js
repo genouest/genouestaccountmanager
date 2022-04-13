@@ -11,7 +11,6 @@ const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
 const idsrv = require('../core/id.service.js');
 const usrsrv = require('../core/user.service.js');
-const { resolve } = require('promise');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -132,54 +131,6 @@ async function create_project_request(asked_project, user) {
 }
 
 
-// async function remove_project_request(uuid, action_owner = 'auto') {
-//     logger.info('Remove Project Request' + uuid);
-//     const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
-//     if (result.deletedCount === 1) {
-//         await dbsrv.mongo_events().insertOne({
-//             owner: action_owner,
-//             date: new Date().getTime(),
-//             action: 'remove Pending project ' + uuid,
-//             logs: [],
-//         });
-//     }
-//     else {
-//         throw { code: 404, message: 'No pending project found' };
-//     }
-
-// }
-// async function auth_from_opidor(token) {
-//     if (token != null) {
-//         resolve(token);
-//     }
-
-//     const data = {
-
-//         "grant_type": "client_credentials",
-
-//         "client_id": "b00dadbf-f8c8-422f-9a81-ae798c527613",
-
-//         "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000"
-
-//     };
-
-//     const options = {
-//         headers: {
-//             "Content-Type": "application/json",
-//             accept: "application/json",
-//         }
-//     };
-//     let response_data = null;
-//     await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then((response) => {
-//         response_data = response.data;
-//         console.log(response_data);
-//         resolve(response_data);
-//     }, (error) => {
-//         resolve(error);
-//     });
-
-// }
-
 async function request_DMP(dmpid, research_output) {
 
     let redis_client = idsrv.redis();
@@ -212,16 +163,12 @@ async function request_DMP(dmpid, research_output) {
     return await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then(response => {
         let response_data = null;
         response_data = response.data;
-        console.log('auth answer:');
-        console.log(response_data.access_token);
         let expiration = response_data.expires_in;
 
         let current_time = Math.floor((new Date()).getTime() / 1000);
         let expiration_time = current_time - expiration;
         let redis_client = idsrv.redis();
         redis_client.set('my:dmp:token', response_data.access_token, function (err, reply) {
-            console.log('token set? :');
-            console.log(reply);
             redis_client.expire('my:dmp:token', expiration_time);
         });
 
@@ -231,141 +178,10 @@ async function request_DMP(dmpid, research_output) {
                 Authorization: `Bearer ${response_data.access_token}`
             }
         };
-        console.log('axios:');
         return axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
     }).then(response => { return response.data; });
 
-
-
 }
-
-// }).then(async function (token) {
-    //     console.log(token);
-    //     if (token != null) {
-    //         return token;
-    //     }
-
-    //     const data = {
-
-    //         "grant_type": "client_credentials",
-
-    //         "client_id": "b00dadbf-f8c8-422f-9a81-ae798c527613",
-
-    //         "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000"
-
-    //     };
-
-    //     const options = {
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             accept: "application/json",
-    //         }
-    //     };
-    //     let response_data = null;
-    //     await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then(response => {
-    //         response_data = response.data;
-    //         console.log(response_data);
-    //         token = response_data.access_token;
-    //         let expiration = response_data.expires_in;
-
-    //         let current_time = Math.floor((new Date()).getTime() / 1000);
-    //         let expiration_time = current_time - expiration;
-    //         let redis_client = idsrv.redis();
-    //         redis_client.set('my:dmp:token', token, function (err, reply) {
-    //             console.log(reply);
-    //             redis_client.expire('my:dmp:token', expiration_time);
-    //         });
-    //         return token;
-
-    //     });
-
-
-    // }).then(function (token) { // (***)
-    //     const options = {
-    //         headers: {
-    //             accept: "application/json",
-    //             Authorization: `Bearer ${token}`
-    //         }
-    //     };
-    //     let resp = { data: 'none' };
-    //     // let resp = axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${plan_id}?research_output_id=${research_output_id}`, options);
-
-    //     return resp;
-    // });
-
-// }
-// async function is_token_stored() {
-//     return new Promise((resolve) => {
-//         let redis_client = idsrv.redis();
-//         console.log('get token');
-//         redis_client.get('my:dmp:token', function (err, value) {
-//             resolve(value);
-//         });
-
-//     });
-// }
-// async function save_token(token, expiration) {
-
-//     let current_time = Math.floor((new Date()).getTime() / 1000);
-//     let expiration_time = current_time - expiration;
-//     redis_client.set('my:dmp:token', token, function (err, reply) {
-//         console.log(reply);
-//         redis_client.expire('my:dmp:token', expiration_time);
-//     });
-
-// }
-// async function opidor_token_refresh() {
-
-
-//     let token = await is_token_stored();
-//     await auth_from_opidor(token).then(answer => {
-//         save_token(answer.access_token, answer.expires_in);
-//         resolve(answer);
-
-//     }
-
-
-//     );
-// }
-
-
-// let redis_client = idsrv.redis();
-// console.log('get tokens');
-// let token = '';
-// let expiration = null;
-
-// redis_client.get('my:dmp:token', function (err, value) {
-//     console.log('token found?');
-//     console.log(value);
-
-//     if (!value) {
-//         console.log('no token saved');
-//         await auth_from_opidor().then(response => {
-//             let resp = response;
-//             console.log('auth:');
-//             console.log(resp);
-//             expiration = resp.expires_in;
-
-//             let current_time = Math.floor((new Date()).getTime() / 1000);
-//             let expiration_time = current_time - expiration;
-//             redis_client.set('my:dmp:token', token, function (err, reply) {
-//                 console.log(reply);
-//                 redis_client.expire('my:dmp:token', expiration_time);
-//             });
-//             resolve(token);
-//         });
-
-//     }
-//     else {
-//         console.log('token found!');
-//         token = value;
-//         resolve(token);
-//     }
-//     console.log('RETURNING TOKEN:');
-//     console.log(token);
-
-// });
-//     });
 
 
 
