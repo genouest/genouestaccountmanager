@@ -154,7 +154,8 @@ router.post('/project', async function (req, res) {
             'path': req.body.path,
             'orga': req.body.orga,
             'access': req.body.access,
-            'dmpid': req.body.dmpid
+            'dmpid': req.body.dmpid,
+            'researchoutputid': req.body.researchoutputid
         }, req.body.uuid, user.uid);
     } catch (e) {
         logger.error(e);
