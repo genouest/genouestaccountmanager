@@ -178,7 +178,7 @@ async function request_DMP(dmpid, research_output) {
                 Authorization: `Bearer ${response_data.access_token}`
             }
         };
-        return axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_output_id=${research_output}`, options);
+        return axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_outputs[]=${research_output}`, options);
     }).then(response => { return response.data; });
 
 }

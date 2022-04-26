@@ -84,78 +84,26 @@
     </div>
     
     <div *ngIf="dmp_linked" class="card bg-light">
-      <div class="card-header" (click)="display_dmp_to_admin()">Dmp data</div>
+      <div class="card-header" (click)="display_dmp_to_admin()">Data currently in the DMP</div>
       <div *ngIf="dmp_visible"class="card-body">
-        <p-table [value]="products" responsiveLayout="scroll">
-          <ng-template pTemplate="header">
-              <tr>
-                  <th>Code</th>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Quantity</th>
-              </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-product>
-              <tr>
-                  <td>{{product.code}}</td>
-                  <td>{{product.name}}</td>
-                  <td>{{product.category}}</td>
-                  <td>{{product.quantity}}</td>
-              </tr>
-          </ng-template>
-      </p-table>
-        <ngx-json-viewer [json]="dmp" [expanded]="false"></ngx-json-viewer>
-        <!-- <p-table #dtp [value]="dmp" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-        [rowsPerPageOptions]="[10,25,50]" [globalFilterFields]="['id','owner']" [filterDelay]="0">
-        <ng-template pTemplate="caption">
-          <div class="table-header">
-            List of properties
-            <span class="p-input-icon-right">
-              <i class="pi pi-search"></i>
-              <input pInputText id="search_projects" type="text"
-                (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-            </span>
-          </div>
-        </ng-template>
-        <ng-template pTemplate="header">
+        <table class="table">
           <tr>
-            <th>properties</th>
-            <th>Owner</th>
-            <th *ngIf="!config.project || config.project.enable_group">Group</th>
-            <th>Path</th>
-            <th>Size (GB)</th>
-            <th>Cpu (Hour)</th>
-            <th>Creation</th>
-            <th>Expiration</th>
+            <th>Size</th>
+            <td>Jill</td>
           </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-project>
           <tr>
-            <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a>
-            </td>
-            <td>{{project.owner}}</td>
-            <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
-            <td>{{project.path}}</td>
-            <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
-                <meter *ngIf="project.current_size"
-                    min="0" max="{{project.size}}"
-                    optimum="0" low="{{project.low_size}}" high="{{project.high_size}}"
-                    value="{{project.current_size}}">
-                </meter>
-            </td>
-            <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&#47;</span>{{project.cpu}}
-                <meter *ngIf="project.current_cpu"
-                    min="0" max="{{project.cpu}}"
-                    optimum="0" low="{{project.low_cpu}}" high="{{project.high_cpu}}"
-                    value="{{project.current_cpu}}">
-                </meter>
-            </td>
-            <td>{{date_convert(project.created_at)}}</td>
-            <td>{{date_convert(project.expire)}}</td>
-            
+            <th>Expiration date</th>
+            <td>Smith</td>
           </tr>
-        </ng-template>
-      </p-table> -->
+          <tr>
+            <th>Financing</th>
+            <td>94</td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <td>94</td>
+          </tr>
+        </table> 
       </div>
 
     </div>

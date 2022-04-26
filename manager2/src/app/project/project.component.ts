@@ -218,6 +218,7 @@ export class ProjectComponent implements OnInit {
         if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "") && !(this.new_project.researchoutputid == null) && !(this.new_project.researchoutputid == "")) {
             this.projectsService.fetch_dmp(dmpid, researchoutputid).subscribe(
                 resp => {
+                    console.log(resp)
                     let funders = []
                     let data = resp.data.project.funding
                     for (data in resp.data.project.funding) {
