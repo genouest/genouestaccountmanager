@@ -123,6 +123,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             user = await usrsrv.create_user(user);
             user.password = usrsrv.new_password(10);
             await usrsrv.activate_user(user);
+
             users.push(user);
             startnbr++;
 
@@ -136,11 +137,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
                 await usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
             }
 
-            try {
-                await plgsrv.run_plugins('activate', user.uid, user, 'auto');
-            } catch(err) {
-                logger.error('activation errors', err);
-            }
+            await plgsrv.run_plugins('activate', user.uid, user, 'auto');
 
         }
     }
@@ -193,6 +190,7 @@ async function delete_tp_user(user) {
         await fdbs.delete_dbs(user);
         await fwebs.delete_webs(user);
         await usrsrv.delete_user(user);
+        await plgsrv.run_plugins('remove', user.uid, user, 'auto@tp');
     }
     catch(exception) {
         logger.error(exception);
@@ -285,6 +283,7 @@ async function create_tp_reservation(reservation_id) {
         Math.ceil((reservation.to-reservation.from)/(1000*3600*24)),
         reservation.to, newGroup, newProject
     );
+    
     for(let i=0;i<activated_users.length;i++) {
         logger.debug('activated user ', activated_users[i].uid);
         reservation.accounts.push(activated_users[i].uid);
