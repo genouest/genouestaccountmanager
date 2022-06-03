@@ -21,8 +21,6 @@ export class ProjectsComponent implements OnInit {
     @ViewChild('dtw') tablepending: Table;
     @ViewChild('dte') tableexpired: Table;
 
-    NBR_EXPIRATION_NOTIF_THR = 1;
-
     config: any
 
     notification: string
@@ -96,7 +94,6 @@ export class ProjectsComponent implements OnInit {
 
         this.project_list(true);
         this.pending_list(true);
-        this.expired_list(true);
         this.groupService.list().subscribe(
             resp => {
                 this.groups = resp;
@@ -202,23 +199,32 @@ export class ProjectsComponent implements OnInit {
 
     project_list(refresh_requests = false) {
         this.projects = [];
+        this.expired_projects = [];
         this.projectService.list(true).subscribe(
             resp => {
                 if (resp.length == 0) {
                     return;
                 }
-                let data = resp;
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].size && data[i].current_size) {
-                        data[i].low_size = data[i].size / 3;
-                        data[i].high_size = 2 * data[i].size / 3;
+                let projects = resp;
+                let expired_projects = [];
+                let active_projects = [];
+                for (var i = 0; i < projects.length; i++) {
+                    if (projects[i].size && projects[i].current_size) {
+                        projects[i].low_size = projects[i].size / 3;
+                        projects[i].high_size = 2 * projects[i].size / 3;
                     }
-                    if (data[i].cpu && data[i].current_cpu) {
-                        data[i].low_cpu = data[i].cpu / 3;
-                        data[i].high_cpu = 2 * data[i].cpu / 3;
+                    if (projects[i].cpu && projects[i].current_cpu) {
+                        projects[i].low_cpu = projects[i].cpu / 3;
+                        projects[i].high_cpu = 2 * projects[i].cpu / 3;
+                    }
+                    if (projects[i].expire > Date.now()) {
+                        active_projects.push(projects[i]);
+                    } else {
+                        expired_projects.push(projects[i]);
                     }
                 }
-                this.projects = data;
+                this.projects = active_projects;
+                this.expired_projects = expired_projects;
             },
             err => console.log('failed to get projects')
         );
@@ -244,36 +250,6 @@ export class ProjectsComponent implements OnInit {
         );
     }
 
-    expired_list(refresh_requests = false) {
-        this.expired_projects = [];
-        this.projectService.list(true).subscribe(
-            resp => {
-                if (resp.length == 0) {
-                    return;
-                }
-                let projects = resp;
-                let expired = [];
-                for (var i = 0; i < projects.length; i++) {
-                    // In the absence of "status"
-                    // Filter on the number of notification the project owner had so far
-                    if (!projects[i].expiration_notif || projects[i].expiration_notif < this.NBR_EXPIRATION_NOTIF_THR) {
-                      continue;
-                    }
-                    if (projects[i].size && projects[i].current_size) {
-                        projects[i].low_size = projects[i].size / 3;
-                        projects[i].high_size = 2 * projects[i].size / 3;
-                    }
-                    if (projects[i].cpu && projects[i].current_cpu) {
-                        projects[i].low_cpu = projects[i].cpu / 3;
-                        projects[i].high_cpu = 2 * projects[i].cpu / 3;
-                    }
-                    expired.push(projects[i]);
-                }
-                this.expired_projects = expired;
-            },
-            err => console.log('failed to get expired projects')
-        );
-    }
 
     date_convert = function timeConverter(tsp) {
         let res;
