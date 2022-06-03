@@ -19,6 +19,7 @@ export class ProjectsComponent implements OnInit {
     @ViewChild('dta') tableadd: Table;
     @ViewChild('dtd') tabledel: Table;
     @ViewChild('dtw') tablepending: Table;
+    @ViewChild('dte') tableexpired: Table;
 
     config: any
 
@@ -31,6 +32,7 @@ export class ProjectsComponent implements OnInit {
 
     pending_projects: any[]
     projects: any[]
+    expired_projects: any[]
     groups: any[]
     all_users: any[]
     new_project: any
@@ -74,6 +76,7 @@ export class ProjectsComponent implements OnInit {
         this.requests_visible = false;
         this.pending_projects = [];
         this.projects = [];
+        this.expired_projects = [];
         this.groups = [];
         this.all_users = [];
         this.new_project = {
@@ -196,27 +199,35 @@ export class ProjectsComponent implements OnInit {
 
     project_list(refresh_requests = false) {
         this.projects = [];
+        this.expired_projects = [];
         this.projectService.list(true).subscribe(
             resp => {
                 if (resp.length == 0) {
                     return;
                 }
-                let data = resp;
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].size && data[i].current_size) {
-                        data[i].low_size = data[i].size / 3;
-                        data[i].high_size = 2 * data[i].size / 3;
+                let projects = resp;
+                let expired_projects = [];
+                let active_projects = [];
+                for (var i = 0; i < projects.length; i++) {
+                    if (projects[i].size && projects[i].current_size) {
+                        projects[i].low_size = projects[i].size / 3;
+                        projects[i].high_size = 2 * projects[i].size / 3;
                     }
-                    if (data[i].cpu && data[i].current_cpu) {
-                        data[i].low_cpu = data[i].cpu / 3;
-                        data[i].high_cpu = 2 * data[i].cpu / 3;
+                    if (projects[i].cpu && projects[i].current_cpu) {
+                        projects[i].low_cpu = projects[i].cpu / 3;
+                        projects[i].high_cpu = 2 * projects[i].cpu / 3;
+                    }
+                    if (projects[i].expire > Date.now()) {
+                        active_projects.push(projects[i]);
+                    } else {
+                        expired_projects.push(projects[i]);
                     }
                 }
-                this.projects = data;
+                this.projects = active_projects;
+                this.expired_projects = expired_projects;
             },
             err => console.log('failed to get projects')
         );
-
     }
 
     pending_list(refresh_requests = false) {
@@ -237,8 +248,8 @@ export class ProjectsComponent implements OnInit {
             },
             err => console.log('failed to get pending projects')
         );
-
     }
+
 
     date_convert = function timeConverter(tsp) {
         let res;
