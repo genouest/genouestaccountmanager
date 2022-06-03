@@ -214,4 +214,8 @@ export class ProjectComponent implements OnInit {
         }
         return res;
     }
+
+    scroll(el: HTMLElement) {
+        el.scrollIntoView({behavior: 'smooth'});
+    }
 }
