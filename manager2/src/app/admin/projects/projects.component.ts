@@ -256,7 +256,7 @@ export class ProjectsComponent implements OnInit {
                 for (var i = 0; i < projects.length; i++) {
                     // In the absence of "status"
                     // Filter on the number of notification the project owner had so far
-                    if (projects[i].expiration_notif < this.NBR_EXPIRATION_NOTIF_THR) {
+                    if (!projects[i].expiration_notif || projects[i].expiration_notif < this.NBR_EXPIRATION_NOTIF_THR) {
                       continue;
                     }
                     if (projects[i].size && projects[i].current_size) {
