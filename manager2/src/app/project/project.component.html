@@ -126,10 +126,10 @@
 <div class="alert alert-danger" *ngIf="request_err_msg">{{request_err_msg}}</div>
 <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
-<hr *ngIf="selectedProject">
 <a #selectedProjectAnchor></a>
 <div *ngIf="selectedProject">
-  <div class="well">
+  <hr/>
+  <div class="well" >
       <h4>Project <b>{{selectedProject.id}}</b></h4>
   </div>
   <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">

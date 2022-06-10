@@ -127,30 +127,39 @@ export class ProjectComponent implements OnInit {
     }
 
     show_project_users(project) {
-        this.msg = '';
-        this.rm_prj_err_msg = '';
-        this.rm_prj_msg_ok = '';
-        let project_name = project.id;
+        return new Promise((resolve, reject) => {
+            this.msg = '';
+            this.rm_prj_err_msg = '';
+            this.rm_prj_msg_ok = '';
+            let project_name = project.id;
 
-        this.projectsService.getUsers(project_name).subscribe(
-            resp => {
-                this.users = resp;
-                this.selectedProject = project;
-                this.oldGroup = project.group;
-                for (let i = 0; i < resp.length; i++) {
-                    if (resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0) {
-                        this.users[i].access = true;
+            this.projectsService.getUsers(project_name).subscribe(
+                resp => {
+                    this.users = resp;
+                    this.selectedProject = project;
+                    this.oldGroup = project.group;
+                    for (let i = 0; i < resp.length; i++) {
+                        if (resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0) {
+                            this.users[i].access = true;
+                        }
                     }
+                    resolve(resp)
+                },
+                err => {
+                    console.log('failed to get project users')
+                    reject(err)
                 }
-            },
-            err => console.log('failed to get project users')
         )
+        })
     }
 
     async show_project_users_and_scroll(project, anchor) {
-        this.show_project_users(project)
-        await new Promise(f => setTimeout(f, 250));
-        this.scroll(anchor)
+        this.show_project_users(project).then(() => {
+            return new Promise(f => setTimeout(f, 250));
+        }).then(() => {
+            this.scroll(anchor)
+        }).catch(err => this.request_err_msg = err.error.message)
+
     }
 
     extend(project) {
@@ -203,7 +212,7 @@ export class ProjectComponent implements OnInit {
         this.projectsService.request(project.id, { 'request': request_type, 'user': user_id }).subscribe(
             resp => {
                 this.request_msg = resp['message']
-                this.show_project_users(project); // update user list
+                this.show_project_users(project).catch(err => this.request_err_msg = err.error.message); // update user list
             },
             err => this.request_err_msg = err.error.message
         );
