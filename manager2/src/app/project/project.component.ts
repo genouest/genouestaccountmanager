@@ -147,6 +147,12 @@ export class ProjectComponent implements OnInit {
         )
     }
 
+    async show_project_users_and_scroll(project, anchor) {
+        this.show_project_users(project)
+        await new Promise(f => setTimeout(f, 250));
+        this.scroll(anchor)
+    }
+
     extend(project) {
         this.projectsService.extend(project.id).subscribe(
             resp => {
@@ -213,5 +219,9 @@ export class ProjectComponent implements OnInit {
             res = '';
         }
         return res;
+    }
+
+    scroll(el: HTMLElement) {
+        el.scrollIntoView({behavior: 'smooth'});
     }
 }

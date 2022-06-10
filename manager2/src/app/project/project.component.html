@@ -92,7 +92,7 @@
             </ng-template>
             <ng-template pTemplate="body" let-project>
               <tr>
-                <td (click)="show_project_users(project)" style="cursor: pointer;"><span class="label label-primary">{{project.id}}</span></td>
+                <td (click)="show_project_users_and_scroll(project, selectedProjectAnchor)" style="cursor: pointer;"><span class="label label-primary">{{project.id}}</span></td>
                 <td>{{project.owner}}</td>
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
@@ -127,6 +127,7 @@
 <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
 <hr *ngIf="selectedProject">
+<a #selectedProjectAnchor></a>
 <div *ngIf="selectedProject">
   <div class="well">
       <h4>Project <b>{{selectedProject.id}}</b></h4>
