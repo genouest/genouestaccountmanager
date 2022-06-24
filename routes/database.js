@@ -115,6 +115,11 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         return;
     }
 
+    if (!session_user){
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+
     session_user.is_admin = isadmin;
 
     if(!session_user.is_admin) {
@@ -143,6 +148,11 @@ router.get('/database', async function(req, res) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         res.end();
+        return;
+    }
+
+    if (!session_user){
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -176,6 +186,11 @@ router.get('/database/owner/:owner', async function(req, res) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         res.end();
+        return;
+    }
+
+    if (!session_user){
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
