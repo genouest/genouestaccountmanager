@@ -88,20 +88,24 @@
       <div *ngIf="dmp_visible"class="card-body">
         <table class="table">
           <tr>
+            <th>Last modified</th>
+            <td>{{dmp.meta.lastModifiedDate}}</td>
+          </tr>
+          <tr>
             <th>Size</th>
-            <td>Jill</td>
+            <td>{{dmp.researchOutput[0].dataStorage.estimatedVolume}}</td>
           </tr>
           <tr>
             <th>Expiration date</th>
-            <td>Smith</td>
+            <td>{{dmp.project.endDate}}</td>
           </tr>
           <tr>
             <th>Financing</th>
-            <td>94</td>
+            <td>{{dmp_funders}}</td>
           </tr>
           <tr>
             <th>Description</th>
-            <td>94</td>
+            <td>{{dmp.researchOutput[0].researchOutputDescription.description}}</td>
           </tr>
         </table> 
       </div>

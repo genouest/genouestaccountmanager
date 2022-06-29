@@ -229,9 +229,9 @@ export class ProjectComponent implements OnInit {
 
                     }
                     
-                    console.log(resp.data.researchOutputs)
+                    console.log(resp.data.researchOutput)
                     let research_output = null
-                    for (var elem of resp.data.researchOutputs){
+                    for (var elem of resp.data.researchOutput){
                         if (elem.research_output_id == this.new_project.researchoutputid) {
                             research_output = elem  
                             break
@@ -243,6 +243,8 @@ export class ProjectComponent implements OnInit {
                     }
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
+                    console.log('ici')
+                    console.log(research_output.researchOutputDescription)
                     this.new_project = {
                         'id': resp.data.project.acronym,
                         'description': this.convertToPlain(research_output.researchOutputDescription.description),
@@ -288,7 +290,7 @@ export class ProjectComponent implements OnInit {
     //             catch (error){}
     //                 console.log(funders )
     //                 let research_output = null
-    //                 for (var elem of resp.data.researchOutputs){
+    //                 for (var elem of resp.data.researchOutput){
     //                     console.log(elem.research_output_id)
     //                     if (elem.research_output_id == "2100") {
     //                         research_output = elem

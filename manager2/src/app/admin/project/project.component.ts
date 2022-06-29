@@ -26,6 +26,7 @@ export class ProjectComponent implements OnInit {
     dmp: any
     dmp_visible: boolean
     dmp_linked: boolean
+    dmp_funders: any
 
     new_user_admin: string = ''
     remove_user_admin: string = ''
@@ -213,7 +214,17 @@ export class ProjectComponent implements OnInit {
         this.projectsService.fetch_dmp(this.project.dmpid, this.project.researchoutputid).subscribe(
             resp => { console.log(resp.data);
                 console.log(this.project)
-                this.dmp = resp.data;},
+                this.dmp = resp.data;
+                this.dmp.researchOutput[0].researchOutputDescription.description = this.dmp.researchOutput[0].researchOutputDescription.description.replace(/<\/?[^>]+>/gi, ' ')
+                this.dmp_funders = []
+                let data = resp.data.project.funding
+                for (data in resp.data.project.funding) {
+                    if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
+                        this.dmp_funders.push(resp.data.project.funding[data].funder.name)
+                    }
+                    
+
+                }},
             err => console.log('dmperr')
         );
     }

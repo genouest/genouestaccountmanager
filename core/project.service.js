@@ -170,6 +170,7 @@ async function request_DMP(dmpid, research_output) {
         let redis_client = idsrv.redis();
         redis_client.set('my:dmp:token', response_data.access_token, function (err, reply) {
             redis_client.expire('my:dmp:token', expiration_time);
+            
         });
 
         const options = {
