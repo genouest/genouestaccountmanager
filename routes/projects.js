@@ -543,7 +543,79 @@ router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
     
 
 });
+//2157/2383
+router.post('/project/dmp/remote_request', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
+        return;
+    }
+    if (!sansrv.sanitizeAll([req.body.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
+        return;
+    }
+    let user = null;
+    let isadmin = false;
+    try {
+        // change from email to real var
+        user = await dbsrv.mongo_users().findOne({ email: req.body.mail });
+        isadmin = await rolsrv.is_admin(user);
+    } catch (e) {
+        logger.error(e);
+        res.status(404).send({ message: 'User session not found' });
+        res.end();
+        return;
+    }
+    if (!user) {
+        res.status(404).send({ message: 'User not found' });
+        return;
+    }
+    // if (!isadmin) {
+    //     res.status(401).send({ message: 'Not authorized' });
+    //     return;
+    // }
+    let owner = await dbsrv.mongo_users().findOne({ 'uid': req.body.owner });
+    if (!owner) {
+        res.status(404).send({ message: 'Owner not found' });
+        return;
+    }
 
+    let project = await dbsrv.mongo_projects().findOne({ 'id': req.body.id });
+    if (project) {
+        res.status(403).send({ message: 'Not authorized or project already exists' });
+        return;
+    }
+    let plan_id = req.params.planid;
+    let research_output_id = req.params.researchoutputid;
+    let dmp = await prjsrv.request_DMP(plan_id, research_output_id);
+    console.log(response);
+    try {
+        await prjsrv.create_project_request({
+            'id':   dmp.project.acronym,
+            'owner': dmp.project.principalInvestigator..uid,
+            'group': user.group,
+            'size': req.body.size,
+            'cpu': req.body.cpu,
+            'description': req.body.description,
+            'orga': req.body.orga,
+            'dmpid': req.body.dmpid,
+            'researchoutputid': req.body.researchoutputid,
+        }, user);
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({ message: e.message });
+            res.end();
+            return;
+        } else {
+            res.status(500).send({ message: 'Server Error, contact admin' });
+            res.end();
+            return;
+        }
+    }
+    res.send({ message: 'Pending Project created' });
+
+    return;
+});
 
 router.post;
 module.exports = router;
