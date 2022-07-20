@@ -20,6 +20,8 @@ WORKDIR /root/genouestaccountmanager
 
 
 COPY *.json /root/genouestaccountmanager/
+RUN rm /root/genouestaccountmanager/package-lock.json
+RUN npm install
 RUN npm ci
 COPY *.js /root/genouestaccountmanager/
 
