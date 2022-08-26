@@ -587,11 +587,10 @@ router.post('/project/dmp/remote_request', async function (req, res) {
     let plan_id = req.params.planid;
     let research_output_id = req.params.researchoutputid;
     let dmp = await prjsrv.request_DMP(plan_id, research_output_id);
-    console.log(response);
     try {
         await prjsrv.create_project_request({
             'id':   dmp.project.acronym,
-            'owner': dmp.project.principalInvestigator..uid,
+            'owner': dmp.project.principalInvestigator.uid,
             'group': user.group,
             'size': req.body.size,
             'cpu': req.body.cpu,
