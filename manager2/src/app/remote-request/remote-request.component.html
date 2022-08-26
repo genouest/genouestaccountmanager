@@ -1,0 +1,50 @@
+<div>
+    <button type="button" class="btn btn-outline-primary"
+        (click)="get_dmp(new_project.dmpid, new_project.researchoutputid)">GetDMP</button>
+
+    <div class="card bg-light">
+        <div class="card-header">Data currently in the DMP</div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Project name</th>
+                    <td>{{this.new_project.id}}</td>
+                    <td><span *ngIf="this.new_project.id !==undefined" class="validity-badge status-valid">Valid</span>
+                        <span *ngIf="this.new_project.id ==undefined" class="validity-badge status-unvalid">Unvalid</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Size</th>
+                    <td>{{this.new_project.size}}</td>
+                    <td><span *ngIf="this.new_project.size !==undefined " class="validity-badge status-valid">Valid</span>
+                        <span *ngIf="this.new_project.size ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
+                </tr>
+                <tr>
+                    <th>CPU (hour)</th>
+                    <td>{{this.new_project.cpu}}</td>
+                    <td><span *ngIf="this.new_project.cpu !==undefined" class="validity-badge status-valid">Valid</span>
+                        <span *ngIf="this.new_project.cpu ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
+                </tr>
+                <tr>
+                    <th>Financing</th>
+                    <td>{{this.new_project.orga}}</td>
+                    <td><span *ngIf="this.new_project.orga !==undefined" class="validity-badge status-valid">Valid</span>
+                        <span *ngIf="this.new_project.orga ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{this.new_project.description}}</td>
+                    <td><span *ngIf="this.new_project.description !==undefined" class="validity-badge status-valid">Valid</span>
+                        <span *ngIf="this.new_project.description ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <span [class]="'dmp-badge status-linked'">Linked</span>
+    <i class="bi bi-check2"></i>
+    <div class="badge bg-Valid">Valid</div>
+
+    <button type="button " class="btn btn-primary"
+        (click)="remote_project_request()">Send request</button>
+</div>

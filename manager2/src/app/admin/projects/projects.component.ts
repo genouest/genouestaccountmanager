@@ -7,6 +7,7 @@ import { UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
 
 import { Table } from 'primeng/table'
+import { Console } from 'console';
 
 
 @Component({
@@ -273,6 +274,7 @@ export class ProjectsComponent implements OnInit {
 
     reject_project(project) {
         this.reset_msgs()
+        console.log(project.uuid)
         this.projectService.delete_pending(project.uuid).subscribe(
             resp => {
                 this.pending_msg = resp.message;

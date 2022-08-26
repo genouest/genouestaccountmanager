@@ -18,7 +18,7 @@ exports.create_project = create_project;
 exports.remove_project = remove_project;
 exports.update_project = update_project;
 exports.create_project_request = create_project_request;
-// exports.remove_project_request = remove_project_request;
+exports.remove_project_request = remove_project_request;
 // exports.auth_from_opidor = auth_from_opidor;
 // exports.opidor_token_refresh = opidor_token_refresh;
 exports.request_DMP = request_DMP;
@@ -130,6 +130,21 @@ async function create_project_request(asked_project, user) {
     }
 }
 
+async function remove_project_request(uuid, action_owner = 'auto') {
+    logger.info('Remove Project Request' + uuid);
+    const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
+    if (result.deletedCount === 1) {
+        await dbsrv.mongo_events().insertOne({
+            owner: action_owner,
+            date: new Date().getTime(),
+            action: 'remove Pending project ' + uuid,
+            logs: [],
+        });
+    }
+    else {
+        throw {code: 404, message: 'No pending project found'};
+    }
+}
 
 async function request_DMP(dmpid, research_output) {
 
@@ -183,6 +198,3 @@ async function request_DMP(dmpid, research_output) {
     }).then(response => { return response.data; });
 
 }
-
-
-

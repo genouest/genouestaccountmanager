@@ -1,0 +1,18 @@
+.validity-badge {
+    border-radius:2px;
+    padding:.25em .5rem;
+    text-transform:uppercase;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.3px
+   }
+
+.validity-badge.status-valid {
+background:#c8e6c9;
+color:#256029
+}
+
+.validity-badge.status-unvalid {
+background:#ffcdd2;
+color:#c63737
+}

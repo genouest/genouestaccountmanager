@@ -48,6 +48,7 @@ import {TableModule} from 'primeng/table';
 import { environment } from '../environments/environment';
 import * as Sentry from "@sentry/browser";
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { RemoteRequestComponent } from './remote-request/remote-request.component';
 if (environment.sentry) {
     Sentry.init({
         dsn: environment.sentry
@@ -110,7 +111,8 @@ export class SentryErrorHandler implements ErrorHandler {
         AdminQuotaExamplePluginComponent,
         FlashComponent,
         TagComponent,
-        UserLogsComponent
+        UserLogsComponent,
+        RemoteRequestComponent
     ],
     imports: [
         BrowserModule,
