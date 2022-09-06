@@ -7,7 +7,6 @@ import { UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
 
 import { Table } from 'primeng/table'
-import { Console } from 'console';
 
 
 @Component({

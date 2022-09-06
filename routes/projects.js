@@ -533,6 +533,10 @@ router.get('/project/:id/users', async function (req, res) {
 
 //fetchs a dmp based on his ID, using the dmp OPIDoR API
 router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
+        return;
+    }
     let plan_id = req.params.planid;
     let research_output_id = req.params.researchoutputid;
     await prjsrv.request_DMP(plan_id, research_output_id).then(response => {

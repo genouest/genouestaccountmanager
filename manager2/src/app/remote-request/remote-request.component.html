@@ -1,6 +1,4 @@
 <div>
-    <button type="button" class="btn btn-outline-primary"
-        (click)="get_dmp(new_project.dmpid, new_project.researchoutputid)">GetDMP</button>
 
     <div class="card bg-light">
         <div class="card-header">Data currently in the DMP</div>
@@ -41,10 +39,6 @@
         </div>
 
     </div>
-    <span [class]="'dmp-badge status-linked'">Linked</span>
-    <i class="bi bi-check2"></i>
-    <div class="badge bg-Valid">Valid</div>
-
     <button type="button " class="btn btn-primary"
         (click)="remote_project_request()">Send request</button>
 </div>
