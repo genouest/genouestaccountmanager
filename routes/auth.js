@@ -377,6 +377,12 @@ router.post('/auth/:id', async function(req, res) {
         res.status(404).send({message: 'User not found'});
         return;
     }
+
+    if(user.status == STATUS_EXPIRED){
+        res.status(401).send({message: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
+        return;
+    }
+
     let usertoken = jwt.sign(
         { user: user._id, isLogged: true, u2f: user._id },
         CONFIG.general.secret,
