@@ -153,11 +153,11 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
     let from = new Date(from_date);
     let to = new Date(to_date);
 
-    let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
+    let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>' + '\n';
     for(let i=0;i<users.length;i++) {
-        credentials_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>';
+        credentials_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>' + '\n';
     }
-    credentials_html += '</tbody></table>';
+    credentials_html += '</tbody></table>' + '\n';
 
     let user_owner = await dbsrv.mongo_users().findOne({'uid': owner});
     try {
