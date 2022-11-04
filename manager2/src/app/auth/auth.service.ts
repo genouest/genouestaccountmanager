@@ -29,7 +29,7 @@ export class AuthService {
                 { observe: 'response' }).subscribe(
                     resp => {
                         if(! resp.body['user']) {
-                            reject({'error': resp.body['message']});
+                            reject({'error': {'message': resp.body['message']}});
                             return;
                         }
 
