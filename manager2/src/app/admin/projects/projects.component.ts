@@ -208,7 +208,7 @@ export class ProjectsComponent implements OnInit {
                 let projects = resp;
                 let expired_projects = [];
                 let active_projects = [];
-                for (var i = 0; i < projects.length; i++) {
+                for (let i = 0; i < projects.length; i++) {
                     if (projects[i].size && projects[i].current_size) {
                         projects[i].low_size = projects[i].size / 3;
                         projects[i].high_size = 2 * projects[i].size / 3;
@@ -221,6 +221,9 @@ export class ProjectsComponent implements OnInit {
                         active_projects.push(projects[i]);
                     } else {
                         expired_projects.push(projects[i]);
+                    }
+                    if(!projects[i].created_at) {
+                        projects[i].created_at = parseInt(projects[i]['_id'].substring(0, 8), 16) * 1000
                     }
                 }
                 this.projects = active_projects;
@@ -242,7 +245,12 @@ export class ProjectsComponent implements OnInit {
                     this.pending_number = 0;
                 }
                 let data = resp;
-                if (data.length > 0) { this.requests_visible = true; };
+                if (data.length > 0) { 
+                    this.requests_visible = true;
+                    for (let i = 0; i < data.length; i++) {
+                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000
+                    }
+                };
                 this.pending_number = data.length;
                 this.pending_projects = data;
             },

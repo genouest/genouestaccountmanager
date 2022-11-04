@@ -107,6 +107,7 @@
             <p-table #dtw [(value)]="pending_projects" [autolayout]="false">
               <ng-template pTemplate="header">
                 <tr>
+                  <th>Request</th>
                   <th>Project</th>
                   <th>User</th>
                   <th>Size (GB)</th>
@@ -117,6 +118,7 @@
               </ng-template>
               <ng-template pTemplate="body" let-pending>
                 <tr>
+                  <td>{{date_convert(pending.created_at)}}</td>
                   <td>{{pending.id}}</td>
                   <td>{{pending.owner}}</td>
                   <td>{{pending.size}}</td>
