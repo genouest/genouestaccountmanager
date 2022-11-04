@@ -55,8 +55,8 @@ describe('My', () => {
                 .post('/auth/admin')
                 .send({'password': 'wrong'})
                 .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    assert(res.body.user === null);
+                    expect(res).to.have.status(401);
+                    //assert(res.body.user === null);
                     done();
                 });
         });
