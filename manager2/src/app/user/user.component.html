@@ -1,7 +1,7 @@
 <div class="well">
   <div class="row">
       <div class="col-sm-6">
-          <h2>{{user.uid}} <button *ngIf="locked" class="btn btn-warning" (click)="unlock()"><small class="oi oi-lock-locked glyphicon glyphicon-lock" title="The user is locked" style="color:red"></small> locked</button></h2>
+          <h2>{{user.uid}} <button *ngIf="session_user.is_admin && locked" class="btn btn-warning" (click)="unlock()"><small class="oi oi-lock-locked glyphicon glyphicon-lock" title="The user is locked" style="color:red"></small> locked</button></h2>
           <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
           <div *ngIf="user && user.created_at"><small>Created at : {{date_convert(user.created_at)}}</small></div>
