@@ -1241,7 +1241,11 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
         let expiration = new Date().getTime() + day_time*duration_list[user.duration];
-        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {
+            expiration: expiration,
+            expiration_notif: 0,
+            history: user.history
+        }});
         await dbsrv.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
         if(accept == 'json') {
@@ -1302,7 +1306,12 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + day_time*duration_list[user.duration]), history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {
+            status: STATUS_ACTIVE,
+            expiration: (new Date().getTime() + day_time*duration_list[user.duration]),
+            expiration_notif: 0,
+            history: user.history
+        }});
 
         try {
             let created_file = await filer.user_renew_user(user, fid);
