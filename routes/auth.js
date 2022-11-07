@@ -397,6 +397,7 @@ router.post('/auth/:id', async function(req, res) {
         res.end();
         return;
     }
+
     if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
         let diffTime = (new Date()).getTime() - attemps[user.uid]['last'].getTime();
         if(diffTime < 1000 * bansec) {
@@ -484,6 +485,59 @@ router.post('/auth/:id', async function(req, res) {
             return;
         }
     }
+});
+
+router.get('/auth/:id/lock', async function(req, res) {
+    let isadmin = false;
+    try {
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if (!isadmin) {
+        res.status(403).send();
+        res.end();
+        return;
+    }
+
+    let uid = req.params.id;
+    let locked = false;
+    if(attemps[uid] != undefined && attemps[uid]['attemps']>=2) {
+        locked = true;
+    }
+
+    res.send({'lock': locked});
+    res.end();
+
+});
+
+router.delete('/auth/:id/lock', async function(req, res) {
+    let isadmin = false;
+    try {
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+    if (!isadmin) {
+        res.status(403).send();
+        res.end();
+        return;
+    }
+
+    let uid = req.params.id;
+    if(attemps[uid] !== undefined) {
+        delete attemps[uid];
+    }
+    res.end();
 });
 
 

@@ -133,6 +133,7 @@ export class UserComponent implements OnInit {
     timeoutId: any
     note: string
     err_note: string
+    locked: boolean
 
     STATUS_PENDING_EMAIL = 'Waiting for email approval'
     STATUS_PENDING_APPROVAL = 'Waiting for admin approval'
@@ -236,6 +237,7 @@ export class UserComponent implements OnInit {
         this.notify_err = ''
         this.key_err = ''
         this.otp = null
+        this.locked = false
 
     }
 
@@ -283,6 +285,12 @@ export class UserComponent implements OnInit {
                 },
                 err => console.log('failed to get user ', params['id'])
             )
+            this.authService.isLocked(params['id']).subscribe(
+                resp => {
+                    this.locked = resp['lock']
+                },
+                err => {console.log('lockError',err);}
+            )
 
             this.userService.isSubscribed(params['id']).subscribe(
                 resp =>{
@@ -303,6 +311,7 @@ export class UserComponent implements OnInit {
         this.unsubscribe = this.unsubscribe.bind(this);
         this.initUser = this.initUser.bind(this);
         this.sendmail = this.sendmail.bind(this);
+        this.unlock = this.unlock.bind(this);
 
         this.configService.config.subscribe(
             resp => {
@@ -313,6 +322,24 @@ export class UserComponent implements OnInit {
         )
 
 
+    }
+
+    unlock() {
+        let ctx = this;
+        let uid = this.user.uid;
+        this.authService.unlock(uid).subscribe(
+            resp => {
+                ctx.authService.isLocked(uid).subscribe(
+                    resp => {
+                        ctx.locked = resp['lock']
+                    },
+                    err => {console.log('lockError',err);}
+                )
+            },
+            err => {
+                console.log('unlockError',err);
+            }
+        )
     }
 
     _compareName(a,b) {

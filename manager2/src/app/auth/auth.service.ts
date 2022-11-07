@@ -63,6 +63,14 @@ export class AuthService {
         return this.http.post(environment.apiUrl + '/u2f/auth/' + userId, u2fData)
     }
 
+    isLocked(userId) {
+        return this.http.get(environment.apiUrl + '/auth/' + userId + '/lock')
+    }
+
+    unlock(userId) {
+        return this.http.delete(environment.apiUrl + '/auth/' + userId + '/lock')
+    }
+
     otpCheck(userId: string, token: string) {
         let httpOptions = {
             //headers: new HttpHeaders({
