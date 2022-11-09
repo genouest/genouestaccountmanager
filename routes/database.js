@@ -261,10 +261,17 @@ router.post('/database/:id', async function(req, res) {
         host: db_host
     };
 
-    if (create_db && !req.params.id.match(/^[0-9a-z_]+$/)) {
-        res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
-        res.end();
-        return;
+    if (create_db) {
+        if(!req.params.id.match(/^[0-9a-z_]+$/)) {
+            res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
+            res.end();
+            return;
+        }
+        if(!req.params.id.length<5) {
+            res.status(403).send({database: null, message: 'Database name length must be >= 5'});
+            res.end();
+            return;
+        }
     }
 
     let database = await dbsrv.mongo_databases().findOne({name: db.name});
