@@ -267,7 +267,7 @@ router.post('/database/:id', async function(req, res) {
             res.end();
             return;
         }
-        if(!req.params.id.length<5) {
+        if(req.params.id.length<5) {
             res.status(403).send({database: null, message: 'Database name length must be >= 5'});
             res.end();
             return;
