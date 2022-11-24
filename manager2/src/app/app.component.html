@@ -35,6 +35,12 @@
               My projects
             </a>
           </li>
+          <li *ngIf="isLogged" class="nav-item">
+            <a class="nav-link" routerLink="/database">
+              <i class="glyphicon glyphicon-briefcase"></i>
+              My databases
+            </a>
+          </li>
 
           <li *ngIf="user && user.is_admin" class="nav-item dropdown">
             <a href="" id="dropdownMenu1" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-cog"></i> Admin</a>

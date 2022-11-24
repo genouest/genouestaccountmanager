@@ -14,7 +14,7 @@ const usrsrv = require('../core/user.service.js');
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
-
+ 
 router.get('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});

@@ -5,7 +5,7 @@ import { UserService } from 'src/app/user/user.service';
 import { Table } from 'primeng/table';
 
 @Component({
-    selector: 'app-databases',
+    selector: 'app-database',
     templateUrl: './databases.component.html',
     styleUrls: ['./databases.component.css']
 })

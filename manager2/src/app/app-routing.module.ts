@@ -26,6 +26,7 @@ import { PasswordResetConfirmComponent } from './callback/password-reset-confirm
 import { PendingAccountComponent } from './callback/pending-account/pending-account.component';
 import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component';
 import { AdminStatComponent } from './admin/stats/stats.component';
+import { DatabaseComponent } from './database/database.component';
 
 const routes: Routes = [
     {
@@ -45,6 +46,13 @@ const routes: Routes = [
     {
         path: 'project',
         component: ProjectComponent,
+        canActivate: [
+            AuthGuard
+        ]
+    },
+    {
+        path: 'database',
+        component: DatabaseComponent,
         canActivate: [
             AuthGuard
         ]

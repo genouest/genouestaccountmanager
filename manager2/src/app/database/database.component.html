@@ -1,0 +1,37 @@
+<div class="card bg-light">
+    <div class="card-header">
+        <h3>Databases</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive table-striped">
+      <p-table #dtp [value]="databases"
+                  [paginator]="true"
+                  [rows]="10"
+                  [showCurrentPageReport]="true"
+                  [rowsPerPageOptions]="[10,25,50]"
+                  [globalFilterFields]="['name', 'type', 'host', 'owner']"
+                  [filterDelay]="0"
+      >
+    <ng-template pTemplate="caption">
+        <div class="table-header">
+            <span class="p-input-icon-right">
+                <i class="pi pi-search"></i>
+                <input pInputText id="search_databases" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+            </span>
+        </div>
+    </ng-template>
+        <ng-template pTemplate="header">
+          <tr><th>Name</th><th>Owner</th><th>Type</th><th>Host</th></tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-database>
+          <tr>
+            <td><span class="label label-primary">{{database.name}}</span></td>
+            <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
+            <td>{{database.type}}</td>
+            <td>{{database.host}}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      </div>
+  </div>
+</div>
