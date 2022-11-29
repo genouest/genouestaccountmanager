@@ -36,7 +36,7 @@ export class DatabasesComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.db = new Database('','mysql','','', false)
+        this.db = new Database('','mysql','','', false, "", "", "",true)
         this.dbService.list().subscribe(
             resp => {this.databases = resp;},
             err => console.log('failed to get databases')
@@ -77,7 +77,7 @@ export class DatabasesComponent implements OnInit {
         this.dbService.add(this.db).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.db = new Database('', 'mysql', '', '');
+                this.db = new Database('','mysql','','', false, "", "", "",true);
                 this.dbService.list().subscribe(
                     resp => {this.databases = resp;},
                     err => console.log('failed to list databases')

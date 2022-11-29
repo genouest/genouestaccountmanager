@@ -220,7 +220,7 @@ export class UserComponent implements OnInit {
         this.config = {}
         this.website = new Website('', '', '', '')
         this.websites = []
-        this.database = new Database('', 'mysql', '', '', true)
+        this.database = new Database('','mysql','','', true, "", "", "",true)
         this.databases = []
         this.plugins = []
         this.plugin_data = {}

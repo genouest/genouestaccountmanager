@@ -11,13 +11,22 @@ export class Database {
     host: string
     owner: string
     create: boolean
+    usage: string
+    size: string
+    expire: string
+    single_user: boolean
 
-    constructor(name: string, type: string, host: string, owner: string, create: boolean = false) {
+    constructor(name: string, type: string, host: string, owner: string, create: boolean = false, usage: string, size: string, expire: string, single_user: boolean) {
         this.name = name
         this.type = type
         this.host = host
         this.owner = owner
         this.create = create
+        this.usage = usage
+        this.size = size
+        this.expire = expire
+        this.single_user = single_user
+
     }
 
     toJson() {
@@ -26,7 +35,11 @@ export class Database {
             type: this.type,
             host: this.host,
             owner: this.owner,
-            create: this.create
+            create: this.create,
+            usage: this.usage,
+            size: this.size,
+            expire: this.expire,
+            single_user: this.single_user,
         }
     }
 }
@@ -64,7 +77,12 @@ export class DatabaseService {
                         item.name,
                         item.type,
                         item.host,
-                        item.owner
+                        item.owner,
+                        item.create,
+                        item.usage,
+                        item.size,
+                        item.expire,
+                        item.single_user,
                     );
                 });
             }));
@@ -85,7 +103,12 @@ export class DatabaseService {
                         item.name,
                         item.type,
                         item.host,
-                        item.owner
+                        item.owner,
+                        item.create,
+                        item.usage,
+                        item.size,
+                        item.expire,
+                        item.single_user,
                     );
                 });
             }));

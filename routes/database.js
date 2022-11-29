@@ -253,12 +253,33 @@ router.post('/database/:id', async function(req, res) {
     if(req.body.host!=undefined && req.body.host && sansrv.sanitize(req.body.host)){
         db_host = req.body.host;
     }
+    let db_usage = '';
+    if(req.body.usage != undefined && req.body.usage){
+        db_usage = req.body.usage;
+    }
+    let db_size = '';
+    if(req.body.size != undefined && req.body.size){
+        db_size = req.body.size;
+    }
+    let db_expire = '';
+    if(req.body.expire != undefined && req.body.expire){
+        db_size = req.body.expire;
+    }
+    let db_single_user = true;
+    if(req.body.single_user != undefined && req.body.single_user){
+        db_single_user = req.body.single_user;
+    }
 
     let db = {
         owner: owner,
         name: req.params.id,
         type: db_type,
-        host: db_host
+        host: db_host,
+        usage: db_usage,
+        size: db_size,
+        expire: db_expire,
+        single_user: db_single_user
+
     };
 
     if (create_db) {
