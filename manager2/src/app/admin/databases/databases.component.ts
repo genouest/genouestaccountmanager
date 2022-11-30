@@ -107,6 +107,7 @@ export class DatabasesComponent implements OnInit {
                     this.pending_number = 0;
                 }
                 let data = resp;
+                console.log(data)
                 if (data.length > 0) { 
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {

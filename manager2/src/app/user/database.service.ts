@@ -162,8 +162,10 @@ export class DatabaseService {
             environment.apiUrl + '/pending/database',
             httpOptions
         ).pipe(map((response: any[]) => {
+            
             return response.sort(function(a, b) {
-                return a.id.localeCompare(b.id);
+                console.log(a)
+                return a.name.localeCompare(b.name);
             });
         }));
     }
