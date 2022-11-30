@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
@@ -60,6 +60,16 @@ export class DatabaseService {
             //}),
         };
         return this.http.post(environment.apiUrl + '/database/' + db.name , db.toJson(), httpOptions)
+    }
+    
+    ask(db: Database) {
+        //let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.post(environment.apiUrl + '/requestdatabase/' + db.name , db.toJson(), httpOptions)
     }
 
     list(): Observable<Database[]> {
@@ -133,6 +143,29 @@ export class DatabaseService {
         };
 
         return this.http.put(environment.apiUrl + '/database/' + dbName + '/owner/' + dbOldOwner + '/' + dbNewOwner, {}, httpOptions)
+    }
+
+    list_pending(getAll: boolean): Observable<any[]> {
+        //let user = this.authService.profile;
+        let params = new HttpParams();
+        if (getAll) {
+            params = params.append("all", "true");
+        }
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.get(
+            environment.apiUrl + '/pending/database',
+            httpOptions
+        ).pipe(map((response: any[]) => {
+            return response.sort(function(a, b) {
+                return a.id.localeCompare(b.id);
+            });
+        }));
     }
 
 }

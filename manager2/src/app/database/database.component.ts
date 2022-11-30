@@ -59,7 +59,14 @@ export class DatabaseComponent implements OnInit {
           err => console.log('failed to get databases')
       )
   }
-
+  db_ask() {
+    this.dbmsg='';
+    this.dbmsg_error='';
+    this.databaseService.ask(this.db).subscribe(
+        resp => { this.dbmsg = resp['message']; this.db_list()},
+        err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
+    )
+}
   db_add() {
       this.dbmsg='';
       this.dbmsg_error='';

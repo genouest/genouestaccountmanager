@@ -22,6 +22,12 @@ export class DatabasesComponent implements OnInit {
     databases: Database[]
     users: any
 
+    requests_visible: boolean
+    pending_databases: any
+    pending_number: any
+    pending_msg: string
+    pending_error_msg: string
+
     msg: string
     err_msg: string
 
@@ -45,6 +51,7 @@ export class DatabasesComponent implements OnInit {
             resp => this.users = resp,
             err => console.log('failed to get users')
         )
+        this.pending_list()
     }
 
     changeOwner() {
@@ -87,4 +94,42 @@ export class DatabasesComponent implements OnInit {
         )
     }
 
+    pending_list(refresh_requests = false) {
+        console.log('ici')
+        this.pending_databases = [];
+        this.dbService.list_pending(true).subscribe(
+            resp => {
+                if (resp.length == 0) {
+                    this.pending_number = 0;
+                    return;
+                }
+                if (refresh_requests) {
+                    this.pending_number = 0;
+                }
+                let data = resp;
+                if (data.length > 0) { 
+                    this.requests_visible = true;
+                    for (let i = 0; i < data.length; i++) {
+                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000
+                    }
+                };
+                this.pending_number = data.length;
+                this.pending_databases = data;
+            },
+            err => console.log('failed to get pending databases')
+        );
+    }
+
+    date_convert = function timeConverter(tsp){
+        let res;
+        try {
+            var a = new Date(tsp);
+            res = a.toISOString().substring(0, 10);
+        }
+        catch (e) {
+            res = '';
+        }
+        return res;
+    }
 }
+

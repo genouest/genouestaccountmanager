@@ -36,6 +36,54 @@
       </div>
     </div>
 
+    <div class="card bg-light">
+      <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
+        <h3>{{pending_number}} request(s) waiting </h3>
+      </div>
+    
+      <div *ngIf="requests_visible" class="card-body">
+        <div class="row">
+    
+          <div class="col-md-12">
+            <div class="card bg-light">
+              <div class="card-header">
+                <h3>Pending databases</h3>
+              </div>
+              <div class="card-body">
+                <div>
+                  <div class="alert alert-danger" *ngIf="pending_err_msg">{{pending_err_msg}}</div>
+                  <div *ngIf="pending_msg" class="alert alert-info">{{pending_msg}}</div>
+                </div>
+                <p-table #dtw [(value)]="pending_databases" [autolayout]="false">
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th>Request</th>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Host</th>
+                      <th>Owner</th>
+                      <th>Size (GB)</th>
+                      <th>Expire</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-pending>
+                    <tr>
+                      <td>{{date_convert(pending.created_at)}}</td>
+                      <td>{{pending.id}}</td>
+                      <td>{{pending.type}}</td>
+                      <td>{{pending.host}}</td>
+                      <td>{{pending.owner}}</td>
+                      <td>{{pending.size}}</td>
+                      <td>{{pending.expire}}</td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
     <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
