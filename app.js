@@ -302,6 +302,7 @@ app.get('/user', users);
 app.get('/database', database);
 app.get('/database/owner/:owner', database);
 app.post('/database/:id', database);
+app.post('/requestdatabase/:id', database);
 app.put('/database/:id/owner/:old/:new', database);
 app.delete('/database/:id', database);
 app.get('/web', web);
