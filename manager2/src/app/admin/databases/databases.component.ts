@@ -116,7 +116,8 @@ export class DatabasesComponent implements OnInit {
                 this.pending_number = data.length;
                 this.pending_databases = data;
             },
-            err => console.log('failed to get pending databases')
+            err => console.log(err)
+            // err => console.log('failed to get pending databases')
         );
     }
 
