@@ -300,6 +300,7 @@ app.delete('/group/:id', groups);
 app.get('/group/:id', groups);
 app.get('/user', users);
 app.get('/database', database);
+app.get('/pending/database', database);
 app.get('/database/owner/:owner', database);
 app.post('/database/:id', database);
 app.post('/requestdatabase/:id', database);
