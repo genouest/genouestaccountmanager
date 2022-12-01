@@ -447,7 +447,7 @@ router.post('/requestdatabase/:id', async function(req, res) {
         single_user: db_single_user
 
     };
-    console.log(this.db);
+    console.log(db);
     if (create_db) {
         if(!req.params.id.match(/^[0-9a-z_]+$/)) {
             res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
