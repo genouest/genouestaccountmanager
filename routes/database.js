@@ -430,7 +430,7 @@ router.post('/requestdatabase/:id', async function(req, res) {
     }
     let db_expire = '';
     if(req.body.expire != undefined && req.body.expire){
-        db_size = req.body.expire;
+        db_expire = req.body.expire;
     }
     let db_single_user = true;
     if(req.body.single_user != undefined && req.body.single_user){
@@ -447,7 +447,6 @@ router.post('/requestdatabase/:id', async function(req, res) {
         single_user: db_single_user
 
     };
-    console.log(db);
     if (create_db) {
         if(!req.params.id.match(/^[0-9a-z_]+$/)) {
             res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
