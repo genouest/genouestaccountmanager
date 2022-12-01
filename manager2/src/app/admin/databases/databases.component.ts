@@ -21,15 +21,19 @@ export class DatabasesComponent implements OnInit {
 
     databases: Database[]
     users: any
+    selecteddb: any
 
     requests_visible: boolean
     pending_databases: any
     pending_number: any
     pending_msg: string
     pending_error_msg: string
-
+    
     msg: string
     err_msg: string
+    dbmsg: string
+    dbmsg_error: string
+    
 
     constructor(private dbService: DatabaseService, private userService: UserService) { }
 
@@ -52,6 +56,7 @@ export class DatabasesComponent implements OnInit {
             err => console.log('failed to get users')
         )
         this.pending_list()
+        this.selecteddb = []
     }
 
     changeOwner() {
@@ -133,5 +138,38 @@ export class DatabasesComponent implements OnInit {
         }
         return res;
     }
+    db_add(db) {
+        
+    }
+
+    db_refuse(dbName: string) {
+        this.dbmsg = '';
+        this.dbmsg_error = '';
+        this.databases.forEach((ws)=>{
+            if(ws.name == dbName) {
+                this.dbService.remove(ws).subscribe(
+                    resp => { this.dbmsg = resp['message'];},
+                    err => { this.dbmsg_error = err.error.message; console.log('failed to delete database')}
+                )
+            }
+        });
+    }
+
+    validate_selected_databases(selection = []) {
+        for (var i = 0; i < selection.length; i++) {
+            this.dbmsg='';
+            this.dbmsg_error='';
+         this.dbService.add(selection[i]).subscribe(
+            resp => { this.dbmsg = resp['message'];},
+            err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
+        )
+            
+
+        }
+        
+    }
+    print(text: string) {
+        console.log(text)
+      }
 }
 

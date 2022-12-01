@@ -51,12 +51,13 @@
               </div>
               <div class="card-body">
                 <div>
-                  <div class="alert alert-danger" *ngIf="pending_err_msg">{{pending_err_msg}}</div>
-                  <div *ngIf="pending_msg" class="alert alert-info">{{pending_msg}}</div>
+                  <div class="alert alert-danger" *ngIf="dbmsg_error">{{dbmsg_error}}</div>
+                  <div *ngIf="dbmsg" class="alert alert-info">{{dbmsg}}</div>
                 </div>
-                <p-table #dtw [(value)]="pending_databases" [autolayout]="false">
+                <p-table #dtw [(value)]="pending_databases" [autolayout]="false" [(selection)]="selecteddb">
                   <ng-template pTemplate="header">
                     <tr>
+                      <th style="width: 2.25em"></th>
                       <th>Request</th>
                       <th>Name</th>
                       <th>Type</th>
@@ -68,6 +69,9 @@
                   </ng-template>
                   <ng-template pTemplate="body" let-pending>
                     <tr>
+                      <td>
+                        <p-tableCheckbox [value]="pending"></p-tableCheckbox>
+                    </td>
                       <td>{{date_convert(pending.created_at)}}</td>
                       <td>{{pending.name}}</td>
                       <td>{{pending.type}}</td>
@@ -75,11 +79,20 @@
                       <td>{{pending.owner}}</td>
                       <td>{{pending.size}}</td>
                       <td>{{pending.expire}}</td>
+                      <!-- <td>
+                        
+                      </td> -->
                     </tr>
                   </ng-template>
                 </p-table>
               </div>
+              
             </div>
+            
+          </div>
+          <div class="btn-group col-md-3">
+            <button type="button" style="" class="btn btn-sm btn-success" (click)="print(selecteddb)">Accept</button>
+            <button type="button" style="" class="btn btn-sm btn-danger " (click)="reject_project(pending)">Reject</button>
           </div>
         </div>
       </div>

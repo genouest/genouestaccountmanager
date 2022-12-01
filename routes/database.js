@@ -359,6 +359,7 @@ router.post('/database/:id', async function(req, res) {
                 logger.error(error);
             }
 
+            await dbsrv.mongo_pending_databases().deleteOne({ name: db.name });
 
             await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
 

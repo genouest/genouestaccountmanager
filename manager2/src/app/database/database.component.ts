@@ -68,14 +68,7 @@ export class DatabaseComponent implements OnInit {
         err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
     )
 }
-  db_add() {
-      this.dbmsg='';
-      this.dbmsg_error='';
-      this.databaseService.add(this.db).subscribe(
-          resp => { this.dbmsg = resp['message']; this.db_list()},
-          err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
-      )
-  }
+  
 
   db_delete(dbName: string) {
       this.rm_dbmsg = '';
@@ -89,5 +82,7 @@ export class DatabaseComponent implements OnInit {
           }
       });
   }
+
+  
 
 }
