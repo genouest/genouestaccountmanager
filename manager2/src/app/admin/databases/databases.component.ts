@@ -21,7 +21,7 @@ export class DatabasesComponent implements OnInit {
 
     databases: Database[]
     users: any
-    selecteddb: any
+    selecteddb: Database[]
 
     requests_visible: boolean
     pending_databases: any
@@ -100,7 +100,6 @@ export class DatabasesComponent implements OnInit {
     }
 
     pending_list(refresh_requests = false) {
-        console.log('ici')
         this.pending_databases = [];
         this.dbService.list_pending(true).subscribe(
             resp => {
@@ -112,7 +111,6 @@ export class DatabasesComponent implements OnInit {
                     this.pending_number = 0;
                 }
                 let data = resp;
-                console.log(data)
                 if (data.length > 0) { 
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {
@@ -155,11 +153,23 @@ export class DatabasesComponent implements OnInit {
         });
     }
 
-    validate_selected_databases(selection = []) {
-        for (var i = 0; i < selection.length; i++) {
+    validate_selected_databases() {
+        
+        for (var i = 0; i < this.selecteddb.length; i++) {
             this.dbmsg='';
             this.dbmsg_error='';
-         this.dbService.add(selection[i]).subscribe(
+            console.log("before adding")
+            console.log(this.selecteddb[i])
+            this.dbService.add(new Database(
+                this.selecteddb[i].name,
+                this.selecteddb[i].type,
+                this.selecteddb[i].host,
+                this.selecteddb[i].owner,
+                this.selecteddb[i].create,
+                this.selecteddb[i].usage,
+                this.selecteddb[i].size,
+                this.selecteddb[i].expire,
+                this.selecteddb[i].single_user)).subscribe(
             resp => { this.dbmsg = resp['message'];},
             err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
         )

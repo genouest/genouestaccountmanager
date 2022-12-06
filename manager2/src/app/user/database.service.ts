@@ -59,6 +59,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
+        console.log(db) 
         return this.http.post(environment.apiUrl + '/database/' + db.name , db.toJson(), httpOptions)
     }
     

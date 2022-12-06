@@ -306,6 +306,7 @@ app.post('/database/:id', database);
 app.post('/requestdatabase/:id', database);
 app.put('/database/:id/owner/:old/:new', database);
 app.delete('/database/:id', database);
+app.delete('/pending/database/:id', database);
 app.get('/web', web);
 app.get('/web/owner/:owner', web);
 app.post('/web/:id', web);
