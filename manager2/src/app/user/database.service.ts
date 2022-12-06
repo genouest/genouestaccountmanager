@@ -59,7 +59,6 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        console.log(db) 
         return this.http.post(environment.apiUrl + '/database/' + db.name , db.toJson(), httpOptions)
     }
     
@@ -165,7 +164,6 @@ export class DatabaseService {
         ).pipe(map((response: any[]) => {
             
             return response.sort(function(a, b) {
-                console.log(a)
                 return a.name.localeCompare(b.name);
             });
         }));
@@ -178,7 +176,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        console.log(db)
+
         return this.http.delete(environment.apiUrl + '/pending/database/' + db.name, httpOptions)
     }
 

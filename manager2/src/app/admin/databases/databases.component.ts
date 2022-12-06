@@ -160,8 +160,7 @@ export class DatabasesComponent implements OnInit {
         for (var i = 0; i < this.selecteddb.length; i++) {
             this.dbmsg='';
             this.dbmsg_error='';
-            console.log("before adding")
-            console.log(this.selecteddb[i])
+
             this.dbService.add(new Database(
                 this.selecteddb[i].name,
                 this.selecteddb[i].type,
@@ -182,8 +181,5 @@ export class DatabasesComponent implements OnInit {
         }
         
     }
-    print(text: string) {
-        console.log(text)
-      }
 }
 
