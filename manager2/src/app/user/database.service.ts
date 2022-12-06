@@ -171,4 +171,15 @@ export class DatabaseService {
         }));
     }
 
+    refuse(db) {
+        //let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        console.log(db)
+        return this.http.delete(environment.apiUrl + '/pending/database/' + db.name, httpOptions)
+    }
+
 }

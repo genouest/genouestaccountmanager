@@ -263,7 +263,7 @@ router.post('/database/:id', async function(req, res) {
     }
     let db_expire = '';
     if(req.body.expire != undefined && req.body.expire){
-        db_size = req.body.expire;
+        db_expire = req.body.expire;
     }
     let db_single_user = true;
     if(req.body.single_user != undefined && req.body.single_user){

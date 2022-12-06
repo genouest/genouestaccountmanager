@@ -1,4 +1,62 @@
-    <div class="card bg-light">
+<div class="card bg-light">
+  <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
+    <h3>{{pending_number}} request(s) waiting </h3>
+  </div>
+
+  <div *ngIf="requests_visible" class="card-body">
+    <div class="row">
+
+      <div class="col-md-12">
+        <div class="card bg-light">
+          <div class="card-header">
+            <h3>Pending databases</h3>
+          </div>
+          <div class="card-body">
+            <div>
+              <div class="alert alert-danger" *ngIf="dbmsg_error">{{dbmsg_error}}</div>
+              <div *ngIf="dbmsg" class="alert alert-info">{{dbmsg}}</div>
+            </div>
+            <p-table #dtw [(value)]="pending_databases" [autolayout]="false" [(selection)]="selecteddb">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 2.25em"></th>
+                  <th>Request</th>
+                  <th>Name</th>
+                  <th>Owner</th>
+                  <th>Type</th>
+                  <th>Host</th>
+                  <th>Size (GB)</th>
+                  <th>Expiration</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-pending>
+                <tr>
+                  <td>
+                    <p-tableCheckbox [value]="pending"></p-tableCheckbox>
+                </td>
+                  <td>{{date_convert(pending.created_at)}}</td>
+                  <td>{{pending.name}}</td>
+                  <td>{{pending.owner}}</td>
+                  <td>{{pending.type}}</td>
+                  <td>{{pending.host}}</td> 
+                  <td>{{pending.size}}</td>
+                  <td>{{pending.expire}}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+          
+        </div>
+        
+      </div>
+      <div class="btn-group col-md-3">
+        <button type="button" style="" class="btn btn-sm btn-success" (click)="validate_selected_databases()">Accept</button>
+        <button type="button" style="" class="btn btn-sm btn-danger " (click)="refuse_selected_databases()">Reject</button>
+      </div>
+    </div>
+  </div>
+</div>
+   <div class="card bg-light">
         <div class="card-header">
             <h3>Databases</h3>
         </div>
@@ -21,7 +79,9 @@
             </div>
         </ng-template>
             <ng-template pTemplate="header">
-              <tr><th>Name</th><th>Owner</th><th>Type</th><th>Host</th></tr>
+              <tr>
+                <th>Name</th><th>Owner</th><th>Type</th><th>Host</th><th>Expected Size (GB)</th>
+                <th>Expected Expiration</th></tr>
             </ng-template>
             <ng-template pTemplate="body" let-database>
               <tr>
@@ -29,6 +89,8 @@
                 <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
                 <td>{{database.type}}</td>
                 <td>{{database.host}}</td>
+                <td>{{database.size}}</td>
+                <td>{{database.expire}}</td>
               </tr>
             </ng-template>
           </p-table>
@@ -36,67 +98,7 @@
       </div>
     </div>
 
-    <div class="card bg-light">
-      <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
-        <h3>{{pending_number}} request(s) waiting </h3>
-      </div>
-    
-      <div *ngIf="requests_visible" class="card-body">
-        <div class="row">
-    
-          <div class="col-md-12">
-            <div class="card bg-light">
-              <div class="card-header">
-                <h3>Pending databases</h3>
-              </div>
-              <div class="card-body">
-                <div>
-                  <div class="alert alert-danger" *ngIf="dbmsg_error">{{dbmsg_error}}</div>
-                  <div *ngIf="dbmsg" class="alert alert-info">{{dbmsg}}</div>
-                </div>
-                <p-table #dtw [(value)]="pending_databases" [autolayout]="false" [(selection)]="selecteddb">
-                  <ng-template pTemplate="header">
-                    <tr>
-                      <th style="width: 2.25em"></th>
-                      <th>Request</th>
-                      <th>Name</th>
-                      <th>Type</th>
-                      <th>Host</th>
-                      <th>Owner</th>
-                      <th>Size (GB)</th>
-                      <th>Expire</th>
-                    </tr>
-                  </ng-template>
-                  <ng-template pTemplate="body" let-pending>
-                    <tr>
-                      <td>
-                        <p-tableCheckbox [value]="pending"></p-tableCheckbox>
-                    </td>
-                      <td>{{date_convert(pending.created_at)}}</td>
-                      <td>{{pending.name}}</td>
-                      <td>{{pending.type}}</td>
-                      <td>{{pending.host}}</td>
-                      <td>{{pending.owner}}</td>
-                      <td>{{pending.size}}</td>
-                      <td>{{pending.expire}}</td>
-                      <!-- <td>
-                        
-                      </td> -->
-                    </tr>
-                  </ng-template>
-                </p-table>
-              </div>
-              
-            </div>
-            
-          </div>
-          <div class="btn-group col-md-3">
-            <button type="button" style="" class="btn btn-sm btn-success" (click)="validate_selected_databases()">Accept</button>
-            <button type="button" style="" class="btn btn-sm btn-danger " (click)="reject_project(pending)">Reject</button>
-          </div>
-        </div>
-      </div>
-    </div>
+   
 
     <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
     <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>

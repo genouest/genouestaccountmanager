@@ -47,10 +47,7 @@ export class DatabasesComponent implements OnInit {
 
     ngOnInit() {
         this.db = new Database('','mysql','','', false, "", "", "",true)
-        this.dbService.list().subscribe(
-            resp => {this.databases = resp;},
-            err => console.log('failed to get databases')
-        )
+        this.db_list()
         this.userService.list().subscribe(
             resp => this.users = resp,
             err => console.log('failed to get users')
@@ -125,6 +122,12 @@ export class DatabasesComponent implements OnInit {
         );
     }
 
+    db_list() {
+        this.dbService.list().subscribe(
+            resp => {this.databases = resp;},
+            err => console.log('failed to get databases')
+        )
+    }
     date_convert = function timeConverter(tsp){
         let res;
         try {
@@ -136,21 +139,20 @@ export class DatabasesComponent implements OnInit {
         }
         return res;
     }
-    db_add(db) {
-        
-    }
 
-    db_refuse(dbName: string) {
+
+    refuse_selected_databases() {
         this.dbmsg = '';
         this.dbmsg_error = '';
-        this.databases.forEach((ws)=>{
-            if(ws.name == dbName) {
-                this.dbService.remove(ws).subscribe(
-                    resp => { this.dbmsg = resp['message'];},
-                    err => { this.dbmsg_error = err.error.message; console.log('failed to delete database')}
-                )
-            }
+        this.selecteddb.forEach((ws)=>{
+            this.dbService.refuse(ws).subscribe(
+                resp => { this.dbmsg = resp['message'];
+                this.pending_list()},
+                err => { this.dbmsg_error = err.error.message; console.log('failed to delete database')}
+            )
+            
         });
+        
     }
 
     validate_selected_databases() {
@@ -170,7 +172,9 @@ export class DatabasesComponent implements OnInit {
                 this.selecteddb[i].size,
                 this.selecteddb[i].expire,
                 this.selecteddb[i].single_user)).subscribe(
-            resp => { this.dbmsg = resp['message'];},
+            resp => { this.dbmsg = resp['message'];
+            this.pending_list()
+            this.db_list()},
             err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
         )
             
