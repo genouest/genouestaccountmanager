@@ -41,6 +41,7 @@ export class DatabaseComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.db_delete = this.db_delete.bind(this);
     this.session_user = this.authService.profile;
     this.db = new Database('','mysql','','', true, "", "", "", true)
     
@@ -84,6 +85,9 @@ export class DatabaseComponent implements OnInit {
       });
   }
 
+  print(dbName: string) {
+    console.log(dbName)
+  }
   
 
 }

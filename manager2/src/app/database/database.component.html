@@ -84,8 +84,7 @@
             <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
             <td>{{database.type}}</td>
             <td>{{database.host}}</td>
-            <!-- <td><app-my-delete-confirm [onConfirm]="db_delete" [data]="database.name"></app-my-delete-confirm></td> -->
-            <td><button class="btn btn-danger" (click)="db_delete(database.name)">Delete</button></td>
+            <td><app-my-delete-confirm [onConfirm]="db_delete" [data]="database.name"></app-my-delete-confirm></td>
           </tr>
         </ng-template>
       </p-table>
