@@ -361,7 +361,7 @@ router.post('/database/:id', async function(req, res) {
 
             await dbsrv.mongo_pending_databases().deleteOne({ name: db.name });
 
-            await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created by ' +  session_user.uid, 'logs': []});
+            await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' created for ' +  db.owner, 'logs': []});
 
             res.send({message: 'Database created, credentials will be sent by mail'});
             res.end();
@@ -511,30 +511,16 @@ router.get('/pending/database', async function (req, res) {
         return;
     }
     if (!isadmin) {
-        if (!user.pending) {
-            res.send([]);
-            return;
-        } else {
-            let pendings = await dbsrv.mongo_pending_databases().find({ id: { $in: user.pending } }).toArray();
-            res.send(pendings);
-            return;
-        }
-    } else {
-        if (req.query.all === 'true') {
-            let pendings = await dbsrv.mongo_pending_databases().find({}).toArray();
-            res.send(pendings);
-            return;
-        } else {
-            if (!user.pending) {
-                res.send([]);
-                return;
-            } else {
-                let pendings = await dbsrv.mongo_pending_databases().find({ id: { $in: user.pending } }).toArray();
-                res.send(pendings);
-                return;
-            }
-        }
-    }
+        res.status(401).send('Not authorized');
+        return;
+    } 
+
+    let pendings = await dbsrv.mongo_pending_databases().find({}).toArray();
+    res.send(pendings);
+    return;
+    
+    
+    
 });
 
 
