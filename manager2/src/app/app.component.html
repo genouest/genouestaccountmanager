@@ -35,7 +35,7 @@
               My projects
             </a>
           </li>
-          <li *ngIf="isLogged" class="nav-item">
+          <li *ngIf="isLogged && config.enable_ui && config.enable_ui.databases" class="nav-item">
             <a class="nav-link" routerLink="/database">
               <i class="glyphicon glyphicon-briefcase"></i>
               My databases

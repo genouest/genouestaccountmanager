@@ -3,7 +3,6 @@ import { UserService } from './user.service'
 import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
 import { Website, WebsiteService } from './website.service'
-import { Database, DatabaseService} from './database.service'
 import { PluginService} from '../plugin/plugin.service'
 import { GroupsService } from '../admin/groups/groups.service'
 import { ProjectsService } from '../admin/projects/projects.service'
@@ -144,9 +143,6 @@ export class UserComponent implements OnInit {
     website: Website
     websites: Website[]
 
-    database: Database
-    databases: Database[]
-
     plugins: any[]
     plugin_data: any
 
@@ -185,15 +181,10 @@ export class UserComponent implements OnInit {
 
     del_msg: string
 
-    dbmsg: string
-    dbmsg_error: string
-    rm_dbmsg: string
-    rm_dbmsg_error: string
-
     notify_subject: string
     notify_message: string
     notify_err: string
-
+f
     key_err: string
 
     otp: string
@@ -204,7 +195,6 @@ export class UserComponent implements OnInit {
         private authService: AuthService,
         private configService: ConfigService,
         private websiteService: WebsiteService,
-        private databaseService: DatabaseService,
         private pluginService: PluginService,
         private groupService: GroupsService,
         private projectService: ProjectsService,
@@ -220,8 +210,6 @@ export class UserComponent implements OnInit {
         this.config = {}
         this.website = new Website('', '', '', '')
         this.websites = []
-        this.database = new Database('','mysql','','', true, "", "", "",true)
-        this.databases = []
         this.plugins = []
         this.plugin_data = {}
         this.subscribed = false
@@ -297,7 +285,6 @@ export class UserComponent implements OnInit {
         this.onExtraValue = this.onExtraValue.bind(this);
         this.web_delete = this.web_delete.bind(this);
         this.delete_secondary_group = this.delete_secondary_group.bind(this);
-        this.db_delete = this.db_delete.bind(this);
         this.delete = this.delete.bind(this);
         this.subscribe = this.subscribe.bind(this);
         this.unsubscribe = this.unsubscribe.bind(this);
@@ -395,7 +382,6 @@ export class UserComponent implements OnInit {
             )
         }
         this.web_list();
-        this.db_list();
 
         this.user.secondarygroups.sort(function (a,b) {
             return a.localeCompare(b);
@@ -429,35 +415,6 @@ export class UserComponent implements OnInit {
             },
             err => console.log('failed to unsubscribe')
         )
-    }
-
-    db_list() {
-        this.databaseService.listOwner(this.user.uid).subscribe(
-            resp => this.databases = resp,
-            err => console.log('failed to get databases')
-        )
-    }
-
-    db_add() {
-        this.dbmsg='';
-        this.dbmsg_error='';
-        this.databaseService.add(this.database).subscribe(
-            resp => { this.dbmsg = resp['message']; this.db_list()},
-            err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
-        )
-    }
-
-    db_delete(dbName: string) {
-        this.rm_dbmsg = '';
-        this.rm_dbmsg_error = '';
-        this.databases.forEach((ws)=>{
-            if(ws.name == dbName) {
-                this.databaseService.remove(ws).subscribe(
-                    resp => { this.rm_dbmsg = resp['message']; this.db_list()},
-                    err => { this.rm_dbmsg_error = err.error.message; console.log('failed to delete database')}
-                )
-            }
-        });
     }
 
     web_list() {

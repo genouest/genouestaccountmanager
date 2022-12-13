@@ -379,56 +379,6 @@
         </div>
     </div>
 
-    <div *ngIf="config.enable_ui && config.enable_ui.databases" class="card bg-light">
-        <div class="card-header">
-            <h4>Databases</h4>
-        </div>
-        <div class="card-body">
-                <div *ngIf="dbmsg" class="alert alert-info alert-dismissible" role="alert">
-                    {{dbmsg}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                 </div>
-                 <div *ngIf="dbmsg_error" class="alert alert-danger alert-dismissible" role="alert">
-                     {{dbmsg_error}}
-                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                         <span aria-hidden="true">&times;</span>
-                       </button>
-                  </div>
-                <div *ngIf="rm_dbmsg" class="alert alert-warning alert-dismissible" role="alert">
-                    {{rm_dbmsg}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                  </div>
-                  <div class="form-group row">
-                      <div class="col-sm-6">
-                        <label for="database">Database name</label>
-                        <input placeholder="no space or accent" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="database.name" id='database'class="form-control"/>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-primary" (click)="db_add()">Create</button>
-                    </div>
-
-                <div class="table-responsive">
-                    <table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
-                        <thead>
-                            <th scope="col">Name</th><th scope="col"></th>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let db of databases">
-                                <td>{{db.name}}</td>
-                                <td><app-my-delete-confirm [onConfirm]="db_delete" [data]="db.name"></app-my-delete-confirm>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-        </div>
-    </div>
-  </div>
-
   <div class="col-md-6 col-sm-12" *ngIf="panel == 1">
         <div class="card bg-light">
                 <div class="card-header">
