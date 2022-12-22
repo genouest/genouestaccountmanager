@@ -238,10 +238,10 @@ module.exports = {
                 headers: gomailHeaders,
                 httpsAgent: gomailAgent
             });
-            return ('', true);
+            // return ('', true);
         } catch(err) {
             logger.error('Failed to send mail : ' + err);
-            return ('Failed to send mail : ' + err, false);
+            // return ('Failed to send mail : ' + err, false);
         }
     }
 };

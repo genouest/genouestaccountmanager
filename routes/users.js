@@ -356,7 +356,6 @@ router.post('/message', async function(req, res){
     };
     await notif.sendList(req.body.list, mailOptions);
     res.send({message: ''});
-    return;
 });
 
 // Get users listing - for admin

@@ -465,6 +465,6 @@ module.exports = {
 
     // eslint-disable-next-line no-unused-vars
     sendList: async function(_mailing_list, _mailOptions) {
-        return ('no listmonk direct sending', false);
+        // return ('no listmonk direct sending', false);
     }
 };

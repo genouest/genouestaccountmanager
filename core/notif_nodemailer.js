@@ -163,6 +163,6 @@ module.exports = {
 
     sendList: async function(mailing_list, mailOptions) {
         logger.warn('sendList: no mailing list configured', mailing_list, mailOptions);
-        return ('no mailing list configured', true);
+        // return ('no mailing list configured', true);
     }
 };
