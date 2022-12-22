@@ -377,6 +377,12 @@ router.post('/auth/:id', async function(req, res) {
         res.status(404).send({message: 'User not found'});
         return;
     }
+
+    if(user.status == STATUS_EXPIRED){
+        res.status(401).send({message: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
+        return;
+    }
+
     let usertoken = jwt.sign(
         { user: user._id, isLogged: true, u2f: user._id },
         CONFIG.general.secret,
@@ -453,7 +459,7 @@ router.post('/auth/:id', async function(req, res) {
             attemps[user.uid]['attemps'] = 0;
             if (!user.apikey) {
                 // let newApikey = Math.random().toString(36).slice(-10);
-                let newApikey = usrsrv.new_password(10);
+                let newApikey = usrsrv.new_random(10);
                 user.apikey = newApikey;
                 await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': newApikey}});
                 res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
@@ -467,12 +473,13 @@ router.post('/auth/:id', async function(req, res) {
             }
 
         } catch(err) {
+            console.error('[auth] error', err);
             if(req.session !== undefined){
                 req.session.destroy();
             }
             attemps[user.uid]['attemps'] += 1;
             attemps[user.uid]['last'] = new Date();
-            res.send({user: null, message: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
+            res.status(401).send({message: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
             res.end();
             return;
         }

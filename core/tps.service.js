@@ -94,7 +94,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
     let groupName = '';
     let projectName = '';
 
-    if (userGroup.name) {
+    if (userGroup && userGroup.name) {
         groupName = userGroup.name;
     }
 
@@ -123,6 +123,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             user = await usrsrv.create_user(user);
             user.password = usrsrv.new_password(10);
             await usrsrv.activate_user(user);
+
             users.push(user);
             startnbr++;
 
@@ -136,11 +137,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
                 await usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
             }
 
-            try {
-                await plgsrv.run_plugins('activate', user.uid, user, 'auto');
-            } catch(err) {
-                logger.error('activation errors', err);
-            }
+            await plgsrv.run_plugins('activate', user.uid, user, 'auto');
 
         }
     }
@@ -156,11 +153,11 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
     let from = new Date(from_date);
     let to = new Date(to_date);
 
-    let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>';
+    let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>' + '\n';
     for(let i=0;i<users.length;i++) {
-        credentials_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>';
+        credentials_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>' + '\n';
     }
-    credentials_html += '</tbody></table>';
+    credentials_html += '</tbody></table>' + '\n';
 
     let user_owner = await dbsrv.mongo_users().findOne({'uid': owner});
     try {
@@ -193,6 +190,7 @@ async function delete_tp_user(user) {
         await fdbs.delete_dbs(user);
         await fwebs.delete_webs(user);
         await usrsrv.delete_user(user);
+        await plgsrv.run_plugins('remove', user.uid, user, 'auto@tp');
     }
     catch(exception) {
         logger.error(exception);
@@ -286,6 +284,7 @@ async function create_tp_reservation(reservation_id) {
         Math.ceil((reservation.to-reservation.from)/(1000*3600*24)),
         reservation.to, newGroup, newProject
     );
+    
     for(let i=0;i<activated_users.length;i++) {
         logger.debug('activated user ', activated_users[i].uid);
         reservation.accounts.push(activated_users[i].uid);

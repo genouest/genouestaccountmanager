@@ -69,7 +69,7 @@ function get_group_home(user) {
 }
 
 
-async function create_group(group_name, owner_name, action_owner = 'auto') {
+async function create_group(group_name, owner_name, action_owner = 'auto', add_owner=true) {
     let mingid = await idsrv.getGroupAvailableId();
     let fid = new Date().getTime();
     let group = {name: group_name, gid: mingid, owner: owner_name};
@@ -92,7 +92,7 @@ async function create_group(group_name, owner_name, action_owner = 'auto') {
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'create group ' + group_name , 'logs': [group_name + '.' + fid + '.update']});
 
     try {
-        if (group.owner) {
+        if (group.owner && add_owner) {
             await usrsrv.add_user_to_group(group.owner, group.name);
         }
     } catch(error) {

@@ -351,6 +351,7 @@ app.post('/project/:id', projects);
 app.post('/project/:id/request', projects);
 app.delete('/project/:id', projects);
 app.put('/project/:id/request', projects);
+app.get('/project/:id/extend', projects);
 app.post('/ask/project', projects);
 app.get('/pending/project', projects);
 app.delete('/pending/project/:id', projects);
@@ -411,10 +412,7 @@ if (app.get('env') === 'development' || process.env.DEBUG) {
     // eslint-disable-next-line no-unused-vars
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
+        res.send(err.message);
     });
 }
 else {
@@ -423,10 +421,7 @@ else {
     // eslint-disable-next-line no-unused-vars
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: {}
-        });
+        res.send(err.message);
     });
 }
 

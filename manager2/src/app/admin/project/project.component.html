@@ -123,7 +123,7 @@
             </ng-template>
             <ng-template pTemplate="body" let-user_l>
               <tr>
-                <td>{{user_l.uid}}</td>
+                <td><a routerLink="/user/{{user_l.uid}}"><span class="label label-primary">{{user_l.uid}}</span></a></td>
                 <td>{{user_l.email}}</td>
                 <td><span *ngIf="user_l.access">x</span></td>
                 <td><span *ngIf="user_l.uid === project.owner">x</span></td>

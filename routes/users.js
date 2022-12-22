@@ -179,7 +179,7 @@ router.post('/user/:id/apikey', async function(req, res){
     }
 
     //let apikey = Math.random().toString(36).slice(-10);
-    let apikey = usrsrv.new_password(10);
+    let apikey = usrsrv.new_random(10);
     await dbsrv.mongo_users().updateOne({uid: req.params.id}, {'$set':{'apikey': apikey}});
     res.send({apikey: apikey});
     res.end();
@@ -690,7 +690,7 @@ router.get('/user/:id', async function(req, res) {
 
     if(!session_user) {
         res.status(401).send({message: 'Not authorized, need to login first'});
-        return; 
+        return;
     }
 
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
@@ -700,6 +700,9 @@ router.get('/user/:id', async function(req, res) {
     }
     if(user.is_fake===undefined) {
         user.is_fake = false;
+    }
+    if(user.never_expire===undefined) {
+        user.never_expire = false;
     }
 
 
@@ -1077,7 +1080,7 @@ router.post('/user/:id/passwordreset', async function(req, res){
 //app.get('/user/:id/passwordreset', users);
 router.get('/user/:id/passwordreset', async function(req, res){
     //let key = Math.random().toString(36).substring(7);
-    let key = usrsrv.new_password(7);
+    let key = usrsrv.new_random(7);
     if(! sansrv.sanitizeAll([req.params.id])) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
@@ -1179,7 +1182,7 @@ router.get('/user/:id/passwordreset/:key', async function(req, res){
 
         // disable previous link sent
         //let new_key = Math.random().toString(36).substring(7);
-        let new_key = usrsrv.new_password(7);
+        let new_key = usrsrv.new_random(7);
         await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {regkey: new_key}});
 
         // Now send email
@@ -1238,7 +1241,11 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
         let expiration = new Date().getTime() + day_time*duration_list[user.duration];
-        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {
+            expiration: expiration,
+            expiration_notif: 0,
+            history: user.history
+        }});
         await dbsrv.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
         if(accept == 'json') {
@@ -1299,7 +1306,12 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + day_time*duration_list[user.duration]), history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {
+            status: STATUS_ACTIVE,
+            expiration: (new Date().getTime() + day_time*duration_list[user.duration]),
+            expiration_notif: 0,
+            history: user.history
+        }});
 
         try {
             let created_file = await filer.user_renew_user(user, fid);
@@ -1514,6 +1526,9 @@ router.put('/user/:id', async function(req, res) {
     if(session_user.is_admin){
         if (req.body.is_fake !== undefined) {
             user.is_fake = req.body.is_fake;
+        }
+        if (req.body.never_expire !== undefined) {
+            user.never_expire = req.body.never_expire;
         }
         if(req.body.is_trainer !== undefined ){
             user.is_trainer = req.body.is_trainer;

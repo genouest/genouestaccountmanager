@@ -64,7 +64,10 @@
             <div class="form-group">
                 <label for="Team">Team</label>
                 <input [ngModelOptions]="{standalone: true}" [(ngModel)]="team" type="text" id="team" class="form-control" placeholder="Lowercase and/or digits" required>
-                <small id="groupHelp" class="form-text text-muted">Use the <i>Institution_ResearchUnit</i> format (ex: <b>inra_umr1246, cnrs_umr3503</b>).</small>
+                <small id="groupHelp" class="form-text text-muted">
+                    Use the <i>institution_researchunit</i> format (ex: <b>inra_umr1246, cnrs_umr3503</b>).<br/>
+                    Lowercase letters (a-z), digits (0-9) and underscores ( _ ) only.
+                </small>
             </div>
             <br>
             <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>

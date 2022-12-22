@@ -195,9 +195,9 @@ router.post('/group/:id', async function(req, res){
         return;
     }
     let groupexisted = await dbsrv.mongo_oldgroups().findOne({name: req.params.id});
-    if(groupexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)){
+    if(groupexisted && (CONFIG.general.prevent_reuse_group === undefined || CONFIG.general.prevent_reuse_group)){
         logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
-        res.send({status: 1, message: 'Group name already used'});
+        res.status(403).send('Group name already used in the past, preventing reuse');
         return;
     }
 
