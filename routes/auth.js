@@ -20,6 +20,7 @@ const jwt = require('jsonwebtoken');
 
 const cfgsrv = require('../core/config.service.js');
 const usrsrv = require('../core/user.service.js');
+const idsrv = require('../core/id.service.js');
 
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
@@ -38,14 +39,6 @@ const notif = require('../core/notif_'+MAILER+'.js');
 const dbsrv = require('../core/db.service.js');
 const maisrv = require('../core/mail.service.js');
 const rolsrv = require('../core/role.service.js');
-
-var attemps = {};
-
-let bansec = 3600;
-
-if(CONFIG.general.bansec) {
-    bansec = CONFIG.general.bansec;
-}
 
 router.get('/logout', function(req, res) {
     req.session.destroy();
@@ -397,17 +390,14 @@ router.post('/auth/:id', async function(req, res) {
         res.end();
         return;
     }
-
-    if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
-        let diffTime = (new Date()).getTime() - attemps[user.uid]['last'].getTime();
-        if(diffTime < 1000 * bansec) {
-            res.status(401).send({message: 'You have reached the maximum of login attemps, your account access is blocked for ' + Math.floor((1000 * bansec - diffTime)/ 60000) + ' minutes'});
-            return;
-        }
-        else {
-            attemps[user.uid]['attemps'] = 0;
-        }
+    
+    let is_locked = await idsrv.user_locked(user.uid);
+    if (is_locked) {
+        let remains = await idsrv.user_lock_remaining_time(user.uid);
+        res.status(401).send({message: 'You have reached the maximum of login attempts, your account access is blocked for ' + Math.floor(remains / 60) + ' minutes'});
+        return;
     }
+
     // Check bind with ldap
     sess.is_logged = true;
     let need_double_auth = false;
@@ -451,13 +441,9 @@ router.post('/auth/:id', async function(req, res) {
         res.end();
     }
     else {
-        if(attemps[user.uid] == undefined) {
-            attemps[user.uid] = { attemps: 0};
-        }
         try {
             let token = await goldap.bind(user.uid, req.body.password);
             user['token'] = token;
-            attemps[user.uid]['attemps'] = 0;
             if (!user.apikey) {
                 // let newApikey = Math.random().toString(36).slice(-10);
                 let newApikey = usrsrv.new_random(10);
@@ -478,9 +464,8 @@ router.post('/auth/:id', async function(req, res) {
             if(req.session !== undefined){
                 req.session.destroy();
             }
-            attemps[user.uid]['attemps'] += 1;
-            attemps[user.uid]['last'] = new Date();
-            res.status(401).send({message: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
+            let locks = await idsrv.user_lock(user.uid);
+            res.status(401).send({message: 'Login error, remains ' + (3-locks) + ' attemps.'});
             res.end();
             return;
         }
@@ -506,11 +491,7 @@ router.get('/auth/:id/lock', async function(req, res) {
     }
 
     let uid = req.params.id;
-    let locked = false;
-    if(attemps[uid] != undefined && attemps[uid]['attemps']>=2) {
-        locked = true;
-    }
-
+    let locked = await idsrv.user_locked(uid);
     res.send({'lock': locked});
     res.end();
 
@@ -534,9 +515,7 @@ router.delete('/auth/:id/lock', async function(req, res) {
     }
 
     let uid = req.params.id;
-    if(attemps[uid] !== undefined) {
-        delete attemps[uid];
-    }
+    idsrv.user_unlock(uid);
     res.end();
 });
 
