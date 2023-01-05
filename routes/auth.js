@@ -464,9 +464,16 @@ router.post('/auth/:id', async function(req, res) {
             if(req.session !== undefined){
                 req.session.destroy();
             }
-            let locks = await idsrv.user_lock(user.uid);
-            res.status(401).send({message: 'Login error, remains ' + (3-locks) + ' attempts.'});
-            res.end();
+
+            // no ban
+            if (CONFIG.general.bansec === 0) {
+                res.status(401).send({message: 'Login error'});
+                res.end();
+            } else {
+                let locks = await idsrv.user_lock(user.uid);
+                res.status(401).send({message: 'Login error, remains ' + (3-locks) + ' attempts.'});
+                res.end();
+            }
             return;
         }
     }

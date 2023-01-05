@@ -355,9 +355,11 @@ exports.user_lock = function (user) {
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject) {
         let bansec = 3600;
+
         if(CONFIG.general.bansec) {
             bansec = CONFIG.general.bansec;
         }
+
         if (redis_client !== null) {
             // eslint-disable-next-line no-unused-vars
             redis_client.incr('my:lock:' + user, function(err, res) {
