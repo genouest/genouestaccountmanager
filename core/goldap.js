@@ -10,7 +10,6 @@ const CONFIG = my_conf;
 const filer = require('../core/file.js');
 
 const dbsrv = require('../core/db.service.js');
-//const { config } = require('chai');
 
 function crypt_password(password) {
     let salt = crypto.randomBytes(32).toString('hex').slice(0,16);
