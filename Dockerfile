@@ -1,10 +1,10 @@
 #FROM quay.io/osallou/node:12-bullseye
 FROM quay.io/osallou/node:16.13-buster
-COPY manager2 /root/genouestaccountmanager/manager2
 RUN npm install -g @angular/cli@10.2.0
 ARG APIURL
 ARG SENTRY
 ARG UITHEME=cerulean
+COPY manager2 /root/genouestaccountmanager/manager2
 RUN cd /root/genouestaccountmanager/manager2/src/assets/css && cp ${UITHEME}.min.css theme.css
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
