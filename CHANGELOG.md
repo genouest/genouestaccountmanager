@@ -9,3 +9,4 @@
 * set min len for database name length
 * [docker] change order of commands
 * on renew by admin or user, reset expiration_notif
+* add listmonk mailer support
