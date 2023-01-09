@@ -308,3 +308,84 @@ function _freeId (objType, id) {
         }
     });
 }
+
+exports.user_locked = function (user) {
+    // eslint-disable-next-line no-unused-vars
+    return new Promise(function (resolve, reject) {
+        if (redis_client !== null) {
+            // eslint-disable-next-line no-unused-vars
+            redis_client.get('my:lock:' + user, function(err, res) {
+                if(res && parseInt(res) >= 3) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        } else {
+            resolve(false);
+        }
+    });
+};
+
+
+exports.user_lock_remaining_time = function (user) {
+    // eslint-disable-next-line no-unused-vars
+    return new Promise(function (resolve, reject) {
+        if (redis_client !== null) {
+            // eslint-disable-next-line no-unused-vars
+            redis_client.get(`my:lock:${user}:last`,  function(err, res) {
+                if(res) {
+                    let bansec = 3600;
+                    if(CONFIG.general.bansec) {
+                        bansec = CONFIG.general.bansec;
+                    }
+                    let remains = (parseInt(res)  + (1000 * bansec)) - Date.now();
+                    resolve(remains/1000);
+                } else {
+                    resolve(0);
+                }
+            });
+        } else {
+            resolve(0);
+        }
+    });
+};
+
+exports.user_lock = function (user) {
+    // eslint-disable-next-line no-unused-vars
+    return new Promise(function (resolve, reject) {
+        let bansec = 3600;
+
+        if(CONFIG.general.bansec) {
+            bansec = CONFIG.general.bansec;
+        }
+
+        if (redis_client !== null) {
+            // eslint-disable-next-line no-unused-vars
+            redis_client.incr('my:lock:' + user, function(err, res) {
+                redis_client.set(`my:lock:${user}:last`, Date.now(), function() {
+                    redis_client.expire(`my:lock:${user}:last`, bansec);
+                });
+                redis_client.expire('my:lock:' + user, bansec);
+                resolve(res);
+            });
+        } else {
+            resolve(0);
+        }
+    });
+};
+
+exports.user_unlock = function (user) {
+    // eslint-disable-next-line no-unused-vars
+    return new Promise(function (resolve, reject) {
+        if (redis_client !== null) {
+            // eslint-disable-next-line no-unused-vars
+            redis_client.del(`my:lock:${user}:last`);
+            redis_client.del('my:lock:' + user, function() {
+                resolve();
+            });
+        } else {
+            resolve();
+        }
+    });
+};

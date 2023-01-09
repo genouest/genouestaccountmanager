@@ -1,13 +1,13 @@
 {
   "name": "go-mngr",
-  "version": "1.4.25",
+  "version": "1.4.26",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
   "bin": {
-    "my-reservations": "./my-reservations.js",
-    "my-accounts": "./my-accounts.js"
+    "my-reservations": "./bin/my-reservations.js",
+    "my-accounts": "./bin/my-accounts.js"
   },
   "dependencies": {
     "@angular/cdk": "^10.2.6",

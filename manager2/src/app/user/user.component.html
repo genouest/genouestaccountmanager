@@ -5,7 +5,7 @@
           <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
           <div *ngIf="user && user.created_at"><small>Created at : {{date_convert(user.created_at)}}</small></div>
-          <div><small>Expires: {{date_convert(user.expiration)}}</small></div>
+          <div *ngIf="user && user.expiration"><small>Expires: {{date_convert(user.expiration)}}</small></div>
           <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
       </div>
       <div class="col-sm-6">
