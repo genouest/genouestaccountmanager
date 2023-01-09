@@ -128,6 +128,7 @@
      }
   },
   "listmonk": {
+      "force_tls": false,
       "origin": "support@my.org",
       "host": "http://listmonk:9000",
       "user": "listmonk",
@@ -136,6 +137,7 @@
       "optout": ["listopt"]
   },
   "gomail": {
+    "force_tls": false,
     "host": "",
     "api_root": "",
     "api_secret": "",

@@ -13,7 +13,7 @@ const dbsrv = require('../core/db.service.js');
 var mail_set = false;
 
 const gomailAgent = new https.Agent({  
-    rejectUnauthorized: CONFIG.listmonk.force_tls ? true : false
+    rejectUnauthorized: CONFIG.gomail.force_tls ? true : false
 });
 
 let gomailHeaders = {};
