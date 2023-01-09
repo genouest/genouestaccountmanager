@@ -180,11 +180,13 @@ async function create_user(user, action_owner = 'auto') {
 
     user.cloud = false;
 
-    if (user.duration) {
-        user.expiration = new Date().getTime() + day_time*duration_list[user.duration];
-    }
-    else {
-        user.expiration = new Date().getTime() + day_time*360;
+    if(!user.expiration) {
+        if (user.duration) {
+            user.expiration = new Date().getTime() + day_time*duration_list[user.duration];
+        }
+        else {
+            user.expiration = new Date().getTime() + day_time*360;
+        }
     }
 
     user.loginShell = '/bin/bash';
