@@ -222,7 +222,7 @@ router.put('/user/:id/subscribe', async function(req, res){
         res.send({subscribed: false});
         res.end();
     } else {
-        await notif.add(user.email);
+        await notif.add(user.email, user.uid);
         res.send({subscribed: true});
         res.end();
     }
@@ -356,7 +356,6 @@ router.post('/message', async function(req, res){
     };
     await notif.sendList(req.body.list, mailOptions);
     res.send({message: ''});
-    return;
 });
 
 // Get users listing - for admin
@@ -649,7 +648,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     if(!user.is_fake) {
         try {
-            await notif.add(user.email);
+            await notif.add(user.email, user.uid);
         } catch (err) {
             logger.error('[notif][error=add][mail=' + user.email + ']');
         }
@@ -1353,7 +1352,7 @@ router.get('/user/:id/renew', async function(req, res){
 
         if(!user.is_fake) {
             try {
-                await notif.add(user.email);
+                await notif.add(user.email, user.uid);
             } catch (err) {
                 logger.error('[notif][error=add][mail=' + user.email + ']');
             }
@@ -1679,9 +1678,9 @@ router.put('/user/:id', async function(req, res) {
         // as expired users are removed from mailing list
         if(user.status == STATUS_ACTIVE) {
             if(user.oldemail!=user.email && !user.is_fake) {
-                await notif.modify(user.oldemail, user.email);
+                await notif.modify(user.oldemail, user.email, user.uid);
             } else if(userWasFake && !user.is_fake) {
-                await notif.add(user.email);
+                await notif.add(user.email, user.uid);
             }else if (!userWasFake && user.is_fake) {
                 await notif.remove(user.email);
             }

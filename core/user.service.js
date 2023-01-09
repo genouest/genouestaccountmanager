@@ -16,6 +16,8 @@ const grpsrv = require('../core/group.service.js');
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
+const MAILER = CONFIG.general.mailer;
+const notif = require('../core/notif_'+MAILER+'.js');
 
 /* TODO : find somewhere smart to put this */
 const STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -583,6 +585,10 @@ async function delete_user(user, action_owner = 'auto', message = '', sendmail =
         } catch(err) {
             logger.error('remove errors', err);
         }
+    }
+
+    if(notif.delete) {
+        notif.delete(user.email);
     }
 
     await idsrv.freeUserId(user.uidnumber);

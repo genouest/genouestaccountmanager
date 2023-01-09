@@ -115,6 +115,8 @@
     "password": "XXX"
   },
   "nodemailer": {
+     "host": "",
+     "port": "",
      "prefix": "",
      "origin": "",
      "smtp": "",
@@ -125,7 +127,17 @@
          "cmd_address": ""
      }
   },
+  "listmonk": {
+      "force_tls": false,
+      "origin": "support@my.org",
+      "host": "http://listmonk:9000",
+      "user": "listmonk",
+      "password": "XXXXXXX",
+      "optin": ["listmandatory", "listopt"],
+      "optout": ["listopt"]
+  },
   "gomail": {
+    "force_tls": false,
     "host": "",
     "api_root": "",
     "api_secret": "",

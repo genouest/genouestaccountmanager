@@ -267,7 +267,10 @@ async function create_tp_reservation(reservation_id) {
         reservation.name = 'tp';
     }
 
-    let trainingName = 'tp_' + latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
+    let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
+    if (CONFIG.tp.prefix) {
+        trainingName = CONFIG.tp.prefix + '_' + trainingName;
+    }
 
     let gpname = '';
     let newGroup;
