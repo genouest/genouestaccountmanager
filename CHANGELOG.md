@@ -10,3 +10,4 @@
 * [docker] change order of commands
 * on renew by admin or user, reset expiration_notif
 * add listmonk mailer support
+* upgrade jsonwebtoken to v9 to fix CVE https://cve.report/CVE-2022-23540
