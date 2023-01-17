@@ -46,6 +46,12 @@
    "multiple": false
    },
    {
+    "title": "second choice with feedback",
+    "choices": [["c7", "choice4", "alert-success", "Positive feedback"], ["c8", "choice5", "alert-warning", "Mixed feedback"], ["c9", "choice6", "alert-danger", "Negative feedback"]],
+    "multiple": false
+    },
+  
+   {
      "title": "extra data",
      "choices": [["cc4", "choice4"], ["cc5", "choice5"], ["cc6", "choice6"]],
      "multiple": false
