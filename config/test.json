@@ -35,10 +35,20 @@
  },
  "registration": [
   {
-    "title": "Ethical and legal aspect of your data",
-    "description": "Ethical and legal aspect of your data",
-    "choices": [["c1","Public data"], ["c2", "Confidential data"], ["c3", "Personal data"], ["c4", "Sensitive data"]],
-    "multiple": false
+    "title": "first choice",
+    "description": "this is truc and bla bla bla",
+    "choices": [["c1","choice1"], ["c2", "choice2"], ["c3", "choice3"]],
+    "multiple": true
+   },
+   {
+   "title": "second choice",
+   "choices": [["c4", "choice4"], ["c5", "choice5"], ["c6", "choice6"]],
+   "multiple": false
+   },
+   {
+     "title": "extra data",
+     "choices": [["cc4", "choice4"], ["cc5", "choice5"], ["cc6", "choice6"]],
+     "multiple": false
    }
     
  ],
