@@ -23,6 +23,7 @@ var test_group_id2 = 'test2' + Math.random().toString(10).slice(-6);
 var test_group_id3 = 'test3' + Math.random().toString(10).slice(-6);
 var test_web_id = 'webtest' + Math.random().toString(10).slice(-6);
 var test_db_id = 'dbtest' + Math.random().toString(10).slice(-6);
+var test_db_id2 = 'dbtest2' + Math.random().toString(10).slice(-6);
 var test_project_id = 'projecttest' + Math.random().toString(10).slice(-6);
 var user_test_password = null;
 var user_info = null;
@@ -570,6 +571,42 @@ describe('My', () => {
                         });
                 });
         });
+        it('Admin validates database', (done) => {
+            let db = {
+                name: test_db_id,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
+
+            };
+            
+            chai.request('http://localhost:3000')
+                .post('/database/' + test_db_id)
+                .set('X-Api-Key', token_id)
+                .send(db)
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    chai.request('http://localhost:3000')
+                        .get('/database')
+                        .set('X-Api-Key', token_id)
+                        .end((err, res) => {
+  
+                            expect(res).to.have.status(200);
+                            let found = false;
+                            for(let i=0; i<res.body.length; i++){
+                                if(res.body[i].name == test_db_id){
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            assert(found);
+                            done();
+                        });
+                });
+        });
 
     });
 
@@ -662,23 +699,29 @@ describe('My', () => {
 
         it('User requests database', (done) => {
             let db = {
-                name: test_db_id,
-                type: 'mysql'
+                name: test_db_id2,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
+
             };
             chai.request('http://localhost:3000')
-                .post('/requestdatabase/' + test_db_id)
+                .post('/requestdatabase/' + test_db_id2)
                 .set('X-Api-Key', user_token_id)
                 .send(db)
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/pending/database')
-                        .set('X-Api-Key', user_token_id)
+                        .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
-                                if(res.body[i].name == test_db_id){
+                                if(res.body[i].name == test_db_id2){
                                     found = true;
                                     break;
                                 }
@@ -689,35 +732,7 @@ describe('My', () => {
                 });
         });
 
-        it('Admin validates database', (done) => {
-            let db = {
-                name: test_db_id,
-                type: 'mysql'
-            };
-            
-            chai.request('http://localhost:3000')
-                .post('/database/' + test_db_id)
-                .set('X-Api-Key', user_token_id)
-                .send(db)
-                .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    chai.request('http://localhost:3000')
-                        .get('/database')
-                        .set('X-Api-Key', user_token_id)
-                        .end((err, res) => {
-                            expect(res).to.have.status(200);
-                            let found = false;
-                            for(let i=0; i<res.body.length; i++){
-                                if(res.body[i].name == test_db_id){
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            assert(found);
-                            done();
-                        });
-                });
-        });
+       
 
         it('User delete database', (done) => {
 
