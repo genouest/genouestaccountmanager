@@ -148,7 +148,7 @@ export class DatabasesComponent implements OnInit {
             this.dbService.refuse(ws).subscribe(
                 resp => { this.dbmsg = resp['message'];
                 this.pending_list()},
-                err => { this.dbmsg_error = err.error.message; console.log('failed to delete database')}
+                err => { this.dbmsg_error = err.error.message; console.log('failed to reject database')}
             )
             
         });
