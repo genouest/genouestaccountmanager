@@ -154,8 +154,7 @@ router.post('/project', async function (req, res) {
             'path': req.body.path,
             'orga': req.body.orga,
             'access': req.body.access,
-            'dmpid': req.body.dmpid,
-            'researchoutputid': req.body.researchoutputid
+            'dmpUuid': req.body.dmpUuid,
         }, req.body.uuid, user.uid);
     } catch (e) {
         logger.error(e);
@@ -373,8 +372,7 @@ router.post('/ask/project', async function (req, res) {
             'cpu': req.body.cpu,
             'description': req.body.description,
             'orga': req.body.orga,
-            'dmpid': req.body.dmpid,
-            'researchoutputid': req.body.researchoutputid,
+            'dmpUuid': req.body.dmpUuid,
         }, user);
     } catch (e) {
         logger.error(e);
@@ -532,14 +530,12 @@ router.get('/project/:id/users', async function (req, res) {
 });
 
 //fetchs a dmp based on his ID, using the dmp OPIDoR API
-router.post('/dmp/:planid/:researchoutputid', async function (req, res) {
+router.post('/dmp/:dmpUuid', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    let plan_id = req.params.planid;
-    let research_output_id = req.params.researchoutputid;
-    await prjsrv.request_DMP(plan_id, research_output_id).then(response => {
+    await prjsrv.request_DMP(req.params.dmpUuid).then(response => {
         console.log(response);
         res.send({ message: 'DMP found', data: response });
     });
@@ -588,9 +584,8 @@ router.post('/project/dmp/remote_request', async function (req, res) {
         res.status(403).send({ message: 'Not authorized or project already exists' });
         return;
     }
-    let plan_id = req.params.planid;
-    let research_output_id = req.params.researchoutputid;
-    let dmp = await prjsrv.request_DMP(plan_id, research_output_id);
+    let dmpUuid = req.params.dmpUuid;
+    let dmp = await prjsrv.request_DMP(dmpUuid);
     try {
         await prjsrv.create_project_request({
             'id':   dmp.project.acronym,
@@ -600,8 +595,7 @@ router.post('/project/dmp/remote_request', async function (req, res) {
             'cpu': req.body.cpu,
             'description': req.body.description,
             'orga': req.body.orga,
-            'dmpid': req.body.dmpid,
-            'researchoutputid': req.body.researchoutputid,
+            'dmpUuid': req.body.dmpUuid,
         }, user);
     } catch (e) {
         logger.error(e);

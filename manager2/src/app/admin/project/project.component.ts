@@ -98,7 +98,7 @@ export class ProjectComponent implements OnInit {
                 this.project = resp;
                 console.log(this.project)
                 this.dmp_linked = false;
-                if (this.project.dmpid != null) { this.dmp_linked = true };
+                if (this.project.dmpUuid != null) { this.dmp_linked = true };
                 this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
@@ -211,7 +211,7 @@ export class ProjectComponent implements OnInit {
 
     display_dmp_to_admin() {
         this.dmp_visible = !this.dmp_visible;
-        this.projectsService.fetch_dmp(this.project.dmpid, this.project.researchoutputid).subscribe(
+        this.projectsService.fetch_dmp(this.project.dmpUuid).subscribe(
             resp => { console.log(resp.data);
                 console.log(this.project)
                 this.dmp = resp.data;

@@ -211,49 +211,37 @@ export class ProjectComponent implements OnInit {
         return res;
     }
 
-    get_dmp(dmpid, researchoutputid) {
+    get_dmp(dmpUuid) {
         this.dmp_err_msg = ""
         this.dmp_msg = ""
         
-        if (!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "") && !(this.new_project.researchoutputid == null) && !(this.new_project.researchoutputid == "")) {
-            this.projectsService.fetch_dmp(dmpid, researchoutputid).subscribe(
+        if (!(this.new_project.dmpUuid == null) && !(this.new_project.dmpUuid == "")) {
+            this.projectsService.fetch_dmp(dmpUuid).subscribe(
                 resp => {
-                    console.log(resp)
                     let funders = []
                     let data = resp.data.project.funding
                     for (data in resp.data.project.funding) {
-                        if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
+                        if (resp.data.project.funding[data].fundingStatus == "Approuvé" || resp.data.project.funding[data].fundingStatus == "Granted") {
                             funders.push(resp.data.project.funding[data].funder.name)
                         }
                         
-
                     }
-                    
+                    let research_output = resp.data.researchOutput[0];
                     console.log(resp.data.researchOutput)
-                    let research_output = null
-                    for (var elem of resp.data.researchOutput){
-                        if (elem.research_output_id == this.new_project.researchoutputid) {
-                            research_output = elem  
-                            break
-                        }
-                    }
+                    
                     if (research_output == null) {
                         this.dmp_msg = ''
                         this.dmp_err_msg = "No research output was found with this ID"
                     }
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
-                    console.log('ici')
-                    console.log(research_output.researchOutputDescription)
                     this.new_project = {
                         'id': resp.data.project.acronym,
                         'description': this.convertToPlain(research_output.researchOutputDescription.description),
                         'orga': funders,
                         'size': research_output.dataStorage.estimatedVolume,
-                        'dmpid': this.new_project.dmpid,
-                        'researchoutputid': this.new_project.researchoutputid
+                        'dmpUuid': this.new_project.dmpUuid,
                     };
-                    console.log(this.new_project)
 
                 },
                 err => {
@@ -326,7 +314,7 @@ export class ProjectComponent implements OnInit {
     display_dmp_to_user() {
         this.dmp_visible = !this.dmp_visible;
 
-        this.projectsService.fetch_dmp(this.selectedProject.dmpid, this.selectedProject.researchoutputid).subscribe(
+        this.projectsService.fetch_dmp(this.selectedProject.dmpUuid).subscribe(
             resp => {this.dmp = resp.data;
             console.log(resp.data)},
             err => console.log('dmperr')

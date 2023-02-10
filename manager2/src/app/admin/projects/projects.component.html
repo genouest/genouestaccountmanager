@@ -136,10 +136,10 @@
                   <td>{{pending.cpu}}</td>
                   <td>{{pending.orga}}</td>
                   <td>
-                    <div *ngIf="pending.dmpid != null">
+                    <div *ngIf="pending.dmpUuid != null">
                       <span [class]="'dmp-badge status-linked'">Linked</span>
                     </div>
-                    <div *ngIf="pending.dmpid == null">
+                    <div *ngIf="pending.dmpUuid == null">
                       <span [class]="'dmp-badge status-legacy'">Legacy</span>
                     </div>
                   </td>

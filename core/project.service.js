@@ -11,6 +11,7 @@ const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
 const idsrv = require('../core/id.service.js');
 const usrsrv = require('../core/user.service.js');
+const { config } = require('chai');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -146,7 +147,7 @@ async function remove_project_request(uuid, action_owner = 'auto') {
     }
 }
 
-async function request_DMP(dmpid, research_output) {
+async function request_DMP(dmpUuid) {
 
     let redis_client = idsrv.redis();
     console.log('get token');
@@ -162,9 +163,9 @@ async function request_DMP(dmpid, research_output) {
 
         "grant_type": "client_credentials",
 
-        "client_id": "b00dadbf-f8c8-422f-9a81-ae798c527613",
+        "client_id": CONFIG.dmp.client_id,
 
-        "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000"
+        "client_secret": CONFIG.dmp.client_secret,
 
     };
 
@@ -175,7 +176,7 @@ async function request_DMP(dmpid, research_output) {
         }
     };
 
-    return await axios.post('https://opidor-preprod.inist.fr/api/v1/authenticate', data, options).then(response => {
+    return await axios.post( CONFIG.dmp.dmp_opidor_url + '/api/v1/authenticate', data, options).then(response => {
         let response_data = null;
         response_data = response.data;
         let expiration = response_data.expires_in;
@@ -194,7 +195,7 @@ async function request_DMP(dmpid, research_output) {
                 Authorization: `Bearer ${response_data.access_token}`
             }
         };
-        return axios.get(`https://opidor-preprod.inist.fr/api/v1/madmp/plans/${dmpid}?research_outputs[]=${research_output}`, options);
+        return axios.get(CONFIG.dmp.dmp_opidor_url + `/api/v1/madmp/plans/research_outputs/${dmpUuid}`, options);
     }).then(response => { return response.data; });
 
 }

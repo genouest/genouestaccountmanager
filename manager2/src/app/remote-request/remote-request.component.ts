@@ -41,11 +41,7 @@ export class RemoteRequestComponent implements OnInit {
   rm_prj_err_msg: string
   rm_prj_msg_ok: string
 
-  plan_id: string
-  ro_id: string
-
-  dmpid: string
-  researchoutputid: string
+  dmpUuid: string
 
 
   constructor(
@@ -65,8 +61,7 @@ export class RemoteRequestComponent implements OnInit {
 
   async ngOnInit() {
 
-    this.dmpid = "2157"
-    this.researchoutputid = "2383"
+    this.dmpUuid = "928306e7-300f-4817-9480-ab24ebcf726a" //test
     this.new_project = {}
     this.manager_visible = true;
     this.session_user = await this.authService.profile;
@@ -92,28 +87,27 @@ export class RemoteRequestComponent implements OnInit {
     await this.route.queryParams.subscribe(params => {
         console.log(params); // { order: "popular" }
 
-        this.dmpid = params.plan_id;
-        this.researchoutputid = params.ro_id;
+        this.dmpUuid = params.dmpUuid;
         console.log(this.order); // popular
       });
     console.log('getting dmp')
-    await this.get_dmp(this.dmpid, this.researchoutputid);
+    await this.get_dmp(this.dmpUuid);
       
   }
 
-  get_dmp(dmpid, researchoutputid) {
+  get_dmp(dmpUuid) {
     this.dmp_err_msg = ""
     this.dmp_msg = ""
     console.log('here')
-    console.log((!(this.new_project.dmpid == null) && !(this.new_project.dmpid == "") && !(this.new_project.researchoutputid == null) && !(this.new_project.researchoutputid == "")))
-    if (!(this.dmpid == null) && !(this.dmpid == "") && !(this.researchoutputid == null) && !(this.researchoutputid == "")) {
-        this.projectsService.fetch_dmp(dmpid, researchoutputid).subscribe(
+    console.log((!(this.new_project.dmpUuid == null) && !(this.new_project.dmpUuid == "")))
+    if (!(this.dmpUuid == null) && !(this.dmpUuid == "") ) {
+        this.projectsService.fetch_dmp(dmpUuid).subscribe(
             resp => {
                 console.log(resp)
                 let funders = []
-                let data = resp.data.project.funding
+                let data = ""
                 for (data in resp.data.project.funding) {
-                    if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
+                    if (resp.data.project.funding[data].fundingStatus == "Approuvé" || resp.data.project.funding[data].fundingStatus == "Granted") {
                         funders.push(resp.data.project.funding[data].funder.name)
                     }
                     
@@ -131,14 +125,16 @@ export class RemoteRequestComponent implements OnInit {
                 this.dmp_available = true;  
                 console.log('description:')
                 console.log(research_output)
-                console.log(this.convertToPlain(research_output.researchOutputDescription.description))
+                console.log(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage)
+                // console.log(this.convertToPlain(research_output.dataStorage.genouestServiceRequest.initialRequest.justification))
                 this.new_project = {
                     'id': resp.data.project.acronym,
-                    'description': this.convertToPlain(research_output.researchOutputDescription.description),
+                    'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
                     'orga': funders,
-                    'size': research_output.dataStorage.estimatedVolume,
-                    'dmpid': this.dmpid,
-                    'researchoutputid': this.researchoutputid
+                    'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
+                    'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
+                    'dmpUuid': this.dmpUuid,
+                    'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
                 };
                 //AJOUTER CPU, GERER GENOUEST SERVICE REQUEST
                 console.log(this.new_project)

@@ -35,6 +35,12 @@
                     <td><span *ngIf="this.new_project.description !==undefined" class="validity-badge status-valid">Valid</span>
                         <span *ngIf="this.new_project.description ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
                 </tr>
+                <tr>
+                    <th>End of project date</th>
+                    <td>{{this.new_project.expire}}</td>
+                    <td><span *ngIf="this.new_project.expire !==undefined" class="validity-badge status-valid">Valid</span>
+                        <span *ngIf="this.new_project.expire ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
+                </tr>
             </table>
         </div>
 

@@ -90,7 +90,7 @@ export class ProjectsComponent implements OnInit {
             description: '',
             access: 'Group',
             path: '',
-            dmpid: null
+            dmpUuid: null
         }
         
             
@@ -176,8 +176,7 @@ export class ProjectsComponent implements OnInit {
             'access': this.new_project.access,
             'orga': this.new_project.orga,
             'path': this.new_project.path,
-            'dmpid': this.new_project.dmpid,
-            'researchoutputid': this.new_project.researchoutputid,
+            'dmpUuid': this.new_project.dmpUuid,
             'dmp_linked': (this.new_project.dmp_status=="Linked"),
             'expire': new Date(this.new_project.expire).getTime()}
                                ).subscribe(
