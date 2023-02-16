@@ -134,7 +134,7 @@ export class RemoteRequestComponent implements OnInit {
                     'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
                     'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
                     'dmpUuid': this.dmpUuid,
-                    'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
+                    'expire': new Date(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate).getTime(),
                 };
                 //AJOUTER CPU, GERER GENOUEST SERVICE REQUEST
                 console.log(this.new_project)
