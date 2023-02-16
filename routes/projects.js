@@ -373,6 +373,7 @@ router.post('/ask/project', async function (req, res) {
             'description': req.body.description,
             'orga': req.body.orga,
             'dmpUuid': req.body.dmpUuid,
+            'expire': req.body.expire
         }, user);
     } catch (e) {
         logger.error(e);
@@ -543,7 +544,6 @@ router.post('/dmp/:dmpUuid', async function (req, res) {
     
 
 });
-//2385/2721
 router.post('/project/dmp/remote_request', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send({ message: 'Not authorized' });
@@ -596,6 +596,7 @@ router.post('/project/dmp/remote_request', async function (req, res) {
             'description': req.body.description,
             'orga': req.body.orga,
             'dmpUuid': req.body.dmpUuid,
+            'expire': req.body.expire
         }, user);
     } catch (e) {
         logger.error(e);

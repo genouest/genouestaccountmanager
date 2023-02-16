@@ -237,10 +237,12 @@ export class ProjectComponent implements OnInit {
                     this.dmp_available = true;  
                     this.new_project = {
                         'id': resp.data.project.acronym,
-                        'description': this.convertToPlain(research_output.researchOutputDescription.description),
+                        'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
                         'orga': funders,
-                        'size': research_output.dataStorage.estimatedVolume,
+                        'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
+                        'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
                         'dmpUuid': this.new_project.dmpUuid,
+                        'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
                     };
 
                 },

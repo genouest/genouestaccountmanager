@@ -54,6 +54,12 @@
             <label for="new_project_description">Description</label>
             <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
           </div>
+          
+          <div class="form-group row col-sm-12">
+            <label for="new_project_expire">Expiration date</label>
+            <input type="date" id="new_project_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.expire"
+              class="form-control" />
+          </div>
 
         </div>
 
