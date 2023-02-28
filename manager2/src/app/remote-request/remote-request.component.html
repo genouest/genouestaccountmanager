@@ -1,61 +1,90 @@
-<div>
+<!-- <div> -->
+    <div *ngIf="project_request_success == false; else elseBlock">
+        <div class="card bg-light">
+            <div class="card-header">Data currently in the DMP</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tr *ngIf="this.new_project.id !==undefined; else elseBlock" class="table-success">
+                        <th>Project name</th>
+                        <td>{{this.new_project.id}}</td>
+                    </tr>
+                    <ng-template #elseBlock>
+                        <tr class="table-warning">
+                            <th>Project name</th>
+                            <td>{{this.new_project.id}}</td>
+                        </tr>
+                    </ng-template>
 
-    <div class="card bg-light">
-        <div class="card-header">Data currently in the DMP</div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <tr *ngIf="this.new_project.id !==undefined" class="table-success">
-                    <th>Project name</th>
-                    <td>{{this.new_project.id}}</td>
-                </tr>    
-                <tr *ngIf="this.new_project.id ==undefined" class="table-warning">
-                    <th>Project name</th>
-                    <td>{{this.new_project.id}}</td>
-                </tr>
-                <tr *ngIf="this.new_project.size !==undefined" class="table-success">
-                    <th>Size</th>
-                    <td>{{this.new_project.size}}</td>
-               </tr>
-               <tr *ngIf="this.new_project.size ==undefined" class="table-warning">
-                <th>Size</th>
-                <td>{{this.new_project.size}}</td>
-           </tr>
-                <tr *ngIf="this.new_project.cpu !==undefined" class="table-success">
-                    <th>CPU (hour)</th>
-                    <td>{{this.new_project.cpu}}</td>
-                </tr>
-                <tr *ngIf="this.new_project.cpu ==undefined" class="table-warning">
-                    <th>CPU (hour)</th>
-                    <td>{{this.new_project.cpu}}</td>
-                </tr>
-                <tr *ngIf="this.new_project.orga !==undefined" class="table-success">
-                    <th>Financing</th>
-                    <td>{{this.new_project.orga}}</td>
-              </tr>
-              <tr *ngIf="this.new_project.orga ==undefined" class="table-warning">
-                <th>Financing</th>
-                <td>{{this.new_project.orga}}</td>
-          </tr>
-                <tr *ngIf="this.new_project.description !==undefined" class="table-success">
-                    <th>Description</th>
-                    <td>{{this.new_project.description}}</td>
-                </tr>
-                <tr *ngIf="this.new_project.description ==undefined" class="table-warning">
-                    <th>Description</th>
-                    <td>{{this.new_project.description}}</td>
-                </tr>
-                <tr *ngIf="this.new_project.expire !==undefined" class="table-success">
-                    <th>End of project date</th>
-                    <td>{{this.new_project.expire}}</td>
-                </tr>
-                <tr *ngIf="this.new_project.expire ==undefined" class="table-warning">
-                    <th>End of project date</th>
-                    <td>{{this.new_project.expire}}</td>
-                </tr>
-            </table>
+                    <tr *ngIf="this.new_project.size !==undefined; else elseBlock" class="table-success">
+                        <th>Size</th>
+                        <td>{{this.new_project.size}}</td>
+                    </tr>
+                    <ng-template #elseBlock>
+                        <tr class="table-warning">
+                            <th>Size</th>
+                            <td>{{this.new_project.size}}</td>
+                        </tr>
+                    </ng-template>
+
+                    <tr *ngIf="this.new_project.cpu !==undefined; else elseBlock" class="table-success">
+                        <th>CPU (hour)</th>
+                        <td>{{this.new_project.cpu}}</td>
+                    </tr>
+                    <ng-template #elseBlock>
+                        <tr class="table-warning">
+                            <th>CPU (hour)</th>
+                            <td>{{this.new_project.cpu}}</td>
+                        </tr>
+                    </ng-template>
+
+                    <tr *ngIf="this.new_project.orga !==undefined; else elseBlock" class="table-success">
+                        <th>Financing</th>
+                        <td>{{this.new_project.orga}}</td>
+                    </tr>
+                    <ng-template #elseBlock>
+                        <tr class="table-warning">
+                            <th>Financing</th>
+                            <td>{{this.new_project.orga}}</td>
+                        </tr>
+                    </ng-template>
+
+                    <tr *ngIf="this.new_project.description !==undefined; else elseBlock" class="table-success">
+                        <th>Description</th>
+                        <td>{{this.new_project.description}}</td>
+                    </tr>
+                    <ng-template #elseBlock>
+                        <tr class="table-warning">
+                            <th>Description</th>
+                            <td>{{this.new_project.description}}</td>
+                        </tr>
+                    </ng-template>
+
+                    <tr *ngIf="this.new_project.expire !==undefined; else elseBlock" class="table-success">
+                        <th>End of project date</th>
+                        <td>{{this.new_project.expire}}</td>
+                    </tr>
+                    <ng-template #elseBlock>
+                        <tr class="table-warning">
+                            <th>End of project date</th>
+                            <td>{{this.new_project.expire}}</td>
+                        </tr>
+                    </ng-template>
+
+                </table>
+            </div>
+
         </div>
-
+        
+        <div *ngIf="request_msg" class="alert alert-success">{{request_msg}}</div>
+        <div *ngIf="request_err_msg" class="alert alert-danger">{{request_err_msg}}</div>
+        <button type="button " class="btn btn-primary" (click)="remote_project_request()">Send request</button>
+    
+    
     </div>
-    <button type="button " class="btn btn-primary"
-        (click)="remote_project_request()">Send request</button>
-</div>
+    <ng-template #elseBlock>
+        <div>
+            <div *ngIf="request_msg" class="alert alert-success">An email has been sent to admin</div>
+                
+        </div>
+    </ng-template>
+ 

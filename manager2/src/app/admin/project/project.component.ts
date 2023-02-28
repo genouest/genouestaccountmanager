@@ -26,7 +26,7 @@ export class ProjectComponent implements OnInit {
     dmp: any
     dmp_visible: boolean
     dmp_linked: boolean
-    dmp_funders: any
+    dmp_err_msg: string
 
     new_user_admin: string = ''
     remove_user_admin: string = ''
@@ -88,6 +88,27 @@ export class ProjectComponent implements OnInit {
             err => console.log('failed to get config')
         );
         this.dmp_visible = false;
+        this.projectsService.fetch_dmp(this.project.dmpUuid).subscribe(
+            resp => { console.log(resp.data);
+                let research_output = resp.data.researchOutput[0];
+                this.dmp = {
+                    'lastModified': resp.data.meta.lastModifiedDate,
+                    'id': resp.data.project.acronym,
+                    'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
+                    'orga': [],
+                    'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
+                    'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
+                    'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
+                };
+                for (let data in resp.data.project.funding) {
+                    if (resp.data.project.funding[data].fundingStatus == "Approuvé" || resp.data.project.funding[data].fundingStatus == "Granted") {
+                        this.dmp.orga.push(resp.data.project.funding[data].funder.name)
+                    }
+                }},
+            err => {console.log(err);
+                this.dmp_err_msg = err}
+        );
+
         // console.log(this.dmp)
 
     }
@@ -211,23 +232,20 @@ export class ProjectComponent implements OnInit {
 
     display_dmp_to_admin() {
         this.dmp_visible = !this.dmp_visible;
-        this.projectsService.fetch_dmp(this.project.dmpUuid).subscribe(
-            resp => { console.log(resp.data);
-                console.log(this.project)
-                this.dmp = resp.data;
-                this.dmp.researchOutput[0].researchOutputDescription.description = this.dmp.researchOutput[0].researchOutputDescription.description.replace(/<\/?[^>]+>/gi, ' ')
-                this.dmp_funders = []
-                let data = resp.data.project.funding
-                for (data in resp.data.project.funding) {
-                    if (resp.data.project.funding[data].fundingStatus == "Approuvé") {
-                        this.dmp_funders.push(resp.data.project.funding[data].funder.name)
-                    }
-                    
-
-                }},
-            err => console.log('dmperr')
-        );
     }
 
+    
+
+    convertToPlain(html){
+
+        // Create a new div element
+        var tempDivElement = document.createElement("div");
+        
+        // Set the HTML content with the given value
+        tempDivElement.innerHTML = html;
+        
+        // Retrieve the text property of the element 
+        return tempDivElement.textContent || tempDivElement.innerText || "";
+    }
 
 }

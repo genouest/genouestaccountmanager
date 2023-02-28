@@ -6,6 +6,7 @@ import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { Table } from 'primeng/table';
+import {Router} from "@angular/router"
 
 @Component({
   selector: 'app-remote-request',
@@ -34,12 +35,10 @@ export class RemoteRequestComponent implements OnInit {
   order: any
   request_err_msg: string
   request_msg: string
-
+  project_request_success: boolean
   oldGroup: string
 
   msg: string
-  rm_prj_err_msg: string
-  rm_prj_msg_ok: string
 
   dmpUuid: string
 
@@ -61,11 +60,11 @@ export class RemoteRequestComponent implements OnInit {
 
   async ngOnInit() {
 
-    this.dmpUuid = "928306e7-300f-4817-9480-ab24ebcf726a" //test
+
     this.new_project = {}
     this.manager_visible = true;
     this.session_user = await this.authService.profile;
-
+    this.project_request_success = false;
 
     this.configService.config.subscribe(
         resp => {
@@ -134,7 +133,8 @@ export class RemoteRequestComponent implements OnInit {
                     'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
                     'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
                     'dmpUuid': this.dmpUuid,
-                    'expire': new Date(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate).getTime(),
+                    'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
+                    // 'expire': new Date(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate).getTime(),
                 };
                 //AJOUTER CPU, GERER GENOUEST SERVICE REQUEST
                 console.log(this.new_project)
@@ -157,21 +157,29 @@ remote_project_request() {
   console.log(this.new_project)
   this.request_msg = '';
   this.request_err_msg = '';
-  if (!this.new_project.includes(undefined)) {
-      this.request_err_msg = 'Your DMP is missing essential information';
-      return;
+  for (let data in this.new_project) {
+    if (data == undefined) {
+        this.request_err_msg = 'Your DMP is missing essential information';
+        return;
+    }
   }
+  
+  console.log('sending')
   this.projectsService.askNew(this.new_project).subscribe(
       resp => {
-          this.request_msg = 'An email have been sent to admin';
+            console.log(resp)
+          this.request_msg = 'An email has been sent to admin';
+          this.project_request_success = true;
           this.new_project = {};
       },
       err => {
-          console.log('failed to get project users', err);
+          console.log(err);
           this.request_err_msg = err.error.message;
       }
   )
 }
+
+
 convertToPlain(html){
 
   // Create a new div element
