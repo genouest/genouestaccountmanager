@@ -157,8 +157,8 @@ remote_project_request() {
   console.log(this.new_project)
   this.request_msg = '';
   this.request_err_msg = '';
-  if (!this.new_project.id) {
-      this.request_err_msg = 'Project name is mandatory';
+  if (!this.new_project.includes(undefined)) {
+      this.request_err_msg = 'Your DMP is missing essential information';
       return;
   }
   this.projectsService.askNew(this.new_project).subscribe(

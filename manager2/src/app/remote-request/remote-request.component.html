@@ -3,43 +3,54 @@
     <div class="card bg-light">
         <div class="card-header">Data currently in the DMP</div>
         <div class="card-body">
-            <table class="table">
-                <tr>
+            <table class="table table-striped">
+                <tr *ngIf="this.new_project.id !==undefined" class="table-success">
                     <th>Project name</th>
                     <td>{{this.new_project.id}}</td>
-                    <td><span *ngIf="this.new_project.id !==undefined" class="validity-badge status-valid">Valid</span>
-                        <span *ngIf="this.new_project.id ==undefined" class="validity-badge status-unvalid">Unvalid</span>
-                    </td>
+                </tr>    
+                <tr *ngIf="this.new_project.id ==undefined" class="table-warning">
+                    <th>Project name</th>
+                    <td>{{this.new_project.id}}</td>
                 </tr>
-                <tr>
+                <tr *ngIf="this.new_project.size !==undefined" class="table-success">
                     <th>Size</th>
                     <td>{{this.new_project.size}}</td>
-                    <td><span *ngIf="this.new_project.size !==undefined " class="validity-badge status-valid">Valid</span>
-                        <span *ngIf="this.new_project.size ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
-                </tr>
-                <tr>
+               </tr>
+               <tr *ngIf="this.new_project.size ==undefined" class="table-warning">
+                <th>Size</th>
+                <td>{{this.new_project.size}}</td>
+           </tr>
+                <tr *ngIf="this.new_project.cpu !==undefined" class="table-success">
                     <th>CPU (hour)</th>
                     <td>{{this.new_project.cpu}}</td>
-                    <td><span *ngIf="this.new_project.cpu !==undefined" class="validity-badge status-valid">Valid</span>
-                        <span *ngIf="this.new_project.cpu ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
                 </tr>
-                <tr>
+                <tr *ngIf="this.new_project.cpu ==undefined" class="table-warning">
+                    <th>CPU (hour)</th>
+                    <td>{{this.new_project.cpu}}</td>
+                </tr>
+                <tr *ngIf="this.new_project.orga !==undefined" class="table-success">
                     <th>Financing</th>
                     <td>{{this.new_project.orga}}</td>
-                    <td><span *ngIf="this.new_project.orga !==undefined" class="validity-badge status-valid">Valid</span>
-                        <span *ngIf="this.new_project.orga ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
-                </tr>
-                <tr>
+              </tr>
+              <tr *ngIf="this.new_project.orga ==undefined" class="table-warning">
+                <th>Financing</th>
+                <td>{{this.new_project.orga}}</td>
+          </tr>
+                <tr *ngIf="this.new_project.description !==undefined" class="table-success">
                     <th>Description</th>
                     <td>{{this.new_project.description}}</td>
-                    <td><span *ngIf="this.new_project.description !==undefined" class="validity-badge status-valid">Valid</span>
-                        <span *ngIf="this.new_project.description ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
                 </tr>
-                <tr>
+                <tr *ngIf="this.new_project.description ==undefined" class="table-warning">
+                    <th>Description</th>
+                    <td>{{this.new_project.description}}</td>
+                </tr>
+                <tr *ngIf="this.new_project.expire !==undefined" class="table-success">
                     <th>End of project date</th>
                     <td>{{this.new_project.expire}}</td>
-                    <td><span *ngIf="this.new_project.expire !==undefined" class="validity-badge status-valid">Valid</span>
-                        <span *ngIf="this.new_project.expire ==undefined" class="validity-badge status-unvalid">Unvalid</span></td>
+                </tr>
+                <tr *ngIf="this.new_project.expire ==undefined" class="table-warning">
+                    <th>End of project date</th>
+                    <td>{{this.new_project.expire}}</td>
                 </tr>
             </table>
         </div>
