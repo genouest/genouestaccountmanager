@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.27
+
+* fix user removal for gomail
+
 ## 1.4.26
 
 * prefix training groups with *tp_* and use config *mail_template* to define training accounts email
