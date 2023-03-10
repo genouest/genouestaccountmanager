@@ -141,7 +141,7 @@ module.exports = {
             });
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'create list ' + name , 'logs': []});
         } catch (err) {
-            logger.error('Failed to create list ' + name, err);
+            logger.error('Failed to create list ' + name);
         }
     },
 
@@ -161,8 +161,7 @@ module.exports = {
                         'email': [email],
                         'message': CONFIG.gomail.optout_message,
                         'message_html': CONFIG.gomail.optout_message_html
-                    }
-                }, {
+                    },
                     headers: gomailHeaders,
                     httpsAgent: gomailAgent
                 }
@@ -171,7 +170,7 @@ module.exports = {
 
         } catch (err) {
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'unsubscribe error with ' + email + 'in mailing list' , 'logs': []});
-            logger.error('Failed to remove ' + email + ' from mailing list', err);
+            logger.error('Failed to remove ' + email + ' from mailing list');
         }
     },
 
@@ -217,7 +216,7 @@ module.exports = {
             logger.info(oldemail+' unsubscribed');
         } catch(err) {
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'subscription update error with ' + newemail + 'in mailing list' , 'logs': []});
-            logger.error('Failed to update ' + newemail + ' to mailing list : ' + err );
+            logger.error('Failed to update ' + newemail + ' to mailing list');
         }
     },
 
@@ -238,10 +237,8 @@ module.exports = {
                 headers: gomailHeaders,
                 httpsAgent: gomailAgent
             });
-            // return ('', true);
         } catch(err) {
             logger.error('Failed to send mail : ' + err);
-            // return ('Failed to send mail : ' + err, false);
         }
     }
 };
