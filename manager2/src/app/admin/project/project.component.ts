@@ -4,6 +4,7 @@ import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
+import {ChangeDetectorRef} from '@angular/core'
 
 import { Table } from 'primeng/table';
 @Component({
@@ -24,6 +25,7 @@ export class ProjectComponent implements OnInit {
     oldGroup: string
 
     dmp: any
+    displayed_dmp: any[]
     dmp_visible: boolean
     dmp_linked: boolean
     dmp_err_msg: string
@@ -40,7 +42,8 @@ export class ProjectComponent implements OnInit {
         private router: Router,
         private groupService: GroupsService,
         private projectsService: ProjectsService,
-        private userService: UserService
+        private userService: UserService,
+        private ref: ChangeDetectorRef
     ) {
         this.project = {
             id: '',
@@ -65,6 +68,7 @@ export class ProjectComponent implements OnInit {
     }
 
     ngAfterViewInit(): void {
+        
     }
 
     ngOnInit() {
@@ -88,28 +92,7 @@ export class ProjectComponent implements OnInit {
             err => console.log('failed to get config')
         );
         this.dmp_visible = false;
-        this.projectsService.fetch_dmp(this.project.dmpUuid).subscribe(
-            resp => { console.log(resp.data);
-                let research_output = resp.data.researchOutput[0];
-                this.dmp = {
-                    'lastModified': resp.data.meta.lastModifiedDate,
-                    'id': resp.data.project.acronym,
-                    'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
-                    'orga': [],
-                    'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
-                    'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
-                    'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
-                };
-                for (let data in resp.data.project.funding) {
-                    if (resp.data.project.funding[data].fundingStatus == "Approuvé" || resp.data.project.funding[data].fundingStatus == "Granted") {
-                        this.dmp.orga.push(resp.data.project.funding[data].funder.name)
-                    }
-                }},
-            err => {console.log(err);
-                this.dmp_err_msg = err}
-        );
-
-        // console.log(this.dmp)
+        
 
     }
 
@@ -119,7 +102,10 @@ export class ProjectComponent implements OnInit {
                 this.project = resp;
                 console.log(this.project)
                 this.dmp_linked = false;
-                if (this.project.dmpUuid != null) { this.dmp_linked = true };
+                if (this.project.dmpUuid != null) { 
+                    this.dmp_linked = true;
+                    this.get_dmp()
+                };
                 this.project.expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
@@ -231,10 +217,49 @@ export class ProjectComponent implements OnInit {
     }
 
     display_dmp_to_admin() {
-        this.dmp_visible = !this.dmp_visible;
+        
+        
+        
+
     }
 
-    
+    get_dmp() {
+        this.projectsService.fetch_dmp(this.project.dmpUuid).subscribe(
+            resp => { console.log(resp);
+                let research_output = resp.researchOutput[0];
+                this.dmp = {
+                    'lastModified': resp.meta.lastModifiedDate,
+                    'id': resp.project.acronym,
+                    'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
+                    'orga': [],
+                    'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
+                    'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
+                    'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
+                };
+                
+                for (let data in resp.project.funding) {
+                    if (resp.project.funding[data].fundingStatus == "Approuvé" || resp.project.funding[data].fundingStatus == "Granted") {
+                        this.dmp.orga.push(resp.project.funding[data].funder.name)
+                    }
+                }
+                
+                let key_list = Object.keys(this.dmp)
+                this.displayed_dmp = []
+                console.log(key_list.length)
+                for (let i = 0 ; i < key_list.length; i++) {
+                    let key = key_list[i]
+                    this.displayed_dmp.push({'key': key, 'value': this.dmp[key], 'synchronized': (this.dmp[key] == this.project[key])});
+                    //check if value == project value and make it another variable in displayedDMP
+                }
+                console.log(this.displayed_dmp)
+                this.dmp_visible = !this.dmp_visible;
+                
+            },
+            err => {console.log('ERR:'); console.log(err);
+                this.dmp_err_msg = err;
+                }
+        ); 
+    }
 
     convertToPlain(html){
 

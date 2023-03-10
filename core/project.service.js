@@ -148,17 +148,6 @@ async function remove_project_request(uuid, action_owner = 'auto') {
 }
 
 async function request_DMP(dmpUuid) {
-
-    let redis_client = idsrv.redis();
-    console.log('get token');
-    await redis_client.get('my:dmp:token', function (err, value) {
-        console.log(value);
-        if (value != null) {
-            return value;
-        }
-    });
-
-
     const data = {
 
         "grant_type": "client_credentials",
@@ -179,23 +168,18 @@ async function request_DMP(dmpUuid) {
     return await axios.post( CONFIG.dmp.dmp_opidor_url + '/api/v1/authenticate', data, options).then(response => {
         let response_data = null;
         response_data = response.data;
-        let expiration = response_data.expires_in;
-
-        let current_time = Math.floor((new Date()).getTime() / 1000);
-        let expiration_time = current_time - expiration;
-        let redis_client = idsrv.redis();
-        redis_client.set('my:dmp:token', response_data.access_token, function (err, reply) {
-            redis_client.expire('my:dmp:token', expiration_time);
-            
-        });
-
         const options = {
             headers: {
                 accept: "application/json",
                 Authorization: `Bearer ${response_data.access_token}`
             }
         };
+        
         return axios.get(CONFIG.dmp.dmp_opidor_url + `/api/v1/madmp/plans/research_outputs/${dmpUuid}`, options);
-    }).then(response => { return response.data; });
+    }).catch(error => {
+        console.log('could not authenticate to DMP OPIDoR');
+        return error;
+
+    });
 
 }

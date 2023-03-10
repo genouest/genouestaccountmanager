@@ -97,8 +97,6 @@ export class RemoteRequestComponent implements OnInit {
   get_dmp(dmpUuid) {
     this.dmp_err_msg = ""
     this.dmp_msg = ""
-    console.log('here')
-    console.log((!(this.new_project.dmpUuid == null) && !(this.new_project.dmpUuid == "")))
     if (!(this.dmpUuid == null) && !(this.dmpUuid == "") ) {
         this.projectsService.fetch_dmp(dmpUuid).subscribe(
             resp => {
@@ -109,8 +107,6 @@ export class RemoteRequestComponent implements OnInit {
                     if (resp.data.project.funding[data].fundingStatus == "Approuvé" || resp.data.project.funding[data].fundingStatus == "Granted") {
                         funders.push(resp.data.project.funding[data].funder.name)
                     }
-                    
-
                 }
                 
                 console.log(resp.data.researchOutput)
@@ -164,7 +160,6 @@ remote_project_request() {
     }
   }
   
-  console.log('sending')
   this.projectsService.askNew(this.new_project).subscribe(
       resp => {
             console.log(resp)

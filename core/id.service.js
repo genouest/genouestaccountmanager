@@ -34,8 +34,6 @@ var ID_STRATEGY = ID_STRATEGY_INCR;
 var userIds = [];
 var groupIds = [];
 var idsLoaded = false;
-// redis_client.set('my:dmp:token', 'xxx');
-// redis_client.set('my:dmp:expiration', '0');
 
 exports.redis = function () { return redis_client;};
 
