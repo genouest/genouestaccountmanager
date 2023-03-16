@@ -206,12 +206,12 @@ module.exports = {
                     'data': {
                         'email': [oldemail],
                         'skip': true
-                    }
-                }, {
+                    },
                     headers: gomailHeaders,
                     httpsAgent: gomailAgent
                 }
             );
+
             await dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'remove ' + oldemail + 'from mailing list' , 'logs': []});
             logger.info(oldemail+' unsubscribed');
         } catch(err) {
