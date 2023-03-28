@@ -22,6 +22,7 @@ exports.create_project_request = create_project_request;
 exports.remove_project_request = remove_project_request;
 // exports.auth_from_opidor = auth_from_opidor;
 // exports.opidor_token_refresh = opidor_token_refresh;
+exports.opidor_auth = opidor_auth;
 exports.request_DMP = request_DMP;
 
 async function create_project(new_project, uuid, action_owner = 'auto') {
@@ -147,7 +148,8 @@ async function remove_project_request(uuid, action_owner = 'auto') {
     }
 }
 
-async function request_DMP(dmpUuid) {
+
+async function opidor_auth() {
     const data = {
 
         "grant_type": "client_credentials",
@@ -165,21 +167,27 @@ async function request_DMP(dmpUuid) {
         }
     };
 
-    return await axios.post( CONFIG.dmp.dmp_opidor_url + '/api/v1/authenticate', data, options).then(response => {
-        let response_data = null;
-        response_data = response.data;
+    return await axios.post( CONFIG.dmp.dmp_opidor_url + '/api/v1/authenticate', data, options);
+
+}
+
+async function request_DMP(dmpUuid) {
+    try {
+        let auth_resp = await this.opidor_auth();
         const options = {
             headers: {
                 accept: "application/json",
-                Authorization: `Bearer ${response_data.access_token}`
+                Authorization: `Bearer ${auth_resp.data.access_token}`
             }
         };
-        
         return axios.get(CONFIG.dmp.dmp_opidor_url + `/api/v1/madmp/plans/research_outputs/${dmpUuid}`, options);
-    }).catch(error => {
-        console.log('could not authenticate to DMP OPIDoR');
+
+    } catch(error) {
+        console.log('failed to auth');
         return error;
-
-    });
-
+    }
+        
+    
+    
+    
 }

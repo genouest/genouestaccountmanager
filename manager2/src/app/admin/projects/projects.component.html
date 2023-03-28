@@ -192,6 +192,7 @@
           <th>Cpu (Hour)</th>
           <th>Creation</th>
           <th>Expiration</th>
+          <th>Synchronized with DMP</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-project>
@@ -217,6 +218,11 @@
           </td>
           <td>{{date_convert(project.created_at)}}</td>
           <td>{{date_convert(project.expire)}}</td>
+          <td>
+            <div [ngClass]="{'badge-success': (project.dmp_synchronized), 'badge-warning': (!project.dmp_synchronized)}">
+              {{project.dmp_synchronized}}
+          </div>
+          </td>
           
         </tr>
       </ng-template>

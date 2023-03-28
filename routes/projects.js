@@ -140,7 +140,11 @@ router.post('/project', async function (req, res) {
         res.status(403).send({ message: 'Not authorized or project already exists' });
         return;
     }
-
+    let dmp_synchronized = false;
+    if (req.body.dmpUuid) {
+        let dmp_synchronized = true;
+    }
+    
     try {
         await prjsrv.create_project({
             'id': req.body.id,
@@ -154,6 +158,7 @@ router.post('/project', async function (req, res) {
             'orga': req.body.orga,
             'access': req.body.access,
             'dmpUuid': req.body.dmpUuid,
+            'dmp_synchronized': dmp_synchronized
         }, req.body.uuid, user.uid);
     } catch (e) {
         logger.error(e);
@@ -361,6 +366,10 @@ router.post('/ask/project', async function (req, res) {
         return;
     }
 
+    let dmp_synchronized = false;
+    if (req.body.dmpUuid) {
+        let dmp_synchronized = true;
+    }
 
     try {
         await prjsrv.create_project_request({
@@ -372,7 +381,8 @@ router.post('/ask/project', async function (req, res) {
             'description': req.body.description,
             'orga': req.body.orga,
             'dmpUuid': req.body.dmpUuid,
-            'expire': req.body.expire
+            'expire': req.body.expire,
+            'dmp_synchronized': dmp_synchronized
         }, user);
     } catch (e) {
         logger.error(e);
@@ -584,6 +594,10 @@ router.post('/project/dmp/remote_request', async function (req, res) {
         return;
     }
     let dmpUuid = req.params.dmpUuid;
+    let dmp_synchronized = false;
+    if (dmpUuid) {
+        let dmp_synchronized = true;
+    }
     let dmp = await prjsrv.request_DMP(dmpUuid);
     try {
         await prjsrv.create_project_request({
@@ -595,7 +609,8 @@ router.post('/project/dmp/remote_request', async function (req, res) {
             'description': req.body.description,
             'orga': req.body.orga,
             'dmpUuid': req.body.dmpUuid,
-            'expire': req.body.expire
+            'expire': req.body.expire,
+            'dmp_synchronized': dmp_synchronized
         }, user);
     } catch (e) {
         logger.error(e);
