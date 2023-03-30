@@ -218,16 +218,17 @@ export class ProjectComponent implements OnInit {
         if (!(this.new_project.dmpUuid == null) && !(this.new_project.dmpUuid == "")) {
             this.projectsService.fetch_dmp(dmpUuid).subscribe(
                 resp => {
+                    console.log(resp)
                     let funders = []
-                    let data = resp.data.project.funding
-                    for (data in resp.data.project.funding) {
-                        if (resp.data.project.funding[data].fundingStatus == "Approuvé" || resp.data.project.funding[data].fundingStatus == "Granted") {
-                            funders.push(resp.data.project.funding[data].funder.name)
+                    let data = resp.project.funding
+                    for (data in resp.project.funding) {
+                        if (resp.project.funding[data].fundingStatus == "Approuvé" || resp.project.funding[data].fundingStatus == "Granted") {
+                            funders.push(resp.project.funding[data].funder.name)
                         }
                         
                     }
-                    let research_output = resp.data.researchOutput[0];
-                    console.log(resp.data.researchOutput)
+                    let research_output = resp.researchOutput[0];
+                    console.log(resp.researchOutput)
                     
                     if (research_output == null) {
                         this.dmp_msg = ''
@@ -236,7 +237,7 @@ export class ProjectComponent implements OnInit {
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
                     this.new_project = {
-                        'id': resp.data.project.acronym,
+                        'id': resp.project.acronym,
                         'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
                         'orga': funders,
                         'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
@@ -268,7 +269,7 @@ export class ProjectComponent implements OnInit {
     //                 let dmpid = this.new_project.dmpid
     //                 let data = null
     //                 try {
-    //                 for (data of resp.data.project.funding) {
+    //                 for (data of resp.project.funding) {
     //                     console.log(data)
     //                     if (data.fundingStatus == "Granted" || data.fundingStatus == "Approuvé") {
     //                         funders.push(data.funder.name)
@@ -280,7 +281,7 @@ export class ProjectComponent implements OnInit {
     //             catch (error){}
     //                 console.log(funders )
     //                 let research_output = null
-    //                 for (var elem of resp.data.researchOutput){
+    //                 for (var elem of resp.researchOutput){
     //                     console.log(elem.research_output_id)
     //                     if (elem.research_output_id == "2100") {
     //                         research_output = elem
@@ -291,14 +292,14 @@ export class ProjectComponent implements OnInit {
     //                 this.dmp_msg = resp.message;
     //                 this.dmp_available = true;  
     //                 this.new_project = {
-    //                     'id': resp.data.project.title,
-    //                     'description': this.convertToPlain(resp.data.project.description),
+    //                     'id': resp.project.title,
+    //                     'description': this.convertToPlain(resp.project.description),
     //                     'orga': funders,
     //                     'size': research_output.dataStorage.estimatedVolume,
     //                     'dmpid': dmpid,
 
     //                 };
-    //                 console.log(resp.data.project)
+    //                 console.log(resp.project)
     //                 console.log(this.new_project.id);
     //             },
     //             err => {
@@ -317,8 +318,8 @@ export class ProjectComponent implements OnInit {
         this.dmp_visible = !this.dmp_visible;
 
         this.projectsService.fetch_dmp(this.selectedProject.dmpUuid).subscribe(
-            resp => {this.dmp = resp.data;
-            console.log(resp.data)},
+            resp => {this.dmp = resp;
+            console.log(resp)},
             err => console.log('dmperr')
         );
     }

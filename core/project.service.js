@@ -171,13 +171,18 @@ async function opidor_auth() {
 
 }
 
-async function request_DMP(dmpUuid) {
+async function request_DMP(dmpUuid,auth_token= undefined) {
     try {
-        let auth_resp = await this.opidor_auth();
+        if (auth_token == undefined) {
+            let auth_resp = await this.opidor_auth();
+            auth_token = auth_resp.data.access_token;
+
+        }
+        
         const options = {
             headers: {
                 accept: "application/json",
-                Authorization: `Bearer ${auth_resp.data.access_token}`
+                Authorization: `Bearer ${auth_token}`
             }
         };
         return axios.get(CONFIG.dmp.dmp_opidor_url + `/api/v1/madmp/plans/research_outputs/${dmpUuid}`, options);

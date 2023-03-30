@@ -218,7 +218,7 @@
           </td>
           <td>{{date_convert(project.created_at)}}</td>
           <td>{{date_convert(project.expire)}}</td>
-          <td>
+          <td *ngIf="(project.dmpUuid != undefined)">
             <div [ngClass]="{'badge-success': (project.dmp_synchronized), 'badge-warning': (!project.dmp_synchronized)}">
               {{project.dmp_synchronized}}
           </div>

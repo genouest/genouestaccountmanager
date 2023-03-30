@@ -248,7 +248,12 @@ export class ProjectComponent implements OnInit {
                 console.log(key_list.length)
                 for (let i = 0 ; i < key_list.length; i++) {
                     let key = key_list[i]
-                    this.displayed_dmp.push({'key': key, 'value': this.dmp[key], 'synchronized': (this.dmp[key] == this.project[key])});
+                    if (key == 'lastModified') {
+                        continue
+                    }
+                    console.log(this.dmp[key])
+                    console.log(this.project[key])
+                    this.displayed_dmp.push({'key': key, 'value': this.dmp[key], 'synchronized': (JSON.stringify(this.dmp[key]).toLowerCase() === JSON.stringify(this.project[key]).toLowerCase())});
                     //check if value == project value and make it another variable in displayedDMP
                 }
                 console.log(this.displayed_dmp)
