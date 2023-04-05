@@ -103,14 +103,14 @@ export class RemoteRequestComponent implements OnInit {
                 console.log(resp)
                 let funders = []
                 let data = ""
-                for (data in resp.data.project.funding) {
-                    if (resp.data.project.funding[data].fundingStatus == "Approuvé" || resp.data.project.funding[data].fundingStatus == "Granted") {
-                        funders.push(resp.data.project.funding[data].funder.name)
+                for (data in resp.project.funding) {
+                    if (resp.project.funding[data].fundingStatus == "Approuvé" || resp.project.funding[data].fundingStatus == "Granted") {
+                        funders.push(resp.project.funding[data].funder.name)
                     }
                 }
                 
-                console.log(resp.data.researchOutput)
-                let research_output = resp.data.researchOutput[0]
+                console.log(resp.researchOutput)
+                let research_output = resp.researchOutput[0]
 
                 if (research_output == null) {
                     this.dmp_msg = ''
@@ -123,7 +123,7 @@ export class RemoteRequestComponent implements OnInit {
                 console.log(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage)
                 // console.log(this.convertToPlain(research_output.dataStorage.genouestServiceRequest.initialRequest.justification))
                 this.new_project = {
-                    'id': resp.data.project.acronym,
+                    'id': resp.project.acronym,
                     'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
                     'orga': funders,
                     'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,

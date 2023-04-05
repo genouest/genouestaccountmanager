@@ -271,7 +271,8 @@ router.post('/project/:id', async function (req, res) {
             'description': req.body.description,
             'access': req.body.access,
             'orga': req.body.orga,
-            'path': req.body.path
+            'path': req.body.path,
+            'dmp_synchronized': req.body.dmp_synchronized
         }, user.uid);
     } catch (e) {
         logger.error(e);

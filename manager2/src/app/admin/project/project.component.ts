@@ -190,7 +190,8 @@ export class ProjectComponent implements OnInit {
                 'description': project.description,
                 'access': project.access,
                 'path': project.path,
-                'orga': project.orga
+                'orga': project.orga,
+                'dmp_synchronized': project.dmp_synchronized
             }
         ).subscribe(
             resp => {
@@ -216,12 +217,6 @@ export class ProjectComponent implements OnInit {
         return res;
     }
 
-    display_dmp_to_admin() {
-        
-        
-        
-
-    }
 
     get_dmp() {
         this.projectsService.fetch_dmp(this.project.dmpUuid).subscribe(
@@ -253,10 +248,22 @@ export class ProjectComponent implements OnInit {
                     }
                     console.log(this.dmp[key])
                     console.log(this.project[key])
+                    
                     this.displayed_dmp.push({'key': key, 'value': this.dmp[key], 'synchronized': (JSON.stringify(this.dmp[key]).toLowerCase() === JSON.stringify(this.project[key]).toLowerCase())});
+                    if (JSON.stringify(this.dmp[key]).toLowerCase() === JSON.stringify(this.project[key]).toLowerCase()) {
+                        console.log(this.dmp[key])
+                    }
+                    else {
+                        this.project.dmp_synchronized = false;
+                        // 
+                    }
                     //check if value == project value and make it another variable in displayedDMP
                 }
                 console.log(this.displayed_dmp)
+                if (this.project.dmp_synchronized == false) {
+                    // this.update_project(this.project)
+
+                }
                 this.dmp_visible = !this.dmp_visible;
                 
             },
@@ -276,6 +283,14 @@ export class ProjectComponent implements OnInit {
         
         // Retrieve the text property of the element 
         return tempDivElement.textContent || tempDivElement.innerText || "";
+    }
+
+    is_project_synchronized() {
+        for (let key in Object.keys(this.dmp)) {
+            if (this.dmp[key] != this.project[key]) {
+                return 
+            }
+        }
     }
 
 }
