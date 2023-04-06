@@ -561,8 +561,9 @@ router.post('/project/dmp/remote_request', async function (req, res) {
         return;
     }
     let user = null;
-    let isadmin = false;
+    
     try {
+        let isadmin = false;
         // change from email to real var
         user = await dbsrv.mongo_users().findOne({ email: req.body.mail });
         isadmin = await rolsrv.is_admin(user);

@@ -231,27 +231,27 @@ export class ProjectComponent implements OnInit {
                     'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
                     'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
                 };
-                
+
                 for (let data in resp.project.funding) {
+                    
                     if (resp.project.funding[data].fundingStatus == "Approuvé" || resp.project.funding[data].fundingStatus == "Granted") {
+                        
                         this.dmp.orga.push(resp.project.funding[data].funder.name)
+                        
                     }
                 }
-                
+
                 let key_list = Object.keys(this.dmp)
                 this.displayed_dmp = []
-                console.log(key_list.length)
                 for (let i = 0 ; i < key_list.length; i++) {
                     let key = key_list[i]
                     if (key == 'lastModified') {
                         continue
                     }
-                    console.log(this.dmp[key])
-                    console.log(this.project[key])
                     
-                    this.displayed_dmp.push({'key': key, 'value': this.dmp[key], 'synchronized': (JSON.stringify(this.dmp[key]).toLowerCase() === JSON.stringify(this.project[key]).toLowerCase())});
-                    if (JSON.stringify(this.dmp[key]).toLowerCase() === JSON.stringify(this.project[key]).toLowerCase()) {
-                        console.log(this.dmp[key])
+                    this.displayed_dmp.push({'key': key, 'value': this.dmp[key], 'synchronized': (this.dmp[key].toString().toLowerCase() == this.project[key].toString().toLowerCase())});
+                    if (this.dmp[key].toString().toLowerCase() === this.project[key].toString().toLowerCase()) {
+                        
                     }
                     else {
                         this.project.dmp_synchronized = false;
@@ -261,7 +261,7 @@ export class ProjectComponent implements OnInit {
                 }
                 console.log(this.displayed_dmp)
                 if (this.project.dmp_synchronized == false) {
-                    // this.update_project(this.project)
+                    
 
                 }
                 this.dmp_visible = !this.dmp_visible;

@@ -15,7 +15,7 @@ const plgsrv = require('../core/plugin.service.js');
 // const maisrv = require('../core/mail.service.js');
 const prsrv = require('../core/project.service.js');
 // const MAILER = CONFIG.general.mailer;
-
+const { convert, htmlToText } = require('html-to-text');
 
 dbsrv.init_db().then(async () => {
 
@@ -26,9 +26,10 @@ dbsrv.init_db().then(async () => {
     // auth to DMP OPIDoR API
     let auth = undefined;
     try {
-        auth = await prsrv.auth_dmp();
+        auth = await prsrv.opidor_auth();
     } catch (error) {
         console.log('could not auth to Opidor, aborting');
+        console.log(error);
         return error;
     }
 
@@ -41,18 +42,26 @@ dbsrv.init_db().then(async () => {
         else {
             console.log('continuing');
             try {
-                let dmp = await prsrv.request_DMP(project.dmpUuid, auth.data.access_token);
+                let answer = await prsrv.request_DMP(project.dmpUuid, auth.data.access_token);
+                let dmp = answer.data;
                 let research_output = dmp.researchOutput[0];
                 let dmp_filtered = {
                     'id': dmp.project.acronym,
-                    'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
+                    'description': htmlToText(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
                     'orga': [],
-                    'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
-                    'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
+                    'cpu': JSON.stringify(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage),
+                    'size': JSON.stringify(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize),
                     'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
                 };
+                for (let data in dmp.project.funding) {
+                    
+                    if (dmp.project.funding[data].fundingStatus == 'Approuvé' || dmp.project.funding[data].fundingStatus == 'Granted') {
+                        
+                        dmp.orga.push(dmp.project.funding[data].funder.name);
+                        
+                    }
+                }
                 let key_list = Object.keys(dmp_filtered);
-                console.log(key_list.length);
                 for (let i = 0; i < key_list.length; i++) {
                     let key = key_list[i];
                     if (key == 'lastModified') {
@@ -78,6 +87,7 @@ dbsrv.init_db().then(async () => {
 
     }
     if (dmp_check_errors == 0) {
+        console.log('no errors');
         process.exit(0);
     } else {
         console.log(`Error: dmp errors ${dmp_check_errors} on ${projects.length} projects`);
