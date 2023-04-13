@@ -15,7 +15,6 @@ const plgsrv = require('../core/plugin.service.js');
 // const maisrv = require('../core/mail.service.js');
 const prsrv = require('../core/project.service.js');
 // const MAILER = CONFIG.general.mailer;
-const { convert, htmlToText } = require('html-to-text');
 
 dbsrv.init_db().then(async () => {
 
