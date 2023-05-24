@@ -15,7 +15,7 @@ const plgsrv = require('../core/plugin.service.js');
 // const maisrv = require('../core/mail.service.js');
 const prsrv = require('../core/project.service.js');
 // const MAILER = CONFIG.general.mailer;
-
+const htmlToText = require('html-to-text');
 dbsrv.init_db().then(async () => {
 
     plgsrv.load_plugins();
@@ -43,32 +43,43 @@ dbsrv.init_db().then(async () => {
             try {
                 let answer = await prsrv.request_DMP(project.dmpUuid, auth.data.access_token);
                 let dmp = answer.data;
+                
                 let research_output = dmp.researchOutput[0];
                 let dmp_filtered = {
                     'id': dmp.project.acronym,
-                    'description': htmlToText(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
+                    'description': htmlToText.htmlToText(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
                     'orga': [],
-                    'cpu': JSON.stringify(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage),
-                    'size': JSON.stringify(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize),
-                    'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
+                    'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
+                    'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
+                    'expire': Date.parse(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate),
                 };
+
                 for (let data in dmp.project.funding) {
                     
                     if (dmp.project.funding[data].fundingStatus == 'Approuvé' || dmp.project.funding[data].fundingStatus == 'Granted') {
-                        
-                        dmp.orga.push(dmp.project.funding[data].funder.name);
+
+                        dmp_filtered.orga.push(dmp.project.funding[data].funder.name);
                         
                     }
                 }
                 let key_list = Object.keys(dmp_filtered);
+                console.log(project);
+                console.log(dmp_filtered);
+                let sync_status = true;
                 for (let i = 0; i < key_list.length; i++) {
                     let key = key_list[i];
                     if (key == 'lastModified') {
                         continue;
                     }
-                    await dbsrv.mongo_projects().updateOne({ '_id': project['_id'] }, { '$set': { 'dmp_synchronized': (JSON.stringify(dmp_filtered[key]).toLowerCase() === JSON.stringify(project[key]).toLowerCase()) } });
-
+                    if (JSON.stringify(dmp_filtered[key]).toLowerCase() != JSON.stringify(project[key]).toLowerCase()) {
+                        console.log('An element is different between the DMP and the project ' + project['id']);
+                        sync_status = false;
+                        break;
+                    }
+                    
+                    
                 }
+                await dbsrv.mongo_projects().updateOne({ '_id': project['_id'] }, { '$set': { 'dmp_synchronized': sync_status} });
 
             } catch (error) {
                 console.error('Error while comparing DMP with project', error);
@@ -78,11 +89,6 @@ dbsrv.init_db().then(async () => {
 
 
         }
-
-        // console.log(`Project will expire, send notication number ${project.expiration_notif} to ${project.id}`);
-
-
-        await dbsrv.mongo_projects().updateOne({ '_id': project['_id'] }, { '$set': { 'dmp_synchronized': true } });
 
     }
     if (dmp_check_errors == 0) {
