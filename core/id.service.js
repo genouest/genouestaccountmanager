@@ -35,6 +35,8 @@ var userIds = [];
 var groupIds = [];
 var idsLoaded = false;
 
+exports.redis = function () { return redis_client;};
+
 exports.isInitOver = function () {
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject) {

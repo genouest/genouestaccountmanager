@@ -1,5 +1,6 @@
 const winston = require('winston');
 const logger = winston.loggers.get('gomngr');
+const axios = require('axios');
 
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
@@ -8,7 +9,9 @@ const CONFIG = my_conf;
 const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
+const idsrv = require('../core/id.service.js');
 const usrsrv = require('../core/user.service.js');
+const { config } = require('chai');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -17,6 +20,8 @@ exports.remove_project = remove_project;
 exports.update_project = update_project;
 exports.create_project_request = create_project_request;
 exports.remove_project_request = remove_project_request;
+exports.opidor_auth = opidor_auth;
+exports.request_DMP = request_DMP;
 
 async function create_project(new_project, uuid, action_owner = 'auto') {
     logger.info('Create Project ' + new_project.id + ' uuid ' + uuid);
@@ -35,22 +40,22 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     try {
         let created_file = await filer.project_add_project(new_project, fid);
         logger.debug('Created file', created_file);
-    } catch(error) {
+    } catch (error) {
         logger.error('Add Project Failed for: ' + new_project.id, error);
-        throw {code: 500, message: 'Add Project Failed'};
+        throw { code: 500, message: 'Add Project Failed' };
     }
 
     if (uuid) {
         await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
     }
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({ 'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id, 'logs': [] });
 
     try {
         if (new_project.owner) {
             await usrsrv.add_user_to_project(new_project.id, new_project.owner);
         }
     }
-    catch(error) {
+    catch (error) {
         logger.error(error);
     }
     return new_project;
@@ -58,35 +63,35 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
 
 async function remove_project(id, action_owner = 'auto') {
     logger.info('Remove Project ' + id);
-    await dbsrv.mongo_projects().deleteOne({'id': id});
+    await dbsrv.mongo_projects().deleteOne({ 'id': id });
     let fid = new Date().getTime();
     try {
-        let created_file = await filer.project_delete_project({'id': id}, fid);
+        let created_file = await filer.project_delete_project({ 'id': id }, fid);
         logger.debug('Created file', created_file);
-    } catch(error){
+    } catch (error) {
         logger.error('Delete Project Failed for: ' + id, error);
-        throw {code: 500, message: 'Delete Project Failed'};
+        throw { code: 500, message: 'Delete Project Failed' };
     }
 
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove project ' + id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({ 'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove project ' + id, 'logs': [] });
 
 }
 
 async function update_project(id, project, action_owner = 'auto') {
     logger.info('Update Project ' + id);
     project.expiration_notif = 0;
-    await dbsrv.mongo_projects().updateOne({'id': id},  {'$set': project});
+    await dbsrv.mongo_projects().updateOne({ 'id': id }, { '$set': project });
     let fid = new Date().getTime();
-    project.id =  id;
+    project.id = id;
     try {
         let created_file = await filer.project_update_project(project, fid);
         logger.debug('Created file', created_file);
-    } catch(error) {
+    } catch (error) {
         logger.error('Update Project Failed for: ' + project.id, error);
-        throw {code: 500, message: 'Update Project Failed'};
+        throw { code: 500, message: 'Update Project Failed' };
     }
 
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
+    await dbsrv.mongo_events().insertOne({ 'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id, 'logs': [] });
 
 }
 
@@ -102,7 +107,7 @@ async function create_project_request(asked_project, user) {
         logs: [],
     });
 
-    let msg_destinations =  [CONFIG.general.accounts, user.email];
+    let msg_destinations = [CONFIG.general.accounts, user.email];
     if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
@@ -113,18 +118,17 @@ async function create_project_request(asked_project, user) {
             'destinations': msg_destinations,
             'subject': 'Project creation request: ' + asked_project.id
         }, {
-            '#UID#':  user.uid,
+            '#UID#': user.uid,
             '#NAME#': asked_project.id,
             '#SIZE#': asked_project.size,
             '#CPU#': asked_project.cpu,
             '#ORGA#': asked_project.orga,
             '#DESC#': asked_project.description
         });
-    } catch(error) {
+    } catch (error) {
         logger.error(error);
     }
 }
-
 
 async function remove_project_request(uuid, action_owner = 'auto') {
     logger.info('Remove Project Request' + uuid);
@@ -140,5 +144,53 @@ async function remove_project_request(uuid, action_owner = 'auto') {
     else {
         throw {code: 404, message: 'No pending project found'};
     }
+}
 
+
+async function opidor_auth() {
+    const data = {
+
+        "grant_type": "client_credentials",
+
+        "client_id": CONFIG.dmp.client_id,
+
+        "client_secret": CONFIG.dmp.client_secret,
+
+    };
+
+    const options = {
+        headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+        }
+    };
+
+    return await axios.post( CONFIG.dmp.dmp_opidor_url + '/api/v1/authenticate', data, options);
+
+}
+
+async function request_DMP(dmpUuid,auth_token= undefined) {
+    try {
+        if (auth_token == undefined) {
+            let auth_resp = await this.opidor_auth();
+            auth_token = auth_resp.data.access_token;
+
+        }
+        
+        const options = {
+            headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${auth_token}`
+            }
+        };
+        return axios.get(CONFIG.dmp.dmp_opidor_url + `/api/v1/madmp/plans/research_outputs/${dmpUuid}`, options);
+
+    } catch(error) {
+        console.log('failed to auth');
+        return error;
+    }
+        
+    
+    
+    
 }

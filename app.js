@@ -355,6 +355,8 @@ app.get('/project/:id/extend', projects);
 app.post('/ask/project', projects);
 app.get('/pending/project', projects);
 app.delete('/pending/project/:id', projects);
+app.post('/dmp/ping', projects);
+app.post('/dmp/:dmpUuid', projects);
 app.get('/quota/:user/:id', quota);
 app.get('/plugin', plugin);
 app.get('/plugin/:id', plugin);

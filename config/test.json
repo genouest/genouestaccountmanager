@@ -115,6 +115,11 @@
     "admin_password": "my",
     "team" : "genouest"
   },
+  "dmp": {
+    "client_id": "b00dadbf-f8c8-422f-9a81-ae798c527613",
+    "client_secret": "12bc248b-5875-4cb6-9fe9-ec083cfda000",
+    "dmp_opidor_url": "https://opidor-preprod.inist.fr"
+  },
   "mysql": {
     "host": "mysql",
     "user": "root",
