@@ -106,11 +106,19 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
     try {
         for(let i=0;i<quantity;i++) {
             logger.debug('create user ', CONFIG.tp.prefix + startnbr);
+            let tp_email = CONFIG.tp.mail_template;
+            if (!tp_email) {
+                // backward compat
+                tp_email = CONFIG.tp.prefix + startnbr + '@fake.' + CONFIG.tp.fake_mail_domain;
+            } else {
+                tp_email = tp_email.replace('${id}', CONFIG.tp.prefix + startnbr);
+            }
+
             let user = {
                 uid: CONFIG.tp.prefix + startnbr,
                 firstname: CONFIG.tp.prefix,
                 lastname: startnbr,
-                email: CONFIG.tp.prefix + startnbr + '@fake.' + CONFIG.tp.fake_mail_domain,
+                email: tp_email,
                 responsible: owner,
                 group: (CONFIG.general.disable_user_group) ? '' : groupName,
                 secondarygroups: (!CONFIG.general.disable_user_group && groupName != '') ? [groupName] : [],
@@ -260,6 +268,10 @@ async function create_tp_reservation(reservation_id) {
     }
 
     let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
+    if (CONFIG.tp.prefix) {
+        trainingName = CONFIG.tp.prefix + '_' + trainingName;
+    }
+
     let gpname = '';
     let newGroup;
     if (reservation.group_or_project == 'group') {
@@ -281,7 +293,9 @@ async function create_tp_reservation(reservation_id) {
         reservation.owner,
         reservation.quantity,
         Math.ceil((reservation.to-reservation.from)/(1000*3600*24)),
-        reservation.to, newGroup, newProject
+        reservation.to,
+        newGroup,
+        newProject
     );
     
     for(let i=0;i<activated_users.length;i++) {

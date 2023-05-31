@@ -120,6 +120,8 @@
     "password": "XXX"
   },
   "nodemailer": {
+     "host": "",
+     "port": "",
      "prefix": "",
      "origin": "",
      "smtp": "",
@@ -130,7 +132,17 @@
          "cmd_address": ""
      }
   },
+  "listmonk": {
+      "force_tls": false,
+      "origin": "support@my.org",
+      "host": "http://listmonk:9000",
+      "user": "listmonk",
+      "password": "XXXXXXX",
+      "optin": ["listmandatory", "listopt"],
+      "optout": ["listopt"]
+  },
   "gomail": {
+    "force_tls": false,
     "host": "",
     "api_root": "",
     "api_secret": "",
@@ -146,7 +158,8 @@
     "prefix": "tp",
     "group": {"name": "tps1", "gid": 1000},
     "extra_expiration": 5,
-    "fake_mail_domain": "genouest.org"
+    "fake_mail_domain": "genouest.org",
+    "mail_template": "noreply+${id}@genouest.org"
   },
   "message": {
     "registration": [

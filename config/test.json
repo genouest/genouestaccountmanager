@@ -34,22 +34,30 @@
     "plugin_script_dir": "/opt/my/plugin-scripts"
  },
  "registration": [
-    {
-     "title": "first choice",
-     "description": "this is truc and bla bla bla",
-     "choices": [["c1","choice1"], ["c2", "choice2"], ["c3", "choice3"]],
-     "multiple": true
+  {
+    "title": "first choice",
+    "description": "this is truc and bla bla bla",
+    "choices": [["c1","choice1"], ["c2", "choice2"], ["c3", "choice3"]],
+    "multiple": true
+   },
+   {
+   "title": "second choice",
+   "choices": [["c4", "choice4"], ["c5", "choice5"], ["c6", "choice6"]],
+   "multiple": false
+   },
+   {
+    "title": "second choice with feedback",
+    "choices": [["c7", "choice4", "alert-success", "Positive feedback"], ["c8", "choice5", "alert-warning", "Mixed feedback"], ["c9", "choice6", "alert-danger", "Negative feedback"]],
+    "multiple": false,
+    "feedback": true
     },
-    {
-    "title": "second choice",
-    "choices": [["c4", "choice4"], ["c5", "choice5"], ["c6", "choice6"]],
-    "multiple": false
-    },
-    {
-      "title": "extra data",
-      "choices": [["cc4", "choice4"], ["cc5", "choice5"], ["cc6", "choice6"]],
-      "multiple": false
-    }
+  
+   {
+     "title": "extra data",
+     "choices": [["cc4", "choice4"], ["cc5", "choice5"], ["cc6", "choice6"]],
+     "multiple": false
+   }
+    
  ],
  "enable_ui": {
      "messages": true,
@@ -99,6 +107,14 @@
          "cmd_address": "sympa@my.org"
      }
  },
+ "listmonk": {
+  "origin": "support@my.org",
+  "host": "http://131.254.16.176:9000",
+  "user": "listmonk",
+  "password": "listmonk",
+  "optin": ["goadmin", "gonews"],
+  "optout": ["gonews"]
+},
  "gomail": {
    "host": "http://gomail-web:6643",
    "api_root": "/api/v1",
@@ -129,7 +145,8 @@
     "prefix": "tp",
     "group": {"name": "tps", "gid": 1000},
     "extra_expiration": 5,
-    "fake_mail_domain": "my.org"
+    "fake_mail_domain": "my.org",
+    "mail_template": "noreply+${id}@my.org"
   },
   "message": {
     "registration": [
