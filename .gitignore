@@ -9,4 +9,3 @@ tests/cron
 tests/home_dir
 manager2/node_modules
 manager2/dist
-manager2/src/app/environments
