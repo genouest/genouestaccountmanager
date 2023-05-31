@@ -565,10 +565,9 @@ router.post('/project/dmp/remote_request', async function (req, res) {
     let user = null;
     
     try {
-        let isadmin = false;
         // change from email to real var
         user = await dbsrv.mongo_users().findOne({ email: req.body.mail });
-        isadmin = await rolsrv.is_admin(user);
+
     } catch (e) {
         logger.error(e);
         res.status(404).send({ message: 'User session not found' });
@@ -579,10 +578,7 @@ router.post('/project/dmp/remote_request', async function (req, res) {
         res.status(404).send({ message: 'User not found' });
         return;
     }
-    // if (!isadmin) {
-    //     res.status(401).send({ message: 'Not authorized' });
-    //     return;
-    // }
+
     let owner = await dbsrv.mongo_users().findOne({ 'uid': req.body.owner });
     if (!owner) {
         res.status(404).send({ message: 'Owner not found' });

@@ -9,9 +9,7 @@ const CONFIG = my_conf;
 const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
-const idsrv = require('../core/id.service.js');
 const usrsrv = require('../core/user.service.js');
-const { config } = require('chai');
 
 let day_time = 1000 * 60 * 60 * 24;
 
