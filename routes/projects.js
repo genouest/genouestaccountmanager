@@ -546,7 +546,6 @@ router.post('/dmp/:dmpUuid', async function (req, res) {
         return;
     }
     await prjsrv.request_DMP(req.params.dmpUuid).then(response => {
-        console.log(response.data);
         res.send(response.data);
     }).catch(error => res.send(error));
 

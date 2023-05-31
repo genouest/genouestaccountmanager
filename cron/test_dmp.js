@@ -34,7 +34,6 @@ dbsrv.init_db().then(async () => {
             continue;
         }
         else {
-            console.log('continuing');
             try {
                 let answer = await prsrv.request_DMP(project.dmpUuid, auth.data.access_token);
                 let dmp = answer.data;
@@ -58,8 +57,6 @@ dbsrv.init_db().then(async () => {
                     }
                 }
                 let key_list = Object.keys(dmp_filtered);
-                console.log(project);
-                console.log(dmp_filtered);
                 let sync_status = true;
                 for (let i = 0; i < key_list.length; i++) {
                     let key = key_list[i];

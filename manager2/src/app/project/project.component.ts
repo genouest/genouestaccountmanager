@@ -116,7 +116,6 @@ export class ProjectComponent implements OnInit {
 
     ask_for_project() {
         // todo: should rename it project_msg
-        console.log(this.new_project)
         this.request_msg = '';
         this.request_err_msg = '';
         if (!this.new_project.id) {
@@ -249,7 +248,6 @@ export class ProjectComponent implements OnInit {
         if (!(this.new_project.dmpUuid == null) && !(this.new_project.dmpUuid == "")) {
             this.projectsService.fetch_dmp(dmpUuid).subscribe(
                 resp => {
-                    console.log(resp)
                     let funders = []
                     let data = resp.project.funding
                     for (data in resp.project.funding) {
@@ -259,7 +257,6 @@ export class ProjectComponent implements OnInit {
                         
                     }
                     let research_output = resp.researchOutput[0];
-                    console.log(resp.researchOutput)
                     
                     if (research_output == null) {
                         this.dmp_msg = ''
@@ -295,8 +292,8 @@ export class ProjectComponent implements OnInit {
 
         this.projectsService.fetch_dmp(this.selectedProject.dmpUuid).subscribe(
             resp => {this.dmp = resp;
-            console.log(resp)},
-            err => console.log('dmperr')
+            },
+            err => console.log( err + 'dmperr')
         );
     }
     

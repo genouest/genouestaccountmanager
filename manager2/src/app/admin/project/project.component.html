@@ -82,40 +82,6 @@
         </form>
       </div>
     </div>
-<!--     
-    <div *ngIf="dmp_linked" class="card bg-light">
-      <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
-      <div class="card-header" (click)="display_dmp_to_admin()">Data currently in the DMP</div>
-      <div *ngIf="dmp_visible"class="card-body">
-        <table class="table">
-          <tr>
-            <th>Last modified</th>
-            <td>{{dmp.lastModified}}</td>
-          </tr>
-          <tr>
-            <th>Size</th>
-            <td *ngIf="dmp.size == project.size; else elseBlock">{{dmp.size}}</td>
-            <td #elseBlock class="table-warning">{{dmp.size}}</td>
-          </tr>
-          <tr>
-            <th>Expiration date</th>
-            <td *ngIf="dmp.expire == project.expire; else elseBlock">{{dmp.expire}}</td>
-            <td #elseBlock class="table-warning">{{dmp.expire}}</td>
-          </tr>
-          <tr>
-            <th>Financing</th>
-            <td *ngIf="dmp.orga == project.orga; else elseBlock">{{dmp.orga}}</td>
-            <td #elseBlock class="table-warning">{{dmp.orga}}</td>
-          </tr>
-          <tr>
-            <th>Description</th>
-            <td *ngIf="dmp.description == project.description; else elseBlock">{{dmp.description}}</td>
-            <td #elseBlock class="table-warning">{{dmp.description}}</td>
-          </tr>
-        </table> 
-      </div>
-
-    </div> -->
     <div *ngIf="dmp_linked" class="card-body">
       <div class="row">
           <div class="card bg-light">
@@ -138,19 +104,8 @@
                     <td>{{displayed_dmp_value.key}}</td>
                     <td>
                       <span [class]="'badge badge sync-' + displayed_dmp_value.synchronized"> {{displayed_dmp_value.value}} </span>
-                      <!-- <span *ngIf="displayed_dmp_value.synchronized; else elseBlock"class="badge badge-secondary">Synchronized</span>
-                      <span #elseBlock class="badge badge-warning">Desynchronized</span> -->
                     </td>
-                    
-<!--                
-                    <td>
-                      <div *ngIf="pending.dmpUuid != null">
-                        <span [class]="'dmp-badge status-linked'">Linked</span>
-                      </div>
-                      <div *ngIf="pending.dmpUuid == null">
-                        <span [class]="'dmp-badge status-legacy'">Legacy</span>
-                      </div>
-                    </td> -->
+
                   </tr>
                 </ng-template>
               </p-table>

@@ -254,9 +254,7 @@ export class ProjectComponent implements OnInit {
                     }
                     else {
                         this.project.dmp_synchronized = false;
-                        // 
                     }
-                    //check if value == project value and make it another variable in displayedDMP
                 }
                 if (this.project.dmp_synchronized == false) {
                     

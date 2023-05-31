@@ -84,12 +84,9 @@ export class RemoteRequestComponent implements OnInit {
     )
 
     await this.route.queryParams.subscribe(params => {
-        console.log(params); // { order: "popular" }
 
         this.dmpUuid = params.dmpUuid;
-        console.log(this.order); // popular
       });
-    console.log('getting dmp')
     await this.get_dmp(this.dmpUuid);
       
   }
@@ -100,16 +97,13 @@ export class RemoteRequestComponent implements OnInit {
     if (!(this.dmpUuid == null) && !(this.dmpUuid == "") ) {
         this.projectsService.fetch_dmp(dmpUuid).subscribe(
             resp => {
-                console.log(resp)
                 let funders = []
                 let data = ""
                 for (data in resp.project.funding) {
                     if (resp.project.funding[data].fundingStatus == "Approuvé" || resp.project.funding[data].fundingStatus == "Granted") {
                         funders.push(resp.project.funding[data].funder.name)
                     }
-                }
-                
-                console.log(resp.researchOutput)
+                }      
                 let research_output = resp.researchOutput[0]
 
                 if (research_output == null) {
@@ -118,10 +112,6 @@ export class RemoteRequestComponent implements OnInit {
                 }
                 this.dmp_msg = resp.message;
                 this.dmp_available = true;  
-                console.log('description:')
-                console.log(research_output)
-                console.log(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage)
-                // console.log(this.convertToPlain(research_output.dataStorage.genouestServiceRequest.initialRequest.justification))
                 this.new_project = {
                     'id': resp.project.acronym,
                     'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
@@ -130,10 +120,7 @@ export class RemoteRequestComponent implements OnInit {
                     'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
                     'dmpUuid': this.dmpUuid,
                     'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
-                    // 'expire': new Date(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate).getTime(),
                 };
-                //AJOUTER CPU, GERER GENOUEST SERVICE REQUEST
-                console.log(this.new_project)
 
             },
             err => {
@@ -149,8 +136,6 @@ export class RemoteRequestComponent implements OnInit {
     
 }
 remote_project_request() {
-  // todo: should rename it project_msg
-  console.log(this.new_project)
   this.request_msg = '';
   this.request_err_msg = '';
   for (let data in this.new_project) {
@@ -162,7 +147,6 @@ remote_project_request() {
   
   this.projectsService.askNew(this.new_project).subscribe(
       resp => {
-            console.log(resp)
           this.request_msg = 'An email has been sent to admin';
           this.project_request_success = true;
           this.new_project = {};
