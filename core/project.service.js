@@ -148,18 +148,18 @@ async function remove_project_request(uuid, action_owner = 'auto') {
 async function opidor_auth() {
     const data = {
 
-        "grant_type": "client_credentials",
+        'grant_type': 'client_credentials',
 
-        "client_id": CONFIG.dmp.client_id,
+        'client_id': CONFIG.dmp.client_id,
 
-        "client_secret": CONFIG.dmp.client_secret,
+        'client_secret': CONFIG.dmp.client_secret,
 
     };
 
     const options = {
         headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
+            'Content-Type': 'application/json',
+            accept: 'application/json',
         }
     };
 
@@ -177,7 +177,7 @@ async function request_DMP(dmpUuid,auth_token= undefined) {
         
         const options = {
             headers: {
-                accept: "application/json",
+                accept: 'application/json',
                 Authorization: `Bearer ${auth_token}`
             }
         };
