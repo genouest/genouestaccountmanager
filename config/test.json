@@ -131,6 +131,11 @@
     "admin_password": "my",
     "team" : "genouest"
   },
+  "dmp": {
+    "client_id": "",
+    "client_secret": "",
+    "dmp_opidor_url": ""
+  },
   "mysql": {
     "host": "mysql",
     "user": "root",

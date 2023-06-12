@@ -7,6 +7,8 @@ import { UserService } from 'src/app/user/user.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { data } from 'jquery';
 
 @Component({
     selector: 'app-project',
@@ -28,6 +30,11 @@ export class ProjectComponent implements OnInit {
     new_user: any
     remove_user: any
     default_size: any
+    dmp: any
+    dmp_err_msg: string;
+    dmp_msg: string;
+    dmp_available: boolean;
+    dmp_visible: boolean;
     default_cpu: any
 
     manager_visible: boolean
@@ -62,6 +69,7 @@ export class ProjectComponent implements OnInit {
         this.new_project = {}
         this.groups = [];
         this.manager_visible = true;
+        this.dmp_visible = false;
         this.session_user = await this.authService.profile;
         this.users = [];
 
@@ -233,4 +241,72 @@ export class ProjectComponent implements OnInit {
     scroll(el: HTMLElement) {
         el.scrollIntoView({behavior: 'smooth'});
     }
+    get_dmp(dmpUuid) {
+        this.dmp_err_msg = ""
+        this.dmp_msg = ""
+        
+        if (!(this.new_project.dmpUuid == null) && !(this.new_project.dmpUuid == "")) {
+            this.projectsService.fetch_dmp(dmpUuid).subscribe(
+                resp => {
+                    let funders = []
+                    let data = resp.project.funding
+                    for (data in resp.project.funding) {
+                        if (resp.project.funding[data].fundingStatus == "Approuvé" || resp.project.funding[data].fundingStatus == "Granted") {
+                            funders.push(resp.project.funding[data].funder.name)
+                        }
+                        
+                    }
+                    let research_output = resp.researchOutput[0];
+                    
+                    if (research_output == null) {
+                        this.dmp_msg = ''
+                        this.dmp_err_msg = "No research output was found with this ID"
+                    }
+                    this.dmp_msg = resp.message;
+                    this.dmp_available = true;  
+                    this.new_project = {
+                        'id': resp.project.acronym,
+                        'description': this.convertToPlain(research_output.dataStorage.genOuestServiceRequest[0].initialRequest.justification),
+                        'orga': funders,
+                        'cpu': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.cpuUsage,
+                        'size': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.dataSize,
+                        'dmpUuid': this.new_project.dmpUuid,
+                        'expire': research_output.dataStorage.genOuestServiceRequest[0].initialRequest.endStorageDate,
+                    };
+
+                },
+                err => {
+                    this.dmp_err_msg = err.error.message
+                    this.dmp_available = false;
+                }
+            )
+        }
+        else {
+            this.dmp_err_msg = "Please enter a valid ID"
+        }
+        
+    }
+
+    display_dmp_to_user() {
+        this.dmp_visible = !this.dmp_visible;
+
+        this.projectsService.fetch_dmp(this.selectedProject.dmpUuid).subscribe(
+            resp => {this.dmp = resp;
+            },
+            err => console.log( err + 'dmperr')
+        );
+    }
+    
+    convertToPlain(html){
+
+        // Create a new div element
+        var tempDivElement = document.createElement("div");
+        
+        // Set the HTML content with the given value
+        tempDivElement.innerHTML = html;
+        
+        // Retrieve the text property of the element 
+        return tempDivElement.textContent || tempDivElement.innerText || "";
+    }
+
 }

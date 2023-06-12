@@ -3,6 +3,7 @@
       <div class="row">
         <div class="col-sm-9">
           <h4>Project <strong>{{project.id}}</strong></h4>
+          <div *ngIf="dmp_linked" class="dmp-badge status-linked">Project linked to DMP</div>
         </div>
         <div class="col-sm-3" >
           <button class="btn btn-danger" (click)="delete_project(project, users)">Delete project</button>
@@ -79,6 +80,38 @@
             </div>
           </div>
         </form>
+      </div>
+    </div>
+    <div *ngIf="dmp_linked" class="card-body">
+      <div class="row">
+          <div class="card bg-light">
+            <div class="card-header" (click)="display_dmp_to_admin()">
+              <h3>Data currently in DMP (Last update: {{dmp.lastModified}}) </h3>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="alert alert-danger" *ngIf="dmp_err_msg">{{dmp_err_msg}}</div>
+              </div>
+              <p-table #dtw [(value)]="displayed_dmp" [autolayout]="false">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>Information</th>
+                    <th>Value</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-displayed_dmp_value>
+                  <tr>
+                    <td>{{displayed_dmp_value.key}}</td>
+                    <td>
+                      <span [class]="'badge badge sync-' + displayed_dmp_value.synchronized"> {{displayed_dmp_value.value}} </span>
+                    </td>
+
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+          </div>
+        
       </div>
     </div>
     <div class="card bg-light">

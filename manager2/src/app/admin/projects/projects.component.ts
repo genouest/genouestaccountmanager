@@ -36,6 +36,9 @@ export class ProjectsComponent implements OnInit {
     groups: any[]
     all_users: any[]
     new_project: any
+    
+    dmp_msg: any
+    dmp_err_msg: any
 
     day_time: number
 
@@ -89,8 +92,11 @@ export class ProjectsComponent implements OnInit {
             orga: '',
             description: '',
             access: 'Group',
-            path: ''
+            path: '',
+            dmpUuid: null
         }
+        
+            
 
         this.project_list(true);
         this.pending_list(true);
@@ -173,28 +179,30 @@ export class ProjectsComponent implements OnInit {
             'access': this.new_project.access,
             'orga': this.new_project.orga,
             'path': this.new_project.path,
-            'expire': new Date(this.new_project.expire).getTime()
-        }).subscribe(
-            resp => {
-                this.add_project_msg = resp.message;
-                this.project_list();
-                this.pending_list(true);
+            'dmpUuid': this.new_project.dmpUuid,
+            'dmp_linked': (this.new_project.dmp_status=="Linked"),
+            'expire': new Date(this.new_project.expire).getTime()}
+                               ).subscribe(
+                                   resp => {
+                                       this.add_project_msg = resp.message;
+                                       this.project_list();
+                                       this.pending_list(true);
+                                       this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
+                                           resp => {
+                                               this.new_project = {};
+                                           },
+                                           err => {
+                                               console.log('failed  to add user to project');
+                                               this.add_project_error_msg = err.error.message;
+                                           }
+                                       )
 
-                this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
-                    resp => {
-                        this.new_project = {};
-                    },
-                    err => {
-                        console.log('failed  to add user to project');
-                        this.add_project_error_msg = err.error.message;
-                    }
-                )
-            },
-            err => {
-                console.log('failed to add project', this.new_project);
-                this.add_project_error_msg = err.error.message;
-            }
-        );
+                                   },
+                                   err => {
+                                       console.log('failed to add project', this.new_project);
+                                       this.add_project_error_msg = err.error.message;
+                                   }
+                               );
     }
 
     project_list(refresh_requests = false) {

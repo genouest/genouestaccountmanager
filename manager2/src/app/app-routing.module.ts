@@ -9,6 +9,7 @@ import { RegisterComponent } from './auth/register/register.component';
 import { LogoutComponent } from './auth/logout/logout.component';
 import { TpsComponent } from './tps/tps.component';
 import { ProjectComponent } from './project/project.component';
+import { RemoteRequestComponent } from './remote-request/remote-request.component';
 import { DatabasesComponent as AdminDatabaseComponent} from './admin/databases/databases.component';
 import { GroupsComponent as AdminGroupComponent} from './admin/groups/groups.component';
 import { LogsComponent as AdminLogComponent} from './admin/logs/logs.component';
@@ -48,6 +49,10 @@ const routes: Routes = [
         canActivate: [
             AuthGuard
         ]
+    },
+    {
+        path: 'project/dmp/remote-request',
+        component: RemoteRequestComponent
     },
     {
         path: 'admin/user',

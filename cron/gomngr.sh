@@ -126,6 +126,14 @@ while true; do
       echo "Exit requested"
       exit 0
     fi
+    echo "Check for project desynchronization with its dmp"
+    /opt/crontask.sh test_dmp
+    if [ $EXIT_REQUEST -eq 1 ]; then
+        rm /tmp/gomngr.lock
+        rm /tmp/gomngr.list
+        echo "Exit requested"
+        exit 0
+    fi
   fi
   if [ $NOW -gt $TOMORROW ]; then
     echo "${NOW}: time for daily tasks"
@@ -177,6 +185,7 @@ while true; do
   rm /tmp/gomngr.lock
 
   if [ "a$RUNONCE" != "a" ]; then
+    
     # For tests, run only once on demand
     exit $ERRCODE
   fi
