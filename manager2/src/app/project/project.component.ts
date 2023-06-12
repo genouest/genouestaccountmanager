@@ -7,8 +7,7 @@ import { UserService } from 'src/app/user/user.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { data } from 'jquery';
+
 
 @Component({
     selector: 'app-project',
@@ -59,9 +58,6 @@ export class ProjectComponent implements OnInit {
         this.config = {}
         this.default_size = 0
         this.default_cpu = 0
-    }
-
-    ngOnDestroy(): void {
     }
 
     async ngOnInit() {
@@ -229,7 +225,7 @@ export class ProjectComponent implements OnInit {
     date_convert = function timeConverter(tsp) {
         let res;
         try {
-            var a = new Date(tsp);
+            let a = new Date(tsp);
             res = a.toISOString().substring(0, 10);
         }
         catch (e) {
@@ -245,12 +241,12 @@ export class ProjectComponent implements OnInit {
         this.dmp_err_msg = ""
         this.dmp_msg = ""
         
-        if (!(this.new_project.dmpUuid == null) && !(this.new_project.dmpUuid == "")) {
+        if ((this.new_project.dmpUuid != null) && (this.new_project.dmpUuid != "")) {
             this.projectsService.fetch_dmp(dmpUuid).subscribe(
                 resp => {
                     let funders = []
-                    let data = resp.project.funding
-                    for (data in resp.project.funding) {
+                    // let data = resp.project.funding
+                    for (let data in resp.project.funding) {
                         if (resp.project.funding[data].fundingStatus == "Approuvé" || resp.project.funding[data].fundingStatus == "Granted") {
                             funders.push(resp.project.funding[data].funder.name)
                         }
@@ -261,6 +257,7 @@ export class ProjectComponent implements OnInit {
                     if (research_output == null) {
                         this.dmp_msg = ''
                         this.dmp_err_msg = "No research output was found with this ID"
+                        return
                     }
                     this.dmp_msg = resp.message;
                     this.dmp_available = true;  
@@ -300,7 +297,7 @@ export class ProjectComponent implements OnInit {
     convertToPlain(html){
 
         // Create a new div element
-        var tempDivElement = document.createElement("div");
+        let tempDivElement = document.createElement("div");
         
         // Set the HTML content with the given value
         tempDivElement.innerHTML = html;

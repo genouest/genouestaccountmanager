@@ -46,7 +46,7 @@
         <li class="nav-item" (click)="switchTo(2)">
             <button class="btn btn-outline-primary nav-link">Details</button>
           </li>
-        <li class="nav-item" (click)="switchTo(3)">
+        <li class="nav-item" ngIf="session_user.is_admin" (click)="switchTo(3)">
           <button class="btn btn-outline-primary nav-link">History</button>
         </li>
         <li class="nav-item" *ngIf="session_user.is_admin" (click)="switchTo(4)">
@@ -545,7 +545,7 @@
     </div>
   </div>
 
-  <div class="col-12" *ngIf="panel == 3">
+  <div class="col-12" *ngIf="session_user.is_admin && panel == 3">
     <div class="card bg-light">
         <div class="card-header">
             <h4>History</h4>

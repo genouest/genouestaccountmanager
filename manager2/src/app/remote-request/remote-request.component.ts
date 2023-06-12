@@ -1,12 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
-import { Table } from 'primeng/table';
-import {Router} from "@angular/router"
 
 @Component({
   selector: 'app-remote-request',
@@ -61,7 +59,7 @@ export class RemoteRequestComponent implements OnInit {
   async ngOnInit() {
 
 
-    this.new_project = {}
+    this.new_project = this.empty_project()
     this.manager_visible = true;
     this.session_user = await this.authService.profile;
     this.project_request_success = false;
@@ -83,18 +81,16 @@ export class RemoteRequestComponent implements OnInit {
         err => console.log('failed to get config')
     )
 
-    await this.route.queryParams.subscribe(params => {
-
+    this.route.queryParams.subscribe(params => {
         this.dmpUuid = params.dmpUuid;
-      });
-    await this.get_dmp(this.dmpUuid);
-      
+        this.get_dmp(this.dmpUuid);
+    });
   }
 
   get_dmp(dmpUuid) {
     this.dmp_err_msg = ""
     this.dmp_msg = ""
-    if (!(this.dmpUuid == null) && !(this.dmpUuid == "") ) {
+    if ((this.dmpUuid != null) && (this.dmpUuid != "") ) {
         this.projectsService.fetch_dmp(dmpUuid).subscribe(
             resp => {
                 let funders = []
@@ -109,6 +105,7 @@ export class RemoteRequestComponent implements OnInit {
                 if (research_output == null) {
                     this.dmp_msg = ''
                     this.dmp_err_msg = "No research output was found with this ID"
+                    return
                 }
                 this.dmp_msg = resp.message;
                 this.dmp_available = true;  
@@ -135,21 +132,33 @@ export class RemoteRequestComponent implements OnInit {
     }
     
 }
+
+empty_project(){
+    return {
+        'id': null,
+        'description': '',
+        'orga': '',
+        'cpu': 0,
+        'size': 0,
+        'dmpUuid': '',
+        'expire': 0,
+    };
+}
+
+
 remote_project_request() {
   this.request_msg = '';
   this.request_err_msg = '';
-  for (let data in this.new_project) {
-    if (data == undefined) {
-        this.request_err_msg = 'Your DMP is missing essential information';
-        return;
-    }
-  }
+if (this.new_project.id === null || this.new_project.id === '') {
+    this.request_err_msg = 'Your DMP is missing essential information';
+    return;
+}
   
   this.projectsService.askNew(this.new_project).subscribe(
       resp => {
           this.request_msg = 'An email has been sent to admin';
           this.project_request_success = true;
-          this.new_project = {};
+          this.new_project = this.empty_project();
       },
       err => {
           console.log(err);
