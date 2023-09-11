@@ -1,5 +1,4 @@
-#FROM quay.io/osallou/node:12-bullseye
-FROM quay.io/osallou/node:16.13-buster
+FROM quay.io/genouest/node:16.13-buster
 RUN npm install -g @angular/cli@10.2.0
 ARG APIURL
 ARG SENTRY
