@@ -1398,6 +1398,10 @@ router.put('/user/:id/ssh', async function(req, res) {
     session_user.is_admin = isadmin;
 
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if(!user) {
+        res.status(404).send({message: 'Not found'});
+        return;
+    }
     // If not admin nor logged user
     if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
         res.status(401).send({message: 'Not authorized'});
@@ -1437,7 +1441,6 @@ router.put('/user/:id/ssh', async function(req, res) {
     user.fid = fid;
     res.send(user);
     res.end();
-    return;
 });
 
 
