@@ -2,15 +2,13 @@
 /* eslint-disable no-console */
 'use strict';
 
-var express = require('express');
-var expressStaticGzip = require('express-static-gzip');
-var cors = require('cors');
-var path = require('path');
-// var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var http = require('http');
+const express = require('express');
+const expressStaticGzip = require('express-static-gzip');
+const cors = require('cors');
+const path = require('path');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const http = require('http');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
@@ -19,8 +17,8 @@ if (process.env.NODE_ENV == 'dev' || process.env.DEBUG) {
     log_level = 'debug';
 }
 
-var winston = require('winston');
-var jwt = require('jsonwebtoken');
+const winston = require('winston');
+const jwt = require('jsonwebtoken');
 
 const myconsole = new (winston.transports.Console)({
     label: 'gomngr',
@@ -32,24 +30,30 @@ const wlogger = winston.loggers.add('gomngr', {
 
 const promBundle = require('express-prom-bundle');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var ssh = require('./routes/ssh');
-var auth = require('./routes/auth');
-// var disks = require('./routes/disks');
-var database = require('./routes/database');
-var web = require('./routes/web');
-var logs = require('./routes/logs');
-var projects = require('./routes/projects');
-var quota = require('./routes/quota');
-var plugin = require('./routes/plugin');
-var tp = require('./routes/tp');
-var conf = require('./routes/conf');
-var utils = require('./routes/utils.js');
-var tags = require('./routes/tags.js');
-var ObjectID = require('mongodb').ObjectID;
+const cfgsrv = require('./core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
-var CONFIG = require('config');
+const dbsrv = require('./core/db.service.js');
+const idsrv = require('./core/id.service.js');
+const plgsrv = require('./core/plugin.service.js');
+const usrsrv = require('./core/user.service.js');
+
+const routes = require('./routes/index');
+const users = require('./routes/users');
+const groups = require('./routes/groups');
+const ssh = require('./routes/ssh');
+const auth = require('./routes/auth');
+const database = require('./routes/database');
+const web = require('./routes/web');
+const logs = require('./routes/logs');
+const projects = require('./routes/projects');
+const quota = require('./routes/quota');
+const plugin = require('./routes/plugin');
+const tp = require('./routes/tp');
+const conf = require('./routes/conf');
+const tags = require('./routes/tags.js');
+const ObjectID = require('mongodb').ObjectID;
 
 const MY_ADMIN_USER = process.env.MY_ADMIN_USER || null;
 const MY_ADMIN_GROUP = process.env.MY_ADMIN_GROUP || 'admin';
@@ -72,11 +76,8 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hjs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
-//app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieParser());
 
 var mongoURL = CONFIG.mongo.url;
@@ -95,7 +96,6 @@ app.use(session({
     cookie: { maxAge: 3600*1000},
     store: mongoStoreClient
 }));
-// app.use('/manager', express.static(path.join(__dirname, 'manager')));
 app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -140,7 +140,15 @@ const if_dev_execute_scripts = function(){
             reject({'err': 'cron script not defined'});
             return;
         }
-        let procScript = spawn(cron_bin_script, [CONFIG.general.script_dir, CONFIG.general.url]);
+        let procScript = spawn(
+            cron_bin_script,
+            [CONFIG.general.script_dir],
+            {
+                'env': {
+                    RUNONCE: 1
+                }
+            }
+        );
         procScript.on('exit', function (code, signal) {
             wlogger.info(cron_bin_script + ' process exited with ' +
                         `code ${code} and signal ${signal}`);
@@ -158,7 +166,7 @@ app.all('*', async function(req, res, next){
     if (runningEnv === 'test'){
         res.on('finish', function() {
             wlogger.debug('*test* env, on finish execute cron script');
-            if_dev_execute_scripts().then(function(){});
+            if_dev_execute_scripts().then(function(){ return; });
         });
     }
 
@@ -204,7 +212,7 @@ app.all('*', async function(req, res, next){
                 logInfo.u2f = jwtToken.u2f;
             }
             if(jwtToken.user) {
-                let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
+                let session_user = await dbsrv.mongo_users().findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
                 if(!session_user){
                     return res.status(401).send('Invalid token').end();
                 }
@@ -229,7 +237,7 @@ app.all('*', async function(req, res, next){
             req.session.is_logged = false;
         }
         try{
-            let session_user = await utils.mongo_users().findOne({'apikey': token});
+            let session_user = await dbsrv.mongo_users().findOne({'apikey': token});
             if(!session_user){
                 return res.status(401).send('Invalid token').end();
             }
@@ -262,7 +270,7 @@ app.all('*', async function(req, res, next){
             logInfo.u2f =req.session.u2f;
         }
         if(req.session.gomngr) {
-            let session_user = await utils.mongo_users().findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
+            let session_user = await dbsrv.mongo_users().findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
             if(session_user){
                 logInfo.session_user = session_user;
             }
@@ -285,11 +293,11 @@ app.get('/log/user/:id', logs);
 app.post('/log/user/:id', logs);
 app.get('/log', logs);
 app.post('/message', users);
-app.get('/group', users);
-app.post('/group/:id', users);
-app.put('/group/:id', users);
-app.delete('/group/:id', users);
-app.get('/group/:id', users);
+app.get('/group', groups);
+app.post('/group/:id', groups);
+app.put('/group/:id', groups);
+app.delete('/group/:id', groups);
+app.get('/group/:id', groups);
 app.get('/user', users);
 app.get('/database', database);
 app.get('/database/owner/:owner', database);
@@ -302,7 +310,6 @@ app.post('/web/:id', web);
 app.put('/web/:id/owner/:old/:new', web);
 app.delete('/web/:id', web);
 app.post('/user/:id', users);
-// app.get('/disk/:id', disks);
 app.put('/user/:id', users);
 app.put('/user/:id/ssh', users);
 app.get('/user/:id', users);
@@ -315,8 +322,8 @@ app.get('/user/:id/passwordreset', users);
 app.get('/user/:id/apikey', users);
 app.post('/user/:id/apikey', users);
 app.post('/user/:id/notify', users);
-app.get('/lists', users),
-app.get('/list/:list', users),
+app.get('/lists', users);
+app.get('/list/:list', users);
 app.post('/user/:id/passwordreset', users);
 app.get('/user/:id/passwordreset/:key', users);
 app.post('/user/:id/cloud', users);
@@ -331,8 +338,8 @@ app.delete('/user/:id', users);
 app.post('/user/:id/project/:project', users);
 app.delete('/user/:id/project/:project', users);
 app.get('/user/:id/usage', users);
-app.get('/project/:id/users', users);
-app.get('/group/:id/projects', projects);
+app.get('/project/:id/users', projects);
+app.get('/group/:id/projects', groups);
 app.get('/ssh/:id', ssh);
 app.get('/ssh/:id/public', ssh);
 app.get('/ssh/:id/putty', ssh);
@@ -344,6 +351,7 @@ app.post('/project/:id', projects);
 app.post('/project/:id/request', projects);
 app.delete('/project/:id', projects);
 app.put('/project/:id/request', projects);
+app.get('/project/:id/extend', projects);
 app.post('/ask/project', projects);
 app.get('/pending/project', projects);
 app.delete('/pending/project/:id', projects);
@@ -367,6 +375,8 @@ app.get('/u2f/register/:id', auth);
 app.post('/u2f/register/:id', auth);
 app.get('/u2f/auth/:id', auth);
 app.post('/u2f/auth/:id', auth);
+app.post('/otp/register/:id', auth);
+app.post('/otp/check/:id', auth);
 app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
 app.get('/logout', auth);
@@ -402,10 +412,7 @@ if (app.get('env') === 'development' || process.env.DEBUG) {
     // eslint-disable-next-line no-unused-vars
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
+        res.send(err.message);
     });
 }
 else {
@@ -414,22 +421,19 @@ else {
     // eslint-disable-next-line no-unused-vars
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: {}
-        });
+        res.send(err.message);
     });
 }
 
 module.exports = app;
 
 
-utils.init_db().then(async () => {
-    await utils.loadAvailableIds();
-    utils.load_plugins();
+dbsrv.init_db().then(async () => {
+    await idsrv.loadAvailableIds();
+    plgsrv.load_plugins();
     if(MY_ADMIN_USER !== null){
         wlogger.info('Create admin user');
-        await users.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
+        await usrsrv.create_admin(MY_ADMIN_USER, MY_ADMIN_GROUP);
         if (runningEnv == 'test'){
             wlogger.info('Execute cron script');
             await if_dev_execute_scripts();

@@ -26,7 +26,7 @@
             <ng-template pTemplate="body" let-database>
               <tr>
                 <td><span class="label label-primary">{{database.name}}</span></td>
-                <td><a [routerLink]="['/user', {id: database.owner}]" ><span class="label label-primary">{{database.owner}}</span></a></td>
+                <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
                 <td>{{database.type}}</td>
                 <td>{{database.host}}</td>
               </tr>
@@ -71,7 +71,7 @@
                   </div>
                   <div class="col-sm-1">
                       <label style="opacity: 0;" class="control-label">Create</label>
-                      <button type="button" class="btn btn-outline-secondary" (click)="declare_db()">Declare DB</button>
+                      <button type="button" class="btn btn-secondary" (click)="declare_db()">Declare DB</button>
                   </div>
               </div>
           </form>
@@ -103,7 +103,7 @@
                   </div>
                   <div class="col-sm-2">
                       <label for="modifyOwner" style="opacity: 0;">Modify</label>
-                      <button id="modifyOwner" type="button" class="btn btn-outline-secondary" (click)="changeOwner()" class="form-control">Modify</button>
+                      <button id="modifyOwner" type="button" class="btn btn-secondary" (click)="changeOwner()" class="form-control">Modify</button>
                   </div>
               </div>
             </form>

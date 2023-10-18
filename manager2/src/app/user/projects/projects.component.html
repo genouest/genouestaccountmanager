@@ -38,7 +38,7 @@
   </div>
 </div>
 <div class="form-group">
-  <button type="button" class="btn btn-outline-secondary" (click)="add_to_project()">Add to project</button>
+  <button type="button" class="btn btn-primary" (click)="add_to_project()">Add to project</button>
 </div>
 <hr/>
 <div class="table-responsive">
@@ -52,8 +52,7 @@
       </thead>
       <tbody>
           <tr *ngFor="let project of user_projects">
-              <td>{{project.id}}</td>
-              <td>{{project.group}}</td>
+              <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
               <td><span *ngIf="project.owner">x</span></td>
               <td><span *ngIf="project.member">x</span></td>
               <td><app-my-delete-confirm [onConfirm]="remove_from_project" [data]="project.id"></app-my-delete-confirm></td>

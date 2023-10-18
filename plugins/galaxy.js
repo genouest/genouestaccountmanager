@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
-var fs = require('fs');
-//var http = require('http');
-var CONFIG = require('config');
+const fs = require('fs');
+const Promise = require('promise');
+const dbsrv = require('../core/db.service.js');
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 
-var utils = require('../routes/utils');
-
-var Promise = require('promise');
 var path_to_script = CONFIG.general.plugin_script_dir + '/remove_galaxy_user.py';
 
 var apikey = '';
@@ -70,9 +70,9 @@ var remove_user_from_galaxy = async function(userId, data, adminId) {
     };
     try {
         await create_script();
-        utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [data.uid+'.'+fid+'.galaxy']});
+        dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [data.uid+'.'+fid+'.galaxy']});
     } catch(err) {
-        utils.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [], 'status': 1});
+        dbsrv.mongo_events().insertOne({'owner': adminId,'date': new Date().getTime(), 'action': 'remove user from galaxy ' + data.uid , 'logs': [], 'status': 1});
         console.trace('[Galaxy][error] : remove user failed');
         return false;
     }
@@ -99,7 +99,9 @@ module.exports = {
     get_data: function(userId, adminId){
         return get_user_info(userId,adminId);
     },
+    // eslint-disable-next-line no-unused-vars
     set_data: function(userId, data, adminId){
+        // eslint-disable-next-line no-unused-vars
         return new Promise(function (resolve, reject){
             console.log('[Galaxy] Nothing to do');
             resolve();
