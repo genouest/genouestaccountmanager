@@ -704,13 +704,12 @@ router.get('/user/:id', async function(req, res) {
         user.never_expire = false;
     }
 
-
     user.quota = [];
     for(let k in GENERAL_CONFIG.quota) {
         user.quota.push(k);
     }
 
-    if(session_user._id.str == user._id.str || isadmin){
+    if(session_user._id.toString() == user._id.toString() || isadmin){
         res.json(user);
     }
     else {
@@ -1403,7 +1402,7 @@ router.put('/user/:id/ssh', async function(req, res) {
         return;
     }
     // If not admin nor logged user
-    if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
+    if(!session_user.is_admin && user._id.toString() != req.locals.logInfo.id.toString()) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -1503,7 +1502,7 @@ router.put('/user/:id', async function(req, res) {
         return;
     }
     // If not admin nor logged user
-    if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
+    if(!session_user.is_admin && user._id.toString() != req.locals.logInfo.id.toString()) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }

@@ -23,7 +23,7 @@ router.get('/ssh/:id/putty', async function(req, res) {
         res.end();
         return;
     }
-    if(user._id.str != req.locals.logInfo.id.str){
+    if(user._id.toString() != req.locals.logInfo.id.toString()){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -67,7 +67,7 @@ router.get('/ssh/:id/private', async function(req, res) {
         res.status(403).send('[admin user] not authorized to download private key');
         return;
     }
-    if(user._id.str != req.locals.logInfo.id.str){
+    if(user._id.toString() != req.locals.logInfo.id.toString()){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -96,7 +96,7 @@ router.get('/ssh/:id/public', async function(req, res) {
         res.end();
         return;
     }
-    if(user._id.str != req.locals.logInfo.id.str){
+    if(user._id.toString() != req.locals.logInfo.id.toString()){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -125,7 +125,7 @@ router.get('/ssh/:id', async function(req, res) {
         res.end();
         return;
     }
-    if(user._id.str != req.locals.logInfo.id.str){
+    if(user._id.toString() != req.locals.logInfo.id.toString()){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
