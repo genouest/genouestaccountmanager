@@ -201,7 +201,7 @@ router.get('/u2f/register/:id', async function(req, res) {
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(!req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
+    if(!req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
         return res.status(401).send({message: 'You need to login first'});
     }
 
@@ -222,7 +222,7 @@ router.get('/u2f/register/:id', async function(req, res) {
 
 router.post('/u2f/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
         return res.status(401).send({message: 'You need to login first'});
     }
 
@@ -242,7 +242,7 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 router.post('/otp/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str != user._id.str){
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()){
         return res.status(401).send({message: 'You need to login first'});
     }
 
@@ -292,7 +292,7 @@ router.post('/otp/check/:id', async function(req, res) {
 
 router.delete('/u2f/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
         return res.status(401).send({message: 'You need to login first'});
     }
     await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': null, 'u2f.challenge': null}});
