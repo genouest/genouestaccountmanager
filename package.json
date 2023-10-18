@@ -1,13 +1,13 @@
 {
   "name": "go-mngr",
-  "version": "1.4.25",
+  "version": "1.4.27",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
   "bin": {
-    "my-reservations": "./my-reservations.js",
-    "my-accounts": "./my-accounts.js"
+    "my-reservations": "./bin/my-reservations.js",
+    "my-accounts": "./bin/my-accounts.js"
   },
   "dependencies": {
     "@angular/cdk": "^10.2.6",
@@ -33,7 +33,7 @@
     "hjs": "0.0.6",
     "html-to-text": "^7.0.0",
     "ipware": "0.0.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "latinize": "^0.4.1",
     "ldapjs": "^1.0.1",
     "markdown": "^0.5.0",

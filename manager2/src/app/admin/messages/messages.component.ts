@@ -61,9 +61,6 @@ export class MessagesComponent implements OnInit {
                     lists.push(resp[i])
                 }
                 this.mailing_lists = lists;
-                /*if(lists.length > 0) {
-                  this.mailing_list = lists[0];
-                  }*/
             },
             err => console.log('failed to get mailing lists', err)
         )

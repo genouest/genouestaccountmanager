@@ -222,7 +222,7 @@ router.put('/user/:id/subscribe', async function(req, res){
         res.send({subscribed: false});
         res.end();
     } else {
-        await notif.add(user.email);
+        await notif.add(user.email, user.uid);
         res.send({subscribed: true});
         res.end();
     }
@@ -356,7 +356,6 @@ router.post('/message', async function(req, res){
     };
     await notif.sendList(req.body.list, mailOptions);
     res.send({message: ''});
-    return;
 });
 
 // Get users listing - for admin
@@ -649,7 +648,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     if(!user.is_fake) {
         try {
-            await notif.add(user.email);
+            await notif.add(user.email, user.uid);
         } catch (err) {
             logger.error('[notif][error=add][mail=' + user.email + ']');
         }
@@ -1241,7 +1240,11 @@ router.get('/user/:id/renew/:regkey', async function(req, res){
     if(user.regkey == regkey) {
         user.history.push({'action': 'extend validity period', date: new Date().getTime()});
         let expiration = new Date().getTime() + day_time*duration_list[user.duration];
-        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {expiration: expiration, history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {
+            expiration: expiration,
+            expiration_notif: 0,
+            history: user.history
+        }});
         await dbsrv.mongo_events().insertOne({'owner': user.uid,'date': new Date().getTime(), 'action': 'Extend validity period: ' + req.params.id , 'logs': []});
         let accept = req.accepts(['json', 'html']);
         if(accept == 'json') {
@@ -1302,7 +1305,12 @@ router.get('/user/:id/renew', async function(req, res){
             return;
         }
         user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {status: STATUS_ACTIVE, expiration: (new Date().getTime() + day_time*duration_list[user.duration]), history: user.history}});
+        await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {
+            status: STATUS_ACTIVE,
+            expiration: (new Date().getTime() + day_time*duration_list[user.duration]),
+            expiration_notif: 0,
+            history: user.history
+        }});
 
         try {
             let created_file = await filer.user_renew_user(user, fid);
@@ -1344,7 +1352,7 @@ router.get('/user/:id/renew', async function(req, res){
 
         if(!user.is_fake) {
             try {
-                await notif.add(user.email);
+                await notif.add(user.email, user.uid);
             } catch (err) {
                 logger.error('[notif][error=add][mail=' + user.email + ']');
             }
@@ -1390,6 +1398,10 @@ router.put('/user/:id/ssh', async function(req, res) {
     session_user.is_admin = isadmin;
 
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if(!user) {
+        res.status(404).send({message: 'Not found'});
+        return;
+    }
     // If not admin nor logged user
     if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
         res.status(401).send({message: 'Not authorized'});
@@ -1429,7 +1441,6 @@ router.put('/user/:id/ssh', async function(req, res) {
     user.fid = fid;
     res.send(user);
     res.end();
-    return;
 });
 
 
@@ -1670,9 +1681,9 @@ router.put('/user/:id', async function(req, res) {
         // as expired users are removed from mailing list
         if(user.status == STATUS_ACTIVE) {
             if(user.oldemail!=user.email && !user.is_fake) {
-                await notif.modify(user.oldemail, user.email);
+                await notif.modify(user.oldemail, user.email, user.uid);
             } else if(userWasFake && !user.is_fake) {
-                await notif.add(user.email);
+                await notif.add(user.email, user.uid);
             }else if (!userWasFake && user.is_fake) {
                 await notif.remove(user.email);
             }
