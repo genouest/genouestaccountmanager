@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.28
+
+* Fix security check for user identity when making API calls
+* Fix ldap sync
+* Use genouest quay.io repo as base images
+* Fix case where user is not found when uploading ssh key
+* Allow optional feedback for user creation options (see PR #406)
+
 ## 1.4.27
 
 * fix user removal for gomail
