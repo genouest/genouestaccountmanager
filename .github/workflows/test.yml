@@ -5,9 +5,9 @@ on: ["push", "pull_request"]
 jobs:
 
   build:
- 
+    if: github.repository == 'genouest/genouestaccountmanager'
     runs-on: self-hosted
- 
+
     steps:
     - uses: actions/checkout@v1
     - name: Run unit tests
