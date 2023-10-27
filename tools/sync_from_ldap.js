@@ -231,11 +231,11 @@ async function record_user(user){
         if (cur_user.lastname !=  user.sn) {
             go_user.lastname = user.sn;
         }
-        if (cur_user.uidNumber != cur_uid) {
-            go_user.uidNumber = cur_uid;
+        if (cur_user.uidnumber != cur_uid) {
+            go_user.uidnumber = cur_uid;
         }
-        if (cur_user.gidNumber != cur_gid) {
-            go_user.gidNumber = cur_gid;
+        if (cur_user.gidnumber != cur_gid) {
+            go_user.gidnumber = cur_gid;
         }
         if (cur_user.created_at != create_time) {
             go_user.created_at = create_time;
