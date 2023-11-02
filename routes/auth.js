@@ -479,5 +479,52 @@ router.post('/auth/:id', async function(req, res) {
     }
 });
 
+router.get('/auth/:id/lock', async function(req, res) {
+    let isadmin = false;
+    try {
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if (!isadmin) {
+        res.status(403).send();
+        res.end();
+        return;
+    }
+
+    let uid = req.params.id;
+    let locked = await idsrv.user_locked(uid);
+    res.send({'lock': locked});
+    res.end();
+
+});
+
+router.delete('/auth/:id/lock', async function(req, res) {
+    let isadmin = false;
+    try {
+        let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+    if (!isadmin) {
+        res.status(403).send();
+        res.end();
+        return;
+    }
+
+    let uid = req.params.id;
+    idsrv.user_unlock(uid);
+    res.end();
+});
+
 
 module.exports = router;

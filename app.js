@@ -379,6 +379,8 @@ app.post('/otp/register/:id', auth);
 app.post('/otp/check/:id', auth);
 app.get('/mail/auth/:id', auth);
 app.post('/mail/auth/:id', auth);
+app.get('/auth/:id/lock', auth);
+app.delete('/auth/:id/lock', auth);
 app.get('/logout', auth);
 
 app.get('/tags', tags);
