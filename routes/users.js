@@ -884,7 +884,8 @@ router.post('/user/:id', async function(req, res) {
         is_fake: req.body.is_fake,
         duration: req.body.duration,
         history: [{action: 'register', date: new Date().getTime()}],
-        extra_info: req.body.extra_info || []
+        extra_info: req.body.extra_info || [],
+        registration: new Date().getTime()
     };
 
     // check if register user is done by admin or by anonymouse user

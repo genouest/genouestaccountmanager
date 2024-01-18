@@ -191,6 +191,10 @@ async function create_user(user, action_owner = 'auto') {
         }
     }
 
+    if(!user.registration) {
+        user.registration = new Date().getTime()
+    }
+
     user.loginShell = '/bin/bash';
 
     // create from script as ui add a register action in history
