@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.29
+
+* Various security PR merged
+* Add ordering to most admin tables
+* Add user registration date to the 'Pending admin approval' and 'Pending email approval' table, and remove user ID
+
 ## 1.4.28
 
 * Fix security check for user identity when making API calls

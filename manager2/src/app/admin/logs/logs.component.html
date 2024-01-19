@@ -13,6 +13,7 @@
                      [rowsPerPageOptions]="[10,25,50]"
                      [globalFilterFields]="['owner', 'action', 'logs']"
                      [filterDelay]="0"
+                     sortMode="multiple"
             >
             <ng-template pTemplate="caption">
               <div class="table-header">
@@ -23,7 +24,13 @@
               </div>
             </ng-template>
             <ng-template pTemplate="header">
-                <tr><th>ID</th><th>Owner</th><th>Date</th><th>Action</th><th>Logs</th></tr>
+                <tr>
+                  <th>ID</th>
+                  <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
+                  <th pSortableColumn="date">Date <p-sortIcon field="date"></p-sortIcon></th>
+                  <th pSortableColumn="action">Action <p-sortIcon field="action"></p-sortIcon></th>
+                  <th>Logs</th>
+                </tr>
             </ng-template>
             <ng-template pTemplate="body" let-log>
               <tr>

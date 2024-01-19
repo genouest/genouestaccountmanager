@@ -104,13 +104,13 @@
               <div class="alert alert-danger" *ngIf="pending_err_msg">{{pending_err_msg}}</div>
               <div *ngIf="pending_msg" class="alert alert-info">{{pending_msg}}</div>
             </div>
-            <p-table #dtw [(value)]="pending_projects" [autolayout]="false">
+            <p-table #dtw [(value)]="pending_projects" [autolayout]="false" sortMode="multiple">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Request</th>
-                  <th>Project</th>
-                  <th>User</th>
-                  <th>Size (GB)</th>
+                  <th pSortableColumn="created_at">Request <p-sortIcon field="created_at"></p-sortIcon></th>
+                  <th pSortableColumn="id">Project <p-sortIcon field="id"></p-sortIcon></th>
+                  <th pSortableColumn="owner">User <p-sortIcon field="owner"></p-sortIcon></th>
+                  <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
                   <th>Cpu (Hour)</th>
                   <th>Org</th>
                   <th>Action</th>
@@ -153,8 +153,9 @@
              [showCurrentPageReport]="true"
 
              [rowsPerPageOptions]="[10,25,50]"
-             [globalFilterFields]="['id','owner']"
+             [globalFilterFields]="['id','owner', 'group']"
              [filterDelay]="0"
+             sortMode="multiple"
              >
       <ng-template pTemplate="caption">
         <div class="table-header">
@@ -167,14 +168,14 @@
       </ng-template>
       <ng-template pTemplate="header">
         <tr>
-          <th>Project</th>
-          <th>Owner</th>
-          <th *ngIf="!config.project || config.project.enable_group">Group</th>
-          <th>Path</th>
-          <th>Size (GB)</th>
-          <th>Cpu (Hour)</th>
-          <th>Creation</th>
-          <th>Expiration</th>
+          <th pSortableColumn="id">Project <p-sortIcon field="id"></p-sortIcon></th>
+          <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
+          <th *ngIf="!config.project || config.project.enable_group" pSortableColumn="group">Group <p-sortIcon field="group"></p-sortIcon></th>
+          <th pSortableColumn="path">Path <p-sortIcon field="path"></p-sortIcon></th>
+          <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
+          <th pSortableColumn="cpu">Cpu (Hour) <p-sortIcon field="cpu"></p-sortIcon></th>
+          <th pSortableColumn="created_at">Creation <p-sortIcon field="created_at"></p-sortIcon></th>
+          <th pSortableColumn="expire">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-project>
@@ -218,6 +219,7 @@
                   [rowsPerPageOptions]="[10,25,50]"
                   [globalFilterFields]="['id','owner']"
                   [filterDelay]="0"
+                  sortMode="multiple"
       >
         <ng-template pTemplate="caption">
           <div class="table-header">
@@ -230,14 +232,14 @@
         </ng-template>
         <ng-template pTemplate="header">
           <tr>
-            <th>Project</th>
-            <th>Owner</th>
-            <th *ngIf="!config.project || config.project.enable_group">Group</th>
-            <th>Path</th>
-            <th>Size (GB)</th>
-            <th>Cpu (Hour)</th>
-            <th>Creation</th>
-            <th>Expiration</th>
+            <th pSortableColumn="id">Project <p-sortIcon field="id"></p-sortIcon></th>
+            <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
+            <th *ngIf="!config.project || config.project.enable_group" pSortableColumn="group">Group <p-sortIcon field="group"></p-sortIcon></th>
+            <th pSortableColumn="path">Path <p-sortIcon field="path"></p-sortIcon></th>
+            <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
+            <th pSortableColumn="cpu">Cpu (Hour) <p-sortIcon field="cpu"></p-sortIcon></th>
+            <th pSortableColumn="created_at">Creation <p-sortIcon field="created_at"></p-sortIcon></th>
+            <th pSortableColumn="expire">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
             <th>Nb Notification</th>
           </tr>
         </ng-template>
@@ -270,4 +272,3 @@
     </div>
   </div>
 </div>
-
