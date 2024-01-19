@@ -12,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { WindowWrapper } from '../windowWrapper.module';
 import { FlashMessagesService } from '../utils/flash/flash.component';
 
-import { 
+import {
     solveRegistrationChallenge
 } from '@webauthn/client';
 
@@ -341,7 +341,7 @@ export class UserComponent implements OnInit {
                 break;
             }
         }
-        if(!found) { this.groups.push({name: this.user.group})}
+        if(!found) { this.groups.push({name: this.user.group, new: true})}
     }
 
     _loadProjects(projects) {
@@ -704,7 +704,7 @@ export class UserComponent implements OnInit {
 
     register_u2f() {
 
-        this.userService.u2fGet(this.user.uid).subscribe( 
+        this.userService.u2fGet(this.user.uid).subscribe(
             resp => {
                 let challenge = resp;
                 let ctx =this;
