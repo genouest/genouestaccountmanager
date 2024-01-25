@@ -145,9 +145,9 @@ router.put('/group/:id', async function(req, res){
         return;
     }
     await dbsrv.mongo_events().insertOne({
-        'owner': user.uid,
+        'owner': session_user.uid,
         'date': new Date().getTime(),
-        'action': 'group owner modification ' + group.name + ' to ' +owner,
+        'action': 'group modification ' + group.name,
         'logs': []});
 
     let data = await dbsrv.mongo_groups().updateOne({name: group.name}, {'$set':{'owner': owner, 'description': description}});
@@ -246,6 +246,7 @@ router.get('/group', async function(req, res){
         return;
     }
     let groups = await dbsrv.mongo_groups().find().toArray();
+
     res.send(groups);
     return;
 });

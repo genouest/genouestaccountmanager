@@ -128,10 +128,10 @@
         <ng-template pTemplate="header">
           <tr>
             <th pSortableColumn="name">Group <p-sortIcon field="name"></p-sortIcon></th>
-            <th pSortableColumn="gid">Gid <p-sortIcon field="gid">></p-sortIcon></th>
-            <th pSortableColumn="owner">Owner <p-sortIcon field="owner">></p-sortIcon></th>
-            <th pSortableColumn="description">Description <p-sortIcon field="description">></p-sortIcon></th>
-            <th pSortableColumn="tags">Tags <p-sortIcon field="tags">></p-sortIcon></th>
+            <th pSortableColumn="gid">Gid <p-sortIcon field="gid"></p-sortIcon></th>
+            <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
+            <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
+            <th pSortableColumn="tags">Tags <p-sortIcon field="tags"></p-sortIcon></th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-group>
@@ -140,7 +140,7 @@
             <td>{{group.gid}}</td>
             <td>{{group.owner}}</td>
             <td>{{group.description}}</td>
-            <td>{{group.tags.join(", ")}}</td>
+            <td>{{group.tags ? group.tags.join(", ") : ""}}</td>
           </tr>
         </ng-template>
       </p-table>
