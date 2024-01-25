@@ -69,10 +69,10 @@ function get_group_home(user) {
 }
 
 
-async function create_group(group_name, owner_name, action_owner = 'auto', add_owner=true) {
+async function create_group(group_name, owner_name, description, action_owner = 'auto', add_owner=true) {
     let mingid = await idsrv.getGroupAvailableId();
     let fid = new Date().getTime();
-    let group = {name: group_name, gid: mingid, owner: owner_name};
+    let group = {name: group_name, gid: mingid, owner: owner_name, description: description};
     try {
         await dbsrv.mongo_groups().insertOne(group);
         await goldap.add_group(group, fid);

@@ -33,7 +33,8 @@ export class GroupsComponent implements OnInit {
         this.selectedGroup = null;
         this.new_group = {
             name: '',
-            owner: ''
+            owner: '',
+            description: '',
         }
         this.projects = [];
         this.groups = [];

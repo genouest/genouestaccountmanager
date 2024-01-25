@@ -131,11 +131,14 @@ router.put('/group/:id', async function(req, res){
     }
     let owner = req.body.owner;
     let user = await dbsrv.mongo_users().findOne({uid: owner});
-    if(!user) {
-        res.status(404).send({message: 'User does not exist'});
+    if(owner && !user) {
+        res.status(404).send({message: 'Owner user does not exist'});
         res.end();
         return;
     }
+
+    let description = req.body.description
+
     let group = await dbsrv.mongo_groups().findOne({name: req.params.id});
     if(! group) {
         res.status(404).send({message: 'Group does not exist'});
@@ -147,7 +150,7 @@ router.put('/group/:id', async function(req, res){
         'action': 'group owner modification ' + group.name + ' to ' +owner,
         'logs': []});
 
-    let data = await dbsrv.mongo_groups().updateOne({name: group.name}, {'$set':{'owner': owner}});
+    let data = await dbsrv.mongo_groups().updateOne({name: group.name}, {'$set':{'owner': owner, 'description': description}});
     res.send(data);
     res.end();
 });
@@ -189,6 +192,9 @@ router.post('/group/:id', async function(req, res){
         res.end();
         return;
     }
+
+    let description = req.body.description
+
     let group = await dbsrv.mongo_groups().findOne({name: req.params.id });
     if(group) {
         res.status(403).send({message: 'Group already exists'});
@@ -202,7 +208,7 @@ router.post('/group/:id', async function(req, res){
     }
 
     try {
-        group = await grpsrv.create_group(req.params.id , owner, session_user.uid);
+        group = await grpsrv.create_group(req.params.id , owner, description, session_user.uid);
     } catch(error){
         logger.error('Add Group Failed for: ' + req.params.id, error);
         res.status(500).send({message: 'Add Group Failed'});

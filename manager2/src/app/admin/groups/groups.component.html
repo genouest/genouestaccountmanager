@@ -14,6 +14,9 @@
         <input placeholder="Owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
       </div>
       <div class="form-group">
+        <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
+      </div>
+      <div class="form-group">
         <button type="button" class="btn btn-secondary" (click)="addGroup()">Create</button>
       </div>
     </form>
@@ -46,6 +49,10 @@
           <label for="group_id" class="col-sm-2 col-form-label">Owner</label>
           <div class="col-sm-3">
             <input placeholder="Owner" id="group_id" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedGroup.owner" class="form-control"/>
+          </div>
+          <label for="group_desc" class="col-sm-2 col-form-label">Description</label>
+          <div class="col-sm-6">
+            <input placeholder="Description" id="group_desc" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="selectedGroup.description" class="form-control"/>
           </div>
           <button type="button" class="btn btn-secondary" (click)="updateGroup()">Update</button>
         </div>
@@ -106,7 +113,7 @@
                [rows]="10"
                [showCurrentPageReport]="true"
                [rowsPerPageOptions]="[10,25,50]"
-               [globalFilterFields]="['name', 'gid', 'owner', 'tags']"
+               [globalFilterFields]="['name', 'gid', 'owner', 'tags', 'description']"
                [filterDelay]="0"
                sortMode="multiple"
                >
@@ -123,13 +130,16 @@
             <th pSortableColumn="name">Group <p-sortIcon field="name"></p-sortIcon></th>
             <th pSortableColumn="gid">Gid <p-sortIcon field="gid">></p-sortIcon></th>
             <th pSortableColumn="owner">Owner <p-sortIcon field="owner">></p-sortIcon></th>
+            <th pSortableColumn="description">Description <p-sortIcon field="description">></p-sortIcon></th>
             <th pSortableColumn="tags">Tags <p-sortIcon field="tags">></p-sortIcon></th>
-        </tr>            </ng-template>
+          </tr>
+        </ng-template>
         <ng-template pTemplate="body" let-group>
           <tr>
             <td (click)="show_group_users(group)" style="cursor: pointer;"><span class="label label-primary">{{group.name}}</span></td>
             <td>{{group.gid}}</td>
             <td>{{group.owner}}</td>
+            <td>{{group.description}}</td>
             <td>{{group.tags.join(", ")}}</td>
           </tr>
         </ng-template>
