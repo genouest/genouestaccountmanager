@@ -184,7 +184,7 @@ router.post('/group/:id', async function(req, res){
     }
     let owner = req.body.owner;
     let user = await dbsrv.mongo_users().findOne({uid: owner});
-    if(!user) {
+    if(owner && !user) {
         res.status(404).send({message: 'Owner user does not exist'});
         res.end();
         return;

@@ -11,6 +11,7 @@
                       [rowsPerPageOptions]="[10,25,50]"
                       [globalFilterFields]="['name', 'type', 'host', 'owner']"
                       [filterDelay]="0"
+                      sortMode="multiple"
           >
         <ng-template pTemplate="caption">
             <div class="table-header">
@@ -21,7 +22,12 @@
             </div>
         </ng-template>
             <ng-template pTemplate="header">
-              <tr><th>Name</th><th>Owner</th><th>Type</th><th>Host</th></tr>
+              <tr>
+                <th pSortableColumn="name">Name <p-sortIcon field="name"</th>
+                <th pSortableColumn="owner">Owner <p-sortIcon field="owner"</th>
+                <th pSortableColumn="type">Type <p-sortIcon field="type"</th>
+                <th pSortableColumn="host">Host <p-sortIcon field="host"</th>
+              </tr>
             </ng-template>
             <ng-template pTemplate="body" let-database>
               <tr>

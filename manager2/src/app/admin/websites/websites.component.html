@@ -10,8 +10,9 @@
                       [rows]="10"
                       [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
-                      [globalFilterFields]="['name', 'description', 'owner']"
+                      [globalFilterFields]="['name', 'description', 'owner', 'url']"
                       [filterDelay]="0"
+                      sortMode="multiple"
           >
         <ng-template pTemplate="caption">
             <div class="table-header">
@@ -23,11 +24,10 @@
         </ng-template>
             <ng-template pTemplate="header">
                 <tr>
-                  <th>Name</th>
-                  <th>Owner</th>
-                  <th>URL</th>
-                  <th>Description</th>
-                  <th></th>
+                  <th pSortableColumn="name">Name <p-sortIcon field="name"</th>
+                  <th pSortableColumn="owner">Owner <p-sortIcon field="owner"</th>
+                  <th pSortableColumn="url">URL <p-sortIcon field="url"</th>
+                  <th pSortableColumn="description">Description <p-sortIcon field="description"</th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-web>
@@ -36,7 +36,6 @@
                     <td><a routerLink="/user/{{web.owner}}"><span class="label label-primary">{{web.owner}}</span></a></td>
                     <td>{{web.url}}</td>
                     <td>{{web.description}}</td>
-                    <td></td>
                   </tr>
             </ng-template>
           </p-table>

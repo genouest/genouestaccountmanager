@@ -46,7 +46,7 @@ export class AdminStatComponent implements OnInit {
                         }
                     }
                     if(!statuses[u.status]) {statuses[u.status] = 0}
-                    statuses[u.status]++                    
+                    statuses[u.status]++
                 })
                 let status_list = [];
                 Object.keys(statuses).forEach(s => {
@@ -58,6 +58,7 @@ export class AdminStatComponent implements OnInit {
                 Object.keys(mail_domain).forEach(domain => {
                     domain_list.push({'title': domain, 'value': mail_domain[domain]})
                 })
+                domain_list.sort((a, b) => (b.value - a.value))
                 this.domains = domain_list;
                 this.extras = extras;
             },

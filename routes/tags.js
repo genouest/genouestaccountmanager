@@ -60,7 +60,7 @@ router.post('/tags/:kind/:id', async function(req, res) {
     }
 
     tags.forEach(tag => {
-        dbsrv.mongo_tags().updateOne({'name': tag}, {'name': tag}, {upsert: true});
+        dbsrv.mongo_tags().updateOne({'name': tag}, {'$set': {'name': tag}}, {upsert: true});
     });
 
     if(req.params.kind == 'group') {
