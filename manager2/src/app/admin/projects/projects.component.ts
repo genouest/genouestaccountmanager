@@ -197,6 +197,42 @@ export class ProjectsComponent implements OnInit {
         );
     }
 
+    edit_project() {
+
+        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
+            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
+            return;
+        }
+
+        this.reset_msgs()
+
+        this.projectsService.edit(
+            this.new_project.uuid,
+            {
+                'id': this.new_project.id,
+                'size': this.new_project.size,
+                'cpu': this.new_project.cpu,
+                'expire': new Date(this.new_project.expire).getTime(),
+                'owner': this.new_project.owner,
+                'group': this.config.project.enable_group ? this.new_project.group : '',
+                'description' : this.new_project.description,
+                'access' : this.new_project.access,
+                'path': this.new_project.path,
+                'orga':this.new_project.orga
+            }
+        ).subscribe(
+            resp => {
+                this.prj_msg = resp['message'];
+                if(this.config.project.enable_group && project.group !== this.oldGroup) {
+                    this.update_users_group(this.users, project.group);
+                }
+                this.show_project_users(project.id);
+            },
+            err => this.prj_err_msg = err.error.message
+        )
+    }
+
+
     project_list(refresh_requests = false) {
         this.projects = [];
         this.expired_projects = [];
@@ -245,7 +281,7 @@ export class ProjectsComponent implements OnInit {
                     this.pending_number = 0;
                 }
                 let data = resp;
-                if (data.length > 0) { 
+                if (data.length > 0) {
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {
                         data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000

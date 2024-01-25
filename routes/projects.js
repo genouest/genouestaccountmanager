@@ -172,6 +172,83 @@ router.post('/project', async function(req, res){
     return;
 });
 
+router.post('/put', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.body.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+    if(!user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+    if(!isadmin){
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    let owner = await dbsrv.mongo_users().findOne({'uid': req.body.owner});
+    if(!owner){
+        res.status(404).send({message: 'Owner not found'});
+        return;
+    }
+    let project = await dbsrv.mongo_projects().findOne({'uuid': req.body.uuid});
+
+    if (!project){
+      res.status(403).send({message: 'Project does not exist'});
+      return;
+    }
+
+    let related_project = await dbsrv.mongo_projects().findOne({'id': req.body.id});
+
+    if(project && !(project.uuid == related_project.uuid)){
+        res.status(403).send({message: 'A project with that name already exists'});
+        return;
+    }
+
+    try {
+        await prjsrv.edit_project({
+            'id': req.body.id,
+            'owner': req.body.owner,
+            'group': req.body.group,
+            'size': req.body.size,
+            'cpu': req.body.cpu,
+            'expire': req.body.expire,
+            'description': req.body.description,
+            'path': req.body.path,
+            'orga': req.body.orga,
+            'access': req.body.access
+        }, req.body.uuid, user.uid);
+    } catch(e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
+    }
+
+    res.send({message: 'Project created'});
+    return;
+});
+
 router.delete('/project/:id', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});

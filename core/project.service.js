@@ -72,6 +72,15 @@ async function remove_project(id, action_owner = 'auto') {
 
 }
 
+async function edit_project(project, uuid, action_owner = 'auto') {
+    logger.info('Editing Project ' + id);
+    project.expiration_notif = 0;
+    await dbsrv.mongo_projects().updateOne({'uuid': uuid},  {'$set': project});
+    let fid = new Date().getTime();
+    project.id =  id;
+    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
+}
+
 async function update_project(id, project, action_owner = 'auto') {
     logger.info('Update Project ' + id);
     project.expiration_notif = 0;
