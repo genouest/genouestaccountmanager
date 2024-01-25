@@ -172,13 +172,15 @@ router.post('/project', async function(req, res){
     return;
 });
 
-router.post('/put', async function(req, res){
+router.put('/project', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
+        res.end();
         return;
     }
     if(! sansrv.sanitizeAll([req.body.id])) {
         res.status(403).send({message: 'Invalid parameters'});
+        res.end();
         return;
     }
     let user = null;
@@ -194,28 +196,34 @@ router.post('/put', async function(req, res){
     }
     if(!user){
         res.status(404).send({message: 'User not found'});
+        res.end();
         return;
     }
     if(!isadmin){
         res.status(401).send({message: 'Not authorized'});
+        res.end();
         return;
     }
     let owner = await dbsrv.mongo_users().findOne({'uid': req.body.owner});
     if(!owner){
         res.status(404).send({message: 'Owner not found'});
+        res.end();
         return;
     }
-    let project = await dbsrv.mongo_projects().findOne({'uuid': req.body.uuid});
+
+    let project = await dbsrv.mongo_pending_projects().findOne({'uuid': req.body.uuid});
 
     if (!project){
       res.status(403).send({message: 'Project does not exist'});
+      res.end();
       return;
     }
 
     let related_project = await dbsrv.mongo_projects().findOne({'id': req.body.id});
 
-    if(project && !(project.uuid == related_project.uuid)){
+    if(related_project && !(project.uuid == related_project.uuid)){
         res.status(403).send({message: 'A project with that name already exists'});
+        res.end();
         return;
     }
 
@@ -245,7 +253,7 @@ router.post('/put', async function(req, res){
         }
     }
 
-    res.send({message: 'Project created'});
+    res.send({message: 'Project updated'});
     return;
 });
 
@@ -464,7 +472,6 @@ router.post('/ask/project', async function(req, res){
 });
 
 router.get('/pending/project', async function (req, res) {
-
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;

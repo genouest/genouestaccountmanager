@@ -349,6 +349,7 @@ app.get('/project/:id', projects);
 app.post('/project', projects);
 app.post('/project/:id', projects);
 app.post('/project/:id/request', projects);
+app.put('/project', projects);
 app.delete('/project/:id', projects);
 app.put('/project/:id/request', projects);
 app.get('/project/:id/extend', projects);
