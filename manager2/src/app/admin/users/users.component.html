@@ -15,7 +15,7 @@
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-warning">{{user.uid}}</span></a></td>
                                 <td>{{user.email}}</td>
                                 <td>{{user.duration}}</td>
                                 <td>{{date_convert(user.registration)}}</td>
@@ -44,7 +44,7 @@
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-warning">{{user.uid}}</span></a></td>
                                 <td>{{user.email}}</td>
                                 <td>{{user.duration}}</td>
                                 <td>{{date_convert(user.registration)}}</td>
@@ -88,7 +88,7 @@
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm">{{user.uid}}</span></a></td>
                                 <td>{{user.uidnumber}}</td>
                                 <td>{{user.email}}</td>
                                 <td>{{date_convert(user.expiration)}}</td>
@@ -132,7 +132,7 @@
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-danger">{{user.uid}}</span></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-danger">{{user.uid}}</span></a></td>
                                 <td>{{user.uidnumber}}</td>
                                 <td>{{user.email}}</td>
                                 <td>{{date_convert(user.expiration)}}</td>
