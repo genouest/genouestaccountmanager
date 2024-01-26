@@ -231,10 +231,19 @@ export class UserComponent implements OnInit {
         this.password1  = ''
         this.password2 = ''
 
+        this.selectedGroupExist = true
+        this.new_group = {
+            name: '',
+            owner: '',
+            description: '',
+        }
+
         this.notify_subject = ''
         this.notify_message = ''
         this.notify_err = ''
         this.key_err = ''
+        this.grp_success_msg = ''
+        this.grp_err_msg = ''
         this.otp = null
 
     }
@@ -341,7 +350,10 @@ export class UserComponent implements OnInit {
                 break;
             }
         }
-        if(!found) { this.groups.push({name: this.user.group, new: true})}
+        if(!found) {
+          this.groups.push({name: this.user.group, new: true});
+          this.selectedGroupExist = false
+        }
     }
 
     _loadProjects(projects) {
@@ -781,6 +793,28 @@ export class UserComponent implements OnInit {
             err => {
                 this.err_msg = err.error.message;
                 console.log('failed to delete user', err);
+            }
+        )
+    }
+
+    addGroup(){
+        if (this.new_group.name === '') {
+            return;
+        }
+        this.grp_err_msg = '';
+        this.grp_success_msg = '';
+        this.groupsService.add(this.new_group).subscribe(
+            resp => {
+                this.grp_success_msg = 'Group was created';
+                this.user.group = this.new_group.name
+                this.groupService.list().subscribe(
+                    resp => this._loadGroups(resp),
+                    err => console.log('failed to get groups')
+                )
+            },
+            err => {
+                this.grp_success_msg = '';
+                this.grp_err_msg = err.error.message;
             }
         )
     }
