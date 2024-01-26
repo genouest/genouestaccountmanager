@@ -124,18 +124,25 @@
                               <label for="group" class="col-4 col-form-label">Group</label>
                               <div class="col-6">
                                   <input disabled type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control"/>
+                              </div>
+                          </div>
+
+                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
+                              <div class="col-4 col-form-label"></div>
+                              <div class="col-6">
                                   <select [(ngModel)]="user.group" [ngModelOptions]="{standalone: true}" class="form-control">
                                       <option *ngFor="let group of groups" [value]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
                                   </select>
                               </div>
-                              <div *ngIf="!selectedGroupExist && session_user.is_admin" class="groupCreation">
+                              <div *ngIf="user.group == this.missing_group" class="groupCreation col-2">
                                 <div>
                                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#group_creation">
-                                    Create group
+                                  <span class="oi oi-plus" aria-hidden="true"></span>
                                   </button>
                                 </div>
                               </div>
                           </div>
+
                           <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.main_group">
                               <label for="mgroup" class="col-4 col-form-label">Main group directory</label>
                               <div class="col-6">
@@ -595,30 +602,21 @@
 <div class="modal" style="z-index: 1500;" id="group_creation" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="panel-title">Group creation</h3>
+      </div>
       <div class="modal-body">
-        <div class="card bg-light">
-          <div class="card-header">
-            <h3 class="panel-title">Group creation</h3>
+        <div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
+        <div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
+        <form role="form" class="user-form form-inline justify-content-center">
+          <div class="form-group">
+            <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
+            <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
           </div>
-          <div class="card-body">
-            <div class="alert alert-success" *ngIf="success_msg">{{grp_success_msg}}</div>
-            <div class="alert alert-danger" *ngIf="err_msg">{{grp_err_msg}}</div>
-            <form role="form" class="user-form form-inline">
-              <div class="form-group">
-                <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
-              </div>
-              <div class="form-group">
-                <input placeholder="Owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
-              </div>
-              <div class="form-group">
-                <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
-              </div>
-            </form>
-          </div>
-        </div>
+        </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="addGroup()">Create</button>
+        <button type="button" class="btn btn-primary"  [disabled]="grp_success_msg || !new_group.name" (click)="addGroup()">Create</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
