@@ -15,7 +15,7 @@ var mail_set = false;
 
 var transporter = null;
 
-const listMonkAgent = new https.Agent({  
+const listMonkAgent = new https.Agent({
     rejectUnauthorized: CONFIG.listmonk.force_tls ? true : false
 });
 
@@ -53,7 +53,7 @@ async function create_user(user) {
         console.error('[create_user] error', err);
         return null;
     }
-    
+
 }
 
 async function delete_user(user) {
@@ -86,7 +86,7 @@ async function get_user(email) {
         });
     } catch(err) {
         console.error('[get_user] error', err);
-        return null;   
+        return null;
     }
     let users = res.data.data.results;
     for(let i=0;i<users.length;i++){
@@ -114,7 +114,7 @@ async function join_list(user, lists) {
         }
         add_lists.push(list.id);
     }
-    
+
     let changed = false;
     for(let l=0;l<add_lists.length;l++){
         if (user.lists.indexOf(add_lists[l])<0) {
@@ -147,7 +147,7 @@ async function join_list(user, lists) {
         });
     } catch(err) {
         console.error('[join_list] error', err);
-        return false;   
+        return false;
     }
     return true;
 }
@@ -190,7 +190,7 @@ async function quit_list(user, lists) {
         });
     } catch(err) {
         console.error('[quit_list] error', err);
-        return false;   
+        return false;
     }
     return true;
 }
@@ -207,7 +207,7 @@ async function update_user(user) {
         });
     } catch(err) {
         console.error('[update_user] error', err);
-        return false;   
+        return false;
     }
     return true;
 }
@@ -225,7 +225,7 @@ async function get_lists() {
         return lists.data.data.results;
     } catch(err) {
         console.error('[get_lists] error', err);
-        return null;        
+        return null;
     }
 }
 
@@ -256,7 +256,7 @@ async function get_list_members(list_id) {
         return members.data.data.results;
     } catch(err) {
         console.error('[get_list_members] error', err);
-        return []; 
+        return [];
     }
 }
 
@@ -350,7 +350,7 @@ module.exports = {
         return;
     },
 
-    remove: async function(email) {
+    remove: async function(email, sendmail=true) {
         if(email===undefined ||email===null || email=='' || ! mail_set) {
             return;
         }
@@ -366,7 +366,7 @@ module.exports = {
             return;
         }
 
-        
+
         let ok = await quit_list(user, CONFIG.listmonk.optout);
         if (ok) {
             dbsrv.mongo_events().insertOne({'date': new Date().getTime(), 'action': 'remove ' + email + ' from mailing list ' + CONFIG.listmonk.optout.join(',') , 'logs': []});

@@ -1,0 +1,17 @@
+<div class="expireConfirmation">
+  <div *ngIf="!isExpiring" >
+    <button type="button" class="btn btn-warning btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i> Expire</button>
+  </div>
+  <div *ngIf="isExpiring">
+    <div *ngIf="explainMessage">
+      <div class="form-group row">
+        <label for="sendmail" class="form-check-label"><b>Send Mail </b></label>
+      	<input id="sendmail" type="checkbox" class="form-check-input" [ngModelOptions]="{standalone: true}" [(ngModel)]="sendmail">
+      </div>
+    </div>
+    <div class="form-group row">
+      <button type="button" class="btn btn-secondary btn-xs" (click)="cancel()">Abort expiration</button>
+      <button type="button" class="btn btn-danger btn-xs"  (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
+    </div>
+  </div>
+</div>

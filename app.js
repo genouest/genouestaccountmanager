@@ -331,6 +331,7 @@ app.post('/user/:id/quota', users);
 app.delete('/user/:id/cloud', users);
 app.post('/user/:id/group/:group', users);
 app.get('/user/:id/subscribed', users);
+app.get('/user/:id/unlock', users);
 app.put('/user/:id/subscribe', users);
 app.put('/user/:id/unsubscribe', users);
 app.delete('/user/:id/group/:group', users);

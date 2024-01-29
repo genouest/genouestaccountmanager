@@ -586,8 +586,8 @@ export class UserComponent implements OnInit {
         )
     }
 
-    expire() {
-        this.userService.expire(this.user.uid).subscribe(
+    expire(sendmail=true) {
+        this.userService.expire(this.user.uid, sendmail).subscribe(
             resp => {
                 this.msg = resp['message'];
                 this.user.status = this.STATUS_EXPIRED;
@@ -824,6 +824,15 @@ export class UserComponent implements OnInit {
                 this.grp_success_msg = '';
                 this.grp_err_msg = err.error.message;
             }
+        )
+    }
+
+    unlock() {
+        this.userService.unlock(this.user.uid).subscribe(
+            resp => {
+                this.msg = resp['message'];
+            },
+            err => console.log('failed to unlock user')
         )
     }
 

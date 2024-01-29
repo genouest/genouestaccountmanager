@@ -76,7 +76,7 @@ export class UserService {
         return this.http.post(
             environment.apiUrl + '/otp/register/' + userId,
             {},
-            httpOptions)       
+            httpOptions)
     }
 
     delete(userId: string, message: string, sendmail: boolean) {
@@ -132,8 +132,9 @@ export class UserService {
             httpOptions)
     }
 
-    expire(userId) {
+    expire(userId, sendmail=false) {
         let httpOptions = {
+            params: {sendmail: sendmail}
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
             //}),
@@ -338,5 +339,16 @@ export class UserService {
             {'log': note},
             httpOptions
         )
+    }
+
+    unlock(userId) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + userId + '/unlock',
+            httpOptions)
     }
 }

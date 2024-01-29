@@ -12,7 +12,7 @@ const dbsrv = require('../core/db.service.js');
 
 var mail_set = false;
 
-const gomailAgent = new https.Agent({  
+const gomailAgent = new https.Agent({
     rejectUnauthorized: CONFIG.gomail.force_tls ? true : false
 });
 
@@ -145,7 +145,7 @@ module.exports = {
         }
     },
 
-    remove: async function(email) {
+    remove: async function(email, sendmail=true) {
         if(email===undefined ||email===null || email=='' || ! mail_set) {
             return;
         }
@@ -153,15 +153,21 @@ module.exports = {
             return;
         }
 
+        let data = {
+            'email': [email],
+            'message': CONFIG.gomail.optout_message,
+            'message_html': CONFIG.gomail.optout_message_html,
+        }
+
+        if (!sendmail){
+          data['skip'] = true
+        }
+
         try {
             await axios.delete(
                 gomailUrl + '/mail/opt/' + CONFIG.gomail.main_list,
                 {
-                    data: {
-                        'email': [email],
-                        'message': CONFIG.gomail.optout_message,
-                        'message_html': CONFIG.gomail.optout_message_html
-                    },
+                    data: data,
                     headers: gomailHeaders,
                     httpsAgent: gomailAgent
                 }

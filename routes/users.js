@@ -36,6 +36,7 @@ let duration_list = CONFIG.duration;
 const grpsrv = require('../core/group.service.js');
 const usrsrv = require('../core/user.service.js');
 const rolsrv = require('../core/role.service.js');
+const idsrv = require('../core/id.service.js');
 
 router.get('/user/:id/apikey', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -709,6 +710,8 @@ router.get('/user/:id', async function(req, res) {
         user.quota.push(k);
     }
 
+    user.is_locked = await idsrv.user_locked(user.uid);
+
     if(session_user._id.toString() == user._id.toString() || isadmin){
         res.json(user);
     }
@@ -941,6 +944,8 @@ router.get('/user/:id/expire', async function(req, res){
         return;
     }
 
+    let sendmail = req.query.regkey === "false" ? false : true;
+
     let session_user = null;
     let isadmin = false;
     try {
@@ -994,7 +999,7 @@ router.get('/user/:id/expire', async function(req, res){
         // Now remove from mailing list
         try {
             // eslint-disable-next-line no-unused-vars
-            await notif.remove(user.email);
+            await notif.remove(user.email, sendmail=sendmail);
             await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
             res.send({message: 'Operation in progress', fid: fid, error: []});
             res.end();
@@ -1894,5 +1899,57 @@ router.get('/lists', async function(req, res){
     res.send(listOfLists);
     res.end();
 });
+
+
+router.get('/user/:id/unlock', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if (!session_user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if (!user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+
+    session_user.is_admin = isadmin;
+
+    if(session_user.is_admin){
+        let fid = new Date().getTime();
+        try {
+            await idsrv.user_unlock(user.uid)
+        } catch(err) {
+            res.send({message: 'Error during operation'});
+            return;
+        }
+        return;
+    }
+    else {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+});
+
 
 module.exports = router;

@@ -1,0 +1,32 @@
+import { Component, Input, OnInit } from '@angular/core';
+
+@Component({
+    selector: 'app-my-expire-confirm',
+    templateUrl: './my-expire-confirm.component.html',
+    styleUrls: ['./my-expire-confirm.component.css']
+})
+export class MyExpireConfirmComponent implements OnInit {
+
+    isDeleting: boolean
+    sendmail: boolean
+
+    @Input()
+    onConfirm: any
+
+    constructor() { }
+
+    ngOnInit() {
+        this.sendmail =  true;
+    }
+
+    startExpire(){
+        this.isExpiring = true;
+    }
+    cancel() {
+        this.isExpiring = false;
+        this.sendmail = true;
+    }
+    confirm() {
+        this.onConfirm(this.sendmail);
+    }
+}
