@@ -814,9 +814,11 @@ export class UserComponent implements OnInit {
         this.groupService.add(this.new_group).subscribe(
             resp => {
                 this.grp_success_msg = 'Group was created';
-                this.user.group = this.new_group.name
                 this.groupService.list().subscribe(
-                    resp => this._loadGroups(resp),
+                    resp => {
+                        this._loadGroups(resp);
+                        this.user.group = this.new_group.name;
+                    },
                     err => console.log('failed to get groups')
                 )
             },

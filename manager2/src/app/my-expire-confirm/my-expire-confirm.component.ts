@@ -7,7 +7,7 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class MyExpireConfirmComponent implements OnInit {
 
-    isDeleting: boolean
+    isExpiring: boolean
     sendmail: boolean
 
     @Input()

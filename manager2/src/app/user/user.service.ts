@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
@@ -132,9 +132,12 @@ export class UserService {
             httpOptions)
     }
 
-    expire(userId, sendmail=false) {
+    expire(userId, sendmail=true) {
+        let params = new HttpParams()
+        params.append("sendmail", sendmail.toString())
+
         let httpOptions = {
-            params: {sendmail: sendmail}
+            params: params
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
             //}),
