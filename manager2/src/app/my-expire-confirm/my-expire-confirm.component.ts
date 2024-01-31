@@ -20,7 +20,6 @@ export class MyExpireConfirmComponent implements OnInit {
 
     ngOnInit() {
         this.sendmail =  true;
-        console.log(this.mailer)
     }
 
     startExpire(){
