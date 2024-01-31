@@ -88,7 +88,7 @@
           </ng-template>
           <ng-template pTemplate="body" let-user>
             <tr>
-              <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
+              <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-primary">{{user.uid}}</span></a></td>
               <td>{{user.email}}</td>
               <td><span *ngIf="user.authorized">x</span></td>
               <td><span *ngIf="user.group == selectedGroup.name">x</span></td>
@@ -136,7 +136,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-group>
           <tr>
-            <td (click)="show_group_users(group)" style="cursor: pointer;"><span class="label label-primary">{{group.name}}</span></td>
+            <td (click)="show_group_users(group)" style="cursor: pointer;"><span class="p-button p-button-sm p-button-primary">{{group.name}}</span></td>
             <td>{{group.gid}}</td>
             <td>{{group.owner}}</td>
             <td>{{group.description}}</td>

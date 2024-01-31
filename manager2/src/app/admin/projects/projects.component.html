@@ -184,8 +184,8 @@
       </ng-template>
       <ng-template pTemplate="body" let-project>
         <tr>
-          <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
-          <td><a routerLink="/user/{{project.owner}}"><span class="label label-primary">{{project.owner}}</span></a></td>
+          <td><a routerLink="/admin/project/{{project.id}}"><span class="p-button p-button-sm p-button-primary">{{project.id}}</span></a></td>
+          <td><a routerLink="/user/{{project.owner}}"><span class="p-button p-button-sm p-button-primary">{{project.owner}}</span></a></td>
           <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
           <td>{{project.path}}</td>
           <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
@@ -249,8 +249,8 @@
         </ng-template>
         <ng-template pTemplate="body" let-project>
           <tr>
-            <td><a routerLink="/admin/project/{{project.id}}"><span class="label label-primary">{{project.id}}</span></a></td>
-            <td><a routerLink="/user/{{project.owner}}"><span class="label label-primary">{{project.owner}}</span></a></td>
+            <td><a routerLink="/admin/project/{{project.id}}"><span class="p-button p-button-sm p-button-primary">{{project.id}}</span></a></td>
+            <td><a routerLink="/user/{{project.owner}}"><span class="p-button p-button-sm p-button-primary">{{project.owner}}</span></a></td>
             <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
             <td>{{project.path}}</td>
             <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}

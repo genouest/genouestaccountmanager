@@ -288,7 +288,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-sm-12" style="margin-bottom: 10px">
-                    <span *ngIf="user.u2f.key" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
+                    <span *ngIf="user.u2f.key"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
                     <button class="p-button p-button-sm p-button-primary btn-sm" (click)="register_u2f()">Register new key</button>
                     <span *ngIf="u2f">{{u2f}}</span>
                 </div>

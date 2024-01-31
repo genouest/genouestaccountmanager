@@ -31,8 +31,8 @@
             </ng-template>
             <ng-template pTemplate="body" let-database>
               <tr>
-                <td><span class="label label-primary">{{database.name}}</span></td>
-                <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
+                <td><span>{{database.name}}</span></td>
+                <td><a routerLink="/user/{{database.owner}}"><span class="p-button p-button-sm p-button-primary">{{database.owner}}</span></a></td>
                 <td>{{database.type}}</td>
                 <td>{{database.host}}</td>
               </tr>
