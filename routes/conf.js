@@ -2,8 +2,8 @@
 
 const express = require('express');
 var router = express.Router();
-const winston = require('winston');
-const logger = winston.loggers.get('gomngr');
+//const winston = require('winston');
+//const logger = winston.loggers.get('gomngr');
 
 const dbsrv = require('../core/db.service.js');
 

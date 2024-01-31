@@ -16,9 +16,6 @@ export class MyExpireConfirmComponent implements OnInit {
     @Input()
     mailer: string
 
-    @Input()
-    data: any
-
     constructor() { }
 
     ngOnInit() {

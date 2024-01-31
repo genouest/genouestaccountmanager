@@ -324,7 +324,6 @@ export class UserComponent implements OnInit {
             resp => {
                 this.config = resp;
                 this.initUser();
-                console.log(resp)
             },
             err => console.log('failed to get config')
         )
