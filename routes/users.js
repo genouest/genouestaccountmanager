@@ -944,7 +944,7 @@ router.get('/user/:id/expire', async function(req, res){
         return;
     }
 
-    let sendmail = req.query.regkey === "false" ? false : true;
+    let sendmail = req.query.sendmail === "false" ? false : true;
 
     let session_user = null;
     let isadmin = false;
@@ -960,11 +960,13 @@ router.get('/user/:id/expire', async function(req, res){
 
     if (!session_user){
         res.status(404).send({message: 'User not found'});
+        res.end();
         return;
     }
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if (!user){
         res.status(404).send({message: 'User not found'});
+        res.end();
         return;
     }
 
@@ -1941,12 +1943,16 @@ router.get('/user/:id/unlock', async function(req, res){
             await idsrv.user_unlock(user.uid)
         } catch(err) {
             res.send({message: 'Error during operation'});
+            res.end();
             return;
         }
+        res.send({message: 'User was unlocked'});
+        res.end();
         return;
     }
     else {
         res.status(401).send({message: 'Not authorized'});
+        res.end();
         return;
     }
 });

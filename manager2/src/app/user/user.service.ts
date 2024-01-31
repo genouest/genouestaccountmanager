@@ -132,9 +132,12 @@ export class UserService {
             httpOptions)
     }
 
-    expire(userId, sendmail=true) {
+    expire(userId: string, sendmail: boolean) {
+
         let params = new HttpParams()
-        params.append("sendmail", sendmail.toString())
+        if (!sendmail) {
+            params = params.append("sendmail", "false")
+        }
 
         let httpOptions = {
             params: params
@@ -142,6 +145,7 @@ export class UserService {
             //  'x-api-key': localStorage.getItem('my-api-key')
             //}),
         };
+
         return this.http.get(
             environment.apiUrl + '/user/' + userId + '/expire',
             httpOptions)

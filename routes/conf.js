@@ -2,8 +2,8 @@
 
 const express = require('express');
 var router = express.Router();
-// const winston = require('winston');
-// const logger = winston.loggers.get('gomngr');
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
 
 const dbsrv = require('../core/db.service.js');
 
@@ -26,7 +26,8 @@ router.get('/conf', async function(req, res){
         'duration': Object.keys(my_conf.duration),
         'project': my_conf.project,
         'registration': my_conf.registration || [],
-        'reservation': my_conf.reservation
+        'reservation': my_conf.reservation,
+        'mailer': my_conf.general.mailer
     };
 
     // should be check on each call

@@ -314,6 +314,7 @@ export class UserComponent implements OnInit {
         this.delete_secondary_group = this.delete_secondary_group.bind(this);
         this.db_delete = this.db_delete.bind(this);
         this.delete = this.delete.bind(this);
+        this.expire = this.expire.bind(this);
         this.subscribe = this.subscribe.bind(this);
         this.unsubscribe = this.unsubscribe.bind(this);
         this.initUser = this.initUser.bind(this);
@@ -323,11 +324,10 @@ export class UserComponent implements OnInit {
             resp => {
                 this.config = resp;
                 this.initUser();
+                console.log(resp)
             },
             err => console.log('failed to get config')
         )
-
-
     }
 
     _compareName(a,b) {
@@ -586,7 +586,7 @@ export class UserComponent implements OnInit {
         )
     }
 
-    expire(sendmail=true) {
+    expire(sendmail: boolean) {
         this.userService.expire(this.user.uid, sendmail).subscribe(
             resp => {
                 this.msg = resp['message'];
@@ -597,6 +597,7 @@ export class UserComponent implements OnInit {
     }
 
     extend() {
+
         this.userService.extend(this.user.uid, this.user.regkey).subscribe(
             resp => {
                 this.msg = resp['message'];
@@ -811,13 +812,14 @@ export class UserComponent implements OnInit {
         }
         this.grp_err_msg = '';
         this.grp_success_msg = '';
+
         this.groupService.add(this.new_group).subscribe(
             resp => {
                 this.grp_success_msg = 'Group was created';
                 this.groupService.list().subscribe(
                     resp => {
-                        this._loadGroups(resp);
                         this.user.group = this.new_group.name;
+                        this._loadGroups(resp);
                     },
                     err => console.log('failed to get groups')
                 )
@@ -832,7 +834,8 @@ export class UserComponent implements OnInit {
     unlock() {
         this.userService.unlock(this.user.uid).subscribe(
             resp => {
-                this.msg = resp['message'];
+                this.user.is_locked = false;
+                this._flashMessagesService.show('User unlocked', { cssClass: 'alert-success', timeout: 5000 });
             },
             err => console.log('failed to unlock user')
         )

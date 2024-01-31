@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MyDeleteConfirmComponent } from './my-delete-confirm.component';
+import { MyExpireConfirmComponent } from './my-expire-confirm.component';
 
 describe('MyExpireConfirmComponent', () => {
     let component: MyExpireConfirmComponent;

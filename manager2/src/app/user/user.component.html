@@ -1,6 +1,6 @@
 <div class="well">
   <div class="row">
-      <div class="col-sm-6">
+      <div class="col-sm-5">
           <h2>{{user.uid}}</h2>
           <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
           <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
@@ -8,16 +8,18 @@
           <div *ngIf="user && user.expiration"><small>Expires: {{date_convert(user.expiration)}}</small></div>
           <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
       </div>
-      <div class="col-sm-6">
+      <div class="col-sm-2">
           <button *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)" class="btn btn-success" (click)="activate()">Activate</button>
-          <div *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
-          <div *ngIf="session_user.is_admin && user.status == STATUS_ACTIVE"><app-my-expire-confirm [onConfirm]="expire"></app-my-expire-confirm></div>
-          <button *ngIf="user.status == STATUS_ACTIVE" class="btn btn-success" (click)="extend()">Extend validity</button>
+          <button *ngIf="user.status == STATUS_ACTIVE" class="btn btn-success" (click)="extend()">Extend</button>
           <button *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED" class="btn btn-success" (click)="renew()">Renew</button>
-          <div *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
       </div>
-      <div *ngIf="user.is_locked && session_user.is_admin" class="col-sm-6">
-          <button class="btn btn-success" (click)="unlock()">Unlock</button>
+      <div *ngIf="user.is_locked && session_user.is_admin" class="col-sm-2">
+          <button class="btn btn-primary" (click)="unlock()">Unlock</button>
+      </div>
+      <div class="col-sm-3">
+          <div *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
+          <div *ngIf="session_user.is_admin && user.status == STATUS_ACTIVE"><app-my-expire-confirm [mailer]="config.mailer" [onConfirm]="expire"></app-my-expire-confirm></div>
+          <div *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
       </div>
   </div>
 </div>
