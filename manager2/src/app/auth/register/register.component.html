@@ -97,10 +97,10 @@
                 <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required>I agree with the <a target="_blank" aria-label="terms of user" href="{{config.terms_of_use}}">terms of use</a> of the {{config.name}} platform</label>
             </div>
             <div *ngIf="! session_user">
-                <button type="button" class="btn btn-lg btn-primary btn-block" (click)="register();">Register</button>
+                <button type="button" class="p-button p-button-sm p-button-lg btn-primary btn-block" (click)="register();">Register</button>
             </div>
             <div *ngIf="session_user && session_user.is_admin">
-                <button type="button" class="btn btn-lg btn-primary btn-block" (click)="register();">Create New Account</button>
+                <button type="button" class="p-button p-button-sm p-button-lg btn-primary btn-block" (click)="register();">Create New Account</button>
             </div>
             <div *ngIf="msg">
                 <div class="alert alert-warning">{{msg}}</div>

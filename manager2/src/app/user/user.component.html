@@ -9,12 +9,12 @@
           <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
       </div>
       <div class="col-sm-2">
-          <button *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)" class="btn btn-success" (click)="activate()">Activate</button>
-          <button *ngIf="user.status == STATUS_ACTIVE" class="btn btn-success" (click)="extend()">Extend</button>
-          <button *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED" class="btn btn-success" (click)="renew()">Renew</button>
+          <button *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)" class="p-button p-button-sm p-button-success" (click)="activate()">Activate</button>
+          <button *ngIf="user.status == STATUS_ACTIVE" class="p-button p-button-sm p-button-success" (click)="extend()">Extend</button>
+          <button *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED" class="p-button p-button-sm p-button-success" (click)="renew()">Renew</button>
       </div>
       <div *ngIf="user.is_locked && session_user.is_admin" class="col-sm-2">
-          <button class="btn btn-primary" (click)="unlock()">Unlock</button>
+          <button class="p-button p-button-sm p-button-primary" (click)="unlock()">Unlock</button>
       </div>
       <div class="col-sm-3">
           <div *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
@@ -43,19 +43,19 @@
     <div class="card-header">
       <ul class="nav nav-pills card-header-pills">
         <li class="nav-item" (click)="switchTo(0)">
-          <button class="btn btn-outline-primary nav-link">Information</button>
+          <button class="p-button p-button-sm p-button-outline-primary nav-link">Information</button>
         </li>
         <li class="nav-item" (click)="switchTo(1)">
-          <button class="btn btn-outline-primary nav-link">SSH</button>
+          <button class="p-button p-button-sm p-button-outline-primary nav-link">SSH</button>
         </li>
         <li class="nav-item" (click)="switchTo(2)">
-            <button class="btn btn-outline-primary nav-link">Details</button>
+            <button class="p-button p-button-sm p-button-outline-primary nav-link">Details</button>
           </li>
         <li class="nav-item" (click)="switchTo(3)">
-          <button class="btn btn-outline-primary nav-link">History</button>
+          <button class="p-button p-button-sm p-button-outline-primary nav-link">History</button>
         </li>
         <li class="nav-item" *ngIf="session_user.is_admin" (click)="switchTo(4)">
-            <button class="btn btn-outline-primary nav-link">Send mail</button>
+            <button class="p-button p-button-sm p-button-outline-primary nav-link">Send mail</button>
         </li>
       </ul>
     </div>
@@ -141,7 +141,7 @@
                               </div>
                               <div *ngIf="user.group == this.missing_group" class="groupCreation col-2">
                                 <div>
-                                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#group_creation">
+                                  <button type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#group_creation">
                                   <span class="oi oi-plus" aria-hidden="true"></span>
                                   </button>
                                 </div>
@@ -239,7 +239,7 @@
               </div>
               <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
               <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
-              <button type="button" class="btn btn-primary pull-right" (click)="update_info()">Update info</button>
+              <button type="button" class="p-button p-button-sm p-button-primary pull-right" (click)="update_info()">Update info</button>
           </div>
 
       </div>
@@ -249,7 +249,7 @@
         <app-user-extra [user]="user" (extraValues)="onExtraValue($event)"></app-user-extra>
                       <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
               <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
-              <button type="button" class="btn btn-primary pull-right" (click)="update_info()">Update info</button>
+              <button type="button" class="p-button p-button-sm p-button-primary pull-right" (click)="update_info()">Update info</button>
       </div>
       </div>
   </div>
@@ -276,7 +276,7 @@
                 </textarea>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-primary" (click)="add_note()">Add note</button>
+                <button type="button" class="p-button p-button-sm p-button-primary" (click)="add_note()">Add note</button>
             </div>
         </div>
     </div>
@@ -289,11 +289,11 @@
             <div class="row">
                 <div class="col-sm-12" style="margin-bottom: 10px">
                     <span *ngIf="user.u2f.key" class="label label-success"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
-                    <button class="btn btn-primary btn-sm" (click)="register_u2f()">Register new key</button>
+                    <button class="p-button p-button-sm p-button-primary btn-sm" (click)="register_u2f()">Register new key</button>
                     <span *ngIf="u2f">{{u2f}}</span>
                 </div>
                 <div class="col-sm-12">
-                    <button class="btn btn-primary btn-sm" (click)="register_otp()">Register OTP</button>
+                    <button class="p-button p-button-sm p-button-primary btn-sm" (click)="register_otp()">Register OTP</button>
                     <img alt={{secret}} *ngIf="otp" src={{otp}}/>
                 </div>
             </div>
@@ -305,7 +305,7 @@
         </div>
         <div class="card-body">
             <span>{{user.apikey}}</span>
-            <button style="margin-left: 10px;" class="btn btn-primary" (click)="generate_apikey(user.uid)">Generate</button>
+            <button style="margin-left: 10px;" class="p-button p-button-sm p-button-primary" (click)="generate_apikey(user.uid)">Generate</button>
         </div>
     </div>
     <div class="card bg-light">
@@ -340,7 +340,7 @@
                         <input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary" (click)="update_password()">Change password</button>
+                <button type="button" class="p-button p-button-sm p-button-primary" (click)="update_password()">Change password</button>
             </form>
         </div>
     </div>
@@ -370,7 +370,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-primary" (click)="add_secondary_group()">Add to group</button>
+                <button type="button" class="p-button p-button-sm p-button-primary" (click)="add_secondary_group()">Add to group</button>
             </div>
             <hr/>
             <div class="table-responsive">
@@ -428,7 +428,7 @@
                       </div>
                     </div>
                     <div class="form-group">
-                        <button type="button" class="btn btn-primary" (click)="db_add()">Create</button>
+                        <button type="button" class="p-button p-button-sm p-button-primary" (click)="db_add()">Create</button>
                     </div>
 
                 <div class="table-responsive">
@@ -466,7 +466,7 @@
                                 <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-primary" (click)="update_ssh()">Add</button>
+                                <button type="button" class="p-button p-button-sm p-button-primary" (click)="update_ssh()">Add</button>
                             </div>
                         </form>
                     </div>
@@ -485,12 +485,12 @@
                     </div>
                     <div *ngIf="key_err" class="alert alert-warning alert-dismissible fade show" role="alert">{{key_err}}</div>
                     <div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
-                    <button class="btn btn-primary" (click)="ssh_new_key()">Generate new key</button>
+                    <button class="p-button p-button-sm p-button-primary" (click)="ssh_new_key()">Generate new key</button>
                     <hr/>
                     <h4 style="font-weight: normal;">Download</h4>
-                    <button (click)="get_key(user.uid, 'private')" class="btn btn-primary">private rsa key</button>
-                    <button (click)="get_key(user.uid, 'putty')" class="btn btn-primary">putty private key</button>
-                    <button (click)="get_key(user.uid, 'public')" class="btn btn-primary">public key</button>
+                    <button (click)="get_key(user.uid, 'private')" class="p-button p-button-sm p-button-primary">private rsa key</button>
+                    <button (click)="get_key(user.uid, 'putty')" class="p-button p-button-sm p-button-primary">putty private key</button>
+                    <button (click)="get_key(user.uid, 'public')" class="p-button p-button-sm p-button-primary">public key</button>
                 </div>
             </div>
   </div>
@@ -527,7 +527,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <button type="button" class="btn btn-primary" (click)="web_add()">Declare owned site</button>
+                                <button type="button" class="p-button p-button-sm p-button-primary" (click)="web_add()">Declare owned site</button>
                             </div>
                         </div>
                         <div>
@@ -591,7 +591,7 @@
                 </textarea>
             </div>
             <div class="form-group">
-                <button type="button" class="btn btn-primary" (click)="sendmail()">Send mail</button>
+                <button type="button" class="p-button p-button-sm p-button-primary" (click)="sendmail()">Send mail</button>
             </div>
 
 
@@ -621,8 +621,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary"  [disabled]="grp_success_msg || !new_group.name" (click)="addGroup()">Create</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="grp_success_msg || !new_group.name" (click)="addGroup()">Create</button>
+        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

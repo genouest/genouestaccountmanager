@@ -1,11 +1,11 @@
-<button *ngIf="!isExpiring" type="button" class="btn btn-warning btn-xs" (click)="startExpire()"> Expire</button>
+<button *ngIf="!isExpiring" type="button" class="p-button p-button-sm p-button-warning btn-xs" (click)="startExpire()"> Expire</button>
 <div *ngIf="isExpiring">
   <div *ngIf="mailer==='gomail'" class="form-group row">
     <label for="sendmail" class="form-check-label"><b>Send list removal mail </b></label>
     <input id="sendmail" type="checkbox" class="form-check-input" [ngModelOptions]="{standalone: true}" [(ngModel)]="sendmail">
   </div>
   <div class="form-group row">
-    <button type="button" class="btn btn-secondary btn-xs" (click)="cancel()">Abort expiration</button>
-    <button type="button" class="btn btn-danger btn-xs"  (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
+    <button type="button" class="p-button p-button-sm p-button-secondary btn-xs" (click)="cancel()">Abort expiration</button>
+    <button type="button" class="p-button p-button-sm p-button-danger btn-xs"  (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
   </div>
 </div>
