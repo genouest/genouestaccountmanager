@@ -751,6 +751,17 @@ export class UserComponent implements OnInit {
         )
     }
 
+    remove_otp() {
+        this.userService.otpRemove(this.user.uid).subscribe(
+            resp => {
+                this.msg = resp['message'];
+            },
+            err => {
+                this.err_msg = err.error.message
+            }
+        )
+    }
+
     add_to_project() {
         this.add_to_project_msg = '';
         this.add_to_project_error_msg = '';

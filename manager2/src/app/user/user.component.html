@@ -293,7 +293,8 @@
                     <span *ngIf="u2f">{{u2f}}</span>
                 </div>
                 <div class="col-sm-12">
-                    <button class="p-button p-button-sm p-button-primary btn-sm" (click)="register_otp()">Register OTP</button>
+                    <button *ngIf="!(user.otp && user.otp.secret)" class="p-button p-button-sm p-button-primary btn-sm" (click)="register_otp()">Register OTP</button>
+                    <button *ngIf="(user.otp && user.otp.secret)" class="p-button p-button-sm p-button-primary btn-sm" (click)="remove_otp()">Remove OTP</button>
                     <img alt={{secret}} *ngIf="otp" src={{otp}}/>
                 </div>
             </div>

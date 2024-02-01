@@ -231,7 +231,7 @@ router.post('/u2f/register/:id', async function(req, res) {
 
         if (user.u2f && user.u2f.challenge === challenge) {
             await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': key, 'u2f.challenge': null}});
-            return res.send({key: key});    
+            return res.send({key: key});
         }
     } catch(err) {
         logger.error('u2f registration error');
@@ -259,7 +259,30 @@ router.post('/otp/register/:id', async function(req, res) {
         }
         res.send({secret,imageUrl});
     });
-    
+
+});
+
+router.delete('/otp/register/:id', async function(req, res) {
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+
+    let adminuser = null;
+    let isadmin = false;
+    try {
+        adminuser = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(adminuser);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!user || !req.locals.logInfo.id || (req.locals.logInfo.id.toString() != user._id.toString() && !isadmin)){
+        return res.status(401).send({message: 'You need to login first'});
+    }
+
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp': null}});
+    res.send({message: 'OTP removed'});
 });
 
 router.post('/otp/check/:id', async function(req, res) {
@@ -296,7 +319,7 @@ router.delete('/u2f/register/:id', async function(req, res) {
         return res.status(401).send({message: 'You need to login first'});
     }
     await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': null, 'u2f.challenge': null}});
-    return res.sendStatus(200);    
+    return res.sendStatus(200);
 });
 
 router.get('/auth', async function(req, res) {
@@ -390,7 +413,7 @@ router.post('/auth/:id', async function(req, res) {
         res.end();
         return;
     }
-    
+
     let is_locked = await idsrv.user_locked(user.uid);
     if (is_locked) {
         let remains = await idsrv.user_lock_remaining_time(user.uid);

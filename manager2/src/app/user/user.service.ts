@@ -79,6 +79,18 @@ export class UserService {
             httpOptions)
     }
 
+    otpRemove(userId: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.delete(
+            environment.apiUrl + '/otp/register/' + userId,
+            {},
+            httpOptions)
+    }
+
     delete(userId: string, message: string, sendmail: boolean) {
         // console.log(userId, message);
         let httpOptions = {
