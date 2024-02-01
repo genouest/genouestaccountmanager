@@ -138,6 +138,8 @@
                                   <select [(ngModel)]="user.group" [ngModelOptions]="{standalone: true}" class="form-control">
                                       <option *ngFor="let group of groups" [value]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
                                   </select>
+                                  <div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
+                                  <div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
                               </div>
                               <div *ngIf="user.group == this.missing_group" class="groupCreation col-2">
                                 <div>
@@ -293,9 +295,11 @@
                     <span *ngIf="u2f">{{u2f}}</span>
                 </div>
                 <div class="col-sm-12">
-                    <button *ngIf="!(user.otp && user.otp.secret)" class="p-button p-button-sm p-button-primary btn-sm" (click)="register_otp()">Register OTP</button>
-                    <button *ngIf="(user.otp && user.otp.secret)" class="p-button p-button-sm p-button-primary btn-sm" (click)="remove_otp()">Remove OTP</button>
+                    <button *ngIf="!((user.otp && user.otp.secret) || otp)" class="p-button p-button-sm p-button-primary btn-sm" (click)="register_otp()">Register OTP</button>
+                    <button *ngIf="(user.otp && user.otp.secret)" class="p-button p-button-sm p-button-danger btn-sm" (click)="remove_otp()">Remove OTP</button>
                     <img alt={{secret}} *ngIf="otp" src={{otp}}/>
+                    <div class="alert alert-success" role="alert" *ngIf="msg">{{otp_msg}}</div>
+                    <div class="alert alert-danger" role="alert" *ngIf="err_msg">{{otp_err_msg}}</div>
                 </div>
             </div>
         </div>
@@ -622,7 +626,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="grp_success_msg || !new_group.name" (click)="addGroup()">Create</button>
+        <button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="!new_group.name" data-dismiss="modal" (click)="addGroup()">Create</button>
         <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>

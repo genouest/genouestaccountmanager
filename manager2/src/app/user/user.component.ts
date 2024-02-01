@@ -161,6 +161,8 @@ export class UserComponent implements OnInit {
     // Error messages
     msg: string
     err_msg: string
+    otp_msg: string
+    otp_err_msg: string
 
     add_to_project_msg: string
     add_to_project_error_msg: string
@@ -252,6 +254,8 @@ export class UserComponent implements OnInit {
         this.grp_err_msg = ''
         this.otp = null
 
+        this.otp_msg =  ""
+        this.otp_err_msg =  ""
     }
 
     date_convert = function timeConverter(tsp){
@@ -746,7 +750,7 @@ export class UserComponent implements OnInit {
                 this.otp = resp['imageUrl'];
             },
             err => {
-                console.error(err)
+                this.otp_err_msg = err.error.message
             }
         )
     }
@@ -754,10 +758,11 @@ export class UserComponent implements OnInit {
     remove_otp() {
         this.userService.otpRemove(this.user.uid).subscribe(
             resp => {
-                this.msg = resp['message'];
+                this.otp_msg = resp['message'];
+                this.user.otp = {};
             },
             err => {
-                this.err_msg = err.error.message
+                this.otp_err_msg = err.error.message
             }
         )
     }

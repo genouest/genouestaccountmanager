@@ -281,7 +281,7 @@ router.delete('/otp/register/:id', async function(req, res) {
         return res.status(401).send({message: 'You need to login first'});
     }
 
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp': null}});
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp.secret': null}});
     res.send({message: 'OTP removed'});
 });
 
