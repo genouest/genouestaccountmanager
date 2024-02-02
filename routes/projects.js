@@ -214,9 +214,9 @@ router.put('/project', async function(req, res){
     let project = await dbsrv.mongo_pending_projects().findOne({'uuid': req.body.uuid});
 
     if (!project){
-      res.status(403).send({message: 'Project does not exist'});
-      res.end();
-      return;
+        res.status(403).send({message: 'Project does not exist'});
+        res.end();
+        return;
     }
 
     let related_project = await dbsrv.mongo_projects().findOne({'id': req.body.id});

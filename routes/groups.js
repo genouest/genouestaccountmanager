@@ -137,7 +137,7 @@ router.put('/group/:id', async function(req, res){
         return;
     }
 
-    let description = req.body.description
+    let description = req.body.description;
 
     let group = await dbsrv.mongo_groups().findOne({name: req.params.id});
     if(! group) {
@@ -193,7 +193,7 @@ router.post('/group/:id', async function(req, res){
         return;
     }
 
-    let description = req.body.description
+    let description = req.body.description;
 
     let group = await dbsrv.mongo_groups().findOne({name: req.params.id });
     if(group) {

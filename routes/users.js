@@ -944,7 +944,7 @@ router.get('/user/:id/expire', async function(req, res){
         return;
     }
 
-    let sendmail = req.query.sendmail === "false" ? false : true;
+    let sendmail = req.query.sendmail === 'false' ? false : true;
 
     let session_user = null;
     let isadmin = false;
@@ -1001,7 +1001,7 @@ router.get('/user/:id/expire', async function(req, res){
         // Now remove from mailing list
         try {
             // eslint-disable-next-line no-unused-vars
-            await notif.remove(user.email, sendmail=sendmail);
+            await notif.remove(user.email, sendmail);
             await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
             res.send({message: 'Operation in progress', fid: fid, error: []});
             res.end();
@@ -1938,9 +1938,8 @@ router.get('/user/:id/unlock', async function(req, res){
     session_user.is_admin = isadmin;
 
     if(session_user.is_admin){
-        let fid = new Date().getTime();
         try {
-            await idsrv.user_unlock(user.uid)
+            await idsrv.user_unlock(user.uid);
         } catch(err) {
             res.send({message: 'Error during operation'});
             res.end();
