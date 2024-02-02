@@ -77,7 +77,6 @@ async function edit_project(project, uuid, action_owner = 'auto') {
     logger.info('Editing Project ' + project.id);
     project.expiration_notif = 0;
     await dbsrv.mongo_pending_projects().updateOne({'uuid': uuid},  {'$set': project});
-    let fid = new Date().getTime();
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
 }
 

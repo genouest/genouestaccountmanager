@@ -101,6 +101,7 @@ module.exports = {
     },
 
     // todo: should be factorized with add, as there is only small difference
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     remove: async function(email, sendmail=true) {
         if (CONFIG.nodemailer.list) {
             if(email===undefined ||email===null || email=='' || ! mail_set) {

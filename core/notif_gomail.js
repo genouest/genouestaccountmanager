@@ -157,10 +157,10 @@ module.exports = {
             'email': [email],
             'message': CONFIG.gomail.optout_message,
             'message_html': CONFIG.gomail.optout_message_html,
-        }
+        };
 
         if (!sendmail){
-          data['skip'] = true
+            data['skip'] = true;
         }
 
         try {
