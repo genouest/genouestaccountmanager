@@ -350,7 +350,7 @@ module.exports = {
         return;
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line no-unused-vars
     remove: async function(email, sendmail=true) {
         if(email===undefined ||email===null || email=='' || ! mail_set) {
             return;
