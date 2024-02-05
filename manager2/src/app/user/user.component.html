@@ -616,8 +616,6 @@
         <h3 class="panel-title">Group creation</h3>
       </div>
       <div class="modal-body">
-        <div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
-        <div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
         <form role="form" class="user-form form-inline justify-content-center">
           <div class="form-group">
             <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>

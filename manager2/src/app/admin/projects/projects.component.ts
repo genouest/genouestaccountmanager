@@ -36,6 +36,7 @@ export class ProjectsComponent implements OnInit {
     groups: any[]
     all_users: any[]
     new_project: any
+    new_group: any
 
     day_time: number
 
@@ -90,6 +91,11 @@ export class ProjectsComponent implements OnInit {
             description: '',
             access: 'Group',
             path: ''
+        };
+        this.new_group = {
+            name: '',
+            owner: '',
+            description: '',
         }
 
         this.project_list(true);
@@ -151,6 +157,9 @@ export class ProjectsComponent implements OnInit {
         if (!this.new_project.cpu || this.new_project.cpu == 0) {
             this.new_project.cpu = this.default_cpu;
         }
+
+        this.new_group.owner = this.new_project.owner
+        this.new_group.name = "prj_" + tmpprojectid
     }
 
 
@@ -331,4 +340,35 @@ export class ProjectsComponent implements OnInit {
         this.pending_msg = "";
         this.pending_err_msg = "";
     }
+
+    addGroup(){
+        if (this.new_group.name === '') {
+            return;
+        }
+        this.add_project_error_msg = '';
+        this.add_project_msg = '';
+
+        this.groupService.add(this.new_group).subscribe(
+            resp => {
+                this.add_project_msg = 'Group was created';
+                this.groupService.list().subscribe(
+                    resp => {
+                        this.new_project.group = this.new_group.name
+                        this.groupService.list().subscribe(
+                            resp => {
+                                this.groups = resp;
+                            },
+                            err => console.log('failed to get groups')
+                        );
+                    },
+                    err => console.log('failed to get groups')
+                )
+            },
+            err => {
+                this.add_project_msg = '';
+                this.add_project_error_msg = err.error.message;
+            }
+        )
+    }
+
 }
