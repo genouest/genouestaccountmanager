@@ -105,6 +105,7 @@ export class ProjectsComponent implements OnInit {
                 this.groups = resp;
                 if (this.groups.length > 0) {
                     this.new_project.group = this.groups[0].name;
+                    this.new_group.name = this.groups[0].name;
                 }
             },
             err => console.log('failed to get groups')

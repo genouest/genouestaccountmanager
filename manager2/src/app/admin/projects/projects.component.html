@@ -25,7 +25,7 @@
             <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
           </select>
         </div>
-        <div class="col-sm-4" *ngIf="!config.project || config.project.enable_group">
+        <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
           <label for="project_group">Group&nbsp;
             <span style="color:red">(required)&nbsp;</span>
             <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" tooltip> </span>
@@ -33,7 +33,10 @@
           <select  id="project_group" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.group" class="form-control">
             <option *ngFor="let group of groups" [value]="group.name">{{group.name}}</option>
           </select>
-          <button type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#group_creation">
+        </div>
+        <div class="col-sm-1" *ngIf="!config.project || config.project.enable_group">
+          <label for="group_create">&nbsp;</label>
+          <button id="group_create" type="button" class="p-button button-primary" data-toggle="modal" data-target="#group_creation">
             <span class="oi oi-plus" aria-hidden="true"></span>
           </button>
         </div>
@@ -81,12 +84,12 @@
       </div>
       <div class="form-group row">
         <div class="col-sm-2">
-          <label style="opacity: 0;">Create</label>
-          <button type="button" class="p-button p-button-sm p-button-success" (click)="add_project()">Create</button>
+          <label style="opacity: 0;">Edit</label>
+          <button type="button" class="p-button" (click)="edit_project()">Save changes</button>
         </div>
         <div class="col-sm-2">
-          <label style="opacity: 0;">Edit</label>
-          <button type="button" class="btn btn btn-info " (click)="edit_project()">Save changes</button>
+          <label style="opacity: 0;">Create</label>
+          <button type="button" class="p-button p-button-success" (click)="add_project()">Create project</button>
         </div>
       </div>
     </form>
@@ -133,9 +136,8 @@
                   <td>{{pending.orga}}</td>
                   <td>
                     <div class="btn-group">
-                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-sm btn-success" (click)="accept_project(pending)">Accept</button>
-                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-sm btn-info " (click)="modify_project(pending)">Edit</button>
-                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-sm btn-danger " (click)="reject_project(pending)">Reject</button>
+                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-info " (click)="modify_project(pending)">View</button>
+                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-danger " (click)="reject_project(pending)">Reject</button>
                     </div>
                   </td>
                 </tr>
@@ -288,11 +290,17 @@
         <h3 class="panel-title">Group creation</h3>
       </div>
       <div class="modal-body">
-        <form role="form" class="user-form form-inline justify-content-center">
-          <div class="form-group">
+        <form role="form" class="user-form form-horizonal">
+          <div class="form-group row">
+            <div class="col-sm-4">
             <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
-            <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
+            </div>
+            <div class="col-sm-4">
+            <input placeholder="Owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
+            </div>
+            <div class="col-sm-4">
             <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
+            </div>
           </div>
         </form>
       </div>
