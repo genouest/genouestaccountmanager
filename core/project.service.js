@@ -17,6 +17,7 @@ exports.remove_project = remove_project;
 exports.update_project = update_project;
 exports.create_project_request = create_project_request;
 exports.remove_project_request = remove_project_request;
+exports.edit_project = edit_project;
 
 async function create_project(new_project, uuid, action_owner = 'auto') {
     logger.info('Create Project ' + new_project.id + ' uuid ' + uuid);
@@ -70,6 +71,13 @@ async function remove_project(id, action_owner = 'auto') {
 
     await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove project ' + id , 'logs': []});
 
+}
+
+async function edit_project(project, uuid, action_owner = 'auto') {
+    logger.info('Editing Project ' + project.id);
+    project.expiration_notif = 0;
+    await dbsrv.mongo_pending_projects().updateOne({'uuid': uuid},  {'$set': project});
+    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
 }
 
 async function update_project(id, project, action_owner = 'auto') {

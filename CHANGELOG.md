@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.4.29
+
+* Various security PR merged
+* Add ordering to most admin tables
+* Add user registration date to the 'Pending admin approval' and 'Pending email approval' table, and remove user ID
+* Updated buttons to make them more visible
+* Allow group creation on the user page
+* Set group owner as 'optional'
+* Allow otp removal for users and admins
+* Allow user expiration without sending a mail for gomail
+* Allow admin 'unlock' of a locked (3 time wrong login) account
+* Fix tag creation crash
+* Allow a pending project edition without validating it.
+* Add optional description to group
+
 ## 1.4.28
 
 * Fix security check for user identity when making API calls

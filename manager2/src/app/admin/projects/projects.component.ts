@@ -36,6 +36,7 @@ export class ProjectsComponent implements OnInit {
     groups: any[]
     all_users: any[]
     new_project: any
+    new_group: any
 
     day_time: number
 
@@ -90,6 +91,11 @@ export class ProjectsComponent implements OnInit {
             description: '',
             access: 'Group',
             path: ''
+        };
+        this.new_group = {
+            name: '',
+            owner: '',
+            description: '',
         }
 
         this.project_list(true);
@@ -99,6 +105,7 @@ export class ProjectsComponent implements OnInit {
                 this.groups = resp;
                 if (this.groups.length > 0) {
                     this.new_project.group = this.groups[0].name;
+                    this.new_group.name = this.groups[0].name;
                 }
             },
             err => console.log('failed to get groups')
@@ -151,6 +158,9 @@ export class ProjectsComponent implements OnInit {
         if (!this.new_project.cpu || this.new_project.cpu == 0) {
             this.new_project.cpu = this.default_cpu;
         }
+
+        this.new_group.owner = this.new_project.owner
+        this.new_group.name = "prj_" + tmpprojectid
     }
 
 
@@ -196,6 +206,38 @@ export class ProjectsComponent implements OnInit {
             }
         );
     }
+
+    edit_project() {
+
+        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
+            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
+            return;
+        }
+
+        this.reset_msgs()
+
+        this.projectService.edit(
+            {
+                'id': this.new_project.id,
+                'uuid': this.new_project.uuid,
+                'size': this.new_project.size,
+                'cpu': this.new_project.cpu,
+                'expire': new Date(this.new_project.expire).getTime(),
+                'owner': this.new_project.owner,
+                'group': this.config.project.enable_group ? this.new_project.group : '',
+                'description': this.new_project.description,
+                'access': this.new_project.access,
+                'path': this.new_project.path,
+                'orga': this.new_project.orga
+            }
+        ).subscribe(
+            resp => {
+                this.add_project_msg = resp['message'];
+            },
+            err => this.add_project_error_msg = err.error.message
+        )
+    }
+
 
     project_list(refresh_requests = false) {
         this.projects = [];
@@ -245,7 +287,7 @@ export class ProjectsComponent implements OnInit {
                     this.pending_number = 0;
                 }
                 let data = resp;
-                if (data.length > 0) { 
+                if (data.length > 0) {
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {
                         data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000
@@ -299,4 +341,35 @@ export class ProjectsComponent implements OnInit {
         this.pending_msg = "";
         this.pending_err_msg = "";
     }
+
+    addGroup(){
+        if (this.new_group.name === '') {
+            return;
+        }
+        this.add_project_error_msg = '';
+        this.add_project_msg = '';
+
+        this.groupService.add(this.new_group).subscribe(
+            resp => {
+                this.add_project_msg = 'Group was created';
+                this.groupService.list().subscribe(
+                    resp => {
+                        this.new_project.group = this.new_group.name
+                        this.groupService.list().subscribe(
+                            resp => {
+                                this.groups = resp;
+                            },
+                            err => console.log('failed to get groups')
+                        );
+                    },
+                    err => console.log('failed to get groups')
+                )
+            },
+            err => {
+                this.add_project_msg = '';
+                this.add_project_error_msg = err.error.message;
+            }
+        )
+    }
+
 }

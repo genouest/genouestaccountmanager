@@ -8,7 +8,7 @@ import { BasePluginComponent } from './base-plugin/base-plugin.component';
     template: `
 <div *ngIf="data">
 <div><input [ngModelOptions]="{standalone: true}" [(ngModel)]="data.newlist"/></div>
-<div style="margin-top: 10px;"><button (click)="sendData()" type="button"  class="btn btn-default">Create</button></div>
+<div style="margin-top: 10px;"><button (click)="sendData()" type="button"  class="p-button p-button-sm p-button-default">Create</button></div>
 </div>
 <div *ngIf="data" class="table-responsive">
 <table class="table table-striped ng-scope">
@@ -34,7 +34,7 @@ export class GomailPluginComponent extends BasePluginComponent implements OnInit
 <div class="alert alert-info">Using this button, you can set your home and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
 = "blank" >data-access </a> for easy access</div>
 
-<div style="text-align:center;"><button (click)="sendData()" type="button"  class="btn btn-primary">Update</button></div><br>
+<div style="text-align:center;"><button (click)="sendData()" type="button"  class="p-button p-button-sm p-button-primary">Update</button></div><br>
 <div *ngIf="data.api_status" class ="alert alert-danger">{{data.api_status}}</div>
 <div *ngIf="data.user_status" class ="alert alert-danger">{{data.user_status}}</div>
 <div *ngIf="data.my" class ="alert alert-success">{{data.my}}</div>
@@ -72,7 +72,7 @@ export class GalaxyPluginComponent extends BasePluginComponent implements OnInit
 <div *ngIf="data">
 <div *ngIf="loading">Loading...</div>
 <div *ngIf="data.api_status" class ="alert alert-danger">{{data.api_status}}</div>
-<div *ngIf="data.has_project == 'False'" style="text-align:center;"><button (click)="sendData()" type="button" class="btn btn-primary">Activate cloud account</button></div>
+<div *ngIf="data.has_project == 'False'" style="text-align:center;"><button (click)="sendData()" type="button" class="p-button p-button-sm p-button-primary">Activate cloud account</button></div>
 <div *ngIf="data.my" class ="alert alert-success">{{data.my}}</div>
 <div *ngIf="data.has_project == 'True'">
   <div>Current project(s) :</div><br>

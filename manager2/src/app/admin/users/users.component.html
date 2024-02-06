@@ -6,16 +6,19 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive table-striped">
-                        <p-table #dt1 [value]="pending_email_users">
+                        <p-table #dt1 [value]="pending_email_users" [resizableColumns]="true" [autoLayout]="true" [tableStyle]="{ 'text-align': 'center' }" sortMode="multiple">
                             <ng-template pTemplate="header">
-                                <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
+                                <th pSortableColumn="uid">UID <p-sortIcon field="uid"></p-sortIcon></th>
+                                <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+                                <th pSortableColumn="duration">Duration <p-sortIcon field="duration"></p-sortIcon></th>
+                                <th pSortableColumn="registration">Registration <p-sortIcon field="registration"></p-sortIcon></th>
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
-                                <td>{{user.uidnumber}}</td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-warning">{{user.uid}}</span></a></td>
                                 <td>{{user.email}}</td>
-                                <td>{{date_convert(user.expiration)}}</td>
+                                <td>{{user.duration}}</td>
+                                <td>{{date_convert(user.registration)}}</td>
                             </tr>
                             </ng-template>
                         </p-table>
@@ -32,16 +35,19 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive table-striped">
-                        <p-table #dt2 [value]="pending_approval_users">
+                        <p-table #dt2 [value]="pending_approval_users" [resizableColumns]="true" [autoLayout]="true">
                             <ng-template pTemplate="header">
-                                <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
+                                <th pSortableColumn="uid">UID <p-sortIcon field="uid"></p-sortIcon></th>
+                                <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+                                <th pSortableColumn="duration">Duration <p-sortIcon field="duration"></p-sortIcon></th>
+                                <th pSortableColumn="registration">Registration <p-sortIcon field="registration"></p-sortIcon></th>
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-warning">{{user.uid}}</span></a></td>
-                                <td>{{user.uidnumber}}</td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-warning">{{user.uid}}</span></a></td>
                                 <td>{{user.email}}</td>
-                                <td>{{date_convert(user.expiration)}}</td>
+                                <td>{{user.duration}}</td>
+                                <td>{{date_convert(user.registration)}}</td>
                             </tr>
                             </ng-template>
                         </p-table>
@@ -58,12 +64,12 @@
         </div>
         <div class="card-body">
              <div class="table-responsive table-striped">
-                        <p-table #dt3 [value]="active_users"
+                        <p-table #dt3 [value]="active_users" [resizableColumns]="true" [autoLayout]="true"
                                     [paginator]="true"
                                     [rows]="10"
                                     [showCurrentPageReport]="true"
                                     [rowsPerPageOptions]="[10,25,50]"
-                                    [globalFilterFields]="['name', 'uid', 'email', 'uidnumber']"
+                                    [globalFilterFields]="['name', 'uid', 'email', 'uidnumber', 'why', 'firstname', 'lastname']"
                                     [filterDelay]="0"
                         >
                         <ng-template pTemplate="caption">
@@ -75,11 +81,14 @@
                             </div>
                         </ng-template>
                             <ng-template pTemplate="header">
-                                <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
+                                <th pSortableColumn="uid">UID <p-sortIcon field="uid"></p-sortIcon></th>
+                                <th pSortableColumn="uidnumber">Uid number <p-sortIcon field="uidnumber"></p-sortIcon></th>
+                                <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+                                <th pSortableColumn="expiration">Expiration <p-sortIcon field="expiration"></p-sortIcon></th>
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-primary">{{user.uid}}</span></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm">{{user.uid}}</span></a></td>
                                 <td>{{user.uidnumber}}</td>
                                 <td>{{user.email}}</td>
                                 <td>{{date_convert(user.expiration)}}</td>
@@ -99,7 +108,7 @@
         </div>
         <div class="card-body">
              <div class="table-responsive table-striped">
-                        <p-table #dt4 [value]="expired_users"
+                        <p-table #dt4 [value]="expired_users" [resizableColumns]="true" [autoLayout]="true"
                                     [paginator]="true"
                                     [rows]="10"
                                     [showCurrentPageReport]="true"
@@ -116,11 +125,14 @@
                             </div>
                         </ng-template>
                             <ng-template pTemplate="header">
-                                <th>UID</th><th>Uid number</th><th>Email</th><!--th>Status</th--><th>Expiration</th>
+                                <th pSortableColumn="uid">UID <p-sortIcon field="uid"></p-sortIcon></th>
+                                <th pSortableColumn="uidnumber">Uid number <p-sortIcon field="uidnumber"></p-sortIcon></th>
+                                <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+                                <th pSortableColumn="expiration">Expiration <p-sortIcon field="expiration"></p-sortIcon></th>
                             </ng-template>
                             <ng-template pTemplate="body" let-user>
                             <tr>
-                                <td><a routerLink="/user/{{user.uid}}"><span class="label label-danger">{{user.uid}}</span></a></td>
+                                <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-danger">{{user.uid}}</span></a></td>
                                 <td>{{user.uidnumber}}</td>
                                 <td>{{user.email}}</td>
                                 <td>{{date_convert(user.expiration)}}</td>

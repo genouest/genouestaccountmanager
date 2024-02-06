@@ -1,4 +1,4 @@
-    <div class="label label-primary">{{msg}}</div>
+    <div>{{msg}}</div>
     <div class="card bg-light">
       <div class="card-header">
         <h3>Web sites</h3>
@@ -10,8 +10,9 @@
                       [rows]="10"
                       [showCurrentPageReport]="true"
                       [rowsPerPageOptions]="[10,25,50]"
-                      [globalFilterFields]="['name', 'description', 'owner']"
+                      [globalFilterFields]="['name', 'description', 'owner', 'url']"
                       [filterDelay]="0"
+                      sortMode="multiple"
           >
         <ng-template pTemplate="caption">
             <div class="table-header">
@@ -23,20 +24,18 @@
         </ng-template>
             <ng-template pTemplate="header">
                 <tr>
-                  <th>Name</th>
-                  <th>Owner</th>
-                  <th>URL</th>
-                  <th>Description</th>
-                  <th></th>
+                  <th pSortableColumn="name">Name <p-sortIcon field="name"</th>
+                  <th pSortableColumn="owner">Owner <p-sortIcon field="owner"</th>
+                  <th pSortableColumn="url">URL <p-sortIcon field="url"</th>
+                  <th pSortableColumn="description">Description <p-sortIcon field="description"</th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-web>
                   <tr>
-                    <td><span class="label label-primary">{{web.name}}</span></td>
-                    <td><a routerLink="/user/{{web.owner}}"><span class="label label-primary">{{web.owner}}</span></a></td>
+                    <td><span>{{web.name}}</span></td>
+                    <td><a routerLink="/user/{{web.owner}}"><span class="p-button p-button-sm p-button-primary">{{web.owner}}</span></a></td>
                     <td>{{web.url}}</td>
                     <td>{{web.description}}</td>
-                    <td></td>
                   </tr>
             </ng-template>
           </p-table>
@@ -67,7 +66,7 @@
               </div>
               <div class="col-sm-2">
                   <label style="opacity: 0;">Modify</label>
-                  <button type="button" class="btn btn-secondary" (click)="change_owner()" class="form-control">Modify</button>
+                  <button type="button" class="p-button p-button-sm p-button-secondary" (click)="change_owner()" class="form-control">Modify</button>
               </div>
           </div>
     </div>

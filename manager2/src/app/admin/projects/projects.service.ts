@@ -70,6 +70,23 @@ export class ProjectsService {
         );
     }
 
+    edit(project: any): Observable<any> {
+        //let user = this.authService.profile;
+        let params = new HttpParams();
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.put(
+            environment.apiUrl + '/project',
+            project,
+            httpOptions
+        );
+    }
+
     get(projectId: string): Observable<any> {
         //let user = this.authService.profile;
 

@@ -46,8 +46,8 @@
 
         <div class="modal-footer">
           <div class="form-group row col-sm-12">
-            <button type="button" class="btn btn-primary" (click)="ask_for_project()" data-dismiss="modal">Ask Admin</button>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="p-button p-button-sm p-button-primary" (click)="ask_for_project()" data-dismiss="modal">Ask Admin</button>
+            <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
           </div>
         </div>
       </form>
@@ -55,7 +55,7 @@
 
   </div>
 </div>
-<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
+<button *ngIf="session_user" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -92,7 +92,7 @@
             </ng-template>
             <ng-template pTemplate="body" let-project>
               <tr>
-                <td (click)="show_project_users_and_scroll(project, selectedProjectAnchor)" style="cursor: pointer;"><span class="label label-primary">{{project.id}}</span></td>
+                <td (click)="show_project_users_and_scroll(project, selectedProjectAnchor)" style="cursor: pointer;"><span class="p-button p-button-sm p-button-primary">{{project.id}}</span></td>
                 <td>{{project.owner}}</td>
                 <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
                 <td>{{project.path}}</td>
@@ -113,8 +113,8 @@
                 <td>{{date_convert(project.created_at)}}</td>
                 <td>{{date_convert(project.expire)}}</td>
                 <td>
-                    <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="btn btn-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
-                    <button *ngIf="session_user.is_admin" type="button" class="btn btn-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>
+                    <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
+                    <button *ngIf="session_user.is_admin" type="button" class="p-button p-button-sm p-button-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>
                 </td>
               </tr>
             </ng-template>
@@ -145,7 +145,7 @@
           </div>
           <div class="col-sm-3">
             <label style="opacity: 0;">Request member</label>
-            <button type="button" class="btn btn-primary" (click)="request_user(selectedProject, new_user, 'add')">Request member</button>
+            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_user(selectedProject, new_user, 'add')">Request member</button>
           </div>
           <div class="col-sm-2">
             <label for="remove_user">Remove project member</label>
@@ -155,7 +155,7 @@
           </div>
           <div class="col-sm-3">
             <label style="opacity: 0;">Request member removal</label>
-            <button type="button" class="btn btn-warning"(click)="request_user(selectedProject,remove_user,'remove')">Request member removal </button>
+            <button type="button" class="p-button p-button-sm p-button-warning"(click)="request_user(selectedProject,remove_user,'remove')">Request member removal </button>
           </div>
         </div>
       </form>
@@ -228,7 +228,7 @@
               <td><b>Expiration</b>&nbsp;
                 <span class="glyphicon glyphicon-question-sign" title="Expiration date" tooltip></span>
               </td>
-              <td>{{selectedProject.expire | date}} &nbsp; <button *ngIf="config.project && config.project.allow_extend" class="btn btn-success" (click)="extend(selectedProject)">Extend validity</button></td>
+              <td>{{selectedProject.expire | date}} &nbsp; <button *ngIf="config.project && config.project.allow_extend" class="p-button p-button-sm p-button-success" (click)="extend(selectedProject)">Extend validity</button></td>
             </tr>
             <tr>
               <td><b>Financing</b>&nbsp;
