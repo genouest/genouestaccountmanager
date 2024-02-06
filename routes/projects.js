@@ -136,6 +136,12 @@ router.post('/project', async function(req, res){
         res.status(404).send({message: 'Owner not found'});
         return;
     }
+
+    if (!usrsrv.is_active(owner)) {
+        res.status(403).send({message: 'Owner account is not active'});
+        return;
+    }
+
     let project = await dbsrv.mongo_projects().findOne({'id': req.body.id});
     if(project){
         res.status(403).send({message: 'Not authorized or project already exists'});

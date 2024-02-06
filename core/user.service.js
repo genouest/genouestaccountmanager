@@ -41,6 +41,7 @@ exports.remove_user_from_project = remove_user_from_project;
 exports.activate_user = activate_user;
 exports.new_password = new_password;
 exports.new_random = new_random;
+exports.is_active = is_active;
 
 function new_random(len=16) {
     return crypto.randomBytes(32).toString('hex').slice(0,len);
@@ -57,6 +58,10 @@ function new_password(len=16) {
         strict: true,
         exclude: '^<>&;"/\'\\'
     });
+}
+
+function is_active(user){
+    return user.status === STATUS_ACTIVE;
 }
 
 // module functions
