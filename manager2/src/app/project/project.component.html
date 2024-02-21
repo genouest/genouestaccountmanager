@@ -14,13 +14,13 @@
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
             <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
-            <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you treat several projects, it is quite possible for you to request more project spaces.</i></small>
+            <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you work on several projects, you can request more project spaces.</i></small>
           </div>
 
           <div class="form-group row col-sm-8">
-              <label for="new_project_size">Size (GB)</label>
+              <label for="new_project_size">Total expected project size (GB)</label>
               <input placeholder="project size in GB" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
-              <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+              <small id="nameHelp" class="form-text text-muted"><i>Please include the <b>total</b> expected size for this project.</i></small>
           </div>
 
           <div class="form-group row col-sm-8">
