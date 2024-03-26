@@ -25,7 +25,7 @@
     "email-validator": "^2.0.4",
     "escapeshellarg": "^0.1.0",
     "eslint": "^6.8.0",
-    "express": "^4.17.1",
+    "express": "^4.19.2",
     "express-prom-bundle": "^5.1.5",
     "express-session": "^1.17.1",
     "express-static-gzip": "^2.0.6",
