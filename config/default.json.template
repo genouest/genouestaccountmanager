@@ -10,7 +10,7 @@
       }
     ],
     "prevent_reuse": true,
-    "prevent_reuse_group": false
+    "prevent_reuse_group": false,
     "terms_of_use": "/doc/terms_of_use.txt",
     "web_home" : "user",
     "double_authentication_for_admin": true,
@@ -74,7 +74,7 @@
      "default_size": 500,
      "default_path": "/opt/project",
      "default_expire": 360,
-     "allow_extend": false,
+     "allow_extend": false
   },
   "reservation": {
       "group_or_project": "group",
@@ -147,7 +147,7 @@
     "optin_message":"",
     "optin_message_html":"",
     "optout_message":"",
-    "optout_message_html":"",
+    "optout_message_html":""
   },
   "tp": {
     "prefix": "tp",
