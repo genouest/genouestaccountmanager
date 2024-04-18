@@ -154,19 +154,18 @@ In *tests* directory, a docker-compose is available to setup whole infrastructur
 
 ## Development
 
-To start server
+You will need node > 18.0 (using NVM to manage node versions is recommended).
+You may also wish to use the *docker-compose.yml* from the **tests** directory to launch required services.
+From there:
 
-    node app.ps
 
-To build docker without sentry support
 
-    docker build --build-arg APIURL=https://MYACCOUNTMANAGERURL -t osallou/my
 
-with sentry support:
 
-    docker build --build-arg APIURL=https://MYACCOUNTMANAGERURL --build-arg SENTRY=https://XXXX@sentry.genouest.org/2 -t osallou/my
 
-Sentry is a service to catch bugs in app and record them in Sentry web app (optional). Sentry key must be set at docker build time.
+
+
+
 
 ## Deploying
 
