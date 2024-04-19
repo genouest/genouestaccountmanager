@@ -1,0 +1,84 @@
+version: '3'
+
+services:
+
+    mysql:
+        image: mariadb
+        environment:
+            - MYSQL_ROOT_PASSWORD=my
+        ports:
+            - "3306:3306"
+
+    mongo:
+        image: mongo
+        ports:
+            - "27017:27017"
+
+    redis:
+        #image: redis
+        image: quay.io/osallou/redis
+        ports:
+            - "6379:6379"
+
+    mailhog:
+        #image: mailhog/mailhog
+        image: quay.io/osallou/mailhog
+        ports:
+            - "8025:8025"
+
+    gomail-rabbitmq:
+        #image: rabbitmq
+        image: quay.io/osallou/rabbitmq
+        hostname: gomail-rabbitmq
+        environment:
+            - RABBITMQ_DEFAULT_USER=gomail
+            - RABBITMQ_DEFAULT_PASS=gomail
+
+    gomail-web:
+        #image: osallou/gomail
+        image: quay.io/osallou/gomail
+        environment:
+            - RABBITMQ_URL=amqp://gomail:gomail@gomail-rabbitmq:5672/%2F
+            - GOMAIL_HREF=http://gomail-web:6643
+            - GOMAIL_SECRET=test
+            - GOMAIL_REDIS_HOST=redis
+            - GOMAIL_SUPPORT=support@my.org
+            - GOMAIL_LISTS=mytestlist
+        ports:
+            - "6643:6643"
+        depends_on:
+            - gomail-rabbitmq
+            - redis
+        command: gunicorn -c gunicorn_conf.py -b 0.0.0.0:6643 gomail.app:app
+
+    gomail-executor:
+        image: quay.io/osallou/gomail
+        depends_on:
+            - gomail-rabbitmq
+        environment:
+            - RABBITMQ_URL=amqp://gomail:gomail@gomail-rabbitmq:5672/%2F
+            - GOMAIL_MAIL_HOST=mailhog
+            - GOMAIL_MAIL_PORT=1025
+            - GOMAIL_MAIL_ORIGIN=support@my.org
+            - GOMAIL_SECRET=test
+        command: bash -c "sleep 20 && python3 gomail/executor.py"
+
+    openldap:
+        #image: dinkel/openldap
+        image: quay.io/osallou/openldap
+        environment:
+            - "SLAPD_PASSWORD=my"
+            - "SLAPD_DOMAIN=my.org"
+        ports:
+            - "389:389"
+        volumes:
+            #- ${MYDIR}/openldap/data/etc:/etc/ldap
+            #- ${MYDIR}/openldap/data/lib:/var/lib/ldap
+            - ./ldap-data:/etc/ldap/prepopulate:ro
+    phpldapadmin:
+        #image: dinkel/phpldapadmin
+        image: quay.io/osallou/phpldapadmin
+        ports:
+            - "8080:80"
+        environment:
+            - LDAP_SERVER_HOST=openldap
