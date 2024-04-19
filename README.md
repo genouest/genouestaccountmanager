@@ -154,18 +154,7 @@ In *tests* directory, a docker-compose is available to setup whole infrastructur
 
 ## Development
 
-You will need node > 18.0 (using NVM to manage node versions is recommended).
-You may also wish to use the *docker-compose.yml* from the **tests** directory to launch required services.
-From there:
-
-
-
-
-
-
-
-
-
+See [dev README file](./dev_quickstart/README.md)
 
 ## Deploying
 

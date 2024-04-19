@@ -106,7 +106,7 @@
     "dn": "dc=my,dc=org",
     "admin_cn": "cn=admin",
     "admin_dn": "dc=my,dc=org",
-    "admin_password": "",
+    "admin_password": "my",
     "team": "genouest"
   },
   "mysql": {
