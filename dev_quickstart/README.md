@@ -5,6 +5,10 @@ Genouestaccountmanager is fairly modular, so it will not fit a deployment for pr
 
 * Edit ldap-data/01_orgs.ldif to fit your needs (not required)
 * `docker compose up -d`
+* If using gomail (default): 
+  * You will need a token: You can use the following command to get it:
+  `docker compose exec gomail-web python3 gomail/tokenmngr.py`
+  * Add this token (formated as follows: `bearer youtokenvalue` in defaut.json, in ['gomail']['api_secret']
 * Edit defaut.json as needed 
   * **At least the 'url' key, to match the access url to your instance**
   * You may want to add your first username to the 'admin' list in the same file
@@ -70,5 +74,5 @@ node app.js
 
 /!\ By default, all cron scripts (ldap operations, etc) are added in the /tmp folder. You will have to launch them manually, or add a cron script to do it for you
 
-
+You can access sent mail content by viewing the logs of the mailhog container.
 

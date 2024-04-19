@@ -138,16 +138,16 @@
   },
   "gomail": {
     "force_tls": false,
-    "host": "",
-    "api_root": "",
-    "api_secret": "",
-    "main_list": "",
-    "origin": "",
+    "host": "http://localhost:6643",
+    "api_root": "/api/v1",
+    "api_secret": "bearer eyzadxazdzadzadazdzadzad",
+    "main_list": "mytestlist",
+    "origin": "support@my.org",
     "tag": "",
-    "optin_message":"",
-    "optin_message_html":"",
-    "optout_message":"",
-    "optout_message_html":""
+    "optin_message":"Optin message",
+    "optin_message_html":"<b>Optin message</b>",
+    "optout_message":"optout_message",
+    "optout_message_html":"<b>optout_message</b>"
   },
   "tp": {
     "prefix": "tp",
