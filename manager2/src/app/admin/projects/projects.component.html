@@ -120,6 +120,7 @@
                   <th pSortableColumn="created_at">Request <p-sortIcon field="created_at"></p-sortIcon></th>
                   <th pSortableColumn="id">Project <p-sortIcon field="id"></p-sortIcon></th>
                   <th pSortableColumn="owner">User <p-sortIcon field="owner"></p-sortIcon></th>
+                  <th pSortableColumn="expire">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
                   <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
                   <th>Cpu (Hour)</th>
                   <th>Org</th>
@@ -131,6 +132,7 @@
                   <td>{{date_convert(pending.created_at)}}</td>
                   <td>{{pending.id}}</td>
                   <td>{{pending.owner}}</td>
+                  <td>{{date_convert(project.expire)}}</td>
                   <td>{{pending.size}}</td>
                   <td>{{pending.cpu}}</td>
                   <td>{{pending.orga}}</td>
