@@ -147,10 +147,6 @@ export class ProjectsComponent implements OnInit {
         // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
         this.new_project.id = tmpprojectid; // todo: maybe add an option to enable or disable this one
 
-        if (!this.new_project.expire) {
-            this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
-        }
-
         if (!this.new_project.size || this.new_project.size == 0) {
             this.new_project.size = this.default_size;
         }
@@ -168,13 +164,14 @@ export class ProjectsComponent implements OnInit {
         this.notification = "";
 
         if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
-            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
+            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.date_convert(this.new_project.expire);
             return;
         }
         this.reset_msgs()
         this.projectService.add({
             'uuid': this.new_project.uuid,
             'id': this.new_project.id,
+            'expire': new Date(this.new_project.expire).getTime(),
             'owner': this.new_project.owner,
             'group': this.config.project.enable_group ? this.new_project.group : '',
             'size': this.new_project.size,
@@ -182,8 +179,7 @@ export class ProjectsComponent implements OnInit {
             'description': this.new_project.description,
             'access': this.new_project.access,
             'orga': this.new_project.orga,
-            'path': this.new_project.path,
-            'expire': new Date(this.new_project.expire).getTime()
+            'path': this.new_project.path
         }).subscribe(
             resp => {
                 this.add_project_msg = resp.message;
@@ -206,11 +202,11 @@ export class ProjectsComponent implements OnInit {
             }
         );
     }
-
+    
     edit_project() {
-
-        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
-            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
+        
+        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner || !this.new_project.expire) {
+            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.date_convert(this.new_project.expire);
             return;
         }
 
