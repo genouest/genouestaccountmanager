@@ -315,7 +315,8 @@ export class ProjectsComponent implements OnInit {
     }
 
     modify_project(project) {
-        this.new_project = project;
+        const project_to_send = { ...project, expire: new Date(project.expire)}
+        this.new_project = project_to_send;
         this.update_project_on_event(project.id);
     }
 
