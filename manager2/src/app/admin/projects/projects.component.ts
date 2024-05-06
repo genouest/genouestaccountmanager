@@ -212,20 +212,20 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.reset_msgs()
-
+        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime()}
         this.projectService.edit(
             {
-                'id': this.new_project.id,
-                'uuid': this.new_project.uuid,
-                'size': this.new_project.size,
-                'cpu': this.new_project.cpu,
-                'expire': new Date(this.new_project.expire).getTime(),
-                'owner': this.new_project.owner,
-                'group': this.config.project.enable_group ? this.new_project.group : '',
-                'description': this.new_project.description,
-                'access': this.new_project.access,
-                'path': this.new_project.path,
-                'orga': this.new_project.orga
+                'id': project_to_send.id,
+                'uuid': project_to_send.uuid,
+                'size': project_to_send.size,
+                'cpu': project_to_send.cpu,
+                'expire': project_to_send.expire,
+                'owner': project_to_send.owner,
+                'group': this.config.project.enable_group ? project_to_send.group : '',
+                'description': project_to_send.description,
+                'access': project_to_send.access,
+                'path': project_to_send.path,
+                'orga': project_to_send.orga
             }
         ).subscribe(
             resp => {
