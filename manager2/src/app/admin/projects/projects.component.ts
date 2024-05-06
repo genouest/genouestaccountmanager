@@ -310,11 +310,6 @@ export class ProjectsComponent implements OnInit {
         return res;
     }
 
-    date_convert_unix = function updateUnixTime(dateValue: string) {
-        const tsp = new Date(dateValue);
-        this.new_project.expire = tsp.getTime();
-    }
-
     accept_project(project) {
         this.modify_project(project);
         this.add_project();
