@@ -118,8 +118,8 @@
                         value="{{project.current_cpu}}">
                     </meter>
                 </td>
-                <td>{{date_convert(project.created_at)}}</td>
-                <td>{{date_convert(project.expire)}}</td>
+                <td>{{project.created_at | date}}</td>
+                <td>{{project.expire | date}}</td>
                 <td>
                     <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(project, session_user.uid,'remove')">Leave</button>
                     <button *ngIf="session_user.is_admin" type="button" class="p-button p-button-sm p-button-danger" (click)="router.navigate(['/admin/project/' + project.id])">Admin</button>
