@@ -162,18 +162,19 @@ export class ProjectComponent implements OnInit {
     }
 
     update_project(project) {
+        const project_to_send = { ...project, expire: new Date(project.expire).getTime()}
         this.projectsService.update(
             project.id,
             {
-                'size': project.size,
-                'cpu': project.cpu,
-                'expire': new Date(project.expire).getTime(),
-                'owner': project.owner,
-                'group': this.config.project.enable_group ? project.group : '',
-                'description' : project.description,
-                'access' : project.access,
-                'path': project.path,
-                'orga':project.orga
+                'size': project_to_send.size,
+                'cpu': project_to_send.cpu,
+                'expire': project_to_send.expire,
+                'owner': project_to_send.owner,
+                'group': this.config.project_to_send.enable_group ? project_to_send.group : '',
+                'description' : project_to_send.description,
+                'access' : project_to_send.access,
+                'path': project_to_send.path,
+                'orga':project_to_send.orga
             }
         ).subscribe(
             resp => {
