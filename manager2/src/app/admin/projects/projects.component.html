@@ -129,10 +129,10 @@
               </ng-template>
               <ng-template pTemplate="body" let-pending>
                 <tr>
-                  <td>{{date_convert(pending.created_at)}}</td>
+                  <td>{{pending.created_at | date}}</td>
                   <td>{{pending.id}}</td>
                   <td>{{pending.owner}}</td>
-                  <td>{{date_convert(project.expire)}}</td>
+                  <td>{{pending.expire | date}}</td>
                   <td>{{pending.size}}</td>
                   <td>{{pending.cpu}}</td>
                   <td>{{pending.orga}}</td>
@@ -209,8 +209,8 @@
                   value="{{project.current_cpu}}">
               </meter>
           </td>
-          <td>{{date_convert(project.created_at)}}</td>
-          <td>{{date_convert(project.expire)}}</td>
+          <td>{{project.created_at | date}}</td>
+          <td>{{project.expire | date}}</td>
         </tr>
       </ng-template>
     </p-table>
@@ -274,8 +274,8 @@
                     value="{{project.current_cpu}}">
                 </meter>
             </td>
-            <td>{{date_convert(project.created_at)}}</td>
-            <td>{{date_convert(project.expire)}}</td>
+            <td>{{project.created_at | date}}</td>
+            <td>{{project.expire | date}}</td>
             <td>{{project.expiration_notif}}</td>
           </tr>
         </ng-template>
