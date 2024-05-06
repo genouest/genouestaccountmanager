@@ -170,7 +170,7 @@ export class ProjectComponent implements OnInit {
                 'cpu': project_to_send.cpu,
                 'expire': project_to_send.expire,
                 'owner': project_to_send.owner,
-                'group': this.config.project_to_send.enable_group ? project_to_send.group : '',
+                'group': this.config.project.enable_group ? project_to_send.group : '',
                 'description' : project_to_send.description,
                 'access' : project_to_send.access,
                 'path': project_to_send.path,
