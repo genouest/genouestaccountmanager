@@ -253,6 +253,27 @@ async function remove_tp_reservation(reservation_id) {
 
 }
 
+async function extend_tp_reservation(reservation_id, new_expire) {
+
+    logger.info('Extend reservation', reservation_id);
+
+    let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
+    logger.debug('Extend reservation', reservation);
+
+    try {
+        await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {
+            '$set': {
+                'to': new_expire
+            }
+        });
+        await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'extend reservation for ' + reservation.owner , 'logs': [] });
+
+    } catch (error) {
+        logger.error(error);
+    }
+
+}
+
 async function create_tp_reservation(reservation_id) {
 
     logger.info('Create reservation', reservation_id);

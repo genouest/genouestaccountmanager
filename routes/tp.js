@@ -264,7 +264,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
         tpssrv.remove_tp_reservation(reservation_id);
     } catch (error) {
         logger.error(error);
-        res.status(500).send({message: 'Error will removing tp reservation'});
+        res.status(500).send({message: 'Error while removing tp reservation'});
         res.end();
         return;
     }
@@ -328,7 +328,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         newresa = await tpssrv.create_tp_reservation(reservation_id, 'auto');
     } catch (error) {
         logger.error(error);
-        res.status(500).send({message: 'Error will creating tp reservation'});
+        res.status(500).send({message: 'Error while creating tp reservation'});
         res.end();
         return;
     }
@@ -374,7 +374,6 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
 
-    // add filter
     let filter = {};
     if(is_admin) {
         filter = {_id: reservation_id};
@@ -384,16 +383,16 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({message: 'Not allowed to delete this reservation'});
+        res.status(403).send({message: 'Not allowed to extend this reservation'});
         res.end();
         return;
     }
 
     try {
-        tpssrv.remove_tp_reservation(reservation_id);
+        tpssrv.extend_tp_reservation(reservation_id);
     } catch (error) {
         logger.error(error);
-        res.status(500).send({message: 'Error will removing tp reservation'});
+        res.status(500).send({message: 'Error while extending tp reservation'});
         res.end();
         return;
     }
