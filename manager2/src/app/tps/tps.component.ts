@@ -174,6 +174,17 @@ export class TpsComponent implements OnInit {
         this.listEvents();
     }
 
+    extend_reservation() {
+        this.msg = '';
+        this.errmsg = '';
+        this.tpService.remove(this.selectedEvent.id).subscribe(
+            resp => this.msg = resp['message'],
+            err => this.errmsg = err.error.message
+        )
+        this.selectedEvent.over = true;
+        this.listEvents();
+    }
+
     eventClicked(clickedEvent) {
         let event = clickedEvent.event;
         this.selectedEvent = event.meta;
