@@ -168,20 +168,8 @@ export class ProjectsComponent implements OnInit {
             return;
         }
         this.reset_msgs()
-        const project_to_send = { ...this.new_project, expire: new Date(this.new_project.expire).getTime()}
-        this.projectService.add({
-            'uuid': project_to_send.uuid,
-            'id': project_to_send.id,
-            'expire': project_to_send.expire,
-            'owner': project_to_send.owner,
-            'group': this.config.project.enable_group ? project_to_send.group : '',
-            'size': project_to_send.size,
-            'cpu': project_to_send.cpu,
-            'description': project_to_send.description,
-            'access': project_to_send.access,
-            'orga': project_to_send.orga,
-            'path': project_to_send.path
-        }).subscribe(
+        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime(), group: this.config.project.enable_group ? this.new_project.group : ''}
+        this.projectService.add(project_to_send).subscribe(
             resp => {
                 this.add_project_msg = resp.message;
                 this.project_list();
@@ -212,22 +200,8 @@ export class ProjectsComponent implements OnInit {
         }
 
         this.reset_msgs()
-        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime()}
-        this.projectService.edit(
-            {
-                'id': project_to_send.id,
-                'uuid': project_to_send.uuid,
-                'size': project_to_send.size,
-                'cpu': project_to_send.cpu,
-                'expire': project_to_send.expire,
-                'owner': project_to_send.owner,
-                'group': this.config.project.enable_group ? project_to_send.group : '',
-                'description': project_to_send.description,
-                'access': project_to_send.access,
-                'path': project_to_send.path,
-                'orga': project_to_send.orga
-            }
-        ).subscribe(
+        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime(), group: this.config.project.enable_group ? this.new_project.group : ''}
+        this.projectService.edit(project_to_send).subscribe(
             resp => {
                 this.add_project_msg = resp['message'];
             },
