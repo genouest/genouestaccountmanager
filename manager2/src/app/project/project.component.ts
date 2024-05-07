@@ -223,18 +223,6 @@ export class ProjectComponent implements OnInit {
         );
     }
 
-    date_convert = function timeConverter(tsp) {
-        let res;
-        try {
-            var a = new Date(tsp);
-            res = a.toISOString().substring(0, 10);
-        }
-        catch (e) {
-            res = '';
-        }
-        return res;
-    }
-
     scroll(el: HTMLElement) {
         el.scrollIntoView({behavior: 'smooth'});
     }
