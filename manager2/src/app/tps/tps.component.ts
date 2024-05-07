@@ -177,7 +177,7 @@ export class TpsComponent implements OnInit {
     extend_reservation() {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.remove(this.selectedEvent.id).subscribe(
+        this.tpService.extend(this.selectedEvent.id).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )

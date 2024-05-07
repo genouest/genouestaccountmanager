@@ -339,4 +339,67 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     res.end();
 });
 
+router.put('/tp/:id/reserve/extend', async function(req, res) {
+    if(! req.locals.logInfo.is_logged) {
+        res.status(403).send({message: 'Not authorized'});
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!user) {
+        res.send({message: 'User does not exist'});
+        res.end();
+        return;
+    }
+
+    let is_admin = isadmin;
+    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+        res.status(403).send({message: 'Not authorized'});
+        return;
+    }
+
+    let reservation_id = ObjectID.createFromHexString(req.params.id);
+
+    // add filter
+    let filter = {};
+    if(is_admin) {
+        filter = {_id: reservation_id};
+    }
+    else{
+        filter = {_id: reservation_id, owner: user.uid};
+    }
+    let reservation = await dbsrv.mongo_reservations().findOne(filter);
+    if(!reservation){
+        res.status(403).send({message: 'Not allowed to delete this reservation'});
+        res.end();
+        return;
+    }
+
+    try {
+        tpssrv.remove_tp_reservation(reservation_id);
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send({message: 'Error will removing tp reservation'});
+        res.end();
+        return;
+    }
+
+    res.send({message: 'Reservation closed'});
+    res.end();
+});
+
 module.exports = router;
