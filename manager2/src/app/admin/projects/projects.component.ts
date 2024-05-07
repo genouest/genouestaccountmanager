@@ -290,7 +290,7 @@ export class ProjectsComponent implements OnInit {
     }
 
     modify_project(project) {
-        this.new_project = project;
+        this.new_project = {...project, expire: new Date(project.expire)};
         this.update_project_on_event(project.id);
     }
 
