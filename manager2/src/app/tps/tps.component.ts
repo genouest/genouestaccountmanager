@@ -39,6 +39,8 @@ export class TpsComponent implements OnInit {
 
     activeDayIsOpen: boolean = true;
 
+    new_expire: Date
+
     constructor(
         private authService: AuthService,
         private configService: ConfigService,
