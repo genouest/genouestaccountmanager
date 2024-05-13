@@ -183,7 +183,6 @@ export class TpsComponent implements OnInit {
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
-        this.selectedEvent.over = true;
         this.listEvents();
     }
 
