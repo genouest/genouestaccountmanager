@@ -93,7 +93,7 @@
                     </table>
                 </div>
                 <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="p-button p-button-sm p-button-secondary" (click)="cancel_reservation()">Cancel</button>
-                <!-- <button *ngIf="selectedEvent.created && authorized && !session_user.is_admin" class="p-button p-button-sm p-button-secondary" (click)="ask_extend_reservation()">Ask for Extension</button> -->
+                <!-- <button *ngIf="selectedEvent.created && authorized && !session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="ask_extend_reservation()">Ask for Extension</button> -->
                 <button *ngIf="!selectedEvent.created && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
                 <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-warning" (click)="remove_reservation()">Remove</button>
                 <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#extend">Extend</button>

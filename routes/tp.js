@@ -396,7 +396,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         return;
     }
 
-    res.status(200).send({message: 'Reservation closed'});
+    res.status(200).send({message: 'Reservation extended'});
     res.end();
 });
 
