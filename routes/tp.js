@@ -361,13 +361,12 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     }
 
     if(!user) {
-        res.send({message: 'User does not exist'});
+        res.status(404).send({message: 'User does not exist'});
         res.end();
         return;
     }
 
-    let is_admin = isadmin;
-    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+    if(! (isadmin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
@@ -375,7 +374,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     let reservation_id = ObjectID.createFromHexString(req.params.id);
 
     let filter = {};
-    if(is_admin) {
+    if(isadmin) {
         filter = {_id: reservation_id};
     }
     else{
@@ -389,7 +388,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     }
 
     try {
-        tpssrv.extend_tp_reservation(reservation_id);
+        tpssrv.extend_tp_reservation(reservation_id, req.body.to);
     } catch (error) {
         logger.error(error);
         res.status(500).send({message: 'Error while extending tp reservation'});
@@ -397,7 +396,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         return;
     }
 
-    res.send({message: 'Reservation closed'});
+    res.status(200).send({message: 'Reservation closed'});
     res.end();
 });
 
