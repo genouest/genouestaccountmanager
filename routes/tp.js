@@ -388,7 +388,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     }
 
     try {
-        tpssrv.extend_tp_reservation(reservation_id, req.body.to);
+        tpssrv.extend_tp_reservation(reservation_id, req.body);
     } catch (error) {
         logger.error(error);
         res.status(500).send({message: 'Error while extending tp reservation'});
