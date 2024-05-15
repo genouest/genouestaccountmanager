@@ -179,7 +179,8 @@ export class TpsComponent implements OnInit {
     extend_reservation(new_expire) {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.extend(this.selectedEvent.id, new Date(new_expire).getTime()).subscribe(
+        const new_reservation = { ...this.selectedEvent, to: new Date(this.new_expire).getTime() }
+        this.tpService.edit(this.selectedEvent.id, new_reservation).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
