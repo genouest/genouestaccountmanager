@@ -261,11 +261,10 @@ async function edit_tp_reservation(reservation_id, new_reservation) {
     logger.debug('Edit reservation', reservation);
 
     try {
-        await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {
-            '$set': {
-                'to': new_reservation.to
-            }
-        });
+        await dbsrv.mongo_reservations().updateOne(
+            {'_id': reservation_id},
+            {'$set': { 'to': new_reservation.to } }
+        );
         await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'extend reservation for ' + reservation.owner , 'logs': [] });
 
     } catch (error) {
