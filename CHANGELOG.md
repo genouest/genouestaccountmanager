@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.30 (TBA)
+
+* Added 'End date' to the projet request page
+* Set 'description' as a required field in the projet request page
+
 ## 1.4.29
 
 * Various security PR merged
