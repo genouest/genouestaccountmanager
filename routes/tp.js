@@ -339,7 +339,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     res.end();
 });
 
-router.put('/tp/:id/reserve/edit', async function(req, res) {
+router.put('/tp/:id/reserve/extend', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(403).send({message: 'Not authorized'});
         return;
@@ -382,21 +382,21 @@ router.put('/tp/:id/reserve/edit', async function(req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({message: 'Not allowed to edit this reservation'});
+        res.status(403).send({message: 'Not allowed to extend this reservation'});
         res.end();
         return;
     }
 
     try {
-        tpssrv.edit_tp_reservation(reservation_id, req.body);
+        tpssrv.extend_tp_reservation(reservation_id, req.body);
     } catch (error) {
         logger.error(error);
-        res.status(500).send({message: 'Error while editing tp reservation'});
+        res.status(500).send({message: 'Error while extending tp reservation'});
         res.end();
         return;
     }
 
-    res.status(200).send({message: 'Reservation edited'});
+    res.status(200).send({message: 'Reservation extended'});
     res.end();
 });
 

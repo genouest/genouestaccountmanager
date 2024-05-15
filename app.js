@@ -370,7 +370,7 @@ app.delete('/tp/:id', tp);
 app.get('/tp/:id', tp);
 app.put('/tp/:id/reserve/now', tp);
 app.put('/tp/:id/reserve/stop', tp);
-app.put('/tp/:id/reserve/edit', tp);
+app.put('/tp/:id/reserve/extend', tp);
 
 app.get('/auth', auth);
 app.post('/auth/:id', auth);

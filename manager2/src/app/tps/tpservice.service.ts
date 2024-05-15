@@ -67,7 +67,7 @@ export class TpserviceService {
         return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/stop', httpOptions)
     }
 
-    edit(reservationId, new_reservation): Observable<any> {
+    extend(reservationId, new_reservation): Observable<any> {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -75,6 +75,6 @@ export class TpserviceService {
             //}),
         };
 
-        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/edit', new_reservation, httpOptions)
+        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/extend', new_reservation, httpOptions)
     }
 }

@@ -29,7 +29,7 @@ var STATUS_EXPIRED = 'Expired';
 exports.tp_reservation = tp_reservation;
 exports.create_tp_reservation = create_tp_reservation;
 exports.remove_tp_reservation = remove_tp_reservation;
-exports.edit_tp_reservation = edit_tp_reservation;
+exports.extend_tp_reservation = extend_tp_reservation;
 
 
 async function createExtraGroup(trainingName, ownerName) {
@@ -254,11 +254,11 @@ async function remove_tp_reservation(reservation_id) {
 
 }
 
-async function edit_tp_reservation(reservation_id, new_reservation) {
-    logger.info('Edit reservation', reservation_id);
+async function extend_tp_reservation(reservation_id, new_reservation) {
+    logger.info('Extend reservation', reservation_id);
 
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
-    logger.debug('Edit reservation', reservation);
+    logger.debug('Extend reservation', reservation);
 
     try {
         await dbsrv.mongo_reservations().updateOne(
