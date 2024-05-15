@@ -179,11 +179,14 @@ export class TpsComponent implements OnInit {
     extend_reservation(new_expire: Date) {
         this.msg = '';
         this.errmsg = '';
-        const new_reservation = { ...this.selectedEvent, to: new Date(this.new_expire).getTime() }
+        if (new_expire < this.selectedEvent.to) {
+            // Error: not meant to advance expiration date
+        }
+        const new_reservation = { ...this.selectedEvent, to: new Date(this.new_expire).getTime() };
         this.tpService.edit(this.selectedEvent.id, new_reservation).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
-        )
+        );
         this.listEvents();
     }
 
