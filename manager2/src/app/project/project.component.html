@@ -5,7 +5,7 @@
         <h3>Request a new project creation</h3>
       </div>
 
-      <form aria-label="project creation request form" role="form" class="user-form form-horizonal">
+      <form aria-label="project creation request form" role="form" class="user-form form-horizonal" ngNativeValidate>
 
         <div class="modal-body">
           <div class="form-group row col-sm-8">
@@ -52,9 +52,9 @@
 
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer" id="submit">
           <div class="form-group row col-sm-12">
-            <button type="button" class="p-button p-button-sm p-button-primary" (click)="ask_for_project()" data-dismiss="modal">Ask Admin</button>
+            <button type="submit" class="p-button p-button-sm p-button-primary" (click)="ask_for_project()" data-dismiss="modal">Ask Admin</button>
             <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
           </div>
         </div>
