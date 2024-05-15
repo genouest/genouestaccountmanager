@@ -449,7 +449,12 @@ router.post('/ask/project', async function(req, res){
         res.status(403).send({'message': 'Project description empty'});
         return;
     }
-    
+
+    if (req.body.description.length < 30) {
+        res.status(403).send({'message': 'Project description length should at least be 30 char'});
+        return;
+    }
+
     let p = await dbsrv.mongo_projects().findOne({id: req.body.id});
     if(p) {
         res.status(403).send({'message': 'Project already exists'});
