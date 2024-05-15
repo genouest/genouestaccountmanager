@@ -168,23 +168,12 @@ export class ProjectsComponent implements OnInit {
         this.notification = "";
 
         if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
-            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
+            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.date_convert(this.new_project.expire);
             return;
         }
         this.reset_msgs()
-        this.projectService.add({
-            'uuid': this.new_project.uuid,
-            'id': this.new_project.id,
-            'owner': this.new_project.owner,
-            'group': this.config.project.enable_group ? this.new_project.group : '',
-            'size': this.new_project.size,
-            'cpu': this.new_project.cpu,
-            'description': this.new_project.description,
-            'access': this.new_project.access,
-            'orga': this.new_project.orga,
-            'path': this.new_project.path,
-            'expire': new Date(this.new_project.expire).getTime()
-        }).subscribe(
+        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime(), group: this.config.project.enable_group ? this.new_project.group : ''}
+        this.projectService.add(project_to_send).subscribe(
             resp => {
                 this.add_project_msg = resp.message;
                 this.project_list();
@@ -209,28 +198,14 @@ export class ProjectsComponent implements OnInit {
 
     edit_project() {
 
-        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
-            this.add_project_error_msg = "Project Id, group, and owner are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner;
+        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner || !this.new_project.expire) {
+            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.date_convert(this.new_project.expire);
             return;
         }
 
         this.reset_msgs()
-
-        this.projectService.edit(
-            {
-                'id': this.new_project.id,
-                'uuid': this.new_project.uuid,
-                'size': this.new_project.size,
-                'cpu': this.new_project.cpu,
-                'expire': new Date(this.new_project.expire).getTime(),
-                'owner': this.new_project.owner,
-                'group': this.config.project.enable_group ? this.new_project.group : '',
-                'description': this.new_project.description,
-                'access': this.new_project.access,
-                'path': this.new_project.path,
-                'orga': this.new_project.orga
-            }
-        ).subscribe(
+        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime(), group: this.config.project.enable_group ? this.new_project.group : ''}
+        this.projectService.edit(project_to_send).subscribe(
             resp => {
                 this.add_project_msg = resp['message'];
             },
@@ -319,7 +294,7 @@ export class ProjectsComponent implements OnInit {
     }
 
     modify_project(project) {
-        this.new_project = project;
+        this.new_project = {...project, expire: this.date_convert(project.expire)};
         this.update_project_on_event(project.id);
     }
 

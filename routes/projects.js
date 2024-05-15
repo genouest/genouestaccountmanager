@@ -1,4 +1,4 @@
-/* TODO : create a core/project.service.js and move all method in it */
+/* TODO : create a core/project.service.js and move all methods into it */
 
 const express = require('express');
 var router = express.Router();
@@ -469,6 +469,7 @@ router.post('/ask/project', async function(req, res){
             'group': user.group,
             'size': req.body.size,
             'cpu': req.body.cpu,
+            'expire': req.body.expire,
             'description': req.body.description,
             'orga': req.body.orga
         }, user);

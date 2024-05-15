@@ -125,6 +125,7 @@ async function create_project_request(asked_project, user) {
             '#NAME#': asked_project.id,
             '#SIZE#': asked_project.size,
             '#CPU#': asked_project.cpu,
+            '#EXPIRE#': asked_project.expire.toISOString().split('T')[0],
             '#ORGA#': asked_project.orga,
             '#DESC#': asked_project.description
         });
