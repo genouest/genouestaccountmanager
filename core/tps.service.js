@@ -260,6 +260,10 @@ async function extend_tp_reservation(reservation_id, new_reservation) {
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
     logger.debug('Extend reservation', reservation);
 
+    if (new_reservation.to < reservation.to) {
+        // Error: not meant to advance expiration date
+    }
+
     try {
         await dbsrv.mongo_reservations().updateOne(
             {'_id': reservation_id},
