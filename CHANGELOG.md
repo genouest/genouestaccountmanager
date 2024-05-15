@@ -3,7 +3,7 @@
 ## 1.4.30 (TBA)
 
 * Added 'End date' to the projet request page
-* Set 'description' as a required field in the projet request page
+* Set 'description' as a required field in the projet request page and set a minimal length of 30 char
 
 ## 1.4.29
 
