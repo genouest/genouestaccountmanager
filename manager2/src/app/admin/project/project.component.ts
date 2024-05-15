@@ -151,7 +151,7 @@ export class ProjectComponent implements OnInit {
             this.userService.removeFromProject(userList[i].uid, project.id)
                 .subscribe(
                     resp => {},
-                    err => this.prj_err_msg = err.error.message                                         );
+                    err => this.prj_err_msg = err.error.message);
         }
         this.projectsService.delete(project.id).subscribe(
             resp => {
@@ -162,20 +162,8 @@ export class ProjectComponent implements OnInit {
     }
 
     update_project(project) {
-        this.projectsService.update(
-            project.id,
-            {
-                'size': project.size,
-                'cpu': project.cpu,
-                'expire': new Date(project.expire).getTime(),
-                'owner': project.owner,
-                'group': this.config.project.enable_group ? project.group : '',
-                'description' : project.description,
-                'access' : project.access,
-                'path': project.path,
-                'orga':project.orga
-            }
-        ).subscribe(
+        const project_to_send = {...project, expire: new Date(project.expire).getTime(), group: this.config.project.enable_group ? project.group : ''}
+        this.projectsService.update(project.id, project_to_send).subscribe(
             resp => {
                 this.prj_msg = resp['message'];
                 if(this.config.project.enable_group && project.group !== this.oldGroup) {
