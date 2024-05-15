@@ -179,7 +179,7 @@ export class TpsComponent implements OnInit {
     extend_reservation(new_expire) {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.extend(this.selectedEvent.id, new_expire).subscribe(
+        this.tpService.extend(this.selectedEvent.id, new Date(new_expire).getTime()).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         )
