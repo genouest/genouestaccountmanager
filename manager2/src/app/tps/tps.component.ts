@@ -179,8 +179,9 @@ export class TpsComponent implements OnInit {
     extend_reservation(new_expire: Date) {
         this.msg = '';
         this.errmsg = '';
-        if (new_expire < this.selectedEvent.to) {
-            // Error: not meant to advance expiration date
+        if (new Date(this.new_expire).getTime() < this.selectedEvent.end) {  // Why did we rename the 'to' field to 'end' for selected events (l.59) ?
+            this.errmsg = 'Extended end date must be after current end date';
+            return;
         }
         const new_reservation = { ...this.selectedEvent, to: new Date(this.new_expire).getTime() };
         this.tpService.extend(this.selectedEvent.id, new_reservation).subscribe(

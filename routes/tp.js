@@ -361,7 +361,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     }
 
     if(!user) {
-        res.status(404).send({message: 'User does not exist'});
+        res.status(404).send({message: 'User does not exist'});  // Why do none of the other routes give a 404 status here ?
         res.end();
         return;
     }
@@ -387,6 +387,12 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         return;
     }
 
+    if (req.body.to < reservation.to) {
+        res.status(403).send({message: 'Extended end date must be after current end date'});
+        // Should I add "res.end();" here ?
+        return;
+    }
+
     try {
         tpssrv.extend_tp_reservation(reservation_id, req.body);
     } catch (error) {
@@ -396,7 +402,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         return;
     }
 
-    res.status(200).send({message: 'Reservation extended'});
+    res.status(200).send({message: 'Reservation extended'});  // Why do none of the other routes give a 200 status on success ?
     res.end();
 });
 
