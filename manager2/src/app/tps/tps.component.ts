@@ -121,8 +121,12 @@ export class TpsComponent implements OnInit {
             this.reserrmsg = 'Quantity must be > 0';
             return;
         }
-        if (this.fromDate > this.toDate) {
-            this.reserrmsg = 'Final date must be superior to start date';
+        if (this.fromDate.getTime() > this.toDate.getTime()) {
+            this.reserrmsg = 'End date must be superior to start date';
+            return;
+        }
+        if (this.toDate.getTime() < new Date().getTime()) {
+            this.reserrmsg = 'End date can not be in the past';
             return;
         }
         let reservation = {
@@ -181,6 +185,10 @@ export class TpsComponent implements OnInit {
         this.errmsg = '';
         if (new Date(this.new_expire).getTime() < this.selectedEvent.end) {
             this.errmsg = 'Extended end date must be after current end date';
+            return;
+        }
+        if (new Date(this.new_expire).getTime() < new Date().getTime()) {
+            this.errmsg = 'Extended end date can not be in the past';
             return;
         }
         const extension = { 'to': new Date(this.new_expire).getTime() };

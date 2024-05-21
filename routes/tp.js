@@ -323,6 +323,12 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         return;
     }
 
+    if (reservation.to < new Date().getTime()) {
+        res.status(403).send({message: 'End date can not be in the past'});
+        res.end();
+        return;
+    }
+
     let newresa;
     try {
         newresa = await tpssrv.create_tp_reservation(reservation_id, 'auto');
@@ -389,6 +395,12 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
 
     if (req.body.to < reservation.to) {
         res.status(403).send({message: 'Extended end date must be after current end date'});
+        res.end();
+        return;
+    }
+
+    if (req.body.to < new Date().getTime()) {
+        res.status(403).send({message: 'Extended end date can not be in the past'});
         res.end();
         return;
     }
