@@ -87,6 +87,26 @@ async function deleteExtraProject(project) {
 }
 
 
+async function extendExtraProject(project, extension) {
+    if (project === undefined || project === null) {
+        return false;
+    }
+    let project_to_extend = await dbsrv.mongo_projects().findOne({'id': project});
+    if(!project_to_extend) {
+        logger.error('Cant find project to extend ' +  project);
+        return false;
+    }
+    try {
+        const extended_project = { ...project_to_extend, expire: extension.to }
+        let res = await prjsrv.update_project(project_to_extend.id, extended_project);
+        return res;
+    } catch(error) {
+        logger.error(error);
+    }
+    return false;
+}
+
+
 async function create_tp_users_db (owner, quantity, duration, end_date, userGroup, userProject) {
     // Duration in days
     logger.debug('create_tp_users ', owner, quantity, duration);
@@ -193,7 +213,6 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
 
 
 async function delete_tp_user(user) {
-
     logger.debug('delete_tp_user', user.uid);
     try{
         await fdbs.delete_dbs(user);
@@ -207,13 +226,36 @@ async function delete_tp_user(user) {
 }
 
 async function delete_tp_users(users) {
-    for(let i=0;i<users.length;i++) {
+    for(let i = 0; i < users.length; i++) {
         let user = await dbsrv.mongo_users().findOne({'uid': users[i]});
         if (user && user.uid) {
             await delete_tp_user(user);
         }
     }
+}
 
+
+async function extend_tp_user(user) {
+    logger.debug('extend_tp_user', user.uid);
+    try{
+        user.history.push({'action': 'reactivate', date: new Date().getTime()});
+        await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set': {
+            status: STATUS_ACTIVE,
+            expiration: (new Date().getTime() + day_time*duration_list[user.duration]),
+        }});
+    }
+    catch(exception) {
+        logger.error(exception);
+    }
+}
+
+async function extend_tp_users(users) {
+    for(let i = 0; i < users.length; i++) {
+        let user = await dbsrv.mongo_users().findOne({'uid': users[i]});
+        if (user && user.uid) {
+            await extend_tp_user(user);
+        }
+    }
 }
 
 
@@ -224,9 +266,8 @@ async function remove_tp_reservation(reservation_id) {
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
     logger.debug('Close reservation', reservation);
 
-    if (reservation.accounts)
-    {
-        logger.info('Delete Account', reservation.accounts);
+    if (reservation.accounts) {
+        logger.info('Delete Accounts', reservation.accounts);
         await delete_tp_users(reservation.accounts);
     }
 
@@ -247,30 +288,38 @@ async function remove_tp_reservation(reservation_id) {
             }
         });
         await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'close reservation for ' + reservation.owner , 'logs': [] });
-
     } catch (error) {
         logger.error(error);
     }
-
 }
 
 async function extend_tp_reservation(reservation_id, extension) {
     logger.info('Extend reservation', reservation_id);
-
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
     logger.debug('Extend reservation', reservation);
 
+    // add grace period to extension
+    extension = { ...extension, to: extension.to + 1000*3600*24*(CONFIG.tp.extra_expiration) }
+
+    if (reservation.accounts) {
+        logger.info('Extend Accounts', reservation.accounts);
+        await extend_tp_users(reservation.accounts);
+    }
+
+    if (reservation.project && reservation.project.id && reservation.project.id != '') {
+        logger.info('Extend Project', reservation.project.id);
+        await extendExtraProject(reservation.project.id, extension);
+    }
+
     try {
         await dbsrv.mongo_reservations().updateOne(
-            {'_id': reservation_id},
-            {'$set': { 'to': extension.to } }
+            { '_id': reservation_id },
+            { '$set': { 'to': extension.to } }
         );
         await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'extend reservation for ' + reservation.owner , 'logs': [] });
-
     } catch (error) {
         logger.error(error);
     }
-
 }
 
 async function create_tp_reservation(reservation_id) {
