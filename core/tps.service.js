@@ -254,7 +254,7 @@ async function remove_tp_reservation(reservation_id) {
 
 }
 
-async function extend_tp_reservation(reservation_id, new_reservation) {
+async function extend_tp_reservation(reservation_id, extension) {
     logger.info('Extend reservation', reservation_id);
 
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
@@ -263,7 +263,7 @@ async function extend_tp_reservation(reservation_id, new_reservation) {
     try {
         await dbsrv.mongo_reservations().updateOne(
             {'_id': reservation_id},
-            {'$set': { 'to': new_reservation.to } }
+            {'$set': { 'to': extension.to } }
         );
         await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'extend reservation for ' + reservation.owner , 'logs': [] });
 

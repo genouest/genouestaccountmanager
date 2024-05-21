@@ -183,8 +183,8 @@ export class TpsComponent implements OnInit {
             this.errmsg = 'Extended end date must be after current end date';
             return;
         }
-        const new_reservation = { ...this.selectedEvent, to: new Date(this.new_expire).getTime()};
-        this.tpService.extend(this.selectedEvent.id, new_reservation).subscribe(
+        const extension = { 'to': new Date(this.new_expire).getTime() };
+        this.tpService.extend(this.selectedEvent.id, extension).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
         );
