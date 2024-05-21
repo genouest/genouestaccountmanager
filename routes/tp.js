@@ -28,12 +28,10 @@ router.get('/tp', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
-        res.end();
         return;
     }
     let reservations = await dbsrv.mongo_reservations().find({}).toArray();
     res.send(reservations);
-    res.end();
 });
 
 router.post('/tp', async function(req, res) {
@@ -59,13 +57,11 @@ router.post('/tp', async function(req, res) {
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
-        res.end();
         return;
     }
 
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
-        res.end();
         return;
     }
 
@@ -84,7 +80,6 @@ router.post('/tp', async function(req, res) {
         req.body.name
     ).then(function(reservation){
         res.send({reservation: reservation, message: 'Reservation done'});
-        res.end();
         return;
     });
 });
@@ -107,13 +102,11 @@ router.get('/tp/:id', async function(req, res) {
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
-        res.end();
         return;
     }
 
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
-        res.end();
         return;
     }
 
@@ -136,11 +129,9 @@ router.get('/tp/:id', async function(req, res) {
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to get this reservation'});
-        res.end();
         return;
     }
     res.send({reservation: reservation});
-    res.end();
 });
 
 router.delete('/tp/:id', async function(req, res) {
@@ -160,13 +151,11 @@ router.delete('/tp/:id', async function(req, res) {
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
-        res.end();
         return;
     }
 
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
-        res.end();
         return;
     }
 
@@ -189,24 +178,20 @@ router.delete('/tp/:id', async function(req, res) {
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to delete this reservation'});
-        res.end();
         return;
     }
 
     if(reservation.over){
         res.status(403).send({message: 'Reservation is already closed'});
-        res.end();
         return;
     }
 
     if(reservation.created){
         res.status(403).send({message: 'Reservation accounts already created, reservation will be closed after closing date'});
-        res.end();
         return;
     }
     await dbsrv.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
     res.send({message: 'Reservation cancelled'});
-    res.end();
     return;
 });
 
@@ -227,13 +212,11 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
-        res.end();
         return;
     }
 
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
-        res.end();
         return;
     }
 
@@ -256,7 +239,6 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to delete this reservation'});
-        res.end();
         return;
     }
 
@@ -265,12 +247,10 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     } catch (error) {
         logger.error(error);
         res.status(500).send({message: 'Error while removing tp reservation'});
-        res.end();
         return;
     }
 
     res.send({message: 'Reservation closed'});
-    res.end();
 });
 
 router.put('/tp/:id/reserve/now', async function(req, res) {
@@ -290,13 +270,11 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
-        res.end();
         return;
     }
 
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
-        res.end();
         return;
     }
 
@@ -319,13 +297,11 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to reserve now this reservation'});
-        res.end();
         return;
     }
 
     if (reservation.to < new Date().getTime()) {
         res.status(403).send({message: 'End date can not be in the past'});
-        res.end();
         return;
     }
 
@@ -335,14 +311,12 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
     } catch (error) {
         logger.error(error);
         res.status(500).send({message: 'Error while creating tp reservation'});
-        res.end();
         return;
     }
 
     logger.debug('set reservation as done', newresa);
     newresa.created = true;
     res.send({reservation: newresa});
-    res.end();
 });
 
 router.put('/tp/:id/reserve/extend', async function(req, res) {
@@ -362,13 +336,11 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
-        res.end();
         return;
     }
 
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
-        res.end();
         return;
     }
 
@@ -389,19 +361,16 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
         res.status(403).send({message: 'Not allowed to extend this reservation'});
-        res.end();
         return;
     }
 
     if (req.body.to < reservation.to) {
         res.status(403).send({message: 'Extended end date must be after current end date'});
-        res.end();
         return;
     }
 
     if (req.body.to < new Date().getTime()) {
         res.status(403).send({message: 'Extended end date can not be in the past'});
-        res.end();
         return;
     }
 
@@ -410,12 +379,10 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     } catch (error) {
         logger.error(error);
         res.status(500).send({message: 'Error while extending tp reservation'});
-        res.end();
         return;
     }
 
     res.send({message: 'Reservation extended'});
-    res.end();
 });
 
 module.exports = router;
