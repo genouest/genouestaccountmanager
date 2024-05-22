@@ -97,7 +97,7 @@ async function extendExtraProject(project, extension) {
         return false;
     }
     try {
-        const extended_project = { ...project_to_extend, expire: extension.to }
+        const extended_project = { ...project_to_extend, expire: extension.to };
         let res = await prjsrv.update_project(project_to_extend.id, extended_project);
         return res;
     } catch(error) {
@@ -235,25 +235,24 @@ async function delete_tp_users(users) {
 }
 
 
-async function extend_tp_user(user) {
+async function extend_tp_user(user, extension) {
     logger.debug('extend_tp_user', user.uid);
     try{
-        user.history.push({'action': 'reactivate', date: new Date().getTime()});
-        await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set': {
-            status: STATUS_ACTIVE,
-            expiration: (new Date().getTime() + day_time*duration_list[user.duration]),
-        }});
+        user.history.push({ 'action': 'reactivate', date: new Date().getTime() });
+        await dbsrv.mongo_users().updateOne({ uid: user.uid }, {
+            '$set': { expiration: extension.to }
+        });
     }
     catch(exception) {
         logger.error(exception);
     }
 }
 
-async function extend_tp_users(users) {
+async function extend_tp_users(users, extension) {
     for(let i = 0; i < users.length; i++) {
-        let user = await dbsrv.mongo_users().findOne({'uid': users[i]});
+        let user = await dbsrv.mongo_users().findOne({ 'uid': users[i] });
         if (user && user.uid) {
-            await extend_tp_user(user);
+            await extend_tp_user(user, extension);
         }
     }
 }
@@ -299,11 +298,11 @@ async function extend_tp_reservation(reservation_id, extension) {
     logger.debug('Extend reservation', reservation);
 
     // add grace period to extension
-    extension = { ...extension, to: extension.to + 1000*3600*24*(CONFIG.tp.extra_expiration) }
+    extension = { ...extension, to: extension.to + 1000*3600*24*(CONFIG.tp.extra_expiration) };
 
     if (reservation.accounts) {
         logger.info('Extend Accounts', reservation.accounts);
-        await extend_tp_users(reservation.accounts);
+        await extend_tp_users(reservation.accounts, extension);
     }
 
     if (reservation.project && reservation.project.id && reservation.project.id != '') {
