@@ -236,7 +236,7 @@ async function delete_tp_users(users) {
 async function extend_tp_user(user, extension) {
     logger.debug('extend_tp_user', user.uid);
     try{
-        user.history.push({ 'action': 'reactivate', date: new Date().getTime() });
+        user.history.push({ 'action': 'extend', date: new Date().getTime() });
         await dbsrv.mongo_users().updateOne({ uid: user.uid }, {
             '$set': { expiration: extension.to }
         });
