@@ -121,11 +121,11 @@ export class TpsComponent implements OnInit {
             this.reserrmsg = 'Quantity must be > 0';
             return;
         }
-        if (this.fromDate.getTime() > this.toDate.getTime()) {
+        if (new Date(this.fromDate).getTime() > new Date(this.toDate).getTime()) {
             this.reserrmsg = 'End date must be superior to start date';
             return;
         }
-        if (this.toDate.getTime() < new Date().getTime()) {
+        if (new Date(this.toDate).getTime() < new Date().getTime()) {
             this.reserrmsg = 'End date can not be in the past';
             return;
         }

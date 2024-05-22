@@ -165,9 +165,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
             if (projectName != '') {
                 await usrsrv.add_user_to_project(userProject.id, user.uid, 'auto', false);
             }
-
             await plgsrv.run_plugins('activate', user.uid, user, 'auto');
-
         }
     }
     catch (error) {
@@ -297,6 +295,16 @@ async function extend_tp_reservation(reservation_id, extension) {
     let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
     logger.debug('Extend reservation', reservation);
 
+    try {
+        await dbsrv.mongo_reservations().updateOne(
+            { '_id': reservation_id },
+            { '$set': { 'to': extension.to } }
+        );
+        await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'extend reservation for ' + reservation.owner , 'logs': [] });
+    } catch (error) {
+        logger.error(error);
+    }
+
     // add grace period to extension
     extension = { ...extension, to: extension.to + 1000*3600*24*(CONFIG.tp.extra_expiration) };
 
@@ -308,16 +316,6 @@ async function extend_tp_reservation(reservation_id, extension) {
     if (reservation.project && reservation.project.id && reservation.project.id != '') {
         logger.info('Extend Project', reservation.project.id);
         await extendExtraProject(reservation.project.id, extension);
-    }
-
-    try {
-        await dbsrv.mongo_reservations().updateOne(
-            { '_id': reservation_id },
-            { '$set': { 'to': extension.to } }
-        );
-        await dbsrv.mongo_events().insertOne({ 'owner': 'auto', 'date': new Date().getTime(), 'action': 'extend reservation for ' + reservation.owner , 'logs': [] });
-    } catch (error) {
-        logger.error(error);
     }
 }
 
@@ -366,7 +364,7 @@ async function create_tp_reservation(reservation_id) {
         newProject
     );
     
-    for(let i=0;i<activated_users.length;i++) {
+    for(let i = 0; i < activated_users.length; i++) {
         logger.debug('activated user ', activated_users[i].uid);
         reservation.accounts.push(activated_users[i].uid);
     }
