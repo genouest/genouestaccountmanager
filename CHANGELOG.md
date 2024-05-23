@@ -2,9 +2,11 @@
 
 ## 1.4.30 (TBA)
 
-* Added 'End date' to the projet request page
-* Set 'description' as a required field in the projet request page and set a minimal length of 30 char
+* Added 'End date' to the project request page
+* Set 'description' as a required field in the project request page and set a minimal length of 30 char
 * Added a link to user profile on admin panels -> projects pending table
+* Added 'Extend' button for admins to extend active TPs
+* Prevented retroactive TP reservations
 
 ## 1.4.29
 
@@ -43,4 +45,4 @@
 * [docker] change order of commands
 * on renew by admin or user, reset expiration_notif
 * add listmonk mailer support
-* upgrade jsonwebtoken to v9 to fix CVE https://cve.report/CVE-2022-23540
+* upgrade jsonwebtoken to v9 to fix CVE <https://cve.report/CVE-2022-23540>
