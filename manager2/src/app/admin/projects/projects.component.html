@@ -131,7 +131,7 @@
                 <tr>
                   <td>{{pending.created_at | date}}</td>
                   <td>{{pending.id}}</td>
-                  <td>{{pending.owner}}</td>
+                  <td><a routerLink="/user/{{pending.owner}}"><span class="p-button p-button-sm p-button-primary">{{pending.owner}}</span></a></td>
                   <td>{{pending.expire | date}}</td>
                   <td>{{pending.size}}</td>
                   <td>{{pending.cpu}}</td>
