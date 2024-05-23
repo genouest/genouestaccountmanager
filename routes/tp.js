@@ -344,7 +344,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         return;
     }
 
-    if(! (isadmin || (user.is_trainer !== undefined && user.is_trainer))) {
+    if(!isadmin) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
