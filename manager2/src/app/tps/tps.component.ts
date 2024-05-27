@@ -180,7 +180,7 @@ export class TpsComponent implements OnInit {
         this.listEvents();
     }
 
-    extend_reservation(new_expire: Date) {
+    extend_reservation() {
         this.msg = '';
         this.errmsg = '';
         if (new Date(this.new_expire).getTime() < this.selectedEvent.end) {

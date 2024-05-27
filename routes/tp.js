@@ -299,7 +299,6 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         res.status(403).send({message: 'Not allowed to reserve now this reservation'});
         return;
     }
-
     if (reservation.to < new Date().getTime()) {
         res.status(403).send({message: 'End date can not be in the past'});
         return;
@@ -322,6 +321,10 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
 router.put('/tp/:id/reserve/extend', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(403).send({message: 'Not authorized'});
+        return;
+    }
+    if(! req.body.to) {
+        res.status(403).send({message: 'No input'});
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
@@ -351,24 +354,16 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
 
-    let filter = {};
-    if(isadmin) {
-        filter = {_id: reservation_id};
-    }
-    else{
-        filter = {_id: reservation_id, owner: user.uid};
-    }
+    let filter = {_id: reservation_id};
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({message: 'Not allowed to extend this reservation'});
+        res.status(404).send({message: 'Reservation does not exist'});
         return;
     }
-
     if (req.body.to < reservation.to) {
         res.status(403).send({message: 'Extended end date must be after current end date'});
         return;
     }
-
     if (req.body.to < new Date().getTime()) {
         res.status(403).send({message: 'Extended end date can not be in the past'});
         return;
