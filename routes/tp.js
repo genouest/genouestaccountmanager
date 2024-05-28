@@ -190,7 +190,7 @@ router.delete('/tp/:id', async function(req, res) {
         res.status(403).send({message: 'Reservation accounts already created, reservation will be closed after closing date'});
         return;
     }
-    await dbsrv.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)},{'$set': {'over': true}});
+    await dbsrv.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)}, {'$set': {'over': true}});
     res.send({message: 'Reservation cancelled'});
     return;
 });
@@ -243,7 +243,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     }
 
     try {
-        tpssrv.remove_tp_reservation(reservation_id);
+        tpssrv.remove_tp_reservation(reservation);
     } catch (error) {
         logger.error(error);
         res.status(500).send({message: 'Error while removing tp reservation'});
@@ -353,7 +353,6 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
-
     let reservation = await dbsrv.mongo_reservations().findOne({_id: reservation_id});
     if(!reservation){
         res.status(404).send({message: 'Reservation does not exist'});
@@ -369,7 +368,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     }
 
     try {
-        tpssrv.extend_tp_reservation(reservation_id, req.body);
+        tpssrv.extend_tp_reservation(reservation, req.body);
     } catch (error) {
         logger.error(error);
         res.status(500).send({message: 'Error while extending tp reservation'});
