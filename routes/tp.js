@@ -35,41 +35,38 @@ router.get('/tp', async function(req, res) {
 });
 
 router.post('/tp', async function(req, res) {
-    if(req.body.quantity === undefined || req.body.quantity === null || req.body.quantity<=0){
+    if(req.body.quantity === undefined || req.body.quantity === null || req.body.quantity<=0) {
         res.status(403).send({message: 'Quantity must be >= 1'});
         return;
     }
-    if(req.body.about === undefined || req.body.about == ''){
+    if(req.body.about === undefined || req.body.about == '') {
         res.status(403).send({message: 'Tell us why you need some tp accounts'});
         return;
     }
-
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
     let user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
+        is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
         return;
     }
-
-    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
+
     tpssrv.tp_reservation(
         user.uid,
         req.body.from,
@@ -95,39 +92,34 @@ router.get('/tp/:id', async function(req, res) {
     }
 
     let user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
+        is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
         return;
     }
-
-    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
-
-    // add filter
     let filter = {};
     if(is_admin) {
         filter = {_id: reservation_id};
     }
-    else{
+    else {
         filter = {_id: reservation_id, owner: user.uid};
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
-    if(!reservation){
+    if(!reservation) {
         res.status(403).send({message: 'Not allowed to get this reservation'});
         return;
     }
@@ -143,31 +135,27 @@ router.delete('/tp/:id', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
     let user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
+        is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
         return;
     }
-
-    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
-
-    // add filter
     let filter = {};
     if(is_admin) {
         filter = {_id: reservation_id};
@@ -180,17 +168,18 @@ router.delete('/tp/:id', async function(req, res) {
         res.status(403).send({message: 'Not allowed to delete this reservation'});
         return;
     }
-
     if(reservation.over){
         res.status(403).send({message: 'Reservation is already closed'});
         return;
     }
-
     if(reservation.created){
         res.status(403).send({message: 'Reservation accounts already created, reservation will be closed after closing date'});
         return;
     }
-    await dbsrv.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)}, {'$set': {'over': true}});
+
+    await dbsrv.mongo_reservations().updateOne({'_id': ObjectID.createFromHexString(req.params.id)}, {
+        '$set': {'over': true}
+    });
     res.send({message: 'Reservation cancelled'});
     return;
 });
@@ -204,31 +193,27 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
     let user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
+        is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
         return;
     }
-
-    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
-
-    // add filter
     let filter = {};
     if(is_admin) {
         filter = {_id: reservation_id};
@@ -249,7 +234,6 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
         res.status(500).send({message: 'Error while removing tp reservation'});
         return;
     }
-
     res.send({message: 'Reservation closed'});
 });
 
@@ -262,31 +246,27 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
     let user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
+        is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if(!user) {
         res.status(404).send({message: 'User does not exist'});
         return;
     }
-
-    let is_admin = isadmin;
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
-
-    // add filter
     let filter = {};
     if(is_admin) {
         filter = {_id: reservation_id};
@@ -312,7 +292,6 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         res.status(500).send({message: 'Error while creating tp reservation'});
         return;
     }
-
     logger.debug('set reservation as done', newresa);
     newresa.created = true;
     res.send({reservation: newresa});
@@ -331,11 +310,12 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         res.status(403).send({message: 'Invalid parameters'});
         return;
     }
+
     let user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         user = await dbsrv.mongo_users().findOne({'_id': req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(user);
+        is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -347,7 +327,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         return;
     }
 
-    if(!isadmin) {
+    if(!is_admin) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }

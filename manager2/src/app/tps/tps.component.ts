@@ -84,7 +84,6 @@ export class TpsComponent implements OnInit {
             resp => {
                 this.config = resp;
                 this.group_or_project = this.config.reservation.group_or_project;
-
             },
             err => console.log('failed to get config')
         );
