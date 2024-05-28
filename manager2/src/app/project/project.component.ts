@@ -118,6 +118,10 @@ export class ProjectComponent implements OnInit {
             this.request_err_msg = 'Project expiration date is mandatory';
             return;
         }
+        if (this.new_project.description.length < 30) {
+            this.request_err_msg = 'Project description length should at least be 30 char';
+            return;
+        }
         const project_to_send = { ...this.new_project, expire: new Date(this.new_project.expire).getTime()}
         this.projectsService.askNew(project_to_send).subscribe(
             resp => {
