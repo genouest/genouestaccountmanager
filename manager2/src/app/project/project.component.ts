@@ -119,7 +119,7 @@ export class ProjectComponent implements OnInit {
             return;
         }
         if (this.new_project.description.length < 30) {
-            this.request_err_msg = 'Project description length should at least be 30 char';
+            this.request_err_msg = 'Project description should be at least 30 characters long';
             return;
         }
         const project_to_send = { ...this.new_project, expire: new Date(this.new_project.expire).getTime()}
