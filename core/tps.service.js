@@ -237,9 +237,10 @@ async function extend_tp_user(user, extension) {
     logger.debug('extend_tp_user', user.uid);
     try{
         user.history.push({ 'action': 'extend', date: new Date().getTime() });
-        await dbsrv.mongo_users().updateOne({ uid: user.uid }, {
-            '$set': { expiration: extension.to }
-        });
+        await dbsrv.mongo_users().updateOne({ uid: user.uid }, { '$set': {
+            expiration: extension.to,
+            history: user.history
+        } });
     }
     catch(exception) {
         logger.error(exception);

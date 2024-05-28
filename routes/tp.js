@@ -354,8 +354,7 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
 
-    let filter = {_id: reservation_id};
-    let reservation = await dbsrv.mongo_reservations().findOne(filter);
+    let reservation = await dbsrv.mongo_reservations().findOne({_id: reservation_id});
     if(!reservation){
         res.status(404).send({message: 'Reservation does not exist'});
         return;
