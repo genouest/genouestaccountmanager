@@ -24,6 +24,7 @@ var test_group_id3 = 'test3' + Math.random().toString(10).slice(-6);
 var test_web_id = 'webtest' + Math.random().toString(10).slice(-6);
 var test_db_id = 'dbtest' + Math.random().toString(10).slice(-6);
 var test_project_id = 'projecttest' + Math.random().toString(10).slice(-6);
+var test_tp_id = 'tptest' + Math.random().toString(10).slice(-6);
 var user_test_password = null;
 var user_info = null;
 
@@ -515,7 +516,7 @@ describe('My', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
-                            for(let i=0; i<res.body.length; i++){
+                            for(let i = 0; i < res.body.length; i++){
                                 if(res.body[i].id == test_project_id){
                                     found = true;
                                     break;
@@ -767,52 +768,60 @@ describe('My', () => {
     });
 
     describe('Test tp reservation', () => {
-        it('create a reservation', (done) => {
-            const create_and_force = async () => {
-                let today = new Date();
-                let res = await chai.request('http://localhost:3000')
-                    .post('/tp')
-                    .set('X-Api-Key', token_id)
-                    .send({
-                        'from': today.getTime(),
-                        'to': today.getTime() + 30,
-                        'quantity': 2,
-                        'about': 'test resa',
-                        'group_or_project': 'group',
-                        'name': 'test tp'
-                    });
-                expect(res).to.have.status(200);
-                let new_resa = res.body.reservation;
-                console.error('new resa', new_resa);
-                assert(new_resa.created == false);
-                let res2 = await chai.request('http://localhost:3000')
-                    .get('/tp/' + new_resa._id)
-                    .set('X-Api-Key', token_id);
-                let resa = res2.body.reservation;
-                expect(res2).to.have.status(200);
-                assert(resa.created == false);
-                // Reserve now /tp/:id/reservenow
-                let resnow = await chai.request('http://localhost:3000')
-                    .put('/tp/' + resa._id + '/reserve/now')
-                    .set('X-Api-Key', token_id)
-                    .send({
-                        'from': today.getTime(),
-                        'to': today.getTime() + 30,
-                        'quantity': 2,
-                        'about': 'test resa'
-                    });
-                expect(resnow).to.have.status(200);
-                res2 = await chai.request('http://localhost:3000')
-                    .get('/tp/' + new_resa._id)
-                    .set('X-Api-Key', token_id);
-                resa = res2.body.reservation;
-                assert(resa.created == true);
-            };
-            create_and_force().then(() => {
-                done();
-            });
+        it('Book reservation', (done) => {
+            let today = new Date();
+            chai.request('http://localhost:3000')
+                .post('/tp')
+                .set('X-Api-Key', token_id)
+                .send({
+                    'from': today.getTime(),
+                    'to': today.getTime() + 30000,
+                    'quantity': 2,
+                    'about': 'test resa',
+                    'group_or_project': 'group',
+                    'name': 'test tp'
+                })
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    let new_resa = res.body.reservation;
+                    assert(new_resa.created == false);
+                    test_tp_id = new_resa._id;
+                    chai.request('http://localhost:3000')
+                        .get('/tp/' + test_tp_id)
+                        .set('X-Api-Key', token_id)
+                        .end((err, res2) => {
+                            expect(res2).to.have.status(200);
+                            let resa = res2.body.reservation;
+                            assert(resa.created == false);
+                            done();
+                        });
+                });
         });
 
+        it('Create reservation', (done) => {
+            let today = new Date();
+            chai.request('http://localhost:3000')
+                .put('/tp/' + test_tp_id + '/reserve/now')
+                .set('X-Api-Key', token_id)
+                .send({
+                    'from': today.getTime(),
+                    'to': today.getTime() + 30000,
+                    'quantity': 2,
+                    'about': 'test resa'
+                })
+                .end((err, resnow) => {
+                    expect(resnow).to.have.status(200);
+                    chai.request('http://localhost:3000')
+                        .get('/tp/' + test_tp_id)
+                        .set('X-Api-Key', token_id)
+                        .end((err, res2) => {
+                            expect(res2).to.have.status(200);
+                            let resa = res2.body.reservation;
+                            assert(resa.created == true);
+                            done();
+                        });
+                });
+        });
     });
 
 });
