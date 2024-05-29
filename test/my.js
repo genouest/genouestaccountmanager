@@ -849,6 +849,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, resnow) => {
                     expect(resnow).to.have.status(200);
+                    done();
                 });
         });
     });
