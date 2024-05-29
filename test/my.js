@@ -837,7 +837,7 @@ describe('My', () => {
                         .end((err, res2) => {
                             expect(res2).to.have.status(200);
                             let resa = res2.body.reservation;
-                            assert(resa.created == true);
+                            assert(resa.to == today.getTime() + 2*24*3600*10000);
                             done();
                         });
                 });
