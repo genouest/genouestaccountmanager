@@ -118,6 +118,10 @@ export class ProjectComponent implements OnInit {
             this.request_err_msg = 'Project expiration date is mandatory';
             return;
         }
+        if (!this.new_project.description) {
+            this.request_err_msg = 'Project description is mandatory';
+            return;
+        }
         if (this.new_project.description.length < 30) {
             this.request_err_msg = 'Project description should be at least 30 characters long';
             return;
