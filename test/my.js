@@ -775,7 +775,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .send({
                     'from': today.getTime(),
-                    'to': today.getTime() + 30000,
+                    'to': today.getTime() + 24*3600*1000,
                     'quantity': 2,
                     'about': 'test resa',
                     'group_or_project': 'group',
@@ -805,7 +805,7 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .send({
                     'from': today.getTime(),
-                    'to': today.getTime() + 30000,
+                    'to': today.getTime() + 24*3600*1000,
                     'quantity': 2,
                     'about': 'test resa'
                 })
@@ -820,6 +820,35 @@ describe('My', () => {
                             assert(resa.created == true);
                             done();
                         });
+                });
+        });
+
+        it('Extend reservation', (done) => {
+            let today = new Date();
+            chai.request('http://localhost:3000')
+                .put('/tp/' + test_tp_id + '/reserve/extend')
+                .set('X-Api-Key', token_id)
+                .send({'to': today.getTime() + 2*24*3600*10000})
+                .end((err, resnow) => {
+                    expect(resnow).to.have.status(200);
+                    chai.request('http://localhost:3000')
+                        .get('/tp/' + test_tp_id)
+                        .set('X-Api-Key', token_id)
+                        .end((err, res2) => {
+                            expect(res2).to.have.status(200);
+                            let resa = res2.body.reservation;
+                            assert(resa.created == true);
+                            done();
+                        });
+                });
+        });
+
+        it('Remove reservation', (done) => {
+            chai.request('http://localhost:3000')
+                .put('/tp/' + test_tp_id + '/reserve/stop')
+                .set('X-Api-Key', token_id)
+                .end((err, resnow) => {
+                    expect(resnow).to.have.status(200);
                 });
         });
     });
