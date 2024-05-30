@@ -2,9 +2,11 @@
 
 ## 1.4.30 (TBA)
 
-* Added 'End date' to the projet request page
-* Set 'description' as a required field in the projet request page and set a minimal length of 30 char
+* Added 'End date' to the project request page
+* Set 'description' as a required field in the project request page and set a minimal length of 30 char
 * Added a link to user profile on admin panels -> projects pending table
+* Added 'Extend' button for admins to extend active TPs
+* Prevented retroactive TP reservations
 
 ## 1.4.29
 
