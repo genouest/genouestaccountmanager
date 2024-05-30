@@ -112,14 +112,6 @@ export class ProjectComponent implements OnInit {
             // todo: should rename it project_msg
             this.request_msg = '';
             this.request_err_msg = '';
-            if (!this.new_project.id) {
-                this.request_err_msg = 'Project name is mandatory';
-                return;
-            }
-            if (!this.new_project.expire) {
-                this.request_err_msg = 'Project expiration date is mandatory';
-                return;
-            }
             const project_to_send = { ...this.new_project, expire: new Date(this.new_project.expire).getTime()}
             this.projectsService.askNew(project_to_send).subscribe(
                 resp => {

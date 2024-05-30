@@ -51,7 +51,7 @@
           </div>
       
           <div class="form-group row col-sm-12">
-            <label for="new_project_description">Description</label>
+            <label for="new_project_description">Description <span style="color:red">(required)</span>            </label>
             <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" name="description" ngModel class="form-control" #description="ngModel"></textarea>
             <div *ngIf="description.invalid && (description.dirty || description.touched)" class="text-danger">
               <div *ngIf="description.errors.required">Description is required.</div>
