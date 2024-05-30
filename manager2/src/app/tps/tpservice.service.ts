@@ -18,7 +18,6 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-
         return this.http.get(environment.apiUrl + '/tp', httpOptions)
     }
 
@@ -29,7 +28,6 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-
         return this.http.post(environment.apiUrl + '/tp', reservation, httpOptions)
     }
 
@@ -40,7 +38,6 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-
         return this.http.delete(environment.apiUrl + '/tp/' + reservationId, httpOptions)
     }
 
@@ -52,7 +49,6 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-
         return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/now', httpOptions)
     }
 
@@ -63,7 +59,16 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-
         return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/stop', httpOptions)
+    }
+
+    extend(reservationId, extension): Observable<any> {
+        //let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/extend', extension, httpOptions)
     }
 }
