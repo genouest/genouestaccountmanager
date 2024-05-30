@@ -5,56 +5,64 @@
         <h3>Request a new project creation</h3>
       </div>
 
-      <form aria-label="project creation request form" role="form" class="user-form form-horizonal" ngNativeValidate>
-
+      <form #projectForm="ngForm" aria-label="project creation request form" role="form" class="user-form form-horizontal" (ngSubmit)="ask_for_project(projectForm)" novalidate>
         <div class="modal-body">
           <div class="form-group row col-sm-8">
-            <label for="new_project_id">Name&nbsp;
-              <span style="color:red">(required)&nbsp;</span>
+            <label for="new_project_id">Name
+              <span style="color:red">(required)</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control"/>
+            <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" name="id" ngModel class="form-control" #id="ngModel"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you work on several projects, you can request more project spaces.</i></small>
+            <div *ngIf="id.invalid && (id.dirty || id.touched)" class="text-danger">
+              <div *ngIf="id.errors.required">Name is required.</div>
+            </div>
           </div>
-
+      
           <div class="form-group row col-sm-8">
-            <label for="new_project_expire">Expiration date&nbsp;
-              <span style="color:red">(required)&nbsp;</span>
+            <label for="new_project_expire">Expiration date
+              <span style="color:red">(required)</span>
               <span class="glyphicon glyphicon-question-sign" title="Project expiration date" tooltip></span>
             </label>
-            <input required type="date" id="new_project_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.expire" class="form-control"/>
+            <input required type="date" id="new_project_expire" name="expire" ngModel class="form-control" #expire="ngModel"/>
+            <div *ngIf="expire.invalid && (expire.dirty || expire.touched)" class="text-danger">
+              <div *ngIf="expire.errors.required">Expiration date is required.</div>
+            </div>
           </div>
-
+      
           <div class="form-group row col-sm-8">
               <label for="new_project_size">Total expected project size (GB)</label>
-              <input placeholder="project size in GB" type="number" id="new_project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+              <input placeholder="project size in GB" type="number" id="new_project_size" name="size" ngModel class="form-control"/>
               <small id="nameHelp" class="form-text text-muted"><i>Please include the <b>total</b> expected size for this project.</i></small>
           </div>
-
+      
           <div class="form-group row col-sm-8">
               <label for="new_project_cpu">Cpu (Hour)</label>
-              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
+              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" name="cpu" ngModel class="form-control"/>
               <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
-
+      
           <div class="form-group row col-sm-8">
-            <label for="new_project_org">Financing&nbsp;
+            <label for="new_project_org">Financing
               <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
             </label>
-            <input placeholder="Ex : CNRS" type="text" id="new_project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
+            <input placeholder="Ex : CNRS" type="text" id="new_project_org" name="orga" ngModel class="form-control"/>
             <small id="orgaHelp" class="form-text text-muted"><em>Optional, for information only</em></small>
           </div>
-
+      
           <div class="form-group row col-sm-12">
             <label for="new_project_description">Description</label>
-            <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
+            <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" name="description" ngModel class="form-control" #description="ngModel"></textarea>
+            <div *ngIf="description.invalid && (description.dirty || description.touched)" class="text-danger">
+              <div *ngIf="description.errors.required">Description is required.</div>
+              <div *ngIf="description.errors.minlength">Description must be at least 30 characters long.</div>
+            </div>
           </div>
-
         </div>
-
+      
         <div class="modal-footer" id="submit">
           <div class="form-group row col-sm-12">
-            <button type="submit" class="p-button p-button-sm p-button-primary" (click)="ask_for_project()" data-dismiss="modal">Ask Admin</button>
+            <button type="submit" class="p-button p-button-sm p-button-primary" [disabled]="projectForm.invalid">Ask Admin</button>
             <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
           </div>
         </div>
