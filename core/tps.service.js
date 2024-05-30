@@ -257,7 +257,6 @@ async function extend_tp_users(users, extension) {
 
 
 async function remove_tp_reservation(reservation) {
-    logger.info('Close reservation', reservation._id);
     logger.debug('Close reservation', reservation);
 
     if (reservation.accounts) {
@@ -289,7 +288,6 @@ async function remove_tp_reservation(reservation) {
 }
 
 async function extend_tp_reservation(reservation, extension) {
-    logger.info('Extend reservation', reservation._id);
     logger.debug('Extend reservation', reservation);
 
     try {
