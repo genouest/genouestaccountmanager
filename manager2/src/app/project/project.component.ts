@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
@@ -17,7 +17,7 @@ import { Table } from 'primeng/table';
 export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
-
+    @ViewChild('modal') modal: ElementRef;
 
     new_project: any
     projects: any
@@ -117,6 +117,7 @@ export class ProjectComponent implements OnInit {
                 resp => {
                     this.request_msg = 'An email has been sent to an admin';
                     this.new_project = {};
+                    this.closeModal();
                 },
                 err => {
                     console.log('failed to get project users', err);
@@ -126,6 +127,15 @@ export class ProjectComponent implements OnInit {
         } else {
             form.control.markAllAsTouched();
             console.log('Form is invalid');
+        }
+    }
+
+    closeModal() {
+        const modalElement = this.modal.nativeElement;
+        modalElement.style.display = 'none';
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        if (modalBackdrop) {
+            modalBackdrop.remove();
         }
     }
 

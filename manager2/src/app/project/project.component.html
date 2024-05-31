@@ -1,4 +1,4 @@
-<div class="modal" style="z-index: 1500;" id="ask_project" tabindex="-1" role="dialog">
+<div class="modal" style="z-index: 1500;" id="ask_project" tabindex="-1" role="dialog" #modal>
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -12,7 +12,7 @@
               <span style="color:red">(required)</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
             </label>
-            <input required maxlength="42" placeholder="project name" type="text" id="new_project_id" name="id" [(ngModel)]="new_project.id" class="form-control" #id="ngModel"/>
+            <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" name="id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control" #id="ngModel"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you work on several projects, you can request more project spaces.</i></small>
             <div *ngIf="id.invalid && (id.dirty || id.touched)" class="text-danger">
               <div *ngIf="id.errors.required">Name is required</div>
@@ -25,7 +25,7 @@
               <span style="color:red">(required)</span>
               <span class="glyphicon glyphicon-question-sign" title="Project expiration date" tooltip></span>
             </label>
-            <input required type="date" id="new_project_expire" name="expire" [(ngModel)]="new_project.expire" class="form-control" #expire="ngModel"/>
+            <input required type="date" id="new_project_expire" name="expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.expire" class="form-control" #expire="ngModel"/>
             <div *ngIf="expire.invalid && (expire.dirty || expire.touched)" class="text-danger">
               <div *ngIf="expire.errors.required">Expiration date is required</div>
             </div>
@@ -33,13 +33,13 @@
       
           <div class="form-group row col-sm-8">
               <label for="new_project_size">Total expected project size (GB)</label>
-              <input placeholder="project size in GB" type="number" id="new_project_size" name="size" [(ngModel)]="new_project.size" class="form-control"/>
-              <small id="nameHelp" class="form-text text-muted"><i>Please include the <b>total</b> expected size for this project</i></small>
+              <input placeholder="project size in GB" type="number" id="new_project_size" name="size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+              <small id="nameHelp" class="form-text text-muted"><i>Please include the <b>total</b> expected size for this project.</i></small>
           </div>
       
           <div class="form-group row col-sm-8">
               <label for="new_project_cpu">Cpu (Hour)</label>
-              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" name="cpu" [(ngModel)]="new_project.cpu" class="form-control"/>
+              <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" name="cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
               <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
       
@@ -47,13 +47,13 @@
             <label for="new_project_org">Financing
               <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
             </label>
-            <input placeholder="Ex : CNRS" type="text" id="new_project_org" name="orga" [(ngModel)]="new_project.orga" class="form-control"/>
+            <input placeholder="Ex : CNRS" type="text" id="new_project_org" name="orga" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
             <small id="orgaHelp" class="form-text text-muted"><em>Optional, for information only</em></small>
           </div>
       
           <div class="form-group row col-sm-12">
-            <label for="new_project_description">Description <span style="color:red">(required)</span></label>
-            <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" name="description" [(ngModel)]="new_project.description" class="form-control" #description="ngModel"></textarea>
+            <label for="new_project_description">Description <span style="color:red">(required)</span>            </label>
+            <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" name="description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control" #description="ngModel"></textarea>
             <div *ngIf="description.invalid && (description.dirty || description.touched)" class="text-danger">
               <div *ngIf="description.errors.required">Description is required</div>
               <div *ngIf="description.errors.minlength">Description must be at least 30 characters long</div>
