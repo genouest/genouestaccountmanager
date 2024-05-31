@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
 import { ConfigService } from '../config.service'
 import { TpserviceService } from './tpservice.service';
@@ -113,41 +114,46 @@ export class TpsComponent implements OnInit {
         this.refresh.next();
     }
 
-    reserve() {
-        this.msg = '';
-        this.errmsg = '';
-        if (this.quantity <= 0) {
-            this.reserrmsg = 'Quantity must be > 0';
-            return;
+    reserve(form: NgForm) {
+        if (form.valid) {
+            this.msg = '';
+            this.errmsg = '';
+            if (this.quantity <= 0) {
+                this.reserrmsg = 'Quantity must be > 0';
+                return;
+            }
+            if(this.about === undefined || this.about == '') {
+                this.reserrmsg = 'Tell us why you need tp accounts';
+                return;
+            }
+            if (new Date(this.fromDate).getTime() > new Date(this.toDate).getTime()) {
+                this.reserrmsg = 'End date must be superior to start date';
+                return;
+            }
+            if (new Date(this.toDate).getTime() < new Date().getTime()) {
+                this.reserrmsg = 'End date can not be in the past';
+                return;
+            }
+            let reservation = {
+                quantity: this.quantity,
+                from: new Date(this.fromDate).getTime(),
+                to: new Date(this.toDate).getTime(),
+                about: this.about,
+                group_or_project: this.group_or_project,
+                name: this.name
+            }
+            console.log(reservation);
+            this.tpService.reserve(reservation).subscribe(
+                resp => {
+                    this.msg = resp['message'];
+                    this.listEvents();
+                },
+                err => this.errmsg = err.error.message
+            )
+        } else {
+            form.control.markAllAsTouched();
+            console.log('Form is invalid');
         }
-        if(this.about === undefined || this.about == '') {
-            this.reserrmsg = 'Tell us why you need tp accounts';
-            return;
-        }
-        if (new Date(this.fromDate).getTime() > new Date(this.toDate).getTime()) {
-            this.reserrmsg = 'End date must be superior to start date';
-            return;
-        }
-        if (new Date(this.toDate).getTime() < new Date().getTime()) {
-            this.reserrmsg = 'End date can not be in the past';
-            return;
-        }
-        let reservation = {
-            quantity: this.quantity,
-            from: new Date(this.fromDate).getTime(),
-            to: new Date(this.toDate).getTime(),
-            about: this.about,
-            group_or_project: this.group_or_project,
-            name: this.name
-        }
-        console.log(reservation);
-        this.tpService.reserve(reservation).subscribe(
-            resp => {
-                this.msg = resp['message'];
-                this.listEvents();
-            },
-            err => this.errmsg = err.error.message
-        )
     }
 
     cancel_reservation() {

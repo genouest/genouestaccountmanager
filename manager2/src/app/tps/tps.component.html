@@ -137,48 +137,61 @@
             <div class="card-body">
                 <div class="alert alert-success" *ngIf="resmsg">{{resmsg}}</div>
                 <div class="alert alert-danger" *ngIf="reserrmsg">{{reserrmsg}}</div>
-                <form class="form form-group row">
+                <form #tpForm="ngForm" role="form" class="user-form form-horizontal" (ngSubmit)="reserve(tpForm)" novalidate>
                     <div class="col-md-4">
                         <label for="quantity" class="control-label">Number of students</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="quantity" type="number" class="form-control"/>
+                        <input required min=1 type="number" class="form-control" [(ngModel)]="quantity" name="quant" #quant="ngModel" id="tp_quantity"/>
+                        <div *ngIf="quant.invalid && (quant.dirty || quant.touched)" class="text-danger">
+                            <div *ngIf="quant.errors.required">Number of students required</div>
+                            <div *ngIf="quant.errors.min">Create at least one student account</div>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label for="from_date" class="control-label">From</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="fromDate" type="date" class="form-control" />
+                        <input required [(ngModel)]="fromDate" type="date" class="form-control"  name="from" #from="ngModel" id="tp_from"/>
+                        <div *ngIf="from.invalid && (from.dirty || from.touched)" class="text-danger">
+                            <div *ngIf="from.errors.required">TP start date required</div>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label for="to_date" class="control-label">To</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="toDate" type="date" class="form-control" />
+                        <input required [(ngModel)]="toDate" type="date" class="form-control" name="to" #to="ngModel" id="tp_to"/>
+                        <div *ngIf="to.invalid && (to.dirty || to.touched)" class="text-danger">
+                            <div *ngIf="to.errors.required">TP end date required</div>
+                        </div>
                     </div>
-                </form>
-                <div class="form-group row">
                     <div class="col-md-8">
                         <label for="name" class="control-label">Training Name</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="name" type="text" class="form-control"/>
+                        <input required [(ngModel)]="name" type="text" class="form-control" name="id" #id="ngModel" id="tp_name"/>
+                        <div *ngIf="id.invalid && (id.dirty || id.touched)" class="text-danger">
+                            <div *ngIf="id.errors.required">TP name required</div>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="about">About</label>
-                    <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
-                </div>
-                <div *ngIf="config && config.reservation && config.reservation.show_choice_in_ui" class="form-group row">
-                    <div class="col-4">
-                        <p>Associate account to:</p>
+                    <div class="col-md-12">
+                        <label for="about">About</label>
+                        <textarea required [(ngModel)]="about" class="form-control" name="description" #description="ngModel" id="tp_about"></textarea>
+                        <div *ngIf="description.invalid && (description.dirty || description.touched)" class="text-danger">
+                            <div *ngIf="description.errors.required">TP description required</div>
+                        </div>
                     </div>
-                    <div class="col-2">
-                        <input id="group" type="radio" class="form-check-input" name="project_or_group"  value="group" [(ngModel)]="group_or_project">
-                        <label for="group" class="form-check-label">
-                            Group
-                        </label>
+                    <div *ngIf="config && config.reservation && config.reservation.show_choice_in_ui" class="form-group row">
+                        <div class="col-4">
+                            <p>Associate account to:</p>
+                        </div>
+                        <div class="col-2">
+                            <input id="group" type="radio" class="form-check-input" name="project_or_group"  value="group" [(ngModel)]="group_or_project">
+                            <label for="group" class="form-check-label">Group</label>
+                        </div>
+                        <div class="col-2">
+                            <input id="project" type="radio" class="form-check-input" name="project_or_group" value="project" [(ngModel)]="group_or_project">
+                            <label for="project" class="form-check-label">Project</label>
+                        </div>
                     </div>
-                    <div class="col-2">
-                        <input id="project" type="radio" class="form-check-input" name="project_or_group" value="project" [(ngModel)]="group_or_project">
-                        <label for="project" class="form-check-label">
-                            Project
-                        </label>
+                    <div class="col-md-4">
+                        <label class="control-label"></label>
+                        <button type="submit" class="p-button p-button-sm p-button-secondary">Reserve</button>
                     </div>
-                </div>
-                <button class="p-button p-button-sm p-button-secondary" (click)="reserve()">Reserve</button>
+                </form>
                 <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
                 <div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
             </div>
