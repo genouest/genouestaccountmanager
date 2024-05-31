@@ -120,6 +120,10 @@ export class TpsComponent implements OnInit {
             this.reserrmsg = 'Quantity must be > 0';
             return;
         }
+        if(this.about === undefined || this.about == '') {
+            this.reserrmsg = 'Tell us why you need tp accounts';
+            return;
+        }
         if (new Date(this.fromDate).getTime() > new Date(this.toDate).getTime()) {
             this.reserrmsg = 'End date must be superior to start date';
             return;
