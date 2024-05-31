@@ -124,6 +124,7 @@ export class ProjectComponent implements OnInit {
                 }
             )
         } else {
+            form.control.markAllAsTouched();
             console.log('Form is invalid');
         }
     }
