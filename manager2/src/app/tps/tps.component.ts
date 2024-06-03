@@ -118,12 +118,16 @@ export class TpsComponent implements OnInit {
         if (form.valid) {
             this.msg = '';
             this.errmsg = '';
+            // validate(control: AbstractControl): ValidationErrors | null {
+            //     const quantity = control.value;
+            //     if (quantity <= 0) {
+            //         return {
+            //             mustBePositive: {quantity}
+            //         };
+            //     }
+            // }
             if (this.quantity <= 0) {
                 this.reserrmsg = 'Quantity must be > 0';
-                return;
-            }
-            if(this.about === undefined || this.about == '') {
-                this.reserrmsg = 'Tell us why you need tp accounts';
                 return;
             }
             if (new Date(this.fromDate).getTime() > new Date(this.toDate).getTime()) {
@@ -152,7 +156,7 @@ export class TpsComponent implements OnInit {
             )
         } else {
             form.control.markAllAsTouched();
-            console.log('Form is invalid');
+            return;
         }
     }
 

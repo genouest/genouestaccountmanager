@@ -140,10 +140,9 @@
                 <form #tpForm="ngForm" role="form" class="user-form form-horizontal" (ngSubmit)="reserve(tpForm)" novalidate>
                     <div class="col-md-4">
                         <label for="quantity" class="control-label">Number of students</label>
-                        <input required min=1 type="number" class="form-control" [(ngModel)]="quantity" name="quant" #quant="ngModel" id="tp_quantity"/>
+                        <input required type="number" class="form-control" [(ngModel)]="quantity" name="quant" #quant="ngModel" id="tp_quantity"/>
                         <div *ngIf="quant.invalid && (quant.dirty || quant.touched)" class="text-danger">
                             <div *ngIf="quant.errors.required">Number of students required</div>
-                            <div *ngIf="quant.errors.min">Create at least one student account</div>
                         </div>
                     </div>
                     <div class="col-md-4">
