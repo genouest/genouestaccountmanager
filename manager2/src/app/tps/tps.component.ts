@@ -118,14 +118,6 @@ export class TpsComponent implements OnInit {
         if (form.valid) {
             this.msg = '';
             this.errmsg = '';
-            // validate(control: AbstractControl): ValidationErrors | null {
-            //     const quantity = control.value;
-            //     if (quantity <= 0) {
-            //         return {
-            //             mustBePositive: {quantity}
-            //         };
-            //     }
-            // }
             if (this.quantity <= 0) {
                 this.reserrmsg = 'Quantity must be > 0';
                 return;
@@ -219,7 +211,7 @@ export class TpsComponent implements OnInit {
         this.selectedEvent.start = event.start;
         this.selectedEvent.end = event.end;
         if (!event.meta.group) {
-            this.selectedEvent.group = {}
+            this.selectedEvent.group = { }
         }
     }
 
@@ -234,12 +226,8 @@ export class TpsComponent implements OnInit {
     }
 
     get_status(over) {
-        if (over) {
-            return "panel panel-danger";
-        }
-        else {
-            return "panel panel-primary"
-        }
+        if (over) { return "panel panel-danger"; }
+        else { return "panel panel-primary"; }
     }
 
 }
