@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { UserService } from 'src/app/user/user.service';
-
+import { NgForm } from '@angular/forms';
 import { Table } from 'primeng/table';
 
 
@@ -34,11 +34,14 @@ export class DatabaseComponent implements OnInit {
               private authService: AuthService,
   ) { }
 
+
   ngAfterViewInit(): void {
   }
 
+
   ngOnDestroy(): void {
   }
+
 
   ngOnInit() {
     this.db_delete = this.db_delete.bind(this);
@@ -51,41 +54,48 @@ export class DatabaseComponent implements OnInit {
     //     resp => this.users = resp,
     //     err => console.log('failed to get users')
     // )
-    }
-  
-  
-    db_list() {
-      this.databaseService.listOwner(this.session_user.uid).subscribe(
-          resp => {this.databases = resp},
-          err => console.log('failed to get databases')
-      )
   }
-  db_ask() {
-    this.dbmsg='';
-    this.dbmsg_error='';
-    this.databaseService.ask(this.db).subscribe(
-        resp => { this.dbmsg = resp['message']; this.db_list()},
-        err => { this.dbmsg_error = err.error.message; console.log('failed to add database')}
-    )
-}
   
+  
+  db_list() {
+    this.databaseService.listOwner(this.session_user.uid).subscribe(
+      resp => {this.databases = resp},
+      err => console.log('failed to get databases')
+    )
+  }
+
+
+  db_ask(form: NgForm) {
+    if (form.valid) {
+      this.dbmsg='';
+      this.dbmsg_error='';
+      this.databaseService.ask(this.db).subscribe(
+        resp => { this.dbmsg = resp['message']; this.db_list() },
+        err => { this.dbmsg_error = err.error.message; console.log('failed to add database') }
+      )
+    } else {
+      form.control.markAllAsTouched();
+      console.log('Form is invalid');
+    }
+  }
+
 
   db_delete(dbName: string) {
-      this.rm_dbmsg = '';
-      this.rm_dbmsg_error = '';
-      this.databases.forEach((ws)=>{
-          if(ws.name == dbName) {
-              this.databaseService.remove(ws).subscribe(
-                  resp => { this.rm_dbmsg = resp['message']; this.db_list()},
-                  err => { this.rm_dbmsg_error = err.error.message; console.log('failed to delete database')}
-              )
-          }
-      });
+    this.rm_dbmsg = '';
+    this.rm_dbmsg_error = '';
+    this.databases.forEach((ws) => {
+      if(ws.name == dbName) {
+        this.databaseService.remove(ws).subscribe(
+          resp => { this.rm_dbmsg = resp['message']; this.db_list() },
+          err => { this.rm_dbmsg_error = err.error.message; console.log('failed to delete database') }
+        )
+      }
+    });
   }
 
+  
   print(dbName: string) {
     console.log(dbName)
   }
-  
 
 }
