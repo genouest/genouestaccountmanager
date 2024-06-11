@@ -10,4 +10,4 @@ tests/home_dir
 manager2/node_modules
 manager2/dist
 
-/dev_quickstart
+/dev_quickstart/env.sh

@@ -106,6 +106,7 @@ export class DatabasesComponent implements OnInit {
                 }
                 if (refresh_requests) {
                     this.pending_number = 0;
+                    return;
                 }
                 let data = resp;
                 if (data.length > 0) { 

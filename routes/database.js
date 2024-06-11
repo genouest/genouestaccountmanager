@@ -635,7 +635,7 @@ router.delete('/pending/database/:id', async function(req, res) {
     let pending_database = await dbsrv.mongo_pending_databases().findOne({name: req.params.id});
     if(! pending_database || (pending_database.type!==undefined && pending_database.type != 'mysql')) {
         await dbsrv.mongo_pending_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database request' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
+        await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
         res.send({message: ''});
         res.end();
         return;
@@ -643,7 +643,7 @@ router.delete('/pending/database/:id', async function(req, res) {
     else {
         await dbsrv.mongo_pending_databases().deleteOne(filter);
 
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database request' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
+        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database request ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
         res.send({message: 'Database removed'});
         res.end();
         return;

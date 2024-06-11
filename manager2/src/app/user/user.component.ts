@@ -184,7 +184,6 @@ export class UserComponent implements OnInit {
     notify_subject: string
     notify_message: string
     notify_err: string
-f
     key_err: string
 
     otp: string

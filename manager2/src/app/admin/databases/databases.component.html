@@ -34,7 +34,7 @@
                   <td>
                     <p-tableCheckbox [value]="pending"></p-tableCheckbox>
                 </td>
-                  <td>{{date_convert(pending.created_at)}}</td>
+                  <td>{{pending.created_at | date}}</td>
                   <td>{{pending.name}}</td>
                   <td>{{pending.owner}}</td>
                   <td>{{pending.type}}</td>
