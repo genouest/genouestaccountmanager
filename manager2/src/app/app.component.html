@@ -35,27 +35,35 @@
               My projects
             </a>
           </li>
+          <li *ngIf="isLogged && config.enable_ui && config.enable_ui.databases" class="nav-item">
+            <a class="nav-link" routerLink="/database">
+              <i class="glyphicon glyphicon-briefcase"></i>
+              My databases
+            </a>
+          </li>
 
           <li *ngIf="user && user.is_admin" class="nav-item dropdown">
             <a href="" id="dropdownMenu1" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-cog"></i> Admin</a>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-              <li><a class="dropdown-item" routerLink="/admin/user">Users</a></li>
+                <li><a class="dropdown-item" routerLink="/register">New Account</a></li>
+                <li><a class="dropdown-item" routerLink="/admin/user">Users</a></li>
               <li><a class="dropdown-item" routerLink="/admin/group">Groups</a></li>
               <li><a class="dropdown-item" routerLink="/admin/project">Projects</a></li>
               <li *ngIf="config.enable_ui && config.enable_ui.messages"><a class="dropdown-item" routerLink="/admin/message">Send message</a></li>
               <li *ngIf="config.enable_ui && config.enable_ui.databases" ><a class="dropdown-item" routerLink="/admin/database">Databases</a></li>
               <li *ngIf="config.enable_ui && config.enable_ui.websites" ><a class="dropdown-item" routerLink="/admin/web">Web sites</a></li>
               <li><a class="dropdown-item" routerLink="/admin/log">Logs</a></li>
+              <li><a class="dropdown-item" routerLink="/admin/stats">Stats</a></li>
               <li *ngFor="let plugin of plugins">
                 <a class="dropdown-item" routerLink="/admin/plugin/{{plugin.name}}">{{plugin.display_name}}</a>
               </li>
             </ul>
           </li>
           <li *ngIf="!isLogged" class="nav-item">
-            <a class="nav-link" routerLink="/login"><span class="oi oi-person" aria-hidden="true" title="login"> </span>Log In</a>
+            <a class="nav-link" routerLink="/login"><span class="oi oi-person" aria-hidden="true" title="login"> </span> Sign In</a>
           </li>
           <li *ngIf="!isLogged" class="nav-item">
-            <a class="nav-link" routerLink="/register"><span class="oi oi-plus" aria-hidden="true" title="register"> </span>Sign In</a>
+            <a class="nav-link" routerLink="/register"><span class="oi oi-plus" aria-hidden="true" title="register"> </span> Sign Up</a>
           </li>
           <li *ngIf="isLogged" class="nav-item">
             <a  class="nav-link" routerLink="/logout">Log Out</a>

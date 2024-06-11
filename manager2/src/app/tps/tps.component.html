@@ -38,7 +38,7 @@
                         <tbody>
                             <tr>
                                 <th>Owner</th>
-                                <td>{{selectedEvent.owner}}</td>
+                                <td><a routerLink="/user/{{selectedEvent.owner}}">{{selectedEvent.owner}}</a></td>
                             </tr>
                             <tr>
                                 <th>From</th>
@@ -47,6 +47,10 @@
                             <tr>
                                 <th>To</th>
                                 <td>{{selectedEvent.end.toISOString().slice(0,10)}}</td>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <td>{{selectedEvent.name}}</td>
                             </tr>
                             <tr>
                                 <th>About</th>
@@ -58,7 +62,11 @@
                             </tr>
                             <tr>
                                 <th>Group</th>
-                                <td>{{selectedEvent.group.name}}</td>
+                                <td><span *ngIf="selectedEvent.group && selectedEvent.group.name">{{selectedEvent.group.name}}</span></td>
+                            </tr>
+                            <tr>
+                                <th>Project</th>
+                                <td><span *ngIf="selectedEvent.project && selectedEvent.project.id" >{{selectedEvent.project.id}}</span></td>
                             </tr>
                             <tr>
                                 <th>Status</th>
@@ -79,12 +87,14 @@
                         </thead>
                         <tbody>
                             <tr *ngFor="let account of selectedEvent.students">
-                                <td>{{account}}</td>
+                                <td><a routerLink="/user/{{account}}">{{account}}</a></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-outline-secondary" (click)="cancel_reservation()">Cancel</button>
+                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-secondary" (click)="cancel_reservation()">Cancel</button>
+                <button *ngIf="!selectedEvent.created && session_user.is_admin" class="btn btn-primary" (click)="create_reservation()">Create</button>
+                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="btn btn-warning" (click)="remove_reservation()">Remove</button>
             </div>
         </div>
     </div>
@@ -93,7 +103,7 @@
 <div *ngIf="authorized" class="row">
     <div class="col-md-8">
         <div class="card bg-light">
-            <div class="panel-header">
+            <div class="card-header">
                 <h3>New reservation</h3>
             </div>
             <div class="card-body">
@@ -113,11 +123,34 @@
                         <input [ngModelOptions]="{standalone: true}" [(ngModel)]="toDate" type="date" class="form-control" />
                     </div>
                 </form>
+                <div class="form-group row">
+                    <div class="col-md-8">
+                        <label for="name" class="control-label">Training Name</label>
+                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="name" type="text" class="form-control"/>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="about">About</label>
                     <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
                 </div>
-                <button class="btn btn-outline-secondary" (click)="reserve()">Reserve</button>
+                <div *ngIf="config && config.reservation && config.reservation.show_choice_in_ui" class="form-group row">
+                    <div class="col-4">
+                        <p>Associate account to:</p>
+                    </div>
+                    <div class="col-2">
+                        <input id="group" type="radio" class="form-check-input" name="project_or_group"  value="group" [(ngModel)]="group_or_project">
+                        <label for="group" class="form-check-label">
+                            Group
+                        </label>
+                    </div>
+                    <div class="col-2">
+                        <input id="project" type="radio" class="form-check-input" name="project_or_group" value="project" [(ngModel)]="group_or_project">
+                        <label for="project" class="form-check-label">
+                            Project
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" (click)="reserve()">Reserve</button>
                 <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
                 <div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
             </div>

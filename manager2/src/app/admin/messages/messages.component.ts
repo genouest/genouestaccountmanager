@@ -58,7 +58,7 @@ export class MessagesComponent implements OnInit {
             resp => {
                 let lists = [];
                 for(let i=0;i<resp.length;i++){
-                    lists.push(resp[i].list_name)
+                    lists.push(resp[i])
                 }
                 this.mailing_lists = lists;
                 /*if(lists.length > 0) {

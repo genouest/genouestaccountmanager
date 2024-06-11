@@ -1,9 +1,13 @@
-var express = require('express');
+const express = require('express');
 var router = express.Router();
-var CONFIG = require('config');
-var GENERAL_CONFIG = CONFIG.general;
 
-var utils = require('./utils');
+
+const winston = require('winston');
+const logger = winston.loggers.get('gomngr');
+
+const dbsrv = require('../core/db.service.js');
+const plgsrv = require('../core/plugin.service.js');
+const rolsrv = require('../core/role.service.js');
 
 
 /**
@@ -27,8 +31,8 @@ var utils = require('./utils');
 
 router.get('/plugin', function(req, res) {
 
-    let plugins_info = utils.plugins_info();
-    let plugins_modules = utils.plugins_modules();
+    let plugins_info = plgsrv.plugins_info();
+    let plugins_modules = plgsrv.plugins_modules();
 
     let plugin_list = [];
     for(let i=0;i<plugins_info.length;i++){
@@ -46,7 +50,7 @@ router.get('/plugin', function(req, res) {
 
 
 router.get('/plugin/:id', function(req, res) {
-    let plugins_modules = utils.plugins_modules();
+    let plugins_modules = plgsrv.plugins_modules();
     let template = plugins_modules[req.params.id].template();
     res.send(template);
 });
@@ -56,19 +60,31 @@ router.get('/plugin/:id/:user', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        user.is_admin = false;
+
+    user.is_admin = isadmin;
+
+    if(req.params.user != user.uid && !user.is_admin) {
+        res.status(403).send({message: 'Not authorized to get an other user data if not admin...'});
     }
-    else {
-        user.is_admin = true;
-    }
-    let plugins_modules = utils.plugins_modules();
+
+    let plugins_modules = plgsrv.plugins_modules();
     plugins_modules[req.params.id].get_data(req.params.user, user.uid).then(function(result){
+        //res.set('Cache-control', 'public, max-age=300');
         res.send(result);
     });
 });
@@ -79,18 +95,29 @@ router.post('/plugin/:id/:user', async function(req, res) {
         return;
     }
 
-    let user = await utils.mongo_users().findOne({_id: req.locals.logInfo.id});
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
     if(!user){
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(GENERAL_CONFIG.admin.indexOf(user.uid) < 0){
-        user.is_admin = false;
+
+    user.is_admin = isadmin;
+    if(req.params.user != user.uid && !user.is_admin) {
+        res.status(403).send({message: 'Not authorized to update an other user data if not admin...'});
     }
-    else {
-        user.is_admin = true;
-    }
-    let plugins_modules = utils.plugins_modules();
+
+    let plugins_modules = plgsrv.plugins_modules();
     plugins_modules[req.params.id].set_data(req.params.user, req.body, user.uid).then(function(result){
         res.send(result);
     }, function(err){

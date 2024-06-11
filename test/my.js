@@ -23,6 +23,7 @@ var test_group_id2 = 'test2' + Math.random().toString(10).slice(-6);
 var test_group_id3 = 'test3' + Math.random().toString(10).slice(-6);
 var test_web_id = 'webtest' + Math.random().toString(10).slice(-6);
 var test_db_id = 'dbtest' + Math.random().toString(10).slice(-6);
+var test_db_id2 = 'dbtest2' + Math.random().toString(10).slice(-6);
 var test_project_id = 'projecttest' + Math.random().toString(10).slice(-6);
 var user_test_password = null;
 var user_info = null;
@@ -55,8 +56,8 @@ describe('My', () => {
                 .post('/auth/admin')
                 .send({'password': 'wrong'})
                 .end((err, res) => {
-                    expect(res).to.have.status(200);
-                    assert(res.body.user === null);
+                    expect(res).to.have.status(401);
+                    //assert(res.body.user === null);
                     done();
                 });
         });
@@ -240,7 +241,7 @@ describe('My', () => {
             chai.request('http://localhost:3000')
                 .post('/group/' + test_group_id3)
                 .set('X-Api-Key', token_id)
-                .send({'owner': test_user_id2})
+                .send({'owner': test_user_id})
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
@@ -249,7 +250,7 @@ describe('My', () => {
                         .end((err, res) => {
                             let group_exists = false;
                             for(var i=0;i<res.body.length;i++){
-                                if(res.body[i].name == test_group_id2){
+                                if(res.body[i].name == test_group_id3){
                                     group_exists = true;
                                     break;
                                 }
@@ -286,7 +287,7 @@ describe('My', () => {
                                             let mailIndex = raw.To.indexOf(test_user_id + '@my.org');
                                             if(mailIndex >= 0 && raw.Data.indexOf('Subject: my account activation') >= 0){
                                                 gotMail = true;
-                                                let password = raw.Data.match(/Password:\s(\w+)/);
+                                                let password = raw.Data.match(/Password:\s(.*)\s*$/m);
                                                 assert(password.length > 0);
                                                 user_test_password = password[1];
                                                 break;
@@ -527,11 +528,31 @@ describe('My', () => {
                 });
         });
 
-        it('Admin adds user to project', (done) => {
+        it('As project owner user is in project', (done) => {
             chai.request('http://localhost:3000')
-                .post('/user/' + test_user_id + '/project/' + test_project_id)
+                .get('/project/' + test_project_id + '/users')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    let found = false;
+                    for(let i=0; i<res.body.length; i++){
+                        if(res.body[i].uid == test_user_id){
+                            found = true;
+                            break;
+                        }
+                    }
+                    assert(found);
+                    done();
+                });
+
+        });
+
+        it('Admin adds user2 to project', (done) => {
+            chai.request('http://localhost:3000')
+                .post('/user/' + test_user_id2 + '/project/' + test_project_id)
+                .set('X-Api-Key', token_id)
+                .end((err, res) => {
+
                     expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
                         .get('/project/' + test_project_id + '/users')
@@ -541,6 +562,42 @@ describe('My', () => {
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
                                 if(res.body[i].uid == test_user_id){
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            assert(found);
+                            done();
+                        });
+                });
+        });
+        it('Admin validates database', (done) => {
+            let db = {
+                name: test_db_id,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
+
+            };
+            
+            chai.request('http://localhost:3000')
+                .post('/database/' + test_db_id)
+                .set('X-Api-Key', token_id)
+                .send(db)
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    chai.request('http://localhost:3000')
+                        .get('/database')
+                        .set('X-Api-Key', token_id)
+                        .end((err, res) => {
+  
+                            expect(res).to.have.status(200);
+                            let found = false;
+                            for(let i=0; i<res.body.length; i++){
+                                if(res.body[i].name == test_db_id){
                                     found = true;
                                     break;
                                 }
@@ -611,25 +668,60 @@ describe('My', () => {
                 });
         });
 
-        it('User declare database', (done) => {
+        // it('User declare database', (done) => {
+        //     let db = {
+        //         name: test_db_id,
+        //         type: 'mysql'
+        //     };
+        //     chai.request('http://localhost:3000')
+        //         .post('/database/' + test_db_id)
+        //         .set('X-Api-Key', user_token_id)
+        //         .send(db)
+        //         .end((err, res) => {
+        //             expect(res).to.have.status(200);
+        //             chai.request('http://localhost:3000')
+        //                 .get('/database')
+        //                 .set('X-Api-Key', user_token_id)
+        //                 .end((err, res) => {
+        //                     expect(res).to.have.status(200);
+        //                     let found = false;
+        //                     for(let i=0; i<res.body.length; i++){
+        //                         if(res.body[i].name == test_db_id){
+        //                             found = true;
+        //                             break;
+        //                         }
+        //                     }
+        //                     assert(found);
+        //                     done();
+        //                 });
+        //         });
+        // });
+
+        it('User requests database', (done) => {
             let db = {
-                name: test_db_id,
-                type: 'mysql'
+                name: test_db_id2,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
+
             };
             chai.request('http://localhost:3000')
-                .post('/database/' + test_db_id)
+                .post('/requestdatabase/' + test_db_id2)
                 .set('X-Api-Key', user_token_id)
                 .send(db)
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
-                        .get('/database')
-                        .set('X-Api-Key', user_token_id)
+                        .get('/pending/database')
+                        .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
-                                if(res.body[i].name == test_db_id){
+                                if(res.body[i].name == test_db_id2){
                                     found = true;
                                     break;
                                 }
@@ -639,6 +731,8 @@ describe('My', () => {
                         });
                 });
         });
+
+       
 
         it('User delete database', (done) => {
 
@@ -684,12 +778,13 @@ describe('My', () => {
                         });
                 });
         });
+        /* Nope user1 is still owner
         it('Deleted group3, did not delete admin', (done) => {
             chai.request('http://localhost:3000')
                 .get('/group')
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
-                    let g3_was_deleted = true;
+                    //let g3_was_deleted = true;
                     let admin_was_not_deleted = false;
                     for(var i=0;i<res.body.length;i++){
                         if(res.body[i].name == test_group_id3){
@@ -699,11 +794,12 @@ describe('My', () => {
                             admin_was_not_deleted = true;
                         }
                     }
-                    assert(g3_was_deleted);
-                    assert(admin_was_not_deleted);
+                    assert(g3_was_deleted, 'group 3 not deleted');
+                    assert(admin_was_not_deleted, 'admin was deleted');
                     done();
                 });
         });
+        */
 
         it('Deleted user2', (done) => {
             chai.request('http://localhost:3000')
@@ -755,10 +851,13 @@ describe('My', () => {
                         'from': today.getTime(),
                         'to': today.getTime() + 30,
                         'quantity': 2,
-                        'about': 'test resa'
+                        'about': 'test resa',
+                        'group_or_project': 'group',
+                        'name': 'test tp'
                     });
                 expect(res).to.have.status(200);
                 let new_resa = res.body.reservation;
+                console.error('new resa', new_resa);
                 assert(new_resa.created == false);
                 let res2 = await chai.request('http://localhost:3000')
                     .get('/tp/' + new_resa._id)

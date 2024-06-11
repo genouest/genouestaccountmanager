@@ -9,12 +9,15 @@
         "source_folder" : "/folder/with/readme2/"
       }
     ],
+    "prevent_reuse": true,
+    "prevent_reuse_group": false
     "terms_of_use": "/doc/terms_of_use.txt",
     "web_home" : "user",
     "double_authentication_for_admin": true,
     "db": "gomngr",
     "url": "http://localhost:3000",
     "admin": [""],
+    "admin_group": "",
     "support": "",
     "accounts": "",
     "secret": "",
@@ -23,6 +26,7 @@
     "usage_directory": "/tmp",
     "home": "/home",
     "use_group_in_path": true,
+    "never_update_user_home": false,
     "main_groups": [""],
     "default_main_group": "",
     "mailer" : "gomail",
@@ -48,9 +52,13 @@
             "series": "goacct.fixed.disk.panasas-omaha.*.user.#USER#"
         }
     },
+    "send_expiration_notif_to_admin": true,
+    "disable_auto_expiration": false,
+    "limit_expire_mail": 3,
     "plugin_script_dir": "/tmp/scripts",
     "user_extra_dirs": []
   },
+  "registration": [],
   "enable_ui": {
     "messages": true,
     "databases": true,
@@ -65,7 +73,12 @@
      "enable_group": true,
      "default_size": 500,
      "default_path": "/opt/project",
-     "default_expire": 360
+     "default_expire": 360,
+     "allow_extend": false,
+  },
+  "reservation": {
+      "group_or_project": "group",
+      "show_choice_in_ui": false
   },
   "rabbitmq": {
     "url": "amqp://localhost",
@@ -88,6 +101,7 @@
     "port": 27017
   },
   "ldap": {
+    "crypt": false,
     "host": "localhost",
     "dn": "dc=nodomain",
     "admin_cn": "cn=admin",
@@ -149,18 +163,15 @@
       "- You should change your password at your first connection, with the command 'passwd'",
       "- You can consult the README file in your home directory for more information.",
       "",
-      "User manual:",
-      "You can download the complete user guide here: https://www.genouest.org/wp-content/uploads/sites/9/2018/06/NouveauxArrivantsGO.pdf",
+      "Help:",
+      "Tutorials and usage information is available at: https://help.genouest.org/",
       "",
       "Citations, acknowledgements  :",
       "The services proposed by the GenOuest platform to the Biogenouest commmunity have no financial compensations: in the case where studies made within the platform environment lead to a publication, we ask you to cite or thank the GenOuest bioinformatics platform with something like:",
       "Study/Work made with the help of the GenOuest bioinformatics platform team (https://www.genouest.org).",
       "",
       "*------------------------- Cluster description---------------------*",
-      "Cluster:",
-      "Cluster nodes running Linux CentOS 6",
-      "Architecture x86_64, 140 to 520 GB RAM, 16 to 80 Processors Intel Xeon",
-      "To connect:",
+      "To connect to the cluster:",
       "ssh #UID#@genossh.genouest.org [SSH key access]",
       "To setup an environment, one should execute:",
       "source /local/env/envXXX.sh",
@@ -182,17 +193,15 @@
       "<p>- You should change your password at your first connection with the command 'passwd' or via https://my.genouest.org</p>",
       "<p>- You can consult the README file in your home directory for more information.</p>",
       "<br/>",
-      "<h3>User manual</h3>",
-      "<p>You can download the complete user guide <a href=\"https://www.genouest.org/wp-content/uploads/sites/9/2018/06/NouveauxArrivantsGO.pdf\">here</a>.</p>",
+      "<h3>Help</h3>",
+      "<p>Tutorials and usage information is available at: https://help.genouest.org/</p>",
       "<br/>",
       "<h3>Citations, acknowledgements</h3>",
       "<p>The services proposed by the GenOuest platform to the Biogenouest commmunity have no financial compensations: in the case where studies made within the platform environment lead to a publication, we ask you to cite or thank the GenOuest bioinformatics platform with something like:</p>",
       "<p>Study/Work made with the help of the GenOuest bioinformatics platform team (https://www.genouest.org).</p>",
       "<br/>",
       "<h3>Cluster informations</h3>",
-      "<p>Cluster nodes running Linux CentOS 7",
-      "<p>Architecture x86_64, 140 to 520 GB RAM, 16 to 80 Processors Intel Xeon</p>",
-      "<h5>To connect:</h5>",
+      "<h5>To connect to the cluster:</h5>",
       "<p>ssh #UID#@genossh.genouest.org [SSH key access]</p>",
       "<h5>To setup an environment, one should execute:</h5>",
       "<p>source /local/env/envXXX.sh</p>",
@@ -295,16 +304,17 @@
     "add_to_project": [
         "#UID# has been added to project '#NAME#' in My",
         "#DESC#",
-        "The project quota is #SIZE#, and the path is #PATH#"
+        "The project quota is #SIZE# GB and #CPU# Hour, and the path is #PATH#"
     ],
     "add_to_project_html": [
         "<p>#UID# has been added to project '#NAME#' in My</p>",
         "<p>#DESC#</p>",
-        "<p>The project quota is #SIZE#, and the path is #PATH#</p>"
+        "<p>The project quota is #SIZE# GB and #CPU# Hour, and the path is #PATH#</p>"
     ],
     "ask_project": [
       "#UID# has requested a new project '#NAME#' in My",
       "Size needed: #SIZE# GB",
+      "Cpu needed: #CPU# Hour",
       "Entity: #ORGA#",
       "Description: #DESC#",
       "Please review it, and keep #UID# inform"
@@ -312,15 +322,23 @@
     "ask_project_html": [
       "<p>#UID# has requested a new project '#NAME#' in My</p>",
       "<p>Size needed: #SIZE# GB</p>",
+      "<p>Cpu needed: #CPU# Hour</p>",
       "<p>Entity: #ORGA#</p>",
       "<p>Description: #DESC#</p>",
-      "<p>Please review it, and keep #UID# inform</p>"
+      "<p>Please review it, and keep #UID# informed</p>"
     ],
     "ask_project_user": [
       "#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My"
     ],
     "ask_project_user_html": [
       "<p>#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My</p>"
+    ],
+    "ask_database": [
+      "#UID# has requested a new database '#NAME#' in My",
+      "Size needed: #SIZE# GB",
+      "Usage: #USAGE#",
+      "Expiration date: #EXP#",
+      "Please review it, and keep #UID# informed"
     ],
     "database_creation": [
         "The MySQL database you requested (#DBNAME#, owned by #OWNER#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
@@ -382,7 +400,7 @@
       ]
   },
   "plugins": [
-    {"name": "test", "display_name": "for testing", "admin_only": false, "admin": false}
+    {"name": "test", "display_name": "for testing", "admin_only": false, "admin": false, "allow_fake": true}
   ],
   "plugin_config" : {
     "test": {

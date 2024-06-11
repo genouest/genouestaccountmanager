@@ -1,10 +1,13 @@
 /* eslint-disable no-console */
-var CONFIG = require('config');
-var http = require('http');
+const http = require('http');
+const cfgsrv = require('../core/config.service.js');
+const dbsrv = require('../core/db.service.js');
+let my_conf = cfgsrv.get_conf();
+const CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
 
 
-var Promise = require('promise');
+const Promise = require('promise');
 
 
 var get_quota = function(quota) {
@@ -61,8 +64,68 @@ var get_quota = function(quota) {
 var get_user_info = function(userId){
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject){
-        //var quotas = [];
-        //var quota_name = null;
+        console.log('[quotas] get user info', userId);
+        try {
+
+            dbsrv.mongo_users().findOne({'uid': userId}).then((user) => {
+                if(!user) {
+                    console.error('[quotas] user not found');
+                    resolve({'quotas': []});
+                }
+                let user_quotas = [];
+                dbsrv.mongo_others('quotas').find({'type': 'user', 'uid': userId}).toArray().then(quotas => {
+                    quotas.forEach(quota => {
+                        let warning = null;
+                        let error = null;
+                        if(quota.max > 0 && quota.value/quota.max > 0.99) {
+                            error = quota.name + ' quota reached!';
+                        }
+                        else if(quota.max > 0 && quota.value/quota.max > 0.8) {
+                            warning = quota.name + ' quota using more than 80% of use';
+                        }
+
+                        user_quotas.push({'name':  quota.name, 'value': quota.value, 'max': quota.max, 'warning': warning, 'error': error});
+                    });
+                    let groups = user.secondarygroups ? user.secondarygroups : [];
+                    groups.push(user.group);
+                    dbsrv.mongo_others('quotas').find({'type': 'group', 'name': {'$in': groups}}).toArray().then(volumes => {
+                        let vol_list = [];
+                        volumes.forEach(vol => {
+                            let warning = null;
+                            let error = null;
+                            if(vol.max > 0 && vol.value/vol.max > 0.99) {
+                                error = vol.name + ' quota reached!';
+                            }
+                            else if(vol.max > 0 && vol.value/vol.max > 0.8) {
+                                warning = vol.name + ' quota using more than 80% of use';
+                            }
+                            if(vol_list.indexOf(vol.name)>=0) {
+                                return;
+                            }
+                            vol_list.push(vol.name);
+                            user_quotas.push({'name':  vol.name, 'value': vol.value, 'max': vol.max, 'warning': warning, error: error});
+                        });
+                        resolve({'quotas': user_quotas});
+                    }).catch(err => {
+                        console.error('[quotas] something went wrong', err);
+                        resolve({'quotas': [], 'error': err});
+                    });
+
+                }).catch(err => {
+                    console.error('[quotas] something went wrong', err);
+                    resolve({'quotas': [], 'error': err});
+                });
+            }).catch(err => {
+                console.error('[quotas] something went wrong', err);
+                resolve({'quotas': [], 'error': err});
+            });
+
+        } catch(err) {
+            console.error('[quotas] error', err);
+            resolve({'quotas': []});
+        }
+
+        /*
         let quota_names = [];
         for(let key in GENERAL_CONFIG.quota) {
             quota_names.push({'quota_name': key, 'user': userId});
@@ -76,6 +139,7 @@ var get_user_info = function(userId){
             }
             resolve({'quotas': values, 'warnings': warnings, 'errors': errors});
         });
+        */
 
     });
 };
@@ -123,7 +187,32 @@ module.exports = {
     set_data: function(userId, data, adminId){
         // eslint-disable-next-line no-unused-vars
         return new Promise(function(resolve, reject){
-            console.log('[Quotas] Nothing to do');
+            // console.debug('[Quotas] set quotas', userId, data, adminId);
+            if(!data.volumes) {
+                resolve();
+                return;
+            }
+            data.volumes.forEach(volume => {
+                if(!volume.name) {
+                    return;
+                }
+                try{
+                    let vol = {
+                        uid: volume.type == 'user' ? userId: adminId,  // user id if type==user else admin user setting data
+                        type: volume.type,  // user or group
+                        name: volume.name,
+                        value: Math.round(volume.usage/(1024*1024*1024)),
+                        max: Math.round(volume.capacity/(1024*1024*1024)),
+                        path: volume.path ? volume.path : volume.name
+                    };
+                    dbsrv.mongo_others('quotas').updateOne({'name': vol.name, 'uid': vol.uid, 'type': vol.type}, {'$set': vol}, {upsert: true});
+                    if(vol.type == 'group') {
+                        dbsrv.mongo_projects().updateOne({'path': vol.path}, {'$set': {'current_size': vol.value}});
+                    }
+                }catch(err) {
+                    console.error('[Quotas] error', err);
+                }
+            });
             resolve();
         });
     }

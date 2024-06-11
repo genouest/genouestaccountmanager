@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { UserComponent } from './user/user.component';
+import { UserComponent, UserExtraComponent } from './user/user.component';
 import { LoginComponent } from './auth/login/login.component';
 import { LogoutComponent } from './auth/logout/logout.component';
 import { HomeComponent } from './home/home.component';
@@ -14,11 +14,13 @@ import { MyDeleteConfirmComponent } from './my-delete-confirm/my-delete-confirm.
 import { TpsComponent } from './tps/tps.component';
 import { ProjectComponent } from './project/project.component';
 import { UsersComponent, MyStatusFilterPipe } from './admin/users/users.component';
+import { AdminStatComponent} from './admin/stats/stats.component';
 import { GroupsComponent } from './admin/groups/groups.component';
 import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/projects.component';
 import { ProjectComponent as AdminProjectComponent} from './admin/project/project.component';
 import { MessagesComponent } from './admin/messages/messages.component';
 import { DatabasesComponent } from './admin/databases/databases.component';
+import { DatabaseComponent } from './database/database.component';
 import { WebsitesComponent } from './admin/websites/websites.component';
 import { LogsComponent } from './admin/logs/logs.component';
 import { RegisterComponent } from './auth/register/register.component';
@@ -67,6 +69,7 @@ export class SentryErrorHandler implements ErrorHandler {
     declarations: [
         AppComponent,
         UserComponent,
+        UserExtraComponent,
         LoginComponent,
         LogoutComponent,
         HomeComponent,
@@ -74,12 +77,14 @@ export class SentryErrorHandler implements ErrorHandler {
         TpsComponent,
         ProjectComponent,
         UsersComponent,
+        AdminStatComponent,
         GroupsComponent,
         AdminProjectsComponent,
         AdminProjectComponent,
         UserProjectsComponent,
         MessagesComponent,
         DatabasesComponent,
+        DatabaseComponent,
         WebsitesComponent,
         LogsComponent,
         RegisterComponent,

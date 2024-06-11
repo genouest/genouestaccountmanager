@@ -43,4 +43,27 @@ export class TpserviceService {
 
         return this.http.delete(environment.apiUrl + '/tp/' + reservationId, httpOptions)
     }
+
+
+    create(reservationId): Observable<any> {
+        //let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+
+        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/now', httpOptions)
+    }
+
+    remove(reservationId): Observable<any> {
+        //let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+
+        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/stop', httpOptions)
+    }
 }

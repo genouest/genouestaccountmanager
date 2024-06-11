@@ -31,10 +31,10 @@ export class GomailPluginComponent extends BasePluginComponent implements OnInit
     template: `
 <div *ngIf="data">
 <div *ngIf="loading">Loading...</div>
-<div class="alert alert-info">Using this button, you can set your home, omaha-beach and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
+<div class="alert alert-info">Using this button, you can set your home and groups in <a href=\"http:\/\/data-access.cesgo.org\/\" target
 = "blank" >data-access </a> for easy access</div>
 
-<div style="text-align:center;"><button (click)="sendData()" type="button"  class="btn btn-default">Update</button></div><br>
+<div style="text-align:center;"><button (click)="sendData()" type="button"  class="btn btn-primary">Update</button></div><br>
 <div *ngIf="data.api_status" class ="alert alert-danger">{{data.api_status}}</div>
 <div *ngIf="data.user_status" class ="alert alert-danger">{{data.user_status}}</div>
 <div *ngIf="data.my" class ="alert alert-success">{{data.my}}</div>
@@ -69,8 +69,19 @@ export class GalaxyPluginComponent extends BasePluginComponent implements OnInit
 
 @Component({
     template: `
-<div>
-<div class="alert alert-info">Plugin Genostack is active<br><br> A cloud project will be created on user activation, and deleted on user deletion.</div>
+<div *ngIf="data">
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="data.api_status" class ="alert alert-danger">{{data.api_status}}</div>
+<div *ngIf="data.has_project == 'False'" style="text-align:center;"><button (click)="sendData()" type="button" class="btn btn-primary">Activate cloud account</button></div>
+<div *ngIf="data.my" class ="alert alert-success">{{data.my}}</div>
+<div *ngIf="data.has_project == 'True'">
+  <div>Current project(s) :</div><br>
+  <table style ="width:100%;" class="table table-striped">
+    <tr *ngFor="let project of data.projects">
+      <td>{{project.name}}</td>
+    </tr>
+  </table>
+</div>
 </div>
 `,
 })
@@ -101,7 +112,7 @@ export class PopulateHomePluginComponent extends BasePluginComponent implements 
 <div *ngIf="loading">Loading...</div>
 <table *ngIf="data" class="table table-striped ng-scope">
 <tr><th>Namespace</th><th>Used</th><th>Max</th></tr>
-<tr *ngFor="let quota of data.quotas">
+<tr [ngClass]="(data.error || data.warning) ? 'label label-warning': ''" *ngFor="let quota of data.quotas">
 <td>{{quota.name}}</td>
 <td>{{quota.value | number: '1.0-2'}} G</td>
 <td>{{quota.max | number: '1.0-2'}} G</td>

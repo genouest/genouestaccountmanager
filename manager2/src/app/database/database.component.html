@@ -1,0 +1,112 @@
+<div class="modal" style="z-index: 1500;" id="ask_database" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Request a new database creation</h3>
+      </div>
+
+      <form aria-label="database creation request form" role="form" class="user-form form-horizonal">
+
+        <div class="modal-body">
+          <div class="form-group row col-sm-8">
+            <label for="new_database_id">Name&nbsp;
+              <span style="color:red">(required)&nbsp;</span>
+              <span class="glyphicon glyphicon-question-sign" title="Unique name for the database" tooltip></span>
+            </label>
+            <input required placeholder="database name" type="text" maxlength="42" id="new_database_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.name" class="form-control"/>
+          </div>
+
+           <div class="form-group row col-sm-8">
+            <label for="db_usage">Usage</label>
+            <input placeholder="website, software,... " type="text" id="db_usage" [value]='1' [ngModelOptions]="{standalone: true}" [(ngModel)]="db.usage" class="form-control"/>
+            <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+        </div>
+
+        <div class="form-group row col-sm-8">
+            <label for="db_size">Size (GB)</label>
+            <input placeholder="estimated database size" type="text" id="db_size" [value]='1' [ngModelOptions]="{standalone: true}" [(ngModel)]="db.size" class="form-control"/>
+            <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+        </div>
+
+        <div class="form-group row col-sm-8">
+          <label for="db_expire">Expiration date</label>
+          <input type="date" id="db_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.expire" class="form-control"/>
+          <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
+      </div>
+
+        <div class="form-group row col-sm-8">
+          
+            <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.single_user">I will be the only one using this database</label>
+        </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="form-group row col-sm-12">
+            <button type="button" class="btn btn-primary" (click)="db_ask()" data-dismiss="modal">Request MySQL Database</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_database">Request A New Database</button>
+
+<div class="card bg-light">
+    <div class="card-header">
+        <h3>Databases</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive table-striped">
+      <p-table #dtp [value]="databases"
+                  [paginator]="true"
+                  [rows]="10"
+                  [showCurrentPageReport]="true"
+                  [rowsPerPageOptions]="[10,25,50]"
+                  [globalFilterFields]="['name', 'type', 'host', 'owner']"
+                  [filterDelay]="0"
+      >
+    <ng-template pTemplate="caption">
+        <div class="table-header">
+            <span class="p-input-icon-right">
+                <i class="pi pi-search"></i>
+                <input pInputText id="search_databases" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+            </span>
+        </div>
+    </ng-template>
+        <ng-template pTemplate="header">
+          <tr><th>Name</th><th>Owner</th><th>Type</th><th>Host</th><th>Delete</th></tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-database>
+          <tr>
+            <td><span class="label label-primary">{{database.name}}</span></td>
+            <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
+            <td>{{database.type}}</td>
+            <td>{{database.host}}</td>
+            <td><app-my-delete-confirm [onConfirm]="db_delete" [data]="database.name"></app-my-delete-confirm></td>
+          </tr>
+        </ng-template>
+      </p-table>
+      </div>
+  </div>
+</div>
+
+<div *ngIf="dbmsg" class="alert alert-info alert-dismissible" role="alert">
+  {{dbmsg}}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div *ngIf="dbmsg_error" class="alert alert-danger alert-dismissible" role="alert">
+   {{dbmsg_error}}
+   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+       <span aria-hidden="true">&times;</span>
+     </button>
+</div>
+<div *ngIf="rm_dbmsg" class="alert alert-warning alert-dismissible" role="alert">
+  {{rm_dbmsg}}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+</div>

@@ -2,7 +2,7 @@
     <div class="col-md-6">
         <div class="card bg-light">
             <div class="card-header bg-warning">
-                <h3>Pending email approval</h3>
+                <h3>Pending email approval [{{pending_email_users.length}}]</h3>
             </div>
             <div class="card-body">
                 <div class="table-responsive table-striped">
@@ -28,7 +28,7 @@
     <div class="col-md-6">
         <div class="card bg-light">
             <div class="card-header bg-warning">
-                <h3>Pending admin approval</h3>
+                <h3>Pending admin approval [{{pending_approval_users.length}}]</h3>
             </div>
             <div class="card-body">
                 <div class="table-responsive table-striped">
@@ -54,7 +54,7 @@
   <div class="col-sm-12">
     <div class="card bg-light">
         <div class="card-header">
-            <h3>Active</h3>
+            <h3>Active [{{active_users.length}}]</h3>
         </div>
         <div class="card-body">
              <div class="table-responsive table-striped">
@@ -95,11 +95,11 @@
   <div class="col-sm-12">
     <div class="card bg-light">
         <div class="card-header bg-danger">
-            <h3>Expired</h3>
+            <h3>Expired [{{expired_users.length}}]</h3>
         </div>
         <div class="card-body">
              <div class="table-responsive table-striped">
-                        <p-table #dt3 [value]="expired_users"
+                        <p-table #dt4 [value]="expired_users"
                                     [paginator]="true"
                                     [rows]="10"
                                     [showCurrentPageReport]="true"
@@ -111,7 +111,7 @@
                             <div class="table-header">
                                 <span class="p-input-icon-right">
                                     <i class="pi pi-search"></i>
-                                    <input pInputText id="search_expired_users" type="text" (input)="dt3.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+                                    <input pInputText id="search_expired_users" type="text" (input)="dt4.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
                                 </span>
                             </div>
                         </ng-template>
