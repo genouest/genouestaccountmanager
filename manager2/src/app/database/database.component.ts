@@ -17,6 +17,7 @@ export class DatabaseComponent implements OnInit {
   session_user: any
 
   db: Database
+  db_expire_string: string
   databases: Database[]
 
   users: any
@@ -46,7 +47,7 @@ export class DatabaseComponent implements OnInit {
   ngOnInit() {
     this.db_delete = this.db_delete.bind(this);
     this.session_user = this.authService.profile;
-    this.db = new Database('','mysql','','', true, "", "", "", true)
+    this.db = new Database('', 'mysql', '', '', true, "", "", 0, true)
     
     this.databases = []
     this.db_list();
@@ -69,6 +70,7 @@ export class DatabaseComponent implements OnInit {
     if (form.valid) {
       this.dbmsg='';
       this.dbmsg_error='';
+      this.db.expire = new Date(this.db_expire_string).getTime()
       this.databaseService.ask(this.db).subscribe(
         resp => { this.dbmsg = resp['message']; this.db_list() },
         err => { this.dbmsg_error = err.error.message; console.log('failed to add database') }
@@ -97,5 +99,4 @@ export class DatabaseComponent implements OnInit {
   print(dbName: string) {
     console.log(dbName)
   }
-
 }

@@ -2,10 +2,8 @@
   <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
     <h3>{{pending_number}} request(s) waiting </h3>
   </div>
-
   <div *ngIf="requests_visible" class="card-body">
     <div class="row">
-
       <div class="col-md-12">
         <div class="card bg-light">
           <div class="card-header">
@@ -17,6 +15,7 @@
               <div *ngIf="dbmsg" class="alert alert-info">{{dbmsg}}</div>
             </div>
             <p-table #dtw [(value)]="pending_databases" [autolayout]="false" [(selection)]="selecteddb">
+
               <ng-template pTemplate="header">
                 <tr>
                   <th style="width: 2.25em"></th>
@@ -29,23 +28,24 @@
                   <th>Expiration</th>
                 </tr>
               </ng-template>
+
               <ng-template pTemplate="body" let-pending>
                 <tr>
                   <td>
                     <p-tableCheckbox [value]="pending"></p-tableCheckbox>
-                </td>
+                  </td>
                   <td>{{pending.created_at | date}}</td>
                   <td>{{pending.name}}</td>
                   <td>{{pending.owner}}</td>
                   <td>{{pending.type}}</td>
                   <td>{{pending.host}}</td> 
                   <td>{{pending.size}}</td>
-                  <td>{{pending.expire}}</td>
+                  <td>{{pending.expire | date}}</td>
                 </tr>
               </ng-template>
+
             </p-table>
           </div>
-          
         </div>
         <button class="btn btn-sm btn-success" (click)="validate_selected_databases()">Accept</button>
         <button class="btn btn-sm btn-danger " (click)="refuse_selected_databases()">Reject</button>
@@ -53,119 +53,134 @@
     </div>
   </div>
 </div>
-   <div class="card bg-light">
-        <div class="card-header">
-            <h3>Databases</h3>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive table-striped">
-          <p-table #dtp [value]="databases"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true"
-                      [rowsPerPageOptions]="[10,25,50]"
-                      [globalFilterFields]="['name', 'type', 'host', 'owner']"
-                      [filterDelay]="0"
-          >
+
+
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Databases</h3>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive table-striped">
+      <p-table #dtp [value]="databases"
+                    [paginator]="true"
+                    [rows]="10"
+                    [showCurrentPageReport]="true"
+                    [rowsPerPageOptions]="[10,25,50]"
+                    [globalFilterFields]="['name', 'type', 'host', 'owner']"
+                    [filterDelay]="0"
+      >
+
         <ng-template pTemplate="caption">
-            <div class="table-header">
-                <span class="p-input-icon-right">
-                    <i class="pi pi-search"></i>
-                    <input pInputText id="search_databases" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-                </span>
-            </div>
+          <div class="table-header">
+            <span class="p-input-icon-right">
+              <i class="pi pi-search"></i>
+              <input pInputText id="search_databases" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+            </span>
+          </div>
         </ng-template>
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Name</th><th>Owner</th><th>Type</th><th>Host</th><th>Expected Size (GB)</th>
-                <th>Expiration</th></tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-database>
-              <tr>
-                <td><span class="label label-primary">{{database.name}}</span></td>
-                <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
-                <td>{{database.type}}</td>
-                <td>{{database.host}}</td>
-                <td>{{database.size}}</td>
-                <td>{{database.expire}}</td>
-              </tr>
-            </ng-template>
-          </p-table>
-          </div>
-      </div>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th><th>Owner</th><th>Type</th><th>Host</th><th>Expected Size (GB)</th>
+            <th>Expiration</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-database>
+          <tr>
+            <td><span class="label label-primary">{{database.name}}</span></td>
+            <td><a routerLink="/user/{{database.owner}}"><span class="label label-primary">{{database.owner}}</span></a></td>
+            <td>{{database.type}}</td>
+            <td>{{database.host}}</td>
+            <td>{{database.size}}</td>
+            <td>{{database.expire | date}}</td>
+          </tr>
+        </ng-template>
+
+      </p-table>
     </div>
+  </div>
+</div>
 
-   
 
-    <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
-    <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
-    <div class="card bg-light">
-      <div class="card-header">
-        <h3>Declare existing database (no creation)</h3>
+<div class="alert alert-success" *ngIf="msg">{{msg}}</div>
+<div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Declare existing database (no creation)</h3>
+  </div>
+  <div class="card-body">
+    <form role="form" data-toggle="validator" class="user-form form-horizonal">
+      <div class="form-group row">
+
+        <div class="col-sm-2">
+          <label for="dbname" class="control-label">Database name</label>
+          <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.name" id="dbname" class="form-control" required/>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="dbowner" class="control-label">Database owner</label>
+          <select [ngModelOptions]="{standalone: true}" [(ngModel)]="db.owner" id="dbowner" class="form-control" required>
+            <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
+          </select>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="dbtype" class="control-label">Database type</label>
+          <select id="dbtype" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.type" class="form-control" required>
+            <option value="mysql">MySQL</option>
+            <option value="postgresql">Postgres</option>
+            <option value="mongo">Mongo</option>
+            <option value="docker">Docker</option>
+          </select>
+        </div>
+
+        <div class="col-sm-2">
+            <label for="dbhost" class="control-label">Database host</label>
+            <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.host" id="dbhost" class="form-control" required>
+        </div>
+
+        <div class="col-sm-1">
+            <label style="opacity: 0;" class="control-label">Create</label>
+            <button type="button" class="btn btn-secondary" (click)="declare_db()">Declare DB</button>
+        </div>
+
       </div>
-      <div class="card-body">
-          <form role="form" data-toggle="validator" class="user-form form-horizonal">
-              <div class="form-group row">
-                  <div class="col-sm-2">
-                      <label for="dbname" class="control-label">Database name</label>
-                      <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.name" id="dbname" class="form-control" required/>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="dbowner" class="control-label">Database owner</label>
-                      <select [ngModelOptions]="{standalone: true}" [(ngModel)]="db.owner" id="dbowner" class="form-control" required>
-                        <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="dbtype" class="control-label">Database type</label>
-                      <select id="dbtype" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.type" class="form-control" required>
-                          <option value="mysql">MySQL</option>
-                          <option value="postgresql">Postgres</option>
-                          <option value="mongo">Mongo</option>
-                          <option value="docker">Docker</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="dbhost" class="control-label">Database host</label>
-                      <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.host" id="dbhost" class="form-control" required>
-                  </div>
-                  <div class="col-sm-1">
-                      <label style="opacity: 0;" class="control-label">Create</label>
-                      <button type="button" class="btn btn-secondary" (click)="declare_db()">Declare DB</button>
-                  </div>
-              </div>
-          </form>
+    </form>
+  </div>
+</div>
+
+
+<div class="alert alert-success" *ngIf="chowner_msg">{{chowner_msg}}</div>
+<div class="alert alert-danger" *ngIf="chowner_err_msg">{{chowner_err_msg}}</div>
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Change database owner</h3>
+  </div>
+  <div class="card-body">
+    <form role="form" data-toggle="validator" class="user-form form-horizonal">
+      <div class="form-group">
+
+        <div class="col-sm-2">
+          <label for="owner_db_name">Database name</label>
+          <select id="owner_db_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_name" class="form-control">
+            <option *ngFor="let database of databases" [value]="database">{{database.name}}</option>
+          </select>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="owner_dbhost">Database owner</label>
+          <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_owner" id="owner_dbhost" class="form-control">
+            <option *ngFor="let user of users" [value]="user">{{user.uid}}</option>
+          </select>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="modifyOwner" style="opacity: 0;">Modify</label>
+          <button id="modifyOwner" type="button" class="btn btn-secondary" (click)="changeOwner()" class="form-control">Modify</button>
+        </div>
+        
       </div>
-    </div>
-
-
-
-    <div class="alert alert-success" *ngIf="chowner_msg">{{chowner_msg}}</div>
-    <div class="alert alert-danger" *ngIf="chowner_err_msg">{{chowner_err_msg}}</div>
-      <div class="card bg-light">
-          <div class="card-header">
-            <h3>Change database owner</h3>
-          </div>
-          <div class="card-body">
-              <form role="form" data-toggle="validator" class="user-form form-horizonal">
-                <div class="form-group">
-                  <div class="col-sm-2">
-                      <label for="owner_db_name">Database name</label>
-                      <select id="owner_db_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_name" class="form-control">
-                        <option *ngFor="let database of databases" [value]="database">{{database.name}}</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="owner_dbhost">Database owner</label>
-                      <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_owner" id="owner_dbhost" class="form-control">
-                          <option *ngFor="let user of users" [value]="user">{{user.uid}}</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="modifyOwner" style="opacity: 0;">Modify</label>
-                      <button id="modifyOwner" type="button" class="btn btn-secondary" (click)="changeOwner()" class="form-control">Modify</button>
-                  </div>
-              </div>
-            </form>
-          </div>
-    </div>
+    </form>
+  </div>
+</div>

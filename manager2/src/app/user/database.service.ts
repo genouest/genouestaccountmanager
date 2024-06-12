@@ -13,10 +13,10 @@ export class Database {
     create: boolean
     usage: string
     size: string
-    expire: string
+    expire: number
     single_user: boolean
 
-    constructor(name: string, type: string, host: string, owner: string, create: boolean = false, usage: string, size: string, expire: string, single_user: boolean) {
+    constructor(name: string, type: string, host: string, owner: string, create: boolean = false, usage: string, size: string, expire: number, single_user: boolean) {
         this.name = name
         this.type = type
         this.host = host
@@ -26,11 +26,10 @@ export class Database {
         this.size = size
         this.expire = expire
         this.single_user = single_user
-
     }
 
     toJson() {
-        return  {
+        return {
             name: this.name,
             type: this.type,
             host: this.host,
@@ -141,7 +140,6 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-
         return this.http.put(environment.apiUrl + '/database/' + dbName + '/owner/' + dbOldOwner + '/' + dbNewOwner, {}, httpOptions)
     }
 
@@ -158,6 +156,7 @@ export class DatabaseService {
             //}),
             params: params
         };
+
         return this.http.get(
             environment.apiUrl + '/pending/database',
             httpOptions
@@ -176,8 +175,6 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-
         return this.http.delete(environment.apiUrl + '/pending/database/' + db.name, httpOptions)
     }
-
 }

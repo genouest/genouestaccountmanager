@@ -14,9 +14,9 @@
               <span style="color:red">(required)</span>
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the database" tooltip></span>
             </label>
-            <input required placeholder="database name" type="text" maxlength="42" id="new_database_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.name" class="form-control" name="dbname" #dbname="ngModel"/>
-            <div *ngIf="dbname.invalid && (dbname.dirty || dbname.touched)" class="text-danger">
-              <div *ngIf="dbname.errors.required">Name Required</div>
+            <input required placeholder="database name" type="text" maxlength="42" id="new_database_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.name" class="form-control" name="name" #name="ngModel"/>
+            <div *ngIf="name.invalid && (name.dirty || name.touched)" class="text-danger">
+              <div *ngIf="name.errors.required">Name Required</div>
             </div>
           </div>
 
@@ -34,7 +34,7 @@
 
           <div class="form-group row col-sm-8">
             <label for="db_expire">Expiration date</label>
-            <input type="date" id="db_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.expire" class="form-control"/>
+            <input type="date" id="db_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="db_expire_string" class="form-control"/>
             <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
 
