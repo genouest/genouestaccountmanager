@@ -288,15 +288,17 @@ router.post('/database/:id', async function(req, res) {
     }
     try {
         await dbsrv.mongo_databases().insertOne(db);
+        let filter = {name: req.params.id};
+        if(!session_user.is_admin) {filter['owner'] = session_user.uid}
+        await dbsrv.mongo_pending_databases().deleteOne(filter);
         if(!create_db) {
             await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []});
             res.send({message: 'Database declared'});
-            return;
         } else {
             await udbsrv.create_db(db, session_user, req.params.id);
             res.send({message: 'Database created, credentials will be sent by mail'});
-            return;
         }
+        return;
     } catch(e) {
         logger.error(e);
         if (e.code && e.message) {
