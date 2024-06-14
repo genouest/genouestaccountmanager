@@ -58,7 +58,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.post(environment.apiUrl + '/database/' + db.name , db.toJson(), httpOptions)
+        return this.http.post(environment.apiUrl + '/database/' + db.name, db.toJson(), httpOptions)
     }
     
     ask(db: Database) {
@@ -68,7 +68,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.post(environment.apiUrl + '/requestdatabase/' + db.name , db.toJson(), httpOptions)
+        return this.http.post(environment.apiUrl + '/requestdatabase/' + db.name, db.toJson(), httpOptions)
     }
 
     list(): Observable<Database[]> {
