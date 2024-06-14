@@ -45,10 +45,11 @@
           </div>
         </div>
 
+        <div class="alert alert-success alert-dismissible" *ngIf="form_msg">{{form_msg}}</div>
+        <div class="alert alert-danger" *ngIf="form_err_msg">{{form_err_msg}}</div>
+
         <div class="modal-footer">
           <div class="form-group row col-sm-12">
-            <div class="alert alert-success" *ngIf="dbmsg">{{dbmsg}}</div>
-            <div class="alert alert-danger" *ngIf="dbmsg_error">{{dbmsg_error}}</div>
             <button type="submit" class="btn btn-primary">Request MySQL Database</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
@@ -109,21 +110,5 @@
 </div>
 
 
-<div *ngIf="dbmsg" class="alert alert-info alert-dismissible" role="alert">
-  {{dbmsg}}
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-<div *ngIf="dbmsg_error" class="alert alert-danger alert-dismissible" role="alert">
-  {{dbmsg_error}}
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-<div *ngIf="rm_dbmsg" class="alert alert-warning alert-dismissible" role="alert">
-  {{rm_dbmsg}}
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
+<div *ngIf="msg" class="alert alert-success alert-dismissible" role="alert">{{msg}}</div>
+<div *ngIf="err_msg" class="alert alert-warning alert-dismissible" role="alert">{{err_msg}}</div>
