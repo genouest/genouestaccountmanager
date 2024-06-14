@@ -105,27 +105,30 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         return;
     }
     let session_user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user);
+        is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
         return;
     }
-    if (!session_user){
+    if(!session_user){
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
-    session_user.is_admin = isadmin;
-    if(!session_user.is_admin) {
+    if(is_admin) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
     await dbsrv.mongo_databases().updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
-    await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new, 'logs': []});
+    await dbsrv.mongo_events().insertOne({
+        'owner': session_user.uid,
+        'date': new Date().getTime(),
+        'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new,
+        'logs': []});
     res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
     return;
 });
@@ -137,10 +140,10 @@ router.get('/database', async function(req, res) {
         return;
     }
     let session_user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user);
+        is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -151,9 +154,8 @@ router.get('/database', async function(req, res) {
         return;
     }
 
-    session_user.is_admin = isadmin;
     let filter = {};
-    if(!session_user.is_admin) {
+    if(!is_admin) {
         filter = {owner: session_user.uid};
     }
     let databases = await dbsrv.mongo_databases().find(filter).toArray();
@@ -172,10 +174,8 @@ router.get('/database/owner/:owner', async function(req, res) {
         return;
     }
     let session_user = null;
-    let isadmin = false;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -186,9 +186,7 @@ router.get('/database/owner/:owner', async function(req, res) {
         return;
     }
 
-    session_user.is_admin = isadmin;
-    let filter = {owner: req.params.owner};
-    let databases = await dbsrv.mongo_databases().find(filter).toArray();
+    let databases = await dbsrv.mongo_databases().find({owner: req.params.owner}).toArray();
     res.send(databases);
     return;
 });
@@ -204,10 +202,10 @@ router.post('/database/:id', async function(req, res) {
         return;
     }
     let session_user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user);
+        is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -218,8 +216,7 @@ router.post('/database/:id', async function(req, res) {
         return;
     }
 
-    session_user.is_admin = isadmin;
-    if (req.body.owner!=undefined && req.body.owner!='' && req.body.owner != session_user.uid && ! session_user.is_admin) {
+    if (req.body.owner!=undefined && req.body.owner!='' && req.body.owner != session_user.uid && ! is_admin) {
         res.status(401).send({message: 'Not authorized, cant declare a database for a different user'});
         return;
     }
@@ -289,10 +286,14 @@ router.post('/database/:id', async function(req, res) {
     try {
         await dbsrv.mongo_databases().insertOne(db);
         let filter = {name: req.params.id};
-        if(!session_user.is_admin) {filter['owner'] = session_user.uid}
+        if(!is_admin) {filter['owner'] = session_user.uid}
         await dbsrv.mongo_pending_databases().deleteOne(filter);
         if(!create_db) {
-            await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid, 'logs': []});
+            await dbsrv.mongo_events().insertOne({
+                'owner': session_user.uid,
+                'date': new Date().getTime(),
+                'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid,
+                'logs': []});
             res.send({message: 'Database declared'});
         } else {
             await udbsrv.create_db(db, session_user, req.params.id);
@@ -322,10 +323,10 @@ router.post('/requestdatabase/:id', async function(req, res) {
         return;
     }
     let session_user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user);
+        is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -336,8 +337,7 @@ router.post('/requestdatabase/:id', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    session_user.is_admin = isadmin;
-    if (req.body.owner != undefined && req.body.owner != '' && req.body.owner != session_user.uid && !session_user.is_admin) {
+    if (req.body.owner != undefined && req.body.owner != '' && req.body.owner != session_user.uid && !is_admin) {
         res.status(401).send({message: 'Not authorized, cant ask for a database for a different user'});
         return;
     }
@@ -431,10 +431,10 @@ router.get('/pending/database', async function (req, res) {
         return;
     }
     let user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-        isadmin = await rolsrv.is_admin(user);
+        is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -445,7 +445,7 @@ router.get('/pending/database', async function (req, res) {
         res.status(404).send('User not found');
         return;
     }
-    if (!isadmin) {
+    if (!is_admin) {
         res.status(401).send('Not authorized');
         return;
     } 
@@ -466,10 +466,10 @@ router.delete('/database/:id', async function(req, res) {
         return;
     }
     let session_user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user);
+        is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -481,17 +481,18 @@ router.delete('/database/:id', async function(req, res) {
         return;
     }
 
-    session_user.is_admin = isadmin;
     let filter = {name: req.params.id};
-    if(!session_user.is_admin) {
+    if(!is_admin) {
         filter['owner'] = session_user.uid;
     }
-
-    let database = await dbsrv.mongo_databases().findOne({name: req.params.id});
+    let database = await dbsrv.mongo_databases().findOne(filter);
     if(!database || (database.type !== undefined && database.type != 'mysql')) {
         await dbsrv.mongo_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
-        res.send({message: ''});
+        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,
+            'date': new Date().getTime(),
+            'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid,
+            'logs': []});
+        res.send({message: 'Database removed'});
         return;
     } else {
         await dbsrv.mongo_databases().deleteOne(filter);
@@ -505,7 +506,11 @@ router.delete('/database/:id', async function(req, res) {
             res.status(500).send({message: 'Could not delete database:' + err});
             return;
         }
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
+        await dbsrv.mongo_events().insertOne({
+            'owner': session_user.uid,
+            'date': new Date().getTime(),
+            'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid,
+            'logs': []});
         res.send({message: 'Database removed'});
         return;
         /*
@@ -535,10 +540,10 @@ router.delete('/pending/database/:id', async function(req, res) {
         return;
     }
     let session_user = null;
-    let isadmin = false;
+    let is_admin = false;
     try {
         session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
-        isadmin = await rolsrv.is_admin(session_user);
+        is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
@@ -550,24 +555,29 @@ router.delete('/pending/database/:id', async function(req, res) {
         return;
     }
 
-    session_user.is_admin = isadmin;
     let filter = {name: req.params.id};
-    if(!session_user.is_admin) {
+    if(!is_admin) {
         filter['owner'] = session_user.uid;
     }
-
-    let pending_database = await dbsrv.mongo_pending_databases().findOne({name: req.params.id});
+    let pending_database = await dbsrv.mongo_pending_databases().findOne(filter);
     if(!pending_database || (pending_database.type !== undefined && pending_database.type != 'mysql')) {
         await dbsrv.mongo_pending_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid, 'logs': []});
-        res.send({message: ''});
-        return;
+        await dbsrv.mongo_events().insertOne({
+            'owner': session_user.uid,
+            'date': new Date().getTime(),
+            'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid,
+            'logs': []});
     } else {
         await dbsrv.mongo_pending_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database request ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
-        res.send({message: 'Database removed'});
-        return;
+        await dbsrv.mongo_events().insertOne({
+            'owner': session_user.uid,
+            'date': new Date().getTime(),
+            'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid,
+            'logs': []
+        });
     }
+    res.send({message: 'Database removed'});
+    return;
 });
 
 
@@ -578,49 +588,10 @@ router.delete_dbs = async function(user) {
         return true;
     }
     let res = await Promise.all(databases.map(function(database) {
-        return delete_db(user, database.name);
+        return udbsrv.delete_db(user, database.name);
     }));
     return res;
 };
 
-
-var delete_db = async function(user, db_id) {
-    logger.debug('delete_db', db_id);
-    let filter = {name: db_id};
-    if(!user.is_admin) {
-        filter['owner'] = user.uid;
-    }
-    let database = await dbsrv.mongo_databases().findOne({name: db_id});
-    if(!database || (database.type !== undefined && database.type != 'mysql')) {
-        await dbsrv.mongo_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({
-            'owner': user.uid,
-            'date': new Date().getTime(),
-            'action': 'database ' + db_id+ ' deleted by ' +  user.uid, 'logs': []
-        });
-        return true;
-    } else {
-        await dbsrv.mongo_databases().deleteOne(filter);
-        try {
-            let dropuser = `DROP USER '${db_id}'@'%';\n`;
-            await querydb(dropuser);
-            let dropdb = `DROP DATABASE ${db_id};\n`;
-            await querydb(dropdb);
-        } catch(err) {
-            await dbsrv.mongo_events().insertOne({
-                'owner': user.uid,
-                'date': new Date().getTime(),
-                'action': 'Error: database ' + db_id + ' could not be deleted by ' + user.uid, 'logs': []
-            });
-            return false;
-        }
-        await dbsrv.mongo_events().insertOne({
-            'owner': user.uid,
-            'date': new Date().getTime(),
-            'action': 'database ' + db_id + ' deleted by ' + user.uid, 'logs': []
-        });
-        return true;
-    }
-};
 
 module.exports = router;
