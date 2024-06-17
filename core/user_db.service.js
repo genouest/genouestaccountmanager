@@ -92,8 +92,13 @@ async function create_db(new_db, user, id) {
         //await connection.query(createdb);
     } catch(err) {
         logger.error('sql error', err);
-        await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + id , 'logs': []});
-        throw {code: 500, message: 'Creation error: ' + err};
+        await dbsrv.mongo_events().insertOne({
+            'owner': user.uid,
+            'date': new Date().getTime(),
+            'action': 'database creation error ' + id ,
+            'logs': []
+        });
+        throw { code: 500, message: 'Creation error: ' + err };
     }
 
     //let password = Math.random().toString(36).slice(-10);
@@ -104,7 +109,7 @@ async function create_db(new_db, user, id) {
         //await connection.query(createuser);
     } catch(err) {
         logger.error('sql error', err);
-        throw {code: 500, message: 'Failed to create user'};
+        throw { code: 500, message: 'Failed to create user' };
     }
 
     let grant = `GRANT ALL PRIVILEGES ON ${id}.* TO '${id}'@'%'\n`;
@@ -113,7 +118,7 @@ async function create_db(new_db, user, id) {
         //await connection.query(grant);
     } catch(err) {
         logger.error('sql error', err);
-        throw {code: 500, message: 'Failed to grant access to user'};
+        throw { code: 500, message: 'Failed to grant access to user' };
     }
 
     try {
@@ -132,7 +137,12 @@ async function create_db(new_db, user, id) {
         logger.error(error);
     }
     await dbsrv.mongo_pending_databases().deleteOne({ name: db.name });
-    await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'database ' + id + ' created for ' +  db.owner, 'logs': []});
+    await dbsrv.mongo_events().insertOne({
+        'owner': user.uid,
+        'date': new Date().getTime(),
+        'action': 'database ' + id + ' created for ' +  db.owner,
+        'logs': []
+    });
 }
 
 
@@ -148,7 +158,7 @@ async function delete_db(user, db_id) {
         await dbsrv.mongo_events().insertOne({
             'owner': user.uid,
             'date': new Date().getTime(),
-            'action': 'database ' + db_id+ ' deleted by ' +  user.uid, 'logs': []
+            'action': 'database ' + db_id + ' deleted by ' +  user.uid, 'logs': []
         });
         return true;
     } else {

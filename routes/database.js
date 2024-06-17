@@ -97,11 +97,11 @@ var querydb = (sql) => {
  */
 router.put('/database/:id/owner/:old/:new', async function(req, res) {
     if(!req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(!sansrv.sanitizeAll([req.params.id, req.params.old, req.params.new])) {
-        res.status(403).send({message: 'Invalid parameters'});
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
     let session_user = null;
@@ -111,15 +111,15 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
     if(!session_user) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(is_admin) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     
@@ -130,14 +130,14 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new,
         'logs': []
     });
-    res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
+    res.send({ message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new });
     return;
 });
 
 
 router.get('/database', async function(req, res) {
     if(!req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     let session_user = null;
@@ -147,17 +147,17 @@ router.get('/database', async function(req, res) {
         is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
     if (!session_user) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
 
     let filter = { };
     if(!is_admin) {
-        filter = {owner: session_user.uid};
+        filter = { owner: session_user.uid };
     }
     let databases = await dbsrv.mongo_databases().find(filter).toArray();
     res.send(databases);
@@ -167,27 +167,27 @@ router.get('/database', async function(req, res) {
 
 router.get('/database/owner/:owner', async function(req, res) {
     if(!req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(!sansrv.sanitizeAll([req.params.owner])) {
-        res.status(403).send({message: 'Invalid parameters'});
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
     let session_user = null;
     try {
-        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
     } catch(e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
     if (!session_user) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
 
-    let databases = await dbsrv.mongo_databases().find({owner: req.params.owner}).toArray();
+    let databases = await dbsrv.mongo_databases().find({ owner: req.params.owner }).toArray();
     res.send(databases);
     return;
 });
@@ -362,7 +362,7 @@ router.get('/pending/database', async function (req, res) {
         is_admin = await rolsrv.is_admin(user);
     } catch(e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
     if (!user) {
@@ -382,59 +382,62 @@ router.get('/pending/database', async function (req, res) {
 
 router.delete('/database/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
     let session_user = null;
     let is_admin = false;
     try {
-        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
     if(!session_user){
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
 
-    let filter = {name: req.params.id};
+    let filter = { name: req.params.id };
     if(!is_admin) {
         filter['owner'] = session_user.uid;
     }
     let database = await dbsrv.mongo_databases().findOne(filter);
     if(!database || (database.type !== undefined && database.type != 'mysql')) {
         await dbsrv.mongo_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({'owner': session_user.uid,
+        await dbsrv.mongo_events().insertOne({
+            'owner': session_user.uid,
             'date': new Date().getTime(),
             'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid,
-            'logs': []});
-        res.send({message: 'Database removed'});
+            'logs': []
+        });
+        res.send({ message: 'Database removed' });
         return;
     } else {
         await dbsrv.mongo_databases().deleteOne(filter);
-        let dropusersql = `DROP USER '${req.params.id}'@'%';\n`;
-        let dropdbsql = `DROP DATABASE ${req.params.id};\n`;
+        let dropusersql = `DROP USER IF EXISTS '${req.params.id}'@'%';\n`;
+        let dropdbsql = `DROP DATABASE IF EXISTS ${req.params.id};\n`;
         try {
             await querydb(dropusersql);
             await querydb(dropdbsql);
         } catch(err) {
             logger.error('sql error', err);
-            res.status(500).send({message: 'Could not delete database:' + err});
+            res.status(500).send({ message: 'Could not delete database: ' + err });
             return;
         }
         await dbsrv.mongo_events().insertOne({
             'owner': session_user.uid,
             'date': new Date().getTime(),
             'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid,
-            'logs': []});
-        res.send({message: 'Database removed'});
+            'logs': []
+        });
+        res.send({ message: 'Database removed' });
         return;
         /*
         // eslint-disable-next-line no-unused-vars
@@ -455,29 +458,29 @@ router.delete('/database/:id', async function(req, res) {
 
 router.delete('/pending/database/:id', async function(req, res) {
     if(!req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     if(!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
     let session_user = null;
     let is_admin = false;
     try {
-        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         is_admin = await rolsrv.is_admin(session_user);
     } catch(e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
-    if(!session_user){
-        res.status(401).send({message: 'Not authorized'});
+    if(!session_user) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
 
-    let filter = {name: req.params.id};
+    let filter = { name: req.params.id };
     if(!is_admin) {
         filter['owner'] = session_user.uid;
     }
@@ -488,7 +491,8 @@ router.delete('/pending/database/:id', async function(req, res) {
             'owner': session_user.uid,
             'date': new Date().getTime(),
             'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid,
-            'logs': []});
+            'logs': []
+        });
     } else {
         await dbsrv.mongo_pending_databases().deleteOne(filter);
         await dbsrv.mongo_events().insertOne({
@@ -498,13 +502,13 @@ router.delete('/pending/database/:id', async function(req, res) {
             'logs': []
         });
     }
-    res.send({message: 'Database removed'});
+    res.send({ message: 'Database removed' });
     return;
 });
 
 
 router.delete_dbs = async function(user) {
-    let databases = await dbsrv.mongo_databases().find({'owner': user.uid}).toArray();
+    let databases = await dbsrv.mongo_databases().find({ 'owner': user.uid }).toArray();
     logger.debug('delete_dbs');
     if(!databases) {
         return true;
