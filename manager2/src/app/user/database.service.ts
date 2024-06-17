@@ -39,12 +39,12 @@ export class Database {
             size: this.size,
             expire: this.expire,
             single_user: this.single_user,
-        }
+        };
     }
 }
 
 
-@Injectable({
+@Injectable( {
     providedIn: 'root'
 })
 export class DatabaseService {
@@ -58,7 +58,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.post(environment.apiUrl + '/database/' + db.name, db.toJson(), httpOptions)
+        return this.http.post(environment.apiUrl + '/database/' + db.name, db.toJson(), httpOptions);
     }
     
     ask(db: Database) {
@@ -68,7 +68,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.post(environment.apiUrl + '/requestdatabase/' + db.name, db.toJson(), httpOptions)
+        return this.http.post(environment.apiUrl + '/requestdatabase/' + db.name, db.toJson(), httpOptions);
     }
 
     list(): Observable<Database[]> {
@@ -130,7 +130,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.delete(environment.apiUrl + '/database/' + db.name, httpOptions)
+        return this.http.delete(environment.apiUrl + '/database/' + db.name, httpOptions);
     }
 
     changeOwner(dbName, dbOldOwner, dbNewOwner) {
@@ -140,7 +140,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.put(environment.apiUrl + '/database/' + dbName + '/owner/' + dbOldOwner + '/' + dbNewOwner, {}, httpOptions)
+        return this.http.put(environment.apiUrl + '/database/' + dbName + '/owner/' + dbOldOwner + '/' + dbNewOwner, { }, httpOptions);
     }
 
     list_pending(getAll: boolean): Observable<any[]> {
@@ -149,19 +149,16 @@ export class DatabaseService {
         if (getAll) {
             params = params.append("all", "true");
         }
-
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
             //}),
             params: params
         };
-
         return this.http.get(
             environment.apiUrl + '/pending/database',
             httpOptions
         ).pipe(map((response: any[]) => {
-            
             return response.sort(function(a, b) {
                 return a.name.localeCompare(b.name);
             });
@@ -175,6 +172,6 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.delete(environment.apiUrl + '/pending/database/' + db.name, httpOptions)
+        return this.http.delete(environment.apiUrl + '/pending/database/' + db.name, httpOptions);
     }
 }

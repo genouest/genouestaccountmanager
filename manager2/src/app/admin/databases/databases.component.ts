@@ -24,9 +24,7 @@ export class DatabasesComponent implements OnInit {
 
     requests_visible: boolean
     pending_databases: any
-    pending_number: any
-    pending_msg: string
-    pending_error_msg: string
+    pending_number: number
     
     msg: string
     err_msg: string
@@ -37,23 +35,21 @@ export class DatabasesComponent implements OnInit {
     constructor(private dbService: DatabaseService, private userService: UserService) { }
 
 
-    ngAfterViewInit(): void {
-    }
+    ngAfterViewInit(): void { }
 
 
-    ngOnDestroy(): void {
-    }
+    ngOnDestroy(): void { }
 
 
     ngOnInit() {
-        this.db = new Database('', 'mysql', '', '', false, "", "", 0, true)
-        this.db_list()
+        this.db = new Database('', 'mysql', '', '', false, "", "", 0, true);
+        this.db_list();
         this.userService.list().subscribe(
-            resp => this.users = resp,
-            err => console.log('failed to get users')
-        )
-        this.pending_list()
-        this.selecteddb = []
+            resp => { this.users = resp; },
+            err => { console.log('failed to get users'); }
+        );
+        this.pending_list();
+        this.selecteddb = [];
     }
 
 
@@ -68,19 +64,19 @@ export class DatabasesComponent implements OnInit {
             resp => {
                 this.chowner_msg = resp['message'];
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp;},
-                    err => console.log('failed to list databases')
-                )
+                    resp => { this.databases = resp; },
+                    err => { console.log('failed to list databases'); }
+                );
             },
-            err => console.log('failed to change owner')
-        )
+            err => { console.log('failed to change owner'); }
+        );
     }
 
 
     declare_db() {
         this.msg = '';
         this.err_msg = '';
-        if(!this.db.owner || !this.db.name){
+        if(!this.db.owner || !this.db.name) {
             this.err_msg = 'no database or owner selected';
             return;
         }
@@ -89,12 +85,12 @@ export class DatabasesComponent implements OnInit {
                 this.msg = resp['message'];
                 this.db = new Database('', 'mysql', '', '', false, "", "", 0, true);
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp;},
-                    err => console.log('failed to list databases')
-                )
+                    resp => { this.databases = resp; },
+                    err => { console.log('failed to list databases'); }
+                );
             },
-            err => this.err_msg = err.error.message
-        )
+            err => { this.err_msg = err.error.message; }
+        );
     }
 
 
@@ -114,13 +110,13 @@ export class DatabasesComponent implements OnInit {
                 if (data.length > 0) { 
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {
-                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000
+                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000;
                     }
-                };
+                }
                 this.pending_number = data.length;
                 this.pending_databases = data;
             },
-            err => console.log(err)
+            err => { console.log(err); }
             // err => console.log('failed to get pending databases')
         );
     }
@@ -128,26 +124,26 @@ export class DatabasesComponent implements OnInit {
 
     db_list() {
         this.dbService.list().subscribe(
-            resp => {this.databases = resp;},
-            err => console.log('failed to get databases')
-        )
+            resp => { this.databases = resp; },
+            err => { console.log('failed to get databases'); }
+        );
     }
 
 
     refuse_selected_databases() {
         this.dbmsg = '';
         this.dbmsg_error = '';
-        this.selecteddb.forEach((ws)=>{
+        this.selecteddb.forEach((ws) => {
             this.dbService.refuse(ws).subscribe(
                 resp => {
                     this.dbmsg = resp['message'];
-                    this.pending_list()
+                    this.pending_list();
                 },
                 err => {
                     this.dbmsg_error = err.error.message;
-                    console.log('failed to reject database')
+                    console.log('failed to reject database');
                 }
-            )
+            );
         });
     }
 
@@ -169,14 +165,14 @@ export class DatabasesComponent implements OnInit {
             )).subscribe(
                 resp => {
                     this.dbmsg = resp['message'];
-                    this.pending_list()
-                    this.db_list()
+                    this.pending_list();
+                    this.db_list();
                 },
                 err => {
                     this.dbmsg_error = err.error.message;
-                    console.log('failed to add database')
+                    console.log('failed to add database');
                 }
-            )
+            );
         }
     }
 }
