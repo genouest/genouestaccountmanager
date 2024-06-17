@@ -56,7 +56,6 @@ var querydb = (sql) => {
 
 async function create_db_request(asked_db, user) {
     logger.info('Create Database Request ' + asked_db.name + ' for ' + user.uid);
-
     await dbsrv.mongo_pending_databases().insertOne(asked_db);
     await dbsrv.mongo_events().insertOne({
         owner: user.uid,
@@ -64,7 +63,6 @@ async function create_db_request(asked_db, user) {
         action:  'new pending database ' + asked_db.name + ' asked for by ' +  user.uid,
         logs: [],
     });
-
     let msg_destinations =  [CONFIG.general.accounts, user.email];
     if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
@@ -97,6 +95,7 @@ async function create_db(new_db, user, id) {
         await dbsrv.mongo_events().insertOne({'owner': user.uid, 'date': new Date().getTime(), 'action': 'database creation error ' + id , 'logs': []});
         throw {code: 500, message: 'Creation error: ' + err};
     }
+
     //let password = Math.random().toString(36).slice(-10);
     let password = usrsrv.new_password(10);
     let createuser = `CREATE USER '${id}'@'%' IDENTIFIED BY '${password}';\n`;
@@ -107,6 +106,7 @@ async function create_db(new_db, user, id) {
         logger.error('sql error', err);
         throw {code: 500, message: 'Failed to create user'};
     }
+
     let grant = `GRANT ALL PRIVILEGES ON ${id}.* TO '${id}'@'%'\n`;
     try {
         await querydb(grant);

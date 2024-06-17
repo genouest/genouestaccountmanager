@@ -114,21 +114,22 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         res.status(404).send({message: 'User session not found'});
         return;
     }
-    if(!session_user){
+    if(!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-
     if(is_admin) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-    await dbsrv.mongo_databases().updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
+    
+    await dbsrv.mongo_databases().updateOne({name: req.params.id}, {'$set': {owner: req.params.new}});
     await dbsrv.mongo_events().insertOne({
         'owner': session_user.uid,
         'date': new Date().getTime(),
         'action': 'database ' + req.params.id + ' changed from ' + req.params.old + ' to ' + req.params.new,
-        'logs': []});
+        'logs': []
+    });
     res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
     return;
 });
@@ -149,12 +150,12 @@ router.get('/database', async function(req, res) {
         res.status(404).send({message: 'User session not found'});
         return;
     }
-    if (!session_user){
+    if (!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
-    let filter = {};
+    let filter = { };
     if(!is_admin) {
         filter = {owner: session_user.uid};
     }
@@ -181,7 +182,7 @@ router.get('/database/owner/:owner', async function(req, res) {
         res.status(404).send({message: 'User session not found'});
         return;
     }
-    if (!session_user){
+    if (!session_user) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -193,234 +194,158 @@ router.get('/database/owner/:owner', async function(req, res) {
 
 
 router.post('/database/:id', async function(req, res) {
-    if(!req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if(!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
-    let session_user = null;
-    let is_admin = false;
+    let session_user;
+    let is_admin;
     try {
-        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         is_admin = await rolsrv.is_admin(session_user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
     if (!session_user) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-
-    if (req.body.owner!=undefined && req.body.owner!='' && req.body.owner != session_user.uid && ! is_admin) {
-        res.status(401).send({message: 'Not authorized, cant declare a database for a different user'});
+    if (req.body.owner && req.body.owner !== session_user.uid && !is_admin) {
+        res.status(401).send({ message: 'Not authorized, cannot declare a database for a different user' });
         return;
     }
-    let owner = session_user.uid;
-    let create_db = true;
-    if(req.body.owner!=undefined && req.body.owner != '') {
-        owner = req.body.owner;
-    }
-    if(req.body.create == false || (req.body.type != undefined && req.body.type != 'mysql')) {
-        create_db = false;
-    }
-
-    if (req.body.expire == null) {
-        res.status(403).send({message: 'No expiration date'});
+    if (!req.body.expire) {
+        res.status(403).send({ message: 'No expiration date' });
         return;
     }
-    let db_expire = req.body.expire;
-
-    let db_type = 'mysql';
-    if(req.body.type != undefined && req.body.type) {
-        db_type = req.body.type;
-    }
-    let db_host = CONFIG.mysql.host;
-    if(req.body.host!=undefined && req.body.host && sansrv.sanitize(req.body.host)) {
-        db_host = req.body.host;
-    }
-    let db_usage = '';
-    if(req.body.usage != undefined && req.body.usage) {
-        db_usage = req.body.usage;
-    }
-    let db_size = '';
-    if(req.body.size != undefined && req.body.size) {
-        db_size = req.body.size;
-    }
-    let db_single_user = true;
-    if(req.body.single_user != undefined && req.body.single_user) {
-        db_single_user = req.body.single_user;
-    }
-
     let db = {
-        owner: owner,
+        owner: req.body.owner ? req.body.owner : session_user.uid,
         name: req.params.id,
-        type: db_type,
-        host: db_host,
-        usage: db_usage,
-        size: db_size,
-        expire: db_expire,
-        single_user: db_single_user
+        type: req.body.type ? req.body.type : 'mysql',
+        host: req.body.host && sansrv.sanitize(req.body.host) ? req.body.host : CONFIG.mysql.host,
+        usage: req.body.usage ? req.body.usage : '',
+        size: req.body.size ? req.body.size : '',
+        expire: req.body.expire,
+        single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
-
+    let create_db = !(req.body.create === false || (req.body.type && req.body.type !== 'mysql'));
     if (create_db) {
-        if(!req.params.id.match(/^[0-9a-z_]+$/)) {
-            res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
+        if (!req.params.id.match(/^[0-9a-z_]+$/)) {
+            res.status(403).send({ database: null, message: 'Database name must be alphanumeric [0-9a-z_]' });
             return;
         }
-        if(req.params.id.length<5) {
-            res.status(403).send({database: null, message: 'Database name length must be >= 5'});
+        if (req.params.id.length < 5) {
+            res.status(403).send({ database: null, message: 'Database name length must be >= 5' });
             return;
         }
-    }
-
-    let database = await dbsrv.mongo_databases().findOne({name: db.name});
-    if(database) {
-        res.status(403).send({database: null, message: 'Database already exists, please use an other name'});
-        return;
     }
     try {
+        let database = await dbsrv.mongo_databases().findOne({ name: db.name });
+        if (database) {
+            res.status(403).send({ database: null, message: 'Database already exists, please use another name' });
+            return;
+        }
+
         await dbsrv.mongo_databases().insertOne(db);
-        let filter = {name: req.params.id};
-        if(!is_admin) {filter['owner'] = session_user.uid}
+        let filter = { name: req.params.id };
+        if (!is_admin) {
+            filter['owner'] = session_user.uid;
+        }
         await dbsrv.mongo_pending_databases().deleteOne(filter);
-        if(!create_db) {
+        if (!create_db) {
             await dbsrv.mongo_events().insertOne({
-                'owner': session_user.uid,
-                'date': new Date().getTime(),
-                'action': 'database ' + req.params.id + ' declared by ' +  session_user.uid,
-                'logs': []});
-            res.send({message: 'Database declared'});
+                owner: session_user.uid,
+                date: new Date().getTime(),
+                action: `database ${req.params.id} declared by ${session_user.uid}`,
+                logs: []
+            });
+            res.send({ message: 'Database declared' });
         } else {
             await udbsrv.create_db(db, session_user, req.params.id);
-            res.send({message: 'Database created, credentials will be sent by mail'});
+            res.send({ message: 'Database created, credentials will be sent by mail' });
         }
-        return;
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        if (e.code && e.message) {
-            res.status(e.code).send({message: e.message});
-            return;
-        } else {
-            res.status(500).send({message: 'Server Error, contact admin'});
-            return;
-        }
+        res.status(e.code || 500).send({ message: e.message || 'Server Error, contact admin' });
     }
 });
 
 
 router.post('/requestdatabase/:id', async function(req, res) {
-    if(!req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if(!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
-    let session_user = null;
-    let is_admin = false;
+    let session_user;
+    let is_admin;
     try {
-        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         is_admin = await rolsrv.is_admin(session_user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         return;
     }
-
     if (!session_user) {
-        res.status(401).send({message: 'Not authorized'});
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if (req.body.owner != undefined && req.body.owner != '' && req.body.owner != session_user.uid && !is_admin) {
-        res.status(401).send({message: 'Not authorized, cant ask for a database for a different user'});
+    if (req.body.owner && req.body.owner !== session_user.uid && !is_admin) {
+        res.status(401).send({ message: 'Not authorized, cannot request a database for a different user' });
         return;
     }
-
-    if (req.body.expire == null) {
-        res.status(403).send({message: 'No expiration date'});
+    if (!req.body.expire) {
+        res.status(403).send({ message: 'No expiration date' });
         return;
-    }
-    let db_expire = req.body.expire;
-
-    let owner = session_user.uid;
-    if(req.body.owner != undefined && req.body.owner != '') {
-        owner = req.body.owner;
-    }
-    let create_db = true;
-    if(req.body.create == false || (req.body.type != undefined && req.body.type != 'mysql')) {
-        create_db = false;
-    }
-    let db_type = 'mysql';
-    if(req.body.type != undefined && req.body.type) {
-        db_type = req.body.type;
-    }
-    let db_host = CONFIG.mysql.host;
-    if(req.body.host!=undefined && req.body.host && sansrv.sanitize(req.body.host)) {
-        db_host = req.body.host;
-    }
-    let db_usage = '';
-    if(req.body.usage != undefined && req.body.usage) {
-        db_usage = req.body.usage;
-    }
-    let db_size = '';
-    if(req.body.size != undefined && req.body.size) {
-        db_size = req.body.size;
-    }
-    let db_single_user = true;
-    if(req.body.single_user != undefined && req.body.single_user) {
-        db_single_user = req.body.single_user;
     }
     let pending_db = {
-        owner: owner,
+        owner: req.body.owner ? req.body.owner : session_user.uid,
         name: req.params.id,
-        type: db_type,
-        host: db_host,
-        create: create_db,
-        usage: db_usage,
-        size: db_size,
-        expire: db_expire,
-        single_user: db_single_user
+        type: req.body.type ? req.body.type : 'mysql',
+        host: req.body.host && sansrv.sanitize(req.body.host) ? req.body.host : CONFIG.mysql.host,
+        usage: req.body.usage ? req.body.usage : '',
+        size: req.body.size ? req.body.size : '',
+        expire: req.body.expire,
+        single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
-    if(create_db) {
-        if(!req.params.id.match(/^[0-9a-z_]+$/)) {
-            res.status(403).send({database: null, message: 'Database name must be alphanumeric [0-9a-z_]'});
+    let create_db = !(req.body.create === false || (req.body.type && req.body.type !== 'mysql'))
+    if (create_db) {
+        if (!req.params.id.match(/^[0-9a-z_]+$/)) {
+            res.status(403).send({ database: null, message: 'Database name must be alphanumeric [0-9a-z_]' });
             return;
         }
-        if(req.params.id.length<5) {
-            res.status(403).send({database: null, message: 'Database name length must be >= 5'});
+        if (req.params.id.length < 5) {
+            res.status(403).send({ database: null, message: 'Database name length must be >= 5' });
             return;
         }
     }
-
-    let database = await dbsrv.mongo_databases().findOne({name: pending_db.name});
-    let pending_database = await dbsrv.mongo_pending_databases().findOne({name: pending_db.name});
-    if(database) {
-        res.status(403).send({database: null, message: 'Database already exists, please use an other name'});
-        return;
-    } else if(pending_database) {
-        res.status(403).send({database: null, message: 'Database request already exists'});
-        return;
-    } else {
-        try {
-            await udbsrv.create_db_request(pending_db, session_user);
-        } catch(e) {
-            logger.error(e);
-            if (e.code && e.message) {
-                res.status(e.code).send({message: e.message});
-                return;
-            } else {
-                res.status(500).send({message: 'Server Error, contact admin'});
-                return;
-            }
+    try {
+        let database = await dbsrv.mongo_databases().findOne({ name: pending_db.name });
+        let pending_database = await dbsrv.mongo_pending_databases().findOne({ name: pending_db.name });
+        if (database) {
+            res.status(403).send({ database: null, message: 'Database already exists, please use another name' });
+            return;
         }
-        res.send({ message: 'Database requested, the admins will review your request'});
-        return;
+        if (pending_database) {
+            res.status(403).send({ database: null, message: 'Database request already exists' });
+            return;
+        }
+
+        await udbsrv.create_db_request(pending_db, session_user);
+        res.send({ message: 'Database requested, the admins will review your request' });
+    } catch (e) {
+        logger.error(e);
+        res.status(e.code || 500).send({ message: e.message || 'Server Error, contact admin' });
     }
 });
 
@@ -440,7 +365,6 @@ router.get('/pending/database', async function (req, res) {
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if (!user) {
         res.status(404).send('User not found');
         return;
@@ -448,7 +372,7 @@ router.get('/pending/database', async function (req, res) {
     if (!is_admin) {
         res.status(401).send('Not authorized');
         return;
-    } 
+    }
 
     let pendings = await dbsrv.mongo_pending_databases().find({ }).toArray();
     res.send(pendings);
@@ -475,7 +399,6 @@ router.delete('/database/:id', async function(req, res) {
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if(!session_user){
         res.status(401).send({message: 'Not authorized'});
         return;
@@ -549,7 +472,6 @@ router.delete('/pending/database/:id', async function(req, res) {
         res.status(404).send({message: 'User session not found'});
         return;
     }
-
     if(!session_user){
         res.status(401).send({message: 'Not authorized'});
         return;
