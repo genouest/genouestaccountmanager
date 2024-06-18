@@ -10,6 +10,7 @@ const Promise = require('promise');
 const maisrv = require('../core/mail.service.js');
 const dbsrv = require('../core/db.service.js');
 const mysql = require('mysql');
+const usrsrv = require('../core/user.service.js');
 
 exports.create_db_request = create_db_request;
 exports.create_db = create_db;
