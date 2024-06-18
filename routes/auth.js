@@ -20,6 +20,7 @@ const jwt = require('jsonwebtoken');
 
 const cfgsrv = require('../core/config.service.js');
 const usrsrv = require('../core/user.service.js');
+const idsrv = require('../core/id.service.js');
 
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
@@ -38,14 +39,6 @@ const notif = require('../core/notif_'+MAILER+'.js');
 const dbsrv = require('../core/db.service.js');
 const maisrv = require('../core/mail.service.js');
 const rolsrv = require('../core/role.service.js');
-
-var attemps = {};
-
-let bansec = 3600;
-
-if(CONFIG.general.bansec) {
-    bansec = CONFIG.general.bansec;
-}
 
 router.get('/logout', function(req, res) {
     req.session.destroy();
@@ -208,7 +201,7 @@ router.get('/u2f/register/:id', async function(req, res) {
         res.status(404).send({message: 'User not found'});
         return;
     }
-    if(!req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
+    if(!req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
         return res.status(401).send({message: 'You need to login first'});
     }
 
@@ -229,7 +222,7 @@ router.get('/u2f/register/:id', async function(req, res) {
 
 router.post('/u2f/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
         return res.status(401).send({message: 'You need to login first'});
     }
 
@@ -238,7 +231,7 @@ router.post('/u2f/register/:id', async function(req, res) {
 
         if (user.u2f && user.u2f.challenge === challenge) {
             await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': key, 'u2f.challenge': null}});
-            return res.send({key: key});    
+            return res.send({key: key});
         }
     } catch(err) {
         logger.error('u2f registration error');
@@ -249,7 +242,7 @@ router.post('/u2f/register/:id', async function(req, res) {
 
 router.post('/otp/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str != user._id.str){
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()){
         return res.status(401).send({message: 'You need to login first'});
     }
 
@@ -266,7 +259,30 @@ router.post('/otp/register/:id', async function(req, res) {
         }
         res.send({secret,imageUrl});
     });
-    
+
+});
+
+router.delete('/otp/register/:id', async function(req, res) {
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+
+    let adminuser = null;
+    let isadmin = false;
+    try {
+        adminuser = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(adminuser);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!user || !req.locals.logInfo.id || (req.locals.logInfo.id.toString() != user._id.toString() && !isadmin)){
+        return res.status(401).send({message: 'You need to login first'});
+    }
+
+    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp.secret': null}});
+    res.send({message: 'OTP removed'});
 });
 
 router.post('/otp/check/:id', async function(req, res) {
@@ -299,11 +315,11 @@ router.post('/otp/check/:id', async function(req, res) {
 
 router.delete('/u2f/register/:id', async function(req, res) {
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.str!=user._id.str) {
+    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
         return res.status(401).send({message: 'You need to login first'});
     }
     await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': null, 'u2f.challenge': null}});
-    return res.sendStatus(200);    
+    return res.sendStatus(200);
 });
 
 router.get('/auth', async function(req, res) {
@@ -397,16 +413,14 @@ router.post('/auth/:id', async function(req, res) {
         res.end();
         return;
     }
-    if(attemps[user.uid] != undefined && attemps[user.uid]['attemps']>=2) {
-        let diffTime = (new Date()).getTime() - attemps[user.uid]['last'].getTime();
-        if(diffTime < 1000 * bansec) {
-            res.status(401).send({message: 'You have reached the maximum of login attemps, your account access is blocked for ' + Math.floor((1000 * bansec - diffTime)/ 60000) + ' minutes'});
-            return;
-        }
-        else {
-            attemps[user.uid]['attemps'] = 0;
-        }
+
+    let is_locked = await idsrv.user_locked(user.uid);
+    if (is_locked) {
+        let remains = await idsrv.user_lock_remaining_time(user.uid);
+        res.status(401).send({message: 'You have reached the maximum of login attempts, your account access is blocked for ' + Math.floor(remains / 60) + ' minutes'});
+        return;
     }
+
     // Check bind with ldap
     sess.is_logged = true;
     let need_double_auth = false;
@@ -450,13 +464,9 @@ router.post('/auth/:id', async function(req, res) {
         res.end();
     }
     else {
-        if(attemps[user.uid] == undefined) {
-            attemps[user.uid] = { attemps: 0};
-        }
         try {
             let token = await goldap.bind(user.uid, req.body.password);
             user['token'] = token;
-            attemps[user.uid]['attemps'] = 0;
             if (!user.apikey) {
                 // let newApikey = Math.random().toString(36).slice(-10);
                 let newApikey = usrsrv.new_random(10);
@@ -477,10 +487,16 @@ router.post('/auth/:id', async function(req, res) {
             if(req.session !== undefined){
                 req.session.destroy();
             }
-            attemps[user.uid]['attemps'] += 1;
-            attemps[user.uid]['last'] = new Date();
-            res.status(401).send({message: 'Login error, remains ' + (3-attemps[user.uid]['attemps']) + ' attemps.'});
-            res.end();
+
+            // no ban
+            if (CONFIG.general.bansec === 0) {
+                res.status(401).send({message: 'Login error'});
+                res.end();
+            } else {
+                let locks = await idsrv.user_lock(user.uid);
+                res.status(401).send({message: 'Login error, remains ' + (3-locks) + ' attempts.'});
+                res.end();
+            }
             return;
         }
     }

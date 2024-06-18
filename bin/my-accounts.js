@@ -11,6 +11,8 @@ const dbsrv = require('../core/db.service.js');
 const plgsrv = require('../core/plugin.service.js');
 const cfgsrv = require('../core/config.service.js');
 const usrv = require('../core/user.service.js');
+const idsrv = require('../core/id.service.js');
+
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
 
@@ -42,6 +44,21 @@ program
         dbsrv.mongo_users().findOne(filter).then(function(user){
             console.table(user);
             process.exit(0);
+        });
+    });
+
+
+program
+    .command('unlock')
+    .description('unlock user after failed password attempts')
+    .arguments('<uid>')
+    .action(function(uid) {
+        idsrv.user_unlock(uid).then(() => {
+            console.log('user unlocked');
+            process.exit(0);
+        }).catch(err => {
+            console.error('An error occured', err);
+            process.exit(1);
         });
     });
 

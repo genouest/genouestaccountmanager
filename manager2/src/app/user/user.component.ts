@@ -11,7 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { WindowWrapper } from '../windowWrapper.module';
 import { FlashMessagesService } from '../utils/flash/flash.component';
 
-import { 
+import {
     solveRegistrationChallenge
 } from '@webauthn/client';
 
@@ -157,6 +157,8 @@ export class UserComponent implements OnInit {
     // Error messages
     msg: string
     err_msg: string
+    otp_msg: string
+    otp_err_msg: string
 
     add_to_project_msg: string
     add_to_project_error_msg: string
@@ -188,6 +190,12 @@ export class UserComponent implements OnInit {
 
     otp: string
 
+    missing_group: string
+    new_group: any
+
+    grp_success_msg: string
+    grp_err_msg: string
+
     constructor(
         private route: ActivatedRoute,
         private userService: UserService,
@@ -218,12 +226,23 @@ export class UserComponent implements OnInit {
         this.password1  = ''
         this.password2 = ''
 
+        this.missing_group = ""
+        this.new_group = {
+            name: '',
+            owner: '',
+            description: '',
+        }
+
         this.notify_subject = ''
         this.notify_message = ''
         this.notify_err = ''
         this.key_err = ''
+        this.grp_success_msg = ''
+        this.grp_err_msg = ''
         this.otp = null
 
+        this.otp_msg =  ""
+        this.otp_err_msg =  ""
     }
 
     date_convert = function timeConverter(tsp){
@@ -285,6 +304,7 @@ export class UserComponent implements OnInit {
         this.web_delete = this.web_delete.bind(this);
         this.delete_secondary_group = this.delete_secondary_group.bind(this);
         this.delete = this.delete.bind(this);
+        this.expire = this.expire.bind(this);
         this.subscribe = this.subscribe.bind(this);
         this.unsubscribe = this.unsubscribe.bind(this);
         this.initUser = this.initUser.bind(this);
@@ -297,8 +317,6 @@ export class UserComponent implements OnInit {
             },
             err => console.log('failed to get config')
         )
-
-
     }
 
     _compareName(a,b) {
@@ -320,6 +338,7 @@ export class UserComponent implements OnInit {
     _loadGroups(groups) {
         groups.sort(this._compareName)
         this.groups = groups;
+        this.missing_group= "";
         let found = false;
         for(let i=0;i<groups.length;i++){
             if(groups[i].name == this.user.group) {
@@ -327,7 +346,11 @@ export class UserComponent implements OnInit {
                 break;
             }
         }
-        if(!found) { this.groups.push({name: this.user.group})}
+        if(!found) {
+          this.groups.push({name: this.user.group, new: true});
+          this.missing_group = this.user.group
+          this.new_group.name = this.user.group
+        }
     }
 
     _loadProjects(projects) {
@@ -522,8 +545,8 @@ export class UserComponent implements OnInit {
         )
     }
 
-    expire() {
-        this.userService.expire(this.user.uid).subscribe(
+    expire(sendmail: boolean) {
+        this.userService.expire(this.user.uid, sendmail).subscribe(
             resp => {
                 this.msg = resp['message'];
                 this.user.status = this.STATUS_EXPIRED;
@@ -533,6 +556,7 @@ export class UserComponent implements OnInit {
     }
 
     extend() {
+
         this.userService.extend(this.user.uid, this.user.regkey).subscribe(
             resp => {
                 this.msg = resp['message'];
@@ -660,7 +684,7 @@ export class UserComponent implements OnInit {
 
     register_u2f() {
 
-        this.userService.u2fGet(this.user.uid).subscribe( 
+        this.userService.u2fGet(this.user.uid).subscribe(
             resp => {
                 let challenge = resp;
                 let ctx =this;
@@ -682,7 +706,19 @@ export class UserComponent implements OnInit {
                 this.otp = resp['imageUrl'];
             },
             err => {
-                console.error(err)
+                this.otp_err_msg = err.error.message
+            }
+        )
+    }
+
+    remove_otp() {
+        this.userService.otpRemove(this.user.uid).subscribe(
+            resp => {
+                this.otp_msg = resp['message'];
+                this.user.otp = {};
+            },
+            err => {
+                this.otp_err_msg = err.error.message
             }
         )
     }
@@ -738,6 +774,41 @@ export class UserComponent implements OnInit {
                 this.err_msg = err.error.message;
                 console.log('failed to delete user', err);
             }
+        )
+    }
+
+    addGroup(){
+        if (this.new_group.name === '') {
+            return;
+        }
+        this.grp_err_msg = '';
+        this.grp_success_msg = '';
+
+        this.groupService.add(this.new_group).subscribe(
+            resp => {
+                this.grp_success_msg = 'Group was created';
+                this.groupService.list().subscribe(
+                    resp => {
+                        this.user.group = this.new_group.name;
+                        this._loadGroups(resp);
+                    },
+                    err => console.log('failed to get groups')
+                )
+            },
+            err => {
+                this.grp_success_msg = '';
+                this.grp_err_msg = err.error.message;
+            }
+        )
+    }
+
+    unlock() {
+        this.userService.unlock(this.user.uid).subscribe(
+            resp => {
+                this.user.is_locked = false;
+                this._flashMessagesService.show('User unlocked', { cssClass: 'alert-success', timeout: 5000 });
+            },
+            err => console.log('failed to unlock user')
         )
     }
 

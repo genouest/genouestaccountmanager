@@ -15,7 +15,7 @@
               <option *ngFor="let list of mailing_lists" [value]="list.list_name">{{list.list_name}}</option>
             </select>
             <br *ngIf="mailing_list"/>
-            <button type="button" *ngIf="mailing_list" class="btn btn-primary" data-toggle="modal" data-target="#members_view">
+            <button type="button" *ngIf="mailing_list" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#members_view">
               View list members
             </button>
           </div>
@@ -56,11 +56,11 @@
       </div>
     </div>
     <!-- Button trigger modal -->
-    <button type="button" *ngIf="message && (input_type == 'HTML' || input_type == 'Markdown')" class="btn btn-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">
+    <button type="button" *ngIf="message && (input_type == 'HTML' || input_type == 'Markdown')" class="p-button p-button-sm p-button-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">
       Viewer
     </button>
 
-    <button type="button" class="btn btn-secondary" (click)="send()">Send</button>
+    <button type="button" *ngIf="mailing_lists && mailing_lists.length>0" class="p-button p-button-sm p-button-secondary" (click)="send()">Send</button>
     <div class="row">
       <div *ngIf="msg" class="alert alert-success">{{msg}}</div>
       <div *ngIf="error_msg" class="alert alert-danger">{{error_msg}}</div>
@@ -77,7 +77,7 @@
         <p *ngIf="input_type == 'Markdown'" [innerHTML]="trustAsMarkdown(message)"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -110,7 +110,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

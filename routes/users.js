@@ -36,6 +36,7 @@ let duration_list = CONFIG.duration;
 const grpsrv = require('../core/group.service.js');
 const usrsrv = require('../core/user.service.js');
 const rolsrv = require('../core/role.service.js');
+const idsrv = require('../core/id.service.js');
 
 router.get('/user/:id/apikey', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
@@ -222,7 +223,7 @@ router.put('/user/:id/subscribe', async function(req, res){
         res.send({subscribed: false});
         res.end();
     } else {
-        await notif.add(user.email);
+        await notif.add(user.email, user.uid);
         res.send({subscribed: true});
         res.end();
     }
@@ -356,7 +357,6 @@ router.post('/message', async function(req, res){
     };
     await notif.sendList(req.body.list, mailOptions);
     res.send({message: ''});
-    return;
 });
 
 // Get users listing - for admin
@@ -649,7 +649,7 @@ router.get('/user/:id/activate', async function(req, res) {
 
     if(!user.is_fake) {
         try {
-            await notif.add(user.email);
+            await notif.add(user.email, user.uid);
         } catch (err) {
             logger.error('[notif][error=add][mail=' + user.email + ']');
         }
@@ -705,13 +705,14 @@ router.get('/user/:id', async function(req, res) {
         user.never_expire = false;
     }
 
-
     user.quota = [];
     for(let k in GENERAL_CONFIG.quota) {
         user.quota.push(k);
     }
 
-    if(session_user._id.str == user._id.str || isadmin){
+    user.is_locked = await idsrv.user_locked(user.uid);
+
+    if(session_user._id.toString() == user._id.toString() || isadmin){
         res.json(user);
     }
     else {
@@ -886,7 +887,8 @@ router.post('/user/:id', async function(req, res) {
         is_fake: req.body.is_fake,
         duration: req.body.duration,
         history: [{action: 'register', date: new Date().getTime()}],
-        extra_info: req.body.extra_info || []
+        extra_info: req.body.extra_info || [],
+        registration: new Date().getTime()
     };
 
     // check if register user is done by admin or by anonymouse user
@@ -942,6 +944,8 @@ router.get('/user/:id/expire', async function(req, res){
         return;
     }
 
+    let sendmail = req.query.sendmail === 'false' ? false : true;
+
     let session_user = null;
     let isadmin = false;
     try {
@@ -956,11 +960,13 @@ router.get('/user/:id/expire', async function(req, res){
 
     if (!session_user){
         res.status(404).send({message: 'User not found'});
+        res.end();
         return;
     }
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if (!user){
         res.status(404).send({message: 'User not found'});
+        res.end();
         return;
     }
 
@@ -995,7 +1001,7 @@ router.get('/user/:id/expire', async function(req, res){
         // Now remove from mailing list
         try {
             // eslint-disable-next-line no-unused-vars
-            await notif.remove(user.email);
+            await notif.remove(user.email, sendmail);
             await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
             res.send({message: 'Operation in progress', fid: fid, error: []});
             res.end();
@@ -1353,7 +1359,7 @@ router.get('/user/:id/renew', async function(req, res){
 
         if(!user.is_fake) {
             try {
-                await notif.add(user.email);
+                await notif.add(user.email, user.uid);
             } catch (err) {
                 logger.error('[notif][error=add][mail=' + user.email + ']');
             }
@@ -1399,8 +1405,12 @@ router.put('/user/:id/ssh', async function(req, res) {
     session_user.is_admin = isadmin;
 
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if(!user) {
+        res.status(404).send({message: 'Not found'});
+        return;
+    }
     // If not admin nor logged user
-    if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
+    if(!session_user.is_admin && user._id.toString() != req.locals.logInfo.id.toString()) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -1438,7 +1448,6 @@ router.put('/user/:id/ssh', async function(req, res) {
     user.fid = fid;
     res.send(user);
     res.end();
-    return;
 });
 
 
@@ -1501,7 +1510,7 @@ router.put('/user/:id', async function(req, res) {
         return;
     }
     // If not admin nor logged user
-    if(!session_user.is_admin && user._id.str != req.locals.logInfo.id.str) {
+    if(!session_user.is_admin && user._id.toString() != req.locals.logInfo.id.toString()) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -1679,9 +1688,9 @@ router.put('/user/:id', async function(req, res) {
         // as expired users are removed from mailing list
         if(user.status == STATUS_ACTIVE) {
             if(user.oldemail!=user.email && !user.is_fake) {
-                await notif.modify(user.oldemail, user.email);
+                await notif.modify(user.oldemail, user.email, user.uid);
             } else if(userWasFake && !user.is_fake) {
-                await notif.add(user.email);
+                await notif.add(user.email, user.uid);
             }else if (!userWasFake && user.is_fake) {
                 await notif.remove(user.email);
             }
@@ -1892,5 +1901,60 @@ router.get('/lists', async function(req, res){
     res.send(listOfLists);
     res.end();
 });
+
+
+router.get('/user/:id/unlock', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if (!session_user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+    if (!user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+
+    session_user.is_admin = isadmin;
+
+    if(session_user.is_admin){
+        try {
+            await idsrv.user_unlock(user.uid);
+        } catch(err) {
+            res.send({message: 'Error during operation'});
+            res.end();
+            return;
+        }
+        res.send({message: 'User was unlocked'});
+        res.end();
+        return;
+    }
+    else {
+        res.status(401).send({message: 'Not authorized'});
+        res.end();
+        return;
+    }
+});
+
 
 module.exports = router;

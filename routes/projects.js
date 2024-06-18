@@ -1,4 +1,4 @@
-/* TODO : create a core/project.service.js and move all method in it */
+/* TODO : create a core/project.service.js and move all methods into it */
 
 const express = require('express');
 var router = express.Router();
@@ -136,6 +136,12 @@ router.post('/project', async function(req, res){
         res.status(404).send({message: 'Owner not found'});
         return;
     }
+
+    if (!usrsrv.is_active(owner)) {
+        res.status(403).send({message: 'Owner account is not active'});
+        return;
+    }
+
     let project = await dbsrv.mongo_projects().findOne({'id': req.body.id});
     if(project){
         res.status(403).send({message: 'Not authorized or project already exists'});
@@ -169,6 +175,91 @@ router.post('/project', async function(req, res){
     }
 
     res.send({message: 'Project created'});
+    return;
+});
+
+router.put('/project', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        res.end();
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.body.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        res.end();
+        return;
+    }
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+    if(!user){
+        res.status(404).send({message: 'User not found'});
+        res.end();
+        return;
+    }
+    if(!isadmin){
+        res.status(401).send({message: 'Not authorized'});
+        res.end();
+        return;
+    }
+    let owner = await dbsrv.mongo_users().findOne({'uid': req.body.owner});
+    if(!owner){
+        res.status(404).send({message: 'Owner not found'});
+        res.end();
+        return;
+    }
+
+    let project = await dbsrv.mongo_pending_projects().findOne({'uuid': req.body.uuid});
+
+    if (!project){
+        res.status(403).send({message: 'Project does not exist'});
+        res.end();
+        return;
+    }
+
+    let related_project = await dbsrv.mongo_projects().findOne({'id': req.body.id});
+
+    if(related_project && !(project.uuid == related_project.uuid)){
+        res.status(403).send({message: 'A project with that name already exists'});
+        res.end();
+        return;
+    }
+
+    try {
+        await prjsrv.edit_project({
+            'id': req.body.id,
+            'owner': req.body.owner,
+            'group': req.body.group,
+            'size': req.body.size,
+            'cpu': req.body.cpu,
+            'expire': req.body.expire,
+            'description': req.body.description,
+            'path': req.body.path,
+            'orga': req.body.orga,
+            'access': req.body.access
+        }, req.body.uuid, user.uid);
+    } catch(e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            res.end();
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            res.end();
+            return;
+        }
+    }
+
+    res.send({message: 'Project updated'});
     return;
 });
 
@@ -353,6 +444,17 @@ router.post('/ask/project', async function(req, res){
         res.status(403).send({'message': 'Project name empty'});
         return;
     }
+
+    if (!req.body.description) {
+        res.status(403).send({'message': 'Project description empty'});
+        return;
+    }
+
+    if (req.body.description.length < 30) {
+        res.status(403).send({'message': 'Project description length should at least be 30 char'});
+        return;
+    }
+
     let p = await dbsrv.mongo_projects().findOne({id: req.body.id});
     if(p) {
         res.status(403).send({'message': 'Project already exists'});
@@ -367,6 +469,7 @@ router.post('/ask/project', async function(req, res){
             'group': user.group,
             'size': req.body.size,
             'cpu': req.body.cpu,
+            'expire': req.body.expire,
             'description': req.body.description,
             'orga': req.body.orga
         }, user);
@@ -387,7 +490,6 @@ router.post('/ask/project', async function(req, res){
 });
 
 router.get('/pending/project', async function (req, res) {
-
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send('Not authorized');
         return;

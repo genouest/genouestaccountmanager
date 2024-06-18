@@ -1,4 +1,4 @@
-FROM osallou/my
+FROM quay.io/genouest/my
 
 RUN apt-get update && apt-get install -y curl ldap-utils openssh-client putty-tools
 RUN curl -sL https://sentry.io/get-cli/ | bash

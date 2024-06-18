@@ -1,7 +1,7 @@
 <div class="card bg-light">
 <div class="card-header">Status</div>
 <div class="card-body">
-<button *ngFor="let s of status" type="button" class="btn btn-primary">
+<button *ngFor="let s of status" type="button" class="p-button p-button-sm p-button-primary">
 {{s.title}} <span class="badge badge-light">{{s.value}}</span>
 <span class="sr-only">user in {{s.title}} status</span>
 </button>
@@ -11,7 +11,7 @@
 <div class="card bg-light">
 <div class="card-header">Email domain</div>
 <div class="card-body">
-<button *ngFor="let s of domains" type="button" class="btn btn-primary">
+<button *ngFor="let s of domains" type="button" class="p-button p-button-sm p-button-primary">
 {{s.title}} <span class="badge badge-light">{{s.value}}</span>
 <span class="sr-only">user in {{s.title}} mail domain</span>
 </button>
@@ -23,7 +23,7 @@
 <div class="card-body">
     <div *ngFor="let extra of extras | keyvalue">
         <div>{{extra.key}}</div>
-        <button *ngFor="let s of extra.value | keyvalue" type="button" class="btn btn-primary">
+        <button *ngFor="let s of extra.value | keyvalue" type="button" class="p-button p-button-sm p-button-primary">
         {{s.key}} <span class="badge badge-light">{{s.value}}</span>
         <span class="sr-only">user extra info {{s.key}}</span>
         </button>

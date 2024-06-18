@@ -16,6 +16,8 @@ const grpsrv = require('../core/group.service.js');
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
+const MAILER = CONFIG.general.mailer;
+const notif = require('../core/notif_'+MAILER+'.js');
 
 /* TODO : find somewhere smart to put this */
 const STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -39,6 +41,7 @@ exports.remove_user_from_project = remove_user_from_project;
 exports.activate_user = activate_user;
 exports.new_password = new_password;
 exports.new_random = new_random;
+exports.is_active = is_active;
 
 function new_random(len=16) {
     return crypto.randomBytes(32).toString('hex').slice(0,len);
@@ -55,6 +58,10 @@ function new_password(len=16) {
         strict: true,
         exclude: '^<>&;"/\'\\'
     });
+}
+
+function is_active(user){
+    return user.status === STATUS_ACTIVE;
 }
 
 // module functions
@@ -180,11 +187,17 @@ async function create_user(user, action_owner = 'auto') {
 
     user.cloud = false;
 
-    if (user.duration) {
-        user.expiration = new Date().getTime() + day_time*duration_list[user.duration];
+    if(!user.expiration) {
+        if (user.duration) {
+            user.expiration = new Date().getTime() + day_time*duration_list[user.duration];
+        }
+        else {
+            user.expiration = new Date().getTime() + day_time*360;
+        }
     }
-    else {
-        user.expiration = new Date().getTime() + day_time*360;
+
+    if(!user.registration) {
+        user.registration = new Date().getTime();
     }
 
     user.loginShell = '/bin/bash';
@@ -581,6 +594,10 @@ async function delete_user(user, action_owner = 'auto', message = '', sendmail =
         } catch(err) {
             logger.error('remove errors', err);
         }
+    }
+
+    if(notif.delete) {
+        notif.delete(user.email);
     }
 
     await idsrv.freeUserId(user.uidnumber);

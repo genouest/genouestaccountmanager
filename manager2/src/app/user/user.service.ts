@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
@@ -76,7 +76,18 @@ export class UserService {
         return this.http.post(
             environment.apiUrl + '/otp/register/' + userId,
             {},
-            httpOptions)       
+            httpOptions)
+    }
+
+    otpRemove(userId: string) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.delete(
+            environment.apiUrl + '/otp/register/' + userId,
+            httpOptions)
     }
 
     delete(userId: string, message: string, sendmail: boolean) {
@@ -132,12 +143,20 @@ export class UserService {
             httpOptions)
     }
 
-    expire(userId) {
+    expire(userId: string, sendmail: boolean) {
+
+        let params = new HttpParams()
+        if (!sendmail) {
+            params = params.append("sendmail", "false")
+        }
+
         let httpOptions = {
+            params: params
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
             //}),
         };
+
         return this.http.get(
             environment.apiUrl + '/user/' + userId + '/expire',
             httpOptions)
@@ -338,5 +357,16 @@ export class UserService {
             {'log': note},
             httpOptions
         )
+    }
+
+    unlock(userId) {
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': localStorage.getItem('my-api-key')
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/user/' + userId + '/unlock',
+            httpOptions)
     }
 }

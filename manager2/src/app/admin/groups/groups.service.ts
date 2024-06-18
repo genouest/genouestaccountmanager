@@ -20,6 +20,7 @@ export class GroupsService {
             //  'x-api-key': user.apikey
             //}),
         };
+
         return this.http.get(
             environment.apiUrl + '/group',
             httpOptions

@@ -11,6 +11,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { LogoutComponent } from './auth/logout/logout.component';
 import { HomeComponent } from './home/home.component';
 import { MyDeleteConfirmComponent } from './my-delete-confirm/my-delete-confirm.component';
+import { MyExpireConfirmComponent } from './my-expire-confirm/my-expire-confirm.component';
 import { TpsComponent } from './tps/tps.component';
 import { ProjectComponent } from './project/project.component';
 import { UsersComponent, MyStatusFilterPipe } from './admin/users/users.component';
@@ -74,6 +75,7 @@ export class SentryErrorHandler implements ErrorHandler {
         LogoutComponent,
         HomeComponent,
         MyDeleteConfirmComponent,
+        MyExpireConfirmComponent,
         TpsComponent,
         ProjectComponent,
         UsersComponent,

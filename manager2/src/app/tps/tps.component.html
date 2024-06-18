@@ -92,10 +92,38 @@
                         </tbody>
                     </table>
                 </div>
-                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="btn btn-secondary" (click)="cancel_reservation()">Cancel</button>
-                <button *ngIf="!selectedEvent.created && session_user.is_admin" class="btn btn-primary" (click)="create_reservation()">Create</button>
-                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="btn btn-warning" (click)="remove_reservation()">Remove</button>
+                <button *ngIf="!selectedEvent.created && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
+                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="p-button p-button-sm p-button-secondary" (click)="cancel_reservation()">Cancel</button>
+                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#extend">Extend</button>
+                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-warning" (click)="remove_reservation()">Remove</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" style="z-index: 1500;" id="extend" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Extend TP {{ selectedEvent ? selectedEvent.name : '' }}</h3>
+            </div>
+            <form aria-label="TP extension request form" role="form" class="user-form form-horizonal">
+                <div class="modal-body">
+                <div class="form-group row col-sm-8">
+                    <label for="new_expire">New Expiration Date&nbsp;
+                        <span style="color:red">(required)&nbsp;</span>
+                        <span class="glyphicon glyphicon-question-sign" title="Project expiration date" tooltip></span>
+                    </label>
+                    <input required id="new_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_expire" type="date" class="form-control"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                <div class="form-group row col-sm-12">
+                    <button type="button" class="p-button p-button-sm p-button-primary" (click)="extend_reservation()" data-dismiss="modal">Extend</button>
+                    <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -150,7 +178,7 @@
                         </label>
                     </div>
                 </div>
-                <button class="btn btn-secondary" (click)="reserve()">Reserve</button>
+                <button class="p-button p-button-sm p-button-secondary" (click)="reserve()">Reserve</button>
                 <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
                 <div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
             </div>

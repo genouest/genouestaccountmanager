@@ -1,6 +1,6 @@
 <div class="deleteConfirmation">
   <div *ngIf="!isDeleting" >
-    <button type="button" class="btn btn-danger btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i> Delete</button>
+    <button type="button" class="p-button p-button-sm p-button-danger btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i> Delete</button>
   </div>
   <div *ngIf="isDeleting">
     <div *ngIf="explainMessage">
@@ -14,8 +14,8 @@
       </div>
     </div>
     <div class="form-group row">
-      <button type="button" class="btn btn-secondary btn-xs" (click)="cancel()">Abort deletion</button>
-      <button type="button" class="btn btn-danger btn-xs"  (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
+      <button type="button" class="p-button p-button-sm p-button-secondary btn-xs" (click)="cancel()">Abort deletion</button>
+      <button type="button" class="p-button p-button-sm p-button-danger btn-xs"  (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
     </div>
   </div>
 </div>

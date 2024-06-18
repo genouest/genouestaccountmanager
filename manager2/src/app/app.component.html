@@ -1,5 +1,24 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <div class="container">
+  <div class="modal fade" id="confirmLogout" tabindex="-1" role="dialog" aria-labelledby="confirmLogoutLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="onfirmLogout">Confirm logout</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Do you wish to logout?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="p-button p-button-sm p-button-outline-secondary" data-dismiss="modal">Stay logged in</button>
+          <button type="button " routerLink="/logout" data-dismiss="modal" class="p-button p-button-sm p-button-danger ">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <nav class="navbar navbar-expand-lg navbar-fixed-top navbar-dark bg-dark navbar-inverse">
     <a class="navbar-brand" routerLink="/">
       <img class="d-inline-block align-top" style="width: 70px; height: 50px;" src="assets/images/logo-brand.png" alt="">
@@ -66,7 +85,7 @@
             <a class="nav-link" routerLink="/register"><span class="oi oi-plus" aria-hidden="true" title="register"> </span> Sign Up</a>
           </li>
           <li *ngIf="isLogged" class="nav-item">
-            <a  class="nav-link" routerLink="/logout">Log Out</a>
+            <a class="nav-link" href="#" data-toggle="modal" data-target="#confirmLogout">Log Out</a>
           </li>
         </ul>
     </div>

@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -16,7 +17,7 @@ import { Table } from 'primeng/table';
 export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
-
+    @ViewChild('modal') modal: ElementRef;
 
     new_project: any
     projects: any
@@ -106,24 +107,36 @@ export class ProjectComponent implements OnInit {
 
     }
 
-    ask_for_project() {
-        // todo: should rename it project_msg
-        this.request_msg = '';
-        this.request_err_msg = '';
-        if (!this.new_project.id) {
-            this.request_err_msg = 'Project name is mandatory';
-            return;
+    ask_for_project(form: NgForm) {
+        if (form.valid) {
+            // todo: should rename it project_msg
+            this.request_msg = '';
+            this.request_err_msg = '';
+            const project_to_send = { ...this.new_project, expire: new Date(this.new_project.expire).getTime()}
+            this.projectsService.askNew(project_to_send).subscribe(
+                resp => {
+                    this.request_msg = 'An email has been sent to an admin';
+                    this.new_project = {};
+                    this.closeModal();
+                },
+                err => {
+                    console.log('failed to get project users', err);
+                    this.request_err_msg = err.error.message;
+                }
+            )
+        } else {
+            form.control.markAllAsTouched();
+            console.log('Form is invalid');
         }
-        this.projectsService.askNew(this.new_project).subscribe(
-            resp => {
-                this.request_msg = 'An email have been sent to admin';
-                this.new_project = {};
-            },
-            err => {
-                console.log('failed to get project users', err);
-                this.request_err_msg = err.error.message;
-            }
-        )
+    }
+
+    closeModal() {
+        const modalElement = this.modal.nativeElement;
+        modalElement.style.display = 'none';
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        if (modalBackdrop) {
+            modalBackdrop.remove();
+        }
     }
 
     show_project_users(project) {
@@ -216,18 +229,6 @@ export class ProjectComponent implements OnInit {
             },
             err => this.request_err_msg = err.error.message
         );
-    }
-
-    date_convert = function timeConverter(tsp) {
-        let res;
-        try {
-            var a = new Date(tsp);
-            res = a.toISOString().substring(0, 10);
-        }
-        catch (e) {
-            res = '';
-        }
-        return res;
     }
 
     scroll(el: HTMLElement) {
