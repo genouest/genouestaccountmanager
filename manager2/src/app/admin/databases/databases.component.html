@@ -53,7 +53,7 @@
           </div>
         </div>
         <button class="btn btn-sm btn-success" (click)="validate_selected_databases()">Accept</button>
-        <button class="btn btn-sm btn-danger " (click)="refuse_selected_databases()">Reject</button>
+        <button class="btn btn-sm btn-danger" (click)="refuse_selected_databases()">Reject</button>
       </div>
     </div>
   </div>
@@ -94,6 +94,7 @@
             <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
             <th pSortableColumn="expire">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
             <th pSortableColumn="single_user">Sole User <p-sortIcon field="single_user"></p-sortIcon></th>
+            <th>Delete</th>
           </tr>
         </ng-template>
 
@@ -109,6 +110,7 @@
               <i *ngIf="database.single_user" class="pi pi-check" style="color: green;" aria-label="Single User"></i>
               <i *ngIf="!database.single_user" class="pi pi-times" style="color: red;" aria-label="Multiple Users"></i>
             </td>
+            <td><app-my-delete-confirm [onConfirm]="db_delete.bind(this)" [data]="database"></app-my-delete-confirm></td>
           </tr>
         </ng-template>
 

@@ -73,6 +73,22 @@ export class DatabasesComponent implements OnInit {
     }
 
 
+    db_delete(db: Database) {
+        this.msg = '';
+        this.err_msg = '';
+        this.dbService.remove(db).subscribe(
+            resp => {
+                this.msg = resp['message'];
+                this.db_list();
+            },
+            err => {
+                this.err_msg = err.error.message;
+                console.log('failed to delete database');
+            }
+        );
+    }
+
+
     declare_db() {
         this.msg = '';
         this.err_msg = '';
