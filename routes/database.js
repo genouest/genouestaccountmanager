@@ -10,9 +10,7 @@ const CONFIG = my_conf;
 const dbsrv = require('../core/db.service.js');
 const udbsrv = require('../core/user_db.service.js');
 const sansrv = require('../core/sanitize.service.js');
-const maisrv = require('../core/mail.service.js');
 const rolsrv = require('../core/role.service.js');
-const usrsrv = require('../core/user.service.js');
 
 const mysql = require('mysql');
 const winston = require('winston');
@@ -234,7 +232,7 @@ router.post('/requestdatabase/:id', async function(req, res) {
         expire: req.body.expire,
         single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
-    let create_db = !(req.body.create === false || (req.body.type && req.body.type !== 'mysql'))
+    let create_db = !(req.body.create === false || (req.body.type && req.body.type !== 'mysql'));
     if (create_db) {
         if (!req.params.id.match(/^[0-9a-z_]+$/)) {
             res.status(403).send({ database: null, message: 'Database name must be alphanumeric [0-9a-z_]' });
