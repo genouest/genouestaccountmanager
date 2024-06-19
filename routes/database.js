@@ -129,7 +129,6 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         'logs': []
     });
     res.send({ message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new });
-    return;
 });
 
 
@@ -159,7 +158,6 @@ router.get('/database', async function(req, res) {
     }
     let databases = await dbsrv.mongo_databases().find(filter).toArray();
     res.send(databases);
-    return;
 });
 
 
@@ -187,7 +185,6 @@ router.get('/database/owner/:owner', async function(req, res) {
 
     let databases = await dbsrv.mongo_databases().find({ owner: req.params.owner }).toArray();
     res.send(databases);
-    return;
 });
 
 
@@ -374,7 +371,6 @@ router.get('/pending/database', async function (req, res) {
 
     let pendings = await dbsrv.mongo_pending_databases().find({ }).toArray();
     res.send(pendings);
-    return;
 });
 
 
@@ -401,55 +397,12 @@ router.delete('/database/:id', async function(req, res) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
-
-    let filter = { name: req.params.id };
-    if(!is_admin) {
-        filter['owner'] = session_user.uid;
-    }
-    let database = await dbsrv.mongo_databases().findOne(filter);
-    if(!database || (database.type !== undefined && database.type != 'mysql')) {
-        await dbsrv.mongo_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({
-            'owner': session_user.uid,
-            'date': new Date().getTime(),
-            'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid,
-            'logs': []
-        });
+    try {
+        await udbsrv.delete_db(req.params.id, session_user.uid, is_admin)
         res.send({ message: 'Database removed' });
-        return;
-    } else {
-        await dbsrv.mongo_databases().deleteOne(filter);
-        let dropusersql = `DROP USER IF EXISTS '${req.params.id}'@'%';\n`;
-        let dropdbsql = `DROP DATABASE IF EXISTS ${req.params.id};\n`;
-        try {
-            await querydb(dropusersql);
-            await querydb(dropdbsql);
-        } catch(err) {
-            logger.error('sql error', err);
-            res.status(500).send({ message: 'Could not delete database: ' + err });
-            return;
-        }
-        await dbsrv.mongo_events().insertOne({
-            'owner': session_user.uid,
-            'date': new Date().getTime(),
-            'action': 'database ' + req.params.id + ' deleted by ' +  session_user.uid,
-            'logs': []
-        });
-        res.send({ message: 'Database removed' });
-        return;
-        /*
-        // eslint-disable-next-line no-unused-vars
-        connection.query(sql, function(err, results) {
-            let sql = `DROP DATABASE ${req.params.id};\n`;
-            // eslint-disable-next-line no-unused-vars
-            connection.query(sql, async function(err, results) {
-                await dbsrv.mongo_events().insertOne({'owner': session_user.uid,'date': new Date().getTime(), 'action': 'database ' + req.params.id+ ' deleted by ' +  session_user.uid, 'logs': []});
-                res.send({message: 'Database removed'});
-                res.end();
-                return;
-            });
-        });
-        */
+    } catch (e) {
+        logger.error(e);
+        res.status(e.code || 500).send({ message: e.message || 'Server Error, contact admin' });
     }
 });
 
@@ -482,24 +435,13 @@ router.delete('/pending/database/:id', async function(req, res) {
     if(!is_admin) {
         filter['owner'] = session_user.uid;
     }
-    let pending_database = await dbsrv.mongo_pending_databases().findOne(filter);
-    if(!pending_database || (pending_database.type !== undefined && pending_database.type != 'mysql')) {
-        await dbsrv.mongo_pending_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({
-            'owner': session_user.uid,
-            'date': new Date().getTime(),
-            'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid,
-            'logs': []
-        });
-    } else {
-        await dbsrv.mongo_pending_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({
-            'owner': session_user.uid,
-            'date': new Date().getTime(),
-            'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid,
-            'logs': []
-        });
-    }
+    await dbsrv.mongo_pending_databases().deleteOne(filter);
+    await dbsrv.mongo_events().insertOne({
+        'owner': session_user.uid,
+        'date': new Date().getTime(),
+        'action': 'database request ' + req.params.id + ' deleted by ' +  session_user.uid,
+        'logs': []
+    });
     res.send({ message: 'Database removed' });
     return;
 });
@@ -512,7 +454,7 @@ router.delete_dbs = async function(user) {
         return true;
     }
     let res = await Promise.all(databases.map(function(database) {
-        return udbsrv.delete_db(user, database.name);
+        return udbsrv.delete_db(database.name, user.uid, user.is_admin);
     }));
     return res;
 };

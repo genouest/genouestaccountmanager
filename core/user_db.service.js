@@ -147,41 +147,30 @@ async function create_db(new_db, user, id) {
 }
 
 
-async function delete_db(user, db_id) {
+async function delete_db(db_id, user_id, is_admin) {
     logger.debug('delete_db', db_id);
-    let filter = {name: db_id};
-    if(!user.is_admin) {
-        filter['owner'] = user.uid;
+    let filter = { name: db_id };
+    if(!is_admin) {
+        filter['owner'] = user_id;
     }
-    let database = await dbsrv.mongo_databases().findOne({name: db_id});
-    if(!database || (database.type !== undefined && database.type != 'mysql')) {
+    let database = await dbsrv.mongo_databases().findOne(filter);
+    await dbsrv.mongo_databases().deleteOne(filter);
+    if(database && (database.type === undefined || database.type == 'mysql')) {
         await dbsrv.mongo_databases().deleteOne(filter);
-        await dbsrv.mongo_events().insertOne({
-            'owner': user.uid,
-            'date': new Date().getTime(),
-            'action': 'database ' + db_id + ' deleted by ' +  user.uid, 'logs': []
-        });
-        return true;
-    } else {
-        await dbsrv.mongo_databases().deleteOne(filter);
+        let dropusersql = `DROP USER IF EXISTS '${db_id}'@'%';\n`;
+        let dropdbsql = `DROP DATABASE IF EXISTS ${db_id};\n`;
         try {
-            let dropuser = `DROP USER '${db_id}'@'%';\n`;
-            await querydb(dropuser);
-            let dropdb = `DROP DATABASE ${db_id};\n`;
-            await querydb(dropdb);
+            await querydb(dropusersql);
+            await querydb(dropdbsql);
         } catch(err) {
-            await dbsrv.mongo_events().insertOne({
-                'owner': user.uid,
-                'date': new Date().getTime(),
-                'action': 'Error: database ' + db_id + ' could not be deleted by ' + user.uid, 'logs': []
-            });
-            return false;
+            logger.error('sql error', err);
+            throw { code: 500, message: 'Could not delete database: ' + err };
         }
-        await dbsrv.mongo_events().insertOne({
-            'owner': user.uid,
-            'date': new Date().getTime(),
-            'action': 'database ' + db_id + ' deleted by ' + user.uid, 'logs': []
-        });
-        return true;
     }
+    await dbsrv.mongo_events().insertOne({
+        'owner': user_id,
+        'date': new Date().getTime(),
+        'action': 'database ' + db_id + ' deleted by ' +  user_id,
+        'logs': []
+    });
 }
