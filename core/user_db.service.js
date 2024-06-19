@@ -137,11 +137,11 @@ async function create_db(new_db, user, id) {
     } catch(error) {
         logger.error(error);
     }
-    await dbsrv.mongo_pending_databases().deleteOne({ name: db.name });
+    await dbsrv.mongo_pending_databases().deleteOne({ name: new_db.name });
     await dbsrv.mongo_events().insertOne({
         'owner': user.uid,
         'date': new Date().getTime(),
-        'action': 'database ' + id + ' created for ' +  db.owner,
+        'action': 'database ' + id + ' created for ' +  new_db.owner,
         'logs': []
     });
 }
