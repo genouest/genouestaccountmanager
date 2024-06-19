@@ -26,6 +26,7 @@
                   <th>Host</th>
                   <th>Size (GB)</th>
                   <th>Expiration</th>
+                  <th>Sole User</th>
                 </tr>
               </ng-template>
 
@@ -41,6 +42,10 @@
                   <td>{{pending.host}}</td> 
                   <td>{{pending.size}}</td>
                   <td>{{pending.expire | date}}</td>
+                  <td>
+                    <i *ngIf="pending.single_user" class="pi pi-check" style="color: green;" aria-label="Single User"></i>
+                    <i *ngIf="!pending.single_user" class="pi pi-times" style="color: red;" aria-label="Multiple Users"></i>
+                  </td>
                 </tr>
               </ng-template>
 
@@ -66,7 +71,7 @@
         [rows]="10"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10,25,50]"
-        [globalFilterFields]="['name', 'type', 'host', 'owner']"
+        [globalFilterFields]="['name', 'type', 'host', 'owner', 'size', 'expire', 'single_user']"
         [filterDelay]="0"
         sortMode="multiple"
       >
@@ -86,8 +91,9 @@
             <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
             <th pSortableColumn="type">Type <p-sortIcon field="type"></p-sortIcon></th>
             <th pSortableColumn="host">Host <p-sortIcon field="host"></p-sortIcon></th>
-            <th pSortableColumn="host">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
-            <th pSortableColumn="host">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
+            <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
+            <th pSortableColumn="expire">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
+            <th pSortableColumn="single_user">Sole User <p-sortIcon field="single_user"></p-sortIcon></th>
           </tr>
         </ng-template>
 
@@ -99,6 +105,10 @@
             <td>{{database.host}}</td>
             <td>{{database.size}}</td>
             <td>{{database.expire | date}}</td>
+            <td>
+              <i *ngIf="database.single_user" class="pi pi-check" style="color: green;" aria-label="Single User"></i>
+              <i *ngIf="!database.single_user" class="pi pi-times" style="color: red;" aria-label="Multiple Users"></i>
+            </td>
           </tr>
         </ng-template>
 
