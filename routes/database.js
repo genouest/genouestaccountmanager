@@ -250,7 +250,6 @@ router.post('/database/:id', async function(req, res) {
         }
 
         await dbsrv.mongo_databases().insertOne(db);
-        await dbsrv.mongo_pending_databases().deleteOne({ name: req.params.id });
         if (!create_db) {
             await dbsrv.mongo_events().insertOne({
                 owner: session_user.uid,
@@ -370,19 +369,6 @@ router.delete('/pending/database/:id', async function(req, res) {
     res.send({ message: 'Database removed' });
     return;
 });
-
-
-router.delete_dbs = async function(user) {
-    let databases = await dbsrv.mongo_databases().find({ 'owner': user.uid }).toArray();
-    logger.debug('delete_dbs');
-    if(!databases) {
-        return true;
-    }
-    let res = await Promise.all(databases.map(function(database) {
-        return udbsrv.delete_db(database.name, user.uid, user.is_admin);
-    }));
-    return res;
-};
 
 
 module.exports = router;

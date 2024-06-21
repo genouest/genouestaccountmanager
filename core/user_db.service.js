@@ -15,6 +15,7 @@ const usrsrv = require('../core/user.service.js');
 exports.create_db_request = create_db_request;
 exports.create_db = create_db;
 exports.delete_db = delete_db;
+exports.delete_dbs = delete_dbs;
 
 
 var pool = null;
@@ -172,4 +173,17 @@ async function delete_db(db_id, user_id, is_admin) {
         'action': 'database ' + db_id + ' deleted by ' +  user_id,
         'logs': []
     });
+}
+
+
+async function delete_dbs(user) {
+    let databases = await dbsrv.mongo_databases().find({ 'owner': user.uid }).toArray();
+    logger.debug('delete_dbs');
+    if(!databases) {
+        return true;
+    }
+    let res = await Promise.all(databases.map(function(database) {
+        return delete_db(database.name, user.uid, user.is_admin);
+    }));
+    return res;
 }
