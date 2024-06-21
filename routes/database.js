@@ -296,7 +296,6 @@ router.post('/database/declare/:id', async function(req, res) {
         expire: req.body.expire,
         single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
-    let create_db = !(req.body.create === false || (req.body.type && req.body.type !== 'mysql'));
     try {
         let database = await dbsrv.mongo_databases().findOne({ name: db.name });
         if (database) {
