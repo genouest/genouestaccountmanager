@@ -735,7 +735,7 @@ describe('My', () => {
 
         it('User can not validate database', (done) => {
             let db = {
-                name: test_db_id,
+                name: test_db_id2,
                 type: 'mysql',
                 usage: 'To test',
                 size: '10',
@@ -745,7 +745,7 @@ describe('My', () => {
             };
             
             chai.request('http://localhost:3000')
-                .post('/database/create/' + test_db_id)
+                .post('/database/create/' + test_db_id2)
                 .set('X-Api-Key', token_id)
                 .send(db)
                 .end((err, res) => {
