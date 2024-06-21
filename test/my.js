@@ -105,7 +105,7 @@ describe('My', () => {
                                 // check email confirmation sent
                                 let gotMail = false;
                                 let msg_list = JSON.parse(resMsg.text);
-                                for(var i=0;i<msg_list.items.length;i++){
+                                for(var i = 0; i < msg_list.items.length; i++){
                                     let raw = msg_list.items[i].Raw;
                                     let mailIndex = raw.To.indexOf(test_user_id + '@my.org');
                                     if(mailIndex >= 0){
@@ -160,7 +160,7 @@ describe('My', () => {
                     expect(res).to.have.status(200);
                     assert(res.body.length >= 1);
                     let pending_user = null;
-                    for(var i=0;i<res.body.length;i++){
+                    for(var i = 0; i < res.body.length; i++){
                         if(res.body[i].uid == test_user_id){
                             pending_user = res.body[i];
                         }
@@ -180,13 +180,13 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     let group_exists = false;
-                    for(var i=0;i<res.body.length;i++){
-                        if(res.body[i].name == test_group_id){
+                    for(var i = 0; i < res.body.length; i++) {
+                        if(res.body[i].name == test_group_id) {
                             group_exists = true;
                             break;
                         }
                     }
-                    assert(! group_exists);
+                    assert(!group_exists);
                     done();
                 });
         });
@@ -202,8 +202,8 @@ describe('My', () => {
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             let group_exists = false;
-                            for(var i=0;i<res.body.length;i++){
-                                if(res.body[i].name == test_group_id){
+                            for(var i = 0; i < res.body.length; i++) {
+                                if(res.body[i].name == test_group_id) {
                                     group_exists = true;
                                     break;
                                 }
@@ -226,7 +226,7 @@ describe('My', () => {
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             let group_exists = false;
-                            for(var i=0;i<res.body.length;i++){
+                            for(var i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_group_id2){
                                     group_exists = true;
                                     break;
@@ -250,7 +250,7 @@ describe('My', () => {
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             let group_exists = false;
-                            for(var i=0;i<res.body.length;i++){
+                            for(var i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_group_id3){
                                     group_exists = true;
                                     break;
@@ -283,7 +283,7 @@ describe('My', () => {
                                         // check email confirmation sent
                                         let gotMail = false;
                                         let msg_list = JSON.parse(resMsg.text);
-                                        for(var i=0;i<msg_list.items.length;i++){
+                                        for(var i = 0; i < msg_list.items.length; i++){
                                             let raw = msg_list.items[i].Raw;
                                             let mailIndex = raw.To.indexOf(test_user_id + '@my.org');
                                             if(mailIndex >= 0 && raw.Data.indexOf('Subject: my account activation') >= 0){
@@ -433,7 +433,7 @@ describe('My', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
-                            for(let i=0; i<res.body.length; i++){
+                            for(let i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_web_id){
                                     found = true;
                                     break;
@@ -456,7 +456,7 @@ describe('My', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
-                            for(let i=0; i<res.body.length; i++){
+                            for(let i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_web_id && res.body[i].owner == 'user2'){
                                     found = true;
                                     break;
@@ -481,7 +481,7 @@ describe('My', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
-                            for(let i=0; i<res.body.length; i++){
+                            for(let i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_web_id){
                                     found = true;
                                     break;
@@ -745,8 +745,8 @@ describe('My', () => {
             };
             
             chai.request('http://localhost:3000')
-                .post('/database/create/' + test_db_id2)
-                .set('X-Api-Key', token_id)
+                .post('/database/create/' + db.name)
+                .set('X-Api-Key', user_token_id)
                 .send(db)
                 .end((err, res) => {
                     expect(res).to.have.status(401);
@@ -844,7 +844,7 @@ describe('My', () => {
                 .end((err, res) => {
                     let g2_was_deleted = true;
                     let admin_was_not_deleted = false;
-                    for(var i=0;i<res.body.length;i++){
+                    for(var i = 0; i < res.body.length; i++){
                         if(res.body[i].name == test_group_id2){
                             g2_was_deleted = false;
                         }
