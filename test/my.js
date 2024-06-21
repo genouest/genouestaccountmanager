@@ -585,7 +585,7 @@ describe('My', () => {
             };
             
             chai.request('http://localhost:3000')
-                .post('/database/' + test_db_id)
+                .post('/database/create/' + test_db_id)
                 .set('X-Api-Key', token_id)
                 .send(db)
                 .end((err, res) => {
@@ -707,10 +707,9 @@ describe('My', () => {
                 expire: String(Date.now() + 10000),
                 single_user: true,
                 create: true
-
             };
             chai.request('http://localhost:3000')
-                .post('/requestdatabase/' + test_db_id2)
+                .post('/database/request/' + test_db_id2)
                 .set('X-Api-Key', user_token_id)
                 .send(db)
                 .end((err, res) => {
@@ -733,10 +732,30 @@ describe('My', () => {
                 });
         });
 
+
+        it('User can not validate database', (done) => {
+            let db = {
+                name: test_db_id,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
+            };
+            
+            chai.request('http://localhost:3000')
+                .post('/database/create/' + test_db_id)
+                .set('X-Api-Key', token_id)
+                .send(db)
+                .end((err, res) => {
+                    expect(res).to.have.status(401);
+                    done();
+                });
+        });
+
        
-
         it('User delete database', (done) => {
-
             chai.request('http://localhost:3000')
                 .delete('/database/' + test_db_id)
                 .set('X-Api-Key', user_token_id)
