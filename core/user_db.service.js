@@ -156,7 +156,6 @@ async function delete_db(db_id, user_id, is_admin) {
     let database = await dbsrv.mongo_databases().findOne(filter);
     await dbsrv.mongo_databases().deleteOne(filter);
     if(database && (database.type === undefined || database.type == 'mysql')) {
-        await dbsrv.mongo_databases().deleteOne(filter);
         let dropusersql = `DROP USER IF EXISTS '${db_id}'@'%';\n`;
         let dropdbsql = `DROP DATABASE IF EXISTS ${db_id};\n`;
         try {

@@ -110,15 +110,11 @@ export class DatabasesComponent implements OnInit {
     }
 
 
-    pending_list(refresh_requests = false) {
+    pending_list() {
         this.pending_databases = [];
         this.dbService.list_pending(true).subscribe(
             resp => {
                 if (resp.length == 0) {
-                    this.pending_number = 0;
-                    return;
-                }
-                if (refresh_requests) {
                     this.pending_number = 0;
                     return;
                 }
@@ -153,7 +149,6 @@ export class DatabasesComponent implements OnInit {
             this.dbService.refuse(ws).subscribe(
                 resp => {
                     this.dbmsg = resp['message'];
-                    this.pending_list();
                 },
                 err => {
                     this.dbmsg_error = err.error.message;
@@ -161,6 +156,7 @@ export class DatabasesComponent implements OnInit {
                 }
             );
         });
+        this.pending_list();
     }
 
 
@@ -181,8 +177,6 @@ export class DatabasesComponent implements OnInit {
             )).subscribe(
                 resp => {
                     this.dbmsg = resp['message'];
-                    this.pending_list();
-                    this.db_list();
                 },
                 err => {
                     this.dbmsg_error = err.error.message;
@@ -190,5 +184,7 @@ export class DatabasesComponent implements OnInit {
                 }
             );
         }
+        this.pending_list();
+        this.db_list();
     }
 }
