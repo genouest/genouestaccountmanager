@@ -51,14 +51,24 @@ export class DatabaseService {
 
     constructor(private http: HttpClient, private authService: AuthService) { }
 
-    add(db: Database) {
+    create(db: Database) {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.post(environment.apiUrl + '/database/' + db.name, db.toJson(), httpOptions);
+        return this.http.post(environment.apiUrl + '/database/create/' + db.name, db.toJson(), httpOptions);
+    }
+
+    declare(db: Database) {
+        //let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.post(environment.apiUrl + '/database/declare/' + db.name, db.toJson(), httpOptions);
     }
     
     ask(db: Database) {
@@ -68,7 +78,7 @@ export class DatabaseService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.post(environment.apiUrl + '/requestdatabase/' + db.name, db.toJson(), httpOptions);
+        return this.http.post(environment.apiUrl + '/database/request/' + db.name, db.toJson(), httpOptions);
     }
 
     list(): Observable<Database[]> {

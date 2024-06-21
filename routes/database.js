@@ -1,7 +1,6 @@
 
 const express = require('express');
 var router = express.Router();
-const Promise = require('promise');
 
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
@@ -120,7 +119,7 @@ router.get('/database/owner/:owner', async function(req, res) {
 });
 
 
-router.post('/requestdatabase/:id', async function(req, res) {
+router.post('/database/request/:id', async function(req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send({ message: 'Not authorized' });
         return;
@@ -190,7 +189,7 @@ router.post('/requestdatabase/:id', async function(req, res) {
 });
 
 
-router.post('/database/:id', async function(req, res) {
+router.post('/database/create/:id', async function(req, res) {
     if (!req.locals.logInfo.is_logged) {
         res.status(401).send({ message: 'Not authorized' });
         return;
@@ -231,16 +230,13 @@ router.post('/database/:id', async function(req, res) {
         expire: req.body.expire,
         single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
-    let create_db = !(req.body.create === false || (req.body.type && req.body.type !== 'mysql'));
-    if (create_db) {
-        if (!req.params.id.match(/^[0-9a-z_]+$/)) {
-            res.status(403).send({ database: null, message: 'Database name must be alphanumeric [0-9a-z_]' });
-            return;
-        }
-        if (req.params.id.length < 5) {
-            res.status(403).send({ database: null, message: 'Database name length must be >= 5' });
-            return;
-        }
+    if (!req.params.id.match(/^[0-9a-z_]+$/)) {
+        res.status(403).send({ database: null, message: 'Database name must be alphanumeric [0-9a-z_]' });
+        return;
+    }
+    if (req.params.id.length < 5) {
+        res.status(403).send({ database: null, message: 'Database name length must be >= 5' });
+        return;
     }
     try {
         let database = await dbsrv.mongo_databases().findOne({ name: db.name });
@@ -250,18 +246,72 @@ router.post('/database/:id', async function(req, res) {
         }
 
         await dbsrv.mongo_databases().insertOne(db);
-        if (!create_db) {
-            await dbsrv.mongo_events().insertOne({
-                owner: session_user.uid,
-                date: new Date().getTime(),
-                action: `database ${req.params.id} declared by ${session_user.uid}`,
-                logs: []
-            });
-            res.send({ message: 'Database declared' });
-        } else {
-            await udbsrv.create_db(db, session_user, req.params.id);
-            res.send({ message: 'Database created, credentials will be sent by mail' });
+        await udbsrv.create_db(db, session_user, req.params.id);
+        res.send({ message: 'Database created, credentials will be sent by mail' });
+    } catch (e) {
+        logger.error(e);
+        res.status(e.code || 500).send({ message: e.message || 'Server Error, contact admin' });
+    }
+});
+
+
+router.post('/database/declare/:id', async function(req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
+        return;
+    }
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
+        return;
+    }
+    let session_user;
+    let is_admin;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        is_admin = await rolsrv.is_admin(session_user);
+    } catch (e) {
+        logger.error(e);
+        res.status(404).send({ message: 'User session not found' });
+        return;
+    }
+    if (!session_user) {
+        res.status(401).send({ message: 'Not authorized' });
+        return;
+    }
+    if (!is_admin) {
+        res.status(401).send({ message: 'Only admins can declare a database' });
+        return;
+    }
+    if (!req.body.expire) {
+        res.status(403).send({ message: 'No expiration date' });
+        return;
+    }
+    let db = {
+        owner: req.body.owner ? req.body.owner : session_user.uid,
+        name: req.params.id,
+        type: req.body.type ? req.body.type : 'mysql',
+        host: req.body.host && sansrv.sanitize(req.body.host) ? req.body.host : CONFIG.mysql.host,
+        usage: req.body.usage ? req.body.usage : '',
+        size: req.body.size ? req.body.size : '',
+        expire: req.body.expire,
+        single_user: req.body.single_user !== undefined ? req.body.single_user : true
+    };
+    let create_db = !(req.body.create === false || (req.body.type && req.body.type !== 'mysql'));
+    try {
+        let database = await dbsrv.mongo_databases().findOne({ name: db.name });
+        if (database) {
+            res.status(403).send({ database: null, message: 'Database already exists, please use another name' });
+            return;
         }
+
+        await dbsrv.mongo_databases().insertOne(db);
+        await dbsrv.mongo_events().insertOne({
+            owner: session_user.uid,
+            date: new Date().getTime(),
+            action: `database ${req.params.id} declared by ${session_user.uid}`,
+            logs: []
+        });
+        res.send({ message: 'Database declared' });
     } catch (e) {
         logger.error(e);
         res.status(e.code || 500).send({ message: e.message || 'Server Error, contact admin' });

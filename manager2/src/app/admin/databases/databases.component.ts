@@ -96,7 +96,7 @@ export class DatabasesComponent implements OnInit {
             this.err_msg = 'no database or owner selected';
             return;
         }
-        this.dbService.add(this.db).subscribe(
+        this.dbService.declare(this.db).subscribe(
             resp => {
                 this.msg = resp['message'];
                 this.db = new Database('', 'mysql', '', '', false, "", "", 0, true);
@@ -164,7 +164,7 @@ export class DatabasesComponent implements OnInit {
         for (var i = 0; i < this.selecteddb.length; i++) {
             this.dbmsg='';
             this.dbmsg_error='';
-            this.dbService.add(new Database(
+            this.dbService.create(new Database(
                 this.selecteddb[i].name,
                 this.selecteddb[i].type,
                 this.selecteddb[i].host,
