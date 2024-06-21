@@ -23,6 +23,7 @@ var test_group_id2 = 'test2' + Math.random().toString(10).slice(-6);
 var test_group_id3 = 'test3' + Math.random().toString(10).slice(-6);
 var test_web_id = 'webtest' + Math.random().toString(10).slice(-6);
 var test_db_id = 'dbtest' + Math.random().toString(10).slice(-6);
+var test_db_id2 = 'dbtest2' + Math.random().toString(10).slice(-6);
 var test_project_id = 'projecttest' + Math.random().toString(10).slice(-6);
 var test_tp_id = 'tptest' + Math.random().toString(10).slice(-6);
 var user_test_password = null;
@@ -104,7 +105,7 @@ describe('My', () => {
                                 // check email confirmation sent
                                 let gotMail = false;
                                 let msg_list = JSON.parse(resMsg.text);
-                                for(var i=0;i<msg_list.items.length;i++){
+                                for(var i = 0; i < msg_list.items.length; i++){
                                     let raw = msg_list.items[i].Raw;
                                     let mailIndex = raw.To.indexOf(test_user_id + '@my.org');
                                     if(mailIndex >= 0){
@@ -159,7 +160,7 @@ describe('My', () => {
                     expect(res).to.have.status(200);
                     assert(res.body.length >= 1);
                     let pending_user = null;
-                    for(var i=0;i<res.body.length;i++){
+                    for(var i = 0; i < res.body.length; i++){
                         if(res.body[i].uid == test_user_id){
                             pending_user = res.body[i];
                         }
@@ -179,13 +180,13 @@ describe('My', () => {
                 .set('X-Api-Key', token_id)
                 .end((err, res) => {
                     let group_exists = false;
-                    for(var i=0;i<res.body.length;i++){
-                        if(res.body[i].name == test_group_id){
+                    for(var i = 0; i < res.body.length; i++) {
+                        if(res.body[i].name == test_group_id) {
                             group_exists = true;
                             break;
                         }
                     }
-                    assert(! group_exists);
+                    assert(!group_exists);
                     done();
                 });
         });
@@ -201,8 +202,8 @@ describe('My', () => {
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             let group_exists = false;
-                            for(var i=0;i<res.body.length;i++){
-                                if(res.body[i].name == test_group_id){
+                            for(var i = 0; i < res.body.length; i++) {
+                                if(res.body[i].name == test_group_id) {
                                     group_exists = true;
                                     break;
                                 }
@@ -225,7 +226,7 @@ describe('My', () => {
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             let group_exists = false;
-                            for(var i=0;i<res.body.length;i++){
+                            for(var i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_group_id2){
                                     group_exists = true;
                                     break;
@@ -249,7 +250,7 @@ describe('My', () => {
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             let group_exists = false;
-                            for(var i=0;i<res.body.length;i++){
+                            for(var i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_group_id3){
                                     group_exists = true;
                                     break;
@@ -282,7 +283,7 @@ describe('My', () => {
                                         // check email confirmation sent
                                         let gotMail = false;
                                         let msg_list = JSON.parse(resMsg.text);
-                                        for(var i=0;i<msg_list.items.length;i++){
+                                        for(var i = 0; i < msg_list.items.length; i++){
                                             let raw = msg_list.items[i].Raw;
                                             let mailIndex = raw.To.indexOf(test_user_id + '@my.org');
                                             if(mailIndex >= 0 && raw.Data.indexOf('Subject: my account activation') >= 0){
@@ -432,7 +433,7 @@ describe('My', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
-                            for(let i=0; i<res.body.length; i++){
+                            for(let i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_web_id){
                                     found = true;
                                     break;
@@ -455,7 +456,7 @@ describe('My', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
-                            for(let i=0; i<res.body.length; i++){
+                            for(let i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_web_id && res.body[i].owner == 'user2'){
                                     found = true;
                                     break;
@@ -480,7 +481,7 @@ describe('My', () => {
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
-                            for(let i=0; i<res.body.length; i++){
+                            for(let i = 0; i < res.body.length; i++){
                                 if(res.body[i].name == test_web_id){
                                     found = true;
                                     break;
@@ -571,6 +572,42 @@ describe('My', () => {
                         });
                 });
         });
+        it('Admin validates database', (done) => {
+            let db = {
+                name: test_db_id,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
+
+            };
+            
+            chai.request('http://localhost:3000')
+                .post('/database/create/' + test_db_id)
+                .set('X-Api-Key', token_id)
+                .send(db)
+                .end((err, res) => {
+                    expect(res).to.have.status(200);
+                    chai.request('http://localhost:3000')
+                        .get('/database')
+                        .set('X-Api-Key', token_id)
+                        .end((err, res) => {
+  
+                            expect(res).to.have.status(200);
+                            let found = false;
+                            for(let i=0; i<res.body.length; i++){
+                                if(res.body[i].name == test_db_id){
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            assert(found);
+                            done();
+                        });
+                });
+        });
 
     });
 
@@ -632,25 +669,59 @@ describe('My', () => {
                 });
         });
 
-        it('User declare database', (done) => {
+        // it('User declare database', (done) => {
+        //     let db = {
+        //         name: test_db_id,
+        //         type: 'mysql'
+        //     };
+        //     chai.request('http://localhost:3000')
+        //         .post('/database/' + test_db_id)
+        //         .set('X-Api-Key', user_token_id)
+        //         .send(db)
+        //         .end((err, res) => {
+        //             expect(res).to.have.status(200);
+        //             chai.request('http://localhost:3000')
+        //                 .get('/database')
+        //                 .set('X-Api-Key', user_token_id)
+        //                 .end((err, res) => {
+        //                     expect(res).to.have.status(200);
+        //                     let found = false;
+        //                     for(let i=0; i<res.body.length; i++){
+        //                         if(res.body[i].name == test_db_id){
+        //                             found = true;
+        //                             break;
+        //                         }
+        //                     }
+        //                     assert(found);
+        //                     done();
+        //                 });
+        //         });
+        // });
+
+        it('User requests database', (done) => {
             let db = {
-                name: test_db_id,
-                type: 'mysql'
+                name: test_db_id2,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
             };
             chai.request('http://localhost:3000')
-                .post('/database/' + test_db_id)
+                .post('/database/request/' + test_db_id2)
                 .set('X-Api-Key', user_token_id)
                 .send(db)
                 .end((err, res) => {
                     expect(res).to.have.status(200);
                     chai.request('http://localhost:3000')
-                        .get('/database')
-                        .set('X-Api-Key', user_token_id)
+                        .get('/pending/database')
+                        .set('X-Api-Key', token_id)
                         .end((err, res) => {
                             expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
-                                if(res.body[i].name == test_db_id){
+                                if(res.body[i].name == test_db_id2){
                                     found = true;
                                     break;
                                 }
@@ -661,8 +732,30 @@ describe('My', () => {
                 });
         });
 
-        it('User delete database', (done) => {
 
+        it('User can not validate database', (done) => {
+            let db = {
+                name: test_db_id2,
+                type: 'mysql',
+                usage: 'To test',
+                size: '10',
+                expire: String(Date.now() + 10000),
+                single_user: true,
+                create: true
+            };
+            
+            chai.request('http://localhost:3000')
+                .post('/database/create/' + db.name)
+                .set('X-Api-Key', user_token_id)
+                .send(db)
+                .end((err, res) => {
+                    expect(res).to.have.status(401);
+                    done();
+                });
+        });
+
+       
+        it('User delete database', (done) => {
             chai.request('http://localhost:3000')
                 .delete('/database/' + test_db_id)
                 .set('X-Api-Key', user_token_id)
@@ -751,7 +844,7 @@ describe('My', () => {
                 .end((err, res) => {
                     let g2_was_deleted = true;
                     let admin_was_not_deleted = false;
-                    for(var i=0;i<res.body.length;i++){
+                    for(var i = 0; i < res.body.length; i++){
                         if(res.body[i].name == test_group_id2){
                             g2_was_deleted = false;
                         }

@@ -7,10 +7,9 @@ let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
 
 /* TODO Remove this */
-const fdbs = require('../routes/database.js');
 const fwebs = require('../routes/web.js');
-
 const dbsrv = require('../core/db.service.js');
+const udbsrv = require('../core/user_db.service.js');
 const usrsrv = require('../core/user.service.js');
 const idsrv = require('../core/id.service.js');
 const maisrv = require('../core/mail.service.js');
@@ -210,7 +209,7 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
 async function delete_tp_user(user) {
     logger.debug('delete_tp_user', user.uid);
     try {
-        await fdbs.delete_dbs(user);
+        await udbsrv.delete_dbs(user);
         await fwebs.delete_webs(user);
         await usrsrv.delete_user(user);
         await plgsrv.run_plugins('remove', user.uid, user, 'auto@tp');

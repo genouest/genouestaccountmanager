@@ -1,117 +1,200 @@
-    <div class="card bg-light">
-        <div class="card-header">
-            <h3>Databases</h3>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive table-striped">
-          <p-table #dtp [value]="databases"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true"
-                      [rowsPerPageOptions]="[10,25,50]"
-                      [globalFilterFields]="['name', 'type', 'host', 'owner']"
-                      [filterDelay]="0"
-                      sortMode="multiple"
-          >
-        <ng-template pTemplate="caption">
-            <div class="table-header">
-                <span class="p-input-icon-right">
-                    <i class="pi pi-search"></i>
-                    <input pInputText id="search_databases" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-                </span>
-            </div>
-        </ng-template>
-            <ng-template pTemplate="header">
-              <tr>
-                <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
-                <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
-                <th pSortableColumn="type">Type <p-sortIcon field="type"></p-sortIcon></th>
-                <th pSortableColumn="host">Host <p-sortIcon field="host"></p-sortIcon></th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-database>
-              <tr>
-                <td><span>{{database.name}}</span></td>
-                <td><a routerLink="/user/{{database.owner}}"><span class="p-button p-button-sm p-button-primary">{{database.owner}}</span></a></td>
-                <td>{{database.type}}</td>
-                <td>{{database.host}}</td>
-              </tr>
-            </ng-template>
-          </p-table>
-          </div>
-      </div>
-    </div>
-
-
-    <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
-    <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
-    <div class="card bg-light">
-      <div class="card-header">
-        <h3>Declare existing database (no creation)</h3>
-      </div>
-      <div class="card-body">
-          <form role="form" data-toggle="validator" class="user-form form-horizonal">
-              <div class="form-group row">
-                  <div class="col-sm-2">
-                      <label for="dbname" class="control-label">Database name</label>
-                      <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.name" id="dbname" class="form-control" required/>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="dbowner" class="control-label">Database owner</label>
-                      <select [ngModelOptions]="{standalone: true}" [(ngModel)]="db.owner" id="dbowner" class="form-control" required>
-                        <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="dbtype" class="control-label">Database type</label>
-                      <select id="dbtype" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.type" class="form-control" required>
-                          <option value="mysql">MySQL</option>
-                          <option value="postgresql">Postgres</option>
-                          <option value="mongo">Mongo</option>
-                          <option value="docker">Docker</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="dbhost" class="control-label">Database host</label>
-                      <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.host" id="dbhost" class="form-control" required>
-                  </div>
-                  <div class="col-sm-1">
-                      <label style="opacity: 0;" class="control-label">Create</label>
-                      <button type="button" class="p-button p-button-sm p-button-secondary" (click)="declare_db()">Declare DB</button>
-                  </div>
-              </div>
-          </form>
-      </div>
-    </div>
-
-
-
-    <div class="alert alert-success" *ngIf="chowner_msg">{{chowner_msg}}</div>
-    <div class="alert alert-danger" *ngIf="chowner_err_msg">{{chowner_err_msg}}</div>
-      <div class="card bg-light">
+<div class="card bg-light">
+  <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
+    <h3>{{pending_number}} request(s) waiting </h3>
+  </div>
+  <div *ngIf="requests_visible" class="card-body">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card bg-light">
           <div class="card-header">
-            <h3>Change database owner</h3>
+            <h3>Pending databases</h3>
           </div>
           <div class="card-body">
-              <form role="form" data-toggle="validator" class="user-form form-horizonal">
-                <div class="form-group">
-                  <div class="col-sm-2">
-                      <label for="owner_db_name">Database name</label>
-                      <select id="owner_db_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_name" class="form-control">
-                        <option *ngFor="let database of databases" [value]="database">{{database.name}}</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="owner_dbhost">Database owner</label>
-                      <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_owner" id="owner_dbhost" class="form-control">
-                          <option *ngFor="let user of users" [value]="user">{{user.uid}}</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-2">
-                      <label for="modifyOwner" style="opacity: 0;">Modify</label>
-                      <button id="modifyOwner" type="button" class="p-button p-button-sm p-button-secondary" (click)="changeOwner()" class="form-control">Modify</button>
-                  </div>
-              </div>
-            </form>
+            <div>
+              <div class="alert alert-danger" *ngIf="dbmsg_error">{{dbmsg_error}}</div>
+              <div *ngIf="dbmsg" class="alert alert-info">{{dbmsg}}</div>
+            </div>
+            <p-table #dtw [(value)]="pending_databases" [autolayout]="false" [(selection)]="selecteddb">
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 2.25em"></th>
+                  <th>Request</th>
+                  <th>Name</th>
+                  <th>Owner</th>
+                  <th>Size (GB)</th>
+                  <th>Expiration</th>
+                  <th>Sole User</th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-pending>
+                <tr>
+                  <td>
+                    <p-tableCheckbox [value]="pending"></p-tableCheckbox>
+                  </td>
+                  <td>{{pending.created_at | date}}</td>
+                  <td>{{pending.name}}</td>
+                  <td><a routerLink="/user/{{pending.owner}}"><span class="p-button p-button-sm p-button-primary">{{pending.owner}}</span></a></td>
+                  <td>{{pending.size}}</td>
+                  <td>{{pending.expire | date}}</td>
+                  <td>
+                    <i *ngIf="pending.single_user" class="pi pi-check" style="color: green;" aria-label="Sole User"></i>
+                    <i *ngIf="!pending.single_user" class="pi pi-times" style="color: red;" aria-label="Multiple Users"></i>
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
           </div>
+        </div>
+        <button class="btn btn-sm btn-success" (click)="validate_selected_databases()">Accept</button>
+        <button class="btn btn-sm btn-danger" (click)="refuse_selected_databases()">Reject</button>
+      </div>
     </div>
+  </div>
+</div>
+
+  
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Databases</h3>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive table-striped">
+      <p-table #dtp [value]="databases"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10,25,50]"
+        [globalFilterFields]="['name', 'type', 'host', 'owner', 'size', 'expire', 'single_user']"
+        [filterDelay]="0"
+        sortMode="multiple"
+      >
+
+        <ng-template pTemplate="caption">
+          <div class="table-header">
+            <span class="p-input-icon-right">
+              <i class="pi pi-search"></i>
+              <input pInputText id="search_databases" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+            </span>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+            <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
+            <th pSortableColumn="type">Type <p-sortIcon field="type"></p-sortIcon></th>
+            <th pSortableColumn="host">Host <p-sortIcon field="host"></p-sortIcon></th>
+            <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
+            <th pSortableColumn="expire">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
+            <th pSortableColumn="single_user">Sole User <p-sortIcon field="single_user"></p-sortIcon></th>
+            <th>Delete</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-database>
+          <tr>
+            <td><span>{{database.name}}</span></td>
+            <td><a routerLink="/user/{{database.owner}}"><span class="p-button p-button-sm p-button-primary">{{database.owner}}</span></a></td>
+            <td>{{database.type}}</td>
+            <td>{{database.host}}</td>
+            <td>{{database.size}}</td>
+            <td>{{database.expire | date}}</td>
+            <td>
+              <i *ngIf="database.single_user" class="pi pi-check" style="color: green;" aria-label="Single User"></i>
+              <i *ngIf="!database.single_user" class="pi pi-times" style="color: red;" aria-label="Multiple Users"></i>
+            </td>
+            <td><app-my-delete-confirm [onConfirm]="db_delete.bind(this)" [data]="database"></app-my-delete-confirm></td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+  </div>
+</div>
+
+
+<div class="alert alert-success" *ngIf="msg">{{msg}}</div>
+<div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
+
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Declare existing database (no creation)</h3>
+  </div>
+  <div class="card-body">
+    <form role="form" data-toggle="validator" class="user-form form-horizonal">
+      <div class="form-group row">
+
+        <div class="col-sm-2">
+          <label for="dbname" class="control-label">Database name</label>
+          <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.name" id="dbname" class="form-control" required/>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="dbowner" class="control-label">Database owner</label>
+          <select [ngModelOptions]="{standalone: true}" [(ngModel)]="db.owner" id="dbowner" class="form-control" required>
+            <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
+          </select>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="dbtype" class="control-label">Database type</label>
+          <select id="dbtype" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.type" class="form-control" required>
+            <option value="mysql">MySQL</option>
+            <option value="postgresql">Postgres</option>
+            <option value="mongo">Mongo</option>
+            <option value="docker">Docker</option>
+          </select>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="dbhost" class="control-label">Database host</label>
+          <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.host" id="dbhost" class="form-control" required>
+        </div>
+
+        <div class="col-sm-2">
+          <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.single_user">Sole Owner</label>
+        </div>
+        
+        <div class="col-sm-1">
+          <label style="opacity: 0;" class="control-label">Create</label>
+          <button type="button" class="p-button p-button-sm p-button-secondary" (click)="declare_db()">Declare DB</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div class="alert alert-success" *ngIf="chowner_msg">{{chowner_msg}}</div>
+<div class="alert alert-danger" *ngIf="chowner_err_msg">{{chowner_err_msg}}</div>
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Change database owner</h3>
+  </div>
+  <div class="card-body">
+    <form role="form" data-toggle="validator" class="user-form form-horizonal">
+      <div class="form-group">
+        <div class="col-sm-2">
+          <label for="owner_db_name">Database name</label>
+          <select id="owner_db_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_name" class="form-control">
+            <option *ngFor="let database of databases" [value]="database">{{database.name}}</option>
+          </select>
+        </div>
+        <div class="col-sm-2">
+          <label for="owner_dbhost">Database owner</label>
+          <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_db_owner" id="owner_dbhost" class="form-control">
+            <option *ngFor="let user of users" [value]="user">{{user.uid}}</option>
+          </select>
+        </div>
+        <div class="col-sm-2">
+          <label for="modifyOwner" style="opacity: 0;">Modify</label>
+          <button id="modifyOwner" type="button" class="p-button p-button-sm p-button-secondary" (click)="changeOwner()" class="form-control">Modify</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

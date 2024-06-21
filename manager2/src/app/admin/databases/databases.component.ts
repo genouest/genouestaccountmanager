@@ -5,13 +5,12 @@ import { UserService } from 'src/app/user/user.service';
 import { Table } from 'primeng/table';
 
 @Component({
-    selector: 'app-databases',
+    selector: 'app-database',
     templateUrl: './databases.component.html',
     styleUrls: ['./databases.component.css']
 })
 export class DatabasesComponent implements OnInit {
     @ViewChild('dtp') table: Table;
-
 
     db: Database
     owner_db_name: any
@@ -21,31 +20,38 @@ export class DatabasesComponent implements OnInit {
 
     databases: Database[]
     users: any
+    selecteddb: Database[]
 
+    requests_visible: boolean
+    pending_databases: any
+    pending_number: number
+    
     msg: string
     err_msg: string
+    dbmsg: string
+    dbmsg_error: string
+    
 
     constructor(private dbService: DatabaseService, private userService: UserService) { }
 
-    ngAfterViewInit(): void {
-    }
+
+    ngAfterViewInit(): void { }
 
 
+    ngOnDestroy(): void { }
 
-    ngOnDestroy(): void {
-    }
 
     ngOnInit() {
-        this.db = new Database('','mysql','','', false)
-        this.dbService.list().subscribe(
-            resp => {this.databases = resp;},
-            err => console.log('failed to get databases')
-        )
+        this.db = new Database('', 'mysql', '', '', false, "", "", 0, true);
+        this.db_list();
         this.userService.list().subscribe(
-            resp => this.users = resp,
-            err => console.log('failed to get users')
-        )
+            resp => { this.users = resp; },
+            err => { console.log('failed to get users'); }
+        );
+        this.pending_list();
+        this.selecteddb = [];
     }
+
 
     changeOwner() {
         this.chowner_msg = '';
@@ -58,33 +64,127 @@ export class DatabasesComponent implements OnInit {
             resp => {
                 this.chowner_msg = resp['message'];
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp;},
-                    err => console.log('failed to list databases')
-                )
+                    resp => { this.databases = resp; },
+                    err => { console.log('failed to list databases'); }
+                );
             },
-            err => console.log('failed to change owner')
-        )
+            err => { console.log('failed to change owner'); }
+        );
     }
+
+
+    db_delete(db: Database) {
+        this.msg = '';
+        this.err_msg = '';
+        this.dbService.remove(db).subscribe(
+            resp => {
+                this.msg = resp['message'];
+                this.db_list();
+            },
+            err => {
+                this.err_msg = err.error.message;
+                console.log('failed to delete database');
+            }
+        );
+    }
+
 
     declare_db() {
         this.msg = '';
         this.err_msg = '';
-
-        if(!this.db.owner || !this.db.name){
+        if(!this.db.owner || !this.db.name) {
             this.err_msg = 'no database or owner selected';
             return;
         }
-        this.dbService.add(this.db).subscribe(
+        this.dbService.declare(this.db).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.db = new Database('', 'mysql', '', '');
+                this.db = new Database('', 'mysql', '', '', false, "", "", 0, true);
                 this.dbService.list().subscribe(
-                    resp => {this.databases = resp;},
-                    err => console.log('failed to list databases')
-                )
+                    resp => { this.databases = resp; },
+                    err => { console.log('failed to list databases'); }
+                );
             },
-            err => this.err_msg = err.error.message
-        )
+            err => { this.err_msg = err.error.message; }
+        );
     }
 
+
+    pending_list() {
+        this.pending_databases = [];
+        this.dbService.list_pending(true).subscribe(
+            resp => {
+                if (resp.length == 0) {
+                    this.pending_number = 0;
+                    return;
+                }
+                let data = resp;
+                if (data.length > 0) { 
+                    this.requests_visible = true;
+                    for (let i = 0; i < data.length; i++) {
+                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000;
+                    }
+                }
+                this.pending_number = data.length;
+                this.pending_databases = data;
+            },
+            err => { console.log(err); }
+            // err => console.log('failed to get pending databases')
+        );
+    }
+
+
+    db_list() {
+        this.dbService.list().subscribe(
+            resp => { this.databases = resp; },
+            err => { console.log('failed to get databases'); }
+        );
+    }
+
+
+    refuse_selected_databases() {
+        this.dbmsg = '';
+        this.dbmsg_error = '';
+        this.selecteddb.forEach((ws) => {
+            this.dbService.refuse(ws).subscribe(
+                resp => {
+                    this.dbmsg = resp['message'];
+                },
+                err => {
+                    this.dbmsg_error = err.error.message;
+                    console.log('failed to reject database');
+                }
+            );
+        });
+        this.pending_list();
+    }
+
+
+    validate_selected_databases() {
+        for (var i = 0; i < this.selecteddb.length; i++) {
+            this.dbmsg='';
+            this.dbmsg_error='';
+            this.dbService.create(new Database(
+                this.selecteddb[i].name,
+                this.selecteddb[i].type,
+                this.selecteddb[i].host,
+                this.selecteddb[i].owner,
+                this.selecteddb[i].create,
+                this.selecteddb[i].usage,
+                this.selecteddb[i].size,
+                this.selecteddb[i].expire,
+                this.selecteddb[i].single_user
+            )).subscribe(
+                resp => {
+                    this.dbmsg = resp['message'];
+                },
+                err => {
+                    this.dbmsg_error = err.error.message;
+                    console.log('failed to add database');
+                }
+            );
+        }
+        this.pending_list();
+        this.db_list();
+    }
 }
