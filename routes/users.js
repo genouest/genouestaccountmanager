@@ -746,35 +746,35 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
     if (req.body.firstname=='' || req.body.firstname===null || req.body.firstname===undefined) {
-        res.status(403).send({ message: 'Missing field: firstname' });
+        res.send({ status: 1, message: 'Missing field: firstname' });
         return;
     }
     if (req.body.lastname=='' || req.body.lastname===null || req.body.lastname===undefined) {
-        res.status(403).send({ message: 'Missing field: lastname' });
+        res.send({ status: 1, message: 'Missing field: lastname' });
         return;
     }
     if (req.body.team=='' || req.body.team===null || req.body.team===undefined) {
-        res.status(403).send({ message: 'Missing field: team' });
+        res.send({ status: 1, message: 'Missing field: team' });
         return;
     }
     if (!req.body.team.match(/^[0-9a-z_]+$/)) {
-        res.status(403).send({ message: 'Team name must be alphanumeric and lowercase [0-9a-z_]' });
+        res.send({ status: 1, message: 'Team name must be alphanumeric and lowercase [0-9a-z_]' });
         return;
     }
     if (req.body.lab=='' || req.body.lab===null || req.body.lab===undefined) {
-        res.status(403).send({ message: 'Missing field: lab' });
+        res.send({ status: 1, message: 'Missing field: lab' });
         return;
     }
     if (req.body.address=='' || req.body.address===null || req.body.address===undefined) {
-        res.status(403).send({ message: 'Missing field: address' });
+        res.send({ status: 1, message: 'Missing field: address' });
         return;
     }
     if (req.body.responsible=='' || req.body.responsible===null || req.body.responsible===undefined) {
-        res.status(403).send({ message: 'Missing field: Responsible/Manager' });
+        res.send({ status: 1, message: 'Missing field: Responsible/Manager' });
         return;
     }
     if (!req.params.id.match(/^[0-9a-z]+$/)) {
-        res.status(403).send({ message: 'invalid data identifier, numeric and lowercase letters only' });
+        res.send({ status: 1, message: 'invalid data identifier, numeric and lowercase letters only' });
         return;
     }
     let usermaxlen = 12;
@@ -782,32 +782,32 @@ router.post('/user/:id', async function(req, res) {
         usermaxlen = CONFIG.general.username_max_length;
     }
     if (req.params.id.length > usermaxlen) {
-        res.status(403).send({ message: 'user id too long, must be < ' + usermaxlen + ' characters' });
+        res.send({ status: 1, message: 'user id too long, must be < ' + usermaxlen + ' characters' });
         return;
     }
     if (req.body.why=='' || req.body.why===null || req.body.why===undefined) {
-        res.status(403).send({ message: 'Missing field: Why do you need an account' });
+        res.send({ status: 1, message: 'Missing field: Why do you need an account' });
         return;
     }
     if (!validator.validate(req.body.email)) {
-        res.status(403).send({ message: 'Invalid email format' });
+        res.send({ status: 1, message: 'Invalid email format' });
         return;
     }
     if (!req.body.is_fake) {
         let user_email = await dbsrv.mongo_users().findOne({ email: req.body.email, is_fake: false });
         if (user_email) {
-            res.status(403).send({ message: 'User email already exists' });
+            res.send({ status: 1, message: 'User email already exists' });
             return;
         }
     }
     if (!(req.body.duration in duration_list)) {
-        res.status(403).send({ message: 'Invalid duration format' });
+        res.send({ status: 1, message: 'Invalid duration format' });
         return;
     }
 
     let userexists = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (userexists) {
-        res.status(403).send({ message: 'User id already exists' });
+        res.send({ status: 1, message: 'User id already exists' });
         return;
     }
 
@@ -815,7 +815,7 @@ router.post('/user/:id', async function(req, res) {
     let userexisted = await dbsrv.mongo_oldusers().findOne({ uid: uidMd5 });
     if (userexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)) {
         logger.error(`User uid ${ req.params.id } already used in the past, preventing reuse`);
-        res.status(403).send({ message: 'User id already used' });
+        res.send({ status: 1, message: 'User id already used' });
         return;
     }
 
@@ -875,7 +875,7 @@ router.post('/user/:id', async function(req, res) {
     } catch (error) {
         logger.error(error);
     }
-    res.send({ message: 'Could not send an email, please contact the support.' });
+    res.send({ status: 0, message: 'Could not send an email, please contact the support.' });
     return;
 });
 
