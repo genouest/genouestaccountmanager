@@ -15,13 +15,14 @@
             </div>
             <div class="card-body">
                 <mwl-calendar-month-view
-                [viewDate]="viewDate"
-                [events]="events"
-                (eventClicked)="eventClicked($event)"
-                [refresh]="refresh"
-                (eventTimesChanged)="eventTimesChanged($event)">
+                    [viewDate]="viewDate"
+                    [events]="events"
+                    (eventClicked)="eventClicked($event)"
+                    [refresh]="refresh"
+                    (eventTimesChanged)="eventTimesChanged($event)"
+                    weekStartsOn=1
                 >
-              </mwl-calendar-month-view>
+                </mwl-calendar-month-view>
             </div>
         </div>
     </div>
