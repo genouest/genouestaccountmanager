@@ -17,12 +17,24 @@
                 <mwl-calendar-month-view
                     [viewDate]="viewDate"
                     [events]="events"
-                    (eventClicked)="eventClicked($event)"
                     [refresh]="refresh"
                     (eventTimesChanged)="eventTimesChanged($event)"
-                    weekStartsOn=1
-                >
+                    [cellTemplate]="customCellTemplate"
+                    weekStartsOn=1>
                 </mwl-calendar-month-view>
+                <ng-template #customCellTemplate let-day="day">
+                    <div class="cal-cell-top">
+                        <span class="cal-day-number">{{day.date | calendarDate:'monthViewDayNumber':locale}}</span>
+                    </div>
+                    <div *ngIf="day.events">
+                        <p *ngFor="let event of day.events" (click)="eventClicked(event)" [ngStyle]="{'background-color': event.color.primary}">
+                            <span class="text-white p-2 small" [ngStyle]="{
+                                'overflow': 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis',
+                                'max-width': '92px', 'display': 'inline-block'
+                            }">{{event.meta?.name}}</span>
+                        </p>
+                    </div>
+                </ng-template>
             </div>
         </div>
     </div>

@@ -215,12 +215,11 @@ export class TpsComponent implements OnInit {
     }
 
     eventClicked(clickedEvent) {
-        let event = clickedEvent.event;
-        this.selectedEvent = event.meta;
-        this.selectedEvent.title = event.title;
-        this.selectedEvent.start = event.start;
-        this.selectedEvent.end = event.end;
-        if (!event.meta.group) {
+        this.selectedEvent = clickedEvent.meta;
+        this.selectedEvent.title = clickedEvent.title;
+        this.selectedEvent.start = clickedEvent.start;
+        this.selectedEvent.end = clickedEvent.end;
+        if (!clickedEvent.meta.group) {
             this.selectedEvent.group = { }
         }
     }
