@@ -1,200 +1,200 @@
 <div class="row text-center">
-    <div class="col-md-8">
-      <div class="btn-group">
-        <button type="button" class="btn" (click)="prevMonth()">Previous</button>
-        <button type="button" class="btn" (click)="curMonth()">Today</button>
-        <button type="button" class="btn" (click)="nextMonth()">Next</button>
-        </div>
-    </div>
+	<div class="col-md-8">
+		<div class="btn-group">
+			<button type="button" class="btn" (click)="prevMonth()">Previous</button>
+			<button type="button" class="btn" (click)="curMonth()">Today</button>
+			<button type="button" class="btn" (click)="nextMonth()">Next</button>
+		</div>
+	</div>
 </div>
 <div class="row">
-    <div class="col-md-8">
-        <div class="card bg-light">
-            <div class="card-header">
-                <h3>Calendar {{viewDate.toLocaleDateString()}}</h3>
-            </div>
-            <div class="card-body">
-                <mwl-calendar-month-view
-                    [viewDate]="viewDate"
-                    [events]="events"
-                    [refresh]="refresh"
-                    (eventTimesChanged)="eventTimesChanged($event)"
-                    [cellTemplate]="customCellTemplate"
-                    weekStartsOn=1>
-                </mwl-calendar-month-view>
-                <ng-template #customCellTemplate let-day="day">
-                    <div class="cal-cell-top">
-                        <span class="cal-day-number">{{day.date | calendarDate:'monthViewDayNumber':locale}}</span>
-                    </div>
-                    <div *ngIf="day.events">
-                        <p *ngFor="let event of day.events" (click)="eventClicked(event)" [ngStyle]="{'background-color': event.color.primary}">
-                            <span class="text-white p-2 small" [ngStyle]="{
-                                'overflow': 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis',
-                                'max-width': '92px', 'display': 'inline-block'
-                            }">{{event.meta?.name}}</span>
-                        </p>
-                    </div>
-                </ng-template>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4" *ngIf="selectedEvent">
-        <div [ngClass]="get_status(selectedEvent.over)">
-            <div class="card-header">
-                <h3>Reservation</h3>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
-                <div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <tbody>
-                            <tr>
-                                <th>Owner</th>
-                                <td><a routerLink="/user/{{selectedEvent.owner}}">{{selectedEvent.owner}}</a></td>
-                            </tr>
-                            <tr>
-                                <th>From</th>
-                                <td>{{selectedEvent.start.toISOString().slice(0,10)}}</td>
-                            </tr>
-                            <tr>
-                                <th>To</th>
-                                <td>{{selectedEvent.end.toISOString().slice(0,10)}}</td>
-                            </tr>
-                            <tr>
-                                <th>Name</th>
-                                <td>{{selectedEvent.name}}</td>
-                            </tr>
-                            <tr>
-                                <th>About</th>
-                                <td>{{selectedEvent.about}}</td>
-                            </tr>
-                            <tr>
-                                <th>Quantity</th>
-                                <td>{{selectedEvent.quantity}}</td>
-                            </tr>
-                            <tr>
-                                <th>Group</th>
-                                <td><span *ngIf="selectedEvent.group && selectedEvent.group.name">{{selectedEvent.group.name}}</span></td>
-                            </tr>
-                            <tr>
-                                <th>Project</th>
-                                <td><span *ngIf="selectedEvent.project && selectedEvent.project.id" >{{selectedEvent.project.id}}</span></td>
-                            </tr>
-                            <tr>
-                                <th>Status</th>
-                                <td *ngIf="!selectedEvent.created && !selectedEvent.over">Pending</td>
-                                <td *ngIf="selectedEvent.created && selectedEvent.over">Over</td>
-                                <td *ngIf="selectedEvent.created && !selectedEvent.over">Active</td>
-                                <td *ngIf="!selectedEvent.created && selectedEvent.over">Cancelled</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-responsive" *ngIf="selectedEvent.students.length > 0">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Accounts</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let account of selectedEvent.students">
-                                <td><a routerLink="/user/{{account}}">{{account}}</a></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button *ngIf="!selectedEvent.created && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
-                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="p-button p-button-sm p-button-secondary" (click)="cancel_reservation()">Cancel</button>
-                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#extend">Extend</button>
-                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-warning" (click)="remove_reservation()">Remove</button>
-            </div>
-        </div>
-    </div>
+	<div class="col-md-8">
+		<div class="card bg-light">
+			<div class="card-header">
+				<h3>Calendar {{viewDate.toLocaleDateString()}}</h3>
+			</div>
+			<div class="card-body">
+				<mwl-calendar-month-view
+					[viewDate]="viewDate"
+					[events]="events"
+					[refresh]="refresh"
+					(eventTimesChanged)="eventTimesChanged($event)"
+					[cellTemplate]="customCellTemplate"
+					weekStartsOn=1>
+				</mwl-calendar-month-view>
+				<ng-template #customCellTemplate let-day="day">
+					<div class="cal-cell-top">
+						<span class="cal-day-number">{{day.date | calendarDate:'monthViewDayNumber':locale}}</span>
+					</div>
+					<div *ngIf="day.events">
+						<p *ngFor="let event of day.events" (click)="eventClicked(event)" [ngStyle]="{'background-color': event.color.primary}">
+							<span class="text-white p-2 small" [ngStyle]="{
+								'overflow': 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis',
+								'max-width': '92px', 'display': 'inline-block'
+							}">{{event.meta?.name}}</span>
+						</p>
+					</div>
+				</ng-template>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4" *ngIf="selectedEvent">
+		<div [ngClass]="get_status(selectedEvent.over)">
+			<div class="card-header">
+				<h3>Reservation</h3>
+			</div>
+			<div class="card-body">
+				<div class="alert alert-success" *ngIf="msg">{{msg}}</div>
+				<div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<tbody>
+							<tr>
+								<th>Owner</th>
+								<td><a routerLink="/user/{{selectedEvent.owner}}">{{selectedEvent.owner}}</a></td>
+							</tr>
+							<tr>
+								<th>From</th>
+								<td>{{selectedEvent.start.toISOString().slice(0,10)}}</td>
+							</tr>
+							<tr>
+								<th>To</th>
+								<td>{{selectedEvent.end.toISOString().slice(0,10)}}</td>
+							</tr>
+							<tr>
+								<th>Name</th>
+								<td>{{selectedEvent.name}}</td>
+							</tr>
+							<tr>
+								<th>About</th>
+								<td>{{selectedEvent.about}}</td>
+							</tr>
+							<tr>
+								<th>Quantity</th>
+								<td>{{selectedEvent.quantity}}</td>
+							</tr>
+							<tr>
+								<th>Group</th>
+								<td><span *ngIf="selectedEvent.group && selectedEvent.group.name">{{selectedEvent.group.name}}</span></td>
+							</tr>
+							<tr>
+								<th>Project</th>
+								<td><span *ngIf="selectedEvent.project && selectedEvent.project.id" >{{selectedEvent.project.id}}</span></td>
+							</tr>
+							<tr>
+								<th>Status</th>
+								<td *ngIf="!selectedEvent.created && !selectedEvent.over">Pending</td>
+								<td *ngIf="selectedEvent.created && selectedEvent.over">Over</td>
+								<td *ngIf="selectedEvent.created && !selectedEvent.over">Active</td>
+								<td *ngIf="!selectedEvent.created && selectedEvent.over">Cancelled</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="table-responsive" *ngIf="selectedEvent.students.length > 0">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Accounts</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let account of selectedEvent.students">
+								<td><a routerLink="/user/{{account}}">{{account}}</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<button *ngIf="!selectedEvent.created && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
+				<button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="p-button p-button-sm p-button-secondary" (click)="cancel_reservation()">Cancel</button>
+				<button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#extend">Extend</button>
+				<button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-warning" (click)="remove_reservation()">Remove</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="modal" style="z-index: 1500;" id="extend" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Extend TP {{ selectedEvent ? selectedEvent.name : '' }}</h3>
-            </div>
-            <form aria-label="TP extension request form" role="form" class="user-form form-horizonal">
-                <div class="modal-body">
-                <div class="form-group row col-sm-8">
-                    <label for="new_expire">New Expiration Date&nbsp;
-                        <span style="color:red">(required)&nbsp;</span>
-                        <span class="glyphicon glyphicon-question-sign" title="Project expiration date" tooltip></span>
-                    </label>
-                    <input required id="new_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_expire" type="date" class="form-control"/>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                <div class="form-group row col-sm-12">
-                    <button type="button" class="p-button p-button-sm p-button-primary" (click)="extend_reservation()" data-dismiss="modal">Extend</button>
-                    <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-                </div>
-            </form>
-        </div>
-    </div>
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Extend TP {{ selectedEvent ? selectedEvent.name : '' }}</h3>
+			</div>
+			<form aria-label="TP extension request form" role="form" class="user-form form-horizonal">
+				<div class="modal-body">
+					<div class="form-group row col-sm-8">
+						<label for="new_expire">New Expiration Date&nbsp;
+							<span style="color:red">(required)&nbsp;</span>
+							<span class="glyphicon glyphicon-question-sign" title="Project expiration date" tooltip></span>
+						</label>
+						<input required id="new_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_expire" type="date" class="form-control"/>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<div class="form-group row col-sm-12">
+						<button type="button" class="p-button p-button-sm p-button-primary" (click)="extend_reservation()" data-dismiss="modal">Extend</button>
+						<button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
 </div>
 
 <div *ngIf="authorized" class="row">
-    <div class="col-md-8">
-        <div class="card bg-light">
-            <div class="card-header">
-                <h3>New reservation</h3>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-success" *ngIf="resmsg">{{resmsg}}</div>
-                <div class="alert alert-danger" *ngIf="reserrmsg">{{reserrmsg}}</div>
-                <form class="form form-group row">
-                    <div class="col-md-4">
-                        <label for="quantity" class="control-label">Number of students</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="quantity" type="number" class="form-control"/>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="from_date" class="control-label">From</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="fromDate" type="date" class="form-control" />
-                    </div>
-                    <div class="col-md-4">
-                        <label for="to_date" class="control-label">To</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="toDate" type="date" class="form-control" />
-                    </div>
-                </form>
-                <div class="form-group row">
-                    <div class="col-md-8">
-                        <label for="name" class="control-label">Training Name</label>
-                        <input [ngModelOptions]="{standalone: true}" [(ngModel)]="name" type="text" class="form-control"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="about">About</label>
-                    <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
-                </div>
-                <div *ngIf="config && config.reservation && config.reservation.show_choice_in_ui" class="form-group row">
-                    <div class="col-4">
-                        <p>Associate account to:</p>
-                    </div>
-                    <div class="col-2">
-                        <input id="group" type="radio" class="form-check-input" name="project_or_group"  value="group" [(ngModel)]="group_or_project">
-                        <label for="group" class="form-check-label">
-                            Group
-                        </label>
-                    </div>
-                    <div class="col-2">
-                        <input id="project" type="radio" class="form-check-input" name="project_or_group" value="project" [(ngModel)]="group_or_project">
-                        <label for="project" class="form-check-label">
-                            Project
-                        </label>
-                    </div>
-                </div>
-                <button class="p-button p-button-sm p-button-secondary" (click)="reserve()">Reserve</button>
-                <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
-                <div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
-            </div>
-        </div>
-    </div>
+	<div class="col-md-8">
+		<div class="card bg-light">
+			<div class="card-header">
+				<h3>New reservation</h3>
+			</div>
+			<div class="card-body">
+				<div class="alert alert-success" *ngIf="resmsg">{{resmsg}}</div>
+				<div class="alert alert-danger" *ngIf="reserrmsg">{{reserrmsg}}</div>
+				<form class="form form-group row">
+					<div class="col-md-4">
+						<label for="quantity" class="control-label">Number of students</label>
+						<input [ngModelOptions]="{standalone: true}" [(ngModel)]="quantity" type="number" class="form-control"/>
+					</div>
+					<div class="col-md-4">
+						<label for="from_date" class="control-label">From</label>
+						<input [ngModelOptions]="{standalone: true}" [(ngModel)]="fromDate" type="date" class="form-control" />
+					</div>
+					<div class="col-md-4">
+						<label for="to_date" class="control-label">To</label>
+						<input [ngModelOptions]="{standalone: true}" [(ngModel)]="toDate" type="date" class="form-control" />
+					</div>
+				</form>
+				<div class="form-group row">
+					<div class="col-md-8">
+						<label for="name" class="control-label">Training Name</label>
+						<input [ngModelOptions]="{standalone: true}" [(ngModel)]="name" type="text" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="about">About</label>
+					<textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="about" class="form-control"></textarea>
+				</div>
+				<div *ngIf="config && config.reservation && config.reservation.show_choice_in_ui" class="form-group row">
+					<div class="col-4">
+						<p>Associate account to:</p>
+					</div>
+					<div class="col-2">
+						<input id="group" type="radio" class="form-check-input" name="project_or_group"  value="group" [(ngModel)]="group_or_project">
+						<label for="group" class="form-check-label">
+							Group
+						</label>
+					</div>
+					<div class="col-2">
+						<input id="project" type="radio" class="form-check-input" name="project_or_group" value="project" [(ngModel)]="group_or_project">
+						<label for="project" class="form-check-label">
+							Project
+						</label>
+					</div>
+				</div>
+				<button class="p-button p-button-sm p-button-secondary" (click)="reserve()">Reserve</button>
+				<div class="alert alert-success" *ngIf="msg">{{msg}}</div>
+				<div class="alert alert-danger" *ngIf="errmsg">{{errmsg}}</div>
+			</div>
+		</div>
+	</div>
 </div>
