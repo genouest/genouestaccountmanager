@@ -6,9 +6,9 @@ import { CalendarEvent, CalendarEventTimesChangedEvent} from 'angular-calendar';
 import { Subject } from 'rxjs';
 
 const eventColors = {
-    green: { primary: '#00ff00' },
-    cyan: { primary: '#00ffff' },
-    gray: { primary: '#808080' }
+    created: { primary: '#00ff00' },
+    pending: { primary: '#00ffff' },
+    over: { primary: '#808080' }
 };
 
 @Component({
@@ -57,14 +57,13 @@ export class TpsComponent implements OnInit {
             resp => {
                 const events: CalendarEvent[] = resp.map(event => {
                     let color;
-                    if (event.over) { color = eventColors.gray; }
-                    else if (event.created) { color = eventColors.green; }
-                    else { color = eventColors.cyan; }
+                    if (event.over) { color = eventColors.over; }
+                    else if (event.created) { color = eventColors.created; }
+                    else { color = eventColors.pending; }
                     return {
                         title: `${event.owner}, ${event.quantity} students`,
                         start: new Date(event.from),
-                        end: new Date(event.to), 
-                        allDay: true,
+                        end: new Date(event.to),
                         color: color,
                         meta: {
                             'id': event._id,
