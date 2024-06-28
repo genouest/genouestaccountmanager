@@ -2,8 +2,14 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { ConfigService } from '../config.service'
 import { TpserviceService } from './tpservice.service';
-import { CalendarEventTimesChangedEvent } from 'angular-calendar';
+import { CalendarEvent, CalendarEventTimesChangedEvent} from 'angular-calendar';
 import { Subject } from 'rxjs';
+
+const eventColors = {
+    created: { primary: '#00ff00' },
+    pending: { primary: '#00ffff' },
+    over: { primary: '#808080' }
+};
 
 @Component({
     selector: 'app-tps',
@@ -23,8 +29,9 @@ export class TpsComponent implements OnInit {
     session_user: any
 
     viewDate: Date
-    events: any
+    events: CalendarEvent[]
     selectedEvent: any
+    refresh: Subject<any> = new Subject();
 
     quantity: number
     fromDate: Date
@@ -34,8 +41,6 @@ export class TpsComponent implements OnInit {
 
     group_or_project: string
     name: string
-
-    refresh: Subject<any> = new Subject();
 
     activeDayIsOpen: boolean = true;
 
@@ -50,14 +55,16 @@ export class TpsComponent implements OnInit {
     private listEvents() {
         this.tpService.list().subscribe(
             resp => {
-                let events = [];
-                for (var i = 0; i < resp.length; i++) {
-                    let event = resp[i];
-                    events.push({
-                        'title': event.owner + ', ' + event.quantity + ' students',
-                        'start': new Date(event.from),
-                        'end': new Date(event.to),
-                        'allDay': false,
+                const events: CalendarEvent[] = resp.map(event => {
+                    let color;
+                    if (event.over) { color = eventColors.over; }
+                    else if (event.created) { color = eventColors.created; }
+                    else { color = eventColors.pending; }
+                    return {
+                        title: `${event.owner}, ${event.quantity} students`,
+                        start: new Date(event.from),
+                        end: new Date(event.to),
+                        color: color,
                         meta: {
                             'id': event._id,
                             'owner': event.owner,
@@ -70,13 +77,13 @@ export class TpsComponent implements OnInit {
                             'group': event.group,
                             'project': event.project
                         }
-                    });
-                }
+                    }
+                });
                 this.events = events;
                 this.refresh.next();
             },
-            err => console.log('failed to log tp reservations')
-        )
+            err => console.error('failed to log tp reservations', err)
+        );
     }
 
     ngOnInit() {
@@ -85,7 +92,7 @@ export class TpsComponent implements OnInit {
                 this.config = resp;
                 this.group_or_project = this.config.reservation.group_or_project;
             },
-            err => console.log('failed to get config')
+            err => console.error('failed to get config', err)
         );
         this.fromDate = new Date();
         this.toDate = new Date();
@@ -143,40 +150,46 @@ export class TpsComponent implements OnInit {
                 this.listEvents();
             },
             err => this.errmsg = err.error.message
-        )
+        );
     }
 
     cancel_reservation() {
         this.msg = '';
         this.errmsg = '';
         this.tpService.cancel(this.selectedEvent.id).subscribe(
-            resp => this.msg = resp['message'],
+            resp => {
+                this.msg = resp['message'];
+                this.selectedEvent.over = true;
+                this.listEvents();
+            },
             err => this.errmsg = err.error.message
-        )
-        this.selectedEvent.over = true;
-        this.listEvents();
+        );
     }
 
     create_reservation() {
         this.msg = '';
         this.errmsg = '';
         this.tpService.create(this.selectedEvent.id).subscribe(
-            resp => this.msg = resp['message'],
+            resp => {
+                this.msg = resp['message'];
+                this.selectedEvent.created = true;
+                this.listEvents();
+            },
             err => this.errmsg = err.error.message
-        )
-        this.selectedEvent.created = true;
-        this.listEvents();
+        );
     }
 
     remove_reservation() {
         this.msg = '';
         this.errmsg = '';
         this.tpService.remove(this.selectedEvent.id).subscribe(
-            resp => this.msg = resp['message'],
+            resp => {
+                this.msg = resp['message'];
+                this.selectedEvent.over = true;
+                this.listEvents();
+            },
             err => this.errmsg = err.error.message
-        )
-        this.selectedEvent.over = true;
-        this.listEvents();
+        );
     }
 
     extend_reservation() {
@@ -192,20 +205,21 @@ export class TpsComponent implements OnInit {
         }
         const extension = { 'to': new Date(this.new_expire).getTime() };
         this.tpService.extend(this.selectedEvent.id, extension).subscribe(
-            resp => this.msg = resp['message'],
+            resp => {
+                this.msg = resp['message'];
+                this.listEvents();
+            },
             err => this.errmsg = err.error.message
         );
-        this.listEvents();
     }
 
     eventClicked(clickedEvent) {
-        let event = clickedEvent.event;
-        this.selectedEvent = event.meta;
-        this.selectedEvent.title = event.title;
-        this.selectedEvent.start = event.start;
-        this.selectedEvent.end = event.end;
-        if (!event.meta.group) {
-            this.selectedEvent.group = {}
+        this.selectedEvent = clickedEvent.meta;
+        this.selectedEvent.title = clickedEvent.title;
+        this.selectedEvent.start = clickedEvent.start;
+        this.selectedEvent.end = clickedEvent.end;
+        if (!clickedEvent.meta.group) {
+            this.selectedEvent.group = { }
         }
     }
 
@@ -227,5 +241,4 @@ export class TpsComponent implements OnInit {
             return "panel panel-primary"
         }
     }
-
 }
