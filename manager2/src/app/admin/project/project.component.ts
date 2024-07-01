@@ -4,6 +4,7 @@ import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
+import { AuthService } from '../../auth/auth.service';
 
 import { Table } from 'primeng/table';
 
@@ -30,7 +31,10 @@ export class ProjectComponent implements OnInit {
     admin_user_err_msg: string
     admin_user_msg: string
 
+    session_user = this.authService.profile;
+
     constructor(
+        private authService: AuthService,
         private route: ActivatedRoute,
         private configService: ConfigService,
         private router: Router,
@@ -70,19 +74,18 @@ export class ProjectComponent implements OnInit {
             });
         this.groupService.list().subscribe(
             resp => this.groups = resp,
-            err => console.log('failed to get groups')
+            err => console.error('failed to get groups', err)
         );
         this.userService.list().subscribe(
             resp => this.all_users = resp,
-            err => console.log('failed to get all users')
+            err => console.error('failed to get all users', err)
         );
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
             },
-            err => console.log('failed to get config')
+            err => console.error('failed to get config', err)
         );
-
     }
 
     show_project_users(projectId) {
@@ -94,21 +97,19 @@ export class ProjectComponent implements OnInit {
                     resp => {
                         this.users = resp;
                         this.oldGroup = this.project.group;
-                        for(var i = 0; i<resp.length;i++){
-                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0){
+                        for(var i = 0; i < resp.length; i++) {
+                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0) {
                                 this.users[i].access=true;
                             }
                         }
                         this.remove_user_admin = '';
                         this.new_user_admin = '';
-
                     },
-                    err => console.log('failed to get project users')
-                )
+                    err => console.error('failed to get project users', err)
+                );
             },
-            err => console.log('failed to get project')
-        )
-
+            err => console.error('failed to get project', err)
+        );
     }
 
     add_user() {
@@ -120,7 +121,7 @@ export class ProjectComponent implements OnInit {
                 this.show_project_users(this.project.id);
             },
             err => this.admin_user_err_msg = err.error.message
-        )
+        );
     }
 
     remove_user() {
@@ -136,8 +137,8 @@ export class ProjectComponent implements OnInit {
     }
 
     // todo: maybe move this in backend too
-    update_users_group(usersList, newGroupId){
-        for(var i = 0; i< usersList.length; i++){
+    update_users_group(usersList, newGroupId) {
+        for(var i = 0; i < usersList.length; i++) {
             this.userService.addGroup(usersList[i].uid, newGroupId).subscribe(
                 resp => {},
                 err => this.prj_err_msg = err.error.message
@@ -147,22 +148,26 @@ export class ProjectComponent implements OnInit {
 
     delete_project(project, userList) {
         this.admin_user_err_msg = '';
-        for(var i = 0; i < userList.length; i++){
-            this.userService.removeFromProject(userList[i].uid, project.id)
-                .subscribe(
-                    resp => {},
-                    err => this.prj_err_msg = err.error.message);
+        for(var i = 0; i < userList.length; i++) {
+            this.userService.removeFromProject(userList[i].uid, project.id).subscribe(
+                resp => {},
+                err => this.prj_err_msg = err.error.message
+            );
         }
         this.projectsService.delete(project.id).subscribe(
             resp => {
-                this.router.navigate(['/admin/project'], { queryParams: {'deleted': 'ok'}})
+                this.router.navigate(['/admin/project'], { queryParams: { 'deleted': 'ok' } });
             },
             err => this.admin_user_err_msg = err.error.message
-        )
+        );
     }
 
     update_project(project) {
-        const project_to_send = {...project, expire: new Date(project.expire).getTime(), group: this.config.project.enable_group ? project.group : ''}
+        const project_to_send = {
+            ...project,
+            expire: new Date(project.expire).getTime(),
+            group: this.config.project.enable_group ? project.group : ''
+        };
         this.projectsService.update(project.id, project_to_send).subscribe(
             resp => {
                 this.prj_msg = resp['message'];
@@ -172,10 +177,10 @@ export class ProjectComponent implements OnInit {
                 this.show_project_users(project.id);
             },
             err => this.prj_err_msg = err.error.message
-        )
+        );
     }
 
-    date_convert = function timeConverter(tsp){
+    date_convert = function timeConverter(tsp) {
         let res;
         try {
             var a = new Date(tsp);
@@ -186,5 +191,4 @@ export class ProjectComponent implements OnInit {
         }
         return res;
     }
-
 }
