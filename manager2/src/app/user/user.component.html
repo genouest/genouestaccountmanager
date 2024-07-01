@@ -1,632 +1,688 @@
 <div class="well">
-  <div class="row">
-      <div class="col-sm-5">
-          <h2>{{user.uid}}</h2>
-          <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
-          <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
-          <div *ngIf="user && user.created_at"><small>Created at : {{date_convert(user.created_at)}}</small></div>
-          <div *ngIf="user && user.expiration"><small>Expires: {{date_convert(user.expiration)}}</small></div>
-          <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
-      </div>
-      <div class="col-sm-2">
-          <button *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)" class="p-button p-button-sm p-button-success" (click)="activate()">Activate</button>
-          <button *ngIf="user.status == STATUS_ACTIVE" class="p-button p-button-sm p-button-success" (click)="extend()">Extend</button>
-          <button *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED" class="p-button p-button-sm p-button-success" (click)="renew()">Renew</button>
-      </div>
-      <div *ngIf="user.is_locked && session_user.is_admin" class="col-sm-2">
-          <button class="p-button p-button-sm p-button-primary" (click)="unlock()">Unlock</button>
-      </div>
-      <div class="col-sm-3">
-          <div *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
-          <div *ngIf="session_user.is_admin && user.status == STATUS_ACTIVE"><app-my-expire-confirm [mailer]="config.mailer" [onConfirm]="expire"></app-my-expire-confirm></div>
-          <div *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
-      </div>
-  </div>
+	<div class="row">
+
+		<div class="col-sm-5">
+			<h2>{{user.uid}}</h2>
+			<div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
+			<div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
+			<div *ngIf="user && user.created_at"><small>Created at : {{date_convert(user.created_at)}}</small></div>
+			<div *ngIf="user && user.expiration"><small>Expires: {{date_convert(user.expiration)}}</small></div>
+			<div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
+		</div>
+
+		<div class="col-sm-2">
+			<button *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)" class="p-button p-button-sm p-button-success" (click)="activate()">Activate</button>
+			<button *ngIf="user.status == STATUS_ACTIVE" class="p-button p-button-sm p-button-success" (click)="extend()">Extend</button>
+			<button *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED" class="p-button p-button-sm p-button-success" (click)="renew()">Renew</button>
+		</div>
+
+		<div *ngIf="user.is_locked && session_user.is_admin" class="col-sm-2">
+			<button class="p-button p-button-sm p-button-primary" (click)="unlock()">Unlock</button>
+		</div>
+
+		<div class="col-sm-3">
+			<div *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
+			<div *ngIf="session_user.is_admin && user.status == STATUS_ACTIVE"><app-my-expire-confirm [mailer]="config.mailer" [onConfirm]="expire"></app-my-expire-confirm></div>
+			<div *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED"><app-my-delete-confirm [onConfirm]="delete" [data]="" [explainMessage]="true"></app-my-delete-confirm></div>
+		</div>
+
+	</div>
 </div>
+
+
+
 <div *ngFor="let template of plugins">
-  <div *ngIf="plugin_data[template.name] && plugin_data[template.name].warnings && plugin_data[template.name].warnings.length>0" class="alert alert-warning">
-      <div *ngFor="let warning of plugin_data[template.name].warnings">
-          <strong>Warning!</strong> {{warning}}
-      </div>
-  </div>
-  <div *ngIf="plugin_data[template.name] && plugin_data[template.name].errors && plugin_data[template.name].errors.length>0" class="alert alert-danger">
-      <div *ngFor="let error of plugin_data[template.name].errors">
-          <strong>Alert!</strong> {{error}}
-      </div>
-  </div>
+
+	<div *ngIf="plugin_data[template.name] && plugin_data[template.name].warnings && plugin_data[template.name].warnings.length>0" class="alert alert-warning">
+		<div *ngFor="let warning of plugin_data[template.name].warnings">
+			<strong>Warning!</strong> {{warning}}
+		</div>
+	</div>
+
+	<div *ngIf="plugin_data[template.name] && plugin_data[template.name].errors && plugin_data[template.name].errors.length>0" class="alert alert-danger">
+		<div *ngFor="let error of plugin_data[template.name].errors">
+			<strong>Alert!</strong> {{error}}
+		</div>
+	</div>
+
 </div>
+
+
+
 <div class="alert alert-success" role="alert" *ngIf="msg">{{msg}}</div>
 <div class="alert alert-warning" role="alert" *ngIf="del_msg">{{del_msg}}</div>
 <div class="alert alert-danger" role="alert" *ngIf="err_msg">{{err_msg}}</div>
 
+
+
 <div class="card text-center">
-    <div class="card-header">
-      <ul class="nav nav-pills card-header-pills">
-        <li class="nav-item" (click)="switchTo(0)">
-          <button class="p-button p-button-sm p-button-outline-primary nav-link">Information</button>
-        </li>
-        <li class="nav-item" (click)="switchTo(1)">
-          <button class="p-button p-button-sm p-button-outline-primary nav-link">SSH</button>
-        </li>
-        <li class="nav-item" (click)="switchTo(2)">
-            <button class="p-button p-button-sm p-button-outline-primary nav-link">Details</button>
-          </li>
-        <li class="nav-item" (click)="switchTo(3)">
-          <button class="p-button p-button-sm p-button-outline-primary nav-link">History</button>
-        </li>
-        <li class="nav-item" *ngIf="session_user.is_admin" (click)="switchTo(4)">
-            <button class="p-button p-button-sm p-button-outline-primary nav-link">Send mail</button>
-        </li>
-      </ul>
-    </div>
-    <div class="card-body">
-
-<div class="row">
-  <div class="col-sm-6" *ngIf="panel == 0">
-      <div class="card bg-light">
-          <div class="card-header">
-              <h4>Information</h4>
-          </div>
-          <div class="card-body">
-              <div class="user-information">
-                  <form aria-label="user information" role="form" class="user-form form-horizontal form-register">
-                      <div class="form-group row">
-                          <label for="firstname" class="col-4 col-form-label">First name</label>
-                          <div class="col-6">
-                              <input type="text" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.firstname" class="form-control"/>
-                          </div>
-                      </div>
-                      <div class="form-group row">
-                          <label for="lastname" class="col-4 col-form-label">Last name</label>
-                          <div class="col-6">
-                              <input type="text" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lastname" class="form-control"/>
-                          </div>
-                      </div>
-                      <div class="form-group row">
-                          <label for="email" class="col-4 col-form-label label-control">Email</label>
-                          <div class="col-6">
-                              <input type="email" id="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.email" class="form-control"/>
-                          </div>
-                      </div>
-                      <div class="form-group row">
-                          <label for="address" class="col-4 col-form-label">Address</label>
-                          <div class="col-6">
-                              <textarea id="address" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.address" class="form-control"></textarea>
-                          </div>
-                      </div>
-                      <div class="form-group row">
-                          <label for="why" class="col-4 col-form-label">Why</label>
-                          <div class="col-6">
-                              <textarea id="why" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.why" class="form-control"></textarea>
-                          </div>
-                      </div>
-                      <div class="form-group row">
-                          <label for="lab" class="col-4 col-form-label">Laboratory</label>
-                          <div class="col-6">
-                              <input type="text" id="lab" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lab" class="form-control"/>
-                          </div>
-                      </div>
-                      <div class="form-group row">
-                          <label for="responsible" class="col-4 col-form-label">Manager</label>
-                          <div class="col-6">
-                              <input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
-                          </div>
-                      </div>
-                      <div class="form-group row">
-                          <label for="team" class="col-4 col-form-label">Team</label>
-                          <div class="col-6">
-                              <input type="text" id="team" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.team" class="form-control"/>
-                          </div>
-                      </div>
-                      <div *ngIf="session_user.is_admin">
-                          <div class="form-group row">
-                              <label for="key" class="col-4 col-form-label">Key</label>
-                              <div class="col-6">
-                                  <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.regkey" class="form-control" readonly/>
-                              </div>
-                          </div>
-                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
-                              <label for="group" class="col-4 col-form-label">Group</label>
-                              <div class="col-6">
-                                  <input disabled type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control"/>
-                              </div>
-                          </div>
-
-                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
-                              <div class="col-4 col-form-label"></div>
-                              <div class="col-6">
-                                  <select [(ngModel)]="user.group" [ngModelOptions]="{standalone: true}" class="form-control">
-                                      <option *ngFor="let group of groups" [value]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
-                                  </select>
-                                  <div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
-                                  <div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
-                              </div>
-                              <div *ngIf="user.group == this.missing_group" class="groupCreation col-2">
-                                <div>
-                                  <button type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#group_creation">
-                                  <span class="oi oi-plus" aria-hidden="true"></span>
-                                  </button>
-                                </div>
-                              </div>
-                          </div>
-
-                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.main_group">
-                              <label for="mgroup" class="col-4 col-form-label">Main group directory</label>
-                              <div class="col-6">
-                                  <select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.maingroup" class="form-control">
-                                    <option *ngFor="let item of config.main_groups" [value]="item">{{item}}</option>
-                                  </select>
-                              </div>
-                          </div>
-                          <div class="form-group row" *ngIf="user.secondarygroups && user.secondarygroups.length > 0">
-                              <label label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
-                              <div class="col-6">
-                                  <div *ngFor="let secondarygroup of user.secondarygroups">
-                                      <input type="text" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
-                                  </div>
-                              </div>
-                          </div>
-                          <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.ip">
-                              <label for="ip" class="col-4 col-form-label">IP address</label>
-                              <div class="col-6">
-                                  <input type="text" id="ip" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ip" class="form-control"/>
-                              </div>
-                          </div>
-                          <div class="form-group row">
-                              <label for="loginShell" class="col-4 col-form-label">Shell</label>
-                              <div class="col-6">
-                                  <input type="text" id="loginShell" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.loginShell" class="form-control"/>
-                              </div>
-                          </div>
-                          <div class="form-group row">
-                              <label for="duration" class="col-4 col-form-label">Duration</label>
-                              <div class="col-6">
-                                  <select [ngModelOptions]="{standalone: true}" [(ngModel)]="user.duration" class="form-control" >
-                                    <option *ngFor="let duration of config.duration">{{duration}}</option>
-
-                                  </select>
-                              </div>
-                          </div>
-                          <div class="form-check row">
-                            <input id="staff" name="staff" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_internal" type="checkbox" class="form-check-input">
-                              <label class="col-6 form-check-label" for="staff">
-                                  Staff member
-                              </label>
-                          </div>
-                          <div class="form-check row">
-                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
-                              <label class="col-6 form-check-label">
-                                  Fake/App account
-                              </label>
-                          </div>
-                          <div class="form-check row">
-                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.never_expire" type="checkbox" class="form-check-input">
-                              <label class="col-6 form-check-label">
-                                  Never expire
-                              </label>
-                          </div>
-                          <div class="form-check row">
-                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
-                              <label class="col-6 form-check-label">
-                                  Trainer account
-                              </label>
-                          </div>
-                          <div class="form-check row">
-                              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.send_copy_to_support" type="checkbox" class="form-check-input">
-                              <label class="col-6 form-check-label">
-                                  Copy mail to Support Team
-                              </label>
-                          </div>
-
-                      </div>
-
-                      <div *ngIf="! session_user.is_admin">
-                          <div class="form-group">
-                              <label for="group" class="col-4 col-form-label">Group</label>
-                              <div class="col-6">
-                                  <input type="text" id="group" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control" readonly/>
-                              </div>
-                          </div>
-                          <div class="form-group">
-                              <label *ngIf="user.secondarygroups && user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
-                              <div class="col-6">
-                                  <div *ngFor="let secondarygroup of user.secondarygroups">
-                                      <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </form>
-
-              </div>
-              <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
-              <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
-              <button type="button" class="p-button p-button-sm p-button-primary pull-right" (click)="update_info()">Update info</button>
-          </div>
-
-      </div>
-      <div class="card bg-light" *ngIf="user && user.extra_info">
-      <div class="card-header"><h4>Extra information</h4></div>
-      <div class="card-body">
-        <app-user-extra [user]="user" (extraValues)="onExtraValue($event)"></app-user-extra>
-                      <div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
-              <div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
-              <button type="button" class="p-button p-button-sm p-button-primary pull-right" (click)="update_info()">Update info</button>
-      </div>
-      </div>
-  </div>
-
-  <div class="col-sm-6"*ngIf="panel == 0">
-
-    <div class="card bg-light" *ngIf="session_user.is_admin">
-        <div class="card-header">
-            <h4>Tags</h4>
-        </div>
-        <div class="card-body">
-            <app-tag [tag]="user.tags" [user]="user.uid" kind="user"></app-tag>
-        </div>
-    </div>
-
-    <div class="card bg-light" *ngIf="session_user.is_admin && config.enable_ui && config.enable_ui.log">
-        <div class="card-header">
-            <h4>Note</h4>
-        </div>
-        <div class="card-body">
-            <div class="alert alert-danger" role="alert" *ngIf="err_note">{{err_note}}</div>
-            <div class="form-group">
-                <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="note">
-                </textarea>
-            </div>
-            <div class="form-group">
-                <button type="button" class="p-button p-button-sm p-button-primary" (click)="add_note()">Add note</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="card bg-light" *ngIf="user.u2f && config.enable_ui && config.enable_ui.u2f_key">
-        <div class="card-header">
-            <h4>Authentication</h4>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-sm-12" style="margin-bottom: 10px">
-                    <span *ngIf="user.u2f.key"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
-                    <button class="p-button p-button-sm p-button-primary btn-sm" (click)="register_u2f()">Register new key</button>
-                    <span *ngIf="u2f">{{u2f}}</span>
-                </div>
-                <div class="col-sm-12">
-                    <button *ngIf="!((user.otp && user.otp.secret) || otp)" class="p-button p-button-sm p-button-primary btn-sm" (click)="register_otp()">Register OTP</button>
-                    <button *ngIf="(user.otp && user.otp.secret)" class="p-button p-button-sm p-button-danger btn-sm" (click)="remove_otp()">Remove OTP</button>
-                    <img alt={{secret}} *ngIf="otp" src={{otp}}/>
-                    <div class="alert alert-success" role="alert" *ngIf="msg">{{otp_msg}}</div>
-                    <div class="alert alert-danger" role="alert" *ngIf="err_msg">{{otp_err_msg}}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card bg-light">
-        <div class="card-header">
-            <h4>API Key</h4>
-        </div>
-        <div class="card-body">
-            <span>{{user.apikey}}</span>
-            <button style="margin-left: 10px;" class="p-button p-button-sm p-button-primary" (click)="generate_apikey(user.uid)">Generate</button>
-        </div>
-    </div>
-    <div class="card bg-light">
-        <div class="card-header">
-            <h4>Home directory</h4>
-        </div>
-        <div class="card-body">
-            <span>{{user.home}}</span>
-        </div>
-    </div>
-
-    <div class="card bg-light">
-        <div class="card-header">
-            <h4>Update password</h4>
-        </div>
-        <div class="card-body">
-            <div *ngIf="update_passwd" class="alert alert-success">{{update_passwd}}</div>
-            <div *ngIf="wrong_confirm_passwd" class="alert alert-danger">{{wrong_confirm_passwd}}</div>
-            <form>
-                <div class="form-group row">
-                            <div class="col-sm-8">
-                                <input [value]="user.uid" id="user_id" type="text" autocomplete="username" hidden readonly>
-                            </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-8">
-                        <label for="password" class="col-form-label">New password</label>
-                        <input autocomplete="new-password" placeholder="10 characters min" id="password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password1" class="form-control"/>
-                    </div>
-                    <div class="col-sm-8">
-                        <label for="confirm_password" class="col-form-label">Confirm password</label>
-                        <input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
-                    </div>
-                </div>
-                <button type="button" class="p-button p-button-sm p-button-primary" (click)="update_password()">Change password</button>
-            </form>
-        </div>
-    </div>
-    <div class="card bg-light" *ngIf="session_user.is_admin">
-        <div class="card-header">
-            <h4>Secondary groups</h4>
-        </div>
-        <div class="card-body">
-            <div *ngIf="add_group_msg" class="alert alert-success alert-dismissible" role="alert">
-                {{add_group_msg}}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div *ngIf="rm_group_msg" class="alert alert-warning alert-dismissible" role="alert">
-                {{rm_group_msg}}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="form-group row">
-                <div class="col-sm-6">
-                    <label for="newgroup" class="col-form-label">Groups</label>
-                    <select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newgroup" class="form-control">
-                        <option *ngFor="let group of groups" [ngValue]="group.name">{{group.name}}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <button type="button" class="p-button p-button-sm p-button-primary" (click)="add_secondary_group()">Add to group</button>
-            </div>
-            <hr/>
-            <div class="table-responsive">
-                <table aria-label="secondary groups" *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
-                    <thead>
-                        <th scope="col">Name</th><th scope="col"></th>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let secondarygroup of user.secondarygroups">
-                            <td>{{secondarygroup}}</td>
-                            <td><app-my-delete-confirm [onConfirm]="delete_secondary_group" [data]="secondarygroup"></app-my-delete-confirm></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="card bg-light" *ngIf="session_user.is_admin && user.projects">
-        <div class="card-header">
-            <h4>Projects</h4>
-        </div>
-        <div class="card-body">
-            <app-user-projects [projects]="new_projects" [user_projects]="user_projects" [user]="user"></app-user-projects>
-        </div>
-    </div>
-
-    <div *ngIf="config.enable_ui && config.enable_ui.databases" class="card bg-light">
-        <div class="card-header">
-            <h4>Databases</h4>
-        </div>
-        <div class="card-body">
-                <div *ngIf="dbmsg" class="alert alert-info alert-dismissible" role="alert">
-                    {{dbmsg}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                 </div>
-                 <div *ngIf="dbmsg_error" class="alert alert-danger alert-dismissible" role="alert">
-                     {{dbmsg_error}}
-                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                         <span aria-hidden="true">&times;</span>
-                       </button>
-                  </div>
-                <div *ngIf="rm_dbmsg" class="alert alert-warning alert-dismissible" role="alert">
-                    {{rm_dbmsg}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                  </div>
-                  <div class="form-group row">
-                      <div class="col-sm-6">
-                        <label for="database">Database name</label>
-                        <input placeholder="no space or accent" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="database.name" id='database'class="form-control"/>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="p-button p-button-sm p-button-primary" (click)="db_add()">Create</button>
-                    </div>
-
-                <div class="table-responsive">
-                    <table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
-                        <thead>
-                            <th scope="col">Name</th><th scope="col"></th>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let db of databases">
-                                <td>{{db.name}}</td>
-                                <td><app-my-delete-confirm [onConfirm]="db_delete" [data]="db.name"></app-my-delete-confirm>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-        </div>
-    </div>
-  </div>
-
-  <div class="col-md-6 col-sm-12" *ngIf="panel == 1">
-        <div class="card bg-light">
-                <div class="card-header">
-                    <h4>Add public SSH key</h4>
-                </div>
-                <div class="card-body">
-                    <div *ngIf="ssh_message" class="alert alert-success alert-dismissible" role="alert">
-                        {{ssh_message}}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div>
-                        <form aria-label="ssh key" role="form" class="user-form form-inline">
-                            <div class="form-group">
-                                <input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="p-button p-button-sm p-button-primary" (click)="update_ssh()">Add</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-  </div>
-  <div  class="col-md-6 col-sm-12" *ngIf="panel == 1">
-        <div class="card bg-light">
-                <div class="card-header">
-                    <h4>SSH keys</h4>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info" role="alert">
-                        When generating a key, public key is automatically added to authorized keys, process takes one minute
-                    </div>
-                    <div *ngIf="key_err" class="alert alert-warning alert-dismissible fade show" role="alert">{{key_err}}</div>
-                    <div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
-                    <button class="p-button p-button-sm p-button-primary" (click)="ssh_new_key()">Generate new key</button>
-                    <hr/>
-                    <h4 style="font-weight: normal;">Download</h4>
-                    <button (click)="get_key(user.uid, 'private')" class="p-button p-button-sm p-button-primary">private rsa key</button>
-                    <button (click)="get_key(user.uid, 'putty')" class="p-button p-button-sm p-button-primary">putty private key</button>
-                    <button (click)="get_key(user.uid, 'public')" class="p-button p-button-sm p-button-primary">public key</button>
-                </div>
-            </div>
-  </div>
-
-  <div class="col-12" *ngIf="panel == 2">
-      <div class="row">
-        <div class="col-md-6 col-sm-12" *ngIf="panel == 2">
-            <div *ngIf="config.enable_ui && config.enable_ui.websites" class="card bg-light">
-                    <div class="card-header">
-                        <h4>Web sites</h4>
-                    </div>
-                    <div class="card-body">
-                        <div *ngIf="session_user.is_admin">
-                            <div *ngIf="webmsg" class="alert alert-success alert-dismissible" role="alert">
-                                {{webmsg}}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                  </button>
-                              </div>
-                              <div *ngIf="rmwebmsg" class="alert alert-warning alert-dismissible" role="alert">
-                                  {{rmwebmsg}}
-                                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                      <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            <div class="form-group row">
-                                <div class="col-sm-6">
-                                    <label for="website_name">Web site name</label>
-                                    <input placeholder="alphanumeric" id="website_name" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.name"/>
-                                    <label for="website_url">Web site url</label>
-                                    <input type="text" id="website_url" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.url"/>
-                                    <label for="website_description">Web site short description</label>
-                                    <input id="website_description" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.description"/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="p-button p-button-sm p-button-primary" (click)="web_add()">Declare owned site</button>
-                            </div>
-                        </div>
-                        <div>
-                            <hr/>
-                            <div class="table-responsive">
-                                <table aria-label="web sites" *ngIf="websites && websites.length > 0" class="table table-striped">
-                                    <thead>
-                                        <th scope="col">Name</th><th scope="col">Url</th><th scope="col">Description</th><th scope="col"></th>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let site of websites">
-                                            <td>{{site.name}}</td>
-                                            <td>{{site.url}}</td>
-                                            <td>{{site.description}}</td>
-                                            <td><app-my-delete-confirm [onConfirm]="web_delete" [data]="site.name"></app-my-delete-confirm></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        </div>
-        <div class="col-md-6 col-sm-12" *ngFor="let template of plugins">
-                <div *ngIf="!template.admin_only || session_user.is_admin" class="card bg-light">
-                    <div class="card-header">
-                        <h4>{{template.display_name}}</h4>
-                    </div>
-                    <div class="card-body">
-                        <app-plugin [pluginItem]="template.name" [userId]="user.uid"></app-plugin>
-                    </div>
-                </div>
-        </div>
-    </div>
-  </div>
-
-  <div class="col-12" *ngIf="panel == 3">
-    <div class="card bg-light">
-        <div class="card-header">
-            <h4>History</h4>
-        </div>
-        <div class="card-body">
-                <app-userlogs [user]="user.uid"></app-userlogs>
-        </div>
-    </div>
-  </div>
-
-    <div class="col-md-6 col-sm-12" *ngIf="session_user.is_admin && panel == 4">
-        <div class="card bg-light">
-                <div class="card-header">
-                    <h4>Send message to user</h4>
-                </div>
-                <div class="card-body">
-
-            <div class="alert alert-danger" role="alert" *ngIf="notify_err">{{err_notify}}</div>
-            <div class="form-group">
-                <input class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="notify_subject" placeholder="mail subject"/>
-            </div>
-            <div class="form-group">
-                <textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="notify_message" placeholder="mail message in markdown">
-                </textarea>
-            </div>
-            <div class="form-group">
-                <button type="button" class="p-button p-button-sm p-button-primary" (click)="sendmail()">Send mail</button>
-            </div>
 
 
-                </div>
-        </div>
-    </div>
+	<div class="card-header">
+		<ul class="nav nav-pills card-header-pills">
+
+			<li class="nav-item" (click)="switchTo(0)">
+				<button class="p-button p-button-sm p-button-outline-primary nav-link">Information</button>
+			</li>
+
+			<li class="nav-item" (click)="switchTo(1)">
+				<button class="p-button p-button-sm p-button-outline-primary nav-link">SSH</button>
+			</li>
+
+			<li class="nav-item" (click)="switchTo(2)">
+				<button class="p-button p-button-sm p-button-outline-primary nav-link">Details</button>
+			</li>
+
+			<li class="nav-item" (click)="switchTo(3)">
+				<button class="p-button p-button-sm p-button-outline-primary nav-link">History</button>
+			</li>
+
+			<li class="nav-item" *ngIf="session_user.is_admin" (click)="switchTo(4)">
+				<button class="p-button p-button-sm p-button-outline-primary nav-link">Send mail</button>
+			</li>
+
+		</ul>
+	</div>
+
+
+	<div class="card-body">
+		<div class="row">
+
+			<div class="col-sm-6" *ngIf="panel == 0">
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>Information</h4>
+					</div>
+					<div class="card-body">
+						<div class="user-information">
+							<form aria-label="user information" role="form" class="user-form form-horizontal form-register">
+								<div class="form-group row">
+									<label for="firstname" class="col-4 col-form-label">First name</label>
+									<div class="col-6">
+										<input type="text" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.firstname" class="form-control"/>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="lastname" class="col-4 col-form-label">Last name</label>
+									<div class="col-6">
+										<input type="text" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lastname" class="form-control"/>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="email" class="col-4 col-form-label label-control">Email</label>
+									<div class="col-6">
+										<input type="email" id="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.email" class="form-control"/>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="address" class="col-4 col-form-label">Address</label>
+									<div class="col-6">
+										<textarea id="address" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.address" class="form-control"></textarea>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="why" class="col-4 col-form-label">Why</label>
+									<div class="col-6">
+										<textarea id="why" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.why" class="form-control"></textarea>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="lab" class="col-4 col-form-label">Laboratory</label>
+									<div class="col-6">
+										<input type="text" id="lab" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lab" class="form-control"/>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="responsible" class="col-4 col-form-label">Manager</label>
+									<div class="col-6">
+										<input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="team" class="col-4 col-form-label">Team</label>
+									<div class="col-6">
+										<input type="text" id="team" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.team" class="form-control"/>
+									</div>
+								</div>
+
+								<div *ngIf="session_user.is_admin">
+									<div class="form-group row">
+										<label for="key" class="col-4 col-form-label">Key</label>
+										<div class="col-6">
+											<input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.regkey" class="form-control" readonly/>
+										</div>
+									</div>
+
+									<div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
+										<label for="group" class="col-4 col-form-label">Group</label>
+										<div class="col-6">
+											<input disabled type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control"/>
+										</div>
+									</div>
+
+									<div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
+										<div class="col-4 col-form-label"></div>
+										<div class="col-6">
+											<select [(ngModel)]="user.group" [ngModelOptions]="{standalone: true}" class="form-control">
+												<option *ngFor="let group of groups" [value]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
+											</select>
+											<div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
+											<div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
+										</div>
+										<div *ngIf="user.group == this.missing_group" class="groupCreation col-2">
+											<div>
+												<button type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#group_creation">
+													<span class="oi oi-plus" aria-hidden="true"></span>
+												</button>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.main_group">
+										<label for="mgroup" class="col-4 col-form-label">Main group directory</label>
+										<div class="col-6">
+											<select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.maingroup" class="form-control">
+												<option *ngFor="let item of config.main_groups" [value]="item">{{item}}</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group row" *ngIf="user.secondarygroups && user.secondarygroups.length > 0">
+										<label label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
+										<div class="col-6">
+											<div *ngFor="let secondarygroup of user.secondarygroups">
+												<input type="text" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.ip">
+										<label for="ip" class="col-4 col-form-label">IP address</label>
+										<div class="col-6">
+											<input type="text" id="ip" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ip" class="form-control"/>
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="loginShell" class="col-4 col-form-label">Shell</label>
+										<div class="col-6">
+											<input type="text" id="loginShell" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.loginShell" class="form-control"/>
+										</div>
+									</div>
+
+									<div class="form-group row">
+										<label for="duration" class="col-4 col-form-label">Duration</label>
+										<div class="col-6">
+											<select [ngModelOptions]="{standalone: true}" [(ngModel)]="user.duration" class="form-control" >
+												<option *ngFor="let duration of config.duration">{{duration}}</option>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-check row">
+									<input id="staff" name="staff" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_internal" type="checkbox" class="form-check-input">
+										<label class="col-6 form-check-label" for="staff">
+											Staff member
+										</label>
+									</div>
+
+									<div class="form-check row">
+										<input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_fake" type="checkbox" class="form-check-input">
+										<label class="col-6 form-check-label">
+											Fake/App account
+										</label>
+									</div>
+
+									<div class="form-check row">
+										<input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.never_expire" type="checkbox" class="form-check-input">
+										<label class="col-6 form-check-label">
+											Never expire
+										</label>
+									</div>
+
+									<div class="form-check row">
+										<input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.is_trainer" type="checkbox" class="form-check-input">
+										<label class="col-6 form-check-label">
+											Trainer account
+										</label>
+									</div>
+
+									<div class="form-check row">
+										<input [ngModelOptions]="{standalone: true}" [(ngModel)]="user.send_copy_to_support" type="checkbox" class="form-check-input">
+										<label class="col-6 form-check-label">
+											Copy mail to Support Team
+										</label>
+									</div>
+								</div>
+
+								<div *ngIf="!session_user.is_admin">
+									<div class="form-group">
+										<label for="group" class="col-4 col-form-label">Group</label>
+										<div class="col-6">
+											<input type="text" id="group" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control" readonly/>
+										</div>
+									</div>
+									<div class="form-group">
+										<label *ngIf="user.secondarygroups && user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
+										<div class="col-6">
+											<div *ngFor="let secondarygroup of user.secondarygroups">
+												<input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
+						<div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
+						<button type="button" class="p-button p-button-sm p-button-primary pull-right" (click)="update_info()">Update info</button>
+					</div>
+				</div>
+
+				<div class="card bg-light" *ngIf="user && user.extra_info">
+					<div class="card-header"><h4>Extra information</h4></div>
+					<div class="card-body">
+						<app-user-extra [user]="user" (extraValues)="onExtraValue($event)"></app-user-extra>
+						<div class="alert alert-success" role="alert" *ngIf="update_msg">{{update_msg}}</div>
+						<div class="alert alert-danger" role="alert" *ngIf="update_error_msg">{{update_error_msg}}</div>
+						<button type="button" class="p-button p-button-sm p-button-primary pull-right" (click)="update_info()">Update info</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-6"*ngIf="panel == 0">
+				<div class="card bg-light" *ngIf="session_user.is_admin">
+					<div class="card-header">
+						<h4>Tags</h4>
+					</div>
+					<div class="card-body">
+						<app-tag [tag]="user.tags" [user]="user.uid" kind="user"></app-tag>
+					</div>
+				</div>
+
+				<div class="card bg-light" *ngIf="session_user.is_admin && config.enable_ui && config.enable_ui.log">
+					<div class="card-header">
+						<h4>Note</h4>
+					</div>
+					<div class="card-body">
+						<div class="alert alert-danger" role="alert" *ngIf="err_note">{{err_note}}</div>
+						<div class="form-group">
+							<textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="note"></textarea>
+						</div>
+						<div class="form-group">
+							<button type="button" class="p-button p-button-sm p-button-primary" (click)="add_note()">Add note</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="card bg-light" *ngIf="user.u2f && config.enable_ui && config.enable_ui.u2f_key">
+					<div class="card-header">
+						<h4>Authentication</h4>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-sm-12" style="margin-bottom: 10px">
+								<span *ngIf="user.u2f.key"><span class="glyphicon glyphicon-ok"> </span> Using Webauthn key</span>
+								<button class="p-button p-button-sm p-button-primary btn-sm" (click)="register_u2f()">Register new key</button>
+								<span *ngIf="u2f">{{u2f}}</span>
+							</div>
+							<div class="col-sm-12">
+								<button *ngIf="!((user.otp && user.otp.secret) || otp)" class="p-button p-button-sm p-button-primary btn-sm" (click)="register_otp()">Register OTP</button>
+								<button *ngIf="(user.otp && user.otp.secret)" class="p-button p-button-sm p-button-danger btn-sm" (click)="remove_otp()">Remove OTP</button>
+								<img alt={{secret}} *ngIf="otp" src={{otp}}/>
+								<div class="alert alert-success" role="alert" *ngIf="msg">{{otp_msg}}</div>
+								<div class="alert alert-danger" role="alert" *ngIf="err_msg">{{otp_err_msg}}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>API Key</h4>
+					</div>
+					<div class="card-body">
+						<span>{{user.apikey}}</span>
+						<button style="margin-left: 10px;" class="p-button p-button-sm p-button-primary" (click)="generate_apikey(user.uid)">Generate</button>
+					</div>
+				</div>
+
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>Home directory</h4>
+					</div>
+					<div class="card-body">
+						<span>{{user.home}}</span>
+					</div>
+				</div>
+
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>Update password</h4>
+					</div>
+					<div class="card-body">
+						<div *ngIf="update_passwd" class="alert alert-success">{{update_passwd}}</div>
+						<div *ngIf="wrong_confirm_passwd" class="alert alert-danger">{{wrong_confirm_passwd}}</div>
+						<form>
+							<div class="form-group row">
+								<div class="col-sm-8">
+									<input [value]="user.uid" id="user_id" type="text" autocomplete="username" hidden readonly>
+								</div>
+							</div>
+							<div class="form-group row">
+								<div class="col-sm-8">
+									<label for="password" class="col-form-label">New password</label>
+									<input autocomplete="new-password" placeholder="10 characters min" id="password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password1" class="form-control"/>
+								</div>
+								<div class="col-sm-8">
+									<label for="confirm_password" class="col-form-label">Confirm password</label>
+									<input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
+								</div>
+							</div>
+							<button type="button" class="p-button p-button-sm p-button-primary" (click)="update_password()">Change password</button>
+						</form>
+					</div>
+				</div>
+
+				<div class="card bg-light" *ngIf="session_user.is_admin">
+					<div class="card-header">
+						<h4>Secondary groups</h4>
+					</div>
+					<div class="card-body">
+						<div *ngIf="add_group_msg" class="alert alert-success alert-dismissible" role="alert">
+							{{add_group_msg}}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+
+						<div *ngIf="rm_group_msg" class="alert alert-warning alert-dismissible" role="alert">
+							{{rm_group_msg}}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+
+						<div class="form-group row">
+							<div class="col-sm-6">
+								<label for="newgroup" class="col-form-label">Groups</label>
+								<select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newgroup" class="form-control">
+									<option *ngFor="let group of groups" [ngValue]="group.name">{{group.name}}</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<button type="button" class="p-button p-button-sm p-button-primary" (click)="add_secondary_group()">Add to group</button>
+						</div>
+						<hr/>
+
+						<div class="table-responsive">
+							<table aria-label="secondary groups" *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
+								<thead>
+									<th scope="col">Name</th><th scope="col"></th>
+								</thead>
+								<tbody>
+									<tr *ngFor="let secondarygroup of user.secondarygroups">
+										<td>{{secondarygroup}}</td>
+										<td><app-my-delete-confirm [onConfirm]="delete_secondary_group" [data]="secondarygroup"></app-my-delete-confirm></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div class="card bg-light" *ngIf="session_user.is_admin && user.projects">
+					<div class="card-header">
+						<h4>Projects</h4>
+					</div>
+					<div class="card-body">
+						<app-user-projects [projects]="new_projects" [user_projects]="user_projects" [user]="user"></app-user-projects>
+					</div>
+				</div>
+
+				<div *ngIf="config.enable_ui && config.enable_ui.databases" class="card bg-light">
+					<div class="card-header">
+						<h4>Databases</h4>
+					</div>
+					<div class="card-body">
+						<div *ngIf="dbmsg" class="alert alert-info alert-dismissible" role="alert">
+							{{dbmsg}}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+
+						<div *ngIf="dbmsg_error" class="alert alert-danger alert-dismissible" role="alert">
+							{{dbmsg_error}}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+
+						<div *ngIf="rm_dbmsg" class="alert alert-warning alert-dismissible" role="alert">
+							{{rm_dbmsg}}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+
+						<div class="form-group row">
+							<div class="col-sm-6">
+								<label for="database">Database name</label>
+								<input placeholder="no space or accent" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="database.name" id='database'class="form-control"/>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<button type="button" class="p-button p-button-sm p-button-primary" (click)="db_add()">Create</button>
+						</div>
+
+						<div class="table-responsive">
+							<table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
+								<thead>
+									<th scope="col">Name</th><th scope="col"></th>
+								</thead>
+								<tbody>
+									<tr *ngFor="let db of databases">
+										<td>{{db.name}}</td>
+										<td><app-my-delete-confirm [onConfirm]="db_delete" [data]="db.name"></app-my-delete-confirm>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6 col-sm-12" *ngIf="panel == 1">
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>Add public SSH key</h4>
+					</div>
+					<div class="card-body">
+						<div *ngIf="ssh_message" class="alert alert-success alert-dismissible" role="alert">
+							{{ssh_message}}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div>
+							<form aria-label="ssh key" role="form" class="user-form form-inline">
+								<div class="form-group">
+									<input placeholder="SSH public key (one line)" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.ssh" class="form-control"/>
+								</div>
+								<div class="form-group">
+									<button type="button" class="p-button p-button-sm p-button-primary" (click)="update_ssh()">Add</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div  class="col-md-6 col-sm-12" *ngIf="panel == 1">
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>SSH keys</h4>
+					</div>
+					<div class="card-body">
+						<div class="alert alert-info" role="alert">
+							When generating a key, public key is automatically added to authorized keys, process takes one minute
+						</div>
+						<div *ngIf="key_err" class="alert alert-warning alert-dismissible fade show" role="alert">{{key_err}}</div>
+						<div *ngIf="new_key_message" class="alert alert-success">{{new_key_message}}</div>
+						<button class="p-button p-button-sm p-button-primary" (click)="ssh_new_key()">Generate new key</button>
+						<hr/>
+						<h4 style="font-weight: normal;">Download</h4>
+						<button (click)="get_key(user.uid, 'private')" class="p-button p-button-sm p-button-primary">private rsa key</button>
+						<button (click)="get_key(user.uid, 'putty')" class="p-button p-button-sm p-button-primary">putty private key</button>
+						<button (click)="get_key(user.uid, 'public')" class="p-button p-button-sm p-button-primary">public key</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12" *ngIf="panel == 2">
+				<div class="row">
+					<div class="col-md-6 col-sm-12" *ngIf="panel == 2">
+						<div *ngIf="config.enable_ui && config.enable_ui.websites" class="card bg-light">
+							<div class="card-header">
+								<h4>Web sites</h4>
+							</div>
+							<div class="card-body">
+								<div *ngIf="session_user.is_admin">
+									<div *ngIf="webmsg" class="alert alert-success alert-dismissible" role="alert">
+										{{webmsg}}
+										<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div *ngIf="rmwebmsg" class="alert alert-warning alert-dismissible" role="alert">
+										{{rmwebmsg}}
+										<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="form-group row">
+										<div class="col-sm-6">
+											<label for="website_name">Web site name</label>
+											<input placeholder="alphanumeric" id="website_name" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.name"/>
+											<label for="website_url">Web site url</label>
+											<input type="text" id="website_url" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.url"/>
+											<label for="website_description">Web site short description</label>
+											<input id="website_description" type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="website.description"/>
+										</div>
+									</div>
+									<div class="form-group">
+										<button type="button" class="p-button p-button-sm p-button-primary" (click)="web_add()">Declare owned site</button>
+									</div>
+								</div>
+
+								<div>
+									<hr/>
+									<div class="table-responsive">
+										<table aria-label="web sites" *ngIf="websites && websites.length > 0" class="table table-striped">
+											<thead>
+												<th scope="col">Name</th><th scope="col">Url</th><th scope="col">Description</th><th scope="col"></th>
+											</thead>
+											<tbody>
+												<tr *ngFor="let site of websites">
+													<td>{{site.name}}</td>
+													<td>{{site.url}}</td>
+													<td>{{site.description}}</td>
+													<td><app-my-delete-confirm [onConfirm]="web_delete" [data]="site.name"></app-my-delete-confirm></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6 col-sm-12" *ngFor="let template of plugins">
+						<div *ngIf="!template.admin_only || session_user.is_admin" class="card bg-light">
+							<div class="card-header">
+								<h4>{{template.display_name}}</h4>
+							</div>
+							<div class="card-body">
+								<app-plugin [pluginItem]="template.name" [userId]="user.uid"></app-plugin>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12" *ngIf="panel == 3">
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>History</h4>
+					</div>
+					<div class="card-body">
+							<app-userlogs [user]="user.uid"></app-userlogs>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6 col-sm-12" *ngIf="session_user.is_admin && panel == 4">
+				<div class="card bg-light">
+					<div class="card-header">
+						<h4>Send message to user</h4>
+					</div>
+					<div class="card-body">
+						<div class="alert alert-danger" role="alert" *ngIf="notify_err">{{err_notify}}</div>
+						<div class="form-group">
+							<input class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="notify_subject" placeholder="mail subject"/>
+						</div>
+						<div class="form-group">
+							<textarea class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="notify_message" placeholder="mail message in markdown">
+							</textarea>
+						</div>
+						<div class="form-group">
+							<button type="button" class="p-button p-button-sm p-button-primary" (click)="sendmail()">Send mail</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+
 
 </div>
-</div>
-</div>
+
+
 
 <!-- Modal -->
 <div class="modal" style="z-index: 1500;" id="group_creation" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="panel-title">Group creation</h3>
-      </div>
-      <div class="modal-body">
-        <form role="form" class="user-form form-inline justify-content-center">
-          <div class="form-group">
-            <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
-            <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="!new_group.name" data-dismiss="modal" (click)="addGroup()">Create</button>
-        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h3 class="panel-title">Group creation</h3>
+			</div>
+
+			<div class="modal-body">
+				<form role="form" class="user-form form-inline justify-content-center">
+					<div class="form-group">
+						<input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
+						<input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
+					</div>
+				</form>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="!new_group.name" data-dismiss="modal" (click)="addGroup()">Create</button>
+				<button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
+			</div>
+
+		</div>
+	</div>
 </div>
