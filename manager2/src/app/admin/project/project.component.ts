@@ -4,7 +4,6 @@ import { ConfigService } from 'src/app/config.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
-import { AuthService } from '../../auth/auth.service';
 
 import { Table } from 'primeng/table';
 
@@ -31,10 +30,7 @@ export class ProjectComponent implements OnInit {
     admin_user_err_msg: string
     admin_user_msg: string
 
-    session_user = this.authService.profile;
-
     constructor(
-        private authService: AuthService,
         private route: ActivatedRoute,
         private configService: ConfigService,
         private router: Router,
