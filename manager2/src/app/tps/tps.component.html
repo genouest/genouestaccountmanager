@@ -29,7 +29,7 @@
 					<div *ngIf="day.events" [ngStyle]="{'position': 'relative'}">
 							<p *ngFor="let event of day.events" (click)="eventClicked(event)" [ngStyle]="{
 								'background-color': event.color.primary,
-								'width': '101%', 'height': '20px', 'margin-bottom': '2px'
+								'width': '100%', 'height': '20px', 'margin-bottom': '2px'
 							}">
 								<span class="text-white small" [ngStyle]="{
 									'overflow': 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis',

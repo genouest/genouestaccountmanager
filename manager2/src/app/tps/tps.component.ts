@@ -6,9 +6,9 @@ import { CalendarEvent, CalendarEventTimesChangedEvent} from 'angular-calendar';
 import { Subject } from 'rxjs';
 
 const eventColors = {
-    created: { primary: '#00ff00' },
-    pending: { primary: '#00ffff' },
-    over: { primary: '#808080' }
+    created: { primary: '#00dd00' },
+    pending: { primary: '#00aabb' },
+    over: { primary: '#0000ff' }
 };
 
 @Component({
@@ -52,19 +52,27 @@ export class TpsComponent implements OnInit {
         private tpService: TpserviceService
     ) { }
 
+    private choseColor(id: string, over: boolean, created: boolean) {
+        let baseColor;
+        if (over) { baseColor = eventColors.over; }
+        else if (created) { baseColor = eventColors.created; }
+        else { baseColor = eventColors.pending; }
+        let color = { ...baseColor }
+        const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const red = (hash % 128).toString(16).padStart(2, '0');
+        color.primary = `#${red}${color.primary.slice(3)}`;
+        return color;
+    }
+
     private listEvents() {
         this.tpService.list().subscribe(
             resp => {
                 const events: CalendarEvent[] = resp.map(event => {
-                    let color;
-                    if (event.over) { color = eventColors.over; }
-                    else if (event.created) { color = eventColors.created; }
-                    else { color = eventColors.pending; }
                     return {
                         title: `${event.owner}, ${event.quantity} students`,
                         start: new Date(event.from),
                         end: new Date(event.to),
-                        color: color,
+                        color: this.choseColor(event._id, event.over, event.created),
                         meta: {
                             'id': event._id,
                             'owner': event.owner,
