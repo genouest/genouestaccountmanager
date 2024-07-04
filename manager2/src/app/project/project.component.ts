@@ -234,4 +234,21 @@ export class ProjectComponent implements OnInit {
     scroll(el: HTMLElement) {
         el.scrollIntoView({behavior: 'smooth'});
     }
+
+    // grayOutFormModal() {
+    //     document.getElementById('ask_project').classList.add('grayed-out');
+    // }
+
+    // resetGrayOut() {
+    //     console.log("resetgray")
+    //     document.getElementById('ask_project').classList.remove('grayed-out');
+    //     document.getElementById('ask_project').focus()
+    // }
+
+    // ngAfterViewInit() {
+    //     $('#termsModal').on('hidden.bs.modal', () => {
+    //       this.resetGrayOut();
+    //     });
+    //   }
+      
 }

@@ -142,10 +142,6 @@ button {
   margin: 5px;
 }
 
-.user-form label {
-  width: 150px;
-}
-
 .form-register input {
   margin-bottom: 10px !important;
 }
@@ -239,3 +235,14 @@ button {
     background-color: #d9edf7;
     border-color: #bce8f1;
 }
+
+.grayed-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-backdrop.show:nth-of-type(2) {
+    z-index: 1051 !important;
+}
+
+    
