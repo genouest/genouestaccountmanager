@@ -21,7 +21,7 @@ var STATUS_EXPIRED = 'Expired';
 
 
 router.get('/tp', async function(req, res) {
-    if(! req.locals.logInfo.is_logged) {
+    if(!req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -35,19 +35,10 @@ router.get('/tp', async function(req, res) {
 });
 
 router.post('/tp', async function(req, res) {
-    if(req.body.quantity === undefined || req.body.quantity === null || req.body.quantity<=0) {
-        res.status(403).send({message: 'Quantity must be >= 1'});
-        return;
-    }
-    if(req.body.about === undefined || req.body.about == '') {
-        res.status(403).send({message: 'Tell us why you need some tp accounts'});
-        return;
-    }
-    if(! req.locals.logInfo.is_logged) {
+    if(!req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
-
     let user = null;
     let is_admin = false;
     try {
@@ -62,11 +53,18 @@ router.post('/tp', async function(req, res) {
         res.status(404).send({message: 'User does not exist'});
         return;
     }
-    if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
+    if(!(is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
         res.status(403).send({message: 'Not authorized'});
         return;
     }
-
+    if(req.body.quantity === undefined || req.body.quantity === null || req.body.quantity <= 0) {
+        res.status(403).send({message: 'Quantity must be >= 1'});
+        return;
+    }
+    if(req.body.about === undefined || req.body.about == '') {
+        res.status(403).send({message: 'Tell us why you need some tp accounts'});
+        return;
+    }
     tpssrv.tp_reservation(
         user.uid,
         req.body.from,

@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
 import { ConfigService } from '../config.service'
 import { TpserviceService } from './tpservice.service';
@@ -51,7 +52,7 @@ export class TpsComponent implements OnInit {
         this.tpService.list().subscribe(
             resp => {
                 let events = [];
-                for (var i = 0; i < resp.length; i++) {
+                for(var i = 0; i < resp.length; i++) {
                     let event = resp[i];
                     events.push({
                         'title': event.owner + ', ' + event.quantity + ' students',
@@ -76,7 +77,7 @@ export class TpsComponent implements OnInit {
                 this.refresh.next();
             },
             err => console.log('failed to log tp reservations')
-        )
+        );
     }
 
     ngOnInit() {
@@ -113,37 +114,52 @@ export class TpsComponent implements OnInit {
         this.refresh.next();
     }
 
-    reserve() {
-        this.msg = '';
-        this.errmsg = '';
-        if (this.quantity <= 0) {
-            this.reserrmsg = 'Quantity must be > 0';
+    reserve(form: NgForm) {
+        if(form.valid) {
+            this.msg = '';
+            this.errmsg = '';
+            if(this.about === undefined || this.about == '') {
+                this.reserrmsg = 'Tell us why you need accounts';
+                return;
+            }
+            if(typeof this.quantity !== 'number' || this.quantity <= 0) {
+                this.reserrmsg = 'Quantity must be > 0';
+                return;
+            }
+            const fromDate = new Date(this.fromDate).getTime();
+            const toDate = new Date(this.toDate).getTime();
+            if(isNaN(fromDate) || isNaN(toDate)) {
+                this.reserrmsg = 'Invalid date format';
+                return;
+            }
+            if(fromDate > toDate) {
+                this.reserrmsg = 'End date must be superior to start date';
+                return;
+            }
+            if(toDate < new Date().getTime()) {
+                this.reserrmsg = 'End date can not be in the past';
+                return;
+            }
+            let reservation = {
+                quantity: this.quantity,
+                from: fromDate,
+                to: toDate,
+                about: this.about,
+                group_or_project: this.group_or_project,
+                name: this.name
+            }
+            console.log(reservation);
+            this.tpService.reserve(reservation).subscribe(
+                resp => {
+                    this.msg = resp['message'];
+                    this.listEvents();
+                },
+                err => this.errmsg = err.error.message
+            )
+        } else {
+            form.control.markAllAsTouched();
             return;
         }
-        if (new Date(this.fromDate).getTime() > new Date(this.toDate).getTime()) {
-            this.reserrmsg = 'End date must be superior to start date';
-            return;
-        }
-        if (new Date(this.toDate).getTime() < new Date().getTime()) {
-            this.reserrmsg = 'End date can not be in the past';
-            return;
-        }
-        let reservation = {
-            quantity: this.quantity,
-            from: new Date(this.fromDate).getTime(),
-            to: new Date(this.toDate).getTime(),
-            about: this.about,
-            group_or_project: this.group_or_project,
-            name: this.name
-        }
-        console.log(reservation);
-        this.tpService.reserve(reservation).subscribe(
-            resp => {
-                this.msg = resp['message'];
-                this.listEvents();
-            },
-            err => this.errmsg = err.error.message
-        )
     }
 
     cancel_reservation() {
@@ -152,7 +168,7 @@ export class TpsComponent implements OnInit {
         this.tpService.cancel(this.selectedEvent.id).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
-        )
+        );
         this.selectedEvent.over = true;
         this.listEvents();
     }
@@ -163,7 +179,7 @@ export class TpsComponent implements OnInit {
         this.tpService.create(this.selectedEvent.id).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
-        )
+        );
         this.selectedEvent.created = true;
         this.listEvents();
     }
@@ -174,7 +190,7 @@ export class TpsComponent implements OnInit {
         this.tpService.remove(this.selectedEvent.id).subscribe(
             resp => this.msg = resp['message'],
             err => this.errmsg = err.error.message
-        )
+        );
         this.selectedEvent.over = true;
         this.listEvents();
     }
@@ -182,11 +198,11 @@ export class TpsComponent implements OnInit {
     extend_reservation() {
         this.msg = '';
         this.errmsg = '';
-        if (new Date(this.new_expire).getTime() < this.selectedEvent.end) {
+        if(new Date(this.new_expire).getTime() < this.selectedEvent.end) {
             this.errmsg = 'Extended end date must be after current end date';
             return;
         }
-        if (new Date(this.new_expire).getTime() < new Date().getTime()) {
+        if(new Date(this.new_expire).getTime() < new Date().getTime()) {
             this.errmsg = 'Extended end date can not be in the past';
             return;
         }
@@ -204,8 +220,8 @@ export class TpsComponent implements OnInit {
         this.selectedEvent.title = event.title;
         this.selectedEvent.start = event.start;
         this.selectedEvent.end = event.end;
-        if (!event.meta.group) {
-            this.selectedEvent.group = {}
+        if(!event.meta.group) {
+            this.selectedEvent.group = { }
         }
     }
 
@@ -220,12 +236,8 @@ export class TpsComponent implements OnInit {
     }
 
     get_status(over) {
-        if (over) {
-            return "panel panel-danger";
-        }
-        else {
-            return "panel panel-primary"
-        }
+        if(over) { return "panel panel-danger"; }
+        else { return "panel panel-primary"; }
     }
 
 }

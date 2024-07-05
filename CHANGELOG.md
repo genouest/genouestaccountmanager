@@ -7,6 +7,7 @@
 * Added a link to user profile on admin panels -> projects pending table
 * Added 'Extend' button for admins to extend active TPs
 * Prevented retroactive TP reservations
+* Added checks to user registration form, the user information update form and the TP reservation form
 
 ## 1.4.29
 
@@ -45,4 +46,4 @@
 * [docker] change order of commands
 * on renew by admin or user, reset expiration_notif
 * add listmonk mailer support
-* upgrade jsonwebtoken to v9 to fix CVE https://cve.report/CVE-2022-23540
+* upgrade jsonwebtoken to v9 to fix CVE <https://cve.report/CVE-2022-23540>

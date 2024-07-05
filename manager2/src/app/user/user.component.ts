@@ -44,7 +44,7 @@ export class UserExtraComponent implements OnInit {
     constructor(
         private configService: ConfigService,
     ) {
-        this.config = {}
+        this.config = { }
         this.extras = []
     }
 
@@ -53,20 +53,20 @@ export class UserExtraComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                let extras =resp.registration || [];
-                let user_extras = {};
+                let extras = resp.registration || [];
+                let user_extras = { };
                 if (this.user && this.user.extra_info) {
-                    for(let i=0;i<this.user.extra_info.length;i++) {
+                    for (let i = 0; i < this.user.extra_info.length; i++) {
                         let extra_info = this.user.extra_info[i];
                         user_extras[extra_info.title] = extra_info.value;
                     }
                 }
-                for(let i=0;i<extras.length;i++) {
+                for (let i = 0; i < extras.length; i++) {
                     extras[i].value = extras[i].choices[0][0];
                     if (extras[i].multiple) {
                         extras[i].value = [extras[i].choices[0][0]];
                     }
-                    if(user_extras[extras[i].title]) {
+                    if (user_extras[extras[i].title]) {
                         extras[i].value = user_extras[extras[i].title];
                     }
                 }
@@ -80,13 +80,13 @@ export class UserExtraComponent implements OnInit {
 
     extraChange(title, data) {
         console.debug('event', data.target.checked, data.target.value)
-        for(let i=0;i<this.extras.length;i++) {
+        for (let i = 0; i < this.extras.length; i++) {
             let extra = this.extras[i];
-            if(extra.title == title) {
-                if(extra.multiple) {
+            if (extra.title == title) {
+                if (extra.multiple) {
                     let cur_values = [...extra.value];
                     let index = cur_values.indexOf(data.target.value);
-                    if(data.target.checked) {
+                    if (data.target.checked) {
                         // add
                         if (index < 0) {
                             cur_values.push(data.target.value);
@@ -213,12 +213,12 @@ export class UserComponent implements OnInit {
         this.user_projects = []
         this.new_projects = []
         this.session_user = this.authService.profile
-        this.user = {}
-        this.config = {}
+        this.user = { }
+        this.config = { }
         this.website = new Website('', '', '', '')
         this.websites = []
         this.plugins = []
-        this.plugin_data = {}
+        this.plugin_data = { }
         this.subscribed = false
         this.groups = []
         this.note = ''
@@ -245,7 +245,7 @@ export class UserComponent implements OnInit {
         this.otp_err_msg =  ""
     }
 
-    date_convert = function timeConverter(tsp){
+    date_convert = function timeConverter(tsp) {
         let res;
         try {
             var a = new Date(tsp);
@@ -260,9 +260,9 @@ export class UserComponent implements OnInit {
     onExtraValue(extras: any) {
         console.debug('extras updated', extras);
         let new_extra = [];
-        for(let i=0;i<extras.length;i++){
+        for (let i = 0; i < extras.length; i++) {
             let extra = extras[i];
-            new_extra.push({'title': extra.title, 'value': extra.value})
+            new_extra.push({ 'title': extra.title, 'value': extra.value })
         }
         this.user.extra_info = new_extra;
     }
@@ -272,30 +272,30 @@ export class UserComponent implements OnInit {
             this.pluginService.list().subscribe(
                 resp => {
                     let plugins = [];
-                    for(let i=0;i < resp.length; i++){
-                        if(! resp[i]['admin']) {
+                    for (let i = 0; i < resp.length; i++) {
+                        if (!resp[i]['admin']) {
                             plugins.push(resp[i]);
                         }
                     }
                     this.plugins = plugins;
                 },
                 err => console.log('failed to get plugins:', err)
-            )
+            );
             this.userService.getUser(params['id']).subscribe(
                 resp => {
-                    if (!resp['u2f']) { resp['u2f'] = {}}
+                    if (!resp['u2f']) { resp['u2f'] = { }}
                     this.user = resp;
                     this.loadUserInfo();
                 },
                 err => console.log('failed to get user ', params['id'])
-            )
+            );
 
             this.userService.isSubscribed(params['id']).subscribe(
-                resp =>{
+                resp => {
                     this.subscribed = resp['subscribed']
                 },
-                err => {console.log('subscribedError',err);}
-            )
+                err => { console.log('subscribedError',err); }
+            );
         });
     }
 
@@ -316,7 +316,7 @@ export class UserComponent implements OnInit {
                 this.initUser();
             },
             err => console.log('failed to get config')
-        )
+        );
     }
 
     _compareName(a,b) {
@@ -340,16 +340,16 @@ export class UserComponent implements OnInit {
         this.groups = groups;
         this.missing_group= "";
         let found = false;
-        for(let i=0;i<groups.length;i++){
-            if(groups[i].name == this.user.group) {
+        for (let i = 0; i < groups.length; i++) {
+            if (groups[i].name == this.user.group) {
                 found = true;
                 break;
             }
         }
-        if(!found) {
+        if (!found) {
           this.groups.push({name: this.user.group, new: true});
-          this.missing_group = this.user.group
-          this.new_group.name = this.user.group
+          this.missing_group = this.user.group;
+          this.new_group.name = this.user.group;
         }
     }
 
@@ -357,20 +357,20 @@ export class UserComponent implements OnInit {
         this.projects = projects;
         let user_projects = [];
         let new_projects = [];
-        for(let i=0; i<projects.length;i++){
-            if(this.user.projects == null){ this.user.projects = []; }
-            if (this.user.projects.indexOf(projects[i].id) >= 0){
+        for (let i = 0; i < projects.length; i++) {
+            if (this.user.projects == null) { this.user.projects = []; }
+            if (this.user.projects.indexOf(projects[i].id) >= 0) {
                 let is_owner = false;
                 let user_in_group = false;
-                if(this.user.uid === projects[i].owner){
+                if (this.user.uid === projects[i].owner) {
                     is_owner = true;
                 }
-                if(this.user.group.indexOf(projects[i].group) >= 0 || this.user.secondarygroups.indexOf(projects[i].group) >= 0){
+                if (this.user.group.indexOf(projects[i].group) >= 0 || this.user.secondarygroups.indexOf(projects[i].group) >= 0) {
                     user_in_group = true;
                 }
-                user_projects.push({id: projects[i].id, owner: is_owner, group: projects[i].group, member: user_in_group});
+                user_projects.push({ id: projects[i].id, owner: is_owner, group: projects[i].group, member: user_in_group });
             } else {
-                new_projects.push({id: projects[i].id, owner: false, group: projects[i].group, member: false});
+                new_projects.push({ id: projects[i].id, owner: false, group: projects[i].group, member: false });
             }
         }
         user_projects.sort(this._compareId)
@@ -393,15 +393,15 @@ export class UserComponent implements OnInit {
     }
 
     loadUserInfo() {
-        if(this.session_user.is_admin) {
+        if (this.session_user.is_admin) {
             this.groupService.list().subscribe(
                 resp => this._loadGroups(resp),
                 err => console.log('failed to get groups')
-            )
+            );
             this.projectService.list(true).subscribe(
                 resp => this._loadProjects(resp),
                 err => console.log('failed to get projects')
-            )
+            );
         }
         this.web_list();
 
@@ -418,11 +418,11 @@ export class UserComponent implements OnInit {
                 if (resp['subscribed']) {
                     ctx.subscribed = true;
                 } else {
-                    ctx.err_msg = "Failed to subscribe"
+                    ctx.err_msg = "Failed to subscribe";
                 }
             },
             err => console.log('failed to subscribe')
-        )
+        );
     }
 
     unsubscribe() {
@@ -432,34 +432,34 @@ export class UserComponent implements OnInit {
                 if (resp['unsubscribed']) {
                     ctx.subscribed = false;
                 } else {
-                    ctx.err_msg = "Failed to unsubscribe"
+                    ctx.err_msg = "Failed to unsubscribe";
                 }
             },
             err => console.log('failed to unsubscribe')
-        )
+        );
     }
 
     web_list() {
         this.websiteService.listOwner(this.user.uid).subscribe(
             resp => this.websites = resp,
             err => console.log('failed to get web sites')
-        )
+        );
     }
 
     get_key(user_id:string, key:string) {
         //['/ssh', {id: user.uid}, 'private']
-        console.log("get key " + key + " for " + user_id)
+        console.log("get key " + key + " for " + user_id);
         this.userService.getSSHKey(user_id, key).subscribe(
             resp => {
                 this.key_err = '';
-                console.log("key = ", resp)
-                let keyName = "id_rsa.pub"
-                if(key == "private") {
+                console.log("key = ", resp);
+                let keyName = "id_rsa.pub";
+                if (key == "private") {
                     keyName = "id_rsa"
                 } else if (key == "putty") {
                     keyName = "id_rsa.ppk"
                 }
-                let blob = new Blob([resp], {type: 'application/octet-stream'});
+                let blob = new Blob([resp], { type: 'application/octet-stream' });
 
                 // IE doesn't allow using a blob object directly as link href
                 // instead it is necessary to use msSaveOrOpenBlob
@@ -489,7 +489,7 @@ export class UserComponent implements OnInit {
                 console.log("failed to get ssh key", err);
                 this.key_err = err.error;
             }
-        )
+        );
     }
 
     web_add() {
@@ -501,30 +501,30 @@ export class UserComponent implements OnInit {
                 this.website = new Website('', '', '', this.user.uid);
                 //this.web_list();
             },
-            err => { this.webmsg = err.error.message; console.log('failed to add web site')}
-        )
+            err => { this.webmsg = err.error.message; console.log('failed to add web site') }
+        );
     }
     web_delete(siteName: string) {
-        this.websites.forEach((ws)=>{
-            if(ws.name == siteName) {
+        this.websites.forEach((ws) => {
+            if (ws.name == siteName) {
                 this.websiteService.remove(ws).subscribe(
-                    resp => { this.rmwebmsg = ''; this.web_list()},
-                    err  => { this.rmwebmsg = err.error.message; console.log('failed to delete web site', err)}
-                )
+                    resp => { this.rmwebmsg = ''; this.web_list(); },
+                    err  => { this.rmwebmsg = err.error.message; console.log('failed to delete web site', err); }
+                );
             }
         });
     }
 
     add_secondary_group() {
         let sgroup =this.user.newgroup;
-        if(sgroup.trim()!=''){
+        if (sgroup.trim() != '') {
             this.userService.addGroup(this.user.uid, sgroup).subscribe(
                 resp => {
                     this.add_group_msg = resp['message'];
                     this.user.secondarygroups.push(sgroup);
                 },
                 err => console.log('failed to add secondary group')
-            )
+            );
 
         }
     }
@@ -534,15 +534,15 @@ export class UserComponent implements OnInit {
             resp => {
                 this.rm_group_msg = resp['message'];
                 let tmpgroups = [];
-                for(var t=0;t<this.user.secondarygroups.length;t++){
-                    if(this.user.secondarygroups[t] != sgroup) {
+                for (var t = 0; t < this.user.secondarygroups.length; t++) {
+                    if (this.user.secondarygroups[t] != sgroup) {
                         tmpgroups.push(this.user.secondarygroups[t]);
                     }
                 }
                 this.user.secondarygroups = tmpgroups;
             },
             err => console.log('failed to remove from secondary group')
-        )
+        );
     }
 
     expire(sendmail: boolean) {
@@ -552,26 +552,23 @@ export class UserComponent implements OnInit {
                 this.user.status = this.STATUS_EXPIRED;
             },
             err => console.log('failed to expire user')
-        )
+        );
     }
 
     extend() {
-
         this.userService.extend(this.user.uid, this.user.regkey).subscribe(
             resp => {
                 this.msg = resp['message'];
                 this.user.expiration = resp['expiration'];
                 this._flashMessagesService.show('Your account validity period has been extended', { cssClass: 'alert-success', timeout: 5000 });
-
-
             },
             err => {
                 console.log('failed to extend user', err)
             }
-        )
+        );
     }
 
-    renew(){
+    renew() {
         this.userService.renew(this.user.uid).subscribe(
             resp => {
                 this.msg = resp['message'],
@@ -587,25 +584,24 @@ export class UserComponent implements OnInit {
 
     sendmail() {
         console.log('should send mail', {subject: this.notify_subject, msg: this.notify_message});
-        this.userService.notify(this.user.uid,
-            {
+        this.userService.notify(this.user.uid, {
                 subject: this.notify_subject,
                 message: this.notify_message
             }).subscribe(
                 resp => {
-                    this.notify_subject = ''
-                    this.notify_message = ''
-                    this.notify_err = ''
-                    this.msg = 'mail sent'
+                    this.notify_subject = '';
+                    this.notify_message = '';
+                    this.notify_err = '';
+                    this.msg = 'mail sent';
                 },
                 err => {
-                    this.notify_err = 'failed to send email'
-                    console.log(('failed to send mail'))
+                    this.notify_err = 'failed to send email';
+                    console.log(('failed to send mail'));
                 }
-            )
+            );
     }
 
-    generate_apikey(uid: string){
+    generate_apikey(uid: string) {
         this.userService.generateApiKey(this.user.uid).subscribe(
             resp => {
                 this.user.apikey = resp['apikey'];
@@ -615,29 +611,28 @@ export class UserComponent implements OnInit {
         );
     }
 
-    ssh_new_key(){
+    ssh_new_key() {
         this.userService.getNewSSHKey(this.user.uid).subscribe(
             resp => this.new_key_message = resp['message'],
             err => console.log('failed to get new ssh key')
         )
     }
 
-    update_password(){
+    update_password() {
         this.wrong_confirm_passwd = "";
         this.update_passwd = "";
-        if((this.password1 != this.password2) || (this.password1=="")) {
+        if ((this.password1 != this.password2) || (this.password1 == "")) {
             this.wrong_confirm_passwd = "Passwords are not identical";
             return;
         }
-        if(this.password1.length < 10) {
+        if (this.password1.length < 10) {
             this.wrong_confirm_passwd = "Password must have 10 characters minimum";
             return;
         }
         this.userService.updatePassword(this.user.uid, this.password1).subscribe(
             resp => this.update_passwd = resp['message'],
             err => console.log('failed to update password')
-        )
-
+        );
     }
 
     change_group() {
@@ -647,16 +642,56 @@ export class UserComponent implements OnInit {
     update_info() {
         this.update_msg = '';
         this.update_error_msg = '';
+        if(this.user.firstname == '' || this.user.firstname === null || this.user.firstname === undefined) {
+            this.update_error_msg = 'Missing field: firstname';
+            return;
+        }
+        if(this.user.lastname == '' || this.user.lastname === null || this.user.lastname === undefined) {
+            this.update_error_msg = 'Missing field: lastname';
+            return;
+        }
+        if(this.user.email == '' || this.user.email === null || this.user.email === undefined) {
+            this.update_error_msg = 'Missing field: email';
+            return;
+        }
+        if(this.user.lab == '' || this.user.lab === null || this.user.lab === undefined) {
+            this.update_error_msg = 'Missing field: lab';
+            return;
+        }
+        if(this.user.responsible == '' || this.user.responsible === null || this.user.responsible === undefined) {
+            this.update_error_msg = 'Missing field: manager';
+            return;
+        }
+        if(this.user.address == '' || this.user.address === null || this.user.address === undefined) {
+            this.update_error_msg = 'Missing field: address';
+            return;
+        }
+        if(this.user.team == '' || this.user.team === null || this.user.team === undefined) {
+            this.update_error_msg = 'Missing field: team';
+            return;
+        }
+        if(this.user.why == '' || this.user.why === null || this.user.why === undefined) {
+            this.update_error_msg = 'Missing field: why do you need an account';
+            return;
+        }
+        if (!this.user.firstname.match(/^[a-zA-Z]+$/) || !this.user.lastname.match(/^[a-zA-Z]+$/)) {
+            this.update_error_msg = 'Name contains unauthorized characters';
+            return;
+        }
+        if (!this.user.team.match(/^[0-9a-z_]+$/)) {
+            this.update_error_msg = 'Team must be alphanumerical [0-9a-z_]';
+            return;
+        }
         this.userService.update(this.user.uid, this.user).subscribe(
             resp => {
                 this.update_msg = 'User info updated';
                 this.user = resp;
             },
             err => this.update_error_msg = err.error.message
-        )
+        );
     }
 
-    update_ssh(){
+    update_ssh() {
         this.ssh_message = '';
         this.userService.updateSSH(this.user.uid, this.user.ssh).subscribe(
             resp => {
@@ -665,9 +700,9 @@ export class UserComponent implements OnInit {
             },
             err => {
                 this.ssh_message = 'Failed to set key';
-                console.log('failed to update ssh key', err)
+                console.log('failed to update ssh key', err);
             }
-        )
+        );
     }
 
     activate() {
@@ -676,10 +711,10 @@ export class UserComponent implements OnInit {
         this.userService.activate(this.user.uid).subscribe(
             resp => {
                 this.user.status = this.STATUS_ACTIVE;
-                this.msg = resp['message']
+                this.msg = resp['message'];
             },
             err => this.err_msg = err.error.message
-        )
+        );
     }
 
     register_u2f() {
@@ -692,12 +727,12 @@ export class UserComponent implements OnInit {
                 solveRegistrationChallenge(challenge).then((credentials) => {
                     this.userService.u2fSet(this.user.uid, credentials).subscribe( () => {
                         ctx.u2f = null;
-                        ctx.user.u2f = {'challenge': challenge};
-                    })
-                }).catch(err => { console.error(err); ctx.u2f = "registration error"});
+                        ctx.user.u2f = { 'challenge': challenge };
+                    });
+                }).catch(err => { console.error(err); ctx.u2f = "registration error" });
             },
             err => console.log('failed to get u2f devices')
-        )
+        );
     }
 
     register_otp() {
@@ -706,21 +741,21 @@ export class UserComponent implements OnInit {
                 this.otp = resp['imageUrl'];
             },
             err => {
-                this.otp_err_msg = err.error.message
+                this.otp_err_msg = err.error.message;
             }
-        )
+        );
     }
 
     remove_otp() {
         this.userService.otpRemove(this.user.uid).subscribe(
             resp => {
                 this.otp_msg = resp['message'];
-                this.user.otp = {};
+                this.user.otp = { };
             },
             err => {
-                this.otp_err_msg = err.error.message
+                this.otp_err_msg = err.error.message;
             }
-        )
+        );
     }
 
     add_to_project() {
@@ -729,17 +764,17 @@ export class UserComponent implements OnInit {
         this.add_to_project_grp_msg = '';
         this.request_mngt_error_msg = '';
         let newproject = this.user.newproject;
-        for(var i=0; i< this.user_projects.length; i++){
-            if(newproject.id === this.user_projects[i].id){
+        for (var i = 0; i < this.user_projects.length; i++) {
+            if (newproject.id === this.user_projects[i].id) {
                 this.add_to_project_error_msg = "User is already in project";
                 return;
             }
         }
-        if(newproject) {
+        if (newproject) {
             this.userService.addToProject(this.user.uid, newproject.id).subscribe(
-                resp =>  {
+                resp => {
                     this.add_to_project_msg = resp['message'];
-                    this.user_projects.push({id: newproject.id, owner: false, member: true})
+                    this.user_projects.push({ id: newproject.id, owner: false, member: true });
                 },
                 err => this.add_to_project_error_msg = err.error.message
             )
@@ -752,15 +787,15 @@ export class UserComponent implements OnInit {
             resp => {
                 this.remove_from_project_msg = resp['message'];
                 var tmpproject = [];
-                for(var t=0;t<this.user_projects.length;t++){
-                    if(this.user_projects[t].id != project_id) {
+                for (var t = 0; t < this.user_projects.length; t++) {
+                    if (this.user_projects[t].id != project_id) {
                         tmpproject.push(this.user_projects[t]);
                     }
                 }
                 this.user_projects = tmpproject;
             },
             err => this.remove_from_project_error_msg = err.error.message
-        )
+        );
     }
 
     delete(message: string, sendmail: boolean) {
@@ -774,10 +809,10 @@ export class UserComponent implements OnInit {
                 this.err_msg = err.error.message;
                 console.log('failed to delete user', err);
             }
-        )
+        );
     }
 
-    addGroup(){
+    addGroup() {
         if (this.new_group.name === '') {
             return;
         }
@@ -793,13 +828,13 @@ export class UserComponent implements OnInit {
                         this._loadGroups(resp);
                     },
                     err => console.log('failed to get groups')
-                )
+                );
             },
             err => {
                 this.grp_success_msg = '';
                 this.grp_err_msg = err.error.message;
             }
-        )
+        );
     }
 
     unlock() {
@@ -809,14 +844,12 @@ export class UserComponent implements OnInit {
                 this._flashMessagesService.show('User unlocked', { cssClass: 'alert-success', timeout: 5000 });
             },
             err => console.log('failed to unlock user')
-        )
+        );
     }
 
     ngOnDestroy() {
-        if(this.sub) {
+        if (this.sub) {
             this.sub.unsubscribe();
         }
     }
-
-
 }
