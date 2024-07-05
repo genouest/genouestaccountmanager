@@ -19,6 +19,7 @@ var mongo_web = null;
 var mongo_projects = null;
 var mongo_tags = null;
 var mongo_pending_projects = null;
+var mongo_pending_databases = null;
 
 var mongo_connect = async function() {
     let url = CONFIG.mongo.url;
@@ -41,6 +42,7 @@ var mongo_connect = async function() {
     mongo_projects = mongodb.collection('projects');
     mongo_tags = mongodb.collection('tags');
     mongo_pending_projects = mongodb.collection('pending_projects');
+    mongo_pending_databases = mongodb.collection('pending_databases');
 };
 // mongo_connect();
 
@@ -71,3 +73,4 @@ exports.mongo_pending_projects = function() {return mongo_pending_projects;};
 exports.mongo_oldusers = function() {return mongo_oldusers;};
 exports.mongo_oldgroups = function() {return mongo_oldgroups;};
 exports.mongo_others = function(coll) { return mongodb.collection(coll);};
+exports.mongo_pending_databases = function() {return mongo_pending_databases;};
