@@ -15,11 +15,11 @@ import $ from "jquery";
     templateUrl: './project.component.html',
     styleUrls: ['./project.component.css']
 })
-export class ProjectComponent implements OnInit, AfterViewInit {
+export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
     @ViewChild('formModal') formModal: ElementRef;
-    @ViewChild('termsAndConditionsModal') termsAndConditionsModal: ElementRef;
+    //@ViewChild('termsAndConditionsModal') termsAndConditionsModal: ElementRef;
 
     new_project: any
     projects: any
@@ -238,20 +238,8 @@ export class ProjectComponent implements OnInit, AfterViewInit {
         el.scrollIntoView({behavior: 'smooth'});
     }
 
-    ngAfterViewInit() {
-        // Access the native elements and set up event listeners
-        if (this.termsAndConditionsModal) {
-          this.termsAndConditionsModal.nativeElement.addEventListener('hidden.bs.modal', () => {
-            console.log('termsAndConditionsModal hidden event triggered');
-          });
-        }
-      }
-
-    // ngAfterViewInit() {
-    //     $('#ask_project').on('hidden.bs.modal', () => {
-    //         console.log("wes")
-    //         //document.getElementById('ask_project').focus()
-    //     });
+    // closeTermsAndConditionsModal(){
+    //    this.formModal.nativeElement.focus();    
     // }
       
 }
