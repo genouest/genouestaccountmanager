@@ -14,7 +14,6 @@ import * as latinize from 'latinize'
 export class RegisterComponent implements OnInit {
     //@ViewChild('extras') extras: UserExtraComponent
     msg: string
-    msgstatus: number = 0
 
     uid: string
     duration: string = '1 year'
@@ -50,21 +49,20 @@ export class RegisterComponent implements OnInit {
 
     ngOnInit() {
         this.session_user = this.authService.profile;
-        this.onExtraValue = this.onExtraValue.bind(this)
+        this.onExtraValue = this.onExtraValue.bind(this);
         this.configService.config.subscribe(
             resp => {
                 this.config = resp ;
                 if (resp['max_account']) {
                     this.msg = "Warning: we reached our user maximum capacity, your request may be rejected or you may be on waiting list"
                 }
-
             },
             err => console.log('failed to get config')
-        )
+        );
         this.http.get('https://json.geoiplookup.io').subscribe(
             resp => this.ip = resp['ip'],
             err => this.ip = '127.0.0.1'
-        )
+        );
         this.send_copy_to_support = false;
         this.create_imap_mailbox = false;
         this.is_fake = false;
@@ -73,9 +71,9 @@ export class RegisterComponent implements OnInit {
     onExtraValue(extras: any) {
         console.debug('extras updated', extras);
         let new_extra = [];
-        for(let i=0;i<extras.length;i++){
+        for (let i = 0; i < extras.length; i++) {
             let extra = extras[i];
-            new_extra.push({'title': extra.title, 'value': extra.value})
+            new_extra.push({ 'title': extra.title, 'value': extra.value });
         }
         this.extra_info = new_extra;
     }
@@ -84,36 +82,72 @@ export class RegisterComponent implements OnInit {
         let first = this.firstname;
         let last = this.lastname;
         if(origin == 0) {
-            first = event
+            first = event;
         } else {
-            last = event
+            last = event;
         }
-        if (event === undefined || event === null || first === "" || last === "") {
-            return
+        if (event === undefined || event === null || first === "" || last === "") {
+            return;
         }
         if(this.firstname && this.lastname) {
             let tmpuserid = latinize(first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', ''));
             // remove non alpha numeric char as they are not allowed in backend
-            this.userid = tmpuserid.replace(/[^0-9a-z]/gi,'');
+            this.userid = tmpuserid.replace(/[^0-9a-z]/gi, '');
         }
     }
 
     register() {
-        this.msg = "";
-        this.msgstatus = 0;
-        if(! this.agree) {
+        this.msg = '';
+        if(this.firstname == '' || this.firstname === null || this.firstname === undefined) {
+            this.msg = 'Missing field: firstname';
+            return;
+        }
+        if(this.lastname == '' || this.lastname === null || this.lastname === undefined) {
+            this.msg = 'Missing field: lastname';
+            return;
+        }
+        if(this.email == '' || this.email === null || this.email === undefined) {
+            this.msg = 'Missing field: email';
+            return;
+        }
+        if(this.lab == '' || this.lab === null || this.lab === undefined) {
+            this.msg = 'Missing field: lab';
+            return;
+        }
+        if(this.responsible == '' || this.responsible === null || this.responsible === undefined) {
+            this.msg = 'Missing field: manager';
+            return;
+        }
+        if(this.address == '' || this.address === null || this.address === undefined) {
+            this.msg = 'Missing field: address';
+            return;
+        }
+        if(this.team == '' || this.team === null || this.team === undefined) {
+            this.msg = 'Missing field: team';
+            return;
+        }
+        if(this.why == '' || this.why === null || this.why === undefined) {
+            this.msg = 'Missing field: why do you need an account';
+            return;
+        }
+        if(!this.agree) {
             this.msg="You must agree with the terms of use";
-            this.msgstatus = 1;
             return;
         }
-        if(this.userid === undefined || this.userid === "") {
-            this.msg="User identifier invalid (empty)"
-            this.msgstatus = 1;
+        if(this.userid  ===  undefined || this.userid  ===  "") {
+            this.msg="User identifier invalid (empty)";
             return;
         }
-        if(this.userid.length < 4) {
-            this.msg="User identifier too short (min 4 characters)"
-            this.msgstatus = 1;
+        if(this.userid.length < 4) {
+            this.msg="User identifier too short (min 4 characters)";
+            return;
+        }
+        if (!this.firstname.match(/^[a-zA-Z]+$/) || !this.lastname.match(/^[a-zA-Z]+$/)) {
+            this.msg = 'Name contains unauthorized characters';
+            return;
+        }
+        if (!this.team.match(/^[0-9a-z_]+$/)) {
+            this.msg = 'Team must be alphanumerical [0-9a-z_]';
             return;
         }
         this.userService.register(this.userid, {
@@ -134,16 +168,12 @@ export class RegisterComponent implements OnInit {
         }).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.msgstatus = resp['status'];
                 if(resp['status'] == 0) {
                     this.router.navigate(['/registered']);
                     // to /registered
                 }
             },
             err => console.log('failed to register')
-        )
-
-
+        );
     }
-
 }

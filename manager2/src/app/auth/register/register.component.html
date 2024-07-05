@@ -94,7 +94,7 @@
             <i>Terms of use</i>
             <hr>
             <div class="checkbox">
-                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required>I agree with the <a target="_blank" aria-label="terms of user" href="{{config.terms_of_use}}">terms of use</a> of the {{config.name}} platform</label>
+                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required> I agree with the <a target="_blank" aria-label="terms of user" href="{{config.terms_of_use}}">terms of use</a> of the {{config.name}} platform</label>
             </div>
             <div *ngIf="! session_user">
                 <button type="button" class="p-button p-button-lg btn-primary btn-block" [ngStyle]="{'display': 'block'}" (click)="register();">Register</button>
