@@ -21,6 +21,7 @@ import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/pro
 import { ProjectComponent as AdminProjectComponent} from './admin/project/project.component';
 import { MessagesComponent } from './admin/messages/messages.component';
 import { DatabasesComponent } from './admin/databases/databases.component';
+import { DatabaseComponent } from './database/database.component';
 import { WebsitesComponent } from './admin/websites/websites.component';
 import { LogsComponent } from './admin/logs/logs.component';
 import { RegisterComponent } from './auth/register/register.component';
@@ -85,6 +86,7 @@ export class SentryErrorHandler implements ErrorHandler {
         UserProjectsComponent,
         MessagesComponent,
         DatabasesComponent,
+        DatabaseComponent,
         WebsitesComponent,
         LogsComponent,
         RegisterComponent,
