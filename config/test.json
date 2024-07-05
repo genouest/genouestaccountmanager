@@ -268,7 +268,7 @@
       "Size needed: #SIZE# GB",
       "Entity: #ORGA#",
       "Description: #DESC#",
-      "Please review it, and keep #UID# inform"
+      "Please review it, and keep #UID# informed"
     ],
     "ask_project_html": [
       "<p>#UID# has requested a new project '#NAME#' in My</p>",
@@ -282,6 +282,13 @@
     ],
     "ask_project_user_html": [
       "<p>#UID# has asked to #REQUEST# #USER# to project '#NAME#' in My</p>"
+    ],
+    "ask_database": [
+      "#UID# has requested a new database '#NAME#' in My",
+      "Size needed: #SIZE# GB",
+      "Usage: #USAGE#",
+      "Expiration date: #EXP#",
+      "Please review it, and keep #UID# informed"
     ],
     "database_creation": [
         "The MySQL database you requested (#DBNAME#, owned by #OWNER#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
