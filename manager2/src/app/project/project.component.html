@@ -1,4 +1,4 @@
-<div class="modal" id="ask_project" tabindex="-1" role="dialog" #modal>
+<div #formModal class="modal fade" id="ask_project" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -75,7 +75,7 @@
       
         <div class="modal-footer" id="submit">
           <div class="form-group row col-sm-12">
-            <button type="submit" class="p-button p-button-sm p-button-primary" [disabled]="id.invalid || expire.invalid || description.invalid || terms_and_conditions.invalid" [ngClass]="{'disabled-btn': id.invalid || expire.invalid || description.invalid || terms_and_conditions.invalid}">Ask Admin</button>
+            <button id="test" type="submit" class="p-button p-button-sm p-button-primary" [disabled]="id.invalid || expire.invalid || description.invalid || terms_and_conditions.invalid" [ngClass]="{'disabled-btn': id.invalid || expire.invalid || description.invalid || terms_and_conditions.invalid}">Ask Admin</button>
             <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
           </div>
         </div>
@@ -314,18 +314,17 @@
   </div>
 </div>
 
-<div class="modal" id="termsAndConditionsModal" data-backdrop="static" tabindex="-1">
-	<div class="modal-dialog modal-lg">
+<div #termsAndConditionsModal class="modal fade" id="termsAndConditionsModal" data-backdrop="static" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title">Terms and Conditions</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
         </div><div class="container"></div>
         <div class="modal-body">
           <p>As our computing infrastructure is not HDS-certified (Health Data Hosting), health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up cannot be uploaded, stored or processed (article L.1111-8, French Public Health Code).</p>
         </div>
         <div class="modal-footer">
-          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>

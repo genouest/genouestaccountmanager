@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
@@ -8,16 +8,18 @@ import { UserService } from 'src/app/user/user.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
+import $ from "jquery";
 
 @Component({
     selector: 'app-project',
     templateUrl: './project.component.html',
     styleUrls: ['./project.component.css']
 })
-export class ProjectComponent implements OnInit {
+export class ProjectComponent implements OnInit, AfterViewInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
-    @ViewChild('modal') modal: ElementRef;
+    @ViewChild('formModal') formModal: ElementRef;
+    @ViewChild('termsAndConditionsModal') termsAndConditionsModal: ElementRef;
 
     new_project: any
     projects: any
@@ -48,7 +50,9 @@ export class ProjectComponent implements OnInit {
         private projectsService: ProjectsService,
         private userService: UserService,
         private groupService: GroupsService,
-        private router: Router
+        private router: Router,
+        private renderer: Renderer2,
+        private el: ElementRef
     ) {
         this.config = {}
         this.default_size = 0
@@ -84,7 +88,6 @@ export class ProjectComponent implements OnInit {
             },
             err => console.log('failed to get config')
         )
-
     }
 
     project_list() {
@@ -117,7 +120,7 @@ export class ProjectComponent implements OnInit {
                 resp => {
                     this.request_msg = 'An email has been sent to an admin';
                     this.new_project = {};
-                    this.closeModal();
+                    this.closeFormModal();
                 },
                 err => {
                     console.log('failed to get project users', err);
@@ -130,9 +133,9 @@ export class ProjectComponent implements OnInit {
         }
     }
 
-    closeModal() {
-        const modalElement = this.modal.nativeElement;
-        modalElement.style.display = 'none';
+    closeFormModal() {
+        const formModalElement = this.formModal.nativeElement;
+        formModalElement.style.display = 'none';
         const modalBackdrop = document.querySelector('.modal-backdrop');
         if (modalBackdrop) {
             modalBackdrop.remove();
@@ -235,20 +238,20 @@ export class ProjectComponent implements OnInit {
         el.scrollIntoView({behavior: 'smooth'});
     }
 
-    // grayOutFormModal() {
-    //     document.getElementById('ask_project').classList.add('grayed-out');
-    // }
-
-    // resetGrayOut() {
-    //     console.log("resetgray")
-    //     document.getElementById('ask_project').classList.remove('grayed-out');
-    //     document.getElementById('ask_project').focus()
-    // }
+    ngAfterViewInit() {
+        // Access the native elements and set up event listeners
+        if (this.termsAndConditionsModal) {
+          this.termsAndConditionsModal.nativeElement.addEventListener('hidden.bs.modal', () => {
+            console.log('termsAndConditionsModal hidden event triggered');
+          });
+        }
+      }
 
     // ngAfterViewInit() {
-    //     $('#termsModal').on('hidden.bs.modal', () => {
-    //       this.resetGrayOut();
+    //     $('#ask_project').on('hidden.bs.modal', () => {
+    //         console.log("wes")
+    //         //document.getElementById('ask_project').focus()
     //     });
-    //   }
+    // }
       
 }
