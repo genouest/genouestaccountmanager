@@ -7,6 +7,7 @@
 * Added a link to user profile on admin panels -> projects pending table
 * Added 'Extend' button for admins to extend active TPs
 * Prevented retroactive TP reservations
+* Improved TP calendar readability
 
 ## 1.4.29
 
