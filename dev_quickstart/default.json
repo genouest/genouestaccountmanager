@@ -74,7 +74,8 @@
      "default_size": 500,
      "default_path": "/opt/project",
      "default_expire": 360,
-     "allow_extend": false
+     "allow_extend": false,
+     "terms_and_conditions_hds": true
   },
   "reservation": {
       "group_or_project": "group",
