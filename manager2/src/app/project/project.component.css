@@ -6,3 +6,8 @@
 #termsAndConditionsModal{
     z-index: 1052 !important;
 }
+
+#ask_project {
+    overflow-y: auto;
+    overflow-x: hidden;
+}

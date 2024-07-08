@@ -8,7 +8,6 @@ import { UserService } from 'src/app/user/user.service';
 import { GroupsService } from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
-import $ from "jquery";
 
 @Component({
     selector: 'app-project',
@@ -19,7 +18,6 @@ export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
     @ViewChild('formModal') formModal: ElementRef;
-    //@ViewChild('termsAndConditionsModal') termsAndConditionsModal: ElementRef;
 
     new_project: any
     projects: any
@@ -237,9 +235,4 @@ export class ProjectComponent implements OnInit {
     scroll(el: HTMLElement) {
         el.scrollIntoView({behavior: 'smooth'});
     }
-
-    // closeTermsAndConditionsModal(){
-    //    this.formModal.nativeElement.focus();    
-    // }
-      
 }

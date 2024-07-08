@@ -64,7 +64,7 @@
               <input class="form-check-input is-invalid" type="checkbox" value="" id="new_project_terms_and_conditions" name="terms_and_conditions" [(ngModel)]="new_project.terms_and_conditions" #terms_and_conditions="ngModel" required>
               <label class="form-check-label" for="new_project_terms_and_conditions">
                 I hereby certify that I will not upload, store or process health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up.
-                <!-- <a href="#termsAndConditionsModal" data-toggle="modal">(Learn more)</a> -->
+                <a href="#termsAndConditionsModal" data-toggle="modal">(Learn more)</a>
               </label>
               <div *ngIf="terms_and_conditions.invalid" class="invalid-feedback">
                 You must agree terms and conditions before submitting.
@@ -314,7 +314,7 @@
   </div>
 </div>
 
-<!-- <div #termsAndConditionsModal class="modal fade" id="termsAndConditionsModal" data-backdrop="static" role="dialog">
+<div #termsAndConditionsModal class="modal fade" id="termsAndConditionsModal" data-backdrop="static" role="dialog">
 	<div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -328,4 +328,4 @@
         </div>
       </div>
     </div>
-</div> -->
+</div>
