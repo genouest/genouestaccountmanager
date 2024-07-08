@@ -8,6 +8,7 @@
 * Added 'Extend' button for admins to extend active TPs
 * Prevented retroactive TP reservations
 * Added checks to user registration form, the user information update form and the TP reservation form
+* Added back button from single project view
 
 ## 1.4.29
 
