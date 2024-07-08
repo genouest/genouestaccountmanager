@@ -59,24 +59,44 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" *ngIf="config.project.terms_and_conditions_hds">
             <div class="form-check">
-              <input class="form-check-input is-invalid" type="checkbox" value="" id="new_project_terms_and_conditions" name="terms_and_conditions" [(ngModel)]="new_project.terms_and_conditions" #terms_and_conditions="ngModel" required>
-              <label class="form-check-label" for="new_project_terms_and_conditions">
+              <input class="form-check-input is-invalid" type="checkbox" value="" id="new_project_terms_and_conditions_hds" name="terms_and_conditions_hds" [(ngModel)]="new_project.terms_and_conditions_hds" #terms_and_conditions_hds="ngModel" required>
+              <label class="form-check-label" for="new_project_terms_and_conditions_hds">
                 I hereby certify that I will not upload, store or process health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up.
-                <a href="#termsAndConditionsModal" data-toggle="modal">(Learn more)</a>
+                <a href="#termsAndConditionsHdsModal" data-toggle="modal">(Learn more)</a>
               </label>
-              <div *ngIf="terms_and_conditions.invalid" class="invalid-feedback">
+              <div *ngIf="terms_and_conditions_hds.invalid" class="invalid-feedback">
                 You must agree terms and conditions before submitting.
               </div>
             </div>
           </div>
+         
         </div>
       
         <div class="modal-footer" id="submit">
           <div class="form-group row col-sm-12">
-            <button id="test" type="submit" class="p-button p-button-sm p-button-primary" [disabled]="id.invalid || expire.invalid || description.invalid || terms_and_conditions.invalid" [ngClass]="{'disabled-btn': id.invalid || expire.invalid || description.invalid || terms_and_conditions.invalid}">Ask Admin</button>
-            <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
+          <!-- Button with terms_and_conditions_hds -->
+          <button *ngIf="config.project.terms_and_conditions_hds" 
+                  id="test" 
+                  type="submit" 
+                  class="p-button p-button-sm p-button-primary" 
+                  [disabled]="id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid" 
+                  [ngClass]="{'disabled-btn': id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid}">
+              Ask Admin
+          </button>
+
+          <!-- Button without terms_and_conditions_hds -->
+          <button *ngIf="!config.project.terms_and_conditions_hds" 
+                  id="test" 
+                  type="submit" 
+                  class="p-button p-button-sm p-button-primary" 
+                  [disabled]="id.invalid || expire.invalid || description.invalid" 
+                  [ngClass]="{'disabled-btn': id.invalid || expire.invalid || description.invalid}">
+              Ask Admin
+          </button>           
+
+          <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
           </div>
         </div>
       </form>
@@ -314,17 +334,17 @@
   </div>
 </div>
 
-<div #termsAndConditionsModal class="modal fade" id="termsAndConditionsModal" data-backdrop="static" role="dialog">
+<div *ngIf="config.project && config.project.terms_and_conditions_hds" #termsAndConditionsHdsModal class="modal fade" id="termsAndConditionsHdsModal" data-backdrop="static" role="dialog">
 	<div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">Terms and Conditions</h4>
+          <h4 class="modal-title">Terms and Conditions HDS</h4>
         </div><div class="container"></div>
         <div class="modal-body">
           <p>As our computing infrastructure is not HDS-certified (Health Data Hosting), health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up cannot be uploaded, stored or processed (article L.1111-8, French Public Health Code).</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="closeTermsAndConditionsModal()">Close</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
