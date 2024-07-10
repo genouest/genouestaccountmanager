@@ -7,9 +7,9 @@ import { CalendarEvent, CalendarEventTimesChangedEvent } from 'angular-calendar'
 import { Subject } from 'rxjs';
 
 const eventColors = {
-    created: { primary: '#00dd00' },
-    pending: { primary: '#00aabb' },
-    over: { primary: '#0000ff' }
+    created: { primary: '#00dd44' },
+    pending: { primary: '#0066ff' },
+    over: { primary: '#808080' }
 };
 
 @Component({
@@ -54,14 +54,15 @@ export class TpsComponent implements OnInit {
     ) { }
 
     private choseColor(id: string, over: boolean, created: boolean) {
-        let baseColor;
-        if (over) { baseColor = eventColors.over; }
-        else if (created) { baseColor = eventColors.created; }
-        else { baseColor = eventColors.pending; }
-        let color = { ...baseColor }
-        const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const red = (hash % 128).toString(16).padStart(2, '0');
-        color.primary = `#${red}${color.primary.slice(3)}`;
+        let color;
+        if (over) { color = eventColors.over; }
+        else {
+            if (created) { color = eventColors.created; }
+            else { color = eventColors.pending; }
+            const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const red = (3*hash % 128).toString(16).padStart(2, '0');
+            color.primary = `#${red}${color.primary.slice(3)}`;
+        }
         return color;
     }
 
