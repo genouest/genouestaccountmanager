@@ -1,11 +1,9 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
-import { GroupsService } from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
 
@@ -51,9 +49,6 @@ export class ProjectComponent implements OnInit {
         this.config = {}
         this.default_size = 0
         this.default_cpu = 0
-    }
-
-    ngOnDestroy(): void {
     }
 
     async ngOnInit() {
