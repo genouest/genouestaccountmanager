@@ -79,8 +79,6 @@ export class ProjectComponent implements OnInit {
                 }
                 this.new_project.size = this.default_size
                 this.new_project.cpu = this.default_cpu
-                console.log(this.config)
-
             },
             err => console.log('failed to get config')
         )
