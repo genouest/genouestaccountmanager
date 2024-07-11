@@ -145,7 +145,7 @@
                       <div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
                       <div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
                     </div>
-                    <div *ngIf="user.group == this.missing_group" class="groupCreation col-2">
+                    <div *ngIf="!group_exists" class="groupCreation col-2">
                       <div>
                         <button type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#group_creation">
                           <span class="oi oi-plus" aria-hidden="true"></span>

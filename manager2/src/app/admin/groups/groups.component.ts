@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { GroupsService } from './groups.service';
+import { Group, GroupsService } from './groups.service';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 
 import { Table } from 'primeng/table';
@@ -19,11 +19,11 @@ export class GroupsComponent implements OnInit {
     rm_grp_err_msg: string
     msg: string
 
-    selectedGroup: any
-    new_group: any
+    selectedGroup: Group
+    new_group: Group
 
     projects: any[]
-    groups: any[]
+    groups: Group[]
     users: any[]
 
     constructor(
@@ -31,11 +31,7 @@ export class GroupsComponent implements OnInit {
         private projectsService: ProjectsService
     ) {
         this.selectedGroup = null;
-        this.new_group = {
-            name: '',
-            owner: '',
-            description: '',
-        }
+        this.new_group = new Group('', '', '', false);
         this.projects = [];
         this.groups = [];
         this.users = [];

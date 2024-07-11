@@ -5,6 +5,20 @@ import { AuthService } from '../../auth/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+export class Group {
+    name: string
+    owner: string
+    description: string
+    new: boolean
+
+    constructor(name: string, owner: string, description: string, is_new: boolean = false) {
+        this.name = name
+        this.owner = owner
+        this.description = description
+        this.new = is_new
+    }
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -13,7 +27,7 @@ export class GroupsService {
     constructor(private http: HttpClient, private authService: AuthService) { }
 
 
-    list(): Observable<any[]> {
+    list(): Observable<Group[]> {
         // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -25,8 +39,16 @@ export class GroupsService {
             environment.apiUrl + '/group',
             httpOptions
         ).pipe(map((response: any[]) => {
-            return response.sort(function (a,b) {
+            response.sort(function (a,b) {
                 return a.name.localeCompare(b.name);
+            });
+            return response.map(item => {
+                return new Group(
+                    item.name || '',
+                    item.owner || '',
+                    item.description || '',
+                    false
+                );
             });
         }));
     }
@@ -44,7 +66,7 @@ export class GroupsService {
         );
     }
 
-    update(group) {
+    update(group: Group) {
         // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -68,9 +90,10 @@ export class GroupsService {
         return this.http.delete(
             environment.apiUrl + '/group/' + groupId,
             httpOptions
-        );  }
+        );
+    }
 
-    add(group) {
+    add(group: Group) {
         // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

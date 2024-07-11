@@ -4,7 +4,7 @@ import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
 import { Website, WebsiteService } from './website.service'
 import { PluginService} from '../plugin/plugin.service'
-import { GroupsService } from '../admin/groups/groups.service'
+import { Group, GroupsService } from '../admin/groups/groups.service'
 import { ProjectsService } from '../admin/projects/projects.service'
 
 import { ActivatedRoute, Router } from '@angular/router';
@@ -124,9 +124,8 @@ export class UserComponent implements OnInit {
     user: any
     session_user: any
     config: any
-    groups: any[]
+    groups: Group[]
     subscribed: boolean
-    selected_group: any
     quotas: any = []
     u2f: any
     timeoutId: any
@@ -190,8 +189,8 @@ export class UserComponent implements OnInit {
 
     otp: string
 
-    missing_group: string
-    new_group: any
+    group_exists: boolean
+    new_group: Group
 
     grp_success_msg: string
     grp_err_msg: string
@@ -226,12 +225,8 @@ export class UserComponent implements OnInit {
         this.password1  = ''
         this.password2 = ''
 
-        this.missing_group = ""
-        this.new_group = {
-            name: '',
-            owner: '',
-            description: '',
-        }
+        this.group_exists = true;
+        this.new_group = new Group('', '', '', false);
 
         this.notify_subject = ''
         this.notify_message = ''
@@ -338,7 +333,7 @@ export class UserComponent implements OnInit {
     _loadGroups(groups) {
         groups.sort(this._compareName)
         this.groups = groups;
-        this.missing_group= "";
+        this.group_exists = true;
         let found = false;
         for (let i = 0; i < groups.length; i++) {
             if (groups[i].name == this.user.group) {
@@ -347,8 +342,8 @@ export class UserComponent implements OnInit {
             }
         }
         if (!found) {
-          this.groups.push({name: this.user.group, new: true});
-          this.missing_group = this.user.group;
+          this.groups.push(new Group(this.user.group, '', '', true));
+          this.group_exists = false;
           this.new_group.name = this.user.group;
         }
     }
@@ -633,10 +628,6 @@ export class UserComponent implements OnInit {
             resp => this.update_passwd = resp['message'],
             err => console.log('failed to update password')
         );
-    }
-
-    change_group() {
-        this.user.group = this.selected_group.name;
     }
 
     update_info() {
