@@ -1,16 +1,16 @@
-<div class="modal" style="z-index: 1500;" id="ask_project" tabindex="-1" role="dialog" #modal>
+<div #formModal class="modal fade" id="ask_project" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h3>Request a new project creation</h3>
       </div>
 
-      <form #projectForm="ngForm" aria-label="project creation request form" role="form" class="user-form form-horizontal" (ngSubmit)="ask_for_project(projectForm)" novalidate>
+      <form #projectForm="ngForm" aria-label="project creation request form" role="form" class="user-form form-horizontal was-validated" (ngSubmit)="ask_for_project(projectForm)" novalidate>
         <div class="modal-body">
-          <div class="form-group row col-sm-8">
+          <div class="form-group row col-sm-12">
             <label for="new_project_id">Name
-              <span style="color:red">(required)</span>
-              <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
+              <span style="color:red">(required) </span>
+              <i class="pi pi-question-circle" title="Unique name for the project"></i>
             </label>
             <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" name="id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" class="form-control" #id="ngModel"/>
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you work on several projects, you can request more project spaces.</i></small>
@@ -20,10 +20,10 @@
             </div>
           </div>
       
-          <div class="form-group row col-sm-8">
+          <div class="form-group row col-sm-12">
             <label for="new_project_expire">Expiration date
-              <span style="color:red">(required)</span>
-              <span class="glyphicon glyphicon-question-sign" title="Project expiration date" tooltip></span>
+              <span style="color:red">(required) </span>
+              <i class="pi pi-question-circle" title="Project expiration date"></i>
             </label>
             <input required type="date" id="new_project_expire" name="expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.expire" class="form-control" #expire="ngModel"/>
             <div *ngIf="expire.invalid && (expire.dirty || expire.touched)" class="text-danger">
@@ -31,21 +31,21 @@
             </div>
           </div>
       
-          <div class="form-group row col-sm-8">
+          <div class="form-group row col-sm-12">
               <label for="new_project_size">Total expected project size (GB)</label>
               <input placeholder="project size in GB" type="number" id="new_project_size" name="size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
               <small id="nameHelp" class="form-text text-muted"><i>Please include the <b>total</b> expected size for this project.</i></small>
           </div>
       
-          <div class="form-group row col-sm-8">
+          <div class="form-group row col-sm-12">
               <label for="new_project_cpu">Cpu (Hour)</label>
               <input placeholder="project cpu in Hour" type="number" id="new_project_cpu" name="cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
               <small id="nameHelp" class="form-text text-muted"><i>Optional, for information only</i></small>
           </div>
       
-          <div class="form-group row col-sm-8">
+          <div class="form-group row col-sm-12">
             <label for="new_project_org">Financing
-              <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
+              <span class="pi pi-question-circle" title="Entity financing the project" tooltip> </span>
             </label>
             <input placeholder="Ex : CNRS" type="text" id="new_project_org" name="orga" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
             <small id="orgaHelp" class="form-text text-muted"><em>Optional, for information only</em></small>
@@ -55,16 +55,48 @@
             <label for="new_project_description">Description <span style="color:red">(required)</span>            </label>
             <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" name="description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control" #description="ngModel"></textarea>
             <div *ngIf="description.invalid && (description.dirty || description.touched)" class="text-danger">
-              <div *ngIf="description.errors.required">Description is required</div>
               <div *ngIf="description.errors.minlength">Description must be at least 30 characters long</div>
             </div>
           </div>
+
+          <div class="form-group" *ngIf="config.project.terms_and_conditions_hds">
+            <div class="form-check">
+              <input class="form-check-input is-invalid" type="checkbox" value="" id="new_project_terms_and_conditions_hds" name="terms_and_conditions_hds" [(ngModel)]="new_project.terms_and_conditions_hds" #terms_and_conditions_hds="ngModel" required>
+              <label class="form-check-label" for="new_project_terms_and_conditions_hds">
+                I hereby certify that I will not upload, store or process health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up.
+                <a href="#termsAndConditionsHdsModal" data-toggle="modal">(Learn more)</a>
+              </label>
+              <div *ngIf="terms_and_conditions_hds.invalid" class="invalid-feedback">
+                You must agree to the terms and conditions before submitting.
+              </div>
+            </div>
+          </div>
+         
         </div>
       
         <div class="modal-footer" id="submit">
           <div class="form-group row col-sm-12">
-            <button type="submit" class="p-button p-button-sm p-button-primary">Ask Admin</button>
-            <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
+          <!-- Button with terms_and_conditions_hds -->
+          <button *ngIf="config.project.terms_and_conditions_hds" 
+                  id="test" 
+                  type="submit" 
+                  class="p-button p-button-sm p-button-primary" 
+                  [disabled]="id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid" 
+                  [ngClass]="{'disabled-btn': id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid}">
+              Ask Admin
+          </button>
+
+          <!-- Button without terms_and_conditions_hds -->
+          <button *ngIf="!config.project.terms_and_conditions_hds" 
+                  id="test" 
+                  type="submit" 
+                  class="p-button p-button-sm p-button-primary" 
+                  [disabled]="id.invalid || expire.invalid || description.invalid" 
+                  [ngClass]="{'disabled-btn': id.invalid || expire.invalid || description.invalid}">
+              Ask Admin
+          </button>           
+
+          <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
           </div>
         </div>
       </form>
@@ -300,4 +332,20 @@
           </div>
     </div>
   </div>
+</div>
+
+<div *ngIf="config.project && config.project.terms_and_conditions_hds" #termsAndConditionsHdsModal class="modal fade" id="termsAndConditionsHdsModal" data-backdrop="static" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Terms and Conditions HDS</h4>
+        </div><div class="container"></div>
+        <div class="modal-body">
+          <p>As our computing infrastructure is not HDS-certified (Health Data Hosting), health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up cannot be uploaded, stored or processed (article L.1111-8, French Public Health Code).</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
 </div>
