@@ -14,6 +14,7 @@
 * Prevented retroactive TP reservations
 * Added checks to user registration form, the user information update form and the TP reservation form
 * Added back button from single project view
+* Improved TP calendar readability
 
 ## 1.4.29
 
