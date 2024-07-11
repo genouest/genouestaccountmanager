@@ -1,11 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
 import { ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
-import { GroupsService } from 'src/app/admin/groups/groups.service';
 
 import { Table } from 'primeng/table';
 
@@ -17,7 +15,7 @@ import { Table } from 'primeng/table';
 export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
-    @ViewChild('modal') modal: ElementRef;
+    @ViewChild('formModal') formModal: ElementRef;
 
     new_project: any
     projects: any
@@ -46,16 +44,11 @@ export class ProjectComponent implements OnInit {
         private authService: AuthService,
         private configService: ConfigService,
         private projectsService: ProjectsService,
-        private userService: UserService,
-        private groupService: GroupsService,
-        private router: Router
+        private userService: UserService
     ) {
         this.config = {}
         this.default_size = 0
         this.default_cpu = 0
-    }
-
-    ngOnDestroy(): void {
     }
 
     async ngOnInit() {
@@ -84,7 +77,6 @@ export class ProjectComponent implements OnInit {
             },
             err => console.log('failed to get config')
         )
-
     }
 
     project_list() {
@@ -117,7 +109,7 @@ export class ProjectComponent implements OnInit {
                 resp => {
                     this.request_msg = 'An email has been sent to an admin';
                     this.new_project = {};
-                    this.closeModal();
+                    this.closeFormModal();
                 },
                 err => {
                     console.log('failed to get project users', err);
@@ -130,9 +122,9 @@ export class ProjectComponent implements OnInit {
         }
     }
 
-    closeModal() {
-        const modalElement = this.modal.nativeElement;
-        modalElement.style.display = 'none';
+    closeFormModal() {
+        const formModalElement = this.formModal.nativeElement;
+        formModalElement.style.display = 'none';
         const modalBackdrop = document.querySelector('.modal-backdrop');
         if (modalBackdrop) {
             modalBackdrop.remove();
