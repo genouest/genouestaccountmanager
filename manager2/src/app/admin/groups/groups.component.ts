@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Group, GroupsService } from './groups.service';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
+import { User } from '../../user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -22,9 +23,9 @@ export class GroupsComponent implements OnInit {
     selectedGroup: Group
     new_group: Group
 
-    projects: any[]
+    projects: Project[]
     groups: Group[]
-    users: any[]
+    users: User[]
 
     constructor(
         private groupsService: GroupsService,
@@ -134,7 +135,7 @@ export class GroupsComponent implements OnInit {
                                     }
                                 }
                             }
-                            this.users[i].authorized = is_authorized;
+                            this.users[i].temp.authorized = is_authorized;
                         }
                     },
                     err => console.log('failed to get users in group', group)

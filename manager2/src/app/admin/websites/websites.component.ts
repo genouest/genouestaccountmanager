@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Website, WebsiteService } from 'src/app/user/website.service';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -17,7 +17,7 @@ export class WebsitesComponent implements OnInit {
     chowner_err_msg: string
     websites: Website[]
     website: Website
-    users: any
+    users: User[]
 
     owner_web_name: any
     owner_web_owner: any

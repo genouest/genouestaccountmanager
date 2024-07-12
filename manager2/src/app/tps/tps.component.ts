@@ -1,7 +1,8 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
-import { ConfigService } from '../config.service'
+import { ConfigService } from '../config.service';
+import { User } from '../user/user.service';
 import { TpserviceService } from './tpservice.service';
 import { CalendarEvent, CalendarEventTimesChangedEvent } from 'angular-calendar';
 import { Subject } from 'rxjs';
@@ -27,7 +28,7 @@ export class TpsComponent implements OnInit {
     resmsg: string
     reserrmsg: string
 
-    session_user: any
+    session_user: User
 
     viewDate: Date
     events: CalendarEvent[]

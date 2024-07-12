@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
 import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
 import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
 import { Table } from 'primeng/table'
 
@@ -33,14 +33,14 @@ export class ProjectsComponent implements OnInit {
     projects: Project[]
     expired_projects: Project[]
     groups: Group[]
-    all_users: any[]
+    all_users: User[]
     new_project: Project
     new_group: Group
 
     day_time: number
 
-    pending_msg: any
-    pending_err_msg: any
+    pending_msg: string
+    pending_err_msg: string
 
     default_path: string
     default_size: number

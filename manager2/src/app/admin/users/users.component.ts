@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Pipe, PipeTransform } from '@angular/core';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -36,12 +36,12 @@ export class UsersComponent implements OnInit {
     STATUS_ACTIVE = 'Active';
     STATUS_EXPIRED = 'Expired';
 
-    users: any
+    users: User[]
 
-    pending_email_users: any = []
-    pending_approval_users: any = []
-    active_users: any = []
-    expired_users: any = []
+    pending_email_users: User[] = []
+    pending_approval_users: User[] = []
+    active_users: User[] = []
+    expired_users: User[] = []
 
     constructor(private userService: UserService) { }
 
@@ -74,18 +74,6 @@ export class UsersComponent implements OnInit {
             },
             err => console.log('failed to get users')
         )
-    }
-
-    date_convert = function timeConverter(tsp){
-        let res;
-        try {
-            var a = new Date(tsp);
-            res = a.toISOString().substring(0, 10);
-        }
-        catch (e) {
-            res = '';
-        }
-        return res;
     }
 
 }

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
 import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
 import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 import { Table } from 'primeng/table';
 
 @Component({
@@ -17,8 +17,8 @@ export class ProjectComponent implements OnInit {
     config: any
     project: Project
     groups: Group[]
-    users: any[]
-    all_users: any[]
+    users: User[]
+    all_users: User[]
     prj_err_msg: string
     prj_msg: string
     oldGroup: string
@@ -84,7 +84,7 @@ export class ProjectComponent implements OnInit {
                         this.oldGroup = this.project.group;
                         for(var i = 0; i<resp.length;i++){
                             if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0){
-                                this.users[i].access=true;
+                                this.users[i].temp.access = true;
                             }
                         }
                         this.remove_user_admin = '';

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 import { ConfigService } from 'src/app/config.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
@@ -37,7 +37,7 @@ export class RegisterComponent implements OnInit {
     create_imap_mailbox: boolean
     is_fake: boolean
 
-    session_user: any
+    session_user: User
 
     constructor(
         private authService: AuthService,

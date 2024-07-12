@@ -3,7 +3,7 @@ import { NgForm } from '@angular/forms';
 import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -20,12 +20,12 @@ export class ProjectComponent implements OnInit {
     new_project: Project
     new_project_expire: string
     projects: Project[]
-    users: any
+    users: User[]
     selectedProject: Project
-    session_user: any
+    session_user: User
     config: any
-    new_user: any
-    remove_user: any
+    new_user: User
+    remove_user: string
     default_size: number
     default_cpu: number
 
@@ -145,7 +145,7 @@ export class ProjectComponent implements OnInit {
                     this.oldGroup = project.group;
                     for (let i = 0; i < resp.length; i++) {
                         if (resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0) {
-                            this.users[i].access = true;
+                            this.users[i].temp.access = true;
                         }
                     }
                     resolve(resp)

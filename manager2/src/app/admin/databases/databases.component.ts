@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -19,7 +19,7 @@ export class DatabasesComponent implements OnInit {
     chowner_err_msg: string
 
     databases: Database[]
-    users: any
+    users: User[]
     selecteddb: Database[]
 
     requests_visible: boolean

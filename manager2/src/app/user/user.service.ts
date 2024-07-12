@@ -5,6 +5,48 @@ import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+export class User {
+    uid: string
+    id: number
+    first_name: string
+    last_name: string
+    email: string
+    send_copy_to_support: boolean
+    create_imap_mailbox: boolean
+    lab: string
+    responsible: string
+    address: string
+    team: string
+    why: string
+    ip: string
+    is_admin: boolean
+    is_fake: boolean
+    is_locked: boolean
+    is_trainer: boolean
+    duration: any
+    history: any[]
+    extra_info: any[]
+    registration: number
+    created_at: number | null
+    group: string
+    secondary_groups: string[]
+    new_group: string
+    projects: string[] | null
+    new_project: any
+    status: string
+    expiration: number
+    reg_key: number
+    api_key: number
+    ssh: string
+    u2f: any
+    otp: any
+    temp: any
+
+    constructor(first_name: string = '') {
+        this.first_name = first_name;
+    }
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -13,6 +55,12 @@ export class UserService {
     config: any
 
     constructor(private http: HttpClient, private authService: AuthService) {
+    }
+
+    private mapToUser(response: any): User {
+        return new User(
+            response.first_name || ''
+        );
     }
 
     getUserLogs(userId: string) {
@@ -108,7 +156,7 @@ export class UserService {
             httpOptions)
     }
 
-    updateSSH(userId: string, ssh: string) {
+    updateSSH(userId: string, ssh: string): Observable<User> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -117,10 +165,13 @@ export class UserService {
         return this.http.put(
             environment.apiUrl + '/user/' + userId + '/ssh',
             {ssh: ssh},
-            httpOptions)
+            httpOptions
+        ).pipe(map((response: any) => {
+            return this.mapToUser(response);
+        }));
     }
 
-    update(userId: string, user) {
+    update(userId: string, user: User): Observable<User> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -129,7 +180,10 @@ export class UserService {
         return this.http.put(
             environment.apiUrl + '/user/' + userId ,
             user,
-            httpOptions)
+            httpOptions
+        ).pipe(map((response: any) => {
+            return this.mapToUser(response);
+        }));
     }
 
     activate(userId: string) {
@@ -162,7 +216,7 @@ export class UserService {
             httpOptions)
     }
 
-    renew(userId) {
+    renew(userId: string) {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -296,7 +350,7 @@ export class UserService {
             httpOptions)
     }
 
-    list() {
+    list(): Observable<User[]> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -304,11 +358,15 @@ export class UserService {
         };
         return this.http.get(
             environment.apiUrl + '/user',
-            httpOptions).pipe(map((response: any[]) => {
-                return response.sort(function (a,b) {
-                    return a.uid.localeCompare(b.uid);
-                });
-            }));
+            httpOptions
+        ).pipe(map((response: any[]) => {
+            response.sort(function (a,b) {
+                return a.uid.localeCompare(b.uid);
+            });
+            return response.map((item: any) => {
+                return this.mapToUser(item);
+            });
+        }));
     }
 
     removeFromProject(userId: string, projectId: string) {
@@ -323,7 +381,7 @@ export class UserService {
             httpOptions)
     }
 
-    register(userId: string, userInfo) {
+    register(userId: string, userInfo: any) {
         //let user = this.authService.profile;
         let httpOptions = {
         };
@@ -333,7 +391,7 @@ export class UserService {
             httpOptions)
     }
 
-    extend(userId, regKey) {
+    extend(userId: string, regKey: number) {
         //console.log(environment.apiUrl + '/user/' + userId + '/renew/' + regKey)
         let httpOptions = {
             headers: new HttpHeaders({
@@ -345,7 +403,7 @@ export class UserService {
         )
     }
 
-    add_note(userId, note) {
+    add_note(userId: string, note: string) {
         //console.log(environment.apiUrl + '/user/' + userId + '/renew/' + regKey)
         let httpOptions = {
             headers: new HttpHeaders({
@@ -359,7 +417,7 @@ export class UserService {
         )
     }
 
-    unlock(userId) {
+    unlock(userId: string) {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')

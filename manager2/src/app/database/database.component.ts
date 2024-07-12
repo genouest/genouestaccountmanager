@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
 import { AuthService } from 'src/app/auth/auth.service';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 import { NgForm } from '@angular/forms';
 import { Table } from 'primeng/table';
 
@@ -14,15 +14,14 @@ import { Table } from 'primeng/table';
 export class DatabaseComponent implements OnInit {
   @ViewChild('dtp') table: Table;
 
-  session_user: any
+  session_user: User
 
   db: Database
   db_expire_string: string
   databases: Database[]
 
-  users: any
+  users: User[]
 
-  new_project: any
   msg: string
   err_msg: string
   form_msg: string
