@@ -11,7 +11,7 @@ export class Group {
     description: string
     new: boolean
 
-    constructor(name: string, owner: string, description: string, is_new: boolean = false) {
+    constructor(name: string = '', owner: string = '', description: string = '', is_new: boolean = false) {
         this.name = name
         this.owner = owner
         this.description = description

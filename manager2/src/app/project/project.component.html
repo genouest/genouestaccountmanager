@@ -25,7 +25,7 @@
               <span style="color:red">(required) </span>
               <i class="pi pi-question-circle" title="Project expiration date"></i>
             </label>
-            <input required type="date" id="new_project_expire" name="expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.expire" class="form-control" #expire="ngModel"/>
+            <input required type="date" id="new_project_expire" name="expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project_expire" class="form-control" #expire="ngModel"/>
             <div *ngIf="expire.invalid && (expire.dirty || expire.touched)" class="text-danger">
               <div *ngIf="expire.errors.required">Expiration date is required</div>
             </div>

@@ -1,10 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
-import { GroupsService } from 'src/app/admin/groups/groups.service';
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
-
 import { Table } from 'primeng/table';
 
 @Component({
@@ -16,8 +15,8 @@ export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
 
     config: any
-    project: any
-    groups: any[]
+    project: Project
+    groups: Group[]
     users: any[]
     all_users: any[]
     prj_err_msg: string
@@ -38,18 +37,7 @@ export class ProjectComponent implements OnInit {
         private projectsService: ProjectsService,
         private userService: UserService
     ) {
-        this.project = {
-            id: '',
-            owner: '',
-            group: '',
-            size: 0,
-            cpu: 0,
-            expire: '',
-            orga: '',
-            description: '',
-            access: 'Group',
-            path: ''
-        }
+        this.project = new Project();
         this.users = [];
         this.groups = [];
         this.all_users = [];

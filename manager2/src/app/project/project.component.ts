@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
 import { UserService } from 'src/app/user/user.service';
@@ -17,17 +17,17 @@ export class ProjectComponent implements OnInit {
     @ViewChild('dtu') tableuser: Table;
     @ViewChild('formModal') formModal: ElementRef;
 
-    new_project: any
-    projects: any
+    new_project: Project
+    new_project_expire: string
+    projects: Project[]
     users: any
-    groups: any
-    selectedProject: any
+    selectedProject: Project
     session_user: any
     config: any
     new_user: any
     remove_user: any
-    default_size: any
-    default_cpu: any
+    default_size: number
+    default_cpu: number
 
     manager_visible: boolean
 
@@ -53,8 +53,8 @@ export class ProjectComponent implements OnInit {
 
     async ngOnInit() {
 
-        this.new_project = {}
-        this.groups = [];
+        this.new_project = new Project();
+        this.new_project_expire = '';
         this.manager_visible = true;
         this.session_user = await this.authService.profile;
         this.users = [];
@@ -104,11 +104,11 @@ export class ProjectComponent implements OnInit {
             // todo: should rename it project_msg
             this.request_msg = '';
             this.request_err_msg = '';
-            const project_to_send = { ...this.new_project, expire: new Date(this.new_project.expire).getTime()}
-            this.projectsService.askNew(project_to_send).subscribe(
+            this.new_project.expire = new Date(this.new_project_expire).getTime();
+            this.projectsService.askNew(this.new_project).subscribe(
                 resp => {
                     this.request_msg = 'An email has been sent to an admin';
-                    this.new_project = {};
+                    this.new_project = new Project();
                     this.closeFormModal();
                 },
                 err => {

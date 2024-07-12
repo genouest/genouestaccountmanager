@@ -1,11 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
-import { GroupsService } from 'src/app/admin/groups/groups.service';
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
 import { UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
-
 import { Table } from 'primeng/table'
 
 
@@ -30,22 +29,22 @@ export class ProjectsComponent implements OnInit {
     add_project_msg: string
     add_project_error_msg: string
 
-    pending_projects: any[]
-    projects: any[]
-    expired_projects: any[]
-    groups: any[]
+    pending_projects: Project[]
+    projects: Project[]
+    expired_projects: Project[]
+    groups: Group[]
     all_users: any[]
-    new_project: any
-    new_group: any
+    new_project: Project
+    new_group: Group
 
     day_time: number
 
     pending_msg: any
     pending_err_msg: any
 
-    default_path: any
-    default_size: any
-    default_cpu: any
+    default_path: string
+    default_size: number
+    default_cpu: number
 
     constructor(
         private route: ActivatedRoute,
@@ -80,23 +79,8 @@ export class ProjectsComponent implements OnInit {
         this.expired_projects = [];
         this.groups = [];
         this.all_users = [];
-        this.new_project = {
-            id: '',
-            owner: '',
-            group: '',
-            size: 0,
-            cpu: 0,
-            expire: '',
-            orga: '',
-            description: '',
-            access: 'Group',
-            path: ''
-        };
-        this.new_group = {
-            name: '',
-            owner: '',
-            description: '',
-        }
+        this.new_project = new Project();
+        this.new_group = new Group();
 
         this.project_list(true);
         this.pending_list(true);
@@ -181,7 +165,7 @@ export class ProjectsComponent implements OnInit {
 
                 this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
                     resp => {
-                        this.new_project = {};
+                        this.new_project = new Project();
                     },
                     err => {
                         console.log('failed  to add user to project');

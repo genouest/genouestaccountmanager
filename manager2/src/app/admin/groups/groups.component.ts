@@ -31,7 +31,7 @@ export class GroupsComponent implements OnInit {
         private projectsService: ProjectsService
     ) {
         this.selectedGroup = null;
-        this.new_group = new Group('', '', '', false);
+        this.new_group = new Group();
         this.projects = [];
         this.groups = [];
         this.users = [];
