@@ -140,7 +140,7 @@
                     <div class="col-4 col-form-label"></div>
                     <div class="col-6">
                       <select [(ngModel)]="user.group" [ngModelOptions]="{standalone: true}" class="form-control">
-                        <option *ngFor="let group of groups" [value]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
+                        <option *ngFor="let group of groups" [ngValue]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
                       </select>
                       <div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
                       <div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
