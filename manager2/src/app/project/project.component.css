@@ -1,0 +1,13 @@
+.disabled-btn {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+#termsAndConditionsHdsModal{
+    z-index: 1052 !important;
+}
+
+#ask_project {
+    overflow-y: auto;
+    overflow-x: hidden;
+}

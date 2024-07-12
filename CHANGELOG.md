@@ -8,6 +8,7 @@
 * Add 'Extend' button for admins to extend active TPs
 * Add checks to user registration form, the user information update form and the TP reservation form
 * Add back button from single project view
+* Updated TP calendar to increase readability
 * Fix newly created group selection bug
 
 ## 1.4.29

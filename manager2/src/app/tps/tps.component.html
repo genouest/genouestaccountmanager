@@ -18,13 +18,29 @@
             </div>
             <div class="card-body">
                 <mwl-calendar-month-view
-                [viewDate]="viewDate"
-                [events]="events"
-                (eventClicked)="eventClicked($event)"
-                [refresh]="refresh"
-                (eventTimesChanged)="eventTimesChanged($event)">
-                >
-              </mwl-calendar-month-view>
+                    [viewDate]="viewDate"
+                    [events]="events"
+                    [refresh]="refresh"
+                    (eventTimesChanged)="eventTimesChanged($event)"
+                    [cellTemplate]="customCellTemplate"
+                    weekStartsOn=1>
+                </mwl-calendar-month-view>
+                <ng-template #customCellTemplate let-day="day">
+                    <div class="cal-cell-top">
+                        <span class="cal-day-number">{{day.date | calendarDate:'monthViewDayNumber':locale}}</span>
+                    </div>
+                    <div *ngIf="day.events" [ngStyle]="{'position': 'relative'}">
+                        <p *ngFor="let event of day.events" (click)="eventClicked(event)" [ngStyle]="{
+                            'background-color': event.color.primary,
+                            'width': '100%', 'height': '20px', 'margin-bottom': '2px'
+                        }">
+                            <span class="text-white small" [ngStyle]="{
+                                'overflow': 'hidden', 'white-space': 'nowrap', 'text-overflow': 'ellipsis',
+                                'max-width': '92px', 'display': 'flex', 'justify-content': 'center'
+                            }">{{event.meta?.name}}</span>
+                        </p>
+                    </div>
+                </ng-template>
             </div>
         </div>
     </div>
@@ -99,7 +115,7 @@
                     </table>
                 </div>
 
-                <button *ngIf="!selectedEvent.created && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
+                <button *ngIf="!selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
                 <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="p-button p-button-sm p-button-secondary" (click)="cancel_reservation()">Cancel</button>
                 <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#extend">Extend</button>
                 <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-warning" (click)="remove_reservation()">Remove</button>
