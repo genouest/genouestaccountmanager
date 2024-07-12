@@ -2,6 +2,11 @@
 
 ## 1.4.30 (TBA)
 
+* Added a project.terms_and_conditions_hds setting in the config:
+  If true:
+    "Ask Admin" button to submit project creation form became available after 'project name' and 'expiration date' are filled, 'project description' is at least 30 char and a checkbox appears and 'terms and conditions hds' should also be checked
+  If false:
+    "Ask Admin" button to submit project creation form became available after 'project name' and 'expiration date' are filled, 'project description' is at least 30 char, no consent checkbox
 * Add 'End date' to the project request page
 * Set 'description' as a required field in the project request page and set a minimal length of 30 char
 * Add a link to user profile on admin panels -> projects pending table
