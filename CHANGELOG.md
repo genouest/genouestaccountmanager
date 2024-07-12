@@ -2,13 +2,13 @@
 
 ## 1.4.30 (TBA)
 
-* Added 'End date' to the project request page
+* Add 'End date' to the project request page
 * Set 'description' as a required field in the project request page and set a minimal length of 30 char
-* Added a link to user profile on admin panels -> projects pending table
-* Added 'Extend' button for admins to extend active TPs
-* Prevented retroactive TP reservations
-* Added checks to user registration form, the user information update form and the TP reservation form
-* Added back button from single project view
+* Add a link to user profile on admin panels -> projects pending table
+* Add 'Extend' button for admins to extend active TPs
+* Add checks to user registration form, the user information update form and the TP reservation form
+* Add back button from single project view
+* Fix newly created group selection bug
 
 ## 1.4.29
 
