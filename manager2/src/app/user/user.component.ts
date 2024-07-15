@@ -35,7 +35,7 @@ import {
     styleUrls: ['./user-extra.component.css']
 })
 export class UserExtraComponent implements OnInit {
-    @Input() user: any
+    @Input() user: User
     @Output() extraValues = new EventEmitter<any>();
     config: any
     //@ViewChild('extras') extras: any

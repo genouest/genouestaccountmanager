@@ -249,7 +249,7 @@ export class ProjectsComponent implements OnInit {
                 if (data.length > 0) {
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {
-                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000
+                        data[i].created_at = parseInt(data[i]._id.substring(0, 8), 16) * 1000
                     }
                 };
                 this.pending_number = data.length;
@@ -272,17 +272,17 @@ export class ProjectsComponent implements OnInit {
         return res;
     }
 
-    accept_project(project) {
+    accept_project(project: Project) {
         this.modify_project(project);
         this.add_project();
     }
 
-    modify_project(project) {
+    modify_project(project: Project) {
         this.new_project = {...project, expire: this.date_convert(project.expire)};
         this.update_project_on_event(project.id);
     }
 
-    reject_project(project) {
+    reject_project(project: Project) {
         this.reset_msgs()
         this.projectService.delete_pending(project.uuid).subscribe(
             resp => {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { User, UserService } from 'src/app/user/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -24,7 +25,11 @@ export class Group {
 })
 export class GroupsService {
 
-    constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(
+        private http: HttpClient,
+        private authService: AuthService,
+        private userService: UserService
+    ) { }
 
 
     list(): Observable<Group[]> {
@@ -53,7 +58,7 @@ export class GroupsService {
         }));
     }
 
-    get(groupId): Observable<any> {
+    get(groupId: string): Observable<User[]> {
         // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -63,7 +68,11 @@ export class GroupsService {
         return this.http.get(
             environment.apiUrl + '/group/' + groupId,
             httpOptions
-        );
+        ).pipe(map((response: any[]) => {
+            return response.map(item => {
+                return this.userService.mapToUser(item);
+            });
+        }));
     }
 
     update(group: Group) {
@@ -80,7 +89,7 @@ export class GroupsService {
         );
     }
 
-    delete(groupId) {
+    delete(groupId: string) {
         // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

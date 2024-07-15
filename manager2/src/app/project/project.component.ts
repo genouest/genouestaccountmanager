@@ -144,7 +144,7 @@ export class ProjectComponent implements OnInit {
                     this.selectedProject = project;
                     this.oldGroup = project.group;
                     for (let i = 0; i < resp.length; i++) {
-                        if (resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0) {
+                        if (resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondary_groups.indexOf(this.selectedProject.group) >= 0) {
                             this.users[i].temp.access = true;
                         }
                     }

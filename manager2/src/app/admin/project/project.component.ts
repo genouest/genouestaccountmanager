@@ -16,6 +16,7 @@ export class ProjectComponent implements OnInit {
 
     config: any
     project: Project
+    project_expire: string
     groups: Group[]
     users: User[]
     all_users: User[]
@@ -73,17 +74,17 @@ export class ProjectComponent implements OnInit {
 
     }
 
-    show_project_users(projectId) {
+    show_project_users(projectId: string) {
         this.projectsService.get(projectId).subscribe(
             resp => {
                 this.project = resp;
-                this.project.expire = this.date_convert(resp.expire);
+                this.project_expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
                         this.users = resp;
                         this.oldGroup = this.project.group;
                         for(var i = 0; i<resp.length;i++){
-                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0){
+                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondary_groups.indexOf(this.project.group) >= 0) {
                                 this.users[i].temp.access = true;
                             }
                         }
@@ -163,7 +164,7 @@ export class ProjectComponent implements OnInit {
         )
     }
 
-    date_convert = function timeConverter(tsp){
+    date_convert = function timeConverter(tsp: number) {
         let res;
         try {
             var a = new Date(tsp);

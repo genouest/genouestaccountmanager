@@ -11,8 +11,6 @@ export class User {
     first_name: string
     last_name: string
     email: string
-    send_copy_to_support: boolean
-    create_imap_mailbox: boolean
     lab: string
     responsible: string
     address: string
@@ -23,27 +21,49 @@ export class User {
     is_fake: boolean
     is_locked: boolean
     is_trainer: boolean
-    duration: any
-    history: any[]
-    extra_info: any[]
-    registration: number
+    send_copy_to_support: boolean
+    create_imap_mailbox: boolean
     created_at: number | null
+    expiration: number
+    duration: any
+    registration: number
     group: string
     secondary_groups: string[]
     new_group: string
     projects: string[] | null
     new_project: any
-    status: string
-    expiration: number
     reg_key: number
     api_key: number
     ssh: string
     u2f: any
     otp: any
+    history: any[]
+    extra_info: any[]
+    status: string
     temp: any
 
-    constructor(first_name: string = '') {
-        this.first_name = first_name;
+    constructor(
+        uid: string = '', id: number = 0, first_name: string = '', last_name: string = '',
+        email: string = '', lab: string = '', responsible: string = '', address: string = '',
+        team: string = '', why: string = '', ip: string = '',
+        is_admin: boolean = false, is_fake: boolean = false, is_locked: boolean = false, is_trainer: boolean = false,
+        send_copy_to_support: boolean = false, create_imap_mailbox: boolean = false,
+        created_at: number | null = null, expiration: number = 0, duration: any = null, registration: number = 0,
+        group: string = '', secondary_groups: string[] = [], new_group: string = '',
+        projects: string[] | null = null, new_project: any = null,
+        reg_key: number = 0, api_key: number = 0, ssh: string = '', u2f: any = null, otp: any = null,
+        history: any[] = [], extra_info: any[] = [], status: string = '', temp: any = null
+    ) {
+        this.uid = uid; this.id = id; this.first_name = first_name; this.last_name = last_name;
+        this.email = email; this.lab = lab; this.responsible = responsible; this.address = address;
+        this.team = team; this.why = why; this.ip = ip;
+        this.is_admin = is_admin; this.is_fake = is_fake; this.is_locked = is_locked; this.is_trainer = is_trainer;
+        this.send_copy_to_support = send_copy_to_support; this.create_imap_mailbox = create_imap_mailbox;
+        this.created_at = created_at; this.expiration = expiration; this.duration = duration; this.registration = registration;
+        this.group = group; this.secondary_groups = secondary_groups; this.new_group = new_group;
+        this.projects = projects; this.new_project = new_project;
+        this.reg_key = reg_key; this.api_key = api_key; this.ssh = ssh; this.u2f = u2f; this.otp = otp;
+        this.history = history; this.extra_info = extra_info; this.status = status; this.temp = temp;
     }
 }
 
@@ -57,9 +77,18 @@ export class UserService {
     constructor(private http: HttpClient, private authService: AuthService) {
     }
 
-    private mapToUser(response: any): User {
+    mapToUser(resp: any): User {
         return new User(
-            response.first_name || ''
+            resp.uid || '', resp.id || 0, resp.first_name || '', resp.last_name || '',
+            resp.email || '', resp. lab || '', resp.responsible || '', resp.address || '',
+            resp.team || '', resp.why || '', resp.ip || '',
+            resp.is_admin || false, resp.is_fake || false, resp.is_locked || false, resp.is_trainer || false,
+            resp.send_copy_to_support || false, resp.create_imap_mailbox || false,
+            resp.created_at || null, resp.expiration || 0, resp.duration || null, resp.registration || 0,
+            resp.group || '', resp.secondary_groups || [], resp.new_group || '',
+            resp.projects || null, resp.new_project || null,
+            resp.reg_key || 0, resp.api_key || 0, resp.ssh || '', resp.u2f || null, resp.otp || null,
+            resp.history || [], resp.extra_info || [], resp.status || '', resp.temp || null
         );
     }
 
@@ -166,7 +195,7 @@ export class UserService {
             environment.apiUrl + '/user/' + userId + '/ssh',
             {ssh: ssh},
             httpOptions
-        ).pipe(map((response: any) => {
+        ).pipe(map(response => {
             return this.mapToUser(response);
         }));
     }
@@ -363,7 +392,7 @@ export class UserService {
             response.sort(function (a,b) {
                 return a.uid.localeCompare(b.uid);
             });
-            return response.map((item: any) => {
+            return response.map(item => {
                 return this.mapToUser(item);
             });
         }));

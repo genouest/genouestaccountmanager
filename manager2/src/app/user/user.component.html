@@ -3,7 +3,7 @@
     <div class="col-sm-5">
       <h2>{{user.uid}}</h2>
       <div *ngIf="subscribed && (session_user.is_admin || (config.enable_ui && config.enable_ui.newsletters))"><button class="btn" (click)="unsubscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is subscribed to the newletters" style="color:green"></small> unsubscribe</button></div>
-      <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newletters" style="color:red"></small> subscribe</button></div>
+      <div *ngIf="! subscribed"><button class="btn" (click)="subscribe()"><small class="oi oi-envelope-open glyphicon glyphicon-envelope" title="The user is not subscribed to the newsletters" style="color:red"></small> subscribe</button></div>
       <div *ngIf="user && user.created_at"><small>Created at : {{date_convert(user.created_at)}}</small></div>
       <div *ngIf="user && user.expiration"><small>Expires: {{date_convert(user.expiration)}}</small></div>
       <div>Support available at <a href="mailto:{{config.support}}">{{config.support}}</a></div>
@@ -77,13 +77,13 @@
                 <div class="form-group row">
                   <label for="firstname" class="col-4 col-form-label">First name</label>
                   <div class="col-6">
-                    <input type="text" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.firstname" class="form-control"/>
+                    <input type="text" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.first_name" class="form-control"/>
                   </div>
                 </div>
                 <div class="form-group row">
                   <label for="lastname" class="col-4 col-form-label">Last name</label>
                   <div class="col-6">
-                    <input type="text" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lastname" class="form-control"/>
+                    <input type="text" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.last_name" class="form-control"/>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -126,7 +126,7 @@
                   <div class="form-group row">
                     <label for="key" class="col-4 col-form-label">Key</label>
                     <div class="col-6">
-                      <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.regkey" class="form-control" readonly/>
+                      <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.reg_key" class="form-control" readonly/>
                     </div>
                   </div>
                   <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
@@ -157,16 +157,16 @@
                   <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.main_group">
                     <label for="mgroup" class="col-4 col-form-label">Main group directory</label>
                     <div class="col-6">
-                      <select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.maingroup" class="form-control">
+                      <select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control">
                         <option *ngFor="let item of config.main_groups" [value]="item">{{item}}</option>
                       </select>
                     </div>
                   </div>
-                  <div class="form-group row" *ngIf="user.secondarygroups && user.secondarygroups.length > 0">
+                  <div class="form-group row" *ngIf="user.secondary_groups && user.secondary_groups.length > 0">
                     <label label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
                     <div class="col-6">
-                      <div *ngFor="let secondarygroup of user.secondarygroups">
-                        <input type="text" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
+                      <div *ngFor="let secondary_group of user.secondary_groups">
+                        <input type="text" [ngModelOptions]="{standalone: true}" [value]="secondary_group" class="form-control" readonly/>
                       </div>
                     </div>
                   </div>
@@ -221,10 +221,10 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label *ngIf="user.secondarygroups && user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
+                    <label *ngIf="user.secondary_groups && user.secondary_groups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
                     <div class="col-6">
-                      <div *ngFor="let secondarygroup of user.secondarygroups">
-                        <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [value]="secondarygroup" class="form-control" readonly/>
+                      <div *ngFor="let secondary_group of user.secondary_groups">
+                        <input type="text" id="{{secondarygroup}}" [ngModelOptions]="{standalone: true}" [value]="secondary_group" class="form-control" readonly/>
                       </div>
                     </div>
                   </div>
@@ -362,7 +362,7 @@
             <div class="form-group row">
               <div class="col-sm-6">
                 <label for="newgroup" class="col-form-label">Groups</label>
-                <select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newgroup" class="form-control">
+                <select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.new_group" class="form-control">
                   <option *ngFor="let group of groups" [ngValue]="group.name">{{group.name}}</option>
                 </select>
               </div>
@@ -372,14 +372,14 @@
             </div>
             <hr/>
             <div class="table-responsive">
-              <table aria-label="secondary groups" *ngIf="user.secondarygroups && user.secondarygroups.length > 0" class="table table-striped">
+              <table aria-label="secondary groups" *ngIf="user.secondary_groups && user.secondary_groups.length > 0" class="table table-striped">
                 <thead>
                   <th scope="col">Name</th><th scope="col"></th>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let secondarygroup of user.secondarygroups">
-                    <td>{{secondarygroup}}</td>
-                    <td><app-my-delete-confirm [onConfirm]="delete_secondary_group" [data]="secondarygroup"></app-my-delete-confirm></td>
+                  <tr *ngFor="let secondary_group of user.secondary_groups">
+                    <td>{{secondary_group}}</td>
+                    <td><app-my-delete-confirm [onConfirm]="delete_secondary_group" [data]="secondary_group"></app-my-delete-confirm></td>
                   </tr>
                 </tbody>
               </table>

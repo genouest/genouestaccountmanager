@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { User, UserService } from 'src/app/user/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class Project {
+    _id: string;
+    uuid: string;
     id: string;
     owner: string;
     group: string;
@@ -22,19 +25,21 @@ export class Project {
     access: string;
     path: string;
     expire: number;
-    created_at: number | null;
+    created_at: number;
 
     constructor(
-        id: string = '', owner: string = '', group: string = '',
+        _id: string = '', uuid: string = '', id: string = '',
+        owner: string = '', group: string = '',
         size: number = 0, current_size: number | null = null,
         low_size: number | null = null, high_size: number | null = null,
         cpu: number = 0, current_cpu: number | null = null,
         low_cpu: number | null = null, high_cpu: number | null = null,
         orga: string = '',  description: string = '',
         access: string =  'Group', path: string = '',
-        expire: number = 0, created_at: number | null = null
+        expire: number = 0, created_at: number = 0
     ) {
-        this.id = id; this.owner = owner; this.group = group; this.size = size;
+        this._id = _id; this.uuid = uuid, this.id = id;
+        this.owner = owner; this.group = group; this.size = size;
         this.current_size = current_size; this.low_size = low_size; this.high_size = high_size;
         this.cpu = cpu; this.current_cpu = current_cpu; this.low_cpu = low_cpu; this.high_cpu = high_cpu;
         this.orga = orga; this.description = description; this.access = access; this.path = path;
@@ -47,18 +52,22 @@ export class Project {
 })
 export class ProjectsService {
 
-    constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(private http: HttpClient,
+        private authService: AuthService,
+        private userService: UserService
+    ) { }
 
-    private mapToProject(response: any): Project {
+    private mapToProject(resp: any): Project {
         return new Project(
-            response.id || '', response.owner || '', response.group || '',
-            response.size || 0, response.current_size || null,
-            response.low_size || null, response.high_size || null,
-            response.cpu || 0, response.current_cpu || null,
-            response.low_cpu || null, response.high_cpu || null,
-            response.orga || '', response.description || '',
-            response.access || 'Group', response.path || '',
-            response.expire || 0, response.created_at || null
+            resp._id || '', resp.uuid || '', resp.id || '',
+            resp.owner || '', resp.group || '',
+            resp.size || 0, resp.current_size || null,
+            resp.low_size || null, resp.high_size || null,
+            resp.cpu || 0, resp.current_cpu || null,
+            resp.low_cpu || null, resp.high_cpu || null,
+            resp.orga || '', resp.description || '',
+            resp.access || 'Group', resp.path || '',
+            resp.expire || 0, resp.created_at || 0
         );
     }
 
@@ -151,12 +160,12 @@ export class ProjectsService {
         return this.http.get(
             environment.apiUrl + '/project/' + projectId,
             httpOptions
-        ).pipe(map((response: any) => {
+        ).pipe(map(response => {
             return this.mapToProject(response);
         }));
     }
 
-    getUsers(projectId: string): Observable<any> {
+    getUsers(projectId: string): Observable<User[]> {
         //let user = this.authService.profile;
 
         let httpOptions = {
@@ -167,7 +176,11 @@ export class ProjectsService {
         return this.http.get(
             environment.apiUrl + '/project/' + projectId + '/users',
             httpOptions
-        );
+        ).pipe(map((response: any[]) => {
+            return response.map(item => {
+                return this.userService.mapToUser(item);
+            });
+        }));
     }
 
     getProjectsInGroup(groupName: string): Observable<Project[]> {
