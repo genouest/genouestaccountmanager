@@ -56,11 +56,11 @@ export class AuthService {
         });
     }
 
-    u2f(userId) {
+    u2f(userId: string) {
         return this.http.get(environment.apiUrl + '/u2f/auth/' + userId)
     }
 
-    u2fCheck(userId, u2fData) {
+    u2fCheck(userId: string, u2fData) {
         return this.http.post(environment.apiUrl + '/u2f/auth/' + userId, u2fData)
     }
 
@@ -76,7 +76,7 @@ export class AuthService {
             httpOptions)       
     }
 
-    checkEmailToken(userId, data) {
+    checkEmailToken(userId: string, data) {
         return new Promise((resolve, reject) => {
             this.http.post(
                 environment.apiUrl + '/mail/auth/' + userId,
@@ -104,18 +104,18 @@ export class AuthService {
         });
     }
 
-    handleLoginCallback(authResult) {
+    handleLoginCallback(authResult: User) {
         this.getUserInfo(authResult);
     }
 
-    getUserInfo(profile: User): void {
+    getUserInfo(profile: User) {
         // Get user profile
         if (profile) {
             this._setSession(profile);
         }
     }
 
-    private _setSession(profile: User): void {
+    private _setSession(profile: User) {
         // Save authentication data and update login status subject
         this.userProfile = profile;
         if(localStorage !== null) {
@@ -123,7 +123,7 @@ export class AuthService {
         }
     }
 
-    logout(): void {
+    logout() {
         this.accessToken = null;
         this.userProfile = null;
         this.authenticated = false;
@@ -139,7 +139,7 @@ export class AuthService {
     }
 
     autoLog() {
-        let key = null;
+        let key: string = null;
         if (localStorage !== null) {
             key = localStorage.getItem('my-api-key');
         }
@@ -178,11 +178,11 @@ export class AuthService {
         return this.authenticated
     }
 
-    passwordResetRequest(userId) {
+    passwordResetRequest(userId: string) {
         return this.http.get(environment.apiUrl + '/user/' + userId + '/passwordreset')
     }
 
-    emailTokenRequest(userId) {
+    emailTokenRequest(userId: string) {
         return this.http.get(environment.apiUrl + '/mail/auth/' + userId)
     }
 }

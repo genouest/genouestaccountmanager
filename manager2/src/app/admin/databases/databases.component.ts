@@ -13,8 +13,8 @@ export class DatabasesComponent implements OnInit {
     @ViewChild('dtp') table: Table;
 
     db: Database
-    owner_db_name: any
-    owner_db_owner: any
+    owner_db_name: Database
+    owner_db_owner: User
     chowner_msg: string
     chowner_err_msg: string
 

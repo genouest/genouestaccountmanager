@@ -133,11 +133,11 @@ export class ProjectsComponent implements OnInit {
         // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
         this.new_project.id = tmp_project_id; // todo: maybe add an option to enable or disable this one
 
-        if (this.new_project.size == 0) {
+        if (!this.new_project.size || this.new_project.size == 0) {
             this.new_project.size = this.default_size;
         }
 
-        if (this.new_project.cpu == 0) {
+        if (!this.new_project.cpu || this.new_project.cpu == 0) {
             this.new_project.cpu = this.default_cpu;
         }
 
@@ -150,7 +150,7 @@ export class ProjectsComponent implements OnInit {
         this.notification = "";
 
         if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner || !this.new_project_expire) {
-            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.date_convert(this.new_project.expire);
+            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.new_project_expire;
             return;
         }
         this.reset_msgs()

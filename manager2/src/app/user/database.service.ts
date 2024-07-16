@@ -130,7 +130,7 @@ export class DatabaseService {
         return this.http.delete(environment.apiUrl + '/database/' + db.name, httpOptions);
     }
 
-    changeOwner(dbName, dbOldOwner, dbNewOwner) {
+    changeOwner(dbName: string, dbOldOwner: string, dbNewOwner: string) {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

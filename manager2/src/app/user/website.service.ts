@@ -11,7 +11,7 @@ export class Website {
     description: string
     owner: string
 
-    constructor(name: string, url: string, desc: string, owner: string) {
+    constructor(name: string = '', url: string = '', desc: string = '', owner: string = '') {
         this.name = name
         this.url = url
         this.description = desc

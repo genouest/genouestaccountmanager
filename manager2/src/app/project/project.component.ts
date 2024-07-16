@@ -109,6 +109,7 @@ export class ProjectComponent implements OnInit {
                 resp => {
                     this.request_msg = 'An email has been sent to an admin';
                     this.new_project = new Project();
+                    this.new_project_expire = '';
                     this.closeFormModal();
                 },
                 err => {
@@ -158,7 +159,7 @@ export class ProjectComponent implements OnInit {
         })
     }
 
-    async show_project_users_and_scroll(input_project: any, anchor) {
+    async show_project_users_and_scroll(input_project: any, anchor: HTMLElement) {
         const project: Project = this.projectsService.mapToProject(input_project);
         this.show_project_users(project).then(() => {
             return new Promise(f => setTimeout(f, 250));
@@ -183,7 +184,7 @@ export class ProjectComponent implements OnInit {
         )
     }
 
-    request_user(input_project: any, user_id, request_type) {
+    request_user(input_project: any, user_id: string, request_type: string) {
         const project: Project = this.projectsService.mapToProject(input_project);
         this.request_msg = '';
         this.request_err_msg = '';

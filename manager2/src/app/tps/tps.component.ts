@@ -32,7 +32,7 @@ export class TpsComponent implements OnInit {
 
     viewDate: Date
     events: CalendarEvent[]
-    selectedEvent: any
+    selectedEvent: CalendarEvent
     refresh: Subject<any> = new Subject();
 
     quantity: number
@@ -182,10 +182,10 @@ export class TpsComponent implements OnInit {
     cancel_reservation() {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.cancel(this.selectedEvent.id).subscribe(
+        this.tpService.cancel(this.selectedEvent.meta.id).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.selectedEvent.over = true;
+                this.selectedEvent.meta.over = true;
                 this.listEvents();
             },
             err => this.errmsg = err.error.message
@@ -195,10 +195,10 @@ export class TpsComponent implements OnInit {
     create_reservation() {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.create(this.selectedEvent.id).subscribe(
+        this.tpService.create(this.selectedEvent.meta.id).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.selectedEvent.created = true;
+                this.selectedEvent.meta.created = true;
                 this.listEvents();
             },
             err => this.errmsg = err.error.message
@@ -208,10 +208,10 @@ export class TpsComponent implements OnInit {
     remove_reservation() {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.remove(this.selectedEvent.id).subscribe(
+        this.tpService.remove(this.selectedEvent.meta.id).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.selectedEvent.over = true;
+                this.selectedEvent.meta.over = true;
                 this.listEvents();
             },
             err => this.errmsg = err.error.message
@@ -221,7 +221,7 @@ export class TpsComponent implements OnInit {
     extend_reservation() {
         this.msg = '';
         this.errmsg = '';
-        if(new Date(this.new_expire).getTime() < this.selectedEvent.end) {
+        if(new Date(this.new_expire).getTime() < this.selectedEvent.meta.end) {
             this.errmsg = 'Extended end date must be after current end date';
             return;
         }
@@ -230,7 +230,7 @@ export class TpsComponent implements OnInit {
             return;
         }
         const extension = { 'to': new Date(this.new_expire).getTime() };
-        this.tpService.extend(this.selectedEvent.id, extension).subscribe(
+        this.tpService.extend(this.selectedEvent.meta.id, extension).subscribe(
             resp => {
                 this.msg = resp['message'];
                 this.listEvents();
@@ -239,14 +239,8 @@ export class TpsComponent implements OnInit {
         );
     }
 
-    eventClicked(clickedEvent) {
-        this.selectedEvent = clickedEvent.meta;
-        this.selectedEvent.title = clickedEvent.title;
-        this.selectedEvent.start = clickedEvent.start;
-        this.selectedEvent.end = clickedEvent.end;
-        if (!clickedEvent.meta.group) {
-            this.selectedEvent.group = { }
-        }
+    eventClicked(clickedEvent: CalendarEvent) {
+        this.selectedEvent = clickedEvent;
     }
 
     eventTimesChanged({
@@ -259,7 +253,7 @@ export class TpsComponent implements OnInit {
         this.refresh.next();
     }
 
-    get_status(over) {
+    get_status(over: boolean) {
         if(over) { return "panel panel-danger"; }
         else { return "panel panel-primary"; }
     }

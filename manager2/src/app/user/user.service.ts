@@ -369,7 +369,7 @@ export class UserService {
             httpOptions)
     }
 
-    getUser(id: string) {
+    getUser(id: string): Observable<User> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -377,7 +377,10 @@ export class UserService {
         };
         return this.http.get(
             environment.apiUrl + '/user/' + id,
-            httpOptions)
+            httpOptions
+        ).pipe(map(response => {
+            return this.mapToUser(response);
+        }));
     }
 
     list(): Observable<User[]> {
@@ -411,13 +414,13 @@ export class UserService {
             httpOptions)
     }
 
-    register(userId: string, userInfo: any) {
+    register(userId: string, user: User) {
         //let user = this.authService.profile;
         let httpOptions = {
         };
         return this.http.post(
             environment.apiUrl + '/user/' + userId,
-            userInfo,
+            user,
             httpOptions)
     }
 
