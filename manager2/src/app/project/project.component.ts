@@ -24,7 +24,7 @@ export class ProjectComponent implements OnInit {
     selectedProject: Project
     session_user: User
     config: any
-    new_user: User
+    new_user: string
     remove_user: string
     default_size: number
     default_cpu: number
@@ -131,7 +131,7 @@ export class ProjectComponent implements OnInit {
         }
     }
 
-    show_project_users(project) {
+    show_project_users(project: Project) {
         return new Promise((resolve, reject) => {
             this.msg = '';
             this.rm_prj_err_msg = '';
@@ -144,8 +144,8 @@ export class ProjectComponent implements OnInit {
                     this.selectedProject = project;
                     this.oldGroup = project.group;
                     for (let i = 0; i < resp.length; i++) {
-                        if (resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondary_groups.indexOf(this.selectedProject.group) >= 0) {
-                            this.users[i].temp.access = true;
+                        if ((resp[i].group.indexOf(this.selectedProject.group) >= 0) || (resp[i].secondary_groups.indexOf(this.selectedProject.group) >= 0)) {
+                            this.users[i].temp = { ...this.users[i].temp, access: true };
                         }
                     }
                     resolve(resp)
@@ -158,7 +158,8 @@ export class ProjectComponent implements OnInit {
         })
     }
 
-    async show_project_users_and_scroll(project, anchor) {
+    async show_project_users_and_scroll(input_project: any, anchor) {
+        const project: Project = this.projectsService.mapToProject(input_project);
         this.show_project_users(project).then(() => {
             return new Promise(f => setTimeout(f, 250));
         }).then(() => {
@@ -167,7 +168,8 @@ export class ProjectComponent implements OnInit {
 
     }
 
-    extend(project) {
+    extend(input_project: any) {
+        const project: Project = this.projectsService.mapToProject(input_project);
         this.projectsService.extend(project.id).subscribe(
             resp => {
                 this.request_msg = resp['message'];
@@ -181,7 +183,8 @@ export class ProjectComponent implements OnInit {
         )
     }
 
-    request_user(project, user_id, request_type) {
+    request_user(input_project: any, user_id, request_type) {
+        const project: Project = this.projectsService.mapToProject(input_project);
         this.request_msg = '';
         this.request_err_msg = '';
         if (!user_id) {

@@ -7,16 +7,19 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class Group {
+    gid: string
     name: string
     owner: string
     description: string
+    tags: string[] | null
     new: boolean
 
-    constructor(name: string = '', owner: string = '', description: string = '', is_new: boolean = false) {
-        this.name = name
-        this.owner = owner
-        this.description = description
-        this.new = is_new
+    constructor(
+        gid: string = '', name: string = '', owner: string = '',
+        description: string = '', tags: string[] = null, is_new: boolean = false
+    ) {
+        this.gid = gid; this.name = name; this.owner = owner;
+        this.description = description; this.tags = tags; this.new = is_new;
     }
 }
 
@@ -30,6 +33,13 @@ export class GroupsService {
         private authService: AuthService,
         private userService: UserService
     ) { }
+
+    mapToGroup(resp: any): Group {
+        return new Group(
+            resp.gid || '', resp.name || '', resp.owner || '',
+            resp.description || '', resp.tags || null, resp.new || false
+        );
+    }
 
 
     list(): Observable<Group[]> {
@@ -48,12 +58,7 @@ export class GroupsService {
                 return a.name.localeCompare(b.name);
             });
             return response.map(item => {
-                return new Group(
-                    item.name || '',
-                    item.owner || '',
-                    item.description || '',
-                    false
-                );
+                return this.mapToGroup(item);
             });
         }));
     }

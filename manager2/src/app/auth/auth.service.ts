@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { User, UserService} from '../user/user.service';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
@@ -16,12 +17,12 @@ export class AuthService {
 
     accessToken: string;
     authenticated: boolean;
-    userProfile:  any;
+    userProfile:  User;
 
     constructor(private http: HttpClient, private router: Router) {
     }
 
-    login(login, password) {
+    login(login: string, password: string): Promise<any> {
         return new Promise((resolve, reject) => {
             this.http.post(
                 environment.apiUrl + '/auth/' + login,
@@ -107,14 +108,14 @@ export class AuthService {
         this.getUserInfo(authResult);
     }
 
-    getUserInfo(profile) {
+    getUserInfo(profile: User): void {
         // Get user profile
         if (profile) {
             this._setSession(profile);
         }
     }
 
-    private _setSession(profile) {
+    private _setSession(profile: User): void {
         // Save authentication data and update login status subject
         this.userProfile = profile;
         if(localStorage !== null) {
@@ -122,7 +123,7 @@ export class AuthService {
         }
     }
 
-    logout() {
+    logout(): void {
         this.accessToken = null;
         this.userProfile = null;
         this.authenticated = false;
@@ -133,8 +134,8 @@ export class AuthService {
         }
     }
 
-    updateApiKey(token) {
-        this.userProfile.apikey = token;
+    updateApiKey(token: number) {
+        this.userProfile.api_key = token;
     }
 
     autoLog() {
@@ -163,7 +164,7 @@ export class AuthService {
 
     }
 
-    get profile(): any {
+    get profile(): User {
         if(! this.userProfile && localStorage !== null && localStorage.getItem('my-user')) {
             return JSON.parse(localStorage.getItem('my-user'))
         }

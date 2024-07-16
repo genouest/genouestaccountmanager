@@ -52,10 +52,10 @@ export class UsersComponent implements OnInit {
         this.userService.list().subscribe(
             resp => {
                 //this.users = resp;
-                let pendingEmail = [];
-                let pendingApproval = [];
-                let active = [];
-                let expired = [];
+                let pendingEmail: User[] = [];
+                let pendingApproval: User[] = [];
+                let active: User[] = [];
+                let expired: User[] = [];
                 resp.forEach(user => {
                     if (user.status == this.STATUS_PENDING_EMAIL) {
                         pendingEmail.push(user);

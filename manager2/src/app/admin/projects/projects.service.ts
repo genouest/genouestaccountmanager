@@ -30,13 +30,13 @@ export class Project {
     constructor(
         _id: string = '', uuid: string = '', id: string = '',
         owner: string = '', group: string = '',
-        size: number = 0, current_size: number | null = null,
-        low_size: number | null = null, high_size: number | null = null,
-        cpu: number = 0, current_cpu: number | null = null,
-        low_cpu: number | null = null, high_cpu: number | null = null,
+        size: number = 0, current_size: number = null,
+        low_size: number = null, high_size: number = null,
+        cpu: number = 0, current_cpu: number = null,
+        low_cpu: number = null, high_cpu: number = null,
         orga: string = '',  description: string = '',
         access: string =  'Group', path: string = '',
-        expire: number = 0, created_at: number = 0
+        expire: number = 0, created_at: number = null
     ) {
         this._id = _id; this.uuid = uuid, this.id = id;
         this.owner = owner; this.group = group; this.size = size;
@@ -45,6 +45,7 @@ export class Project {
         this.orga = orga; this.description = description; this.access = access; this.path = path;
         this.expire = expire; this.created_at = created_at;
     }
+
 }
 
 @Injectable({
@@ -57,7 +58,7 @@ export class ProjectsService {
         private userService: UserService
     ) { }
 
-    private mapToProject(resp: any): Project {
+    mapToProject(resp: any): Project {
         return new Project(
             resp._id || '', resp.uuid || '', resp.id || '',
             resp.owner || '', resp.group || '',
@@ -67,7 +68,8 @@ export class ProjectsService {
             resp.low_cpu || null, resp.high_cpu || null,
             resp.orga || '', resp.description || '',
             resp.access || 'Group', resp.path || '',
-            resp.expire || 0, resp.created_at || 0
+            new Date(resp.expire).getTime() || 0,
+            new Date(resp.created_at).getTime() || null
         );
     }
 
@@ -98,13 +100,13 @@ export class ProjectsService {
         }));
     }
 
-    add(project: any): Observable<any> {
+    add(project: Project): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };
@@ -121,7 +123,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };
@@ -138,7 +140,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };
@@ -154,7 +156,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //})
         };
         return this.http.get(
@@ -170,7 +172,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //})
         };
         return this.http.get(
@@ -188,7 +190,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //})
         };
         return this.http.get(
@@ -218,7 +220,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };
@@ -235,7 +237,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };
@@ -251,7 +253,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };
@@ -271,7 +273,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };
@@ -294,7 +296,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
+            //  'x-api-key': user.api_key
             //}),
             params: params
         };

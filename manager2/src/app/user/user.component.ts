@@ -226,7 +226,7 @@ export class UserComponent implements OnInit {
         this.password2 = ''
 
         this.group_exists = true;
-        this.new_group = new Group('', '', '', false);
+        this.new_group = new Group();
 
         this.notify_subject = ''
         this.notify_message = ''
@@ -342,7 +342,7 @@ export class UserComponent implements OnInit {
             }
         }
         if (!found) {
-          this.groups.push(new Group(this.user.group, '', '', true));
+          this.groups.push(new Group('', this.user.group, '', '', null, true));
           this.group_exists = false;
           this.new_group.name = this.user.group;
         }

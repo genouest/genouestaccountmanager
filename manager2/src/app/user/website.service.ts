@@ -95,7 +95,7 @@ export class WebsiteService {
 
     }
 
-    changeOwner(siteName, siteOldOwner, siteNewOwner) {
+    changeOwner(siteName: string, siteOldOwner: string, siteNewOwner: string) {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

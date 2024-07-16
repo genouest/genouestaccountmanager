@@ -7,7 +7,7 @@
 			<h4>Project <strong>{{project.id}}</strong></h4>
 		</div>
 		<div class="col-sm-3" >
-			<button class="p-button p-button-sm p-button-danger" (click)="delete_project(project, users)">Delete project</button>
+			<button class="p-button p-button-sm p-button-danger" (click)="delete_project()">Delete project</button>
 		</div>
 	</div>
 </div>
@@ -45,7 +45,7 @@
             </div>
             <div class="col-sm-2">
               <label for="update_project_exp">Expiration date</label>
-              <input type="date" id="update_project_exp" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.expire" class="form-control"/>
+              <input type="date" id="update_project_exp" [ngModelOptions]="{standalone: true}" [(ngModel)]="project_expire" class="form-control"/>
             </div>
             <div class="col-sm-2">
               <label >Financing</label>
@@ -63,7 +63,7 @@
             <label >Write permission&nbsp;
               <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
             </label>
-            <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.temp.access" class="form-control">
+            <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.access" class="form-control">
                 <option value="Group">Group</option>
                 <option value="Data manager">Data manager</option>
               </select>
@@ -76,7 +76,7 @@
           <div class="form-group row">
             <div class="col-sm-2">
               <label style="opacity: 0;">Update project</label>
-              <button type="button" class="p-button p-button-sm p-button-success" (click)="update_project(project)">Update project</button>
+              <button type="button" class="p-button p-button-sm p-button-success" (click)="update_project()">Update project</button>
             </div>
           </div>
         </form>
@@ -126,7 +126,7 @@
               <tr>
                 <td><a routerLink="/user/{{user_l.uid}}"><span class="p-button p-button-sm p-button-primary">{{user_l.uid}}</span></a></td>
                 <td>{{user_l.email}}</td>
-                <td><span *ngIf="user_l.temp.access">x</span></td>
+                <td><span *ngIf="user_l.temp?.access">x</span></td>
                 <td><span *ngIf="user_l.uid === project.owner">x</span></td>
               </tr>
             </ng-template>

@@ -19,8 +19,8 @@ export class WebsitesComponent implements OnInit {
     website: Website
     users: User[]
 
-    owner_web_name: any
-    owner_web_owner: any
+    owner_web_name: Website
+    owner_web_owner: User
 
     constructor(
         private websitesService: WebsiteService,

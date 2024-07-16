@@ -20,7 +20,7 @@ export class GroupsComponent implements OnInit {
     rm_grp_err_msg: string
     msg: string
 
-    selectedGroup: Group
+    selectedGroup: Group | null
     new_group: Group
 
     projects: Project[]
@@ -78,7 +78,7 @@ export class GroupsComponent implements OnInit {
         )
     }
 
-    delete_group(group){
+    delete_group(){
         this.groupsService.delete(this.selectedGroup.name).subscribe(
             resp => {
                 this.groupsService.list().subscribe(
@@ -114,7 +114,8 @@ export class GroupsComponent implements OnInit {
         )
     }
 
-    show_group_users(group) {
+    show_group_users(input_group: any) {
+        const group: Group = this.groupsService.mapToGroup(input_group);
         this.msg = '';
         this.rm_grp_err_msg = '';
         this.rm_grp_msg_ok = '';
@@ -135,7 +136,7 @@ export class GroupsComponent implements OnInit {
                                     }
                                 }
                             }
-                            this.users[i].temp.authorized = is_authorized;
+                            this.users[i].temp = { ...this.users[i].temp, 'authorized': is_authorized };
                         }
                     },
                     err => console.log('failed to get users in group', group)

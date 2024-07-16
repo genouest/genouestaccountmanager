@@ -324,7 +324,7 @@
                 <span *ngIf="session_user.uid === selectedProject.owner">{{user.email}}</span>
                 <span *ngIf="session_user.uid !== selectedProject.owner">Restricted to owner</span>
               </td>
-              <td><span *ngIf="user.temp.access">x</span></td>
+              <td><span *ngIf="user.temp?.access">x</span></td>
               <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
               </tr>
             </ng-template>
