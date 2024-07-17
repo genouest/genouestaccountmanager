@@ -84,12 +84,16 @@
       </div>
       <div class="form-group row">
         <div class="col-sm-2">
+          <label style="opacity: 0;">Create</label>
+          <button type="button" class="p-button p-button-success" (click)="add_project()">Create project</button>
+        </div>
+        <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
           <label style="opacity: 0;">Edit</label>
           <button type="button" class="p-button" (click)="edit_project()">Save changes</button>
         </div>
-        <div class="col-sm-2">
-          <label style="opacity: 0;">Create</label>
-          <button type="button" class="p-button p-button-success" (click)="add_project()">Create project</button>
+        <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
+          <label style="opacity: 0;">De-select</label>
+          <button type="button" class="p-button p-button-secondary" (click)="new_project = { };">Undo selection</button>
         </div>
       </div>
     </form>
