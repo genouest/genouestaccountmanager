@@ -20,7 +20,7 @@ export class GroupsComponent implements OnInit {
     rm_grp_err_msg: string
     msg: string
 
-    selectedGroup: Group | null
+    selectedGroup: Group
     new_group: Group
 
     projects: Project[]

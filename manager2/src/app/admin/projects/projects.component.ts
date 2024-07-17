@@ -133,6 +133,11 @@ export class ProjectsComponent implements OnInit {
         // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
         this.new_project.id = tmp_project_id; // todo: maybe add an option to enable or disable this one
 
+        if (!this.new_project_expire) {
+            this.new_project_expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+            this.new_project.expire = new Date(this.new_project_expire).getTime();
+        }
+
         if (!this.new_project.size || this.new_project.size == 0) {
             this.new_project.size = this.default_size;
         }

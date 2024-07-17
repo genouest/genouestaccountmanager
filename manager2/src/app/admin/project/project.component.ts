@@ -86,8 +86,6 @@ export class ProjectComponent implements OnInit {
                         for(var i = 0; i<resp.length;i++){
                             if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0) {
                                 this.users[i].temp = { ...this.users[i].temp, 'access': true };
-                            } else {
-                                this.users[i].temp = { ...this.users[i].temp, 'access': false };
                             }
                         }
                         this.remove_user_admin = '';

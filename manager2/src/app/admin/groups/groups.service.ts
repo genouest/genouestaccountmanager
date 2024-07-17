@@ -11,7 +11,7 @@ export class Group {
     name: string
     owner: string
     description: string
-    tags: string[] | null
+    tags: string[]
     new: boolean
 
     constructor(

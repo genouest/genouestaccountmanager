@@ -135,7 +135,7 @@ export class AuthService {
     }
 
     updateApiKey(token: number) {
-        this.userProfile.api_key = token;
+        this.userProfile.apikey = token;
     }
 
     autoLog() {

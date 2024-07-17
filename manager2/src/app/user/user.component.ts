@@ -330,7 +330,7 @@ export class UserComponent implements OnInit {
             }
         }
         if (!found) {
-          this.groups.push(this.groupService.mapToGroup({ name: this.user.group, is_new: true }));
+          this.groups.push(this.groupService.mapToGroup({ name: this.user.group, new: true }));
           this.group_exists = false;
           this.new_group.name = this.user.group;
         }
@@ -499,7 +499,7 @@ export class UserComponent implements OnInit {
     }
 
     add_secondary_group() {
-        let sgroup =this.user.new_group;
+        let sgroup = this.user.newgroup;
         if (sgroup.trim() != '') {
             this.userService.addGroup(this.user.uid, sgroup).subscribe(
                 resp => {
@@ -539,7 +539,7 @@ export class UserComponent implements OnInit {
     }
 
     extend() {
-        this.userService.extend(this.user.uid, this.user.reg_key).subscribe(
+        this.userService.extend(this.user.uid, this.user.regkey).subscribe(
             resp => {
                 this.msg = resp['message'];
                 this.user.expiration = resp['expiration'];
@@ -587,10 +587,10 @@ export class UserComponent implements OnInit {
     generate_apikey(uid: string) {
         this.userService.generateApiKey(this.user.uid).subscribe(
             resp => {
-                this.user.api_key = resp['apikey'];
-                this.authService.updateApiKey(this.user.api_key);
+                this.user.apikey = resp['apikey'];
+                this.authService.updateApiKey(this.user.apikey);
             },
-            err => console.log('failed to generate apikey')
+            err => console.log('failed to generate api key')
         );
     }
 
@@ -742,7 +742,7 @@ export class UserComponent implements OnInit {
         this.add_to_project_error_msg = '';
         this.add_to_project_grp_msg = '';
         this.request_mngt_error_msg = '';
-        let new_project = this.user.new_project;
+        let new_project = this.user.newproject;
         for (var i = 0; i < this.user_projects.length; i++) {
             if (new_project.id === this.user_projects[i].id) {
                 this.add_to_project_error_msg = "User is already in project";

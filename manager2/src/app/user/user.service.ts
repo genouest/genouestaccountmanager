@@ -29,12 +29,12 @@ export class User {
     registration: number
     group: string
     secondarygroups: string[]
-    new_group: string
+    newgroup: string
     projects: string[] | null
-    new_project: any
+    newproject: any
     tags: any
-    reg_key: number
-    api_key: number
+    regkey: number
+    apikey: number
     ssh: string
     u2f: any
     otp: any
@@ -61,9 +61,9 @@ export class User {
         this.is_admin = is_admin; this.is_fake = is_fake; this.is_locked = is_locked; this.is_trainer = is_trainer;
         this.send_copy_to_support = send_copy_to_support; this.create_imap_mailbox = create_imap_mailbox;
         this.created_at = created_at; this.expiration = expiration; this.duration = duration; this.registration = registration;
-        this.group = group; this.secondarygroups = secondary_groups; this.new_group = new_group;
-        this.projects = projects; this.new_project = new_project; this.tags = tags;
-        this.reg_key = reg_key; this.api_key = api_key; this.ssh = ssh; this.u2f = u2f; this.otp = otp;
+        this.group = group; this.secondarygroups = secondary_groups; this.newgroup = new_group;
+        this.projects = projects; this.newproject = new_project; this.tags = tags;
+        this.regkey = reg_key; this.apikey = api_key; this.ssh = ssh; this.u2f = u2f; this.otp = otp;
         this.history = history; this.extra_info = extra_info; this.status = status; this.temp = temp;
     }
 }
@@ -87,9 +87,9 @@ export class UserService {
             resp.send_copy_to_support || false, resp.create_imap_mailbox || false,
             resp.created_at || null, new Date(resp.expiration).getTime() || 0,
             resp.duration || null, new Date(resp.registration).getTime() || 0,
-            resp.group || '', resp.secondarygroups || [], resp.new_group || '',
-            resp.projects || null, resp.new_project || null, resp.tags || null,
-            resp.reg_key || 0, resp.api_key || 0, resp.ssh || '', resp.u2f || null, resp.otp || null,
+            resp.group || '', resp.secondarygroups || [], resp.newgroup || '',
+            resp.projects || null, resp.newproject || null, resp.tags || null,
+            resp.regkey || 0, resp.apikey || 0, resp.ssh || '', resp.u2f || null, resp.otp || null,
             resp.history || [], resp.extra_info || [], resp.status || '', resp.temp || null
         );
     }

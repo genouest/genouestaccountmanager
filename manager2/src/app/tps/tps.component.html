@@ -83,7 +83,7 @@
                             </tr>
                             <tr>
                                 <th>Group</th>
-                                <td><span *ngIf="selectedEvent.meta.group && selectedEvent.meta.group.name">{{selectedEvent.meta.group.name}}</span></td>
+                                <td><span *ngIf="selectedEvent.meta.group && selectedEvent.meta.group?.name">{{selectedEvent.meta.group.name}}</span></td>
                             </tr>
                             <tr>
                                 <th>Project</th>

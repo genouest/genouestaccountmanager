@@ -89,8 +89,8 @@ export class TpsComponent implements OnInit {
                             'name': event.name,
                             'about': event.about,
                             'over': event.over,
-                            'group': event?.group,
-                            'project': event?.project
+                            'group': event.group,
+                            'project': event.project
                         }
                     }
                 });

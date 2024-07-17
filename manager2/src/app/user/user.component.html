@@ -126,7 +126,7 @@
                   <div class="form-group row">
                     <label for="key" class="col-4 col-form-label">Key</label>
                     <div class="col-6">
-                      <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.reg_key" class="form-control" readonly/>
+                      <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.regkey" class="form-control" readonly/>
                     </div>
                   </div>
                   <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.user_group">
@@ -362,7 +362,7 @@
             <div class="form-group row">
               <div class="col-sm-6">
                 <label for="newgroup" class="col-form-label">Groups</label>
-                <select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.new_group" class="form-control">
+                <select id="newgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newgroup" class="form-control">
                   <option *ngFor="let group of groups" [ngValue]="group.name">{{group.name}}</option>
                 </select>
               </div>

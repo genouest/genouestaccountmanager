@@ -32,7 +32,7 @@ export class ProjectsComponent implements OnInit {
         this.add_to_project_grp_msg = "";
         this.add_to_project_error_msg = "";
         this.request_mngt_error_msg = "";
-        let new_project = this.user.new_project;
+        let new_project = this.user.newproject;
         for(var i=0; i<this.user_projects.length; i++){
             if(new_project.id === this.user_projects[i].id){
                 this.add_to_project_error_msg = "User is already in project";

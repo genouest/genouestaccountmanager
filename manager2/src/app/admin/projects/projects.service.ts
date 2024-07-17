@@ -106,7 +106,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
@@ -123,7 +123,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
@@ -140,7 +140,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
@@ -156,7 +156,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //})
         };
         return this.http.get(
@@ -172,7 +172,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //})
         };
         return this.http.get(
@@ -190,7 +190,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //})
         };
         return this.http.get(
@@ -220,7 +220,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
@@ -237,7 +237,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
@@ -253,7 +253,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
@@ -273,7 +273,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
@@ -296,7 +296,7 @@ export class ProjectsService {
 
         let httpOptions = {
             //headers: new HttpHeaders({
-            //  'x-api-key': user.api_key
+            //  'x-api-key': user.apikey
             //}),
             params: params
         };
