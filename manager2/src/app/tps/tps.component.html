@@ -46,7 +46,7 @@
     </div>
 
     <div class="col-md-4" *ngIf="selectedEvent">
-        <div [ngClass]="get_status(selectedEvent.over)">
+        <div [ngClass]="get_status(selectedEvent.meta.over)">
             <div class="card-header">
                 <h3>Reservation</h3>
             </div>
@@ -59,48 +59,48 @@
                         <tbody>
                             <tr>
                                 <th>Owner</th>
-                                <td><a routerLink="/user/{{selectedEvent.owner}}">{{selectedEvent.owner}}</a></td>
+                                <td><a routerLink="/user/{{selectedEvent.meta.owner}}">{{selectedEvent.meta.owner}}</a></td>
                             </tr>
                             <tr>
                                 <th>From</th>
-                                <td>{{selectedEvent.start.toISOString().slice(0,10)}}</td>
+                                <td>{{selectedEvent.start | date}}</td>
                             </tr>
                             <tr>
                                 <th>To</th>
-                                <td>{{selectedEvent.end.toISOString().slice(0,10)}}</td>
+                                <td>{{selectedEvent.end | date}}</td>
                             </tr>
                             <tr>
                                 <th>Name</th>
-                                <td>{{selectedEvent.name}}</td>
+                                <td>{{selectedEvent.meta.name}}</td>
                             </tr>
                             <tr>
                                 <th>About</th>
-                                <td>{{selectedEvent.about}}</td>
+                                <td>{{selectedEvent.meta.about}}</td>
                             </tr>
                             <tr>
                                 <th>Quantity</th>
-                                <td>{{selectedEvent.quantity}}</td>
+                                <td>{{selectedEvent.meta.quantity}}</td>
                             </tr>
                             <tr>
                                 <th>Group</th>
-                                <td><span *ngIf="selectedEvent.group && selectedEvent.group.name">{{selectedEvent.group.name}}</span></td>
+                                <td><span *ngIf="selectedEvent.meta.group && selectedEvent.meta.group.name">{{selectedEvent.meta.group.name}}</span></td>
                             </tr>
                             <tr>
                                 <th>Project</th>
-                                <td><span *ngIf="selectedEvent.project && selectedEvent.project.id" >{{selectedEvent.project.id}}</span></td>
+                                <td><span *ngIf="selectedEvent.meta.project && selectedEvent.meta.project.id" >{{selectedEvent.meta.project.id}}</span></td>
                             </tr>
                             <tr>
                                 <th>Status</th>
-                                <td *ngIf="!selectedEvent.created && !selectedEvent.over">Pending</td>
-                                <td *ngIf="selectedEvent.created && selectedEvent.over">Over</td>
-                                <td *ngIf="selectedEvent.created && !selectedEvent.over">Active</td>
-                                <td *ngIf="!selectedEvent.created && selectedEvent.over">Cancelled</td>
+                                <td *ngIf="!selectedEvent.meta.created && !selectedEvent.meta.over">Pending</td>
+                                <td *ngIf="selectedEvent.meta.created && selectedEvent.meta.over">Over</td>
+                                <td *ngIf="selectedEvent.meta.created && !selectedEvent.meta.over">Active</td>
+                                <td *ngIf="!selectedEvent.meta.created && selectedEvent.meta.over">Cancelled</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="table-responsive" *ngIf="selectedEvent.students.length > 0">
+                <div class="table-responsive" *ngIf="selectedEvent.meta.students.length > 0">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -108,17 +108,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let account of selectedEvent.students">
+                            <tr *ngFor="let account of selectedEvent.meta.students">
                                 <td><a routerLink="/user/{{account}}">{{account}}</a></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <button *ngIf="!selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
-                <button *ngIf="!selectedEvent.created && !selectedEvent.over && authorized" class="p-button p-button-sm p-button-secondary" (click)="cancel_reservation()">Cancel</button>
-                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#extend">Extend</button>
-                <button *ngIf="selectedEvent.created && !selectedEvent.over && session_user.is_admin" class="p-button p-button-sm p-button-warning" (click)="remove_reservation()">Remove</button>
+                <button *ngIf="!selectedEvent.meta.created && !selectedEvent.meta.over && session_user.is_admin" class="p-button p-button-sm p-button-primary" (click)="create_reservation()">Create</button>
+                <button *ngIf="!selectedEvent.meta.created && !selectedEvent.meta.over && authorized" class="p-button p-button-sm p-button-secondary" (click)="cancel_reservation()">Cancel</button>
+                <button *ngIf="selectedEvent.meta.created && !selectedEvent.meta.over && session_user.is_admin" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#extend">Extend</button>
+                <button *ngIf="selectedEvent.meta.created && !selectedEvent.meta.over && session_user.is_admin" class="p-button p-button-sm p-button-warning" (click)="remove_reservation()">Remove</button>
 
             </div>
         </div>

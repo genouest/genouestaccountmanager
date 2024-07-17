@@ -150,9 +150,9 @@ export class RegisterComponent implements OnInit {
             this.msg = 'Team must be alphanumerical [0-9a-z_]';
             return;
         }
-        const user = {
-            first_name: this.first_name,
-            last_name: this.last_name,
+        const user: User = this.userService.mapToUser({
+            firstname: this.first_name,
+            lastname: this.last_name,
             address: this.address,
             lab: this.lab,
             responsible: this.responsible,
@@ -165,8 +165,8 @@ export class RegisterComponent implements OnInit {
             duration: this.duration,
             why: this.why,
             extra_info: this.extra_info
-        }
-        this.userService.register(this.user_id, this.userService.mapToUser(user)).subscribe(
+        });
+        this.userService.register(this.user_id, user).subscribe(
             resp => {
                 this.msg = resp['message'];
                 if(resp['status'] == 0) {

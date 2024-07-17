@@ -266,7 +266,7 @@ export class UserComponent implements OnInit {
             );
             this.userService.getUser(params['id']).subscribe(
                 resp => {
-                    if (!resp['u2f']) { resp['u2f'] = { }}
+                    if (!resp.u2f) { resp.u2f = { }; }
                     this.user = resp;
                     this.loadUserInfo();
                 },
@@ -348,7 +348,7 @@ export class UserComponent implements OnInit {
                 if (this.user.uid === projects[i].owner) {
                     is_owner = true;
                 }
-                if (this.user.group.indexOf(projects[i].group) >= 0 || this.user.secondary_groups.indexOf(projects[i].group) >= 0) {
+                if (this.user.group.indexOf(projects[i].group) >= 0 || this.user.secondarygroups.indexOf(projects[i].group) >= 0) {
                     user_in_group = true;
                 }
                 user_projects.push({ id: projects[i].id, owner: is_owner, group: projects[i].group, member: user_in_group });
@@ -388,7 +388,7 @@ export class UserComponent implements OnInit {
         }
         this.web_list();
 
-        this.user.secondary_groups.sort(function (a,b) {
+        this.user.secondarygroups.sort(function (a,b) {
             return a.localeCompare(b);
         });
     }
@@ -504,7 +504,7 @@ export class UserComponent implements OnInit {
             this.userService.addGroup(this.user.uid, sgroup).subscribe(
                 resp => {
                     this.add_group_msg = resp['message'];
-                    this.user.secondary_groups.push(sgroup);
+                    this.user.secondarygroups.push(sgroup);
                 },
                 err => console.log('failed to add secondary group')
             );
@@ -517,12 +517,12 @@ export class UserComponent implements OnInit {
             resp => {
                 this.rm_group_msg = resp['message'];
                 let tmp_groups: string[] = [];
-                for (var t = 0; t < this.user.secondary_groups.length; t++) {
-                    if (this.user.secondary_groups[t] != sgroup) {
-                        tmp_groups.push(this.user.secondary_groups[t]);
+                for (var t = 0; t < this.user.secondarygroups.length; t++) {
+                    if (this.user.secondarygroups[t] != sgroup) {
+                        tmp_groups.push(this.user.secondarygroups[t]);
                     }
                 }
-                this.user.secondary_groups = tmp_groups;
+                this.user.secondarygroups = tmp_groups;
             },
             err => console.log('failed to remove from secondary group')
         );
@@ -621,11 +621,11 @@ export class UserComponent implements OnInit {
     update_info() {
         this.update_msg = '';
         this.update_error_msg = '';
-        if(this.user.first_name == '' || this.user.first_name === null || this.user.first_name === undefined) {
+        if(this.user.firstname == '' || this.user.firstname === null || this.user.firstname === undefined) {
             this.update_error_msg = 'Missing field: first name';
             return;
         }
-        if(this.user.last_name == '' || this.user.last_name === null || this.user.last_name === undefined) {
+        if(this.user.lastname == '' || this.user.lastname === null || this.user.lastname === undefined) {
             this.update_error_msg = 'Missing field: last name';
             return;
         }
@@ -653,7 +653,7 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Missing field: why do you need an account';
             return;
         }
-        if (!this.user.first_name.match(/^[a-zA-Z]+$/) || !this.user.last_name.match(/^[a-zA-Z]+$/)) {
+        if (!this.user.firstname.match(/^[a-zA-Z]+$/) || !this.user.lastname.match(/^[a-zA-Z]+$/)) {
             this.update_error_msg = 'Name contains unauthorized characters';
             return;
         }

@@ -4,6 +4,8 @@ import { AuthService } from '../auth/auth.service';
 import { ConfigService } from '../config.service';
 import { User } from '../user/user.service';
 import { TpserviceService } from './tpservice.service';
+import { GroupsService } from '../admin/groups/groups.service';
+import { ProjectsService } from '../admin/projects/projects.service';
 import { CalendarEvent, CalendarEventTimesChangedEvent } from 'angular-calendar';
 import { Subject } from 'rxjs';
 
@@ -51,7 +53,9 @@ export class TpsComponent implements OnInit {
     constructor(
         private authService: AuthService,
         private configService: ConfigService,
-        private tpService: TpserviceService
+        private tpService: TpserviceService,
+        private groupsService: GroupsService,
+        private projectsService: ProjectsService
     ) { }
 
     private choseColor(id: string, over: boolean, created: boolean) {
@@ -85,8 +89,8 @@ export class TpsComponent implements OnInit {
                             'name': event.name,
                             'about': event.about,
                             'over': event.over,
-                            'group': event.group,
-                            'project': event.project
+                            'group': event?.group,
+                            'project': event?.project
                         }
                     }
                 });
