@@ -13,7 +13,7 @@ Genouestaccountmanager is fairly modular, so it will not fit a deployment for pr
   * **At least the 'url' key, to match the access url to your instance**
   * You may want to add your first username to the 'admin' list in the same file
 * Copy it in genouestaccountmanager/config/
-* phpldapadmin will be available on port 80 if needed.
+* phpldapadmin will be available on port 8080 if needed.
 
 ## Requirements
 
