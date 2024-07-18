@@ -46,6 +46,12 @@ export class WebsitesComponent implements OnInit {
             this.chowner_err_msg = 'No web or owner selected';
             return;
         }
+
+	if(this.owner_web_name.owner === this.owner_web_owner.uid ){
+            this.chowner_err_msg = this.owner_web_owner.uid + " is already owner of this website";
+            return;
+        }
+
         this.websitesService.changeOwner(this.owner_web_name.name, this.owner_web_name.owner, this.owner_web_owner.uid).subscribe(
             resp => this.chowner_msg = resp['message'],
             err => this.chowner_err_msg = err.error.message

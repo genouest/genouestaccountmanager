@@ -55,13 +55,13 @@
               <div class="col-sm-2">
                   <label for="owner_web_name">Website</label>
                   <select id="owner_web_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_web_name" class="form-control">
-                    <option *ngFor="let web of websites" [value]="web">{{web.name}}</option>
+                    <option *ngFor="let web of websites" [ngValue]="web">{{web.name}}</option>
                   </select>
               </div>
               <div class="col-sm-2">
                   <label for="owner_web_owner">Website owner</label>
                   <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_web_owner" id="owner_web_owner" class="form-control">
-                      <option *ngFor="let user of users" [value]="user">{{user.uid}}</option>
+                      <option *ngFor="let user of users" [ngValue]="user">{{user.uid}}</option>
                   </select>
               </div>
               <div class="col-sm-2">
