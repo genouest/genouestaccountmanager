@@ -15,6 +15,7 @@
 * Add back button from single project view
 * Updated TP calendar to increase readability
 * Fix newly created group selection bug
+* Fix owner change for databases and websites
 
 ## 1.4.29
 
