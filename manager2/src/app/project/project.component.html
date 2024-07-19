@@ -59,7 +59,7 @@
             </div>
           </div>
 
-          <div class="form-group" *ngIf="config.project.terms_and_conditions_hds">
+          <div class="form-group" *ngIf="config.project && config.project.terms_and_conditions_hds">
             <div class="form-check">
               <input class="form-check-input is-invalid" type="checkbox" value="" id="new_project_terms_and_conditions_hds" name="terms_and_conditions_hds" [(ngModel)]="new_project.terms_and_conditions_hds" #terms_and_conditions_hds="ngModel" required>
               <label class="form-check-label" for="new_project_terms_and_conditions_hds">
@@ -77,7 +77,7 @@
         <div class="modal-footer" id="submit">
           <div class="form-group row col-sm-12">
           <!-- Button with terms_and_conditions_hds -->
-          <button *ngIf="config.project.terms_and_conditions_hds" 
+          <button *ngIf="config.project && config.project.terms_and_conditions_hds" 
                   id="test" 
                   type="submit" 
                   class="p-button p-button-sm p-button-primary" 
@@ -87,7 +87,7 @@
           </button>
 
           <!-- Button without terms_and_conditions_hds -->
-          <button *ngIf="!config.project.terms_and_conditions_hds" 
+          <button *ngIf="!(config.project && config.project.terms_and_conditions_hds)" 
                   id="test" 
                   type="submit" 
                   class="p-button p-button-sm p-button-primary" 
