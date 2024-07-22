@@ -60,7 +60,10 @@ if (environment.sentry) {
 export class SentryErrorHandler implements ErrorHandler {
     constructor() {}
     handleError(error) {
-        if (!environment.sentry) { return }
+        if (!environment.sentry && !environment.production) { 
+	  console.log(error.originalError || error)
+	  return 
+	}
         const eventId = Sentry.captureException(error.originalError || error);
         Sentry.showReportDialog({ eventId });
     }

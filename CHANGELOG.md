@@ -16,6 +16,8 @@
 * Updated TP calendar to increase readability
 * Fix newly created group selection bug
 * Update admin project creation UI: disappearing buttons and add "undo selection" button
+* Actually show angular errors in web console when not in production and sentry is not set
+* Fix owner change for databases and websites
 
 ## 1.4.29
 
