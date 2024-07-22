@@ -15,6 +15,7 @@
 * Add back button from single project view
 * Updated TP calendar to increase readability
 * Fix newly created group selection bug
+* Update admin project creation UI: disappearing buttons and add "undo selection" button
 
 ## 1.4.29
 
