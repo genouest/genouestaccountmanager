@@ -95,11 +95,12 @@
                 <option *ngFor="let user_a of all_users" [ngValue]="user_a.uid">{{user_a.uid}}</option>
              </select>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-2">
               <label style="opacity: 0;">Add member</label>
               <button type="button" class="p-button p-button-sm p-button-success" (click)="add_user();  ">Add member</button>
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-3">
               <label for="remove_user_admin">Remove project member</label>
               <select id="remove_user_admin"  [ngModelOptions]="{standalone: true}" [(ngModel)]="remove_user_admin" class="form-control">
                 <option *ngFor="let user_r of users" [ngValue]="user_r.uid">{{user_r.uid}}</option>
