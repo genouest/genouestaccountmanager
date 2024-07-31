@@ -36,7 +36,7 @@
               <tr>
                             <td (class)="get_status(log.status)">{{log._id}}</td>
                             <td>{{log.owner}}</td>
-                            <td>{{date_convert(log.date)}}</td>
+                            <td>{{log.date | date}}</td>
                             <td>{{log.action}}</td>
                             <td>
                                 <span *ngFor="let event of log.logs">

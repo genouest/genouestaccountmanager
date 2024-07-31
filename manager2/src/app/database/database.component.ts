@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
 import { AuthService } from 'src/app/auth/auth.service';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 import { NgForm } from '@angular/forms';
 import { Table } from 'primeng/table';
 
@@ -14,15 +14,14 @@ import { Table } from 'primeng/table';
 export class DatabaseComponent implements OnInit {
   @ViewChild('dtp') table: Table;
 
-  session_user: any
+  session_user: User
 
   db: Database
-  db_expire_string: string
+  db_expire: string
   databases: Database[]
 
-  users: any
+  users: User[]
 
-  new_project: any
   msg: string
   err_msg: string
   form_msg: string
@@ -43,7 +42,7 @@ export class DatabaseComponent implements OnInit {
   ngOnInit() {
     this.db_delete = this.db_delete.bind(this);
     this.session_user = this.authService.profile;
-    this.db = new Database('', 'mysql', '', '', true, "", "", 0, true);
+    this.db = this.databaseService.mapToDatabase({ create: true });
     this.databases = [];
     this.db_list();
     // this.userService.list().subscribe(
@@ -73,7 +72,7 @@ export class DatabaseComponent implements OnInit {
         this.form_err_msg = "Database name must be between 5 and 42 characters";
         return;
       }
-      this.db.expire = new Date(this.db_expire_string).getTime();
+      this.db.expire = new Date(this.db_expire).getTime();
       if (this.db.expire == 0) {
         this.form_err_msg = "Database must have an expiration date";
         return;
@@ -115,8 +114,4 @@ export class DatabaseComponent implements OnInit {
     });
   }
 
-
-  print(dbName: string) {
-    console.log(dbName);
-  }
 }

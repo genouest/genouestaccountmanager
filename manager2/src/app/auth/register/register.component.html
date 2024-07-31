@@ -11,15 +11,15 @@
             <div class="form-group row">
                 <div class="col-md-4">
                     <label for="firstname">First name</label>
-                    <input autocomplete="given-name" (ngModelChange)="update_userid($event, 0)" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="firstname" type="text" class="form-control" required>
+                    <input autocomplete="given-name" (ngModelChange)="update_user_id($event, 0)" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="first_name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-4">
                     <label for="lastname">Last name</label>
-                    <input autocomplete="family-name" (ngModelChange)="update_userid($event, 1)" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="lastname" type="text" class="form-control" required>
+                    <input autocomplete="family-name" (ngModelChange)="update_user_id($event, 1)" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="last_name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-4">
                     <label for="email">Username</label>
-                    <input autocomplete="username" [ngModelOptions]="{standalone: true}" [(ngModel)]="userid" type="text" id="userid" class="form-control" required />
+                    <input autocomplete="username" [ngModelOptions]="{standalone: true}" [(ngModel)]="user_id" type="text" id="userid" class="form-control" required />
 
                 </div>
             </div>

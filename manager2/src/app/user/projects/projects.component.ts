@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { UserService } from '../user.service';
+import { User, UserService } from '../user.service';
+import { Project } from '../../admin/projects/projects.service'
 
 @Component({
     selector: 'app-user-projects',
@@ -7,9 +8,9 @@ import { UserService } from '../user.service';
     styleUrls: ['./projects.component.css']
 })
 export class ProjectsComponent implements OnInit {
-    @Input() projects: any[]
+    @Input() projects: Project[]
     @Input() user_projects: any[]
-    @Input() user: any
+    @Input() user: User
 
     add_to_project_msg: string
     add_to_project_grp_msg: string
@@ -18,7 +19,7 @@ export class ProjectsComponent implements OnInit {
     remove_from_project_error_msg: string
     request_mngt_error_msg: string
 
-    project: any
+    project: Project
 
     constructor(private userService: UserService) { }
 
@@ -31,18 +32,18 @@ export class ProjectsComponent implements OnInit {
         this.add_to_project_grp_msg = "";
         this.add_to_project_error_msg = "";
         this.request_mngt_error_msg = "";
-        let newproject = this.user.newproject;
+        let new_project = this.user.newproject;
         for(var i=0; i<this.user_projects.length; i++){
-            if(newproject.id === this.user_projects[i].id){
+            if(new_project.id === this.user_projects[i].id){
                 this.add_to_project_error_msg = "User is already in project";
                 return;
             }
         }
-        if(newproject){
-            this.userService.addToProject(this.user.uid, newproject.id).subscribe(
+        if(new_project){
+            this.userService.addToProject(this.user.uid, new_project.id).subscribe(
                 resp => {
                     this.add_to_project_msg = resp['message'];
-                    this.user_projects.push({id: newproject.id, owner: false, member: true});
+                    this.user_projects.push({id: new_project.id, owner: false, member: true});
                 },
                 err => {
                     this.add_to_project_error_msg = err.error.message;
