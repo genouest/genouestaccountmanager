@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.30 (TBA)
+## 1.4.30 (2024-08-02)
 
 * Added a `project.terms_and_conditions_hds` setting in the config:
   If true:
