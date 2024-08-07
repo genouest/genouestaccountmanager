@@ -320,7 +320,6 @@
           </div>
           <div class="card-body">
             <div *ngIf="update_passwd" class="alert alert-success">{{update_passwd}}</div>
-            <div *ngIf="wrong_confirm_passwd" class="alert alert-danger">{{wrong_confirm_passwd}}</div>
             <form>
               <div class="form-group row">
                 <div class="col-sm-8">
@@ -330,14 +329,74 @@
               <div class="form-group row">
                 <div class="col-sm-8">
                   <label for="password" class="col-form-label">New password</label>
-                  <input autocomplete="new-password" placeholder="10 characters min" id="password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password1" class="form-control"/>
+                  <input
+                    autocomplete="new-password"
+                    placeholder="16 characters min, including 1 digit, 1 lowercase, 1 uppercase, and 1 special char"
+                    id="password"
+                    type="password"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="password1"
+                    #password1Model="ngModel"
+                    name="password1"
+                    class="form-control"
+                    required
+                    minlength="16"
+                    (input)="checkPasswordRules(password1)"
+                    (blur)="validateInput(password1Model)"
+                  />
+                  <div class="password-rules">
+                    <div [ngClass]="{'rule-satisfied': passwordLengthValid, 'rule-not-satisfied': !passwordLengthValid}">
+                      16 characters minimum
+                    </div>
+                    <div [ngClass]="{'rule-satisfied': hasDigit, 'rule-not-satisfied': !hasDigit}">
+                      At least one digit
+                    </div>
+                    <div [ngClass]="{'rule-satisfied': hasLowercase, 'rule-not-satisfied': !hasLowercase}">
+                      At least one lowercase letter
+                    </div>
+                    <div [ngClass]="{'rule-satisfied': hasUppercase, 'rule-not-satisfied': !hasUppercase}">
+                      At least one uppercase letter
+                    </div>
+                    <div [ngClass]="{'rule-satisfied': hasSpecialChar, 'rule-not-satisfied': !hasSpecialChar}">
+                      At least one special character
+                    </div>
+                    <div [ngClass]="{'rule-satisfied': !hasSpaces, 'rule-not-satisfied': hasSpaces}">
+                      No spaces allowed
+                    </div>
+                  </div>
                 </div>
                 <div class="col-sm-8">
                   <label for="confirm_password" class="col-form-label">Confirm password</label>
-                  <input autocomplete="new-password" placeholder="10 characters min" id="confirm_password" type="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="password2" class="form-control"/>
+                  <input
+                    autocomplete="new-password"
+                    placeholder="Confirm your password"
+                    id="confirm_password"
+                    type="password"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="password2"
+                    #password2Model="ngModel"
+                    name="password2"
+                    class="form-control"
+                    required
+                    (blur)="validateInput(password2Model)"
+                    (input)="checkPasswordMatch(password1Model, password2Model)"
+                  />
+                  <span *ngIf="password1 === password2 && password2Model.valid" class="input-group-text valid-indicator">&#10003;</span>
+                  {{ password2Model.invalid }}
+                  <div *ngIf="password2Model.invalid && (password2Model.dirty || password2Model.touched)">
+                    <div *ngIf="password2Model.errors?.required">Confirmation password is required.</div>
+                    <div *ngIf="password2Model.errors?.mustMatch">Passwords must match.</div>
+                  </div>
                 </div>
               </div>
-              <button type="button" class="p-button p-button-sm p-button-primary" (click)="update_password()">Change password</button>
+              <button
+                type="button"
+                class="p-button p-button-sm p-button-primary"
+                (click)="update_password(password1Model, password2Model)"
+                [disabled]="!isFormValid()"
+              >
+                Change password
+              </button>           
             </form>
           </div>
         </div>

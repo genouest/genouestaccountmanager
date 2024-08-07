@@ -14,6 +14,7 @@ import { FlashMessagesService } from '../utils/flash/flash.component';
 import {
     solveRegistrationChallenge
 } from '@webauthn/client';
+import { NgModel } from '@angular/forms'
 
 /*
   function _window() : any {
@@ -149,10 +150,17 @@ export class UserComponent implements OnInit {
     panel: number = 0;
 
     // Password mngt
-    wrong_confirm_passwd: string
     update_passwd: string
-    password1: string
-    password2: string
+    password1: string = ''
+    password2: string = ''
+
+    // Flags for password rules
+    passwordLengthValid: boolean = false;
+    hasDigit: boolean = false;
+    hasLowercase: boolean = false;
+    hasUppercase: boolean = false;
+    hasSpecialChar: boolean = false;
+    hasSpaces: boolean = false;
 
     // Error messages
     msg: string
@@ -618,22 +626,90 @@ export class UserComponent implements OnInit {
         )
     }
 
-    update_password() {
-        this.wrong_confirm_passwd = "";
-        this.update_passwd = "";
-        if ((this.password1 != this.password2) || (this.password1 == "")) {
-            this.wrong_confirm_passwd = "Passwords are not identical";
-            return;
-        }
-        if (this.password1.length < 10) {
-            this.wrong_confirm_passwd = "Password must have 10 characters minimum";
-            return;
-        }
-        this.userService.updatePassword(this.user.uid, this.password1).subscribe(
-            resp => this.update_passwd = resp['message'],
-            err => console.log('failed to update password')
-        );
+    update_password(password1Model: NgModel, password2Model: NgModel) {
+        this.validateInput(password1Model)
+        this.validateInput(password2Model)
+    
+        const passwordErrors = this.validatePassword(this.password1)
+        const confirmPasswordErrors = this.password1 !== this.password2 ? { mustMatch: true } : null
+    
+        password1Model.control.setErrors(passwordErrors)
+        password2Model.control.setErrors(confirmPasswordErrors)
+    
+        if (!passwordErrors && !confirmPasswordErrors) {
+            this.userService.updatePassword(this.user.uid, this.password1).subscribe(
+                resp => this.update_passwd = resp['message'],
+                err => console.log('failed to update password', err)
+            )
+        } else {
+            console.log('Passwords are invalid or do not match.')
+        }  
     }
+    
+    validateInput(model: NgModel) {
+        model.control.markAsTouched()
+        model.control.markAsDirty()
+        model.control.updateValueAndValidity() 
+    }
+    
+    checkPasswordRules(password: string) {
+        this.passwordLengthValid = password.length >= 12
+        this.hasDigit = /[0-9]/.test(password)
+        this.hasLowercase = /[a-z]/.test(password)
+        this.hasUppercase = /[A-Z]/.test(password)
+        this.hasSpecialChar = /[\W_]/.test(password)
+        this.hasSpaces = / /.test(password)
+    }
+    
+    validatePassword(password: string) {
+        if (!password) {
+            return { required: true }
+        }
+
+        const errors: any = {};
+        if (password.length < 12) {
+            errors.minlength = { requiredLength: 12, actualLength: password.length }
+        }
+        if (!/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])(?!.* ).{12,}$/.test(password)) {
+            errors.pattern = { requiredPattern: 'at least one digit, one lowercase letter, one uppercase letter, one special character, and no spaces' }
+        }
+
+        return Object.keys(errors).length ? errors : null
+    }
+
+    isFormValid(): boolean {
+        return this.passwordLengthValid &&
+               this.hasDigit &&
+               this.hasLowercase &&
+               this.hasUppercase &&
+               this.hasSpecialChar &&
+               !this.hasSpaces &&
+               this.password1 === this.password2;
+    }
+
+    checkPasswordMatch(password1Model: NgModel, password2Model: NgModel) {
+        if (this.password1 !== this.password2) {
+          password2Model.control.setErrors({ mustMatch: true });
+        } else {
+          password2Model.control.setErrors(null); // Clear error if passwords match
+        }
+    }
+    
+
+
+    // update_password() {
+    //     this.wrong_confirm_passwd = "";
+    //     this.update_passwd = "";
+    //     if ((this.password1 != this.password2) || (this.password1 == "")) {
+    //         this.wrong_confirm_passwd = "Passwords are not identical";
+    //         return;
+    //     }
+    //     if (this.password1.length < 10) {
+    //         this.wrong_confirm_passwd = "Password must have 10 characters minimum";
+    //         return;
+    //     }
+        
+    // }
 
     change_group() {
         this.user.group = this.selected_group.name;

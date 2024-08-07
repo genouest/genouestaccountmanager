@@ -1,0 +1,15 @@
+.password-rules {
+    margin-top: 10px;
+}
+  
+.password-rules div {
+    margin-bottom: 5px;
+}
+
+.rule-satisfied {
+    color: green;
+}
+
+.rule-not-satisfied {
+    color: red;
+}

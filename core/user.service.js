@@ -85,7 +85,7 @@ function get_user_home(user) {
 
 async function activate_user(user, action_owner = 'auto') {
     if (!user.password) {
-        user.password = new_password(10);
+        user.password = new_password(16);
         //user.password = Math.random().toString(36).slice(-10);
     }
     if (!user.created_at) {
@@ -217,7 +217,7 @@ async function create_user(user, action_owner = 'auto') {
 // todo should be factorysed with "normal" user creation
 async function create_extra_user(user_name, group, internal_user){
     //let password = Math.random().toString(36).slice(-10);
-    let password = new_password(10);
+    let password = new_password(16);
     if(process.env.MY_ADMIN_PASSWORD){
         password = process.env.MY_ADMIN_PASSWORD;
     }
