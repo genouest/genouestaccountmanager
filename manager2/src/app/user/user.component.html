@@ -327,76 +327,94 @@
                 </div>
               </div>
               <div class="form-group row">
-                <div class="col-sm-8">
+                <div class="col-sm-8 offset-sm-2">
                   <label for="password" class="col-form-label">New password</label>
-                  <input
-                    autocomplete="new-password"
-                    placeholder="16 characters min, including 1 digit, 1 lowercase, 1 uppercase, and 1 special char"
-                    id="password"
-                    type="password"
-                    [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="password1"
-                    #password1Model="ngModel"
-                    name="password1"
-                    class="form-control"
-                    required
-                    minlength="16"
-                    (input)="checkPasswordRules(password1)"
-                    (blur)="validateInput(password1Model)"
-                  />
-                  <div class="password-rules">
+                  <div class="input-group">
+                    <input
+                      autocomplete="new-password"
+                      placeholder="12 characters min, including 1 digit, 1 lowercase, 1 uppercase, and 1 special char"
+                      id="password"
+                      type="password"
+                      [ngModelOptions]="{standalone: true}"
+                      [(ngModel)]="password1"
+                      #password1Model="ngModel"
+                      name="password1"
+                      class="form-control"
+                      required
+                      minlength="12"
+                      (input)="checkPasswordRules(password1)"
+                      (blur)="validateInput(password1Model)"
+                    />
+                    <div class="input-group-append">
+                      <span *ngIf="password1Model.valid && password1Model.dirty && password1.length > 0" class="input-group-text valid-indicator">
+                        &#10003;
+                      </span>
+                      <span *ngIf="password1Model.invalid && password1Model.dirty && password1.length > 0" class="input-group-text invalid-indicator">
+                        &#10007;
+                      </span>
+                    </div>
+                  </div>
+                  <div class="password-rules mt-2">
+                    <p>Password rules requirements:</p>
                     <div [ngClass]="{'rule-satisfied': passwordLengthValid, 'rule-not-satisfied': !passwordLengthValid}">
-                      16 characters minimum
+                      - 12 characters minimum
                     </div>
                     <div [ngClass]="{'rule-satisfied': hasDigit, 'rule-not-satisfied': !hasDigit}">
-                      At least one digit
+                      - At least one digit
                     </div>
                     <div [ngClass]="{'rule-satisfied': hasLowercase, 'rule-not-satisfied': !hasLowercase}">
-                      At least one lowercase letter
+                      - At least one lowercase letter
                     </div>
                     <div [ngClass]="{'rule-satisfied': hasUppercase, 'rule-not-satisfied': !hasUppercase}">
-                      At least one uppercase letter
+                      - At least one uppercase letter
                     </div>
                     <div [ngClass]="{'rule-satisfied': hasSpecialChar, 'rule-not-satisfied': !hasSpecialChar}">
-                      At least one special character
+                      - At least one special character
                     </div>
                     <div [ngClass]="{'rule-satisfied': !hasSpaces, 'rule-not-satisfied': hasSpaces}">
-                      No spaces allowed
+                      - No spaces allowed
                     </div>
                   </div>
                 </div>
-                <div class="col-sm-8">
+              
+                <div class="col-sm-8 offset-sm-2 mt-3">
                   <label for="confirm_password" class="col-form-label">Confirm password</label>
-                  <input
-                    autocomplete="new-password"
-                    placeholder="Confirm your password"
-                    id="confirm_password"
-                    type="password"
-                    [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="password2"
-                    #password2Model="ngModel"
-                    name="password2"
-                    class="form-control"
-                    required
-                    (blur)="validateInput(password2Model)"
-                    (input)="checkPasswordMatch(password1Model, password2Model)"
-                  />
-                  <span *ngIf="password1 === password2 && password2Model.valid" class="input-group-text valid-indicator">&#10003;</span>
-                  {{ password2Model.invalid }}
-                  <div *ngIf="password2Model.invalid && (password2Model.dirty || password2Model.touched)">
-                    <div *ngIf="password2Model.errors?.required">Confirmation password is required.</div>
-                    <div *ngIf="password2Model.errors?.mustMatch">Passwords must match.</div>
+                  <div class="input-group">
+                    <input
+                      autocomplete="new-password"
+                      placeholder="Confirm your password"
+                      id="confirm_password"
+                      type="password"
+                      [ngModelOptions]="{standalone: true}"
+                      [(ngModel)]="password2"
+                      #password2Model="ngModel"
+                      name="password2"
+                      class="form-control"
+                      required
+                      (blur)="validateInput(password2Model)"
+                      (input)="checkPasswordMatch(password1Model, password2Model)"
+                    />
+                    <div class="input-group-append">
+                      <span *ngIf="password1Model.valid && password2Model.valid && password1 === password2 && password2.length > 0" class="input-group-text valid-indicator">
+                        &#10003;
+                      </span>
+                      <span *ngIf="(password2Model.dirty || password2Model.touched) && (password1Model.invalid || password1 !== password2) && password2.length > 0" class="input-group-text invalid-indicator">
+                        &#10007;
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
+              
               <button
                 type="button"
-                class="p-button p-button-sm p-button-primary"
+                class="p-button p-button-sm p-button-primary mt-3"
                 (click)="update_password(password1Model, password2Model)"
-                [disabled]="!isFormValid()"
+                [disabled]="!isFormValid() || password1 !== password2"
+                [ngClass]="{'btn-disabled': !isFormValid() || password1 !== password2}"
               >
                 Change password
-              </button>           
+              </button>                        
             </form>
           </div>
         </div>

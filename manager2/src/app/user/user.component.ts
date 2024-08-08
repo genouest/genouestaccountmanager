@@ -683,8 +683,7 @@ export class UserComponent implements OnInit {
                this.hasLowercase &&
                this.hasUppercase &&
                this.hasSpecialChar &&
-               !this.hasSpaces &&
-               this.password1 === this.password2;
+               !this.hasSpaces;
     }
 
     checkPasswordMatch(password1Model: NgModel, password2Model: NgModel) {
