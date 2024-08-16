@@ -367,7 +367,12 @@ router.get('/user', async function(req, res) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    let users = await dbsrv.mongo_users().find({ }).toArray();
+
+    if (req.query.all === 'true') {
+      let users = await dbsrv.mongo_users().find({ }).toArray();
+    } else {
+      let users = await dbsrv.mongo_users().find({ }, {history: 0 }).toArray();
+    }
     res.json(users);
 });
 
