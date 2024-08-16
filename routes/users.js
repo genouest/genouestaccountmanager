@@ -927,7 +927,7 @@ router.get('/user/:id/expire', async function(req, res) {
         }
         user.history.push({ 'action': 'expire', date: new Date().getTime() });
         // eslint-disable-next-line no-unused-vars
-        await dbsrv.mongo_users().updateOne({ uid: user.uid },{ '$set': { status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history } });
+        await dbsrv.mongo_users().updateOne({ uid: user.uid },{ '$set': { status: STATUS_EXPIRED, expiration: new Date().getTime(), history: user.history, expiration_notif: 0 } });
 
         try {
             let created_file = await filer.user_expire_user(user, fid);
