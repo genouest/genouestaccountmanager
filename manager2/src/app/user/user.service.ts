@@ -303,7 +303,7 @@ export class UserService {
             //}),
         };
         return this.http.get(
-            environment.apiUrl + '/user',
+            environment.apiUrl + '/user?short=true',
             httpOptions).pipe(map((response: any[]) => {
                 return response.sort(function (a,b) {
                     return a.uid.localeCompare(b.uid);

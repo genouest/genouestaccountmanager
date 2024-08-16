@@ -368,10 +368,14 @@ router.get('/user', async function(req, res) {
         return;
     }
 
-    if (req.query.all === 'true') {
-      let users = await dbsrv.mongo_users().find({ }).toArray();
+    let users
+
+    if (req.query.short === 'true') {
+      users = await dbsrv.mongo_users().find({ }).project({
+        history: 0,
+      }).toArray();
     } else {
-      let users = await dbsrv.mongo_users().find({ }, {history: 0 }).toArray();
+      users = await dbsrv.mongo_users().find({ }).toArray();
     }
     res.json(users);
 });
