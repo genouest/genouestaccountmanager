@@ -4,6 +4,7 @@
 
 * Fix 'Admin' button in 'My projects' page for administrators
 * Set expiration_notif = 0 when manually expiring a user
+* Restrict '/user' route results when passing 'short=true' as a get param
 
 ## 1.4.30 (2024-08-02)
 
