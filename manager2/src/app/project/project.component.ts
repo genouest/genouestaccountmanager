@@ -16,6 +16,7 @@ export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
     @ViewChild('formModal') formModal: ElementRef;
+    @ViewChild('terms_and_conditions_hds') terms_and_conditions_hds;
 
     new_project: Project
     new_project_expire: string

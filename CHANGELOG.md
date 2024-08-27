@@ -1,20 +1,27 @@
 # Changelog
 
-## 1.4.30 (TBA)
+## 1.4.31 (Unreleased)
+
+* Fix 'Admin' button in 'My projects' page for administrators
+
+## 1.4.30 (2024-08-02)
 
 * Added a `project.terms_and_conditions_hds` setting in the config:
-  If true: 
+  If true:
     "Ask Admin" button to submit project creation form became available after 'project name' and 'expiration date' are filled, 'project description' is at least 30 char and a checkbox appears and 'terms and conditions hds' should also be checked
   If false:
-    "Ask Admin" button to submit project creation form became available after 'project name' and 'expiration date' are filled, 'project description' is at least 30 char, no consentment checkbox
-* Added 'End date' to the project request page
+    "Ask Admin" button to submit project creation form became available after 'project name' and 'expiration date' are filled, 'project description' is at least 30 char, no consent checkbox
+* Add 'End date' to the project request page
 * Set 'description' as a required field in the project request page and set a minimal length of 30 char
-* Added a link to user profile on admin panels -> projects pending table
-* Added 'Extend' button for admins to extend active TPs
-* Prevented retroactive TP reservations
-* Added checks to user registration form, the user information update form and the TP reservation form
-* Added back button from single project view
-* Improved TP calendar readability
+* Add a link to user profile on admin panels -> projects pending table
+* Add 'Extend' button for admins to extend active TPs
+* Add checks to user registration form, the user information update form and the TP reservation form
+* Add back button from single project view
+* Updated TP calendar to increase readability
+* Fix newly created group selection bug
+* Update admin project creation UI: disappearing buttons and add "undo selection" button
+* Actually show angular errors in web console when not in production and sentry is not set
+* Fix owner change for databases and websites
 
 ## 1.4.29
 

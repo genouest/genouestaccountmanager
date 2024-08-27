@@ -140,7 +140,7 @@
                     <div class="col-4 col-form-label"></div>
                     <div class="col-6">
                       <select [(ngModel)]="user.group" [ngModelOptions]="{standalone: true}" class="form-control">
-                        <option *ngFor="let group of groups" [value]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
+                        <option *ngFor="let group of groups" [ngValue]="group.name">{{group.new ? group.name + " (new group)" : group.name}}</option>
                       </select>
                       <div class="alert alert-success" *ngIf="grp_success_msg">{{grp_success_msg}}</div>
                       <div class="alert alert-danger" *ngIf="grp_err_msg">{{grp_err_msg}}</div>
@@ -393,55 +393,6 @@
           </div>
           <div class="card-body">
             <app-user-projects [projects]="new_projects" [user_projects]="user_projects" [user]="user"></app-user-projects>
-          </div>
-        </div>
-
-        <div *ngIf="config.enable_ui && config.enable_ui.databases" class="card bg-light">
-          <div class="card-header">
-            <h4>Databases</h4>
-          </div>
-          <div class="card-body">
-            <div *ngIf="dbmsg" class="alert alert-info alert-dismissible" role="alert">
-              {{dbmsg}}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div *ngIf="dbmsg_error" class="alert alert-danger alert-dismissible" role="alert">
-              {{dbmsg_error}}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div *ngIf="rm_dbmsg" class="alert alert-warning alert-dismissible" role="alert">
-              {{rm_dbmsg}}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="form-group row">
-              <div class="col-sm-6">
-                <label for="database">Database name</label>
-                <input placeholder="no space or accent" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="database.name" id='database'class="form-control"/>
-              </div>
-            </div>
-            <div class="form-group">
-              <button type="button" class="p-button p-button-sm p-button-primary" (click)="db_add()">Create</button>
-            </div>
-
-            <div class="table-responsive">
-              <table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
-                <thead>
-                  <th scope="col">Name</th><th scope="col"></th>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let db of databases">
-                    <td>{{db.name}}</td>
-                    <td><app-my-delete-confirm [onConfirm]="db_delete" [data]="db.name"></app-my-delete-confirm>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
       </div>
