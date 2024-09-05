@@ -34,7 +34,7 @@
 
           <div class="form-group row col-sm-8">
             <label for="db_expire">Expiration date<span style="color:red">(required)</span></label>
-            <input required type="date" id="db_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="db_expire_string" class="form-control" name="expire" #expire="ngModel"/>
+            <input required type="date" id="db_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="db_expire" class="form-control" name="expire" #expire="ngModel"/>
             <div *ngIf="expire.invalid && (expire.dirty || expire.touched)" class="text-danger">
               <div *ngIf="expire.errors.required">expiration date required</div>
             </div>

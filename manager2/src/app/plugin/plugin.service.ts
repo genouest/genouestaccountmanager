@@ -11,7 +11,7 @@ export class Plugin {
     display_name: string
     admin: boolean = false
 
-    constructor(name, url, display, admin) {
+    constructor(name: string = '', url: string = '', display: string = '', admin: boolean = false) {
         this.name = name
         this.url = url
         this.display_name = display

@@ -90,13 +90,13 @@
             <tr>
               <td><a routerLink="/user/{{user.uid}}"><span class="p-button p-button-sm p-button-primary">{{user.uid}}</span></a></td>
               <td>{{user.email}}</td>
-              <td><span *ngIf="user.authorized">x</span></td>
+              <td><span *ngIf="user.temp?.authorized">x</span></td>
               <td><span *ngIf="user.group == selectedGroup.name">x</span></td>
             </tr>
           </ng-template>
         </p-table>
       </div>
-      <button class="p-button p-button-sm p-button-danger" (click)="delete_group(selectedGroup)">Delete</button>
+      <button class="p-button p-button-sm p-button-danger" (click)="delete_group()">Delete</button>
     </div>
   </div>
 </div>

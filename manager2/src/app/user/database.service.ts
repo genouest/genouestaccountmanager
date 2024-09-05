@@ -14,31 +14,28 @@ export class Database {
     usage: string
     size: string
     expire: number
+    created_at: number
     single_user: boolean
+    _id: string
 
-    constructor(name: string, type: string, host: string, owner: string, create: boolean = false, usage: string, size: string, expire: number, single_user: boolean) {
-        this.name = name
-        this.type = type
-        this.host = host
-        this.owner = owner
-        this.create = create
-        this.usage = usage
-        this.size = size
-        this.expire = expire
-        this.single_user = single_user
+    constructor(
+        name: string = '', type: string = 'mysql', host: string = '',
+        owner: string = '', create: boolean = false, usage: string = '',
+        size: string = '', expire: number = 0, created_at: number = 0,
+        single_user: boolean = true, _id: string = ''
+    ) {
+        this.name = name; this.type = type; this.host = host;
+        this.owner = owner; this.create = create; this.usage = usage;
+        this.size = size; this.expire = expire; this.created_at = created_at;
+        this.single_user = single_user; this._id = _id
     }
 
     toJson() {
         return {
-            name: this.name,
-            type: this.type,
-            host: this.host,
-            owner: this.owner,
-            create: this.create,
-            usage: this.usage,
-            size: this.size,
-            expire: this.expire,
-            single_user: this.single_user,
+            name: this.name, type: this.type, host: this.host,
+            owner: this.owner, create: this.create, usage: this.usage,
+            size: this.size, expire: this.expire, created_at: this.created_at,
+            single_user: this.single_user, _id: this._id
         };
     }
 }
@@ -50,6 +47,16 @@ export class Database {
 export class DatabaseService {
 
     constructor(private http: HttpClient, private authService: AuthService) { }
+
+    mapToDatabase(resp: any): Database {
+        return new Database(
+            resp.name || '', resp.type || 'mysql', resp.host || '',
+            resp.owner || '', resp.create || false, resp.usage || '',
+            resp.size || '', new Date(resp.expire).getTime() || 0,
+            new Date(resp.created_at).getTime() || 0, resp.single_user || true,
+            resp._id || ''
+        );
+    }
 
     create(db: Database) {
         //let user = this.authService.profile;
@@ -92,17 +99,7 @@ export class DatabaseService {
         return this.http.get(environment.apiUrl + '/database', httpOptions)
             .pipe(map((response: any) => {
                 return response.map(item => {
-                    return new Database(
-                        item.name,
-                        item.type,
-                        item.host,
-                        item.owner,
-                        item.create,
-                        item.usage,
-                        item.size,
-                        item.expire,
-                        item.single_user,
-                    );
+                    return this.mapToDatabase(item);
                 });
             }));
     }
@@ -118,17 +115,7 @@ export class DatabaseService {
         return this.http.get(environment.apiUrl + '/database/owner/' + id, httpOptions)
             .pipe(map((response: any) => {
                 return response.map(item => {
-                    return new Database(
-                        item.name,
-                        item.type,
-                        item.host,
-                        item.owner,
-                        item.create,
-                        item.usage,
-                        item.size,
-                        item.expire,
-                        item.single_user,
-                    );
+                    return this.mapToDatabase(item);
                 });
             }));
     }
@@ -143,7 +130,7 @@ export class DatabaseService {
         return this.http.delete(environment.apiUrl + '/database/' + db.name, httpOptions);
     }
 
-    changeOwner(dbName, dbOldOwner, dbNewOwner) {
+    changeOwner(dbName: string, dbOldOwner: string, dbNewOwner: string) {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -153,7 +140,7 @@ export class DatabaseService {
         return this.http.put(environment.apiUrl + '/database/' + dbName + '/owner/' + dbOldOwner + '/' + dbNewOwner, { }, httpOptions);
     }
 
-    list_pending(getAll: boolean): Observable<any[]> {
+    list_pending(getAll: boolean): Observable<Database[]> {
         //let user = this.authService.profile;
         let params = new HttpParams();
         if (getAll) {
@@ -169,13 +156,16 @@ export class DatabaseService {
             environment.apiUrl + '/pending/database',
             httpOptions
         ).pipe(map((response: any[]) => {
-            return response.sort(function(a, b) {
+            response.sort(function(a, b) {
                 return a.name.localeCompare(b.name);
             });
+            return response.map(item => {
+                return this.mapToDatabase(item)
+            })
         }));
     }
 
-    refuse(db) {
+    refuse(db: Database) {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

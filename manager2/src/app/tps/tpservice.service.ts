@@ -31,7 +31,7 @@ export class TpserviceService {
         return this.http.post(environment.apiUrl + '/tp', reservation, httpOptions)
     }
 
-    cancel(reservationId): Observable<any> {
+    cancel(reservationId: string): Observable<any> {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -42,7 +42,7 @@ export class TpserviceService {
     }
 
 
-    create(reservationId): Observable<any> {
+    create(reservationId: string): Observable<any> {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -52,7 +52,7 @@ export class TpserviceService {
         return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/now', httpOptions)
     }
 
-    remove(reservationId): Observable<any> {
+    remove(reservationId: string): Observable<any> {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -62,7 +62,7 @@ export class TpserviceService {
         return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/stop', httpOptions)
     }
 
-    extend(reservationId, extension): Observable<any> {
+    extend(reservationId: string, extension): Observable<any> {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

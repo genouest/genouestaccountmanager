@@ -671,7 +671,7 @@ router.get('/user/:id', async function(req, res) {
     user.is_locked = await idsrv.user_locked(user.uid);
 
     if (session_user._id.toString() == user._id.toString() || isadmin) {
-        res.json(user);
+        res.send(user);
     }
     else {
         res.status(401).send({ message: 'Not authorized to access this user info' });
