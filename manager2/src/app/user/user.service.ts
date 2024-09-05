@@ -23,14 +23,14 @@ export class User {
     is_trainer: boolean
     send_copy_to_support: boolean
     create_imap_mailbox: boolean
-    created_at: number | null
+    created_at: number
     expiration: number
     duration: any
     registration: number
     group: string
     secondarygroups: string[]
     newgroup: string
-    projects: string[] | null
+    projects: string[]
     newproject: any
     tags: any
     regkey: number
@@ -49,9 +49,9 @@ export class User {
         team: string = '', why: string = '', ip: string = '',
         is_admin: boolean = false, is_fake: boolean = false, is_locked: boolean = false, is_trainer: boolean = false,
         send_copy_to_support: boolean = false, create_imap_mailbox: boolean = false,
-        created_at: number | null = null, expiration: number = 0, duration: any = null, registration: number = 0,
+        created_at: number = null, expiration: number = 0, duration: any = null, registration: number = 0,
         group: string = '', secondary_groups: string[] = [], new_group: string = '',
-        projects: string[] | null = null, new_project: any = null, tags: any = null,
+        projects: string[] = null, new_project: any = null, tags: any = null,
         reg_key: number = 0, api_key: number = 0, ssh: string = '', u2f: any = null, otp: any = null,
         history: any[] = [], extra_info: any[] = [], status: string = '', temp: any = null
     ) {
