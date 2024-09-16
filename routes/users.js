@@ -1002,7 +1002,7 @@ router.post('/user/:id/passwordreset', async function(req, res) {
 
     user.password=req.body.password;
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])(?!.*\s).{12,}$/;
-    if (!passwordRegex.test(password)) {
+    if (!passwordRegex.test(user.password)) {
         res.status(400).send({ message: 'Password does not meet the required format: 12 characters min, including 1 digit, 1 lowercase, 1 uppercase, and 1 special character, and no spaces.' });
         return;
     }
