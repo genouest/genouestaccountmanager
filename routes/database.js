@@ -45,7 +45,7 @@ router.put('/database/:id/owner/:old/:new', async function(req, res) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    
+
     await dbsrv.mongo_databases().updateOne({name: req.params.id}, {'$set': {owner: req.params.new}});
     await dbsrv.mongo_events().insertOne({
         'owner': session_user.uid,
@@ -282,10 +282,7 @@ router.post('/database/declare/:id', async function(req, res) {
         res.status(401).send({ message: 'Only admins can declare a database' });
         return;
     }
-    if (!req.body.expire) {
-        res.status(403).send({ message: 'No expiration date' });
-        return;
-    }
+
     let db = {
         owner: req.body.owner ? req.body.owner : session_user.uid,
         name: req.params.id,
@@ -293,7 +290,6 @@ router.post('/database/declare/:id', async function(req, res) {
         host: req.body.host && sansrv.sanitize(req.body.host) ? req.body.host : CONFIG.mysql.host,
         usage: req.body.usage ? req.body.usage : '',
         size: req.body.size ? req.body.size : '',
-        expire: req.body.expire,
         single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
     try {

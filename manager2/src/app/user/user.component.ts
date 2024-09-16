@@ -3,6 +3,7 @@ import { UserService } from './user.service'
 import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
 import { Website, WebsiteService } from './website.service'
+import { Database, DatabaseService} from './database.service'
 import { PluginService} from '../plugin/plugin.service'
 import { GroupsService } from '../admin/groups/groups.service'
 import { ProjectsService } from '../admin/projects/projects.service'
@@ -143,6 +144,8 @@ export class UserComponent implements OnInit {
     website: Website
     websites: Website[]
 
+    databases: Database[]
+
     plugins: any[]
     plugin_data: any
 
@@ -202,6 +205,7 @@ export class UserComponent implements OnInit {
         private authService: AuthService,
         private configService: ConfigService,
         private websiteService: WebsiteService,
+        private databaseService: DatabaseService,
         private pluginService: PluginService,
         private groupService: GroupsService,
         private projectService: ProjectsService,
@@ -217,6 +221,7 @@ export class UserComponent implements OnInit {
         this.config = { }
         this.website = new Website('', '', '', '')
         this.websites = []
+        this.databases = []
         this.plugins = []
         this.plugin_data = { }
         this.subscribed = false
@@ -404,6 +409,7 @@ export class UserComponent implements OnInit {
             );
         }
         this.web_list();
+        this.db_list();
 
         this.user.secondarygroups.sort(function (a,b) {
             return a.localeCompare(b);
@@ -437,6 +443,13 @@ export class UserComponent implements OnInit {
             },
             err => console.log('failed to unsubscribe')
         );
+    }
+
+    db_list() {
+        this.databaseService.listOwner(this.user.uid).subscribe(
+            resp => this.databases = resp,
+            err => console.log('failed to get databases')
+        )
     }
 
     web_list() {
