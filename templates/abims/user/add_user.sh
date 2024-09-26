@@ -16,13 +16,4 @@ chown -R {{ user.uid }}:{{ user.uid }} '{{ user.home }}'
 
 {% include "user/add_extra_dirs.sh" %}
 
-{% if user.create_imap_mailbox %}
-mel create-user-aliases '{{ user.uid }}'
-mel create-mailbox '{{ user.uid }}'
-{% endif %}
-
-{% if user.password %}
-mel add-samba '{{ user.uid }}' --password '{{ user.password }}'
-{% endif %}
-
 # add_user.sh
