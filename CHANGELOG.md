@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.31 (Unreleased)
+## 1.4.31 (2024-09-27)
 
 * Fix 'Admin' button in 'My projects' page for administrators
 * Set expiration_notif = 0 when manually expiring a user
