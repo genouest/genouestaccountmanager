@@ -509,12 +509,12 @@ export class UserComponent implements OnInit {
         this.website.owner = this.user.uid;
         this.websiteService.add(this.website).subscribe(
             resp => {
-                this.webmsg = '';
+                this.rmwebmsg = '';
                 this.websites.push(this.website);
                 this.website = new Website('', '', '', this.user.uid);
                 //this.web_list();
             },
-            err => { this.webmsg = err.error.message; console.log('failed to add web site') }
+            err => { this.rmwebmsg = err.error.message; console.log('failed to add web site') }
         );
     }
     web_delete(siteName: string) {
