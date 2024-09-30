@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.32 (Unreleased)
+
+* Clearer error message when adding a website
+
 ## 1.4.31 (2024-09-27)
 
 * Fix 'Admin' button in 'My projects' page for administrators
