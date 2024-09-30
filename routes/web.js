@@ -123,7 +123,7 @@ router.post('/web/:id', async function(req, res) {
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+        res.status(403).send({message: 'Web site name should be a sanitized string'});
         return;
     }
     let session_user = null;
