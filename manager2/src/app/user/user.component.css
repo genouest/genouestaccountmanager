@@ -1,0 +1,37 @@
+
+.valid-indicator {
+    color: green;
+}
+
+.invalid-indicator {
+    color: red;
+}
+
+.invalid-feedback {
+    color: red;
+}
+
+.password-rules {
+    margin-top: 10px;
+}
+
+.rule-satisfied {
+    color: green;
+}
+
+.rule-not-satisfied {
+    color: red;
+}
+
+.btn-disabled {
+    background-color: #d6d6d6;
+    border-color: #d6d6d6;
+    cursor: not-allowed;
+    pointer-events: none;
+    color: #888888;
+}
+  
+.btn-disabled:hover {
+    background-color: #d6d6d6;
+    border-color: #d6d6d6;
+}
