@@ -154,13 +154,14 @@
           <input [ngModelOptions]="{standalone: true}" [(ngModel)]="db.host" id="dbhost" class="form-control" required>
         </div>
 
-        <div class="col-sm-2">
-          <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.single_user">Sole Owner</label>
+        <div class="col-sm-2 text-center">
+          <label for="sole" class="control-label">Sole owner</label>
+          <p><input style="transform: scale(1.5);" id="sole" type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="db.single_user"></p>
         </div>
         
         <div class="col-sm-1">
           <label style="opacity: 0;" class="control-label">Create</label>
-          <button type="button" class="p-button p-button-sm p-button-secondary" (click)="declare_db()">Declare DB</button>
+          <button type="button" class="p-button p-button-sm p-button-secondary" (click)="declare_db()">Declare</button>
         </div>
 
       </div>

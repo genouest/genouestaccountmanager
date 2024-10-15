@@ -391,10 +391,10 @@ export class UserService {
             //}),
         };
         return this.http.get(
-            environment.apiUrl + '/user',
+            environment.apiUrl + '/user?short=true',
             httpOptions
         ).pipe(map((response: any[]) => {
-            response.sort(function (a,b) {
+            response.sort(function (a, b) {
                 return a.uid.localeCompare(b.uid);
             });
             return response.map(item => {

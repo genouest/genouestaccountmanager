@@ -63,7 +63,7 @@
       </li>
     </ul>
   </div>
-  
+
   <div class="card-body">
     <div class="row">
       <div class="col-sm-6" *ngIf="panel == 0">
@@ -341,7 +341,7 @@
             </form>
           </div>
         </div>
-        
+
         <div class="card bg-light" *ngIf="session_user.is_admin">
           <div class="card-header">
             <h4>Secondary groups</h4>
@@ -395,6 +395,27 @@
             <app-user-projects [projects]="new_projects" [user_projects]="user_projects" [user]="user"></app-user-projects>
           </div>
         </div>
+
+        <div *ngIf="config.enable_ui && config.enable_ui.databases" class="card bg-light">
+          <div class="card-header">
+            <h4>Databases</h4>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table aria-label="databases" *ngIf="databases && databases.length > 0" class="table table-striped">
+                <thead>
+                  <th scope="col">Name</th>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let db of databases">
+                    <td>{{db.name}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div class="col-md-6 col-sm-12" *ngIf="panel == 1">
@@ -511,7 +532,7 @@
               </div>
             </div>
           </div>
-          
+
         </div>
       </div>
 

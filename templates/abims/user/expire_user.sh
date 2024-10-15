@@ -1,9 +1,13 @@
 #!/bin/bash
 
-echo "Start reset_password.sh in $0 ..."
+echo "Start expire_user.sh in $0 ..."
 
 set -e
 
 ldapmodify -H ldap://{{ CONFIG.ldap.host }} -cx -w '{{ CONFIG.ldap.admin_password }}' -D {{ CONFIG.ldap.admin_cn }},{{ CONFIG.ldap.admin_dn }} -f "{{ CONFIG.general.script_dir }}/{{ user.uid }}.{{ fid }}.ldif"
 
-echo "End reset_password.sh in $0 ..."
+if [ -e "{{ user.home }}/.ssh/authorized_keys" ]; then
+    mv  "{{ user.home }}/.ssh/authorized_keys" "{{ user.home }}/.ssh/authorized_keys.expired"
+fi
+
+echo "End expire_user.sh in $0 ..."

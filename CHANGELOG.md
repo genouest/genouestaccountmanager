@@ -1,8 +1,16 @@
 # Changelog
 
-## 1.4.31 (Unreleased)
+## 1.4.32 (Unreleased)
+
+* Clearer error message when adding a website
+
+## 1.4.31 (2024-09-27)
 
 * Fix 'Admin' button in 'My projects' page for administrators
+* Set expiration_notif = 0 when manually expiring a user
+* Restrict '/user' route results when passing 'short=true' as a get param
+* Add list of user DBs back to user page
+* Remove mel from abims templates
 
 ## 1.4.30 (2024-08-02)
 
