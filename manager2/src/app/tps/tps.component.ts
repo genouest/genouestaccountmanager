@@ -1,8 +1,11 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
-import { ConfigService } from '../config.service'
+import { ConfigService } from '../config.service';
+import { User } from '../user/user.service';
 import { TpserviceService } from './tpservice.service';
+import { GroupsService } from '../admin/groups/groups.service';
+import { ProjectsService } from '../admin/projects/projects.service';
 import { CalendarEvent, CalendarEventTimesChangedEvent } from 'angular-calendar';
 import { Subject } from 'rxjs';
 
@@ -27,11 +30,11 @@ export class TpsComponent implements OnInit {
     resmsg: string
     reserrmsg: string
 
-    session_user: any
+    session_user: User
 
     viewDate: Date
     events: CalendarEvent[]
-    selectedEvent: any
+    selectedEvent: CalendarEvent
     refresh: Subject<any> = new Subject();
 
     quantity: number
@@ -50,7 +53,9 @@ export class TpsComponent implements OnInit {
     constructor(
         private authService: AuthService,
         private configService: ConfigService,
-        private tpService: TpserviceService
+        private tpService: TpserviceService,
+        private groupsService: GroupsService,
+        private projectsService: ProjectsService
     ) { }
 
     private choseColor(id: string, over: boolean, created: boolean) {
@@ -181,10 +186,10 @@ export class TpsComponent implements OnInit {
     cancel_reservation() {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.cancel(this.selectedEvent.id).subscribe(
+        this.tpService.cancel(this.selectedEvent.meta.id).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.selectedEvent.over = true;
+                this.selectedEvent.meta.over = true;
                 this.listEvents();
             },
             err => this.errmsg = err.error.message
@@ -194,10 +199,10 @@ export class TpsComponent implements OnInit {
     create_reservation() {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.create(this.selectedEvent.id).subscribe(
+        this.tpService.create(this.selectedEvent.meta.id).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.selectedEvent.created = true;
+                this.selectedEvent.meta.created = true;
                 this.listEvents();
             },
             err => this.errmsg = err.error.message
@@ -207,10 +212,10 @@ export class TpsComponent implements OnInit {
     remove_reservation() {
         this.msg = '';
         this.errmsg = '';
-        this.tpService.remove(this.selectedEvent.id).subscribe(
+        this.tpService.remove(this.selectedEvent.meta.id).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.selectedEvent.over = true;
+                this.selectedEvent.meta.over = true;
                 this.listEvents();
             },
             err => this.errmsg = err.error.message
@@ -220,7 +225,7 @@ export class TpsComponent implements OnInit {
     extend_reservation() {
         this.msg = '';
         this.errmsg = '';
-        if(new Date(this.new_expire).getTime() < this.selectedEvent.end) {
+        if(new Date(this.new_expire).getTime() < this.selectedEvent.meta.end) {
             this.errmsg = 'Extended end date must be after current end date';
             return;
         }
@@ -229,7 +234,7 @@ export class TpsComponent implements OnInit {
             return;
         }
         const extension = { 'to': new Date(this.new_expire).getTime() };
-        this.tpService.extend(this.selectedEvent.id, extension).subscribe(
+        this.tpService.extend(this.selectedEvent.meta.id, extension).subscribe(
             resp => {
                 this.msg = resp['message'];
                 this.listEvents();
@@ -238,14 +243,8 @@ export class TpsComponent implements OnInit {
         );
     }
 
-    eventClicked(clickedEvent) {
-        this.selectedEvent = clickedEvent.meta;
-        this.selectedEvent.title = clickedEvent.title;
-        this.selectedEvent.start = clickedEvent.start;
-        this.selectedEvent.end = clickedEvent.end;
-        if (!clickedEvent.meta.group) {
-            this.selectedEvent.group = { }
-        }
+    eventClicked(clickedEvent: CalendarEvent) {
+        this.selectedEvent = clickedEvent;
     }
 
     eventTimesChanged({
@@ -258,7 +257,7 @@ export class TpsComponent implements OnInit {
         this.refresh.next();
     }
 
-    get_status(over) {
+    get_status(over: boolean) {
         if(over) { return "panel panel-danger"; }
         else { return "panel panel-primary"; }
     }

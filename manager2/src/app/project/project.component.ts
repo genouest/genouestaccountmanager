@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ConfigService } from '../config.service'
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -16,20 +16,19 @@ export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
     @ViewChild('dtu') tableuser: Table;
     @ViewChild('formModal') formModal: ElementRef;
-
     @ViewChild('terms_and_conditions_hds') terms_and_conditions_hds;
 
-    new_project: any
-    projects: any
-    users: any
-    groups: any
-    selectedProject: any
-    session_user: any
+    new_project: Project
+    new_project_expire: string
+    projects: Project[]
+    users: User[]
+    selectedProject: Project
+    session_user: User
     config: any
-    new_user: any
-    remove_user: any
-    default_size: any
-    default_cpu: any
+    new_user: string
+    remove_user: string
+    default_size: number
+    default_cpu: number
 
     manager_visible: boolean
 
@@ -55,8 +54,8 @@ export class ProjectComponent implements OnInit {
 
     async ngOnInit() {
 
-        this.new_project = {}
-        this.groups = [];
+        this.new_project = new Project();
+        this.new_project_expire = '';
         this.manager_visible = true;
         this.session_user = await this.authService.profile;
         this.users = [];
@@ -106,11 +105,12 @@ export class ProjectComponent implements OnInit {
             // todo: should rename it project_msg
             this.request_msg = '';
             this.request_err_msg = '';
-            const project_to_send = { ...this.new_project, expire: new Date(this.new_project.expire).getTime()}
-            this.projectsService.askNew(project_to_send).subscribe(
+            this.new_project.expire = new Date(this.new_project_expire).getTime();
+            this.projectsService.askNew(this.new_project).subscribe(
                 resp => {
                     this.request_msg = 'An email has been sent to an admin';
-                    this.new_project = {};
+                    this.new_project = new Project();
+                    this.new_project_expire = '';
                     this.closeFormModal();
                 },
                 err => {
@@ -133,7 +133,7 @@ export class ProjectComponent implements OnInit {
         }
     }
 
-    show_project_users(project) {
+    show_project_users(project: Project) {
         return new Promise((resolve, reject) => {
             this.msg = '';
             this.rm_prj_err_msg = '';
@@ -146,8 +146,8 @@ export class ProjectComponent implements OnInit {
                     this.selectedProject = project;
                     this.oldGroup = project.group;
                     for (let i = 0; i < resp.length; i++) {
-                        if (resp[i].group.indexOf(this.selectedProject.group) >= 0 || resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0) {
-                            this.users[i].access = true;
+                        if ((resp[i].group.indexOf(this.selectedProject.group) >= 0) || (resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0)) {
+                            this.users[i].temp = { ...this.users[i].temp, access: true };
                         }
                     }
                     resolve(resp)
@@ -160,7 +160,8 @@ export class ProjectComponent implements OnInit {
         })
     }
 
-    async show_project_users_and_scroll(project, anchor) {
+    async show_project_users_and_scroll(input_project: any, anchor: HTMLElement) {
+        const project: Project = this.projectsService.mapToProject(input_project);
         this.show_project_users(project).then(() => {
             return new Promise(f => setTimeout(f, 250));
         }).then(() => {
@@ -169,7 +170,8 @@ export class ProjectComponent implements OnInit {
 
     }
 
-    extend(project) {
+    extend(input_project: any) {
+        const project: Project = this.projectsService.mapToProject(input_project);
         this.projectsService.extend(project.id).subscribe(
             resp => {
                 this.request_msg = resp['message'];
@@ -183,7 +185,8 @@ export class ProjectComponent implements OnInit {
         )
     }
 
-    request_user(project, user_id, request_type) {
+    request_user(input_project: any, user_id: string, request_type: string) {
+        const project: Project = this.projectsService.mapToProject(input_project);
         this.request_msg = '';
         this.request_err_msg = '';
         if (!user_id) {

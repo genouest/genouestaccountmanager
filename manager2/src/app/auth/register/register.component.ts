@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 import { ConfigService } from 'src/app/config.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
@@ -19,9 +19,9 @@ export class RegisterComponent implements OnInit {
     duration: string = '1 year'
     config: any = {}
 
-    userid: string
-    firstname: string
-    lastname: string
+    user_id: string
+    first_name: string
+    last_name: string
     address: string
     lab: string
     responsible: string
@@ -37,7 +37,7 @@ export class RegisterComponent implements OnInit {
     create_imap_mailbox: boolean
     is_fake: boolean
 
-    session_user: any
+    session_user: User
 
     constructor(
         private authService: AuthService,
@@ -78,9 +78,9 @@ export class RegisterComponent implements OnInit {
         this.extra_info = new_extra;
     }
 
-    update_userid(event, origin) {
-        let first = this.firstname;
-        let last = this.lastname;
+    update_user_id(event: string, origin: number) {
+        let first = this.first_name;
+        let last = this.last_name;
         if(origin == 0) {
             first = event;
         } else {
@@ -89,21 +89,21 @@ export class RegisterComponent implements OnInit {
         if (event === undefined || event === null || first === "" || last === "") {
             return;
         }
-        if(this.firstname && this.lastname) {
-            let tmpuserid = latinize(first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', ''));
+        if(this.first_name && this.last_name) {
+            let tmp_user_id: string = latinize(first.charAt(0).toLowerCase() + last.toLowerCase().replace(' ', ''));
             // remove non alpha numeric char as they are not allowed in backend
-            this.userid = tmpuserid.replace(/[^0-9a-z]/gi, '');
+            this.user_id = tmp_user_id.replace(/[^0-9a-z]/gi, '');
         }
     }
 
     register() {
         this.msg = '';
-        if(this.firstname == '' || this.firstname === null || this.firstname === undefined) {
-            this.msg = 'Missing field: firstname';
+        if(this.first_name == '' || this.first_name === null || this.first_name === undefined) {
+            this.msg = 'Missing field: first name';
             return;
         }
-        if(this.lastname == '' || this.lastname === null || this.lastname === undefined) {
-            this.msg = 'Missing field: lastname';
+        if(this.last_name == '' || this.last_name === null || this.last_name === undefined) {
+            this.msg = 'Missing field: last name';
             return;
         }
         if(this.email == '' || this.email === null || this.email === undefined) {
@@ -134,15 +134,15 @@ export class RegisterComponent implements OnInit {
             this.msg="You must agree with the terms of use";
             return;
         }
-        if(this.userid  ===  undefined || this.userid  ===  "") {
+        if(this.user_id  ===  undefined || this.user_id  ===  "") {
             this.msg="User identifier invalid (empty)";
             return;
         }
-        if(this.userid.length < 4) {
+        if(this.user_id.length < 4) {
             this.msg="User identifier too short (min 4 characters)";
             return;
         }
-        if (!this.firstname.match(/^[a-zA-Z]+$/) || !this.lastname.match(/^[a-zA-Z]+$/)) {
+        if (!this.first_name.match(/^[a-zA-Z]+$/) || !this.last_name.match(/^[a-zA-Z]+$/)) {
             this.msg = 'Name contains unauthorized characters';
             return;
         }
@@ -150,9 +150,9 @@ export class RegisterComponent implements OnInit {
             this.msg = 'Team must be alphanumerical [0-9a-z_]';
             return;
         }
-        this.userService.register(this.userid, {
-            firstname: this.firstname,
-            lastname: this.lastname,
+        const user: User = this.userService.mapToUser({
+            firstname: this.first_name,
+            lastname: this.last_name,
             address: this.address,
             lab: this.lab,
             responsible: this.responsible,
@@ -165,7 +165,8 @@ export class RegisterComponent implements OnInit {
             duration: this.duration,
             why: this.why,
             extra_info: this.extra_info
-        }).subscribe(
+        });
+        this.userService.register(this.user_id, user).subscribe(
             resp => {
                 this.msg = resp['message'];
                 if(resp['status'] == 0) {

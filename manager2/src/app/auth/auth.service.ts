@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { User, UserService} from '../user/user.service';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
@@ -16,12 +17,12 @@ export class AuthService {
 
     accessToken: string;
     authenticated: boolean;
-    userProfile:  any;
+    userProfile:  User;
 
     constructor(private http: HttpClient, private router: Router) {
     }
 
-    login(login, password) {
+    login(login: string, password: string): Promise<any> {
         return new Promise((resolve, reject) => {
             this.http.post(
                 environment.apiUrl + '/auth/' + login,
@@ -55,11 +56,11 @@ export class AuthService {
         });
     }
 
-    u2f(userId) {
+    u2f(userId: string) {
         return this.http.get(environment.apiUrl + '/u2f/auth/' + userId)
     }
 
-    u2fCheck(userId, u2fData) {
+    u2fCheck(userId: string, u2fData) {
         return this.http.post(environment.apiUrl + '/u2f/auth/' + userId, u2fData)
     }
 
@@ -75,7 +76,7 @@ export class AuthService {
             httpOptions)       
     }
 
-    checkEmailToken(userId, data) {
+    checkEmailToken(userId: string, data) {
         return new Promise((resolve, reject) => {
             this.http.post(
                 environment.apiUrl + '/mail/auth/' + userId,
@@ -103,18 +104,18 @@ export class AuthService {
         });
     }
 
-    handleLoginCallback(authResult) {
+    handleLoginCallback(authResult: User) {
         this.getUserInfo(authResult);
     }
 
-    getUserInfo(profile) {
+    getUserInfo(profile: User) {
         // Get user profile
         if (profile) {
             this._setSession(profile);
         }
     }
 
-    private _setSession(profile) {
+    private _setSession(profile: User) {
         // Save authentication data and update login status subject
         this.userProfile = profile;
         if(localStorage !== null) {
@@ -133,12 +134,12 @@ export class AuthService {
         }
     }
 
-    updateApiKey(token) {
+    updateApiKey(token: number) {
         this.userProfile.apikey = token;
     }
 
     autoLog() {
-        let key = null;
+        let key: string = null;
         if (localStorage !== null) {
             key = localStorage.getItem('my-api-key');
         }
@@ -163,7 +164,7 @@ export class AuthService {
 
     }
 
-    get profile(): any {
+    get profile(): User {
         if(! this.userProfile && localStorage !== null && localStorage.getItem('my-user')) {
             return JSON.parse(localStorage.getItem('my-user'))
         }
@@ -177,11 +178,11 @@ export class AuthService {
         return this.authenticated
     }
 
-    passwordResetRequest(userId) {
+    passwordResetRequest(userId: string) {
         return this.http.get(environment.apiUrl + '/user/' + userId + '/passwordreset')
     }
 
-    emailTokenRequest(userId) {
+    emailTokenRequest(userId: string) {
         return this.http.get(environment.apiUrl + '/mail/auth/' + userId)
     }
 }

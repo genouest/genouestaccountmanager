@@ -5,6 +5,69 @@ import { AuthService } from '../auth/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+export class User {
+    uid: string
+    id: number
+    firstname: string
+    lastname: string
+    email: string
+    lab: string
+    responsible: string
+    address: string
+    team: string
+    why: string
+    ip: string
+    is_admin: boolean
+    is_fake: boolean
+    is_locked: boolean
+    is_trainer: boolean
+    send_copy_to_support: boolean
+    create_imap_mailbox: boolean
+    created_at: number
+    expiration: number
+    duration: any
+    registration: number
+    group: string
+    secondarygroups: string[]
+    newgroup: string
+    projects: string[]
+    newproject: any
+    tags: any
+    regkey: number
+    apikey: number
+    ssh: string
+    u2f: any
+    otp: any
+    history: any[]
+    extra_info: any[]
+    status: string
+    temp: any
+
+    constructor(
+        uid: string = '', id: number = 0, first_name: string = '', last_name: string = '',
+        email: string = '', lab: string = '', responsible: string = '', address: string = '',
+        team: string = '', why: string = '', ip: string = '',
+        is_admin: boolean = false, is_fake: boolean = false, is_locked: boolean = false, is_trainer: boolean = false,
+        send_copy_to_support: boolean = false, create_imap_mailbox: boolean = false,
+        created_at: number = null, expiration: number = 0, duration: any = null, registration: number = 0,
+        group: string = '', secondary_groups: string[] = [], new_group: string = '',
+        projects: string[] = null, new_project: any = null, tags: any = null,
+        reg_key: number = 0, api_key: number = 0, ssh: string = '', u2f: any = null, otp: any = null,
+        history: any[] = [], extra_info: any[] = [], status: string = '', temp: any = null
+    ) {
+        this.uid = uid; this.id = id; this.firstname = first_name; this.lastname = last_name;
+        this.email = email; this.lab = lab; this.responsible = responsible; this.address = address;
+        this.team = team; this.why = why; this.ip = ip;
+        this.is_admin = is_admin; this.is_fake = is_fake; this.is_locked = is_locked; this.is_trainer = is_trainer;
+        this.send_copy_to_support = send_copy_to_support; this.create_imap_mailbox = create_imap_mailbox;
+        this.created_at = created_at; this.expiration = expiration; this.duration = duration; this.registration = registration;
+        this.group = group; this.secondarygroups = secondary_groups; this.newgroup = new_group;
+        this.projects = projects; this.newproject = new_project; this.tags = tags;
+        this.regkey = reg_key; this.apikey = api_key; this.ssh = ssh; this.u2f = u2f; this.otp = otp;
+        this.history = history; this.extra_info = extra_info; this.status = status; this.temp = temp;
+    }
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -13,6 +76,22 @@ export class UserService {
     config: any
 
     constructor(private http: HttpClient, private authService: AuthService) {
+    }
+
+    mapToUser(resp: any): User {
+        return new User(
+            resp.uid || '', resp.id || 0, resp.firstname || '', resp.lastname || '',
+            resp.email || '', resp. lab || '', resp.responsible || '', resp.address || '',
+            resp.team || '', resp.why || '', resp.ip || '',
+            resp.is_admin || false, resp.is_fake || false, resp.is_locked || false, resp.is_trainer || false,
+            resp.send_copy_to_support || false, resp.create_imap_mailbox || false,
+            resp.created_at || null, new Date(resp.expiration).getTime() || 0,
+            resp.duration || null, new Date(resp.registration).getTime() || 0,
+            resp.group || '', resp.secondarygroups || [], resp.newgroup || '',
+            resp.projects || null, resp.newproject || null, resp.tags || null,
+            resp.regkey || 0, resp.apikey || 0, resp.ssh || '', resp.u2f || null, resp.otp || null,
+            resp.history || [], resp.extra_info || [], resp.status || '', resp.temp || null
+        );
     }
 
     getUserLogs(userId: string) {
@@ -108,7 +187,7 @@ export class UserService {
             httpOptions)
     }
 
-    updateSSH(userId: string, ssh: string) {
+    updateSSH(userId: string, ssh: string): Observable<User> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -117,10 +196,13 @@ export class UserService {
         return this.http.put(
             environment.apiUrl + '/user/' + userId + '/ssh',
             {ssh: ssh},
-            httpOptions)
+            httpOptions
+        ).pipe(map(response => {
+            return this.mapToUser(response);
+        }));
     }
 
-    update(userId: string, user) {
+    update(userId: string, user: User): Observable<User> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -129,7 +211,10 @@ export class UserService {
         return this.http.put(
             environment.apiUrl + '/user/' + userId ,
             user,
-            httpOptions)
+            httpOptions
+        ).pipe(map((response: any) => {
+            return this.mapToUser(response);
+        }));
     }
 
     activate(userId: string) {
@@ -162,7 +247,7 @@ export class UserService {
             httpOptions)
     }
 
-    renew(userId) {
+    renew(userId: string) {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -285,7 +370,7 @@ export class UserService {
             httpOptions)
     }
 
-    getUser(id: string) {
+    getUser(id: string): Observable<User> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -293,10 +378,13 @@ export class UserService {
         };
         return this.http.get(
             environment.apiUrl + '/user/' + id,
-            httpOptions)
+            httpOptions
+        ).pipe(map(response => {
+            return this.mapToUser(response);
+        }));
     }
 
-    list() {
+    list(): Observable<User[]> {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
@@ -304,11 +392,15 @@ export class UserService {
         };
         return this.http.get(
             environment.apiUrl + '/user?short=true',
-            httpOptions).pipe(map((response: any[]) => {
-                return response.sort(function (a,b) {
-                    return a.uid.localeCompare(b.uid);
-                });
-            }));
+            httpOptions
+        ).pipe(map((response: any[]) => {
+            response.sort(function (a, b) {
+                return a.uid.localeCompare(b.uid);
+            });
+            return response.map(item => {
+                return this.mapToUser(item);
+            });
+        }));
     }
 
     removeFromProject(userId: string, projectId: string) {
@@ -323,17 +415,17 @@ export class UserService {
             httpOptions)
     }
 
-    register(userId: string, userInfo) {
+    register(userId: string, user: User) {
         //let user = this.authService.profile;
         let httpOptions = {
         };
         return this.http.post(
             environment.apiUrl + '/user/' + userId,
-            userInfo,
+            user,
             httpOptions)
     }
 
-    extend(userId, regKey) {
+    extend(userId: string, regKey: number) {
         //console.log(environment.apiUrl + '/user/' + userId + '/renew/' + regKey)
         let httpOptions = {
             headers: new HttpHeaders({
@@ -345,7 +437,7 @@ export class UserService {
         )
     }
 
-    add_note(userId, note) {
+    add_note(userId: string, note: string) {
         //console.log(environment.apiUrl + '/user/' + userId + '/renew/' + regKey)
         let httpOptions = {
             headers: new HttpHeaders({
@@ -359,7 +451,7 @@ export class UserService {
         )
     }
 
-    unlock(userId) {
+    unlock(userId: string) {
         let httpOptions = {
             //headers: new HttpHeaders({
             //  'x-api-key': localStorage.getItem('my-api-key')
