@@ -171,7 +171,7 @@ export class ProjectsComponent implements OnInit {
                 this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
                     resp => {
                         this.new_project = new Project();
-                        this.new_project_expire = null;
+                        this.new_project_expire = '';
                     },
                     err => {
                         console.log('failed  to add user to project');
