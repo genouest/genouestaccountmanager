@@ -82,6 +82,7 @@ export class ProjectsComponent implements OnInit {
         this.all_users = [];
         this.new_project = new Project();
         this.new_group = new Group();
+        this.new_project_expire = '';
 
         this.project_list(true);
         this.pending_list(true);
