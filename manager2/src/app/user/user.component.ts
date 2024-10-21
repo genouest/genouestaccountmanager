@@ -192,7 +192,7 @@ export class UserComponent implements OnInit {
 
     otp: string
 
-    group_exists: boolean
+    missing_group: string
     new_group: Group
 
     grp_success_msg: string
@@ -230,7 +230,7 @@ export class UserComponent implements OnInit {
         this.password1  = ''
         this.password2 = ''
 
-        this.group_exists = true;
+        this.missing_group = "";
         this.new_group = new Group();
 
         this.notify_subject = ''
@@ -326,7 +326,7 @@ export class UserComponent implements OnInit {
     _loadGroups(groups: Group[]) {
         groups.sort(this._compareName)
         this.groups = groups;
-        this.group_exists = true;
+        this.missing_group = "";
         let found = false;
         for (let i = 0; i < groups.length; i++) {
             if (groups[i].name == this.user.group) {
@@ -336,7 +336,7 @@ export class UserComponent implements OnInit {
         }
         if (!found) {
           this.groups.push(this.groupService.mapToGroup({ name: this.user.group, new: true }));
-          this.group_exists = false;
+          this.missing_group = this.user.group;
           this.new_group.name = this.user.group;
         }
     }
