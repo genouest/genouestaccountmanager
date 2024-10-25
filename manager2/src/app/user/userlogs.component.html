@@ -15,7 +15,7 @@
             </ng-template>
             <ng-template pTemplate="body" let-hist>
                   <tr>
-                <td>{{date_convert(hist.date)}}</td>
+                <td>{{hist.date | date}}</td>
                 <td>{{hist.action}}</td>
                   </tr>
             </ng-template>

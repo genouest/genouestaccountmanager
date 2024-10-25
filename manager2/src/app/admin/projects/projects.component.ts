@@ -1,11 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
-import { GroupsService } from 'src/app/admin/groups/groups.service';
-import { UserService } from 'src/app/user/user.service';
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
+import { User, UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
-
 import { Table } from 'primeng/table'
 
 
@@ -30,22 +29,23 @@ export class ProjectsComponent implements OnInit {
     add_project_msg: string
     add_project_error_msg: string
 
-    pending_projects: any[]
-    projects: any[]
-    expired_projects: any[]
-    groups: any[]
-    all_users: any[]
-    new_project: any
-    new_group: any
+    pending_projects: Project[]
+    projects: Project[]
+    expired_projects: Project[]
+    groups: Group[]
+    all_users: User[]
+    new_project: Project
+    new_project_expire: string
+    new_group: Group
 
     day_time: number
 
-    pending_msg: any
-    pending_err_msg: any
+    pending_msg: string
+    pending_err_msg: string
 
-    default_path: any
-    default_size: any
-    default_cpu: any
+    default_path: string
+    default_size: number
+    default_cpu: number
 
     constructor(
         private route: ActivatedRoute,
@@ -80,23 +80,9 @@ export class ProjectsComponent implements OnInit {
         this.expired_projects = [];
         this.groups = [];
         this.all_users = [];
-        this.new_project = {
-            id: '',
-            owner: '',
-            group: '',
-            size: 0,
-            cpu: 0,
-            expire: '',
-            orga: '',
-            description: '',
-            access: 'Group',
-            path: ''
-        };
-        this.new_group = {
-            name: '',
-            owner: '',
-            description: '',
-        }
+        this.new_project = new Project();
+        this.new_group = new Group();
+        this.new_project_expire = '';
 
         this.project_list(true);
         this.pending_list(true);
@@ -118,7 +104,8 @@ export class ProjectsComponent implements OnInit {
         this.configService.config.subscribe(
             resp => {
                 this.config = resp;
-                this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+                this.new_project_expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+                this.new_project.expire = new Date(this.new_project_expire).getTime();
                 if (this.config.project) {
                     if (this.config.project.default_path) {
                         this.default_path = this.config.project.default_path;
@@ -140,15 +127,16 @@ export class ProjectsComponent implements OnInit {
     }
 
 
-    update_project_on_event(new_value) {
-        let tmpprojectid = latinize(new_value.toLowerCase()).replace(/[^0-9a-z]+/gi, '_');
-        this.new_project.path = this.config.project.default_path + '/' + tmpprojectid;
+    update_project_on_event(new_value: string) {
+        let tmp_project_id: string = latinize(new_value.toLowerCase()).replace(/[^0-9a-z]+/gi, '_');
+        this.new_project.path = this.config.project.default_path + '/' + tmp_project_id;
         // warning: for this.new_project.id, (ngModelChange) must be after [ngModel] in html line
         // about order, see: https://medium.com/@lukaonik/how-to-fix-the-previous-ngmodelchange-previous-value-in-angular-6c2838c3407d
-        this.new_project.id = tmpprojectid; // todo: maybe add an option to enable or disable this one
+        this.new_project.id = tmp_project_id; // todo: maybe add an option to enable or disable this one
 
-        if (!this.new_project.expire) {
-            this.new_project.expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+        if (!this.new_project_expire) {
+            this.new_project_expire = this.date_convert(new Date().getTime() + this.config.project.default_expire * this.day_time)
+            this.new_project.expire = new Date(this.new_project_expire).getTime();
         }
 
         if (!this.new_project.size || this.new_project.size == 0) {
@@ -159,21 +147,22 @@ export class ProjectsComponent implements OnInit {
             this.new_project.cpu = this.default_cpu;
         }
 
-        this.new_group.owner = this.new_project.owner
-        this.new_group.name = "prj_" + tmpprojectid
+        this.new_group.owner = this.new_project.owner;
+        this.new_group.name = "prj_" + tmp_project_id;
     }
 
 
     add_project() {
         this.notification = "";
 
-        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner) {
-            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.date_convert(this.new_project.expire);
+        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner || !this.new_project_expire) {
+            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.new_project_expire;
             return;
         }
         this.reset_msgs()
-        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime(), group: this.config.project.enable_group ? this.new_project.group : ''}
-        this.projectService.add(project_to_send).subscribe(
+        this.new_project.expire = new Date(this.new_project_expire).getTime();
+        this.new_project.group = this.config.project.enable_group ? this.new_project.group : '';
+        this.projectService.add(this.new_project).subscribe(
             resp => {
                 this.add_project_msg = resp.message;
                 this.project_list();
@@ -181,7 +170,8 @@ export class ProjectsComponent implements OnInit {
 
                 this.userService.addToProject(this.new_project.owner, this.new_project.id).subscribe(
                     resp => {
-                        this.new_project = {};
+                        this.new_project = new Project();
+                        this.new_project_expire = '';
                     },
                     err => {
                         console.log('failed  to add user to project');
@@ -198,14 +188,15 @@ export class ProjectsComponent implements OnInit {
 
     edit_project() {
 
-        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner || !this.new_project.expire) {
-            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.date_convert(this.new_project.expire);
+        if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner || !this.new_project_expire) {
+            this.add_project_error_msg = "Project Id, group, owner and expiration date are required fields " + this.new_project.id + this.new_project.group + this.new_project.owner + this.new_project_expire;
             return;
         }
 
         this.reset_msgs()
-        const project_to_send = {...this.new_project, expire: new Date(this.new_project.expire).getTime(), group: this.config.project.enable_group ? this.new_project.group : ''}
-        this.projectService.edit(project_to_send).subscribe(
+        this.new_project.expire = new Date(this.new_project_expire).getTime();
+        this.new_project.group = this.config.project.enable_group ? this.new_project.group : '';
+        this.projectService.edit(this.new_project).subscribe(
             resp => {
                 this.add_project_msg = resp['message'];
             },
@@ -222,7 +213,7 @@ export class ProjectsComponent implements OnInit {
                 if (resp.length == 0) {
                     return;
                 }
-                let projects = resp;
+                let projects: Project[] = resp;
                 let expired_projects = [];
                 let active_projects = [];
                 for (let i = 0; i < projects.length; i++) {
@@ -265,7 +256,7 @@ export class ProjectsComponent implements OnInit {
                 if (data.length > 0) {
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {
-                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000
+                        data[i].created_at = parseInt(data[i]._id.substring(0, 8), 16) * 1000
                     }
                 };
                 this.pending_number = data.length;
@@ -276,7 +267,7 @@ export class ProjectsComponent implements OnInit {
     }
 
 
-    date_convert = function timeConverter(tsp) {
+    date_convert = function timeConverter(tsp: number): string {
         let res;
         try {
             var a = new Date(tsp);
@@ -288,17 +279,15 @@ export class ProjectsComponent implements OnInit {
         return res;
     }
 
-    accept_project(project) {
-        this.modify_project(project);
-        this.add_project();
-    }
-
-    modify_project(project) {
-        this.new_project = {...project, expire: this.date_convert(project.expire)};
+    modify_project(input_project: any) {
+        const project: Project = this.projectService.mapToProject(input_project);
+        this.new_project = project;
+        this.new_project_expire = this.date_convert(project.expire);
         this.update_project_on_event(project.id);
     }
 
-    reject_project(project) {
+    reject_project(input_project: any) {
+        const project: Project = this.projectService.mapToProject(input_project);
         this.reset_msgs()
         this.projectService.delete_pending(project.uuid).subscribe(
             resp => {

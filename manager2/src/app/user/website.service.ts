@@ -11,7 +11,7 @@ export class Website {
     description: string
     owner: string
 
-    constructor(name: string, url: string, desc: string, owner: string) {
+    constructor(name: string = '', url: string = '', desc: string = '', owner: string = '') {
         this.name = name
         this.url = url
         this.description = desc
@@ -95,7 +95,7 @@ export class WebsiteService {
 
     }
 
-    changeOwner(siteName, siteOldOwner, siteNewOwner) {
+    changeOwner(siteName: string, siteOldOwner: string, siteNewOwner: string) {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({

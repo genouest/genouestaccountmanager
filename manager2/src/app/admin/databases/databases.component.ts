@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
-import { UserService } from 'src/app/user/user.service';
+import { User, UserService } from 'src/app/user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -13,17 +13,17 @@ export class DatabasesComponent implements OnInit {
     @ViewChild('dtp') table: Table;
 
     db: Database
-    owner_db_name: any
-    owner_db_owner: any
+    owner_db_name: Database
+    owner_db_owner: User
     chowner_msg: string
     chowner_err_msg: string
 
     databases: Database[]
-    users: any
+    users: User[]
     selecteddb: Database[]
 
     requests_visible: boolean
-    pending_databases: any
+    pending_databases: Database[]
     pending_number: number
     
     msg: string
@@ -42,7 +42,7 @@ export class DatabasesComponent implements OnInit {
 
 
     ngOnInit() {
-        this.db = new Database('', 'mysql', '', '', false, "", "", 0, true);
+        this.db = new Database();
         this.db_list();
         this.userService.list().subscribe(
             resp => { this.users = resp; },
@@ -99,7 +99,7 @@ export class DatabasesComponent implements OnInit {
         this.dbService.declare(this.db).subscribe(
             resp => {
                 this.msg = resp['message'];
-                this.db = new Database('', 'mysql', '', '', false, "", "", 0, true);
+                this.db = new Database();
                 this.dbService.list().subscribe(
                     resp => { this.databases = resp; },
                     err => { console.log('failed to list databases'); }
@@ -122,7 +122,7 @@ export class DatabasesComponent implements OnInit {
                 if (data.length > 0) { 
                     this.requests_visible = true;
                     for (let i = 0; i < data.length; i++) {
-                        data[i].created_at = parseInt(data[i]['_id'].substring(0, 8), 16) * 1000;
+                        data[i].created_at = parseInt(data[i]._id.substring(0, 8), 16) * 1000;
                     }
                 }
                 this.pending_number = data.length;
@@ -164,17 +164,7 @@ export class DatabasesComponent implements OnInit {
         for (var i = 0; i < this.selecteddb.length; i++) {
             this.dbmsg='';
             this.dbmsg_error='';
-            this.dbService.create(new Database(
-                this.selecteddb[i].name,
-                this.selecteddb[i].type,
-                this.selecteddb[i].host,
-                this.selecteddb[i].owner,
-                this.selecteddb[i].create,
-                this.selecteddb[i].usage,
-                this.selecteddb[i].size,
-                this.selecteddb[i].expire,
-                this.selecteddb[i].single_user
-            )).subscribe(
+            this.dbService.create(this.selecteddb[i]).subscribe(
                 resp => {
                     this.dbmsg = resp['message'];
                 },

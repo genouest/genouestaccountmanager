@@ -57,18 +57,6 @@ export class LogsComponent implements OnInit {
         return (n < 10 ? '0' : '') + n;
     }
 
-    date_convert = function timeConverter(tsp){
-        let res;
-        try {
-            var a = new Date(tsp);
-            res = a.toISOString().substring(0, 10);
-        }
-        catch (e) {
-            res = '';
-        }
-        return res;
-    }
-
     getLogs(): Observable<any> {
         //let user = this.authService.profile;
         let httpOptions = {

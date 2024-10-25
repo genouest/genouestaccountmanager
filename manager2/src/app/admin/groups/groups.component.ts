@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { GroupsService } from './groups.service';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Group, GroupsService } from './groups.service';
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
+import { User } from '../../user/user.service';
 
 import { Table } from 'primeng/table';
 
@@ -19,23 +20,19 @@ export class GroupsComponent implements OnInit {
     rm_grp_err_msg: string
     msg: string
 
-    selectedGroup: any
-    new_group: any
+    selectedGroup: Group
+    new_group: Group
 
-    projects: any[]
-    groups: any[]
-    users: any[]
+    projects: Project[]
+    groups: Group[]
+    users: User[]
 
     constructor(
         private groupsService: GroupsService,
         private projectsService: ProjectsService
     ) {
         this.selectedGroup = null;
-        this.new_group = {
-            name: '',
-            owner: '',
-            description: '',
-        }
+        this.new_group = new Group();
         this.projects = [];
         this.groups = [];
         this.users = [];
@@ -81,7 +78,7 @@ export class GroupsComponent implements OnInit {
         )
     }
 
-    delete_group(group){
+    delete_group(){
         this.groupsService.delete(this.selectedGroup.name).subscribe(
             resp => {
                 this.groupsService.list().subscribe(
@@ -117,7 +114,8 @@ export class GroupsComponent implements OnInit {
         )
     }
 
-    show_group_users(group) {
+    show_group_users(input_group: any) {
+        const group: Group = this.groupsService.mapToGroup(input_group);
         this.msg = '';
         this.rm_grp_err_msg = '';
         this.rm_grp_msg_ok = '';
@@ -138,7 +136,7 @@ export class GroupsComponent implements OnInit {
                                     }
                                 }
                             }
-                            this.users[i].authorized = is_authorized;
+                            this.users[i].temp = { ...this.users[i].temp, 'authorized': is_authorized };
                         }
                     },
                     err => console.log('failed to get users in group', group)

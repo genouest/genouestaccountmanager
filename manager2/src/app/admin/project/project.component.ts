@@ -1,10 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/config.service';
-import { ProjectsService } from 'src/app/admin/projects/projects.service';
-import { GroupsService } from 'src/app/admin/groups/groups.service';
-import { UserService } from 'src/app/user/user.service';
-
+import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
+import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
+import { User, UserService } from 'src/app/user/user.service';
 import { Table } from 'primeng/table';
 
 @Component({
@@ -16,10 +15,11 @@ export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
 
     config: any
-    project: any
-    groups: any[]
-    users: any[]
-    all_users: any[]
+    project: Project
+    project_expire: string
+    groups: Group[]
+    users: User[]
+    all_users: User[]
     prj_err_msg: string
     prj_msg: string
     oldGroup: string
@@ -38,18 +38,7 @@ export class ProjectComponent implements OnInit {
         private projectsService: ProjectsService,
         private userService: UserService
     ) {
-        this.project = {
-            id: '',
-            owner: '',
-            group: '',
-            size: 0,
-            cpu: 0,
-            expire: '',
-            orga: '',
-            description: '',
-            access: 'Group',
-            path: ''
-        }
+        this.project = new Project();
         this.users = [];
         this.groups = [];
         this.all_users = [];
@@ -85,18 +74,18 @@ export class ProjectComponent implements OnInit {
 
     }
 
-    show_project_users(projectId) {
+    show_project_users(projectId: string) {
         this.projectsService.get(projectId).subscribe(
             resp => {
                 this.project = resp;
-                this.project.expire = this.date_convert(resp.expire);
+                this.project_expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
                     resp => {
                         this.users = resp;
                         this.oldGroup = this.project.group;
                         for(var i = 0; i<resp.length;i++){
-                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0){
-                                this.users[i].access=true;
+                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0) {
+                                this.users[i].temp = { ...this.users[i].temp, 'access': true };
                             }
                         }
                         this.remove_user_admin = '';
@@ -136,7 +125,7 @@ export class ProjectComponent implements OnInit {
     }
 
     // todo: maybe move this in backend too
-    update_users_group(usersList, newGroupId){
+    update_users_group(usersList: User[], newGroupId: string) {
         for(var i = 0; i< usersList.length; i++){
             this.userService.addGroup(usersList[i].uid, newGroupId).subscribe(
                 resp => {},
@@ -145,15 +134,15 @@ export class ProjectComponent implements OnInit {
         };
     }
 
-    delete_project(project, userList) {
+    delete_project() {
         this.admin_user_err_msg = '';
-        for(var i = 0; i < userList.length; i++){
-            this.userService.removeFromProject(userList[i].uid, project.id)
+        for(var i = 0; i < this.users.length; i++){
+            this.userService.removeFromProject(this.users[i].uid, this.project.id)
                 .subscribe(
                     resp => {},
                     err => this.prj_err_msg = err.error.message);
         }
-        this.projectsService.delete(project.id).subscribe(
+        this.projectsService.delete(this.project.id).subscribe(
             resp => {
                 this.router.navigate(['/admin/project'], { queryParams: {'deleted': 'ok'}})
             },
@@ -161,21 +150,22 @@ export class ProjectComponent implements OnInit {
         )
     }
 
-    update_project(project) {
-        const project_to_send = {...project, expire: new Date(project.expire).getTime(), group: this.config.project.enable_group ? project.group : ''}
-        this.projectsService.update(project.id, project_to_send).subscribe(
+    update_project() {
+        this.project.expire = new Date(this.project_expire).getTime();
+        this.project.group = this.config.project.enable_group ? this.project.group : ''
+        this.projectsService.update(this.project.id, this.project).subscribe(
             resp => {
                 this.prj_msg = resp['message'];
-                if(this.config.project.enable_group && project.group !== this.oldGroup) {
-                    this.update_users_group(this.users, project.group);
+                if(this.config.project.enable_group && this.project.group !== this.oldGroup) {
+                    this.update_users_group(this.users, this.project.group);
                 }
-                this.show_project_users(project.id);
+                this.show_project_users(this.project.id);
             },
             err => this.prj_err_msg = err.error.message
         )
     }
 
-    date_convert = function timeConverter(tsp){
+    date_convert = function timeConverter(tsp: number): string {
         let res;
         try {
             var a = new Date(tsp);

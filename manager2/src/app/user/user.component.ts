@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
-import { UserService } from './user.service'
+import { User, UserService } from './user.service'
 import { AuthService } from '../auth/auth.service'
 import { ConfigService } from '../config.service'
 import { Website, WebsiteService } from './website.service'
 import { Database, DatabaseService} from './database.service'
 import { PluginService} from '../plugin/plugin.service'
-import { GroupsService } from '../admin/groups/groups.service'
-import { ProjectsService } from '../admin/projects/projects.service'
+import { Group, GroupsService } from '../admin/groups/groups.service'
+import { Project, ProjectsService } from '../admin/projects/projects.service'
 
 import { ActivatedRoute, Router } from '@angular/router';
 import { WindowWrapper } from '../windowWrapper.module';
@@ -36,7 +36,7 @@ import {
     styleUrls: ['./user-extra.component.css']
 })
 export class UserExtraComponent implements OnInit {
-    @Input() user: any
+    @Input() user: User
     @Output() extraValues = new EventEmitter<any>();
     config: any
     //@ViewChild('extras') extras: any
@@ -79,7 +79,7 @@ export class UserExtraComponent implements OnInit {
     }
 
 
-    extraChange(title, data) {
+    extraChange(title: string, data) {
         console.debug('event', data.target.checked, data.target.value)
         for (let i = 0; i < this.extras.length; i++) {
             let extra = this.extras[i];
@@ -121,13 +121,12 @@ export class UserComponent implements OnInit {
 
     user_projects: any[]
     new_projects: any[]
-    projects: any[]
-    user: any
-    session_user: any
+    projects: Project[]
+    user: User
+    session_user: User
     config: any
-    groups: any[]
+    groups: Group[]
     subscribed: boolean
-    selected_group: any
     quotas: any = []
     u2f: any
     timeoutId: any
@@ -194,7 +193,7 @@ export class UserComponent implements OnInit {
     otp: string
 
     missing_group: string
-    new_group: any
+    new_group: Group
 
     grp_success_msg: string
     grp_err_msg: string
@@ -217,9 +216,9 @@ export class UserComponent implements OnInit {
         this.user_projects = []
         this.new_projects = []
         this.session_user = this.authService.profile
-        this.user = { }
+        this.user = new User()
         this.config = { }
-        this.website = new Website('', '', '', '')
+        this.website = new Website()
         this.websites = []
         this.databases = []
         this.plugins = []
@@ -231,12 +230,8 @@ export class UserComponent implements OnInit {
         this.password1  = ''
         this.password2 = ''
 
-        this.missing_group = ""
-        this.new_group = {
-            name: '',
-            owner: '',
-            description: '',
-        }
+        this.missing_group = "";
+        this.new_group = new Group();
 
         this.notify_subject = ''
         this.notify_message = ''
@@ -248,18 +243,6 @@ export class UserComponent implements OnInit {
 
         this.otp_msg =  ""
         this.otp_err_msg =  ""
-    }
-
-    date_convert = function timeConverter(tsp) {
-        let res;
-        try {
-            var a = new Date(tsp);
-            res = a.toISOString().substring(0, 10);
-        }
-        catch (e) {
-            res = '';
-        }
-        return res;
     }
 
     onExtraValue(extras: any) {
@@ -288,7 +271,7 @@ export class UserComponent implements OnInit {
             );
             this.userService.getUser(params['id']).subscribe(
                 resp => {
-                    if (!resp['u2f']) { resp['u2f'] = { }}
+                    if (!resp.u2f) { resp.u2f = { }; }
                     this.user = resp;
                     this.loadUserInfo();
                 },
@@ -324,7 +307,7 @@ export class UserComponent implements OnInit {
         );
     }
 
-    _compareName(a,b) {
+    _compareName(a: Group, b: Group): number {
         if (a.name < b.name)
             return -1;
         if (a.name > b.name)
@@ -332,7 +315,7 @@ export class UserComponent implements OnInit {
         return 0;
     }
 
-    _compareId(a,b) {
+    _compareId(a: Project, b: Project): number {
         if (a.id < b.id)
             return -1;
         if (a.id > b.id)
@@ -340,10 +323,10 @@ export class UserComponent implements OnInit {
         return 0;
     }
 
-    _loadGroups(groups) {
+    _loadGroups(groups: Group[]) {
         groups.sort(this._compareName)
         this.groups = groups;
-        this.missing_group= "";
+        this.missing_group = "";
         let found = false;
         for (let i = 0; i < groups.length; i++) {
             if (groups[i].name == this.user.group) {
@@ -352,13 +335,13 @@ export class UserComponent implements OnInit {
             }
         }
         if (!found) {
-          this.groups.push({name: this.user.group, new: true});
+          this.groups.push(this.groupService.mapToGroup({ name: this.user.group, new: true }));
           this.missing_group = this.user.group;
           this.new_group.name = this.user.group;
         }
     }
 
-    _loadProjects(projects) {
+    _loadProjects(projects: Project[]) {
         this.projects = projects;
         let user_projects = [];
         let new_projects = [];
@@ -529,7 +512,7 @@ export class UserComponent implements OnInit {
     }
 
     add_secondary_group() {
-        let sgroup =this.user.newgroup;
+        let sgroup = this.user.newgroup;
         if (sgroup.trim() != '') {
             this.userService.addGroup(this.user.uid, sgroup).subscribe(
                 resp => {
@@ -546,13 +529,13 @@ export class UserComponent implements OnInit {
         this.userService.deleteGroup(this.user.uid, sgroup).subscribe(
             resp => {
                 this.rm_group_msg = resp['message'];
-                let tmpgroups = [];
+                let tmp_groups: string[] = [];
                 for (var t = 0; t < this.user.secondarygroups.length; t++) {
                     if (this.user.secondarygroups[t] != sgroup) {
-                        tmpgroups.push(this.user.secondarygroups[t]);
+                        tmp_groups.push(this.user.secondarygroups[t]);
                     }
                 }
-                this.user.secondarygroups = tmpgroups;
+                this.user.secondarygroups = tmp_groups;
             },
             err => console.log('failed to remove from secondary group')
         );
@@ -620,7 +603,7 @@ export class UserComponent implements OnInit {
                 this.user.apikey = resp['apikey'];
                 this.authService.updateApiKey(this.user.apikey);
             },
-            err => console.log('failed to generate apikey')
+            err => console.log('failed to generate api key')
         );
     }
 
@@ -648,19 +631,15 @@ export class UserComponent implements OnInit {
         );
     }
 
-    change_group() {
-        this.user.group = this.selected_group.name;
-    }
-
     update_info() {
         this.update_msg = '';
         this.update_error_msg = '';
         if(this.user.firstname == '' || this.user.firstname === null || this.user.firstname === undefined) {
-            this.update_error_msg = 'Missing field: firstname';
+            this.update_error_msg = 'Missing field: first name';
             return;
         }
         if(this.user.lastname == '' || this.user.lastname === null || this.user.lastname === undefined) {
-            this.update_error_msg = 'Missing field: lastname';
+            this.update_error_msg = 'Missing field: last name';
             return;
         }
         if(this.user.email == '' || this.user.email === null || this.user.email === undefined) {
@@ -776,18 +755,18 @@ export class UserComponent implements OnInit {
         this.add_to_project_error_msg = '';
         this.add_to_project_grp_msg = '';
         this.request_mngt_error_msg = '';
-        let newproject = this.user.newproject;
+        let new_project = this.user.newproject;
         for (var i = 0; i < this.user_projects.length; i++) {
-            if (newproject.id === this.user_projects[i].id) {
+            if (new_project.id === this.user_projects[i].id) {
                 this.add_to_project_error_msg = "User is already in project";
                 return;
             }
         }
-        if (newproject) {
-            this.userService.addToProject(this.user.uid, newproject.id).subscribe(
+        if (new_project) {
+            this.userService.addToProject(this.user.uid, new_project.id).subscribe(
                 resp => {
                     this.add_to_project_msg = resp['message'];
-                    this.user_projects.push({ id: newproject.id, owner: false, member: true });
+                    this.user_projects.push({ id: new_project.id, owner: false, member: true });
                 },
                 err => this.add_to_project_error_msg = err.error.message
             )
@@ -799,13 +778,13 @@ export class UserComponent implements OnInit {
         this.userService.removeFromProject(this.user.uid, project_id).subscribe(
             resp => {
                 this.remove_from_project_msg = resp['message'];
-                var tmpproject = [];
+                var tmp_project: any[] = [];
                 for (var t = 0; t < this.user_projects.length; t++) {
                     if (this.user_projects[t].id != project_id) {
-                        tmpproject.push(this.user_projects[t]);
+                        tmp_project.push(this.user_projects[t]);
                     }
                 }
-                this.user_projects = tmpproject;
+                this.user_projects = tmp_project;
             },
             err => this.remove_from_project_error_msg = err.error.message
         );

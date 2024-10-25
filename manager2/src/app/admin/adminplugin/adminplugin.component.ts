@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PluginService } from 'src/app/plugin/plugin.service';
 import { AuthService } from 'src/app/auth/auth.service';
+import { User } from '../../user/user.service';
 
 @Component({
     selector: 'app-adminplugin',
@@ -11,7 +12,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 export class AdminpluginComponent implements OnInit {
 
     pluginId: string
-    user: any
+    user: User
 
     constructor(
         private route: ActivatedRoute,
