@@ -389,12 +389,13 @@ async function create_tp_reservation(reservation_id) {
     }
 }
 
-async function tp_reservation(userId, from_date, to_date, quantity, about, group_or_project, name) {
+async function tp_reservation(userId, from_date, to_date, expire_date, quantity, about, group_or_project, name) {
     // Create a reservation
     let reservation = {
         'owner': userId,
         'from': from_date,
         'to': to_date,
+        'expire': expire_date,
         'quantity': quantity,
         'accounts': [],
         'about': about,

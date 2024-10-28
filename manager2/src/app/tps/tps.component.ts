@@ -40,6 +40,7 @@ export class TpsComponent implements OnInit {
     quantity: number
     fromDate: Date
     toDate: Date
+    expirationDate: Date
     about: string
     authorized: boolean
 
@@ -48,7 +49,7 @@ export class TpsComponent implements OnInit {
 
     activeDayIsOpen: boolean = true;
 
-    new_expire: Date
+    new_toDate: Date
 
     constructor(
         private authService: AuthService,
@@ -111,6 +112,7 @@ export class TpsComponent implements OnInit {
         );
         this.fromDate = new Date();
         this.toDate = new Date();
+        this.expirationDate = new Date();
         this.viewDate = new Date();
         this.quantity = 1;
         this.events = [];
@@ -149,7 +151,8 @@ export class TpsComponent implements OnInit {
             }
             const fromDate = new Date(this.fromDate).getTime();
             const toDate = new Date(this.toDate).getTime();
-            if(isNaN(fromDate) || isNaN(toDate)) {
+            const expirationDate = new Date(this.expirationDate).getTime();
+            if(isNaN(fromDate) || isNaN(toDate) || isNaN(expirationDate)) {
                 this.reserrmsg = 'Invalid date format';
                 return;
             }
@@ -157,14 +160,15 @@ export class TpsComponent implements OnInit {
                 this.reserrmsg = 'End date must be superior to start date';
                 return;
             }
-            if(toDate < new Date().getTime()) {
-                this.reserrmsg = 'End date can not be in the past';
+            if(toDate < new Date().getTime() || expirationDate < new Date().getTime()) {
+                this.reserrmsg = 'End or expiration date can not be in the past';
                 return;
             }
             let reservation = {
                 quantity: this.quantity,
                 from: fromDate,
                 to: toDate,
+                expiration: expirationDate,
                 about: this.about,
                 group_or_project: this.group_or_project,
                 name: this.name
@@ -225,15 +229,15 @@ export class TpsComponent implements OnInit {
     extend_reservation() {
         this.msg = '';
         this.errmsg = '';
-        if(new Date(this.new_expire).getTime() < this.selectedEvent.meta.end) {
+        if(new Date(this.new_toDate).getTime() < this.selectedEvent.meta.end) {
             this.errmsg = 'Extended end date must be after current end date';
             return;
         }
-        if(new Date(this.new_expire).getTime() < new Date().getTime()) {
+        if(new Date(this.new_toDate).getTime() < new Date().getTime()) {
             this.errmsg = 'Extended end date can not be in the past';
             return;
         }
-        const extension = { 'to': new Date(this.new_expire).getTime() };
+        const extension = { 'to': new Date(this.new_toDate).getTime() };
         this.tpService.extend(this.selectedEvent.meta.id, extension).subscribe(
             resp => {
                 this.msg = resp['message'];
