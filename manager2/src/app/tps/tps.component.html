@@ -165,7 +165,7 @@
                 <div class="alert alert-success" *ngIf="resmsg">{{resmsg}}</div>
                 <div class="alert alert-danger" *ngIf="reserrmsg">{{reserrmsg}}</div>
                 <form #tpForm="ngForm" role="form" class="user-form form-horizontal" (ngSubmit)="reserve(tpForm)" novalidate>
-
+                    <div class="form-group row">
                     <div class="col-md-4">
                         <label for="quantity" class="control-label">Number of students</label>
                         <input required type="number" class="form-control" [(ngModel)]="quantity" name="quant" #quant="ngModel" id="tp_quantity"/>
@@ -206,6 +206,14 @@
                         </div>
                     </div>
 
+                    <div class="col-md-8">
+                        <label for="expire_date" class="control-label">
+                            Expire <small id="expirationHelp" class="text-muted"><i>(optional, date beyond which TP accounts are unaccessible, but not deleted)</i></small>
+                        </label>
+                        <input required [(ngModel)]="expireDate" type="date" class="form-control" name="expire" #expire="ngModel" id="tp_expire"/>
+                    </div>
+                    </div>
+
                     <div *ngIf="config && config.reservation && config.reservation.show_choice_in_ui" class="form-group row">
                         <div class="col-4">
                             <p>Associate account to:</p>
@@ -224,7 +232,6 @@
                         <label class="control-label"></label>
                         <button type="submit" class="p-button p-button-sm p-button-secondary">Reserve</button>
                     </div>
-
                 </form>
             </div>
         </div>
