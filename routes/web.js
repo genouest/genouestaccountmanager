@@ -31,7 +31,6 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
     } catch(e) {
         logger.error(e);
         res.status(404).send({message: 'User session not found'});
-        res.end();
         return;
     }
 
@@ -45,10 +44,32 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
+
+    try {
+        await dbsrv.mongo_web().findOne({name: req.params.id});
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'Website not found'});
+        return;
+    }
+    try {
+        await dbsrv.mongo_users().findOne({uid: req.params.old});
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'Old website owner not found'});
+        return;
+    }
+    try {
+        await dbsrv.mongo_users().findOne({uid: req.params.new});
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'New website owner not found'});
+        return;
+    }
+
     await dbsrv.mongo_web().updateOne({name: req.params.id},{'$set': {owner: req.params.new}});
     await dbsrv.mongo_events().insertOne({'owner': session_user.uid, 'date': new Date().getTime(), 'action': 'change website ' + req.params.id + ' owner to ' + req.params.new  , 'logs': []});
     res.send({message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new});
-    res.end();
 });
 
 router.get('/web', async function(req, res) {
