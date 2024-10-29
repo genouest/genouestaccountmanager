@@ -346,6 +346,17 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
         return;
     }
 
+    if (req.body.expire) {
+        if (req.body.expire < reservation.expire) {
+            res.status(403).send({message: 'Extended expiration date must be after current end date'});
+            return;
+        }
+        if (req.body.expire < new Date().getTime()) {
+            res.status(403).send({message: 'Extended expiration date can not be in the past'});
+            return;
+        }
+    }
+
     try {
         tpssrv.extend_tp_reservation(reservation, req.body);
     } catch (error) {

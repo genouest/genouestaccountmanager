@@ -50,6 +50,7 @@ export class TpsComponent implements OnInit {
     activeDayIsOpen: boolean = true;
 
     new_toDate: Date
+    new_expireDate: Date
 
     constructor(
         private authService: AuthService,
@@ -80,6 +81,7 @@ export class TpsComponent implements OnInit {
                         title: `${event.owner}, ${event.quantity} students`,
                         start: new Date(event.from),
                         end: new Date(event.to),
+                        expire: new Date(event.expire),
                         color: this.choseColor(event._id, event.over, event.created),
                         meta: {
                             'id': event._id,
@@ -112,7 +114,7 @@ export class TpsComponent implements OnInit {
         );
         this.fromDate = new Date();
         this.toDate = new Date();
-        this.expirationDate = new Date();
+        this.expirationDate = null;
         this.viewDate = new Date();
         this.quantity = 1;
         this.events = [];
@@ -151,7 +153,7 @@ export class TpsComponent implements OnInit {
             }
             const fromDate = new Date(this.fromDate).getTime();
             const toDate = new Date(this.toDate).getTime();
-            const expirationDate = new Date(this.expirationDate).getTime();
+            const expirationDate = this.expirationDate ? new Date(this.expirationDate).getTime() : toDate;
             if(isNaN(fromDate) || isNaN(toDate) || isNaN(expirationDate)) {
                 this.reserrmsg = 'Invalid date format';
                 return;
@@ -229,15 +231,16 @@ export class TpsComponent implements OnInit {
     extend_reservation() {
         this.msg = '';
         this.errmsg = '';
-        if(new Date(this.new_toDate).getTime() < this.selectedEvent.meta.end) {
+        const new_to_Date = new Date(this.new_toDate).getTime();
+        if(new_to_Date < this.selectedEvent.meta.end) {
             this.errmsg = 'Extended end date must be after current end date';
             return;
         }
-        if(new Date(this.new_toDate).getTime() < new Date().getTime()) {
+        if(new_to_Date < new Date().getTime()) {
             this.errmsg = 'Extended end date can not be in the past';
             return;
         }
-        const extension = { 'to': new Date(this.new_toDate).getTime() };
+        const extension = this.new_expireDate ? { 'to': new_to_Date, 'expire': new Date(this.new_expireDate).getTime() } : { 'to': new_to_Date };
         this.tpService.extend(this.selectedEvent.meta.id, extension).subscribe(
             resp => {
                 this.msg = resp['message'];
