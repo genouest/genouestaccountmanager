@@ -53,7 +53,7 @@
       <tbody>
           <tr *ngFor="let project of user_projects">
               <td><a routerLink="/admin/project/{{project.id}}"><span class="p-button p-button-sm p-button-primary">{{project.id}}</span></a></td>
-              <td><span *ngIf="project.group">x</span></td>
+              <td><span>{{project.group}}</span></td>
               <td><span *ngIf="project.owner">x</span></td>
               <td><span *ngIf="project.member">x</span></td>
               <td><app-my-delete-confirm [onConfirm]="remove_from_project" [data]="project.id"></app-my-delete-confirm></td>
