@@ -666,7 +666,7 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Missing field: why do you need an account';
             return;
         }
-        if (!this.user.firstname.match(/^[a-zA-Z]+$/) || !this.user.lastname.match(/^[a-zA-Z]+$/)) {
+        if (!this.user.firstname.match(/^[a-zA-Zà-ü]+$/) || !this.user.lastname.match(/^[a-zA-Zà-ü]+$/)) {
             this.update_error_msg = 'Name contains unauthorized characters';
             return;
         }
