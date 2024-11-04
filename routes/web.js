@@ -39,12 +39,15 @@ router.put('/web/:id/owner/:old/:new', async function(req, res) {
         return;
     }
     session_user.is_admin = isadmin;
-
     if(!session_user.is_admin) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
 
+    if (req.params.old == req.params.new) {
+        res.status(300).send({message: 'Old owner and new owner are the same person'});
+        return;
+    }
     try {
         await dbsrv.mongo_web().findOne({name: req.params.id});
     } catch(e) {

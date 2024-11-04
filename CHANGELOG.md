@@ -3,6 +3,8 @@
 ## 1.4.32 (Unreleased)
 
 * Clearer error message when adding a website
+* Add User, Project and Group static classes to front end (refactor)
+* Add checks for website owner update
 
 ## 1.4.31 (2024-09-27)
 
