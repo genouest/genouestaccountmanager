@@ -70,8 +70,8 @@
                                 <td>{{selectedEvent.end | date}}</td>
                             </tr>
                             <tr>
-                                <th>Expire</th>
-                                <td>{{selectedEvent.expire | date}}</td>
+                                <th>Lock</th>
+                                <td>{{selectedEvent.lock | date}}</td>
                             </tr>
                             <tr>
                                 <th>Name</th>
@@ -147,13 +147,13 @@
                     <input required id="new_to" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_toDate" type="date" class="form-control"/>
                 </div>
                 <div class="form-group row col-sm-12">
-                    <label for="new_expire">
-                        New Expiration Date <small class="text-muted"><i>
+                    <label for="new_lock">
+                        New Lock Date <small class="text-muted"><i>
                             (date beyond which TP accounts are inaccessible, but not deleted)
                             Optional
                         </i></small>
                     </label>
-                    <input id="new_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_expireDate" type="date" class="form-control"/>
+                    <input id="new_lock" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_lockDate" type="date" class="form-control"/>
                 </div>
                 </div>
                 <div class="modal-footer">
@@ -220,10 +220,10 @@
                     </div>
 
                     <div class="col-md-8">
-                        <label for="expire_date" class="control-label">
-                            Expire <small id="expirationHelp" class="text-muted"><i>(optional, date beyond which TP accounts are inaccessible, but not deleted)</i></small>
+                        <label for="lock_date" class="control-label">
+                            Lock <small id="lockHelp" class="text-muted"><i>(optional, date beyond which TP accounts are inaccessible, but not deleted)</i></small>
                         </label>
-                        <input [(ngModel)]="expireDate" type="date" class="form-control" name="expire" #expire="ngModel" id="tp_expire"/>
+                        <input [(ngModel)]="lockDate" type="date" class="form-control" name="lock" #lock="ngModel" id="tp_lock"/>
                     </div>
                     </div>
 

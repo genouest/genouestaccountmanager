@@ -171,10 +171,11 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
 }
 
 
-async function send_user_passwords(owner, from_date, to_date, users, group) {
+async function send_user_passwords(owner, from_date, to_date, lock_date, users, group) {
     logger.debug('send_user_passwords');
     let from = new Date(from_date);
     let to = new Date(to_date);
+    let lock = new Date(lock_date);
 
     let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>' + '\n';
     for(let i=0;i<users.length;i++) {
@@ -192,11 +193,11 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
             '#FROMDATE#':  from.toDateString(),
             '#TODATE#':  to.toDateString(),
             '#EXPIRATION#': CONFIG.tp.extra_expiration,
+            '#LOCKED#': lock.toDateString(),
             '#CREDENTIALS#': credentials_html, // should be converted by maisrv.send_notif_mail in plain text for text mail
             '#GROUP#': group,
             '#URL#': CONFIG.general.url,
             '#SUPPORT#': CONFIG.general.support
-
         });
     } catch(error) {
         logger.error(error);
@@ -289,9 +290,9 @@ async function remove_tp_reservation(reservation) {
 async function extend_tp_reservation(reservation, extension) {
     logger.debug('Extend reservation', reservation);
     try {
-        if (extension.expire) {
+        if (extension.lock) {
             await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, {
-                '$set': { 'to': extension.to, 'expire': extension.expire }
+                '$set': { 'to': extension.to, 'lock': extension.lock }
             });
         } else {
             await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, {
@@ -369,6 +370,7 @@ async function create_tp_reservation(reservation_id) {
             reservation.owner,
             reservation.from,
             reservation.to,
+            reservation.lock,
             activated_users,
             gpname
         );
@@ -394,13 +396,13 @@ async function create_tp_reservation(reservation_id) {
     }
 }
 
-async function tp_reservation(userId, from_date, to_date, expire_date, quantity, about, group_or_project, name) {
+async function tp_reservation(userId, from_date, to_date, lock_date, quantity, about, group_or_project, name) {
     // Create a reservation
     let reservation = {
         'owner': userId,
         'from': from_date,
         'to': to_date,
-        'expire': expire_date,
+        'lock': lock_date,
         'quantity': quantity,
         'accounts': [],
         'about': about,
