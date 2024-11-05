@@ -3,6 +3,7 @@
 ## 1.4.32 (Unreleased)
 
 * Clearer error message when adding a website
+* Fix error in 'projects' tab from user page
 
 ## 1.4.31 (2024-09-27)
 
