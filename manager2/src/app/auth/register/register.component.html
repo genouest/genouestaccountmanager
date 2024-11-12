@@ -10,21 +10,21 @@
             <hr>
             <div class="form-group row">
                 <div class="col-md-4">
-                    <label for="firstname">First name</label>
+                    <label for="firstname">First name  <span class="text-danger">*</span></label>
                     <input autocomplete="given-name" (ngModelChange)="update_user_id($event, 0)" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="first_name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-4">
-                    <label for="lastname">Last name</label>
+                    <label for="lastname">Last name  <span class="text-danger">*</span></label>
                     <input autocomplete="family-name" (ngModelChange)="update_user_id($event, 1)" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="last_name" type="text" class="form-control" required>
                 </div>
                 <div class="col-md-4">
-                    <label for="email">Username</label>
+                    <label for="email">Username  <span class="text-danger">*</span></label>
                     <input autocomplete="username" [ngModelOptions]="{standalone: true}" [(ngModel)]="user_id" type="text" id="userid" class="form-control" required />
 
                 </div>
             </div>
             <div class="form-group">
-                <label for="email">Professional email</label>
+                <label for="email">Professional email  <span class="text-danger">*</span></label>
                 <input autocomplete="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="email" type="email" id="email" class="form-control" required autofocus>
                 <small id="emailHelp" class="form-text text-muted">Please provide a professional email address (please avoid gmail, yahoo, etc.).</small>
             </div>
@@ -45,39 +45,60 @@
             <hr>
             <div class="form-group row">
                 <div class="col-md-6">
-                    <label for="lab">Laboratory</label>
+                    <label for="lab">Laboratory  <span class="text-danger">*</span></label>
                     <input [ngModelOptions]="{standalone: true}" [(ngModel)]="lab" type="text" id="lab" class="form-control" required>
                     <small id="labHelp" class="form-text text-muted">Research unit or laboratory.</small>
                 </div>
                 <div class="col-md-6">
-                    <label for="responsible">Manager</label>
+                    <label for="responsible">Manager  <span class="text-danger">*</span></label>
                     <input [ngModelOptions]="{standalone: true}" [(ngModel)]="responsible" id="responsible" type="text" class="form-control" required>
                     <small id="responsibleHelp" class="form-text text-muted">Director or supervisor name.</small>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="address">Address</label>
+                <label for="address">Address  <span class="text-danger">*</span></label>
                 <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="address" id="address" class="form-control" required autofocus></textarea>
             </div>
 
             <div class="form-group row">
                 <div class="col-md-4">
-                    <label for="zipCode">ZIP Code</label>
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="zipCode" id="zipCode" type="text" class="form-control" required>
+                    <label for="zipCode">ZIP Code <span class="text-danger">*</span></label>
+                    <input 
+                        [ngModelOptions]="{standalone: true}" 
+                        [(ngModel)]="zipCode" 
+                        id="zipCode" 
+                        type="text" 
+                        class="form-control" 
+                        required
+                    >
                 </div>
                 <div class="col-md-4">
-                    <label for="city">City</label>
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="city" id="city" type="text" class="form-control" required>
+                    <label for="city">City  <span class="text-danger">*</span></label>
+                    <input 
+                        [ngModelOptions]="{standalone: true}" 
+                        [(ngModel)]="city" 
+                        id="city" 
+                        type="text" 
+                        class="form-control" 
+                        required
+                    >
                 </div>
                 <div class="col-md-4">
-                    <label for="country">Country</label>
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="country" id="country" type="text" class="form-control" required>
+                    <label for="country">Country <span class="text-danger">*</span></label>
+                    <input 
+                        [ngModelOptions]="{standalone: true}" 
+                        [(ngModel)]="country" 
+                        id="country" 
+                        type="text" 
+                        class="form-control" 
+                        required
+                    >
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="Team">Team</label>
+                <label for="Team">Team  <span class="text-danger">*</span></label>
                 <input [ngModelOptions]="{standalone: true}" [(ngModel)]="team" type="text" id="team" class="form-control" placeholder="Lowercase and/or digits" required>
                 <small id="groupHelp" class="form-text text-muted">
                     Use the <i>institution_researchunit</i> format (ex: <b>inra_umr1246, cnrs_umr3503</b>).<br/>
@@ -89,7 +110,7 @@
             <i>Other information</i>
             <hr>
             <div class="form-group">
-                <label for="why">Why do you need an account</label>
+                <label for="why">Why do you need an account  <span class="text-danger">*</span></label>
                 <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="why" id="why" class="form-control" required></textarea>
                 <small id="responsibleHelp" class="form-text text-muted">
                     Please specify the scientific purpose of the usage and if you want to join a specific scientific group or project already present on our systems.
@@ -109,7 +130,7 @@
             <i>Terms of use</i>
             <hr>
             <div class="checkbox">
-                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required> I agree with the <a target="_blank" aria-label="terms of user" href="{{config.terms_of_use}}">terms of use</a> of the {{config.name}} platform</label>
+                <label><input type="checkbox" [ngModelOptions]="{standalone: true}" [(ngModel)]="agree" required> I agree with the <a target="_blank" aria-label="terms of user" href="{{config.terms_of_use}}">terms of use</a> of the {{config.name}} platform <span class="text-danger">*</span></label>
             </div>
             <div *ngIf="! session_user">
                 <button type="button" class="p-button p-button-lg btn-primary btn-block" [ngStyle]="{'display': 'block'}" (click)="register();">Register</button>
