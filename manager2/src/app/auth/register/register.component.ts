@@ -55,6 +55,10 @@ export class RegisterComponent implements OnInit {
         this.tutelle = tutelle;
     }
 
+    updateCountry(country: string) {
+        this.country = country;
+    }
+
     ngOnInit() {
         this.session_user = this.authService.profile;
         this.onExtraValue = this.onExtraValue.bind(this);
@@ -105,6 +109,7 @@ export class RegisterComponent implements OnInit {
     }
 
     register() {
+        console.log(this.country)
         this.msg = '';
         if(this.first_name == '' || this.first_name === null || this.first_name === undefined) {
             this.msg = 'Missing field: first name';

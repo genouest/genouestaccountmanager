@@ -49,6 +49,8 @@ import { UserLogsComponent } from './user/userlogs.component';
 import {TableModule} from 'primeng/table';
 import { environment } from '../environments/environment';
 import { TutelleComponent } from './utils/tutelle/tutelle.component';
+import { CountryComponent } from './utils/country/country.component';
+
 import * as Sentry from "@sentry/browser";
 
 if (environment.sentry) {
@@ -119,7 +121,8 @@ export class SentryErrorHandler implements ErrorHandler {
         FlashComponent,
         TagComponent,
         UserLogsComponent,
-        TutelleComponent
+        TutelleComponent,
+        CountryComponent
     ],
     imports: [
         BrowserModule,

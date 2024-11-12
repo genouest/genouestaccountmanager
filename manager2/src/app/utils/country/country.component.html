@@ -1,0 +1,14 @@
+<div class="col-md-4">
+    <label for="country">Country <span class="text-danger">*</span></label>
+    <select
+      id="country"
+      class="form-control"
+      (change)="onSelectCountry($event.target.value)"
+      required
+    >
+      <option value="" disabled selected>Select a country</option>
+      <option *ngFor="let country of countries" [value]="country.name">
+        {{ country.name }}
+      </option>
+    </select>
+  </div>
