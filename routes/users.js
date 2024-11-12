@@ -790,6 +790,10 @@ router.post('/user/:id', async function(req, res) {
         res.send({ status: 1, message: 'Missing field: country' });
         return;
     }
+    if (!req.body.tutelle) {
+        res.send({ status: 1, message: 'Missing field: tutelle' });
+        return;
+    }
     if (req.body.responsible=='' || req.body.responsible===null || req.body.responsible===undefined) {
         res.send({ status: 1, message: 'Missing field: Responsible/Manager' });
         return;
@@ -851,6 +855,7 @@ router.post('/user/:id', async function(req, res) {
         zipCode: req.body.zipCode,
         city: req.body.city,
         country: req.body.country,
+        tutelle: req.body.tutelle,
         lab: req.body.lab,
         responsible: req.body.responsible,
         team: req.body.team,
@@ -1547,6 +1552,9 @@ router.put('/user/:id', async function(req, res) {
     }
     if (req.body.country) {
         user.country = req.body.country;
+    }
+    if (req.body.tutelle) {
+        user.tutelle = req.body.tutelle;
     }
     if (req.body.lab) {
         user.lab = req.body.lab;

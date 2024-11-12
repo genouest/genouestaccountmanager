@@ -48,6 +48,7 @@ import { TagComponent } from './utils/tag/tag.component';
 import { UserLogsComponent } from './user/userlogs.component';
 import {TableModule} from 'primeng/table';
 import { environment } from '../environments/environment';
+import { TutelleComponent } from './utils/tutelle/tutelle.component';
 import * as Sentry from "@sentry/browser";
 
 if (environment.sentry) {
@@ -117,7 +118,8 @@ export class SentryErrorHandler implements ErrorHandler {
         AdminQuotaExamplePluginComponent,
         FlashComponent,
         TagComponent,
-        UserLogsComponent
+        UserLogsComponent,
+        TutelleComponent
     ],
     imports: [
         BrowserModule,

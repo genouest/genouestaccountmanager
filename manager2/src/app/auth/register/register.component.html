@@ -56,6 +56,8 @@
                 </div>
             </div>
 
+            <app-tutelle (tutelleSelected)="updateTutelle($event)"></app-tutelle>
+
             <div class="form-group">
                 <label for="address">Address  <span class="text-danger">*</span></label>
                 <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="address" id="address" class="form-control" required autofocus></textarea>

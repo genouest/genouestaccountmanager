@@ -1,0 +1,202 @@
+{
+  "EPST": [
+    {
+      "name": "CEMAGREF Centre national du machinisme agricole, du génie rural, des eaux et des forêts"
+    },
+    {
+      "name": "CNRS Centre national de la recherche scientifique"
+    },
+    {
+      "name": "INED Institut national d'études démographiques"
+    },
+    {
+      "name": "INRA Institut national de la recherche agronomique"
+    },
+    {
+      "name": "INRETS Institut national de recherche sur les transports et leur sécurité"
+    },
+    {
+      "name": "INRIA Institut national de recherche en informatique et en automatique"
+    },
+    {
+      "name": "INSERM Institut national de la santé et de la recherche médicale"
+    },
+    {
+      "name": "IRD Institut de recherche pour le développement"
+    },
+    {
+      "name": "LCPC Laboratoire central des ponts et chaussées"
+    }
+  ],
+  "EPIC": [
+    {
+      "name": "ADEME Agence de l'environnement et de la maîtrise de l'énergie"
+    },
+    {
+      "name": "ADIT Agence pour la diffusion de l'information technologique"
+    },
+    {
+      "name": "ANDRA Agence nationale de gestion des déchets radioactifs"
+    },
+    {
+      "name": "ANVAR Agence nationale de valorisation de la recherche"
+    },
+    {
+      "name": "BRGM Bureau de recherches géologiques et minières"
+    },
+    {
+      "name": "CEA Commissariat à l'énergie atomique"
+    },
+    {
+      "name": "CIRAD Centre de coopération international en recherche agronomique"
+    },
+    {
+      "name": "CNDP Centre national de documentation pédagogique"
+    },
+    {
+      "name": "CNED Centre national d'enseignement à distance"
+    },
+    {
+      "name": "CNES Centre national d'études spatiales"
+    },
+    {
+      "name": "CSI Cité des sciences et de l'industrie"
+    },
+    {
+      "name": "CSTB Centre scientifique et technique du bâtiment"
+    },
+    {
+      "name": "IFREMER Institut français de recherche pour l'exploitation de la mer"
+    },
+    {
+      "name": "INERIS Institut national de l'environnement industriel et des risques"
+    },
+    {
+      "name": "ONERA Office national d'études et de recherches aérospatiales"
+    }
+  ],
+  "EPA": [
+    {
+      "name": "CEE Centre d'études de l'emploi"
+    },
+    {
+      "name": "CINES Centre informatique national de l'enseignement supérieur"
+    },
+    {
+      "name": "INRP Institut national de recherche pédagogique"
+    },
+    {
+      "name": "EPA Jussieu : désamiantage, mise en sécurité et rénovation du site"
+    }
+  ],
+  "foundations": [
+    {
+      "name": "CEPH Centre d'étude du polymorphisme humain"
+    },
+    {
+      "name": "Institut Curie"
+    },
+    {
+      "name": "Institut Pasteur"
+    }
+  ],
+  "GIP": [
+    {
+      "name": "ANRS Agence nationale de la recherche contre le SIDA"
+    },
+    {
+      "name": "CNG Centre national de génotypage"
+    },
+    {
+      "name": "CNS Génoscope - Centre national de séquençage"
+    },
+    {
+      "name": "HMR Fonds de recherche Hoechst Marion Roussel"
+    },
+    {
+      "name": "IFRTP Institut pour la recherche et la technologie polaires"
+    },
+    {
+      "name": "OST Observatoire des sciences et techniques"
+    },
+    {
+      "name": "RENATER Réseau national pour la technologie, l'enseignement et la recherche"
+    }
+  ],
+  "universities": [
+    {
+      "name": "Université de Provence - Aix-Marseille I"
+    },
+    {
+      "name": "Université de la Méditerannée - Aix-Marseille II"
+    },
+    {
+      "name": "Université de droit, déconomie et des sciences - Aix-Marseille III"
+    },
+    {
+      "name": "Université d'Avignon et des pays du Vaucluse"
+    },
+    {
+      "name": "Université Picardie-Jules Verne Amiens"
+    },
+    {
+      "name": "Université de Technologie de Compiègne"
+    },
+    {
+      "name": "Université de Franche-Comté"
+    },
+    {
+      "name": "Université de Technologie de Belfort-Montbéliard"
+    },
+    {
+      "name": "Université de Bordeaux I - Sciences et technologies"
+    },
+    {
+      "name": "Université \"Victor Segalen\" - Bordeaux II"
+    },
+    {
+      "name": "Université Michel Montaigne - Bordeaux III"
+    },
+    {
+      "name": "Université Montesquieu - Bordeaux IV"
+    },
+    {
+      "name": "Université de Pau et des pays de l'Adour"
+    },
+    {
+      "name": "Université de Caen"
+    },
+    {
+      "name": "Université d'Auvergne - Clermont-Ferrand I"
+    },
+    {
+      "name": "Université Blaise Pascal - Clermont-Ferrand II"
+    },
+    {
+      "name": "Université Pascal Paoli : Corse"
+    },
+    {
+      "name": "Université de Bourgogne"
+    },
+    {
+      "name": "Université de Savoie (Chambéry)"
+    },
+    {
+      "name": "Université Joseph-Fourier - Grenoble I"
+    },
+    {
+      "name": "Université Pierre Mendes-France - Grenoble II"
+    },
+    {
+      "name": "Université Stendhal - Grenoble 3"
+    },
+    {
+      "name": "Institut National Polytechnique de Grenoble"
+    }
+  ],
+  "others": [
+    {
+      "name": "Not listed"
+    }
+  ]
+}

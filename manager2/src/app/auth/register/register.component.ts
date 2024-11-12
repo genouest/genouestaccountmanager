@@ -26,6 +26,7 @@ export class RegisterComponent implements OnInit {
     zipCode: string
     city: string
     country: string
+    tutelle: string
     lab: string
     responsible: string
     team: string
@@ -49,6 +50,10 @@ export class RegisterComponent implements OnInit {
         private http: HttpClient,
         private router: Router
     ) { }
+
+    updateTutelle(tutelle: string) {
+        this.tutelle = tutelle;
+    }
 
     ngOnInit() {
         this.session_user = this.authService.profile;
@@ -100,7 +105,6 @@ export class RegisterComponent implements OnInit {
     }
 
     register() {
-        console.log("t laaaa", this.zipCode)
         this.msg = '';
         if(this.first_name == '' || this.first_name === null || this.first_name === undefined) {
             this.msg = 'Missing field: first name';
@@ -136,6 +140,10 @@ export class RegisterComponent implements OnInit {
         }
         if (!this.country) {
             this.msg = 'Missing field: country';
+            return;
+        }
+        if (!this.tutelle) {
+            this.msg = 'Missing field: tutelle';
             return;
         }
         if(this.team == '' || this.team === null || this.team === undefined) {
@@ -174,6 +182,7 @@ export class RegisterComponent implements OnInit {
             zipCode: this.zipCode,
             city: this.city,
             country: this.country,
+            tutelle: this.tutelle,
             responsible: this.responsible,
             team: this.team,
             email: this.email,
