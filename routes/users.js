@@ -778,6 +778,18 @@ router.post('/user/:id', async function(req, res) {
         res.send({ status: 1, message: 'Missing field: address' });
         return;
     }
+    if (!req.body.zipCode) {
+        res.send({ status: 1, message: 'Missing field: zipCode' });
+        return;
+    } 
+    if (!req.body.city) {
+        res.send({ status: 1, message: 'Missing field: city' });
+        return;
+    } 
+    if (!req.body.country) {
+        res.send({ status: 1, message: 'Missing field: country' });
+        return;
+    }
     if (req.body.responsible=='' || req.body.responsible===null || req.body.responsible===undefined) {
         res.send({ status: 1, message: 'Missing field: Responsible/Manager' });
         return;
@@ -836,6 +848,9 @@ router.post('/user/:id', async function(req, res) {
         send_copy_to_support: req.body.send_copy_to_support,
         create_imap_mailbox: req.body.create_imap_mailbox,
         address: req.body.address,
+        zipCode: req.body.zipCode,
+        city: req.body.city,
+        country: req.body.country,
         lab: req.body.lab,
         responsible: req.body.responsible,
         team: req.body.team,
@@ -1523,6 +1538,15 @@ router.put('/user/:id', async function(req, res) {
     }
     if (req.body.address) {
         user.address = req.body.address;
+    }
+    if (req.body.zipCode) {
+        user.zipCode = req.body.zipCode;
+    }
+    if (req.body.city) {
+        user.city = req.body.city;
+    }
+    if (req.body.country) {
+        user.country = req.body.country;
     }
     if (req.body.lab) {
         user.lab = req.body.lab;

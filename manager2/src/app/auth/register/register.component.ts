@@ -23,6 +23,9 @@ export class RegisterComponent implements OnInit {
     first_name: string
     last_name: string
     address: string
+    zipCode: string
+    city: string
+    country: string
     lab: string
     responsible: string
     team: string
@@ -97,6 +100,7 @@ export class RegisterComponent implements OnInit {
     }
 
     register() {
+        console.log("t laaaa", this.zipCode)
         this.msg = '';
         if(this.first_name == '' || this.first_name === null || this.first_name === undefined) {
             this.msg = 'Missing field: first name';
@@ -120,6 +124,18 @@ export class RegisterComponent implements OnInit {
         }
         if(this.address == '' || this.address === null || this.address === undefined) {
             this.msg = 'Missing field: address';
+            return;
+        }
+        if (!this.zipCode) {
+            this.msg = 'Missing field: ZIP code';
+            return;
+        }
+        if (!this.city) {
+            this.msg = 'Missing field: city';
+            return;
+        }
+        if (!this.country) {
+            this.msg = 'Missing field: country';
             return;
         }
         if(this.team == '' || this.team === null || this.team === undefined) {
@@ -155,6 +171,9 @@ export class RegisterComponent implements OnInit {
             lastname: this.last_name,
             address: this.address,
             lab: this.lab,
+            zipCode: this.zipCode,
+            city: this.city,
+            country: this.country,
             responsible: this.responsible,
             team: this.team,
             email: this.email,

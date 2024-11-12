@@ -50,10 +50,16 @@ export class DatabaseService {
 
     mapToDatabase(resp: any): Database {
         return new Database(
-            resp.name || '', resp.type || 'mysql', resp.host || '',
-            resp.owner || '', resp.create || false, resp.usage || '',
-            resp.size || '', new Date(resp.expire).getTime() || 0,
-            new Date(resp.created_at).getTime() || 0, resp.single_user || true,
+            resp.name || '',
+            resp.type || 'mysql',
+            resp.host || '',
+            resp.owner || '',
+            resp.create || false,
+            resp.usage || '',
+            resp.size || '',
+            new Date(resp.expire).getTime() || 0,
+            new Date(resp.created_at).getTime() || 0,
+            resp.single_user || true,
             resp._id || ''
         );
     }
