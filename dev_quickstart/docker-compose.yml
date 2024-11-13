@@ -105,8 +105,7 @@ services:
         ports:
             - "4200:4200"  
         volumes:
-            - ../manager2/src:/usr/src/app/manager2/src  # Map only the src folder for hot reload
-            - /usr/src/app/node_modules
-        command: ng serve --host 0.0.0.0 --base-href /manager2/ --source-map --watch
+            - ../manager2:/usr/src/app/manager2
+            - /usr/src/app/manager2/node_modules
         depends_on:
             - node-backend
