@@ -82,3 +82,27 @@ services:
             - "8080:80"
         environment:
             - LDAP_SERVER_HOST=openldap
+
+    node-backend:
+        build:
+            context: ../
+        environment:
+            - MY_ADMIN_USER=admin
+            - MY_ADMIN_GROUP=admin
+            - MY_ADMIN_EMAIL=admin@my.org
+            - MY_ADMIN_PASSWORD=my
+        command: node app.js
+        ports:
+            - "3000:3000" 
+
+    angular-frontend:
+        build:
+            context: ../manager2
+        ports:
+            - "4200:4200"  
+        volumes:
+            - ../manager2/src:/usr/src/app/src
+            - /usr/src/app/node_modules
+        command: ng serve --host 0.0.0.0 --base-href /manager2/ --source-map --watch
+        depends_on:
+            - node-backend
