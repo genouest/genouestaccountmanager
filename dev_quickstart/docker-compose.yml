@@ -87,16 +87,17 @@ services:
         build:
             context: ../
             dockerfile: Dockerfile.dev
+        depends_on:
+            - mongo
         environment:
             - MY_ADMIN_USER=admin
             - MY_ADMIN_GROUP=admin
             - MY_ADMIN_EMAIL=admin@my.org
             - MY_ADMIN_PASSWORD=my
             - MY_REDIS_HOST=redis
-            - MONGO_HOST=mongo
         command: node app.js
         ports:
-            - "3000:3000" 
+            - "3001:3000" 
 
     angular-frontend:
         build:
@@ -104,7 +105,7 @@ services:
         ports:
             - "4200:4200"  
         volumes:
-            - ../manager2/src:/usr/src/app/src
+            - ../manager2/src:/usr/src/app/manager2/src  # Map only the src folder for hot reload
             - /usr/src/app/node_modules
         command: ng serve --host 0.0.0.0 --base-href /manager2/ --source-map --watch
         depends_on:
