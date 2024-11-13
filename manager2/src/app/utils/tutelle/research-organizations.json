@@ -125,73 +125,490 @@
   ],
   "universities": [
     {
-      "name": "Université de Provence - Aix-Marseille I"
+      "name": "Université de Provence - Aix-Marseille I",
+      "academy": "Aix-Marseille"
     },
     {
-      "name": "Université de la Méditerannée - Aix-Marseille II"
+      "name": "Université de la Méditerannée - Aix-Marseille II",
+      "academy": "Aix-Marseille"
     },
     {
-      "name": "Université de droit, déconomie et des sciences - Aix-Marseille III"
+      "name": "Université de droit, déconomie et des sciences - Aix-Marseille III",
+      "academy": "Aix-Marseille"
     },
     {
-      "name": "Université d'Avignon et des pays du Vaucluse"
+      "name": "Université d'Avignon et des pays du Vaucluse",
+      "academy": "Aix-Marseille"
     },
     {
-      "name": "Université Picardie-Jules Verne Amiens"
+      "name": "Université Picardie-Jules Verne Amiens",
+      "academy": "Amiens"
+    },
+    {
+      "name": "Université de Technologie de Compiègne",
+      "academy": "Amiens"
+    },
+    {
+      "name": "Université de Franche-Comté",
+      "academy": "Besançon"
+    },
+    {
+      "name": "Université de Technologie de Belfort-Montbéliard",
+      "academy": "Besançon"
+    },
+    {
+      "name": "Université de Bordeaux I - Sciences et technologies",
+      "academy": "Bordeaux"
+    },
+    {
+      "name": "Université \"Victor Segalen\" - Bordeaux II",
+      "academy": "Bordeaux"
+    },
+    {
+      "name": "Université Michel Montaigne - Bordeaux III",
+      "academy": "Bordeaux"
+    },
+    {
+      "name": "Université Montesquieu - Bordeaux IV",
+      "academy": "Bordeaux"
+    },
+    {
+      "name": "Université de Pau et des pays de l'Adour",
+      "academy": "Bordeaux"
+    },
+    {
+      "name": "Université de Caen",
+      "academy": "Caen"
+    },
+    {
+      "name": "Université d'Auvergne - Clermont-Ferrand I",
+      "academy": "Clermont-Ferrand"
+    },
+    {
+      "name": "Université Blaise Pascal - Clermont-Ferrand II",
+      "academy": "Clermont-Ferrand"
+    },
+    {
+      "name": "Université Pascal Paoli : Corse",
+      "academy": "Corse"
+    },
+    {
+      "name": "Université de Bourgogne",
+      "academy": "Dijon"
+    },
+    {
+      "name": "Université de Savoie (Chambéry)",
+      "academy": "Grenoble"
+    },
+    {
+      "name": "Université Joseph-Fourier - Grenoble I",
+      "academy": "Grenoble"
+    },
+    {
+      "name": "Université Pierre Mendes-France - Grenoble II",
+      "academy": "Grenoble"
+    },
+    {
+      "name": "Université Stendhal - Grenoble 3",
+      "academy": "Grenoble"
+    },
+    {
+      "name": "Institut National Polytechnique de Grenoble",
+      "academy": "Grenoble"
+    },
+    {
+      "name": "Université d'Artois",
+      "academy": "Lille"
+    },
+    {
+      "name": "Université des Sciences et technologie de Lille",
+      "academy": "Lille"
+    },
+    {
+      "name": "Université du droit et de la santé",
+      "academy": "Lille"
+    },
+    {
+      "name": "Université Charles de Gaulle - Lille 3",
+      "academy": "Lille"
+    },
+    {
+      "name": "Université du littoral Côte d'Opale",
+      "academy": "Lille"
+    },
+    {
+      "name": "Université de Valenciennes et du Hainaut-Cambrésis",
+      "academy": "Lille"
+    },
+    {
+      "name": "Université de Limoges",
+      "academy": "Limoges"
+    },
+    {
+      "name": "Université Claude Bernard - Lyon I",
+      "academy": "Lyon"
+    },
+    {
+      "name": "Université Lumière - Lyon II",
+      "academy": "Lyon"
+    },
+    {
+      "name": "Université Jean Moulin - Lyon III",
+      "academy": "Lyon"
+    },
+    {
+      "name": "Université Jean Monnet - Saint-Etienne",
+      "academy": "Lyon"
+    },
+    {
+      "name": "Université Montpellier I",
+      "academy": "Montpellier"
+    },
+    {
+      "name": "Université Montpellier II (sciences et techniques du Languedoc)",
+      "academy": "Montpellier"
+    },
+    {
+      "name": "Université Paul Valéry - Montpellier III",
+      "academy": "Montpellier"
+    },
+    {
+      "name": "Université de Perpignan",
+      "academy": "Montpellier"
+    },
+    {
+      "name": "Université de Metz",
+      "academy": "Nancy-Metz"
+    },
+    {
+      "name": "Pôle Universitaire Européen de Nancy-Metz",
+      "academy": "Nancy-Metz"
+    },
+    {
+      "name": "Université Henri Poincaré - Nancy I",
+      "academy": "Nancy-Metz"
+    },
+    {
+      "name": "Université Nancy II",
+      "academy": "Nancy-Metz"
+    },
+    {
+      "name": "Institut national polytechnique de Lorraine",
+      "academy": "Nancy-Metz"
+    },
+    {
+      "name": "Université d'Angers",
+      "academy": "Nantes"
+    },
+    {
+      "name": "Université du Maine - Le Mans",
+      "academy": "Nantes"
+    },
+    {
+      "name": "Université de Nantes",
+      "academy": "Nantes"
+    },
+    {
+      "name": "Université de Nice - Sophia Antipolis",
+      "academy": "Nice"
+    },
+    {
+      "name": "Université de Toulon et du Var",
+      "academy": "Nice"
+    },
+    {
+      "name": "Université d'Orléans",
+      "academy": "Orléans-Tours"
+    },
+    {
+      "name": "Université François Rabelais - Tours",
+      "academy": "Orléans-Tours"
+    },
+    {
+      "name": "Université Panthéon-Sorbonne - Paris 1",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Panthéon-Assas - Paris 2",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université de la Sorbonne nouvelle - Paris 3",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Paris-Sorbonne - Paris 4",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université René Descartes - Paris 5",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Pierre et Maris Curie - Paris 6",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Denis Diderot - Paris 7",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Paris Dauphine - Paris 9",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université de Marne-la-Vallée",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Paris 8 - Vincennes-Saint-Denis",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Paris - Val de Marne - Paris 12",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Paris-Nord - Paris 13",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université de Cergy-Pontoise",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université d'Evry-Val d'Essonne",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université de Nanterre - Paris 10",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université Paris-Sud - Paris 11",
+      "academy": "Paris"
+    },
+    {
+      "name": "Versailles Saint-Quentin en Yvelines",
+      "academy": "Paris"
+    },
+    {
+      "name": "Université de Poitiers",
+      "academy": "Poitiers"
+    },
+    {
+      "name": "Université de La Rochelle",
+      "academy": "Poitiers"
+    },
+    {
+      "name": "Université de Reims",
+      "academy": "Reims"
+    },
+    {
+      "name": "Université de technologie de Troyes",
+      "academy": "Reims"
+    },
+    {
+      "name": "Université de Bretagne occidentale - Brest",
+      "academy": "Rennes"
+    },
+    {
+      "name": "Université de Bretagne Sud",
+      "academy": "Rennes"
+    },
+    {
+      "name": "Université de Rennes 1",
+      "academy": "Rennes"
+    },
+    {
+      "name": "Université de Haute Bretagne - Rennes II",
+      "academy": "Rennes"
+    },
+    {
+      "name": "Université du Havre",
+      "academy": "Rouen"
+    },
+    {
+      "name": "Université de Rouen",
+      "academy": "Rouen"
+    },
+    {
+      "name": "Université de Haute-Alsace - Mulhouse",
+      "academy": "Strasbourg"
+    },
+    {
+      "name": "Université Louis Pasteur - Strasbourg I",
+      "academy": "Strasbourg"
+    },
+    {
+      "name": "Université Marc Bloch - Strasbourg II",
+      "academy": "Strasbourg"
+    },
+    {
+      "name": "Université Robert Schuman",
+      "academy": "Strasbourg"
+    },
+    {
+      "name": "Université des Sciences Sociales - Toulouse I",
+      "academy": "Toulouse"
+    },
+    {
+      "name": "Université Toulouse-Le Mirail - Toulouse II",
+      "academy": "Toulouse"
+    },
+    {
+      "name": "Université Paul Sabatier - Toulouse III",
+      "academy": "Toulouse"
+    },
+    {
+      "name": "Institut national polytechnique de Toulouse",
+      "academy": "Toulouse"
+    },
+    {
+      "name": "Université des Antilles-Guyane",
+      "academy": "Outre-mer"
+    },
+    {
+      "name": "Université de La Réunion",
+      "academy": "Outre-mer"
+    },
+    {
+      "name": "Université de la Polynésie Française",
+      "academy": "Outre-mer"
+    },
+    {
+      "name": "Université de la Nouvelle Calédonie",
+      "academy": "Outre-mer"
+    }
+  ],
+  "instituts_nationaux_polytechniques": [
+    {
+      "name": "Institut National Polytechnique de Grenoble",
+      "url": "www.inpg.fr"
+    },
+    {
+      "name": "Institut National Polytechnique de Lorraine Nancy",
+      "url": "http://www.inpl-nancy.fr"
+    },
+    {
+      "name": "Institut National Polytechnique de Toulouse",
+      "url": "www.univ-inpt.fr"
+    }
+  ],
+  "ecoles_normales_superieures": [
+    {
+      "name": "École Normale Supérieure"
+    },
+    {
+      "name": "École Normale Supérieure de Cachan"
+    },
+    {
+      "name": "École Normale Supérieure Lettres et Sciences Humaines"
+    },
+    {
+      "name": "École Normale Supérieure de Lyon"
+    }
+  ],
+  "ecoles_francaises_a_l_etranger": [
+    {
+      "name": "Casa de Velazquez"
+    },
+    {
+      "name": "École Française de Rome"
+    },
+    {
+      "name": "École Française d'Archéologie à Athènes"
+    },
+    {
+      "name": "École Française d'Extrême-Orient"
+    },
+    {
+      "name": "Institut Français d'Archéologie Orientale du Caire (IFAO)"
+    }
+  ],
+  "grands_etablissements": [
+    {
+      "name": "CNAM Conservatoire National des Arts et Métiers"
+    },
+    {
+      "name": "Collège de France"
+    },
+    {
+      "name": "École Centrale des Arts et Manufactures"
+    },
+    {
+      "name": "École Nationale des Chartes"
+    },
+    {
+      "name": "ENSAM École Nationale Supérieure d'Arts et Métiers"
+    },
+    {
+      "name": "École Nationale Supérieure des Sciences de l'Information et des Bibliothèques"
+    },
+    {
+      "name": "EPHE École Pratique des Hautes Études"
+    },
+    {
+      "name": "EHESS École des Hautes Études en Sciences Sociales"
+    },
+    {
+      "name": "IEP Institut d'Études Politiques de Paris"
+    },
+    {
+      "name": "INALCO Institut National des Langues et Civilisation Orientales"
+    },
+    {
+      "name": "IPG Institut de Physique du Globe de Paris"
+    },
+    {
+      "name": "MNHN Muséum National d'Histoire Naturelle"
+    },
+    {
+      "name": "Observatoire de Paris"
+    },
+    {
+      "name": "Palais de la Découverte"
+    }
+  ],
+  "epcscp": [
+    {
+      "name": "École Centrale de Lille"
+    },
+    {
+      "name": "École Centrale de Lyon"
+    },
+    {
+      "name": "École Centrale de Nantes"
+    },
+    {
+      "name": "École Nationale des Ponts et Chaussées"
+    },
+    {
+      "name": "École Nationale Supérieure des Arts et Industries de Strasbourg"
+    },
+    {
+      "name": "Institut National des Sciences Appliquées de Lyon"
+    },
+    {
+      "name": "Institut National des Sciences Appliquées de Rennes"
+    },
+    {
+      "name": "Institut National des Sciences Appliquées de Toulouse"
+    },
+    {
+      "name": "Institut National des Sciences Appliquées de Rouen"
+    },
+    {
+      "name": "Institut Supérieur des Matériaux et de la Construction Mécanique"
     },
     {
       "name": "Université de Technologie de Compiègne"
     },
     {
-      "name": "Université de Franche-Comté"
-    },
-    {
       "name": "Université de Technologie de Belfort-Montbéliard"
     },
     {
-      "name": "Université de Bordeaux I - Sciences et technologies"
-    },
-    {
-      "name": "Université \"Victor Segalen\" - Bordeaux II"
-    },
-    {
-      "name": "Université Michel Montaigne - Bordeaux III"
-    },
-    {
-      "name": "Université Montesquieu - Bordeaux IV"
-    },
-    {
-      "name": "Université de Pau et des pays de l'Adour"
-    },
-    {
-      "name": "Université de Caen"
-    },
-    {
-      "name": "Université d'Auvergne - Clermont-Ferrand I"
-    },
-    {
-      "name": "Université Blaise Pascal - Clermont-Ferrand II"
-    },
-    {
-      "name": "Université Pascal Paoli : Corse"
-    },
-    {
-      "name": "Université de Bourgogne"
-    },
-    {
-      "name": "Université de Savoie (Chambéry)"
-    },
-    {
-      "name": "Université Joseph-Fourier - Grenoble I"
-    },
-    {
-      "name": "Université Pierre Mendes-France - Grenoble II"
-    },
-    {
-      "name": "Université Stendhal - Grenoble 3"
-    },
-    {
-      "name": "Institut National Polytechnique de Grenoble"
+      "name": "Université de Technologie de Troyes"
     }
   ],
   "others": [
