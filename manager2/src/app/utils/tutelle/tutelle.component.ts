@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as researchData from './research-organizations.json';
 
 @Component({
@@ -7,6 +7,7 @@ import * as researchData from './research-organizations.json';
   styleUrls: ['./tutelle.component.css']
 })
 export class TutelleComponent implements OnInit {
+  @Input() preselectionnedTutelle: string | null = null
   @Output() tutelleSelected = new EventEmitter<string>()
   tutelleList: { category: String, name: string }[] = []
   tutelle: string = ''
@@ -22,6 +23,12 @@ export class TutelleComponent implements OnInit {
         }
         return acc;
       }, [] as { category: string, name: string }[])
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['preselectionnedTutelle'] && changes['preselectionnedTutelle'].currentValue) {
+      this.tutelle = this.preselectionnedTutelle!;
+    }
   }
 
   onSelectTutelle(value: string) {

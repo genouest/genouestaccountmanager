@@ -55,14 +55,14 @@
                     <small id="responsibleHelp" class="form-text text-muted">Director or supervisor name.</small>
                 </div>
             </div>
-
-            <app-tutelle (tutelleSelected)="updateTutelle($event)"></app-tutelle>
-
+            <div class="form-group">
+                <label for="tutelle">Tutelle <span class="text-danger">*</span></label>
+                <app-tutelle (tutelleSelected)="updateTutelle($event)"></app-tutelle>
+            </div>
             <div class="form-group">
                 <label for="address">Address  <span class="text-danger">*</span></label>
                 <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="address" id="address" class="form-control" required autofocus></textarea>
             </div>
-
             <div class="form-group row">
                 <div class="col-md-4">
                     <label for="zipCode">ZIP Code <span class="text-danger">*</span></label>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import * as countryData from './country.json'; 
 
 @Component({
@@ -7,15 +7,18 @@ import * as countryData from './country.json';
   styleUrls: ['./country.component.css']
 })
 export class CountryComponent implements OnInit {
-  @Input() preselectionnedValue: string | null = null
+  @Input() preselectionnedCountry: string | null = null
   @Output() countrySelected = new EventEmitter<string>()
   country: string = ''
   countries: { name: string }[] = []
 
   ngOnInit(): void {
     this.countries = countryData["default"]
-    if (this.preselectionnedValue) {
-      this.country = this.preselectionnedValue
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['preselectionnedCountry'] && changes['preselectionnedCountry'].currentValue) {
+      this.country = this.preselectionnedCountry!;
     }
   }
 

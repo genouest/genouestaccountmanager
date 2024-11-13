@@ -247,7 +247,11 @@ export class UserComponent implements OnInit {
     updateCountry(country: string) {
         this.user.country = country;
     }
-    
+
+    updateTutelle(tutelle: string) {
+        this.user.tutelle = tutelle;
+    }
+
     onExtraValue(extras: any) {
         console.debug('extras updated', extras);
         let new_extra = [];
@@ -667,6 +671,10 @@ export class UserComponent implements OnInit {
         }
         if(this.user.country == '' || this.user.country === null || this.user.country === undefined) {
             this.update_error_msg = 'Missing field: country';
+            return;
+        }
+        if(this.user.tutelle == '' || this.user.tutelle === null || this.user.tutelle === undefined) {
+            this.update_error_msg = 'Missing field: tutelle';
             return;
         }
         if(this.user.team == '' || this.user.team === null || this.user.team === undefined) {

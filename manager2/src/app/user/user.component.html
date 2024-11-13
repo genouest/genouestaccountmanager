@@ -93,6 +93,12 @@
                   </div>
                 </div>
                 <div class="form-group row">
+                  <label for="tutelle" class="col-4 col-form-label">Tutelle </label>
+                  <div class="col-6">
+                    <app-tutelle [preselectionnedTutelle]="user.tutelle" (tutelleSelected)="updateTutelle($event)"></app-tutelle>
+                  </div>  
+              </div>
+                <div class="form-group row">
                   <label for="address" class="col-4 col-form-label">Address</label>
                   <div class="col-6">
                     <textarea id="address" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.address" class="form-control"></textarea>
@@ -128,7 +134,7 @@
                   <label for="country" class="col-4 col-form-label">country {{user.country}}
                   </label>
                   <div class="col-6">
-                    <app-country [preselectionnedValue]="user.country" (countrySelected)="updateCountry($event)"></app-country>
+                    <app-country [preselectionnedCountry]="user.country" (countrySelected)="updateCountry($event)"></app-country>
                   </div>
                 </div>
                 <div class="form-group row">
