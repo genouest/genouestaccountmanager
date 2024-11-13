@@ -98,6 +98,8 @@ services:
         command: node app.js
         ports:
             - "3001:3000" 
+        volumes:
+            - ../manager2/dist/my-ui:/usr/src/app/manager2/dist/my-ui  #
 
     angular-frontend:
         build:
@@ -107,5 +109,4 @@ services:
         volumes:
             - ../manager2:/usr/src/app/manager2
             - /usr/src/app/manager2/node_modules
-        depends_on:
-            - node-backend
+

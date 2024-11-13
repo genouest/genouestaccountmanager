@@ -11,4 +11,4 @@ RUN export gomngr_auth=fake
 
 EXPOSE 4200
 
-CMD ["ng", "build", "--base-href", "/manager2/", "--source-map", "--watch"]
+CMD ["ng", "serve", "--base-href", "/manager2/", "--source-map", "--watch"]
