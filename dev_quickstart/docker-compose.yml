@@ -86,11 +86,14 @@ services:
     node-backend:
         build:
             context: ../
+            dockerfile: Dockerfile.dev
         environment:
             - MY_ADMIN_USER=admin
             - MY_ADMIN_GROUP=admin
             - MY_ADMIN_EMAIL=admin@my.org
             - MY_ADMIN_PASSWORD=my
+            - MY_REDIS_HOST=redis
+            - MONGO_HOST=mongo
         command: node app.js
         ports:
             - "3000:3000" 

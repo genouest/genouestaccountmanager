@@ -86,6 +86,8 @@ if(mongoURL) {
     mongoStoreClient = new MongoStore({ url: mongoURL });
 }
 else {
+    const host = process.env.MONGO_HOST || 'localhost';
+    const port = process.env.MONGO_PORT || 27017; 
     mongoStoreClient = new MongoStore({url: `mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}/gomngr`});
 }
 
