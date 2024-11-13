@@ -99,6 +99,39 @@
                   </div>
                 </div>
                 <div class="form-group row">
+                  <label for="zipCode" class="col-4 col-form-label">zipCode</label>
+                  <div class="col-6">
+                    <input 
+                        [ngModelOptions]="{standalone: true}" 
+                        [(ngModel)]="user.zipCode" 
+                        id="zipCode" 
+                        type="text" 
+                        class="form-control" 
+                        required
+                    >
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="city" class="col-4 col-form-label">city</label>
+                  <div class="col-6">
+                    <input 
+                        [ngModelOptions]="{standalone: true}" 
+                        [(ngModel)]="user.city" 
+                        id="city" 
+                        type="text" 
+                        class="form-control" 
+                        required
+                    >
+                </div>
+                </div>
+                <div class="form-group row">
+                  <label for="country" class="col-4 col-form-label">country {{user.country}}
+                  </label>
+                  <div class="col-6">
+                    <app-country [preselectionnedValue]="user.country" (countrySelected)="updateCountry($event)"></app-country>
+                  </div>
+                </div>
+                <div class="form-group row">
                   <label for="why" class="col-4 col-form-label">Why</label>
                   <div class="col-6">
                     <textarea id="why" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.why" class="form-control"></textarea>

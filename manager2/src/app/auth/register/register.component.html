@@ -86,7 +86,10 @@
                         required
                     >
                 </div>
-                <app-country (countrySelected)="updateCountry($event)" ></app-country>
+                <div class="col-md-4">
+                    <label for="country">Country  <span class="text-danger">*</span></label>
+                    <app-country (countrySelected)="updateCountry($event)" ></app-country>
+                </div>
             </div>
 
             <div class="form-group">

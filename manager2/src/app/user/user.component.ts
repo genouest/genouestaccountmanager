@@ -78,7 +78,6 @@ export class UserExtraComponent implements OnInit {
         )
     }
 
-
     extraChange(title: string, data) {
         console.debug('event', data.target.checked, data.target.value)
         for (let i = 0; i < this.extras.length; i++) {
@@ -245,6 +244,10 @@ export class UserComponent implements OnInit {
         this.otp_err_msg =  ""
     }
 
+    updateCountry(country: string) {
+        this.user.country = country;
+    }
+    
     onExtraValue(extras: any) {
         console.debug('extras updated', extras);
         let new_extra = [];
@@ -658,6 +661,14 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Missing field: address';
             return;
         }
+        if(this.user.city == '' || this.user.city === null || this.user.city === undefined) {
+            this.update_error_msg = 'Missing field: city';
+            return;
+        }
+        if(this.user.country == '' || this.user.country === null || this.user.country === undefined) {
+            this.update_error_msg = 'Missing field: country';
+            return;
+        }
         if(this.user.team == '' || this.user.team === null || this.user.team === undefined) {
             this.update_error_msg = 'Missing field: team';
             return;
@@ -674,6 +685,8 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Team must be alphanumerical [0-9a-z_]';
             return;
         }
+        console.log("ici")
+        console.log(this.user)
         this.userService.update(this.user.uid, this.user).subscribe(
             resp => {
                 this.update_msg = 'User info updated';
