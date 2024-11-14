@@ -1551,9 +1551,6 @@ router.put('/user/:id', async function(req, res) {
     if (req.body.city) {
         user.city = req.body.city;
     }
-    if (req.body.country) {
-        user.country = req.body.country;
-    }
     if (req.body.rnsr) {
         user.rnsr = req.body.rnsr;
     }
@@ -1562,6 +1559,16 @@ router.put('/user/:id', async function(req, res) {
     }
     if (req.body.tutelle) {
         user.tutelle = req.body.tutelle;
+    }
+    if (req.body.country) {
+        user.country = req.body.country;
+        //Reset values
+        if(req.body.country === 'France'){
+            user.ror = ''
+        } else {
+            user.rnsr = ''
+            user.tutelle = ''
+        }
     }
     if (req.body.lab) {
         user.lab = req.body.lab;

@@ -75,19 +75,19 @@
             <div class="user-information">
               <form aria-label="user information" role="form" class="user-form form-horizontal form-register">
                 <div class="form-group row">
-                  <label for="firstname" class="col-4 col-form-label">First name</label>
+                  <label for="firstname" class="col-4 col-form-label">First name <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <input type="text" id="firstname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.firstname" class="form-control"/>
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label for="lastname" class="col-4 col-form-label">Last name</label>
+                  <label for="lastname" class="col-4 col-form-label">Last name <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <input type="text" id="lastname" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lastname" class="form-control"/>
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label for="email" class="col-4 col-form-label label-control">Email</label>
+                  <label for="email" class="col-4 col-form-label label-control">Email <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <input type="email" id="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.email" class="form-control"/>
                   </div>
@@ -102,36 +102,36 @@
                   <label for="zipCode" class="col-4 col-form-label">zipCode</label>
                   <div class="col-6">
                     <input 
-                        [ngModelOptions]="{standalone: true}" 
-                        [(ngModel)]="user.zipCode" 
-                        id="zipCode" 
-                        type="text" 
-                        class="form-control" 
-                        required
+                      [ngModelOptions]="{standalone: true}" 
+                      [(ngModel)]="user.zipCode" 
+                      id="zipCode" 
+                      type="text" 
+                      class="form-control" 
+                      required
                     >
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label for="city" class="col-4 col-form-label">city</label>
+                  <label for="city" class="col-4 col-form-label">city <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <input 
-                        [ngModelOptions]="{standalone: true}" 
-                        [(ngModel)]="user.city" 
-                        id="city" 
-                        type="text" 
-                        class="form-control" 
-                        required
+                      [ngModelOptions]="{standalone: true}" 
+                      [(ngModel)]="user.city" 
+                      id="city" 
+                      type="text" 
+                      class="form-control" 
+                      required
                     >
                 </div>
                 </div>
                 <div class="form-group row">
-                  <label for="country" class="col-4 col-form-label">country {{ user.country }}</label>
+                  <label for="country" class="col-4 col-form-label">country <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <app-country [preselectionnedCountry]="user.country" (countrySelected)="updateCountry($event)"></app-country>
                   </div>
                 </div>
                 <div *ngIf="user.country && user.country === 'France'" class="form-group row">
-                  <label for="tutelle" class="col-4 col-form-label">Tutelle</label>
+                  <label for="tutelle" class="col-4 col-form-label">Tutelle <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <app-tutelle [preselectionnedTutelle]="user.tutelle" (tutelleSelected)="updateTutelle($event)"></app-tutelle>
                   </div>
@@ -146,10 +146,11 @@
                         type="text" 
                         id="rnsr" 
                         class="form-control" 
-                        pattern="^[a-z0-9_]*$"
                         required 
+                        pattern="^[a-z0-9_]*$"
+                        #rnsrInput="ngModel"
                     />
-                    <div *ngIf="rorInput.invalid && rorInput.dirty" class="text-danger">
+                    <div *ngIf="rnsrInput.invalid && rnsrInput.dirty" class="text-danger">
                         RNSR format is invalid. It should match the format: Lowercase letters (a-z), digits (0-9) and underscores ( _ ) only.
                     </div>
                     <small id="groupHelpRnsr" class="form-text text-muted">
@@ -181,19 +182,19 @@
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label for="why" class="col-4 col-form-label">Why</label>
+                  <label for="why" class="col-4 col-form-label">Why <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <textarea id="why" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.why" class="form-control"></textarea>
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label for="lab" class="col-4 col-form-label">Laboratory</label>
+                  <label for="lab" class="col-4 col-form-label">Laboratory <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <input type="text" id="lab" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.lab" class="form-control"/>
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label for="responsible" class="col-4 col-form-label">Manager</label>
+                  <label for="responsible" class="col-4 col-form-label">Manager <span class="text-danger">*</span></label>
                   <div class="col-6">
                     <input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
                   </div>
