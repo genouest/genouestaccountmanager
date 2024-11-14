@@ -245,6 +245,10 @@ export class UserComponent implements OnInit {
         this.otp_err_msg =  ""
     }
 
+    get emailDomain(): string {
+        return this.user.email.split('@')[1] || '';
+    }
+
     onExtraValue(extras: any) {
         console.debug('extras updated', extras);
         let new_extra = [];
