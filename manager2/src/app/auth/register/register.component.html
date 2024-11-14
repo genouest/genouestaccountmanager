@@ -56,23 +56,18 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="tutelle">Tutelle <span class="text-danger">*</span></label>
-                <app-tutelle (tutelleSelected)="updateTutelle($event)"></app-tutelle>
-            </div>
-            <div class="form-group">
-                <label for="address">Address  <span class="text-danger">*</span></label>
-                <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="address" id="address" class="form-control" required autofocus></textarea>
+                <label for="address">Address</label>
+                <textarea [ngModelOptions]="{standalone: true}" [(ngModel)]="address" id="address" class="form-control" autofocus></textarea>
             </div>
             <div class="form-group row">
                 <div class="col-md-4">
-                    <label for="zipCode">ZIP Code <span class="text-danger">*</span></label>
+                    <label for="zipCode">ZIP Code</label>
                     <input 
                         [ngModelOptions]="{standalone: true}" 
                         [(ngModel)]="zipCode" 
                         id="zipCode" 
                         type="number" 
-                        class="form-control" 
-                        required
+                        class="form-control"
                     >
                 </div>
                 <div class="col-md-4">
@@ -92,6 +87,10 @@
                 </div>
             </div>
             <div *ngIf="country && country === 'France'" class="form-group">
+                <label for="tutelle">Tutelle <span class="text-danger">*</span></label>
+                <app-tutelle (tutelleSelected)="updateTutelle($event)"></app-tutelle>
+            </div>
+            <div *ngIf="country && country === 'France'" class="form-group">
                 <label for="rnsr">RNSR <span class="text-danger">*</span></label>
                 <input 
                     autocomplete="RNSR" 
@@ -100,11 +99,14 @@
                     type="text" 
                     id="rnsr" 
                     class="form-control" 
+                    pattern="^[a-z0-9_]*$"
                     required 
                 />
+                <div *ngIf="rorInput.invalid && rorInput.dirty" class="text-danger">
+                    RNSR format is invalid. It should match the format: Lowercase letters (a-z), digits (0-9) and underscores ( _ ) only.
+                </div>
                 <small id="groupHelpRnsr" class="form-text text-muted">
                     Use the <i>institution_researchunit</i> format (ex: <b>inra_umr1246, cnrs_umr3503</b>).<br/>
-                    Lowercase letters (a-z), digits (0-9) and underscores ( _ ) only.
                 </small>
             </div>
             <div *ngIf="country && country !== 'France'" class="form-group">

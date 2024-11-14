@@ -93,12 +93,6 @@
                   </div>
                 </div>
                 <div class="form-group row">
-                  <label for="tutelle" class="col-4 col-form-label">Tutelle </label>
-                  <div class="col-6">
-                    <app-tutelle [preselectionnedTutelle]="user.tutelle" (tutelleSelected)="updateTutelle($event)"></app-tutelle>
-                  </div>  
-              </div>
-                <div class="form-group row">
                   <label for="address" class="col-4 col-form-label">Address</label>
                   <div class="col-6">
                     <textarea id="address" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.address" class="form-control"></textarea>
@@ -131,10 +125,59 @@
                 </div>
                 </div>
                 <div class="form-group row">
-                  <label for="country" class="col-4 col-form-label">country {{user.country}}
-                  </label>
+                  <label for="country" class="col-4 col-form-label">country {{ user.country }}</label>
                   <div class="col-6">
                     <app-country [preselectionnedCountry]="user.country" (countrySelected)="updateCountry($event)"></app-country>
+                  </div>
+                </div>
+                <div *ngIf="user.country && user.country === 'France'" class="form-group row">
+                  <label for="tutelle" class="col-4 col-form-label">Tutelle</label>
+                  <div class="col-6">
+                    <app-tutelle [preselectionnedTutelle]="user.tutelle" (tutelleSelected)="updateTutelle($event)"></app-tutelle>
+                  </div>
+                </div>
+                <div *ngIf="user.country && user.country === 'France'" class="form-group row">
+                  <label for="rnsr" class="col-4 col-form-label">RNSR <span class="text-danger">*</span></label>
+                  <div class="col-6">
+                    <input 
+                        autocomplete="RNSR" 
+                        [ngModelOptions]="{standalone: true}" 
+                        [(ngModel)]="user.rnsr" 
+                        type="text" 
+                        id="rnsr" 
+                        class="form-control" 
+                        pattern="^[a-z0-9_]*$"
+                        required 
+                    />
+                    <div *ngIf="rorInput.invalid && rorInput.dirty" class="text-danger">
+                        RNSR format is invalid. It should match the format: Lowercase letters (a-z), digits (0-9) and underscores ( _ ) only.
+                    </div>
+                    <small id="groupHelpRnsr" class="form-text text-muted">
+                        Use the <i>institution_researchunit</i> format (ex: <b>inra_umr1246, cnrs_umr3503</b>).<br/>
+                    </small>
+                  </div>
+                </div>
+                <div *ngIf="user.country && user.country !== 'France'" class="form-group row">
+                  <label for="ror" class="col-4 col-form-label">ROR <span class="text-danger">*</span></label>
+                  <div class="col-6">
+
+                    <input 
+                        autocomplete="ROR" 
+                        [ngModelOptions]="{standalone: true}" 
+                        [(ngModel)]="user.ror" 
+                        type="text" 
+                        id="ror" 
+                        class="form-control" 
+                        required
+                        pattern="^0[a-zA-Z0-9]{6}[0-9]{2}$"
+                        #rorInput="ngModel"
+                    />
+                    <div *ngIf="rorInput.invalid && rorInput.dirty" class="text-danger">
+                        ROR format is invalid. It should match the format: 0 followed by 6 alphanumeric characters and 2 digits.
+                    </div>
+                    <small id="groupHelpRor" class="form-text text-muted">
+                        You can find your ROR here : https://ror.org/<br/>
+                    </small>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -153,12 +196,6 @@
                   <label for="responsible" class="col-4 col-form-label">Manager</label>
                   <div class="col-6">
                     <input type="text" id="responsible" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.responsible" class="form-control"/>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="team" class="col-4 col-form-label">Team</label>
-                  <div class="col-6">
-                    <input type="text" id="team" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.team" class="form-control"/>
                   </div>
                 </div>
                 <div *ngIf="session_user.is_admin">
@@ -253,13 +290,13 @@
                 </div>
 
                 <div *ngIf="! session_user.is_admin">
-                  <div class="form-group">
+                  <div class="form-group row">
                     <label for="group" class="col-4 col-form-label">Group</label>
                     <div class="col-6">
                       <input type="text" id="group" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control" readonly/>
                     </div>
                   </div>
-                  <div class="form-group">
+                  <div class="form-group row">
                     <label *ngIf="user.secondarygroups && user.secondarygroups.length > 0" label for="sgroup" class="col-4 col-form-label">Secondary groups</label>
                     <div class="col-6">
                       <div *ngFor="let secondary_group of user.secondarygroups">

@@ -661,10 +661,6 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Missing field: manager';
             return;
         }
-        if(this.user.address == '' || this.user.address === null || this.user.address === undefined) {
-            this.update_error_msg = 'Missing field: address';
-            return;
-        }
         if(this.user.city == '' || this.user.city === null || this.user.city === undefined) {
             this.update_error_msg = 'Missing field: city';
             return;
@@ -673,12 +669,8 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Missing field: country';
             return;
         }
-        if(this.user.tutelle == '' || this.user.tutelle === null || this.user.tutelle === undefined) {
+        if(this.user.country == 'France' && !this.user.tutelle) {
             this.update_error_msg = 'Missing field: tutelle';
-            return;
-        }
-        if(this.user.team == '' || this.user.team === null || this.user.team === undefined) {
-            this.update_error_msg = 'Missing field: team';
             return;
         }
         if(this.user.why == '' || this.user.why === null || this.user.why === undefined) {
@@ -689,12 +681,23 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Name contains unauthorized characters';
             return;
         }
-        if (!this.user.team.match(/^[0-9a-z_]+$/)) {
-            this.update_error_msg = 'Team must be alphanumerical [0-9a-z_]';
-            return;
+
+        // ROR/RNSR validation based on country selection
+        const rorPattern = /^0[a-z|0-9]{6}[0-9]{2}$/;
+        const rnsrPattern = /^[a-z0-9_]*$/i;
+
+        if (this.user.country === 'France') {
+            if (!this.user.rnsr || !rnsrPattern.test(this.user.rnsr)) {
+                this.update_error_msg = 'RNSR is required and must match the correct format when country is France';
+                return;
+            }
+        } else {
+            if (!this.user.ror || !rorPattern.test(this.user.ror)) {
+                this.update_error_msg = 'ROR is required and must match the correct format when country is not France';
+                return;
+            }
         }
-        console.log("ici")
-        console.log(this.user)
+
         this.userService.update(this.user.uid, this.user).subscribe(
             resp => {
                 this.update_msg = 'User info updated';

@@ -762,26 +762,10 @@ router.post('/user/:id', async function(req, res) {
         res.send({ status: 1, message: 'Missing field: lastname' });
         return;
     }
-    if (req.body.team=='' || req.body.team===null || req.body.team===undefined) {
-        res.send({ status: 1, message: 'Missing field: team' });
-        return;
-    }
-    if (!req.body.team.match(/^[0-9a-z_]+$/)) {
-        res.send({ status: 1, message: 'Team name must be alphanumeric and lowercase [0-9a-z_]' });
-        return;
-    }
     if (req.body.lab=='' || req.body.lab===null || req.body.lab===undefined) {
         res.send({ status: 1, message: 'Missing field: lab' });
         return;
     }
-    if (req.body.address=='' || req.body.address===null || req.body.address===undefined) {
-        res.send({ status: 1, message: 'Missing field: address' });
-        return;
-    }
-    if (!req.body.zipCode) {
-        res.send({ status: 1, message: 'Missing field: zipCode' });
-        return;
-    } 
     if (!req.body.city) {
         res.send({ status: 1, message: 'Missing field: city' });
         return;
@@ -806,7 +790,7 @@ router.post('/user/:id', async function(req, res) {
         res.status(400).send({ status: 1, message: 'ROR is required for non-France' });
         return;
     }    
-    if (!req.body.tutelle) {
+    if (req.body.country === 'France' && !req.body.tutelle) {
         res.send({ status: 1, message: 'Missing field: tutelle' });
         return;
     }
@@ -876,7 +860,6 @@ router.post('/user/:id', async function(req, res) {
         tutelle: req.body.tutelle,
         lab: req.body.lab,
         responsible: req.body.responsible,
-        team: req.body.team,
         why: req.body.why,
         ip: req.body.ip,
         is_fake: req.body.is_fake,
@@ -1603,9 +1586,6 @@ router.put('/user/:id', async function(req, res) {
         user.duration = req.body.duration;
 
 
-    }
-    if (req.body.team) {
-        user.team = req.body.team;
     }
     if (req.body.extra_info) {
         user.extra_info = req.body.extra_info;

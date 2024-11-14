@@ -20,7 +20,6 @@ export class User {
     rnsr: string
     ror: string
     tutelle: string
-    team: string
     why: string
     ip: string
     is_admin: boolean
@@ -55,7 +54,7 @@ export class User {
         zipCode: number = null, city: string = '', country: string = '',
         rnsr: string = '', ror: string = '',
         tutelle: string = '',
-        team: string = '', why: string = '', ip: string = '',
+        why: string = '', ip: string = '',
         is_admin: boolean = false, is_fake: boolean = false, is_locked: boolean = false, is_trainer: boolean = false,
         send_copy_to_support: boolean = false, create_imap_mailbox: boolean = false,
         created_at: number = null, expiration: number = 0, duration: any = null, registration: number = 0,
@@ -69,7 +68,7 @@ export class User {
         this.zipCode = zipCode; this.city = city; this.country = country;
         this.rnsr = rnsr; this.ror = ror;
         this.tutelle = tutelle;
-        this.team = team; this.why = why; this.ip = ip;
+        this.why = why; this.ip = ip;
         this.is_admin = is_admin; this.is_fake = is_fake; this.is_locked = is_locked; this.is_trainer = is_trainer;
         this.send_copy_to_support = send_copy_to_support; this.create_imap_mailbox = create_imap_mailbox;
         this.created_at = created_at; this.expiration = expiration; this.duration = duration; this.registration = registration;
@@ -97,7 +96,7 @@ export class UserService {
             resp.zipCode || null, resp.city || '', resp.country || '',
             resp.rnsr || '', resp.ror || '',
             resp.tutelle || '',
-            resp.team || '', resp.why || '', resp.ip || '',
+            resp.why || '', resp.ip || '',
             resp.is_admin || false, resp.is_fake || false, resp.is_locked || false, resp.is_trainer || false,
             resp.send_copy_to_support || false, resp.create_imap_mailbox || false,
             resp.created_at || null, new Date(resp.expiration).getTime() || 0,
