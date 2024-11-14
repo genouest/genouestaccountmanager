@@ -26,6 +26,8 @@ export class RegisterComponent implements OnInit {
     zipCode: string
     city: string
     country: string
+    rnsr: string = ''
+    ror: string = ''
     tutelle: string
     lab: string
     responsible: string
@@ -147,6 +149,22 @@ export class RegisterComponent implements OnInit {
             this.msg = 'Missing field: country';
             return;
         }
+        if (this.country === 'France') {
+            if (!this.rnsr) {
+                this.msg = 'Missing field: RNSR for France';
+                return;
+            }
+        } 
+        else {
+            const rorPattern = /^0[a-z0-9]{6}[0-9]{2}$/;
+            if (!this.ror) {
+                this.msg = 'Missing field: ROR';
+                return;
+            } else if (!rorPattern.test(this.ror)) {
+                this.msg = 'Invalid ROR format. Expected format: 0 followed by 6 alphanumeric characters and 2 digits.';
+                return;
+            }
+        }
         if (!this.tutelle) {
             this.msg = 'Missing field: tutelle';
             return;
@@ -187,6 +205,8 @@ export class RegisterComponent implements OnInit {
             zipCode: this.zipCode,
             city: this.city,
             country: this.country,
+            rnsr: this.rnsr,
+            ror: this.ror,
             tutelle: this.tutelle,
             responsible: this.responsible,
             team: this.team,

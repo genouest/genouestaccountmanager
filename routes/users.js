@@ -790,6 +790,22 @@ router.post('/user/:id', async function(req, res) {
         res.send({ status: 1, message: 'Missing field: country' });
         return;
     }
+    if (!req.body.rnsr && !req.body.ror) {
+        res.status(400).send({ status: 1, message: 'Missing field: ROR or RNSR' });
+        return;
+    }
+    if (req.body.ror && !/^0[a-z|0-9]{6}[0-9]{2}$/.test(req.body.ror)) {
+        res.status(400).send({ status: 1, message: 'Invalid ROR format' });
+        return;
+    }
+    if (req.body.country === 'France' && !req.body.rnsr) {
+        res.status(400).send({ status: 1, message: 'RNSR is required for France' });
+        return;
+    }
+    if (req.body.country !== 'France' && !req.body.ror) {
+        res.status(400).send({ status: 1, message: 'ROR is required for non-France' });
+        return;
+    }    
     if (!req.body.tutelle) {
         res.send({ status: 1, message: 'Missing field: tutelle' });
         return;
@@ -855,6 +871,8 @@ router.post('/user/:id', async function(req, res) {
         zipCode: req.body.zipCode,
         city: req.body.city,
         country: req.body.country,
+        rsnr: req.body.rnsr,
+        ror: req.body.ror,
         tutelle: req.body.tutelle,
         lab: req.body.lab,
         responsible: req.body.responsible,
@@ -1552,6 +1570,12 @@ router.put('/user/:id', async function(req, res) {
     }
     if (req.body.country) {
         user.country = req.body.country;
+    }
+    if (req.body.rnsr) {
+        user.rnsr = req.body.rnsr;
+    }
+    if (req.body.ror) {
+        user.ror = req.body.ror;
     }
     if (req.body.tutelle) {
         user.tutelle = req.body.tutelle;

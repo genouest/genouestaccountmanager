@@ -17,6 +17,8 @@ export class User {
     zipCode: number
     city: string
     country: string
+    rnsr: string
+    ror: string
     tutelle: string
     team: string
     why: string
@@ -51,6 +53,7 @@ export class User {
         uid: string = '', id: number = 0, first_name: string = '', last_name: string = '',
         email: string = '', lab: string = '', responsible: string = '', address: string = '',
         zipCode: number = null, city: string = '', country: string = '',
+        rnsr: string = '', ror: string = '',
         tutelle: string = '',
         team: string = '', why: string = '', ip: string = '',
         is_admin: boolean = false, is_fake: boolean = false, is_locked: boolean = false, is_trainer: boolean = false,
@@ -64,6 +67,7 @@ export class User {
         this.uid = uid; this.id = id; this.firstname = first_name; this.lastname = last_name;
         this.email = email; this.lab = lab; this.responsible = responsible; this.address = address;
         this.zipCode = zipCode; this.city = city; this.country = country;
+        this.rnsr = rnsr; this.ror = ror;
         this.tutelle = tutelle;
         this.team = team; this.why = why; this.ip = ip;
         this.is_admin = is_admin; this.is_fake = is_fake; this.is_locked = is_locked; this.is_trainer = is_trainer;
@@ -91,6 +95,7 @@ export class UserService {
             resp.uid || '', resp.id || 0, resp.firstname || '', resp.lastname || '',
             resp.email || '', resp. lab || '', resp.responsible || '', resp.address || '',
             resp.zipCode || null, resp.city || '', resp.country || '',
+            resp.rnsr || '', resp.ror || '',
             resp.tutelle || '',
             resp.team || '', resp.why || '', resp.ip || '',
             resp.is_admin || false, resp.is_fake || false, resp.is_locked || false, resp.is_trainer || false,

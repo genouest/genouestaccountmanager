@@ -5,7 +5,7 @@
   [(ngModel)]="tutelle" 
   required
 >
-  <option value="" disabled selected *ngIf="!country">Select an tutelle</option>
+  <option value="" disabled selected *ngIf="!tutelle">Select an tutelle</option>
   <option *ngFor="let tutelle of tutelleList" [value]="tutelle.name">
     {{ tutelle.category }} - {{ tutelle.name }}
   </option>
