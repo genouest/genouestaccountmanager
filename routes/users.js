@@ -783,11 +783,11 @@ router.post('/user/:id', async function(req, res) {
         return;
     }
     if (req.body.country === 'France' && !req.body.rnsr) {
-        res.status(400).send({ status: 1, message: 'RNSR is required for France' });
+        res.status(400).send({ status: 1, message: 'RNSR is required' });
         return;
     }
     if (req.body.country !== 'France' && !req.body.ror) {
-        res.status(400).send({ status: 1, message: 'ROR is required for non-France' });
+        res.status(400).send({ status: 1, message: 'ROR is required' });
         return;
     }    
     if (req.body.country === 'France' && !req.body.tutelle) {

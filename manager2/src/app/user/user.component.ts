@@ -688,12 +688,12 @@ export class UserComponent implements OnInit {
 
         if (this.user.country === 'France') {
             if (!this.user.rnsr || !rnsrPattern.test(this.user.rnsr)) {
-                this.update_error_msg = 'RNSR is required and must match the correct format when country is France';
+                this.update_error_msg = 'RNSR is required and must match the correct format';
                 return;
             }
         } else {
             if (!this.user.ror || !rorPattern.test(this.user.ror)) {
-                this.update_error_msg = 'ROR is required and must match the correct format when country is not France';
+                this.update_error_msg = 'ROR is required and must match the correct format';
                 return;
             }
         }
