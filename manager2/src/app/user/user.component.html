@@ -92,7 +92,7 @@
                     <input type="email" id="email" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.email" class="form-control"/>
                   </div>
                 </div>
-                <div class="form-group row">
+                <div *ngIf="session_user.is_admin" class="form-group row">
                   <label for="key" class="col-4 col-form-label">Email domain</label>
                   <div class="col-8">
                     <input type="text" id="key" [ngModelOptions]="{standalone: true}" [(ngModel)]="emailDomain" class="form-control" readonly/>
