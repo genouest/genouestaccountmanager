@@ -169,12 +169,29 @@ export class TpsComponent implements OnInit {
                 group_or_project: this.group_or_project,
                 name: this.name
             }
-            console.log(reservation);
+
+            let mailOptions = {
+                //origin: MAIL_CONFIG.origin,
+                origin: "test@test.fr",
+                subject: "TP reservation from",
+                message: "test",
+                html_message: "test"
+            }
+
             this.tpService.reserve(reservation).subscribe(
                 resp => {
                     this.msg = resp['message'];
                     this.listEvents();
-                },
+                     // Send mail to all admin 
+                    this.tpService.notifyAdminsByMail(mailOptions).subscribe(
+                        resp => {
+                            //this.msg += resp['message'];
+                            console.log("mail sent to admin")
+                        },
+                        err => this.errmsg = err.error.message
+                    )
+                }
+                ,
                 err => this.errmsg = err.error.message
             )
         } else {
