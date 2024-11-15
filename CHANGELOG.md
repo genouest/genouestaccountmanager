@@ -4,6 +4,21 @@
 
 * Clearer error message when adding a website
 * Fix error in 'projects' tab from user page
+- in register/user profile form:
+  Added fields :
+  -> ZipCode **not mandatory**
+  -> City **mandatory**
+  -> Country **mandatory**
+  -> RNSR **mandatory** if country is France
+  -> Tutelle **mandatory** if country is france
+  -> ROR **mandatory**if country not France
+
+  Changed fields :
+  -> Adress **not mandatory**
+  -> Laboratory **not mandatory**
+  Removed fields:
+  -> team 
+
 
 ## 1.4.31 (2024-09-27)
 
