@@ -223,7 +223,7 @@ async function send_admin_mail_tp_reservation_created(owner, from_date, to_date,
     `;
     try {
         await maisrv.send_notif_mail({
-            'name': 'tps_password',
+            'name': 'tps_reservation_notif',
             'destinations': [CONFIG.general.accounts],
             'subject': '[TP reservation to accept/decline] ' + owner
         }, {
