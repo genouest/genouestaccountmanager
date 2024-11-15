@@ -4,6 +4,7 @@
 
 * Clearer error message when adding a website
 * Fix error in 'projects' tab from user page
+- dockerise front and backend along all other services for development purpose
 
 ## 1.4.31 (2024-09-27)
 
