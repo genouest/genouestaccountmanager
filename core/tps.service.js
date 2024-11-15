@@ -229,9 +229,7 @@ async function send_admin_mail_tp_reservation_created(owner, from_date, to_date,
         }, {
             '#FROMDATE#':  from.toDateString(),
             '#TODATE#':  to.toDateString(),
-            '#TP_INFO#': email_html,
-            '#URL#': CONFIG.general.url,
-            '#SUPPORT#': CONFIG.general.support
+            '#TP_INFO#': email_html
         });
     } catch(error) {
         logger.error(error);
