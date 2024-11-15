@@ -51,7 +51,6 @@ const projects = require('./routes/projects');
 const quota = require('./routes/quota');
 const plugin = require('./routes/plugin');
 const tp = require('./routes/tp');
-const notify = require('./routes/notify')
 const conf = require('./routes/conf');
 const tags = require('./routes/tags.js');
 const ObjectID = require('mongodb').ObjectID;
@@ -377,7 +376,6 @@ app.get('/tp/:id', tp);
 app.put('/tp/:id/reserve/now', tp);
 app.put('/tp/:id/reserve/stop', tp);
 app.put('/tp/:id/reserve/extend', tp);
-app.post('/notify/allAdminByMail', notify);
 
 app.get('/auth', auth);
 app.post('/auth/:id', auth);

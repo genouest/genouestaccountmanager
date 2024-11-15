@@ -31,16 +31,6 @@ export class TpserviceService {
         return this.http.post(environment.apiUrl + '/tp', reservation, httpOptions)
     }
 
-    notifyAdminsByMail(mailContent): Observable<any> {
-        //let user = this.authService.profile;
-        let httpOptions = {
-            //headers: new HttpHeaders({
-            //  'x-api-key': user.apikey
-            //}),
-        };
-        return this.http.post(environment.apiUrl + '/notify/allAdminByMail', mailContent, httpOptions)
-    }
-
     cancel(reservationId: string): Observable<any> {
         //let user = this.authService.profile;
         let httpOptions = {
