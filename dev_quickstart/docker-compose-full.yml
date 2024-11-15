@@ -82,3 +82,31 @@ services:
             - "8080:80"
         environment:
             - LDAP_SERVER_HOST=openldap
+
+    node-backend:
+        build:
+            context: ../
+            dockerfile: Dockerfile.dev
+        depends_on:
+            - mongo
+        environment:
+            - MY_ADMIN_USER=admin
+            - MY_ADMIN_GROUP=admin
+            - MY_ADMIN_EMAIL=admin@my.org
+            - MY_ADMIN_PASSWORD=my
+            - MY_REDIS_HOST=redis
+        command: node app.js
+        ports:
+            - "3001:3000" 
+        volumes:
+            - ../manager2/dist/my-ui:/usr/src/app/manager2/dist/my-ui  #
+
+    angular-frontend:
+        build:
+            context: ../manager2
+        ports:
+            - "4200:4200"  
+        volumes:
+            - ../manager2:/usr/src/app/manager2
+            - /usr/src/app/manager2/node_modules
+
