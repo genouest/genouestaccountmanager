@@ -23,9 +23,14 @@ export class RegisterComponent implements OnInit {
     first_name: string
     last_name: string
     address: string
+    zipCode: string
+    city: string
+    country: string
+    rnsr: string = ''
+    ror: string = ''
+    tutelle: string
     lab: string
     responsible: string
-    team: string
     email: string
     ip: string
     why: string
@@ -46,6 +51,14 @@ export class RegisterComponent implements OnInit {
         private http: HttpClient,
         private router: Router
     ) { }
+
+    updateTutelle(tutelle: string) {
+        this.tutelle = tutelle;
+    }
+
+    updateCountry(country: string) {
+        this.country = country;
+    }
 
     ngOnInit() {
         this.session_user = this.authService.profile;
@@ -97,6 +110,7 @@ export class RegisterComponent implements OnInit {
     }
 
     register() {
+        console.log(this.country)
         this.msg = '';
         if(this.first_name == '' || this.first_name === null || this.first_name === undefined) {
             this.msg = 'Missing field: first name';
@@ -118,12 +132,37 @@ export class RegisterComponent implements OnInit {
             this.msg = 'Missing field: manager';
             return;
         }
-        if(this.address == '' || this.address === null || this.address === undefined) {
-            this.msg = 'Missing field: address';
+        if (!this.city) {
+            this.msg = 'Missing field: city';
             return;
         }
-        if(this.team == '' || this.team === null || this.team === undefined) {
-            this.msg = 'Missing field: team';
+        if (!this.country) {
+            this.msg = 'Missing field: country';
+            return;
+        }
+        if (this.country === 'France') {
+            const rnsrPattern = /^[a-z0-9_]*$/i;
+
+            if (!this.rnsr) {
+                this.msg = 'Missing field: RNSR for France';
+                return;
+            } else if (!rnsrPattern.test(this.ror)) {
+                this.msg = 'Invalid ROR format. Expected format: 0 followed by 6 alphanumeric characters and 2 digits.';
+                return;
+            }
+        } 
+        else {
+            const rorPattern = /^0[a-z0-9]{6}[0-9]{2}$/;
+            if (!this.ror) {
+                this.msg = 'Missing field: ROR';
+                return;
+            } else if (!rorPattern.test(this.ror)) {
+                this.msg = 'Invalid ROR format. Expected format: 0 followed by 6 alphanumeric characters and 2 digits.';
+                return;
+            }
+        }
+        if (this.country === 'France' && !this.tutelle) {
+            this.msg = 'Missing field: tutelle';
             return;
         }
         if(this.why == '' || this.why === null || this.why === undefined) {
@@ -146,17 +185,18 @@ export class RegisterComponent implements OnInit {
             this.msg = 'Name contains unauthorized characters';
             return;
         }
-        if (!this.team.match(/^[0-9a-z_]+$/)) {
-            this.msg = 'Team must be alphanumerical [0-9a-z_]';
-            return;
-        }
         const user: User = this.userService.mapToUser({
             firstname: this.first_name,
             lastname: this.last_name,
             address: this.address,
             lab: this.lab,
+            zipCode: this.zipCode,
+            city: this.city,
+            country: this.country,
+            rnsr: this.rnsr,
+            ror: this.ror,
+            tutelle: this.tutelle,
             responsible: this.responsible,
-            team: this.team,
             email: this.email,
             send_copy_to_support: this.send_copy_to_support,
             create_imap_mailbox: this.create_imap_mailbox,

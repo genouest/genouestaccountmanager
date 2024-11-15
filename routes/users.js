@@ -762,20 +762,36 @@ router.post('/user/:id', async function(req, res) {
         res.send({ status: 1, message: 'Missing field: lastname' });
         return;
     }
-    if (req.body.team=='' || req.body.team===null || req.body.team===undefined) {
-        res.send({ status: 1, message: 'Missing field: team' });
-        return;
-    }
-    if (!req.body.team.match(/^[0-9a-z_]+$/)) {
-        res.send({ status: 1, message: 'Team name must be alphanumeric and lowercase [0-9a-z_]' });
-        return;
-    }
     if (req.body.lab=='' || req.body.lab===null || req.body.lab===undefined) {
         res.send({ status: 1, message: 'Missing field: lab' });
         return;
     }
-    if (req.body.address=='' || req.body.address===null || req.body.address===undefined) {
-        res.send({ status: 1, message: 'Missing field: address' });
+    if (!req.body.city) {
+        res.send({ status: 1, message: 'Missing field: city' });
+        return;
+    } 
+    if (!req.body.country) {
+        res.send({ status: 1, message: 'Missing field: country' });
+        return;
+    }
+    if (!req.body.rnsr && !req.body.ror) {
+        res.status(400).send({ status: 1, message: 'Missing field: ROR or RNSR' });
+        return;
+    }
+    if (req.body.ror && !/^0[a-z|0-9]{6}[0-9]{2}$/.test(req.body.ror)) {
+        res.status(400).send({ status: 1, message: 'Invalid ROR format' });
+        return;
+    }
+    if (req.body.country === 'France' && !req.body.rnsr) {
+        res.status(400).send({ status: 1, message: 'RNSR is required' });
+        return;
+    }
+    if (req.body.country !== 'France' && !req.body.ror) {
+        res.status(400).send({ status: 1, message: 'ROR is required' });
+        return;
+    }    
+    if (req.body.country === 'France' && !req.body.tutelle) {
+        res.send({ status: 1, message: 'Missing field: tutelle' });
         return;
     }
     if (req.body.responsible=='' || req.body.responsible===null || req.body.responsible===undefined) {
@@ -836,9 +852,14 @@ router.post('/user/:id', async function(req, res) {
         send_copy_to_support: req.body.send_copy_to_support,
         create_imap_mailbox: req.body.create_imap_mailbox,
         address: req.body.address,
+        zipCode: req.body.zipCode,
+        city: req.body.city,
+        country: req.body.country,
+        rsnr: req.body.rnsr,
+        ror: req.body.ror,
+        tutelle: req.body.tutelle,
         lab: req.body.lab,
         responsible: req.body.responsible,
-        team: req.body.team,
         why: req.body.why,
         ip: req.body.ip,
         is_fake: req.body.is_fake,
@@ -1524,6 +1545,31 @@ router.put('/user/:id', async function(req, res) {
     if (req.body.address) {
         user.address = req.body.address;
     }
+    if (req.body.zipCode) {
+        user.zipCode = req.body.zipCode;
+    }
+    if (req.body.city) {
+        user.city = req.body.city;
+    }
+    if (req.body.rnsr) {
+        user.rnsr = req.body.rnsr;
+    }
+    if (req.body.ror) {
+        user.ror = req.body.ror;
+    }
+    if (req.body.tutelle) {
+        user.tutelle = req.body.tutelle;
+    }
+    if (req.body.country) {
+        user.country = req.body.country;
+        //Reset values
+        if(req.body.country === 'France'){
+            user.ror = ''
+        } else {
+            user.rnsr = ''
+            user.tutelle = ''
+        }
+    }
     if (req.body.lab) {
         user.lab = req.body.lab;
     }
@@ -1547,9 +1593,6 @@ router.put('/user/:id', async function(req, res) {
         user.duration = req.body.duration;
 
 
-    }
-    if (req.body.team) {
-        user.team = req.body.team;
     }
     if (req.body.extra_info) {
         user.extra_info = req.body.extra_info;

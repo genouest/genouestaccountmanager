@@ -1,0 +1,12 @@
+<select 
+  id="tutelle" 
+  class="form-control" 
+  (change)="onSelectTutelle($event.target.value)"
+  [(ngModel)]="tutelle" 
+  required
+>
+  <option value="" disabled selected *ngIf="!tutelle">Select an tutelle</option>
+  <option *ngFor="let tutelle of tutelleList" [value]="tutelle.name">
+    {{ tutelle.category }} - {{ tutelle.name }}
+  </option>
+</select>

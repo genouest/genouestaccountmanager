@@ -1,0 +1,12 @@
+<select
+  id="country"
+  class="form-control"
+  (change)="onSelectCountry($event.target.value)"
+  [(ngModel)]="country" 
+  required
+>
+  <option value="" disabled selected *ngIf="!country">Select a country</option>
+  <option *ngFor="let country of countries" [value]="country.name">
+    {{ country.name }}
+  </option>
+</select>
