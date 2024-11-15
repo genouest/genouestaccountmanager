@@ -4,6 +4,8 @@
 
 * Clearer error message when adding a website
 * Fix error in 'projects' tab from user page
+- Add an email to general.account when TP is created + add a `config.tp.notify_reservation_request` to enable/disable this feature
+
 
 ## 1.4.31 (2024-09-27)
 

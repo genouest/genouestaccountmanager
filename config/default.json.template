@@ -155,7 +155,8 @@
     "group": {"name": "tps1", "gid": 1000},
     "extra_expiration": 5,
     "fake_mail_domain": "genouest.org",
-    "mail_template": "noreply+${id}@genouest.org"
+    "mail_template": "noreply+${id}@genouest.org",
+    "notify_reservation_request": false
   },
   "message": {
     "registration": [

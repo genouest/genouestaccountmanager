@@ -183,13 +183,14 @@ export class TpsComponent implements OnInit {
                     this.msg = resp['message'];
                     this.listEvents();
                      // Send mail to all admin 
-                    this.tpService.notifyAdminsByMail(mailOptions).subscribe(
-                        resp => {
-                            //this.msg += resp['message'];
-                            console.log("mail sent to admin")
-                        },
-                        err => this.errmsg = err.error.message
-                    )
+                    if(this.config.tp && this.config.tp.notify_reservation_request){
+                        this.tpService.notifyAdminsByMail(mailOptions).subscribe(
+                            resp => {
+                                //this.msg += resp['message'];
+                            },
+                            err => this.errmsg = err.error.message
+                        )
+                    }   
                 }
                 ,
                 err => this.errmsg = err.error.message
