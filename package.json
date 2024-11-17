@@ -24,7 +24,7 @@
     "cors": "^2.8.5",
     "email-validator": "^2.0.4",
     "escapeshellarg": "^0.1.0",
-    "eslint": "^6.8.0",
+    "eslint": "^9.15.0",
     "express": "^4.21.1",
     "express-prom-bundle": "^5.1.5",
     "express-session": "^1.18.1",
