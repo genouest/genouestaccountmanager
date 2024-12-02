@@ -5,7 +5,8 @@
 * Clearer error message when adding a website
 * Fix error in 'projects' tab from user page
 * increase size of input field in users page
-* add a readonly input field under email for showing the email domain
+* add a readonly input field under email for showing the email domain*
+* Add "custom_users" key to config file, to be used with various scripts
 
 ## 1.4.31 (2024-09-27)
 
