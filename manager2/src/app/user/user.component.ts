@@ -154,6 +154,9 @@ export class UserComponent implements OnInit {
     password1: string = ''
     password2: string = ''
 
+    passwordVisible: boolean = false
+    passwordConfirmVisible: boolean = false
+
     // Flags for password rules
     passwordLengthValid: boolean = false;
     hasDigit: boolean = false;
@@ -694,7 +697,13 @@ export class UserComponent implements OnInit {
         }
     }
     
-
+    togglePasswordVisibility(field: number): void {
+        if (field === 1) {
+          this.passwordVisible = !this.passwordVisible;
+        } else if (field === 2) {
+          this.passwordConfirmVisible = !this.passwordConfirmVisible;
+        }
+      }
 
     // update_password() {
     //     this.wrong_confirm_passwd = "";
