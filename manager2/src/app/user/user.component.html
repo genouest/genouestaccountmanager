@@ -355,13 +355,13 @@
                         tabindex="0"
                       ></i>     
                       <span
-                        *ngIf="password1Model.valid && password1Model.dirty && password1.length > 0"
+                        *ngIf="isFormValid() && password1Model.dirty && password1.length > 0"
                         class="input-group-text valid-indicator"
                       >
                         &#10003;
                       </span>
                       <span
-                        *ngIf="password1Model.invalid && password1Model.dirty && password1.length > 0"
+                        *ngIf="!isFormValid() && password1Model.dirty && password1.length > 0"
                         class="input-group-text invalid-indicator"
                       >
                         &#10007;
@@ -412,7 +412,7 @@
                       <i
                         class="toggle-password pi"
                         [ngClass]="passwordConfirmVisible ? 'pi-eye-slash' : 'pi-eye'"
-                        (click)="togglePasswordVisibility(3)"
+                        (click)="togglePasswordVisibility(2)"
                         aria-label="Toggle password visibility"
                         role="button"
                         tabindex="0"
