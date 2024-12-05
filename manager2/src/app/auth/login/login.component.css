@@ -27,13 +27,14 @@
     z-index: 2;
 }
 
-.form-signin input[type="text"]
+#sign_user_id
 {
     margin-bottom: -1px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
-.form-signin input[type="password"]
+
+#sign_password
 {
     margin-bottom: 10px;
     border-top-left-radius: 0;
@@ -47,3 +48,30 @@
     font-weight: 400;
     display: block;
 }
+
+.password-field {
+    position: relative;
+}
+
+.password-field .password-input {
+    width: 100%;
+    padding-right: 2rem; 
+}
+
+.password-field .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 1rem; 
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #aaa;
+}
+
+.password-field .toggle-password:hover {
+    color: #333;
+}
+
+/* Prevent icon from disappearing when input is focused */
+.password-field:focus-within .toggle-password {
+    z-index: 9;
+  }

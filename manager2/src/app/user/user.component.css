@@ -1,0 +1,68 @@
+
+.valid-indicator {
+    color: green;
+}
+
+.invalid-indicator {
+    color: red;
+}
+
+.invalid-feedback {
+    color: red;
+}
+
+.password-rules {
+    margin-top: 10px;
+}
+
+.rule-satisfied {
+    color: green;
+}
+
+.rule-not-satisfied {
+    color: red;
+}
+
+.btn-disabled {
+    background-color: #d6d6d6;
+    border-color: #d6d6d6;
+    cursor: not-allowed;
+    pointer-events: none;
+    color: #888888;
+}
+  
+.btn-disabled:hover {
+    background-color: #d6d6d6;
+    border-color: #d6d6d6;
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-field .password-input {
+    width: 100%;
+    padding-right: 2rem; 
+}
+
+.password-field .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 1rem; 
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #aaa;
+}
+
+.password-field:has(.input-group-append .valid-indicator, .input-group-append .invalid-indicator) .toggle-password {
+    right: 3rem;
+}
+
+.password-field .toggle-password:hover {
+    color: #333;
+}
+
+/* Prevent icon from disappearing when input is focused */
+.password-field:focus-within .toggle-password {
+    z-index: 9;
+  }
