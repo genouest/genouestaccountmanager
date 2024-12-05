@@ -14,6 +14,8 @@ then
     rm -rf "{{ user.home }}"
 fi
 
+{% include "user/remove_scratch_quota.sh" %}
+
 {% include "user/delete_extra_dirs.sh" %}
 
 # Check if parent dir is empty
@@ -22,7 +24,5 @@ groupdir="$(dirname "{{ user.home }}")"
 find $groupdir -maxdepth 0 -empty -exec rmdir {} \;
 
 # delete_user.sh
-
-{% include "user/remove_scratch_quota.sh" %}
 
 echo "End delete_user.sh in $0 ..."
