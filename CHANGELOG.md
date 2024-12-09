@@ -1,7 +1,7 @@
 # Changelog
 
 ## 1.4.32 (Unreleased)
-
+* UI width take full screen
 * Clearer error message when adding a website
 * Add User, Project and Group static classes to front end (refactor)
 * Add checks for website owner update
