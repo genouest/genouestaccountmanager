@@ -54,6 +54,21 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     catch(error) {
         logger.error(error);
     }
+    
+    const owner = await dbsrv.mongo_users().findOne({ uid: new_project.owner });
+    const msg_destinations =  [CONFIG.general.accounts, owner.email];
+    if (owner.send_copy_to_support) {
+        msg_destinations.push(CONFIG.general.support);
+    }
+    try {
+        await maisrv.send_notif_mail( {
+            'name': 'ask_project',
+            'destinations': msg_destinations,
+            'subject': 'Project ' + new_project.id + ' created'
+        }, { '#NAME#': new_project.id });
+    } catch(error) {
+        logger.error(error);
+    }
     return new_project;
 }
 
