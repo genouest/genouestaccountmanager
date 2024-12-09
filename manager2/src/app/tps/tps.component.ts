@@ -162,8 +162,16 @@ export class TpsComponent implements OnInit {
                 this.reserrmsg = 'End date must be superior to start date';
                 return;
             }
-            if(toDate < new Date().getTime() || lockDate < new Date().getTime()) {
-                this.reserrmsg = 'End or lock date can not be in the past';
+            if(toDate < new Date().getTime()) {
+                this.reserrmsg = 'End date can not be in the past';
+                return;
+            }
+            if(lockDate < new Date().getTime()) {
+                this.reserrmsg = 'Lock date can not be in the past';
+                return;
+            }
+            if(toDate < lockDate) {
+                this.reserrmsg = 'End date must be later than lock date';
                 return;
             }
             let reservation = {
@@ -240,7 +248,15 @@ export class TpsComponent implements OnInit {
             this.errmsg = 'Extended end date can not be in the past';
             return;
         }
-        const extension = this.new_lockDate ? { 'to': new_to_Date, 'lock': new Date(this.new_lockDate).getTime() } : { 'to': new_to_Date };
+        const new_lock_Date = this.new_lockDate ? new Date(this.new_lockDate).getTime() : new_to_Date;
+        if(new_to_Date < new_lock_Date) {
+            this.errmsg = 'New lock date can not be after new end date'
+        }
+        if(new_lock_Date < new Date().getTime()) {
+            this.errmsg = 'New lock date can not be in the past';
+            return;
+        }
+        const extension = { 'to': new_to_Date, 'lock': new_lock_Date }
         this.tpService.extend(this.selectedEvent.meta.id, extension).subscribe(
             resp => {
                 this.msg = resp['message'];

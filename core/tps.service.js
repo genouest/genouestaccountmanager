@@ -28,6 +28,7 @@ var STATUS_EXPIRED = 'Expired';
 exports.tp_reservation = tp_reservation;
 exports.create_tp_reservation = create_tp_reservation;
 exports.remove_tp_reservation = remove_tp_reservation;
+exports.lock_tp_reservation = lock_tp_reservation;
 exports.extend_tp_reservation = extend_tp_reservation;
 
 
@@ -171,11 +172,10 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
 }
 
 
-async function send_user_passwords(owner, from_date, to_date, lock_date, users, group) {
+async function send_user_passwords(owner, from_date, to_date, users, group) {
     logger.debug('send_user_passwords');
     let from = new Date(from_date);
     let to = new Date(to_date);
-    let lock = new Date(lock_date);
 
     let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>' + '\n';
     for(let i=0;i<users.length;i++) {
@@ -193,7 +193,6 @@ async function send_user_passwords(owner, from_date, to_date, lock_date, users, 
             '#FROMDATE#':  from.toDateString(),
             '#TODATE#':  to.toDateString(),
             '#EXPIRATION#': CONFIG.tp.extra_expiration,
-            '#LOCKED#': lock.toDateString(),
             '#CREDENTIALS#': credentials_html, // should be converted by maisrv.send_notif_mail in plain text for text mail
             '#GROUP#': group,
             '#URL#': CONFIG.general.url,
@@ -287,18 +286,29 @@ async function remove_tp_reservation(reservation) {
     }
 }
 
+async function lock_tp_reservation(reservation) {
+    logger.debug('Lock reservation', reservation);
+    try {
+        await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, { '$set': {
+            'locked': true
+        } });
+        await dbsrv.mongo_events().insertOne( {
+            'owner': 'auto',
+            'date': new Date().getTime(),
+            'action': 'lock reservation for ' + reservation.owner ,
+            'logs': []
+        });
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
 async function extend_tp_reservation(reservation, extension) {
     logger.debug('Extend reservation', reservation);
     try {
-        if (extension.lock) {
-            await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, {
-                '$set': { 'to': extension.to, 'lock': extension.lock }
-            });
-        } else {
-            await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, {
-                '$set': { 'to': extension.to }
-            });
-        }
+        await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, {
+            '$set': { 'to': extension.to, 'lock': extension.lock }
+        });
         await dbsrv.mongo_events().insertOne( {
             'owner': 'auto',
             'date': new Date().getTime(),
@@ -370,7 +380,6 @@ async function create_tp_reservation(reservation_id) {
             reservation.owner,
             reservation.from,
             reservation.to,
-            reservation.lock,
             activated_users,
             gpname
         );
