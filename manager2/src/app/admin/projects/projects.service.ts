@@ -11,6 +11,7 @@ export class Project {
     uuid: string;
     id: string;
     owner: string;
+    managers: string[];
     group: string;
     size: number;
     current_size: number;
@@ -29,7 +30,7 @@ export class Project {
 
     constructor(
         _id: string = '', uuid: string = '', id: string = '',
-        owner: string = '', group: string = '',
+        owner: string = '', managers: string[] = null, group: string = '',
         size: number = 0, current_size: number = null,
         low_size: number = null, high_size: number = null,
         cpu: number = 0, current_cpu: number = null,
@@ -39,7 +40,7 @@ export class Project {
         expire: number = 0, created_at: number = null
     ) {
         this._id = _id; this.uuid = uuid, this.id = id;
-        this.owner = owner; this.group = group; this.size = size;
+        this.owner = owner; this.managers = managers, this.group = group; this.size = size;
         this.current_size = current_size; this.low_size = low_size; this.high_size = high_size;
         this.cpu = cpu; this.current_cpu = current_cpu; this.low_cpu = low_cpu; this.high_cpu = high_cpu;
         this.orga = orga; this.description = description; this.access = access; this.path = path;
@@ -61,7 +62,7 @@ export class ProjectsService {
     mapToProject(resp: any): Project {
         return new Project(
             resp._id || '', resp.uuid || '', resp.id || '',
-            resp.owner || '', resp.group || '',
+            resp.owner || '', resp.managers || null, resp.group || '',
             resp.size || 0, resp.current_size || null,
             resp.low_size || null, resp.high_size || null,
             resp.cpu || 0, resp.current_cpu || null,
