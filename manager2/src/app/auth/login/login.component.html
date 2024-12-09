@@ -9,20 +9,53 @@
         <div *ngIf="! double_auth">
             <form class="form-signin form-group">
                 <div class="form-group">
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="userId" id="sign_user_id" type="text" class="form-control" placeholder="User id" autocomplete="username" required autofocus>
+                    <input
+                        [ngModelOptions]="{standalone: true}"
+                        [(ngModel)]="userId"
+                        id="sign_user_id"
+                        type="text"
+                        class="form-control"
+                        placeholder="User id"
+                        autocomplete="username"
+                        required
+                        autofocus
+                    />
+                </div>
+                <div class="form-group password-field">
+                    <input
+                        [ngModelOptions]="{standalone: true}"
+                        [(ngModel)]="password"
+                        [type]="passwordVisible ? 'text' : 'password'"
+                        id="sign_password"
+                        placeholder="Password"
+                        class="form-control password-input"
+                        autocomplete="current-password"
+                        required
+                    />
+                    <i
+                        class="toggle-password pi"
+                        [ngClass]="passwordVisible ? 'pi-eye-slash' : 'pi-eye'"
+                        (click)="togglePasswordVisibility()"
+                        aria-label="Toggle password visibility"
+                        role="button"
+                        tabindex="0"
+                    ></i>          
                 </div>
                 <div class="form-group">
-                    <input [ngModelOptions]="{standalone: true}" [(ngModel)]="password" id="sign_password" type="password" placeholder="Password" class="form-control" autocomplete="current-password" required>
+                    <button
+                        class="p-button p-button-lg p-button-primary btn-block"
+                        [ngStyle]="{ display: 'block' }"
+                        type="submit"
+                        (click)="login()"
+                    >
+                        Sign in
+                    </button>
                 </div>
+                <div class="alert alert-warning" *ngIf="msg">{{ msg }}</div>
                 <div class="form-group">
-                    <button class="p-button p-button-lg p-button-primary btn-block" [ngStyle]="{'display': 'block'}" type="submit" (click)="login()">
-                        Sign in</button>
+                    <span class="lost">Lost your password?</span>
+                    <button class="btn btn-sm" (click)="password_reset_request()">RESET</button>
                 </div>
-                <div class="alert alert-warning" *ngIf="msg">{{msg}}</div>
-                <div class="form-group">
-                    <span class="lost">Lost your password?</span><button class="btn btn-sm" (click)="password_reset_request()">RESET</button>
-                </div>
-
             </form>
         </div>
             <div *ngIf="double_auth">

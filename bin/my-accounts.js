@@ -78,7 +78,7 @@ program
                 process.exit(1);                
             }
 
-            let new_password = usrv.new_password(8);
+            let new_password = usrv.new_password(16);
             user.password = new_password;
             let fid = new Date().getTime();
             try {
