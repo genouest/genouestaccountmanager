@@ -17,7 +17,7 @@ const sansrv = require('../core/sanitize.service.js');
 const grpsrv = require('../core/group.service.js');
 const rolsrv = require('../core/role.service.js');
 
-router.get('/group/:id', async function(req, res){
+router.get('/group/:id/users', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
@@ -49,6 +49,41 @@ router.get('/group/:id', async function(req, res){
     }
     let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
     res.send(users_in_group);
+    res.end();
+});
+
+router.get('/group/:name', async function(req, res){
+    if(! req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    if(! sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+
+    let user = null;
+    let isadmin = false;
+    try {
+        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        isadmin = await rolsrv.is_admin(user);
+    } catch(e) {
+        logger.error(e);
+        res.status(404).send({message: 'User session not found'});
+        res.end();
+        return;
+    }
+
+    if(!user){
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+    if(!isadmin){
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    const group = await dbsrv.mongo_groups().find({ 'name': req.params.name });
+    res.send(group);
     res.end();
 });
 

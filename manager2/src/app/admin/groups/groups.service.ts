@@ -63,7 +63,7 @@ export class GroupsService {
         }));
     }
 
-    get(groupId: string): Observable<User[]> {
+    getUsers(group_name: string): Observable<User[]> {
         // let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -71,12 +71,27 @@ export class GroupsService {
             //}),
         };
         return this.http.get(
-            environment.apiUrl + '/group/' + groupId,
+            environment.apiUrl + '/group/' + group_name + '/users',
             httpOptions
         ).pipe(map((response: any[]) => {
             return response.map(item => {
                 return this.userService.mapToUser(item);
             });
+        }));
+    }
+
+    get(group_name: string): Observable<Group> {
+        // let user = this.authService.profile;
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+        };
+        return this.http.get(
+            environment.apiUrl + '/group/' + group_name,
+            httpOptions
+        ).pipe(map(response => {
+            return this.mapToGroup(response);
         }));
     }
 

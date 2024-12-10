@@ -78,42 +78,6 @@ export class GroupsComponent implements OnInit {
         )
     }
 
-    delete_group(){
-        this.groupsService.delete(this.selectedGroup.name).subscribe(
-            resp => {
-                this.groupsService.list().subscribe(
-                    resp => {
-                        this.groups = resp;
-                    },
-                    err => console.log('failed to get groups')
-                );
-                this.selectedGroup = null;
-            },
-            err => {
-                this.rm_grp_err_msg = err.error.message;
-            }
-        )
-    }
-
-    updateGroup(){
-        this.groupsService.update(this.selectedGroup).subscribe(
-            resp => {
-                this.msg = 'Group updated';
-                this.rm_grp_err_msg = '';
-                this.groupsService.list().subscribe(
-                    resp => {
-                        this.groups = resp;
-                    },
-                    err => console.log('failed to get groups')
-                )
-            },
-            err => {
-                this.msg = '';
-                this.rm_grp_err_msg = err.error.message;
-            }
-        )
-    }
-
     show_group_users(input_group: any) {
         const group: Group = this.groupsService.mapToGroup(input_group);
         this.msg = '';
@@ -123,7 +87,7 @@ export class GroupsComponent implements OnInit {
         this.projectsService.getProjectsInGroup(group.name).subscribe(
             resp => {
                 this.projects = resp;
-                this.groupsService.get(group.name).subscribe(
+                this.groupsService.getUsers(group.gid).subscribe(
                     user_list => {
                         this.users = user_list;
                         for(var i = 0; i < user_list.length; i++){
