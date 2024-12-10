@@ -21,6 +21,16 @@
 
 ## 1.4.30 (2024-08-02)
 
+* Password enhancement
+  * Add an eye for visible/hidden on the password field in login/profile page
+  * Disable "update password" button until both fields are entered on profile page
+  *  Centered input fields
+  *  Added dynamic rules requirements in order for user to know what to add to his password
+  *  Password rules is 12 char, with 1 spec char, 1 digit and no spaces
+  *  Updated generated password via generate-password to 12 when account activated
+  *  Updated also db user password generated to 12
+  *  Added a red cross/green tick in the input for passwork and password confirmation
+
 * Added a `project.terms_and_conditions_hds` setting in the config:
   If true:
     "Ask Admin" button to submit project creation form became available after 'project name' and 'expiration date' are filled, 'project description' is at least 30 char and a checkbox appears and 'terms and conditions hds' should also be checked
