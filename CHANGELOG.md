@@ -7,6 +7,7 @@
 * increase size of input field in users page
 * add a readonly input field under email for showing the email domain*
 * Add "custom_users" key to config file, to be used with various scripts
+* Allow accents in user's first and last names
 
 ## 1.4.31 (2024-09-27)
 
