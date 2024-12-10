@@ -65,7 +65,11 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
             'name': 'ask_project',
             'destinations': msg_destinations,
             'subject': 'Project ' + new_project.id + ' created'
-        }, { '#NAME#': new_project.id });
+        }, {
+            '#NAME#': new_project.id,
+            '#PATH#': new_project.path,
+            '#GROUP#':new_project.group
+        });
     } catch(error) {
         logger.error(error);
     }
