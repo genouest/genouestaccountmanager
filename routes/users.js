@@ -536,6 +536,11 @@ router.delete('/user/:id', async function(req, res) {
             res.status(403).send({ message: 'User owns some web sites, please change owner first!' });
             return;
         }
+        let projects = await dbsrv.mongo_projects().find({ owner: uid }).toArray();
+        if (projects && projects.length > 0) {
+            res.status(403).send({ message: 'User owns some projects, please change owner first!' });
+            return;
+        }
         usrsrv.delete_user(user, session_user.uid, mail_message, mail_send).then(function() {
             res.send({ message: 'User deleted' });
             return;
@@ -1784,10 +1789,7 @@ router.delete('/user/:id/project/:project', async function(req, res) {
         res.status(404).send({ message: 'Project not found' });
         return;
     }
-    if (project.owner == uid) {
-        res.status(400).send({ message: 'Can not remove project owner' });
-        return;
-    }
+    
     if (!isadmin && session_user.uid != project.owner && session_user.uid != uid) {
         res.status(401).send({ message: 'Not authorized' });
         return;
