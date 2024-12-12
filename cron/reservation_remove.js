@@ -33,7 +33,7 @@ dbsrv.init_db().then(()=>{
 
     }).toArray().then(function(reservations){
         if(reservations === undefined || reservations.length == 0){
-            console.log('[INFO] No expired reservation');
+            console.log('[INFO] No expired reservations');
             process.exit(0);
         }
         Promise.all(reservations.map(function(reservation){
@@ -41,6 +41,25 @@ dbsrv.init_db().then(()=>{
             console.log('[INFO] Reservation expired at ', new Date(reservation.to));
             return tpssrv.remove_tp_reservation(reservation._id);
         })).then(function(){
+            process.exit(0);
+        });
+    });
+    dbsrv.mongo_reservations().find( {
+        'lock': { '$lte': ended_after.getTime() },
+        'to': { '$lte': ended_after.getTime() },
+        'created': true,
+        'over': false
+    }).toArray().then(function(reservations) {
+        if(reservations === undefined || reservations.length == 0) {
+            console.log('[INFO] No locked reservations');
+            process.exit(0);
+        }
+        Promise.all(reservations.map(function(reservation) {
+            if(reservation.lock != reservation.to) {
+                console.log('[INFO] Reservation locked at ', new Date(reservation.lock));
+                return tpssrv.lock_tp_reservation(reservation._id);
+            }
+        })).then(function() {
             process.exit(0);
         });
     });
