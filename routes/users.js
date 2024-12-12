@@ -1789,7 +1789,7 @@ router.delete('/user/:id/project/:project', async function(req, res) {
         res.status(404).send({ message: 'Project not found' });
         return;
     }
-    
+
     if (!isadmin && session_user.uid != project.owner && session_user.uid != uid) {
         res.status(401).send({ message: 'Not authorized' });
         return;
