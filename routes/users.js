@@ -541,6 +541,14 @@ router.delete('/user/:id', async function(req, res) {
             res.status(403).send({ message: 'User owns some projects, please change owner first!' });
             return;
         }
+        let allprojects = user.projects ? user.projects : [];
+        for (let project_name in allprojects) {
+            let users_in_project = await dbsrv.mongo_users().find({ 'projects': project_name }).toArray();
+            if (users_in_project.length <= 1) {
+                res.status(403).send({ message: 'User is the last member of project ' + project_name });
+                return;
+            }
+        }
         usrsrv.delete_user(user, session_user.uid, mail_message, mail_send).then(function() {
             res.send({ message: 'User deleted' });
             return;
