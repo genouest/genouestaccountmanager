@@ -77,37 +77,4 @@ export class GroupsComponent implements OnInit {
             }
         )
     }
-
-    show_group_users(input_group: any) {
-        const group: Group = this.groupsService.mapToGroup(input_group);
-        this.msg = '';
-        this.rm_grp_err_msg = '';
-        this.rm_grp_msg_ok = '';
-        this.selectedGroup = group;
-        this.projectsService.getProjectsInGroup(group.name).subscribe(
-            resp => {
-                this.projects = resp;
-                this.groupsService.getUsers(group.gid).subscribe(
-                    user_list => {
-                        this.users = user_list;
-                        for(var i = 0; i < user_list.length; i++){
-                            var is_authorized = false;
-                            if(user_list[i].projects){
-                                for(var j = 0; j < this.projects.length; j++){
-                                    if(user_list[i].projects.indexOf(this.projects[j].id) >= 0){
-                                        is_authorized = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            this.users[i].temp = { ...this.users[i].temp, 'authorized': is_authorized };
-                        }
-                    },
-                    err => console.log('failed to get users in group', group)
-                )
-            },
-            err => console.log('failed to get projects in group')
-        )
-    }
-
 }

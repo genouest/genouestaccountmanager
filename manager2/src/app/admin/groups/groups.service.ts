@@ -87,12 +87,13 @@ export class GroupsService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.get(
-            environment.apiUrl + '/group/' + group_name,
-            httpOptions
-        ).pipe(map(response => {
-            return this.mapToGroup(response);
-        }));
+        return this.http
+            .get(environment.apiUrl + "/group/" + group_name, httpOptions)
+            .pipe(
+                map((response) => {
+                    return this.mapToGroup(response);
+                })
+            );
     }
 
     update(group: Group) {
