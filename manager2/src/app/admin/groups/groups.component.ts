@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Group, GroupsService } from './groups.service';
 import { ActivatedRoute } from '@angular/router';
 import { User } from '../../user/user.service';
-
 import { Table } from 'primeng/table';
 
 @Component({
@@ -42,18 +41,16 @@ export class GroupsComponent implements OnInit {
     ngOnInit() {
         this.route.queryParams
             .subscribe(params => {
-                if (params.deleted == "ok") {
-                    this.notification = "Project was deleted successfully";
+                if (params.deleted == 'ok') {
+                    this.notification = 'Group was deleted successfully';
                 };
             });
         this.listGroups();
     }
 
-    addGroup(){
-        this.notification = "";
-        if (this.new_group.name === '') {
-            return;
-        }
+    addGroup() {
+        this.notification = '';
+        if (this.new_group.name === '') { return; }
         this.err_msg = '';
         this.success_msg = '';
         this.groupsService.add(this.new_group).subscribe(
