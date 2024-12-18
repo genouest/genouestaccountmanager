@@ -17,7 +17,7 @@ const sansrv = require('../core/sanitize.service.js');
 const grpsrv = require('../core/group.service.js');
 const rolsrv = require('../core/role.service.js');
 
-router.get('/group/:id/users', async function(req, res){
+router.get('/group/:id/users', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
@@ -81,7 +81,7 @@ router.get('/group/:id', async function (req, res) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    const group = await dbsrv.mongo_groups().find({ 'name': req.params.id });
+    const group = await dbsrv.mongo_groups().findOne({ 'name': req.params.id });
     if (!group) {
         res.status(404).send({ message: 'Group ' + req.params.id + ' not found' });
         return;

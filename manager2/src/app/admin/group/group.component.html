@@ -2,35 +2,22 @@
 	<a routerLink="/admin/group" class="btn btn-primary">Back to groups</a>
 </div>
 
-<div class="card bg-light card-header">
-	<div class="row">
-		<div class="col-sm-9">
-			<h4>
-				Group <strong>{{ group.name }}</strong>
-			</h4>
-		</div>
-		<div class="col-sm-3">
-			<app-my-delete-confirm [onConfirm]="deleteGroup"></app-my-delete-confirm>
-		</div>
-	</div>
-</div>
+<div class="alert alert-danger" *ngIf="del_err_msg">{{ del_err_msg }}</div>
 
 <div class="card bg-light">
-	<div class="card-header">
-		<h3>Group tags</h3>
+	<div class="card bg-light card-header">
+		<div class="row">
+			<div class="col-sm-9">
+				<h4>
+					Group <strong>{{ group.name }}</strong>
+				</h4>
+			</div>
+			<div class="col-sm-3">
+				<app-my-delete-confirm [onConfirm]="deleteGroup"></app-my-delete-confirm>
+			</div>
+		</div>
 	</div>
 	<div class="card-body">
-		<app-tag [tag]="group.tags" [user]="group.name" kind="group"></app-tag>
-	</div>
-</div>
-
-<div class="card bg-light">
-	<div class="card-header">
-		<h3>Users in {{ group.name }}</h3>
-	</div>
-	<div class="card-body">
-		<div class="alert alert-danger" *ngIf="err_msg">{{ rm_grp_err_msg }}</div>
-		<div class="alert alert-info" *ngIf="msg">{{ msg }}</div>
 		<form role="form" class="user-form form-horizontal form-register">
 			<div class="form-group">
 				<label for="group_id" class="col-sm-2 col-form-label">Owner</label>
@@ -72,6 +59,15 @@
 
 <div class="card bg-light">
 	<div class="card-header">
+		<h3>Group tags</h3>
+	</div>
+	<div class="card-body">
+		<app-tag [tag]="group.tags" [user]="group.name" kind="group"></app-tag>
+	</div>
+</div>
+
+<div class="card bg-light">
+	<div class="card-header">
 		<h3>Projects associated with {{ group.name }} :</h3>
 	</div>
 	<div class="card-body">
@@ -94,9 +90,11 @@
 
 <div class="card bg-light">
 	<div class="card-header">
-		<h3>Members of {{ group.name }} :</h3>
+		<h3>Users in {{ group.name }} :</h3>
 	</div>
 	<div class="card-body">
+		<div class="alert alert-info" *ngIf="msg">{{ msg }}</div>
+		<div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
 		<div class="table-responsive table-striped">
 			<p-table
 				#dtu
@@ -115,7 +113,7 @@
 					</tr>
 				</ng-template>
 				<ng-template pTemplate="body" let-user>
-					<tr>
+					<tr *ngFor="let user of users">
 						<td>
 							<a routerLink="/user/{{ user.uid }}">
 								<span class="p-button p-button-sm p-button-primary">

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Group, GroupsService } from './groups.service';
-import { Project, ProjectsService } from 'src/app/admin/projects/projects.service';
+import { ActivatedRoute } from '@angular/router';
 import { User } from '../../user/user.service';
 
 import { Table } from 'primeng/table';
@@ -14,26 +14,19 @@ export class GroupsComponent implements OnInit {
     @ViewChild('dtg') tableGroups: Table;
     @ViewChild('dtu') tableUsers: Table;
 
+    notification: string
     success_msg: string
     err_msg: string
-    rm_grp_msg_ok: string
-    rm_grp_err_msg: string
-    msg: string
-
     selectedGroup: Group
     new_group: Group
-
-    projects: Project[]
     groups: Group[]
     users: User[]
 
     constructor(
-        private groupsService: GroupsService,
-        private projectsService: ProjectsService
+        private route: ActivatedRoute,
+        private groupsService: GroupsService
     ) {
-        this.selectedGroup = null;
         this.new_group = new Group();
-        this.projects = [];
         this.groups = [];
         this.users = [];
     }
@@ -47,15 +40,17 @@ export class GroupsComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.groupsService.list().subscribe(
-            resp => {
-                this.groups = resp;
-            },
-            err => console.log('failed to get groups')
-        )
+        this.route.queryParams
+            .subscribe(params => {
+                if (params.deleted == "ok") {
+                    this.notification = "Project was deleted successfully";
+                };
+            });
+        this.listGroups();
     }
 
     addGroup(){
+        this.notification = "";
         if (this.new_group.name === '') {
             return;
         }
@@ -64,17 +59,16 @@ export class GroupsComponent implements OnInit {
         this.groupsService.add(this.new_group).subscribe(
             resp => {
                 this.success_msg = 'Group was created';
-                this.groupsService.list().subscribe(
-                    resp => {
-                        this.groups = resp;
-                    },
-                    err => console.log('failed to get groups')
-                )
+                this.listGroups();
             },
-            err => {
-                this.success_msg = '';
-                this.err_msg = err.error.message;
-            }
+            err => this.err_msg = err.error.message
+        )
+    }
+
+    listGroups() {
+        this.groupsService.list().subscribe(
+            resp => (this.groups = resp),
+            err => console.log('failed to get groups')
         )
     }
 }

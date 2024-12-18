@@ -88,7 +88,7 @@ export class GroupsService {
             //}),
         };
         return this.http
-            .get(environment.apiUrl + "/group/" + group_name, httpOptions)
+            .get(environment.apiUrl + '/group/' + group_name, httpOptions)
             .pipe(
                 map((response) => {
                     return this.mapToGroup(response);

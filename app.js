@@ -298,6 +298,7 @@ app.post('/group/:id', groups);
 app.put('/group/:id', groups);
 app.delete('/group/:id', groups);
 app.get('/group/:id', groups);
+app.get('/group/:id/users', groups);
 app.get('/user', users);
 app.get('/database', database);
 app.get('/pending/database', database);
