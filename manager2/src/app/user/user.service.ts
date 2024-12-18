@@ -33,6 +33,7 @@ export class User {
     projects: string[]
     newproject: any
     tags: any
+    loginShell: any
     regkey: number
     apikey: number
     ssh: string
@@ -51,7 +52,7 @@ export class User {
         send_copy_to_support: boolean = false, create_imap_mailbox: boolean = false,
         created_at: number = null, expiration: number = 0, duration: any = null, registration: number = 0,
         group: string = '', secondary_groups: string[] = [], new_group: string = '',
-        projects: string[] = null, new_project: any = null, tags: any = null,
+        projects: string[] = null, new_project: any = null, tags: any = null, loginShell: any = '',
         reg_key: number = 0, api_key: number = 0, ssh: string = '', u2f: any = null, otp: any = null,
         history: any[] = [], extra_info: any[] = [], status: string = '', temp: any = null
     ) {
@@ -62,7 +63,7 @@ export class User {
         this.send_copy_to_support = send_copy_to_support; this.create_imap_mailbox = create_imap_mailbox;
         this.created_at = created_at; this.expiration = expiration; this.duration = duration; this.registration = registration;
         this.group = group; this.secondarygroups = secondary_groups; this.newgroup = new_group;
-        this.projects = projects; this.newproject = new_project; this.tags = tags;
+        this.projects = projects; this.newproject = new_project; this.tags = tags; this.loginShell = loginShell;
         this.regkey = reg_key; this.apikey = api_key; this.ssh = ssh; this.u2f = u2f; this.otp = otp;
         this.history = history; this.extra_info = extra_info; this.status = status; this.temp = temp;
     }
@@ -88,7 +89,7 @@ export class UserService {
             resp.created_at || null, new Date(resp.expiration).getTime() || 0,
             resp.duration || null, new Date(resp.registration).getTime() || 0,
             resp.group || '', resp.secondarygroups || [], resp.newgroup || '',
-            resp.projects || null, resp.newproject || null, resp.tags || null,
+            resp.projects || null, resp.newproject || null, resp.tags || null, resp.loginShell || null,
             resp.regkey || 0, resp.apikey || 0, resp.ssh || '', resp.u2f || null, resp.otp || null,
             resp.history || [], resp.extra_info || [], resp.status || '', resp.temp || null
         );
