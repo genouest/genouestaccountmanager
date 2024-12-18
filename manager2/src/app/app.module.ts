@@ -17,6 +17,7 @@ import { ProjectComponent } from './project/project.component';
 import { UsersComponent, MyStatusFilterPipe } from './admin/users/users.component';
 import { AdminStatComponent} from './admin/stats/stats.component';
 import { GroupsComponent } from './admin/groups/groups.component';
+import { GroupComponent } from './admin/group/group.component';
 import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/projects.component';
 import { ProjectComponent as AdminProjectComponent} from './admin/project/project.component';
 import { MessagesComponent } from './admin/messages/messages.component';
@@ -84,6 +85,7 @@ export class SentryErrorHandler implements ErrorHandler {
         UsersComponent,
         AdminStatComponent,
         GroupsComponent,
+        GroupComponent,
         AdminProjectsComponent,
         AdminProjectComponent,
         UserProjectsComponent,
