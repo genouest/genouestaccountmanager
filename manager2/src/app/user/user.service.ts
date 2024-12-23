@@ -69,7 +69,7 @@ export class User {
         this.projects = projects; this.newproject = new_project; this.tags = tags;
         this.regkey = reg_key; this.apikey = api_key; this.ssh = ssh; this.u2f = u2f; this.otp = otp;
         this.history = history; this.extra_info = extra_info; this.status = status; this.temp = temp;
-        this.loginShell = loginShell; this.maingroup = maingroup, this.uidnumber = uidnumber
+        this.loginShell = loginShell; this.maingroup = maingroup; this.uidnumber = uidnumber
     }
 }
 
