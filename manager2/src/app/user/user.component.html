@@ -163,7 +163,7 @@
                   <div class="form-group row" *ngIf="config.enable_ui && config.enable_ui.main_group">
                     <label for="mgroup" class="col-4 col-form-label">Main group directory</label>
                     <div class="col-8">
-                      <select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.group" class="form-control">
+                      <select id="mgroup" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.maingroup" class="form-control">
                         <option *ngFor="let item of config.main_groups" [value]="item">{{item}}</option>
                       </select>
                     </div>
@@ -359,7 +359,7 @@
                         aria-label="Toggle password visibility"
                         role="button"
                         tabindex="0"
-                      ></i>     
+                      ></i>
                       <span
                         *ngIf="isFormValid() && password1Model.dirty && password1.length > 0"
                         class="input-group-text valid-indicator"
@@ -396,7 +396,7 @@
                     </div>
                   </div>
                 </div>
-              
+
                 <div class="col-sm-8 offset-sm-2 mt-3">
                   <label for="confirm_password" class="col-form-label">Confirm password</label>
                   <div class="input-group password-field">
@@ -422,7 +422,7 @@
                         aria-label="Toggle password visibility"
                         role="button"
                         tabindex="0"
-                      ></i>     
+                      ></i>
                       <span
                         *ngIf="password1Model.valid && password2Model.valid && password1 === password2 && password2.length > 0"
                         class="input-group-text valid-indicator"
@@ -439,7 +439,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <button
                 type="button"
                 class="p-button p-button-sm p-button-primary mt-3"
@@ -448,7 +448,7 @@
                 [ngClass]="{'btn-disabled': !isFormValid() || password1 !== password2}"
               >
                 Change password
-              </button>                        
+              </button>
             </form>
           </div>
         </div>
