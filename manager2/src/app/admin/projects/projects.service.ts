@@ -306,4 +306,8 @@ export class ProjectsService {
         );
     }
 
+    reject_project(projectUuid: string, rejectionReason: string, ownerEmail: string): Observable<any> {
+        return this.http.post(`${environment.apiUrl}/pending/project/${projectUuid}/reject`, { rejectionReason, ownerEmail });
+    }
+
 }

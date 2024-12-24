@@ -134,7 +134,6 @@ async function create_project_request(asked_project, user) {
     }
 }
 
-
 async function remove_project_request(uuid, action_owner = 'auto') {
     logger.info('Remove Project Request' + uuid);
     const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });

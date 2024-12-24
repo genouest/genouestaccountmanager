@@ -7,7 +7,6 @@ import { User, UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
 import { Table } from 'primeng/table'
 
-
 @Component({
     selector: 'app-projects',
     templateUrl: './projects.component.html',
@@ -46,6 +45,9 @@ export class ProjectsComponent implements OnInit {
     default_path: string
     default_size: number
     default_cpu: number
+
+    rejectionReason: string = ''
+    currentProject: any = null
 
     constructor(
         private route: ActivatedRoute,
@@ -296,6 +298,59 @@ export class ProjectsComponent implements OnInit {
             },
             err => this.pending_err_msg = err.error
         );
+
+    }
+
+    openRejectModal(project: any) {
+        this.currentProject = project
+        const rejectModal = document.getElementById('rejectModal')
+        if (rejectModal) {
+            (rejectModal as any).style.display = 'block'
+            rejectModal.classList.add('show')
+        }
+    }
+
+    closeRejectModal() {
+        const rejectModal = document.getElementById('rejectModal')
+        if (rejectModal) {
+            (rejectModal as any).style.display = 'none'
+            rejectModal.classList.remove('show')
+        }
+        this.rejectionReason = ''
+        this.currentProject = null
+    }
+
+    confirmRejectProject() {
+        //this.reject_project(this.currentProject)
+
+        if (this.rejectionReason) {
+            console.log(this.currentProject)
+            console.log(`Reason provided: ${this.currentProject}`);
+            console.log(`Reason provided: ${this.currentProject.uuid}`);
+            console.log(`Reason provided: ${this.currentProject.owner}`);
+
+            
+    
+            // Fetch the user details
+            this.userService.getUser(this.currentProject.owner).subscribe(
+                async (resp) => {
+                    this.projectService.reject_project(this.currentProject.uuid, this.rejectionReason, resp.email).subscribe(
+                        () => {
+                            console.log('Rejection email sent successfully.');
+                        },
+                        err => {
+                            console.error('Failed to send rejection email:', err);
+                        }
+                    );
+                },
+                (err) => {
+                    console.error('Failed to get user email:', err);
+                }
+            );
+        } else {
+            console.warn('Rejection reason or current project is missing.');
+        }
+        this.closeRejectModal()
 
     }
 
