@@ -48,6 +48,7 @@ export class ProjectsComponent implements OnInit {
 
     rejectionReason: string = ''
     currentProject: any = null
+    user_uid: string = null
 
     constructor(
         private route: ActivatedRoute,
@@ -290,68 +291,61 @@ export class ProjectsComponent implements OnInit {
 
     reject_project(input_project: any) {
         const project: Project = this.projectService.mapToProject(input_project);
-        this.reset_msgs()
+        this.reset_msgs();
         this.projectService.delete_pending(project.uuid).subscribe(
-            resp => {
+            (resp) => {
                 this.pending_msg = resp.message;
                 this.pending_list(true);
             },
-            err => this.pending_err_msg = err.error
+            (err) => {
+                this.pending_err_msg = err.error;
+            }
         );
-
     }
 
-    openRejectModal(project: any) {
+    openRejectModal(project: any, user_uid: any) {
         this.currentProject = project
-        const rejectModal = document.getElementById('rejectModal')
-        if (rejectModal) {
-            (rejectModal as any).style.display = 'block'
-            rejectModal.classList.add('show')
-        }
+        this.user_uid = user_uid
     }
 
     closeRejectModal() {
-        const rejectModal = document.getElementById('rejectModal')
+        const rejectModal = document.getElementById('rejectModal');
         if (rejectModal) {
-            (rejectModal as any).style.display = 'none'
-            rejectModal.classList.remove('show')
+            // Simulate the close functionality
+            rejectModal.classList.remove('show');
+            rejectModal.setAttribute('aria-hidden', 'true');
+            rejectModal.style.display = 'none';
+    
+            // Remove the backdrop if present
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.remove();
+            }
+    
+            // Restore scrolling
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
         }
         this.rejectionReason = ''
         this.currentProject = null
+        this.user_uid = null
     }
 
     confirmRejectProject() {
-        //this.reject_project(this.currentProject)
-
-        if (this.rejectionReason) {
-            console.log(this.currentProject)
-            console.log(`Reason provided: ${this.currentProject}`);
-            console.log(`Reason provided: ${this.currentProject.uuid}`);
-            console.log(`Reason provided: ${this.currentProject.owner}`);
-
-            
-    
-            // Fetch the user details
-            this.userService.getUser(this.currentProject.owner).subscribe(
-                async (resp) => {
-                    this.projectService.reject_project(this.currentProject.uuid, this.rejectionReason, resp.email).subscribe(
-                        () => {
-                            console.log('Rejection email sent successfully.');
-                        },
-                        err => {
-                            console.error('Failed to send rejection email:', err);
-                        }
-                    );
-                },
-                (err) => {
-                    console.error('Failed to get user email:', err);
+        this.reject_project(this.currentProject);
+        if(this.rejectionReason)
+            this.userService.notify(this.currentProject.owner, {
+                subject: `: Project ${this.currentProject.id} creation rejected`,
+                message: `The reason why your project was not accepted by one of our admins is the following: ${this.rejectionReason}`,
+                send_copy_to_support: true
+            }).subscribe(
+                err => {
+                    console.log(('failed to send mail'));
                 }
             );
-        } else {
-            console.warn('Rejection reason or current project is missing.');
-        }
-        this.closeRejectModal()
-
+    
+        this.closeRejectModal();
     }
 
     reset_msgs() {

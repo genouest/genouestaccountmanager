@@ -542,62 +542,6 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.status(401).send('Not authorized');
         return;
     }
-    let user = null;
-    let isadmin = false;
-    try {
-        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-        isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
-        logger.error(e);
-        res.status(404).send({message: 'User session not found'});
-        res.end();
-        return;
-    }
-
-    if (!user) {
-        res.status(404).send('User not found');
-        return;
-    }
-    if (!isadmin) {
-        res.status(401).send('Not authorized');
-        return;
-    }
-
-    try {
-        await prjsrv.remove_project_request(req.params.uuid, user.uid);
-    } catch(e) {
-        logger.error(e);
-        if (e.code && e.message) {
-            res.status(e.code).send({message: e.message});
-            res.end();
-            return;
-        } else {
-            res.status(500).send({message: 'Server Error, contact admin'});
-            res.end();
-            return;
-        }
-    }
-    res.send({ message: 'Pending Project deleted'});
-
-});
-
-router.post('/pending/project/:uuid/reject', async function (req, res) {
-    if (!req.locals.logInfo.is_logged) {
-        res.status(401).send('Not authorized');
-        return;
-    }
-
-    const rejectionReason = req.body.rejectionReason?.trim();
-    if (!rejectionReason) {
-        res.status(400).send({ message: 'Rejection reason is required.' });
-        return;
-    }
-
-    const ownerEmail = req.body.rejectionReason?.trim();
-    if (!ownerEmail) {
-        res.status(400).send({ message: 'owner Email is required.' });
-        return;
-    }
 
     let user = null;
     let isadmin = false;
@@ -608,6 +552,7 @@ router.post('/pending/project/:uuid/reject', async function (req, res) {
     } catch (e) {
         logger.error(e);
         res.status(404).send({ message: 'User session not found' });
+        res.end();
         return;
     }
 
@@ -615,27 +560,28 @@ router.post('/pending/project/:uuid/reject', async function (req, res) {
         res.status(404).send('User not found');
         return;
     }
+
     if (!isadmin) {
         res.status(401).send('Not authorized');
         return;
     }
 
     try {
-        await maisrv.send_notif_mail({
-            name: 'rejection_project_creation',
-            destinations: [ownerEmail, CONFIG.general.accounts],
-            subject: `[Creation project rejected] `,
-            message: `Your project "${ownerEmail}" has been rejected for the following reason: ${rejectionReason}`,
-        });
-        logger.info(`Rejection email sent to: ${ownerEmail}`);
-    } catch (emailError) {
-        logger.error('Failed to send rejection email:', emailError);
-        res.status(500).send({ message: 'Failed to send rejection email.' });
+        await prjsrv.remove_project_request(req.params.uuid, user.uid);
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({ message: e.message });
+        } else {
+            res.status(500).send({ message: 'Server Error, contact admin' });
+        }
+        res.end();
         return;
     }
 
-    res.send({ message: 'Rejection email sent successfully.' });
+    res.send({ message: 'Pending Project deleted' });
 });
+
 
 router.get('/project/:id/users', async function(req, res){
     if(! req.locals.logInfo.is_logged) {

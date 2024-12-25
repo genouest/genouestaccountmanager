@@ -143,7 +143,7 @@
                   <td>
                     <div class="btn-group">
                       <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-info " (click)="modify_project(pending)">View</button>
-                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-danger " (click)="openRejectModal(pending)">Reject</button>
+                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-danger " data-toggle="modal" data-target="#rejectModal" (click)="openRejectModal(pending)">Reject</button>
                     </div>
                   </td>
                 </tr>
@@ -318,10 +318,8 @@
   </div>
 </div>
 
-<!-- Reject Modal -->
 <div
-  class="modal"
-  style="z-index: 1500;"
+  class="modal fade"
   id="rejectModal"
   tabindex="-1"
   role="dialog"
