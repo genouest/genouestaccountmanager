@@ -15,6 +15,7 @@ import { FlashMessagesService } from '../utils/flash/flash.component';
 import {
     solveRegistrationChallenge
 } from '@webauthn/client';
+import { NgModel } from '@angular/forms'
 
 /*
   function _window() : any {
@@ -151,10 +152,20 @@ export class UserComponent implements OnInit {
     panel: number = 0;
 
     // Password mngt
-    wrong_confirm_passwd: string
     update_passwd: string
-    password1: string
-    password2: string
+    password1: string = ''
+    password2: string = ''
+
+    passwordVisible: boolean = false
+    passwordConfirmVisible: boolean = false
+
+    // Flags for password rules
+    passwordLengthValid: boolean = false;
+    hasDigit: boolean = false;
+    hasLowercase: boolean = false;
+    hasUppercase: boolean = false;
+    hasSpecialChar: boolean = false;
+    hasSpaces: boolean = false;
 
     // Error messages
     msg: string
@@ -243,6 +254,10 @@ export class UserComponent implements OnInit {
 
         this.otp_msg =  ""
         this.otp_err_msg =  ""
+    }
+
+    get emailDomain(): string {
+        return this.user.email.split('@')[1] || '';
     }
 
     onExtraValue(extras: any) {
@@ -614,22 +629,95 @@ export class UserComponent implements OnInit {
         )
     }
 
-    update_password() {
-        this.wrong_confirm_passwd = "";
-        this.update_passwd = "";
-        if ((this.password1 != this.password2) || (this.password1 == "")) {
-            this.wrong_confirm_passwd = "Passwords are not identical";
-            return;
-        }
-        if (this.password1.length < 10) {
-            this.wrong_confirm_passwd = "Password must have 10 characters minimum";
-            return;
-        }
-        this.userService.updatePassword(this.user.uid, this.password1).subscribe(
-            resp => this.update_passwd = resp['message'],
-            err => console.log('failed to update password')
-        );
+    update_password(password1Model: NgModel, password2Model: NgModel) {
+        this.validateInput(password1Model)
+        this.validateInput(password2Model)
+    
+        const passwordErrors = this.validatePassword(this.password1)
+        const confirmPasswordErrors = this.password1 !== this.password2 ? { mustMatch: true } : null
+    
+        password1Model.control.setErrors(passwordErrors)
+        password2Model.control.setErrors(confirmPasswordErrors)
+    
+        if (!passwordErrors && !confirmPasswordErrors) {
+            this.userService.updatePassword(this.user.uid, this.password1).subscribe(
+                resp => this.update_passwd = resp['message'],
+                err => console.log('failed to update password', err)
+            )
+        } else {
+            console.log('Passwords are invalid or do not match.')
+        }  
     }
+    
+    validateInput(model: NgModel) {
+        model.control.markAsTouched()
+        model.control.markAsDirty()
+        model.control.updateValueAndValidity() 
+    }
+    
+    checkPasswordRules(password: string) {
+        this.passwordLengthValid = password.length >= 12
+        this.hasDigit = /[0-9]/.test(password)
+        this.hasLowercase = /[a-z]/.test(password)
+        this.hasUppercase = /[A-Z]/.test(password)
+        this.hasSpecialChar = /[\W_]/.test(password)
+        this.hasSpaces = / /.test(password)
+    }
+    
+    validatePassword(password: string) {
+        if (!password) {
+            return { required: true }
+        }
+
+        const errors: any = {};
+        if (password.length < 12) {
+            errors.minlength = { requiredLength: 12, actualLength: password.length }
+        }
+        if (!/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])(?!.* ).{12,}$/.test(password)) {
+            errors.pattern = { requiredPattern: 'at least one digit, one lowercase letter, one uppercase letter, one special character, and no spaces' }
+        }
+
+        return Object.keys(errors).length ? errors : null
+    }
+
+    isFormValid(): boolean {
+        return this.passwordLengthValid &&
+               this.hasDigit &&
+               this.hasLowercase &&
+               this.hasUppercase &&
+               this.hasSpecialChar &&
+               !this.hasSpaces;
+    }
+
+    checkPasswordMatch(password1Model: NgModel, password2Model: NgModel) {
+        if (this.password1 !== this.password2) {
+          password2Model.control.setErrors({ mustMatch: true });
+        } else {
+          password2Model.control.setErrors(null); // Clear error if passwords match
+        }
+    }
+    
+    togglePasswordVisibility(field: number): void {
+        if (field === 1) {
+          this.passwordVisible = !this.passwordVisible;
+        } else if (field === 2) {
+          this.passwordConfirmVisible = !this.passwordConfirmVisible;
+        }
+      }
+
+    // update_password() {
+    //     this.wrong_confirm_passwd = "";
+    //     this.update_passwd = "";
+    //     if ((this.password1 != this.password2) || (this.password1 == "")) {
+    //         this.wrong_confirm_passwd = "Passwords are not identical";
+    //         return;
+    //     }
+    //     if (this.password1.length < 10) {
+    //         this.wrong_confirm_passwd = "Password must have 10 characters minimum";
+    //         return;
+    //     }
+        
+    // }
 
     update_info() {
         this.update_msg = '';
@@ -666,7 +754,7 @@ export class UserComponent implements OnInit {
             this.update_error_msg = 'Missing field: why do you need an account';
             return;
         }
-        if (!this.user.firstname.match(/^[a-zA-Z]+$/) || !this.user.lastname.match(/^[a-zA-Z]+$/)) {
+        if (!this.user.firstname.match(/^[a-zA-Zà-ü]+$/) || !this.user.lastname.match(/^[a-zA-Zà-ü]+$/)) {
             this.update_error_msg = 'Name contains unauthorized characters';
             return;
         }

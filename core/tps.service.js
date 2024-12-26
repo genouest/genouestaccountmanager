@@ -148,7 +148,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
                 expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
             };
             user = await usrsrv.create_user(user);
-            user.password = usrsrv.new_password(10);
+            user.password = usrsrv.new_password(16);
             await usrsrv.activate_user(user);
 
             users.push(user);

@@ -104,7 +104,7 @@ async function create_db(new_db, user, id) {
     }
 
     //let password = Math.random().toString(36).slice(-10);
-    let password = usrsrv.new_password(10);
+    let password = usrsrv.new_password(16);
     let createuser = `CREATE USER '${id}'@'%' IDENTIFIED BY '${password}';\n`;
     try {
         await querydb(createuser);

@@ -421,5 +421,6 @@
     "test": {
       "parameter1" : "test1"
     }
-  }
+  },
+  "custom_users": {}
 }
