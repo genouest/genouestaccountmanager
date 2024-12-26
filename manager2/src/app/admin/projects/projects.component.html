@@ -288,43 +288,7 @@
   </div>
 </div>
 
-<!-- Modal -->
-<div class="modal" style="z-index: 1500;" id="group_creation" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="panel-title">Group creation</h3>
-      </div>
-      <div class="modal-body">
-        <form role="form" class="user-form form-horizonal">
-          <div class="form-group row">
-            <div class="col-sm-4">
-            <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
-            </div>
-            <div class="col-sm-4">
-            <input placeholder="Owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
-            </div>
-            <div class="col-sm-4">
-            <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="!new_group.name" data-dismiss="modal" (click)="addGroup()">Create</button>
-        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div
-  class="modal fade"
-  id="rejectModal"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -349,6 +313,18 @@
             class="form-control"
             rows="4"
           ></textarea>
+        </div>
+        <div class="form-check mt-3">
+          <input
+            type="checkbox"
+            id="sendCopyToSupport"
+            [(ngModel)]="sendCopyToSupport"
+            class="form-check-input"
+            [checked]="true"
+          />
+          <label class="form-check-label" for="sendCopyToSupport">
+            Send a copy of the message to support
+          </label>
         </div>
       </div>
       <div class="modal-footer">

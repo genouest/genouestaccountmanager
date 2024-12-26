@@ -49,6 +49,7 @@ export class ProjectsComponent implements OnInit {
     rejectionReason: string = ''
     currentProject: any = null
     user_uid: string = null
+    sendCopyToSupport: boolean = true;
 
     constructor(
         private route: ActivatedRoute,
@@ -338,7 +339,7 @@ export class ProjectsComponent implements OnInit {
             this.userService.notify(this.currentProject.owner, {
                 subject: `: Project ${this.currentProject.id} creation rejected`,
                 message: `The reason why your project was not accepted by one of our admins is the following: ${this.rejectionReason}`,
-                send_copy_to_support: true
+                send_copy_to_support: this.sendCopyToSupport
             }).subscribe(
                 err => {
                     console.log(('failed to send mail'));
