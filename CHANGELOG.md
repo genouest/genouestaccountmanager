@@ -2,6 +2,7 @@
 
 ## 1.4.32 (Unreleased)
 
+* Adding a tool script to delete users accounts in pending email approval
 * Clearer error message when adding a website
 * Add User, Project and Group static classes to front end (refactor)
 * Add checks for website owner update
