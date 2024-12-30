@@ -8,8 +8,7 @@ console.log('CONFIG loaded:', CONFIG);
 
 const optionDefinitions = [
     { name: 'help', description: 'Display this usage guide.', alias: 'h', type: Boolean},
-    { name: 'days', alias: 'd', type: Number, description: 'Number of days after which to delete accounts' },
-    { name: 'config', alias: 'c', type: String, description: 'Path to the configuration file' }
+    { name: 'days', alias: 'd', type: Number, description: 'Number of days after which to delete accounts' }
 ];
 
 const sections = [
@@ -26,18 +25,13 @@ if(commands.h || (commands.days === undefined)){
     return;
 }
 
-
 var db = monk(CONFIG.mongo.host+':'+CONFIG.mongo.port+'/'+CONFIG.general.db);
 var users_db = db.get('users');
 
 const DAYS_TO_DELETE = commands.days || 30;
 const currentTime = new Date().getTime();
 const expirationTime = currentTime - (DAYS_TO_DELETE * 24 * 60 * 60 * 1000); 
-console.log("current")
-console.log(currentTime)
-console.log("days to")
-console.log(DAYS_TO_DELETE * 24 * 60 * 60 * 1000)
-console.log(expirationTime)
+
 async function notify(recipients, subject, message) {
     try {
         await maisrv.send_notif_mail({
