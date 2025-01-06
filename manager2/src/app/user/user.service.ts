@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 
 export class User {
     uid: string
-    id: number
+    uidnumber: number
     firstname: string
     lastname: string
     email: string
@@ -45,7 +45,7 @@ export class User {
     temp: any
 
     constructor(
-        uid: string = '', id: number = 0, first_name: string = '', last_name: string = '',
+        uid: string = '', uidnumber: number = 0, first_name: string = '', last_name: string = '',
         email: string = '', lab: string = '', responsible: string = '', address: string = '',
         team: string = '', why: string = '', ip: string = '',
         is_admin: boolean = false, is_fake: boolean = false, is_locked: boolean = false, is_trainer: boolean = false,
@@ -56,7 +56,7 @@ export class User {
         reg_key: number = 0, api_key: number = 0, ssh: string = '', u2f: any = null, otp: any = null,
         history: any[] = [], extra_info: any[] = [], status: string = '', temp: any = null
     ) {
-        this.uid = uid; this.id = id; this.firstname = first_name; this.lastname = last_name;
+        this.uid = uid; this.uidnumber = uidnumber; this.firstname = first_name; this.lastname = last_name;
         this.email = email; this.lab = lab; this.responsible = responsible; this.address = address;
         this.team = team; this.why = why; this.ip = ip;
         this.is_admin = is_admin; this.is_fake = is_fake; this.is_locked = is_locked; this.is_trainer = is_trainer;
@@ -81,7 +81,7 @@ export class UserService {
 
     mapToUser(resp: any): User {
         return new User(
-            resp.uid || '', resp.id || 0, resp.firstname || '', resp.lastname || '',
+            resp.uid || '', resp.uidnumber || 0, resp.firstname || '', resp.lastname || '',
             resp.email || '', resp. lab || '', resp.responsible || '', resp.address || '',
             resp.team || '', resp.why || '', resp.ip || '',
             resp.is_admin || false, resp.is_fake || false, resp.is_locked || false, resp.is_trainer || false,
