@@ -358,10 +358,8 @@ export class UserComponent implements OnInit {
                 if (this.user.uid === projects[i].owner) {
                     is_owner = true;
                 }
-                if (projects[i].managers) {
-                    if (projects[i].managers.includes(this.user.uid)) {
-                        is_manager = true;
-                    }
+                if (projects[i].managers.includes(this.user.uid)) {
+                    is_manager = true;
                 }
                 if (this.user.group.indexOf(projects[i].group) >= 0 || this.user.secondarygroups.indexOf(projects[i].group) >= 0) {
                     is_member = true;

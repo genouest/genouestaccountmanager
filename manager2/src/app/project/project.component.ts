@@ -30,10 +30,15 @@ export class ProjectComponent implements OnInit {
     default_size: number
     default_cpu: number
 
+    owner_visible: boolean
     manager_visible: boolean
 
     request_err_msg: string
     request_msg: string
+    owner_request_err_msg: string
+    owner_request_msg: string
+    manager_request_err_msg: string
+    manager_request_msg: string
 
     oldGroup: string
 
@@ -56,6 +61,7 @@ export class ProjectComponent implements OnInit {
 
         this.new_project = new Project();
         this.new_project_expire = '';
+        this.owner_visible = true;
         this.manager_visible = true;
         this.session_user = await this.authService.profile;
         this.users = [];

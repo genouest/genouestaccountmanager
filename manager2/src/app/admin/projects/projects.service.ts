@@ -62,7 +62,7 @@ export class ProjectsService {
     mapToProject(resp: any): Project {
         return new Project(
             resp._id || '', resp.uuid || '', resp.id || '',
-            resp.owner || '', resp.managers || null, resp.group || '',
+            resp.owner || '', resp.managers || [], resp.group || '',
             resp.size || 0, resp.current_size || null,
             resp.low_size || null, resp.high_size || null,
             resp.cpu || 0, resp.current_cpu || null,
