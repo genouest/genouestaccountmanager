@@ -541,11 +541,11 @@ router.delete('/user/:id', async function(req, res) {
             res.status(403).send({ message: 'User owns some projects, please change owner first!' });
             return;
         }
-        let allprojects = user.projects ? user.projects : [];
-        for (let project_name in allprojects) {
-            let users_in_project = await dbsrv.mongo_users().find({ 'projects': project_name }).toArray();
+        const allprojects = user.projects ? user.projects : [];
+        for (let project_name of allprojects) {
+            const users_in_project = await dbsrv.mongo_users().find({ 'projects': project_name }).toArray();
             if (users_in_project.length <= 1) {
-                res.status(403).send({ message: 'User is the last member of project ' + project_name });
+                res.status(403).send({ message: 'User is the last member of project ${project_name}' });
                 return;
             }
         }
