@@ -191,9 +191,10 @@ router.put('/user/:id/subscribe', async function(req, res) {
         return;
     }
 
+    let session_user = null;
     let isadmin = false;
     try {
-        let session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
@@ -230,9 +231,10 @@ router.put('/user/:id/unsubscribe', async function(req, res) {
         return;
     }
 
+    let session_user = null;
     let isadmin = false;
     try {
-        let session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
