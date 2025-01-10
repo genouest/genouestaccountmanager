@@ -234,7 +234,7 @@ router.put('/user/:id/unsubscribe', async function(req, res) {
     let session_user = null;
     let isadmin = false;
     try {
-        let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
