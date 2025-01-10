@@ -193,8 +193,8 @@ router.put('/user/:id/subscribe', async function(req, res) {
 
     let isadmin = false;
     try {
-        let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-        isadmin = await rolsrv.is_admin(user);
+        let session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
         res.status(404).send({ message: 'User session not found' });
@@ -202,7 +202,7 @@ router.put('/user/:id/subscribe', async function(req, res) {
     }
 
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && !isadmin) {
+    if (session_user.uid !== req.params.id && !isadmin) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
@@ -232,8 +232,8 @@ router.put('/user/:id/unsubscribe', async function(req, res) {
 
     let isadmin = false;
     try {
-        let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-        isadmin = await rolsrv.is_admin(user);
+        let session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
         res.status(404).send({ message: 'User session not found' });
@@ -241,7 +241,7 @@ router.put('/user/:id/unsubscribe', async function(req, res) {
     }
 
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && !isadmin) {
+    if (session_user.uid !== req.params.id && !isadmin) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
