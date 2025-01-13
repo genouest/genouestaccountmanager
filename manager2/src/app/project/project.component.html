@@ -109,10 +109,10 @@
 <div *ngIf="request_msg" class="alert alert-info">{{request_msg}}</div>
 
 <div class="card bg-light">
-  <div class="card-header">
+  <div class="card-header" (click)="projects_visible=!projects_visible" style="cursor: pointer;">
     <h3>Projects</h3>
   </div>
-  <div class="card-body">
+  <div class="card-body" *ngIf="projects_visible">
     <div class="table-responsive">
           <p-table #dtp [value]="projects"
                       [paginator]="true"
@@ -178,12 +178,12 @@
 <div *ngIf="selectedProject">
   <hr/>
   <div class="well" >
-      <h4>Project <b>{{selectedProject.id}}</b></h4>
+      <h2>Project <b>{{selectedProject.id}}</b></h2>
   </div>
 
   <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">
     <div class="card-header" (click)="owner_visible=!owner_visible" style="cursor: pointer;">
-      <h2>Owner console</h2>
+      <h3>Owner console</h3>
     </div>
     <div class="card-body" *ngIf="owner_visible">
       <div class="alert alert-danger" *ngIf="owner_request_err_msg">{{owner_request_err_msg}}</div>
@@ -206,17 +206,18 @@
           </div>
           <div class="col-sm-3">
             <label style="opacity: 0;">Request manager removal</label>
-            <button type="button" class="p-button p-button-sm p-button-warning"(click)="request_manager(selectedProject, remove_user,'remove')">Request manager removal</button>
+            <button type="button" class="p-button p-button-sm p-button-warning"(click)="request_manager(selectedProject, remove_user, 'remove')">Request manager removal</button>
           </div>
         </div>
       </form>
-      <p-table #dtp [value]="projects"
+      <div class="card-header">
+        <h3>Project managers</h3>
+      </div>
+      <p-table #dtp [value]="managers"
                 [paginator]="true"
                 [rows]="10"
                 [showCurrentPageReport]="true"
                 [rowsPerPageOptions]="[10,25,50]"
-                [globalFilterFields]="['id','owner']"
-                [filterDelay]="0"
       >
         <ng-template pTemplate="caption">
           <span class="p-input-icon-right">
@@ -228,8 +229,9 @@
           <tr>
             <th>User</th>
             <th>Email</th>
-            <th>Access</th>
-            <th>Owner</th>
+            <th>Access?</th>
+            <th>Owner?</th>
+            <th></th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-user>
@@ -238,6 +240,9 @@
             <td><span *ngIf="session_user.uid === selectedProject.owner">{{user.email}}</span></td>
             <td><span *ngIf="user.temp?.access">x</span></td>
             <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
+            <td>
+              <button *ngIf="selectedProject.owner != user.uid" type="button" class="p-button p-button-sm p-button-danger" (click)="request_manager(project, user.uid, 'remove')">Request Demotion</button>
+            </td>
           </tr>
         </ng-template>
       </p-table>
@@ -246,7 +251,7 @@
 
   <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner || selectedProject.managers.includes(session_user.uid)">
     <div class="card-header" (click)="manager_visible=!manager_visible" style="cursor: pointer;">
-      <h2>Manager console</h2>
+      <h3>Manager console</h3>
     </div>
     <div class="card-body" *ngIf="manager_visible">
       <div class="alert alert-danger" *ngIf="manager_request_err_msg">{{manager_request_err_msg}}</div>
@@ -277,10 +282,10 @@
   </div>
 
   <div class="card bg-light">
-    <div class="card-header">
+    <div class="card-header" (click)="overview_visible=!overview_visible" style="cursor: pointer;">
       <h3>Project overview</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body" *ngIf="overview_visible">
       <div class="table-responsive">
         <table class="table table-striped">
           <tbody>
@@ -369,10 +374,10 @@
   </div>
 
   <div class="card bg-light">
-    <div class="card-header">
+    <div class="card-header" (click)="members_visible=!members_visible" style="cursor: pointer;">
       <h3>Project members</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body" *ngIf="members_visible">
       <div class="table-responsive table-striped">
           <p-table #dtu [value]="users"
                       [paginator]="true"
@@ -381,7 +386,13 @@
                       [rowsPerPageOptions]="[10,25,50]"
           >
             <ng-template pTemplate="header">
-                          <tr><th>User</th><th>Email</th><th>Access</th><th>Owner</th></tr>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Access?</th>
+                <th>Manager?</th>
+                <th>Owner?</th>
+              </tr>
             </ng-template>
             <ng-template pTemplate="body" let-user>
               <tr>
@@ -391,11 +402,12 @@
                 <span *ngIf="session_user.uid !== selectedProject.owner">Restricted to owner</span>
               </td>
               <td><span *ngIf="user.temp?.access">x</span></td>
+              <td><span *ngIf="user.temp?.is_manager">x</span></td>
               <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
               </tr>
             </ng-template>
           </p-table>
-          </div>
+      </div>
     </div>
   </div>
 </div>

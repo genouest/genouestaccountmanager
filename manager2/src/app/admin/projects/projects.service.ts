@@ -215,7 +215,7 @@ export class ProjectsService {
         )
     }
 
-    request(projectId: string, request: any): Observable<any> {
+    request_user(projectId: string, request: any): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
 
@@ -226,7 +226,24 @@ export class ProjectsService {
             params: params
         };
         return this.http.post(
-            environment.apiUrl + '/project/' + projectId + '/request',
+            environment.apiUrl + '/project/' + projectId + '/request/user',
+            request,
+            httpOptions
+        );
+    }
+
+    request_manager(projectId: string, request: any): Observable<any> {
+        //let user = this.authService.profile;
+        let params = new HttpParams();
+
+        let httpOptions = {
+            //headers: new HttpHeaders({
+            //  'x-api-key': user.apikey
+            //}),
+            params: params
+        };
+        return this.http.post(
+            environment.apiUrl + '/project/' + projectId + '/request/manager',
             request,
             httpOptions
         );

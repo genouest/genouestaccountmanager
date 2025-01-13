@@ -372,8 +372,8 @@ router.post('/project/:id', async function(req, res){
     res.send({message: 'Project updated'});
 });
 
-router.post('/project/:id/request', async function(req, res){
-    if(! req.locals.logInfo.is_logged){
+router.post('/project/:id/request/user', async function(req, res) {
+    if(! req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -392,7 +392,7 @@ router.post('/project/:id/request', async function(req, res){
         return;
     }
 
-    if(user.uid != project.owner ){
+    if(!project.managers.includes(user.uid) && user.uid != project.owner) {
         res.status(401).send({message: 'User ' + user.uid + ' is not project manager for project ' + project.id});
         return;
     }
@@ -425,6 +425,61 @@ router.post('/project/:id/request', async function(req, res){
         }
     }
 
+    res.send({message: req.body.request + ' ' + req.body.user + ' done'});
+});
+
+
+router.post('/project/:id/request/manager', async function(req, res) {
+    if(!req.locals.logInfo.is_logged) {
+        res.status(401).send({message: 'Not authorized'});
+        return;
+    }
+    if(!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({message: 'Invalid parameters'});
+        return;
+    }
+    let user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+    if(!user) {
+        res.status(404).send({message: 'User not found'});
+        return;
+    }
+    let project = await dbsrv.mongo_projects().findOne({'id': req.params.id});
+    if(!project) {
+        res.status(404).send({message: 'Project ' + req.params.id + ' not found'});
+        return;
+    }
+    if(user.uid != project.owner) {
+        res.status(401).send({message: 'User ' + user.uid + ' is not the owner of project ' + project.id});
+        return;
+    }
+    const new_manager = await dbsrv.mongo_users().findOne({'uid': req.body.user});
+    if(!new_manager) {
+        res.status(404).send({message: 'User ' + req.body.user + ' not found'});
+        return;
+    }
+    if(!(new_manager.projects && new_manager.projects.indexOf(project.id) >= 0)) {
+        res.status(403).send({message: 'User ' + req.body.user + ' is not in project ' + project.id});
+        return;
+    }
+
+    try {
+        if (req.body.request === 'add') {
+            project.managers = { ...project.managers };  //! unfinished
+            await prjsrv.update_project(project.uuid, project, user.uid);
+        } else if (req.body.request === 'remove') {
+            project.managers = { ...project.managers };  //! unfinished
+            await prjsrv.update_project(project.uuid, project, user.uid);
+        }
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            res.status(e.code).send({message: e.message});
+            return;
+        } else {
+            res.status(500).send({message: 'Server Error, contact admin'});
+            return;
+        }
+    }
     res.send({message: req.body.request + ' ' + req.body.user + ' done'});
 });
 

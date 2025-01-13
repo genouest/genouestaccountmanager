@@ -21,8 +21,9 @@ export class ProjectComponent implements OnInit {
     new_project: Project
     new_project_expire: string
     projects: Project[]
-    users: User[]
     selectedProject: Project
+    managers: User[]
+    users: User[]
     session_user: User
     config: any
     new_user: string
@@ -30,8 +31,11 @@ export class ProjectComponent implements OnInit {
     default_size: number
     default_cpu: number
 
+    projects_visible: boolean
     owner_visible: boolean
     manager_visible: boolean
+    overview_visible: boolean
+    members_visible: boolean
 
     request_err_msg: string
     request_msg: string
@@ -41,10 +45,6 @@ export class ProjectComponent implements OnInit {
     manager_request_msg: string
 
     oldGroup: string
-
-    msg: string
-    rm_prj_err_msg: string
-    rm_prj_msg_ok: string
 
     constructor(
         private authService: AuthService,
@@ -58,11 +58,13 @@ export class ProjectComponent implements OnInit {
     }
 
     async ngOnInit() {
-
         this.new_project = new Project();
         this.new_project_expire = '';
+        this.projects_visible = true;
         this.owner_visible = true;
         this.manager_visible = true;
+        this.overview_visible = true;
+        this.members_visible = true;
         this.session_user = await this.authService.profile;
         this.users = [];
 
@@ -141,17 +143,13 @@ export class ProjectComponent implements OnInit {
 
     show_project_users(project: Project) {
         return new Promise((resolve, reject) => {
-            this.msg = '';
-            this.rm_prj_err_msg = '';
-            this.rm_prj_msg_ok = '';
-            let project_name = project.id;
-
-            this.projectsService.getUsers(project_name).subscribe(
+            this.projectsService.getUsers(project.id).subscribe(
                 resp => {
                     this.users = resp;
                     this.selectedProject = project;
                     this.oldGroup = project.group;
                     for (let i = 0; i < resp.length; i++) {
+                        this.users[i].temp = { ...this.users[i].temp, is_manager: this.selectedProject.managers.includes(this.users[i].uid) }
                         if ((resp[i].group.indexOf(this.selectedProject.group) >= 0) || (resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0)) {
                             this.users[i].temp = { ...this.users[i].temp, access: true };
                         }
@@ -166,14 +164,38 @@ export class ProjectComponent implements OnInit {
         })
     }
 
+    show_project_managers(project: Project) {
+        return new Promise((resolve, reject) => {
+            if (this.session_user.uid != this.selectedProject.owner) {
+                resolve(0);
+            }
+            for (let manager of project.managers) {
+                this.userService.getUser(manager).subscribe(
+                    (resp) => {
+                        if (resp.group.indexOf(this.selectedProject.group) >= 0 || resp.secondarygroups.indexOf(this.selectedProject.group) >= 0) {
+                            resp.temp = { ...resp.temp, access: true };
+                        }
+                        this.managers.push(resp);
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            }
+            resolve(1);
+        })
+    }
+
     async show_project_users_and_scroll(input_project: any, anchor: HTMLElement) {
         const project: Project = this.projectsService.mapToProject(input_project);
-        this.show_project_users(project).then(() => {
-            return new Promise(f => setTimeout(f, 250));
-        }).then(() => {
-            this.scroll(anchor)
-        }).catch(err => this.request_err_msg = err.error.message)
-
+        try {
+            await this.show_project_users(project);
+            await this.show_project_managers(project);
+            await new Promise((f) => setTimeout(f, 250));
+            this.scroll(anchor);
+        } catch (err) {
+            this.request_err_msg = err.error.message;
+        }
     }
 
     extend(input_project: any) {
@@ -225,10 +247,38 @@ export class ProjectComponent implements OnInit {
             return;
         }
         // Owner request
-        this.projectsService.request(project.id, { 'request': request_type, 'user': user_id }).subscribe(
+        this.projectsService.request_user(project.id, { 'request': request_type, 'user': user_id }).subscribe(
             resp => {
                 this.request_msg = resp['message']
                 this.show_project_users(project).catch(err => this.request_err_msg = err.error.message); // update user list
+            },
+            err => this.request_err_msg = err.error.message
+        );
+    }
+
+    request_manager(project: Project, user_id: string, request_type: string) {
+        this.request_msg = '';
+        this.request_err_msg = '';
+        if (!user_id) {
+            this.request_err_msg = 'User id is required';
+            return;
+        }
+        if (request_type === "add") {
+            for (var i = 0; i < project.managers.length; i++) {
+                if (project.managers[i] === user_id) {
+                    this.request_err_msg = 'User is already a manager';
+                    return;
+                }
+            }
+        }
+        if (request_type === "remove" && project.owner === user_id) {
+            this.request_err_msg = 'The project owner is always a manager';
+            return;
+        }
+        this.projectsService.request_manager(project.id, { 'request': request_type, 'user': user_id }).subscribe(
+            resp => {
+                this.request_msg = resp['message']
+                this.show_project_managers(project).catch(err => this.request_err_msg = err.error.message);
             },
             err => this.request_err_msg = err.error.message
         );
