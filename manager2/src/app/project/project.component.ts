@@ -27,7 +27,7 @@ export class ProjectComponent implements OnInit {
     session_user: User
     config: any
     new_manager: string
-    remove_manager: string
+    rm_manager: string
     new_user: string
     remove_user: string
     default_size: number
@@ -166,38 +166,13 @@ export class ProjectComponent implements OnInit {
         })
     }
 
-    show_project_managers(project: Project) {
-        return new Promise((resolve, reject) => {
-            if (this.session_user.uid != this.selectedProject.owner) {
-                resolve(0);
-            }
-            for (let manager of project.managers) {
-                this.userService.getUser(manager).subscribe(
-                    (resp) => {
-                        if (resp.group.indexOf(this.selectedProject.group) >= 0 || resp.secondarygroups.indexOf(this.selectedProject.group) >= 0) {
-                            resp.temp = { ...resp.temp, access: true };
-                        }
-                        this.managers.push(resp);
-                    },
-                    (err) => {
-                        reject(err);
-                    }
-                );
-            }
-            resolve(1);
-        })
-    }
-
     async show_project_users_and_scroll(input_project: any, anchor: HTMLElement) {
         const project: Project = this.projectsService.mapToProject(input_project);
-        try {
-            await this.show_project_users(project);
-            await this.show_project_managers(project);
-            await new Promise((f) => setTimeout(f, 250));
-            this.scroll(anchor);
-        } catch (err) {
-            this.request_err_msg = err.error.message;
-        }
+        this.show_project_users(project).then(() => {
+            return new Promise(f => setTimeout(f, 250));
+        }).then(() => {
+            this.scroll(anchor)
+        }).catch(err => this.request_err_msg = err.error.message)
     }
 
     extend(input_project: any) {
@@ -217,33 +192,33 @@ export class ProjectComponent implements OnInit {
 
     request_user(input_project: any, user_id: string, request_type: string) {
         const project: Project = this.projectsService.mapToProject(input_project);
-        this.request_msg = '';
-        this.request_err_msg = '';
+        this.manager_request_msg = '';
+        this.manager_request_err_msg = '';
         if (!user_id) {
-            this.request_err_msg = 'User id is required';
+            this.manager_request_err_msg = 'User id is required';
             return;
         };
         if (request_type === "add") {
             for (var i = 0; i < this.users.length; i++) {
                 if (this.users[i].uid === user_id) {
-                    this.request_err_msg = 'User is already in project';
+                    this.manager_request_err_msg = 'User is already in project';
                     return;
                 }
             }
         }
         if (request_type === "remove" && project.owner === user_id) {
-            this.request_err_msg = 'You cannot remove the project owner';
+            this.manager_request_err_msg = 'You cannot remove the project owner';
             return;
         }
         if (request_type === "remove" && this.session_user.uid === user_id) {
             // Self removal
             this.userService.removeFromProject(user_id, project.id).subscribe(
                 resp => {
-                    this.request_msg = resp['message'];
+                    this.manager_request_msg = resp['message'];
                     this.project_list();
                 },
                 err => {
-                    this.request_err_msg = err.error.message;
+                    this.manager_request_err_msg = err.error.message;
                 }
             )
             return;
@@ -251,36 +226,50 @@ export class ProjectComponent implements OnInit {
         // Owner request
         this.projectsService.request_user(project.id, { 'request': request_type, 'user': user_id }).subscribe(
             resp => {
-                this.request_msg = resp['message']
+                this.manager_request_msg = resp['message']
                 this.show_project_users(project).catch(err => this.request_err_msg = err.error.message); // update user list
             },
             err => this.request_err_msg = err.error.message
         );
     }
 
-    request_manager(project: Project, user_id: string, request_type: string) {
-        this.request_msg = '';
-        this.request_err_msg = '';
+    add_manager(project: Project, user_id: string) {
+        this.owner_request_msg = '';
+        this.owner_request_err_msg = '';
         if (!user_id) {
-            this.request_err_msg = 'User id is required';
+            this.owner_request_err_msg = 'User id is required';
             return;
         }
-        if (request_type === "add") {
-            for (var i = 0; i < project.managers.length; i++) {
-                if (project.managers[i] === user_id) {
-                    this.request_err_msg = 'User is already a manager';
-                    return;
-                }
+        for (var i = 0; i < project.managers.length; i++) {
+            if (project.managers[i] === user_id) {
+                this.owner_request_err_msg = 'User is already a manager';
+                return;
             }
         }
-        if (request_type === "remove" && project.owner === user_id) {
-            this.request_err_msg = 'The project owner is always a manager';
+        this.projectsService.add_manager(project.id, { 'user': user_id }).subscribe(
+            resp => {
+                this.owner_request_msg = resp['message']
+                this.show_project_users(project).catch(err => this.request_err_msg = err.error.message);
+            },
+            err => this.request_err_msg = err.error.message
+        );
+    }
+
+    remove_manager(project: Project, user_id: string) {
+        this.owner_request_msg = '';
+        this.owner_request_err_msg = '';
+        if (!user_id) {
+            this.owner_request_err_msg = 'User id is required';
             return;
         }
-        this.projectsService.request_manager(project.id, { 'request': request_type, 'user': user_id }).subscribe(
+        if (project.owner === user_id) {
+            this.owner_request_err_msg = 'The project owner is always a manager';
+            return;
+        }
+        this.projectsService.remove_manager(project.id, { 'user': user_id }).subscribe(
             resp => {
-                this.request_msg = resp['message']
-                this.show_project_managers(project).catch(err => this.request_err_msg = err.error.message);
+                this.owner_request_msg = resp['message']
+                this.show_project_users(project).catch(err => this.request_err_msg = err.error.message);
             },
             err => this.request_err_msg = err.error.message
         );
