@@ -191,22 +191,24 @@
       <form role="form" class="user-form form-horizontal">
         <div class="form-group row">
           <div class="col-sm-3">
-            <label for="new_user">New project manager</label>
-            <input placeholder="User id" id="new_manager" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_manager" class="form-control"/>
+            <label for="new_manager">New project manager</label>
+            <select id="add_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="new_manager" class="form-control">
+              <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
+            </select>
           </div>
           <div class="col-sm-3">
-            <label style="opacity: 0;">Request new manager</label>
-            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_manager(selectedProject, new_manager, 'add')">Request new manager</button>
+            <label style="opacity: 0;">Add new manager</label>
+            <button type="button" class="p-button p-button-sm p-button-success" (click)="request_manager(selectedProject, new_manager, 'add')">Promote to Manager</button>
           </div>
           <div class="col-sm-3">
             <label for="remove_manager">Remove project manager</label>
             <select id="remove_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="remove_manager" class="form-control">
-              <option *ngFor="let manager of selectedProject.managers" [value]="manager.uid">{{manager.uid}}</option>
+              <option *ngFor="let manager of selectedProject.managers" [value]="manager">{{manager}}</option>
             </select>
           </div>
           <div class="col-sm-3">
-            <label style="opacity: 0;">Request manager removal</label>
-            <button type="button" class="p-button p-button-sm p-button-warning"(click)="request_manager(selectedProject, remove_user, 'remove')">Request manager removal</button>
+            <label style="opacity: 0;">Remove manager</label>
+            <button type="button" class="p-button p-button-sm p-button-danger"(click)="request_manager(selectedProject, remove_manager, 'remove')">Demote to Member</button>
           </div>
         </div>
       </form>
@@ -237,11 +239,11 @@
         <ng-template pTemplate="body" let-user>
           <tr>
             <td>{{user.uid}}</td>
-            <td><span *ngIf="session_user.uid === selectedProject.owner">{{user.email}}</span></td>
+            <td>{{user.email}}</td>
             <td><span *ngIf="user.temp?.access">x</span></td>
             <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
             <td>
-              <button *ngIf="selectedProject.owner != user.uid" type="button" class="p-button p-button-sm p-button-danger" (click)="request_manager(project, user.uid, 'remove')">Request Demotion</button>
+              <button *ngIf="selectedProject.owner != user.uid" type="button" class="p-button p-button-sm p-button-danger" (click)="request_manager(project, user.uid, 'remove')">Demote to Member</button>
             </td>
           </tr>
         </ng-template>
@@ -263,8 +265,8 @@
             <input placeholder="User id" id="new_user" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_user" class="form-control"/>
           </div>
           <div class="col-sm-3">
-            <label style="opacity: 0;">Request member</label>
-            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_user(selectedProject, new_user, 'add')">Request member</button>
+            <label style="opacity: 0;">Request new member</label>
+            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_user(selectedProject, new_user, 'add')">Request New Member</button>
           </div>
           <div class="col-sm-3">
             <label for="remove_user">Remove project member</label>
@@ -274,7 +276,7 @@
           </div>
           <div class="col-sm-3">
             <label style="opacity: 0;">Request member removal</label>
-            <button type="button" class="p-button p-button-sm p-button-warning"(click)="request_user(selectedProject, remove_user,'remove')">Request member removal</button>
+            <button type="button" class="p-button p-button-sm p-button-warning"(click)="request_user(selectedProject, remove_user,'remove')">Request Member Removal</button>
           </div>
         </div>
       </form>
@@ -392,6 +394,8 @@
                 <th>Access?</th>
                 <th>Manager?</th>
                 <th>Owner?</th>
+                <th></th>
+                <th></th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-user>
@@ -404,6 +408,13 @@
               <td><span *ngIf="user.temp?.access">x</span></td>
               <td><span *ngIf="user.temp?.is_manager">x</span></td>
               <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
+              <td>
+                <button *ngIf="session_user.uid === selectedProject.owner || (selectedProject.managers.includes(session_user.uid) && !selectedProject.managers.includes(user.uid))" type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(selectedProject, user.uid, 'remove')">Request Removal</button>
+              </td>
+              <td>
+                <button *ngIf="session_user.uid === selectedProject.owner && selectedProject.managers.includes(user.uid)" type="button" class="p-button p-button-sm p-button-warning" (click)="request_manager(selectedProject, user.uid, 'remove')">Demote to Member</button>
+                <button *ngIf="session_user.uid === selectedProject.owner && !selectedProject.managers.includes(user.uid)" type="button" class="p-button p-button-sm p-button-success" (click)="request_manager(selectedProject, user.uid, 'add')">Promote to Manager</button>
+              </td>
               </tr>
             </ng-template>
           </p-table>

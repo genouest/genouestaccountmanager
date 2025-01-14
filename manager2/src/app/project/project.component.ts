@@ -26,6 +26,8 @@ export class ProjectComponent implements OnInit {
     users: User[]
     session_user: User
     config: any
+    new_manager: string
+    remove_manager: string
     new_user: string
     remove_user: string
     default_size: number
