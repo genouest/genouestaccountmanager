@@ -29,6 +29,7 @@ export class LoginComponent implements OnInit {
     msg: string
     error_msg: string
     msgstatus: number
+    passwordVisible: boolean = false
 
     u2f: any
     uid: string
@@ -169,5 +170,9 @@ export class LoginComponent implements OnInit {
             console.log('failed to validate token', err)
         });
     }
+
+    togglePasswordVisibility() {
+        this.passwordVisible = !this.passwordVisible;
+      }
 
 }

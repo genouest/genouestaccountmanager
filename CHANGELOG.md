@@ -2,6 +2,7 @@
 
 ## 1.4.32 (Unreleased)
 * UI width without padding
+* Fix error when subscribing / unsubscribing to email
 * Clearer error message when adding a website
 * Add User, Project and Group static classes to front end (refactor)
 * Add checks for website owner update
@@ -9,6 +10,7 @@
 * increase size of input field in users page
 * add a readonly input field under email for showing the email domain*
 * Add "custom_users" key to config file, to be used with various scripts
+* Allow accents in user's first and last names
 
 
 ## 1.4.31 (2024-09-27)
@@ -20,6 +22,16 @@
 * Remove mel from abims templates
 
 ## 1.4.30 (2024-08-02)
+
+* Password enhancement
+  * Add an eye for visible/hidden on the password field in login/profile page
+  * Disable "update password" button until both fields are entered on profile page
+  *  Centered input fields
+  *  Added dynamic rules requirements in order for user to know what to add to his password
+  *  Password rules is 12 char, with 1 spec char, 1 digit and no spaces
+  *  Updated generated password via generate-password to 12 when account activated
+  *  Updated also db user password generated to 12
+  *  Added a red cross/green tick in the input for passwork and password confirmation
 
 * Added a `project.terms_and_conditions_hds` setting in the config:
   If true:
