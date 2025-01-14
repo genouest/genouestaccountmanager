@@ -4,6 +4,7 @@
 
 * From admin project page, when rejecting a project, a reason can be added and an email is sended to the user + support
 * New project: make description field required
+* Fix error when subscribing / unsubscribing to email
 * Clearer error message when adding a website
 * Add User, Project and Group static classes to front end (refactor)
 * Add checks for website owner update
