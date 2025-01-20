@@ -56,7 +56,7 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     }
     
     const owner = await dbsrv.mongo_users().findOne({ uid: new_project.owner });
-    const msg_destinations =  [CONFIG.general.accounts, owner.email];
+    const msg_destinations =  [owner.email];
     if (owner.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
