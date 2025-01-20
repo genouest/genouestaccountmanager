@@ -542,12 +542,16 @@ router.delete('/user/:id', async function(req, res) {
             return;
         }
         const allprojects = user.projects ? user.projects : [];
+        let empty_projects = '';
         for (let project_name of allprojects) {
-            const users_in_project = await dbsrv.mongo_users().find({ 'projects': project_name }).toArray();
-            if (users_in_project.length <= 1) {
-                res.status(403).send({ message: 'User is the last member of project ${project_name}' });
-                return;
+            const users_in_project = await dbsrv.mongo_users().find({ 'projects': project_name }).count();
+            if (users_in_project <= 1) {
+                empty_projects += ', ' + project_name;
             }
+        }
+        if(empty_projects != '') {
+            res.status(403).send({ message: 'User is the last member of project(s)${empty_projects}' });
+            return;
         }
         usrsrv.delete_user(user, session_user.uid, mail_message, mail_send).then(function() {
             res.send({ message: 'User deleted' });
