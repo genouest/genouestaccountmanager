@@ -246,7 +246,7 @@ export class ProjectComponent implements OnInit {
                 return;
             }
         }
-        this.projectsService.add_manager(project.id, { 'user': user_id }).subscribe(
+        this.projectsService.add_manager(project.id, user_id).subscribe(
             resp => {
                 this.owner_request_msg = resp['message']
                 this.show_project_users(project).catch(err => this.request_err_msg = err.error.message);
@@ -266,7 +266,7 @@ export class ProjectComponent implements OnInit {
             this.owner_request_err_msg = 'The project owner is always a manager';
             return;
         }
-        this.projectsService.remove_manager(project.id, { 'user': user_id }).subscribe(
+        this.projectsService.remove_manager(project.id, user_id).subscribe(
             resp => {
                 this.owner_request_msg = resp['message']
                 this.show_project_users(project).catch(err => this.request_err_msg = err.error.message);

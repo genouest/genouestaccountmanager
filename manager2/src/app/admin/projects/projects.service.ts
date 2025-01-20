@@ -232,7 +232,7 @@ export class ProjectsService {
         );
     }
 
-    add_manager(projectId: string, request: any): Observable<any> {
+    add_manager(projectId: string, UserId: string): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
 
@@ -243,13 +243,12 @@ export class ProjectsService {
             params: params
         };
         return this.http.post(
-            environment.apiUrl + '/project/' + projectId + '/add/manager',
-            request,
+            environment.apiUrl + '/project/' + projectId + '/add/manager/' + UserId,
             httpOptions
         );
     }
 
-    remove_manager(projectId: string, request: any): Observable<any> {
+    remove_manager(projectId: string, UserId: string): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
 
@@ -260,8 +259,7 @@ export class ProjectsService {
             params: params
         };
         return this.http.post(
-            environment.apiUrl + '/project/' + projectId + '/remove/manager',
-            request,
+            environment.apiUrl + '/project/' + projectId + '/remove/manager/' + UserId,
             httpOptions
         );
     }
