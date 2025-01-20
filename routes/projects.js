@@ -372,8 +372,8 @@ router.post('/project/:id', async function(req, res){
     res.send({message: 'Project updated'});
 });
 
-router.post('/project/:id/request', async function(req, res) {
-    if(! req.locals.logInfo.is_logged) {
+router.post('/project/:id/request/user', async function(req, res) {
+    if(!req.locals.logInfo.is_logged) {
         res.status(401).send({message: 'Not authorized'});
         return;
     }
@@ -392,7 +392,7 @@ router.post('/project/:id/request', async function(req, res) {
         return;
     }
 
-    if(!project.managers.includes(user.uid) && user.uid != project.owner) {
+    if(!project.managers.includes(user.uid)) {
         res.status(401).send({message: 'User ' + user.uid + ' is not project manager for project ' + project.id});
         return;
     }
@@ -461,9 +461,13 @@ router.post('/project/:id/add/manager', async function(req, res) {
         res.status(403).send({message: 'User ' + req.body.user + ' is not in project ' + project.id});
         return;
     }
+    if(project.managers.includes(new_manager.uid)) {
+        res.status(403).send({message: 'User ' + req.body.user + ' is already a manager of project ' + project.id});
+        return;
+    }
 
     try {
-        project.managers = { ...project.managers };  //! unfinished
+        project.managers.push(new_manager.uid);
         await prjsrv.update_project(project.uuid, project, user.uid);
     } catch (e) {
         logger.error(e);
@@ -502,18 +506,22 @@ router.post('/project/:id/remove/manager', async function(req, res) {
         res.status(401).send({message: 'User ' + user.uid + ' is not the owner of project ' + project.id});
         return;
     }
-    const new_manager = await dbsrv.mongo_users().findOne({'uid': req.body.user});
-    if(!new_manager) {
+    const ex_manager = await dbsrv.mongo_users().findOne({'uid': req.body.user});
+    if(!ex_manager) {
         res.status(404).send({message: 'User ' + req.body.user + ' not found'});
         return;
     }
-    if(!(new_manager.projects && new_manager.projects.indexOf(project.id) >= 0)) {
+    if(!(ex_manager.projects && ex_manager.projects.indexOf(project.id) >= 0)) {
         res.status(403).send({message: 'User ' + req.body.user + ' is not in project ' + project.id});
+        return;
+    }
+    if(!project.managers.includes(ex_manager.uid)) {
+        res.status(403).send({message: 'User ' + req.body.user + ' is not a manager of project ' + project.id});
         return;
     }
 
     try {
-        project.managers = { ...project.managers };  //! unfinished
+        project.managers.splice(project.managers.indexOf(ex_manager.uid), 1);
         await prjsrv.update_project(project.uuid, project, user.uid);
     } catch (e) {
         logger.error(e);

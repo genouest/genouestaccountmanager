@@ -21,9 +21,9 @@ export class ProjectComponent implements OnInit {
     new_project: Project
     new_project_expire: string
     projects: Project[]
-    selectedProject: Project
-    managers: User[]
     users: User[]
+    managers: User[]
+    selectedProject: Project
     session_user: User
     config: any
     new_manager: string
