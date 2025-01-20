@@ -61,7 +61,7 @@
           <tr>
             <td><a routerLink="/admin/group/{{group.name}}"><span class="p-button p-button-sm p-button-primary">{{group.name}}</span></a></td>
             <td>{{group.gid}}</td>
-            <td><a routerLink="/user/{{group.owner}}"><span class="p-button p-button-sm p-button-primary">{{group?.owner}}</span></a></td>
+            <td><a *ngIf="group.owner" routerLink="/user/{{group.owner}}"><span class="p-button p-button-sm p-button-primary">{{group?.owner}}</span></a></td>
             <td>{{group.description}}</td>
             <td>{{group.tags ? group.tags.join(", ") : ""}}</td>
           </tr>
