@@ -191,10 +191,11 @@ router.put('/user/:id/subscribe', async function(req, res) {
         return;
     }
 
+    let session_user = null;
     let isadmin = false;
     try {
-        let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-        isadmin = await rolsrv.is_admin(user);
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
         res.status(404).send({ message: 'User session not found' });
@@ -202,7 +203,7 @@ router.put('/user/:id/subscribe', async function(req, res) {
     }
 
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && !isadmin) {
+    if (session_user.uid !== req.params.id && !isadmin) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
@@ -230,10 +231,11 @@ router.put('/user/:id/unsubscribe', async function(req, res) {
         return;
     }
 
+    let session_user = null;
     let isadmin = false;
     try {
-        let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-        isadmin = await rolsrv.is_admin(user);
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
         res.status(404).send({ message: 'User session not found' });
@@ -241,7 +243,7 @@ router.put('/user/:id/unsubscribe', async function(req, res) {
     }
 
     // if not user nor admin
-    if (req.locals.logInfo.id !== req.params.id && !isadmin) {
+    if (session_user.uid !== req.params.id && !isadmin) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
@@ -1027,6 +1029,12 @@ router.post('/user/:id/passwordreset', async function(req, res) {
     }
 
     user.password=req.body.password;
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])(?!.*\s).{12,}$/;
+    if (!passwordRegex.test(user.password)) {
+        res.status(400).send({ message: 'Password does not meet the required format: 12 characters min, including 1 digit, 1 lowercase, 1 uppercase, and 1 special character, and no spaces.' });
+        return;
+    }
+
     await dbsrv.mongo_events().insertOne({
         'owner': session_user.uid,
         'date': new Date().getTime(),
