@@ -1,0 +1,144 @@
+<div class="col-sm-6">
+  <a routerLink="/admin/group" class="btn btn-primary">Back to groups</a>
+</div>
+
+<div class="alert alert-danger" *ngIf="del_err_msg">{{ del_err_msg }}</div>
+
+<div class="card bg-light">
+  <div class="card bg-light card-header">
+    <div class="row">
+      <div class="col-sm-9">
+        <h4>
+          Group <strong>{{ group.name }}</strong>
+        </h4>
+      </div>
+      <div class="col-sm-3">
+        <app-my-delete-confirm
+          [onConfirm]="deleteGroup"
+        ></app-my-delete-confirm>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <form role="form" class="user-form form-horizontal form-register">
+      <div class="form-group row">
+        <div class="col-sm-3">
+          <label for="group_id" class="col-form-label">Owner</label>
+          <input
+            type="text"
+            placeholder="Owner"
+            id="group_id"
+            [ngModelOptions]="{ standalone: true }"
+            [(ngModel)]="group.owner"
+            class="form-control"
+          />
+        </div>
+        <div class="col-sm-9">
+          <label for="group_desc" class="col-form-label">Description</label>
+          <input
+            type="text"
+            placeholder="Description"
+            id="group_desc"
+            [ngModelOptions]="{ standalone: true }"
+            [(ngModel)]="group.description"
+            class="form-control"
+          />
+        </div>
+      </div>
+      <button
+        type="button"
+        class="p-button p-button-sm p-button-primary"
+        (click)="updateGroup()"
+      >
+        Update
+      </button>
+      <div class="form-group"></div>
+    </form>
+  </div>
+</div>
+
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Group tags</h3>
+  </div>
+  <div class="card-body">
+    <app-tag [tag]="group.tags" [user]="group.name" kind="group"></app-tag>
+  </div>
+</div>
+
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Projects associated with {{ group.name }} :</h3>
+  </div>
+  <div class="card-body">
+    <div class="table">
+      <table class="table table-striped">
+        <thead>
+          <th>Project</th>
+          <th>Owner</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let project of projects">
+            <td>
+              <a routerLink="/admin/project/{{ project.id }}">
+                <span class="p-button p-button-sm p-button-primary">
+                  {{ project.id }}
+                </span>
+              </a>
+            </td>
+            <td>
+              <a routerLink="/user/{{ project.owner }}">
+                <span class="p-button p-button-sm p-button-primary">
+                  {{ project.owner }}
+                </span>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Users in {{ group.name }} :</h3>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-info" *ngIf="msg">{{ msg }}</div>
+    <div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
+    <div class="table-responsive table-striped">
+      <p-table
+        #dtu
+        [value]="users"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 25, 50]"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>In associated project?</th>
+            <th>Main group?</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user>
+          <tr *ngFor="let user of users">
+            <td>
+              <a routerLink="/user/{{ user.uid }}">
+                <span class="p-button p-button-sm p-button-primary">
+                  {{ user.uid }}
+                </span>
+              </a>
+            </td>
+            <td>{{ user.email }}</td>
+            <td><span *ngIf="user.temp?.authorized">x</span></td>
+            <td><span *ngIf="user.group == group.name">x</span></td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
