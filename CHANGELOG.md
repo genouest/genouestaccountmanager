@@ -2,6 +2,7 @@
 
 ## 1.4.32 (Unreleased)
 
+* Fix error when subscribing / unsubscribing to email
 * Clearer error message when adding a website
 * Add User, Project and Group static classes to front end (refactor)
 * Add checks for website owner update
@@ -10,6 +11,7 @@
 * add a readonly input field under email for showing the email domain*
 * Add "custom_users" key to config file, to be used with various scripts
 * Add email sent to a project owner when their project is activated
+* Separate global overview from individual group view in admin group management
 * Allow accents in user's first and last names
 
 ## 1.4.31 (2024-09-27)

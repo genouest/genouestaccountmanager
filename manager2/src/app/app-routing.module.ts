@@ -9,8 +9,9 @@ import { RegisterComponent } from './auth/register/register.component';
 import { LogoutComponent } from './auth/logout/logout.component';
 import { TpsComponent } from './tps/tps.component';
 import { ProjectComponent } from './project/project.component';
-import { DatabasesComponent as AdminDatabaseComponent} from './admin/databases/databases.component';
-import { GroupsComponent as AdminGroupComponent} from './admin/groups/groups.component';
+import { DatabasesComponent as AdminDatabaseComponent } from './admin/databases/databases.component';
+import { GroupsComponent as AdminGroupsComponent } from './admin/groups/groups.component';
+import { GroupComponent as AdminGroupComponent } from './admin/group/group.component';
 import { LogsComponent as AdminLogComponent} from './admin/logs/logs.component';
 import { MessagesComponent as AdminMessageComponent} from './admin/messages/messages.component';
 import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/projects.component';
@@ -66,6 +67,13 @@ const routes: Routes = [
     },
     {
         path: 'admin/group',
+        component: AdminGroupsComponent,
+        canActivate: [
+            AdminAuthGuard
+        ]
+    },
+    {
+        path: 'admin/group/:id',
         component: AdminGroupComponent,
         canActivate: [
             AdminAuthGuard
