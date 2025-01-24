@@ -11,8 +11,8 @@
 * add a readonly input field under email for showing the email domain*
 * Add "custom_users" key to config file, to be used with various scripts
 * Check that user being removed is not owner or last member of a project
+* Separate global overview from individual group view in admin group management
 * Allow accents in user's first and last names
-
 
 ## 1.4.31 (2024-09-27)
 
