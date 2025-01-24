@@ -245,4 +245,11 @@ button {
     z-index: 1051 !important;
 }
 
+/* Temporary fix before trying to remove assets/css/*.css files and import corectly bootstrap themes */
+.container
+{
+    max-width: none !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
     
