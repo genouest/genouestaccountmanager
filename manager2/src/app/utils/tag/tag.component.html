@@ -11,11 +11,9 @@
             <button class="p-button p-button-sm p-button-primary" (click)="addTag()" >Add</button>
         </div>
     </div>
-<div class="row">
-    <span *ngFor="let tag of tags" class="tag label label-primary">{{tag}}  <small class="oi oi-delete" title="remove" (click)="deleteTag(tag)"></small></span>
-</div>
+    <div class="row">
+        <span *ngFor="let tag of tags" class="tag label label-primary">{{tag}} <small class="oi oi-delete" title="remove" (click)="deleteTag(tag)"></small></span>
+    </div>
 
-<div class="row">
-        <button class="p-button p-button-sm p-button-primary" (click)="updateTags()" >Update</button>
-</div>
+    <button class="p-button p-button-sm p-button-primary" (click)="updateTags()">Update</button>
 </div>
