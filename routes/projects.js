@@ -468,7 +468,7 @@ router.post('/project/:id/add/manager/:uid', async function(req, res) {
 
     try {
         project.managers.push(new_manager.uid);
-        await prjsrv.update_project(project.uuid, project, user.uid);
+        await dbsrv.mongo_projects().updateOne({'id': project.id},  {'$set': { 'managers': project.managers } });
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
@@ -522,7 +522,7 @@ router.post('/project/:id/remove/manager/:uid', async function(req, res) {
 
     try {
         project.managers.splice(project.managers.indexOf(ex_manager.uid), 1);
-        await prjsrv.update_project(project.uuid, project, user.uid);
+        await dbsrv.mongo_projects().updateOne({'id': project.id},  {'$set': { 'managers': project.managers } });
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
