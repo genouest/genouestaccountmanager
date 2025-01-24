@@ -255,6 +255,18 @@
      "<p>You will receive an email when your account has been validated.</p>",
      "<hr>"
     ],
+    "activated_project": [
+      "Your requested project '#NAME#' has been approved and activated by an admin in My.",
+      "It is for members of the '#GROUP#' group, you can find it at the following path:",
+      "'#PATH#'",
+      "Congratulations!"
+    ],
+    "activated_project_html": [
+      "<p>Your requested project '#NAME#' has been approved and activated by an admin in My.</p>",
+      "<p>It is for members of the '#GROUP#' group, you can find it at the following path:</p>",
+      "<p>'#PATH#'</p>",
+      "<p>Congratulations!</p>"
+    ],
     "add_to_project": [
         "#UID# has been added to project '#NAME#' in My",
         "#DESC#",
