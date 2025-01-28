@@ -7,8 +7,7 @@ import { Component, OnInit } from '@angular/core';
 export class RenewInfoComponent implements OnInit {
     msg: string;
     constructor() {
-        this.msg = "Account validity period has been extended.";
+        this.msg = 'Account validity period has been extended.';
     }
-    ngOnInit() {
-    }
+    ngOnInit() {}
 }

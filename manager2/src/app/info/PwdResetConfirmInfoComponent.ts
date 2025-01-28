@@ -7,8 +7,7 @@ import { Component, OnInit } from '@angular/core';
 export class PwdResetConfirmInfoComponent implements OnInit {
     msg: string;
     constructor() {
-        this.msg = "Your password has been reset, an email with your new password will be sent soon.";
+        this.msg = 'Your password has been reset, an email with your new password will be sent soon.';
     }
-    ngOnInit() {
-    }
+    ngOnInit() {}
 }
