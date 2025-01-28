@@ -13,13 +13,11 @@ const rolsrv = require('../core/role.service.js');
  */
 router.put('/web/:id/owner/:old/:new', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     if (!sansrv.sanitizeAll([req.params.id, req.params.old, req.params.new])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -29,44 +27,37 @@ router.put('/web/:id/owner/:old/:new', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     session_user.is_admin = isadmin;
     if (!session_user.is_admin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     if (req.params.old == req.params.new) {
-        res.status(400).send({ message: 'Old owner and new owner are the same person' });
-        return;
+        return res.status(400).send({ message: 'Old owner and new owner are the same person' });
     }
     try {
         await dbsrv.mongo_web().findOne({ name: req.params.id });
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'Website not found' });
-        return;
+        return res.status(404).send({ message: 'Website not found' });
     }
     try {
         await dbsrv.mongo_users().findOne({ uid: req.params.old });
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'Old website owner not found' });
-        return;
+        return res.status(404).send({ message: 'Old website owner not found' });
     }
     try {
         await dbsrv.mongo_users().findOne({ uid: req.params.new });
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'New website owner not found' });
-        return;
+        return res.status(404).send({ message: 'New website owner not found' });
     }
 
     await dbsrv.mongo_web().updateOne({ name: req.params.id }, { $set: { owner: req.params.new } });
@@ -78,13 +69,12 @@ router.put('/web/:id/owner/:old/:new', async function (req, res) {
             action: 'change website ' + req.params.id + ' owner to ' + req.params.new,
             logs: []
         });
-    res.send({ message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new });
+    return res.send({ message: 'Owner changed from ' + req.params.old + ' to ' + req.params.new });
 });
 
 router.get('/web', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let session_user = null;
     let isadmin = false;
@@ -93,14 +83,11 @@ router.get('/web', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     session_user.is_admin = isadmin;
@@ -110,17 +97,15 @@ router.get('/web', async function (req, res) {
         filter = { owner: session_user.uid };
     }
     let webs = await dbsrv.mongo_web().find(filter).toArray();
-    res.send(webs);
+    return res.send(webs);
 });
 
 router.get('/web/owner/:owner', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.owner])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -130,30 +115,25 @@ router.get('/web/owner/:owner', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     session_user.is_admin = isadmin;
 
     let filter = { owner: req.params.owner };
     let webs = await dbsrv.mongo_web().find(filter).toArray();
-    res.send(webs);
+    return res.send(webs);
 });
 
 router.post('/web/:id', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Web site name should be a sanitized string' });
-        return;
+        return res.status(403).send({ message: 'Web site name should be a sanitized string' });
     }
     let session_user = null;
     let isadmin = false;
@@ -162,19 +142,15 @@ router.post('/web/:id', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Web site name must be alphanumeric only' });
-        return;
+        return res.status(403).send({ message: 'Web site name must be alphanumeric only' });
     }
 
     session_user.is_admin = isadmin;
@@ -200,17 +176,15 @@ router.post('/web/:id', async function (req, res) {
             logs: []
         });
 
-    res.send({ web: web, message: 'New website added' });
+    return res.send({ web: web, message: 'New website added' });
 });
 
 router.delete('/web/:id', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -220,14 +194,11 @@ router.delete('/web/:id', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     session_user.is_admin = isadmin;
@@ -246,7 +217,7 @@ router.delete('/web/:id', async function (req, res) {
             action: 'remove web site ' + req.params.id,
             logs: []
         });
-    res.send({ message: 'Website deleted' });
+    return res.send({ message: 'Website deleted' });
 });
 
 router.delete_webs = async function (user) {

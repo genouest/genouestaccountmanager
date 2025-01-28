@@ -46,9 +46,7 @@ router.get('/quota/:user/:id', function (req, res) {
             let series = points.results[0]['series'];
             // If no stat available
             if (series == undefined) {
-                res.status(404);
-                res.end();
-                return;
+                return res.status(404);
             }
             for (let s = 0; s < series.length; s++) {
                 quotas.push(series[s]['values'][0][1] / 1000000);
@@ -60,8 +58,7 @@ router.get('/quota/:user/:id', function (req, res) {
             if (quotas.length == 1) {
                 quotas.push(0);
             }
-            res.send({ name: req.params.id, value: quotas[0], max: quotas[1] });
-            res.end();
+            return res.send({ name: req.params.id, value: quotas[0], max: quotas[1] });
         });
     });
 });

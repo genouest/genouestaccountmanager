@@ -39,7 +39,6 @@ router.get('/conf', async function (req, res) {
     }
 
     res.send(config);
-    res.end();
 });
 
 module.exports = {

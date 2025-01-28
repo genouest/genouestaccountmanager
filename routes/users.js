@@ -40,12 +40,10 @@ const idsrv = require('../core/id.service.js');
 
 router.get('/user/:id/apikey', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -55,38 +53,31 @@ router.get('/user/:id/apikey', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (session_user.uid !== req.params.id && !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
 
     if (user.apikey === undefined) {
-        res.send({ apikey: '' });
-        return;
+        return res.send({ apikey: '' });
     } else {
-        res.send({ apikey: user.apikey });
-        return;
+        return res.send({ apikey: user.apikey });
     }
 });
 
 router.post('/user/:id/notify', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -96,19 +87,16 @@ router.post('/user/:id/notify', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     let message = req.body.message;
     let subject = req.body.subject;
@@ -129,8 +117,7 @@ router.post('/user/:id/notify', async function (req, res) {
         );
     } catch (error) {
         logger.error(error);
-        res.status(500).send({ message: 'message error', error: error });
-        return;
+        return res.status(500).send({ message: 'message error', error: error });
     }
     await dbsrv.mongo_events().insertOne({
         owner: user.uid,
@@ -139,17 +126,15 @@ router.post('/user/:id/notify', async function (req, res) {
         logs: []
     });
 
-    res.send({ message: 'message sent' });
+    return res.send({ message: 'message sent' });
 });
 
 router.post('/user/:id/apikey', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -159,35 +144,30 @@ router.post('/user/:id/apikey', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (session_user.uid !== req.params.id && !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
 
     //let apikey = Math.random().toString(36).slice(-10);
     let apikey = usrsrv.new_random(10);
     await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { apikey: apikey } });
-    res.send({ apikey: apikey });
+    return res.send({ apikey: apikey });
 });
 
 router.put('/user/:id/subscribe', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -197,36 +177,31 @@ router.put('/user/:id/subscribe', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     // if not user nor admin
     if (session_user.uid !== req.params.id && !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (user.email == undefined || user.email == '' || user.is_fake) {
-        res.send({ subscribed: false });
+        return res.send({ subscribed: false });
     } else {
         await notif.add(user.email, user.uid);
-        res.send({ subscribed: true });
+        return res.send({ subscribed: true });
     }
 });
 
 router.put('/user/:id/unsubscribe', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -236,47 +211,41 @@ router.put('/user/:id/unsubscribe', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     // if not user nor admin
     if (session_user.uid !== req.params.id && !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (user.email == undefined || user.email == '' || user.is_fake) {
-        res.send({ unsubscribed: false });
+        return res.send({ unsubscribed: false });
     } else {
         await notif.remove(user.email);
-        res.send({ unsubscribed: true });
+        return res.send({ unsubscribed: true });
     }
 });
 
 router.get('/user/:id/subscribed', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (user.email == undefined || user.email == '' || user.is_fake) {
-        res.send({ subscribed: false });
+        return res.send({ subscribed: false });
     } else {
         let is_subscribed = await notif.subscribed(user.email);
-        res.send({ subscribed: is_subscribed });
+        return res.send({ subscribed: is_subscribed });
     }
 });
 
@@ -287,18 +256,16 @@ router.get('/ip', function (req, res) {
         req.socket.remoteAddress ||
         req.connection.socket.remoteAddress;
 
-    res.json({ ip: ip });
+    return res.json({ ip: ip });
 });
 
 router.post('/message', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     if (!notif.mailSet()) {
-        res.status(403).send({ message: 'Mail provider is not set' });
-        return;
+        return res.status(403).send({ message: 'Mail provider is not set' });
     }
 
     let user = null;
@@ -308,17 +275,14 @@ router.post('/message', async function (req, res) {
         isadmin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
     if (!isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let message = req.body.message;
     let html_message = req.body.message;
@@ -337,14 +301,13 @@ router.post('/message', async function (req, res) {
         html_message: html_message
     };
     await notif.sendList(req.body.list, mailOptions);
-    res.send({ message: '' });
+    return res.send({ message: '' });
 });
 
 // Get users listing - for admin
 router.get('/user', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let user = null;
@@ -354,17 +317,14 @@ router.get('/user', async function (req, res) {
         isadmin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
     if (!isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let users;
@@ -378,17 +338,15 @@ router.get('/user', async function (req, res) {
     } else {
         users = await dbsrv.mongo_users().find({}).toArray();
     }
-    res.json(users);
+    return res.json(users);
 });
 
 router.post('/user/:id/group/:group', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id, req.params.group])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -398,17 +356,14 @@ router.post('/user/:id/group/:group', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'User not found' });
-        return;
+        return res.status(401).send({ message: 'User not found' });
     }
     if (!isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let uid = req.params.id;
     let secgroup = req.params.group;
@@ -418,26 +373,21 @@ router.post('/user/:id/group/:group', async function (req, res) {
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
-            res.status(e.code).send({ message: e.message });
-            return;
+            return res.status(e.code).send({ message: e.message });
         } else {
-            res.status(500).send({ message: 'Server Error, contact admin' });
-            return;
+            return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
 
-    res.send({ message: 'User added to group' });
-    return;
+    return res.send({ message: 'User added to group' });
 });
 
 router.delete('/user/:id/group/:group', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id, req.params.group])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let session_user = null;
     let isadmin = false;
@@ -446,13 +396,11 @@ router.delete('/user/:id/group/:group', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user || !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let uid = req.params.id;
     let secgroup = req.params.group;
@@ -462,25 +410,21 @@ router.delete('/user/:id/group/:group', async function (req, res) {
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
-            res.status(e.code).send({ message: e.message });
-            return;
+            return res.status(e.code).send({ message: e.message });
         } else {
-            res.status(500).send({ message: 'Server Error, contact admin' });
-            return;
+            return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
 
-    res.send({ message: 'User removed from Group' });
+    return res.send({ message: 'User removed from Group' });
 });
 
 router.delete('/user/:id', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -490,13 +434,11 @@ router.delete('/user/:id', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user || !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let uid = req.params.id;
@@ -511,31 +453,26 @@ router.delete('/user/:id', async function (req, res) {
 
     let user = await dbsrv.mongo_users().findOne({ uid: uid });
     if (!user) {
-        res.status(404).send({ message: 'User not found ' + uid });
-        return;
+        return res.status(404).send({ message: 'User not found ' + uid });
     }
     if (user.status == STATUS_PENDING_EMAIL || user.status == STATUS_PENDING_APPROVAL) {
         usrsrv.delete_user(user, session_user.uid, mail_message, mail_send).then(function () {
-            res.send({ message: 'User deleted' });
-            return;
+            return res.send({ message: 'User deleted' });
         });
     } else {
         // Must check if user has databases and sites
         // Do not remove in this case, owners must be changed before
         let databases = await dbsrv.mongo_databases().find({ owner: uid }).toArray();
         if (databases && databases.length > 0) {
-            res.status(403).send({ message: 'User owns some databases, please change owner first!' });
-            return;
+            return res.status(403).send({ message: 'User owns some databases, please change owner first!' });
         }
         let websites = await dbsrv.mongo_web().find({ owner: uid }).toArray();
         if (websites && websites.length > 0) {
-            res.status(403).send({ message: 'User owns some web sites, please change owner first!' });
-            return;
+            return res.status(403).send({ message: 'User owns some web sites, please change owner first!' });
         }
         let projects = await dbsrv.mongo_projects().find({ owner: uid }).toArray();
         if (projects && projects.length > 0) {
-            res.status(403).send({ message: 'User owns some projects, please change owner first!' });
-            return;
+            return res.status(403).send({ message: 'User owns some projects, please change owner first!' });
         }
         const allprojects = user.projects ? user.projects : [];
         let empty_projects = [];
@@ -547,12 +484,10 @@ router.delete('/user/:id', async function (req, res) {
         }
         if (empty_projects.length) {
             empty_projects = empty_projects.join(', ');
-            res.status(403).send({ message: 'User is the last member of project(s) ${empty_projects}' });
-            return;
+            return res.status(403).send({ message: 'User is the last member of project(s) ${empty_projects}' });
         }
         usrsrv.delete_user(user, session_user.uid, mail_message, mail_send).then(function () {
-            res.send({ message: 'User deleted' });
-            return;
+            return res.send({ message: 'User deleted' });
         });
     }
 });
@@ -560,12 +495,10 @@ router.delete('/user/:id', async function (req, res) {
 // activate user
 router.get('/user/:id/activate', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let session_user = null;
     let isadmin = false;
@@ -574,34 +507,28 @@ router.get('/user/:id/activate', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
     if (!isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(403).send({ message: 'User does not exist' });
-        return;
+        return res.status(403).send({ message: 'User does not exist' });
     }
     if (user.maingroup == undefined || user.group == undefined) {
-        res.status(403).send({ message: 'Group or main group directory are not set' });
-        return;
+        return res.status(403).send({ message: 'Group or main group directory are not set' });
     }
 
     try {
         user = await usrsrv.activate_user(user, session_user.uid);
     } catch (error) {
         logger.error(error);
-        res.status(error.code).send({ message: error.message });
-        return;
+        return res.status(error.code).send({ message: error.message });
     }
 
     try {
@@ -643,21 +570,19 @@ router.get('/user/:id/activate', async function (req, res) {
     }
 
     if (error) {
-        res.status(500).send({ message: 'Activation error', error: [] });
+        return res.status(500).send({ message: 'Activation error', error: [] });
     } else {
-        res.send({ message: 'Activation in progress', error: [] });
+        return res.send({ message: 'Activation in progress', error: [] });
     }
 });
 
 // Get user - for logged user or admin
 router.get('/user/:id', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized, need to login first' });
-        return;
+        return res.status(401).send({ message: 'Not authorized, need to login first' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -667,19 +592,16 @@ router.get('/user/:id', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'Not authorized, need to login first' });
-        return;
+        return res.status(401).send({ message: 'Not authorized, need to login first' });
     }
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
     if (user.is_fake === undefined) {
         user.is_fake = false;
@@ -696,9 +618,9 @@ router.get('/user/:id', async function (req, res) {
     user.is_locked = await idsrv.user_locked(user.uid);
 
     if (session_user._id.toString() == user._id.toString() || isadmin) {
-        res.send(user);
+        return res.send(user);
     } else {
-        res.status(401).send({ message: 'Not authorized to access this user info' });
+        return res.status(401).send({ message: 'Not authorized to access this user info' });
     }
 });
 
@@ -707,20 +629,17 @@ router.get('/user/:id/confirm', async function (req, res) {
     let uid = req.params.id;
     let regkey = req.query.regkey;
     if (!sansrv.sanitizeAll([uid])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: uid });
     if (!user) {
-        res.status(401).send({ message: 'Invalid user' });
-        return;
+        return res.status(401).send({ message: 'Invalid user' });
     } else {
         if (user.regkey == regkey) {
             //if (user.status == STATUS_PENDING_APPROVAL) {
             if (user.status != STATUS_PENDING_EMAIL) {
                 // Already pending or active
-                res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
-                return;
+                return res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
             }
             let account_event = { action: 'email_confirm', date: new Date().getTime() };
             await dbsrv.mongo_users().updateOne(
@@ -754,10 +673,9 @@ router.get('/user/:id/confirm', async function (req, res) {
                 action: 'user confirmed email:' + req.params.id,
                 logs: []
             });
-            res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
+            return res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
         } else {
-            res.status(401).send({ message: 'Invalid registration key' });
-            return;
+            return res.status(401).send({ message: 'Invalid registration key' });
         }
     }
 });
@@ -766,81 +684,65 @@ router.get('/user/:id/confirm', async function (req, res) {
 router.post('/user/:id', async function (req, res) {
     logger.info('New register request for ' + req.params.id);
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     if (req.body.firstname == '' || req.body.firstname === null || req.body.firstname === undefined) {
-        res.send({ status: 1, message: 'Missing field: firstname' });
-        return;
+        return res.send({ status: 1, message: 'Missing field: firstname' });
     }
     if (req.body.lastname == '' || req.body.lastname === null || req.body.lastname === undefined) {
-        res.send({ status: 1, message: 'Missing field: lastname' });
-        return;
+        return res.send({ status: 1, message: 'Missing field: lastname' });
     }
     if (req.body.team == '' || req.body.team === null || req.body.team === undefined) {
-        res.send({ status: 1, message: 'Missing field: team' });
-        return;
+        return res.send({ status: 1, message: 'Missing field: team' });
     }
     if (!req.body.team.match(/^[0-9a-z_]+$/)) {
-        res.send({ status: 1, message: 'Team name must be alphanumeric and lowercase [0-9a-z_]' });
-        return;
+        return res.send({ status: 1, message: 'Team name must be alphanumeric and lowercase [0-9a-z_]' });
     }
     if (req.body.lab == '' || req.body.lab === null || req.body.lab === undefined) {
-        res.send({ status: 1, message: 'Missing field: lab' });
-        return;
+        return res.send({ status: 1, message: 'Missing field: lab' });
     }
     if (req.body.address == '' || req.body.address === null || req.body.address === undefined) {
-        res.send({ status: 1, message: 'Missing field: address' });
-        return;
+        return res.send({ status: 1, message: 'Missing field: address' });
     }
     if (req.body.responsible == '' || req.body.responsible === null || req.body.responsible === undefined) {
-        res.send({ status: 1, message: 'Missing field: Responsible/Manager' });
-        return;
+        return res.send({ status: 1, message: 'Missing field: Responsible/Manager' });
     }
     if (!req.params.id.match(/^[0-9a-z]+$/)) {
-        res.send({ status: 1, message: 'invalid data identifier, numeric and lowercase letters only' });
-        return;
+        return res.send({ status: 1, message: 'invalid data identifier, numeric and lowercase letters only' });
     }
     let usermaxlen = 12;
     if (CONFIG.general.username_max_length) {
         usermaxlen = CONFIG.general.username_max_length;
     }
     if (req.params.id.length > usermaxlen) {
-        res.send({ status: 1, message: 'user id too long, must be < ' + usermaxlen + ' characters' });
-        return;
+        return res.send({ status: 1, message: 'user id too long, must be < ' + usermaxlen + ' characters' });
     }
     if (req.body.why == '' || req.body.why === null || req.body.why === undefined) {
-        res.send({ status: 1, message: 'Missing field: Why do you need an account' });
-        return;
+        return res.send({ status: 1, message: 'Missing field: Why do you need an account' });
     }
     if (!validator.validate(req.body.email)) {
-        res.send({ status: 1, message: 'Invalid email format' });
-        return;
+        return res.send({ status: 1, message: 'Invalid email format' });
     }
     if (!req.body.is_fake) {
         let user_email = await dbsrv.mongo_users().findOne({ email: req.body.email, is_fake: false });
         if (user_email) {
-            res.send({ status: 1, message: 'User email already exists' });
-            return;
+            return res.send({ status: 1, message: 'User email already exists' });
         }
     }
     if (!(req.body.duration in duration_list)) {
-        res.send({ status: 1, message: 'Invalid duration format' });
-        return;
+        return res.send({ status: 1, message: 'Invalid duration format' });
     }
 
     let userexists = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (userexists) {
-        res.send({ status: 1, message: 'User id already exists' });
-        return;
+        return res.send({ status: 1, message: 'User id already exists' });
     }
 
     let uidMd5 = crypto.createHash('md5').update(req.params.id).digest('hex');
     let userexisted = await dbsrv.mongo_oldusers().findOne({ uid: uidMd5 });
     if (userexisted && (CONFIG.general.prevent_reuse === undefined || CONFIG.general.prevent_reuse)) {
         logger.error(`User uid ${req.params.id} already used in the past, preventing reuse`);
-        res.send({ status: 1, message: 'User id already used' });
-        return;
+        return res.send({ status: 1, message: 'User id already used' });
     }
 
     let user = {
@@ -902,18 +804,15 @@ router.post('/user/:id', async function (req, res) {
     } catch (error) {
         logger.error(error);
     }
-    res.send({ status: 0, message: 'Could not send an email, please contact the support.' });
-    return;
+    return res.send({ status: 0, message: 'Could not send an email, please contact the support.' });
 });
 
 router.get('/user/:id/expire', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let sendmail = req.query.sendmail === 'false' ? false : true;
@@ -925,18 +824,15 @@ router.get('/user/:id/expire', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
 
     session_user.is_admin = isadmin;
@@ -949,8 +845,7 @@ router.get('/user/:id/expire', async function (req, res) {
         try {
             await goldap.reset_password(user, fid);
         } catch (err) {
-            res.status(500).send({ message: 'Error during operation' });
-            return;
+            return res.status(500).send({ message: 'Error during operation' });
         }
         user.history.push({ action: 'expire', date: new Date().getTime() });
         // eslint-disable-next-line no-unused-vars
@@ -973,8 +868,7 @@ router.get('/user/:id/expire', async function (req, res) {
             logger.info('File Created: ', created_file);
         } catch (error) {
             logger.error('Expire User Failed for: ' + user.uid, error);
-            res.status(500).send({ message: 'Expire User Failed' });
-            return;
+            return res.status(500).send({ message: 'Expire User Failed' });
         }
 
         await dbsrv.mongo_events().insertOne({
@@ -989,26 +883,21 @@ router.get('/user/:id/expire', async function (req, res) {
             // eslint-disable-next-line no-unused-vars
             await notif.remove(user.email, sendmail);
             await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
-            res.send({ message: 'Operation in progress', fid: fid, error: [] });
+            return res.send({ message: 'Operation in progress', fid: fid, error: [] });
         } catch (error) {
-            res.send({ message: 'Operation in progress, user not in mailing list', fid: fid, error: error });
-            return;
+            return res.send({ message: 'Operation in progress, user not in mailing list', fid: fid, error: error });
         }
-        return;
     } else {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 });
 
 router.post('/user/:id/passwordreset', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -1018,31 +907,26 @@ router.post('/user/:id/passwordreset', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user || (session_user.uid != req.params.id && !isadmin)) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist:' + req.params.id });
-        return;
+        return res.status(404).send({ message: 'User does not exist:' + req.params.id });
     }
     if (user.status != STATUS_ACTIVE) {
-        res.status(401).send({ message: 'Your account is not active' });
-        return;
+        return res.status(401).send({ message: 'Your account is not active' });
     }
 
     user.password = req.body.password;
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])(?!.*\s).{12,}$/;
     if (!passwordRegex.test(user.password)) {
-        res.status(400).send({
+        return res.status(400).send({
             message: 'Password does not meet the required format: 12 characters min, including 1 digit, 1 lowercase, 1 uppercase, and 1 special character, and no spaces.'
         });
-        return;
     }
 
     await dbsrv.mongo_events().insertOne({
@@ -1055,8 +939,7 @@ router.post('/user/:id/passwordreset', async function (req, res) {
     try {
         await goldap.reset_password(user, fid);
     } catch (err) {
-        res.status(500).send({ message: 'Error during operation' });
-        return;
+        return res.status(500).send({ message: 'Error during operation' });
     }
 
     try {
@@ -1064,12 +947,10 @@ router.post('/user/:id/passwordreset', async function (req, res) {
         logger.info('File Created: ', created_file);
     } catch (error) {
         logger.error('Reset Password Failed for: ' + user.uid, error);
-        res.status(500).send({ message: 'Reset Password Failed' });
-        return;
+        return res.status(500).send({ message: 'Reset Password Failed' });
     }
 
-    res.send({ message: 'Password updated' });
-    return;
+    return res.send({ message: 'Password updated' });
 });
 
 //app.get('/user/:id/passwordreset', users);
@@ -1077,30 +958,25 @@ router.get('/user/:id/passwordreset', async function (req, res) {
     //let key = Math.random().toString(36).substring(7);
     let key = usrsrv.new_random(7);
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (user.status != STATUS_ACTIVE) {
-        res.status(401).send({ message: 'Your account is not active' });
-        return;
+        return res.status(401).send({ message: 'Your account is not active' });
     }
 
     if (user.is_fake) {
-        res.status(403).send({ message: 'Password reset not allowed for fake accounts' });
-        return;
+        return res.status(403).send({ message: 'Password reset not allowed for fake accounts' });
     }
 
     try {
         await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { regkey: key } });
     } catch (err) {
-        res.status(404).send({ message: 'User cannot be updated' });
-        return;
+        return res.status(404).send({ message: 'User cannot be updated' });
     }
 
     user.password = '';
@@ -1135,22 +1011,20 @@ router.get('/user/:id/passwordreset', async function (req, res) {
     });
 
     if (notif.mailSet()) {
-        res.send({ message: 'Password reset requested, check your inbox for instructions to reset your password.' });
+        return res.send({ message: 'Password reset requested, check your inbox for instructions to reset your password.' });
     } else {
-        res.send({ message: 'Could not send an email, please contact the support' });
+        return res.send({ message: 'Could not send an email, please contact the support' });
     }
 });
 
 router.get('/user/:id/passwordreset/:key', async function (req, res) {
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (req.params.key == user.regkey) {
         // reset the password
@@ -1161,8 +1035,7 @@ router.get('/user/:id/passwordreset/:key', async function (req, res) {
         try {
             await goldap.reset_password(user, fid);
         } catch (err) {
-            res.status(500).send({ message: 'Error during operation' });
-            return;
+            return res.status(500).send({ message: 'Error during operation' });
         }
         user.history.push({ action: 'password reset', date: new Date().getTime() });
         await dbsrv.mongo_users().updateOne({ uid: user.uid }, { $set: { history: user.history } });
@@ -1173,8 +1046,7 @@ router.get('/user/:id/passwordreset/:key', async function (req, res) {
             logger.info('File Created: ', created_file);
         } catch (error) {
             logger.error('Reset Password Failed for: ' + user.uid, error);
-            res.status(500).send({ message: 'Reset Password Failed' });
-            return;
+            return res.status(500).send({ message: 'Reset Password Failed' });
         }
 
         // disable previous link sent
@@ -1211,13 +1083,12 @@ router.get('/user/:id/passwordreset/:key', async function (req, res) {
         });
 
         if (notif.mailSet()) {
-            res.redirect(GENERAL_CONFIG.url + '/manager2/passwordresetconfirm');
+            return res.redirect(GENERAL_CONFIG.url + '/manager2/passwordresetconfirm');
         } else {
-            res.send({ message: 'Could not send an email, please contact the support' });
+            return res.send({ message: 'Could not send an email, please contact the support' });
         }
     } else {
-        res.status(401).send({ message: 'Invalid authorization key.' });
-        return;
+        return res.status(401).send({ message: 'Invalid authorization key.' });
     }
 });
 
@@ -1226,17 +1097,14 @@ router.get('/user/:id/passwordreset/:key', async function (req, res) {
  */
 router.get('/user/:id/renew/:regkey', async function (req, res) {
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
     if (user.status != STATUS_ACTIVE) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let regkey = req.params.regkey;
     if (user.regkey == regkey) {
@@ -1260,26 +1128,21 @@ router.get('/user/:id/renew/:regkey', async function (req, res) {
         });
         let accept = req.accepts(['json', 'html']);
         if (accept == 'json') {
-            res.send({ message: 'validity period extended', expiration: expiration });
-            return;
+            return res.send({ message: 'validity period extended', expiration: expiration });
         }
-        res.redirect(GENERAL_CONFIG.url + '/manager2/user/' + user.uid + '/renew/' + regkey);
-        return;
+        return res.redirect(GENERAL_CONFIG.url + '/manager2/user/' + user.uid + '/renew/' + regkey);
     } else {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 });
 
 // reactivate user
 router.get('/user/:id/renew', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -1289,14 +1152,12 @@ router.get('/user/:id/renew', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
 
     session_user.is_admin = isadmin;
@@ -1309,8 +1170,7 @@ router.get('/user/:id/renew', async function (req, res) {
         try {
             await goldap.reset_password(user, fid);
         } catch (err) {
-            res.status(500).send({ message: 'Error during operation' });
-            return;
+            return res.status(500).send({ message: 'Error during operation' });
         }
         user.history.push({ action: 'reactivate', date: new Date().getTime() });
         await dbsrv.mongo_users().updateOne(
@@ -1330,8 +1190,7 @@ router.get('/user/:id/renew', async function (req, res) {
             logger.info('File Created: ', created_file);
         } catch (error) {
             logger.error('Renew User Failed for: ' + user.uid, error);
-            res.status(500).send({ message: 'Renew User Failed' });
-            return;
+            return res.status(500).send({ message: 'Renew User Failed' });
         }
 
         await dbsrv.mongo_events().insertOne({
@@ -1379,25 +1238,21 @@ router.get('/user/:id/renew', async function (req, res) {
         }
 
         if (error) {
-            res.status(500).send({ message: 'Activation Error', fid: fid, error: [] });
+            return res.status(500).send({ message: 'Activation Error', fid: fid, error: [] });
         } else {
-            res.send({ message: 'Activation in progress', fid: fid, error: [] });
+            return res.send({ message: 'Activation in progress', fid: fid, error: [] });
         }
-        return;
     } else {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 });
 
 router.put('/user/:id/ssh', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let session_user = null;
     let isadmin = false;
@@ -1406,37 +1261,31 @@ router.put('/user/:id/ssh', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     session_user.is_admin = isadmin;
 
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'Not found' });
-        return;
+        return res.status(404).send({ message: 'Not found' });
     }
     // If not admin nor logged user
     if (!session_user.is_admin && user._id.toString() != req.locals.logInfo.id.toString()) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let key = req.body.ssh;
     if (!key) {
-        res.status(403).send({ message: 'Invalid SSH Key' });
-        return;
+        return res.status(403).send({ message: 'Invalid SSH Key' });
     }
     // Remove carriage returns if any
     // Escape some special chars for security
     user.ssh = key.replace(/[\n\r]+/g, '').replace(/(["'$`\\])/g, '\\$1');
     if (sansrv.sanitizeSSHKey(user.ssh) === undefined) {
-        res.status(403).send({ message: 'Invalid SSH Key' });
-        return;
+        return res.status(403).send({ message: 'Invalid SSH Key' });
     }
     if (sansrv.sanitizePath(user.home) === undefined) {
-        res.status(403).send({ message: 'Invalid home directory' });
-        return;
+        return res.status(403).send({ message: 'Invalid home directory' });
     }
     // Update SSH Key
     await dbsrv.mongo_users().updateOne({ _id: user._id }, { $set: { ssh: key } });
@@ -1447,8 +1296,7 @@ router.put('/user/:id/ssh', async function (req, res) {
         logger.info('File Created: ', created_file);
     } catch (error) {
         logger.error('Add Ssh Key Failed for: ' + user.uid, error);
-        res.status(500).send({ message: 'Ssh Key Failed' });
-        return;
+        return res.status(500).send({ message: 'Ssh Key Failed' });
     }
 
     await dbsrv.mongo_events().insertOne({
@@ -1459,17 +1307,15 @@ router.put('/user/:id/ssh', async function (req, res) {
     });
 
     user.fid = fid;
-    res.send(user);
+    return res.send(user);
 });
 
 router.get('/user/:id/usage', function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let usage = JSON.parse(JSON.stringify(CONFIG.usage));
     let usages = [];
@@ -1477,20 +1323,17 @@ router.get('/user/:id/usage', function (req, res) {
         usage[i]['link'] = usage[i]['link'].replace('#USER#', req.params.id);
         usages.push(usage[i]);
     }
-    res.send({ usages: usages });
-    return;
+    return res.send({ usages: usages });
 });
 
 // Update user info
 router.put('/user/:id', async function (req, res) {
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let session_user = null;
@@ -1500,13 +1343,11 @@ router.put('/user/:id', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     session_user.is_admin = isadmin;
@@ -1514,13 +1355,11 @@ router.put('/user/:id', async function (req, res) {
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
 
     if (!user) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     // If not admin nor logged user
     if (!session_user.is_admin && user._id.toString() != req.locals.logInfo.id.toString()) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     if (req.body.firstname) {
@@ -1557,8 +1396,7 @@ router.put('/user/:id', async function (req, res) {
 
     if (user.email == '' || user.firstname == '' || user.lastname == '') {
         if (!user.is_fake) {
-            res.status(403).send({ message: 'Some mandatory fields are empty' });
-            return;
+            return res.status(403).send({ message: 'Some mandatory fields are empty' });
         }
     }
     if (req.body.loginShell) {
@@ -1578,8 +1416,7 @@ router.put('/user/:id', async function (req, res) {
     }
     if (req.body.duration) {
         if (!(req.body.duration in duration_list)) {
-            res.status(403).send({ message: 'Duration is not valid' });
-            return;
+            return res.status(403).send({ message: 'Duration is not valid' });
         }
         // update expiration if duration have changed
         if (user.duration != req.body.duration) {
@@ -1610,23 +1447,20 @@ router.put('/user/:id', async function (req, res) {
             let group = await dbsrv.mongo_groups().findOne({ name: req.body.group });
 
             if (!group) {
-                res.status(403).send({
+                return res.status(403).send({
                     message: 'Group ' + req.body.group + ' does not exist, please create it first'
                 });
-                return;
             }
 
             if (user.secondarygroups.indexOf(group.name) != -1) {
-                res.status(403).send({
+                return res.status(403).send({
                     message: 'Group ' + req.body.group + ' is already a secondary group, please remove user from secondary group first!'
                 });
-                return;
             }
             user.group = req.body.group;
             user.gidnumber = group.gid;
             if (user.group == '' || user.group == null) {
-                res.status(403).send({ message: 'Some mandatory fields are empty' });
-                return;
+                return res.status(403).send({ message: 'Some mandatory fields are empty' });
             }
         }
 
@@ -1663,8 +1497,7 @@ router.put('/user/:id', async function (req, res) {
         try {
             await goldap.modify(user, fid);
         } catch (err) {
-            res.status(403).send({ message: 'User update failed' });
-            return;
+            return res.status(403).send({ message: 'User update failed' });
         }
 
         try {
@@ -1715,7 +1548,7 @@ router.put('/user/:id', async function (req, res) {
                 await notif.remove(user.email);
             }
         }
-        res.send(user);
+        return res.send(user);
     } else {
         await dbsrv.mongo_users().replaceOne({ _id: user._id }, user);
         await dbsrv.mongo_events().insertOne({
@@ -1735,18 +1568,16 @@ router.put('/user/:id', async function (req, res) {
             }
         }
         user.fid = null;
-        res.send(user);
+        return res.send(user);
     }
 });
 
 router.post('/user/:id/project/:project', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id, req.params.project])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let newproject = req.params.project;
     let uid = req.params.id;
@@ -1760,23 +1591,19 @@ router.post('/user/:id/project/:project', async function (req, res) {
         project = await dbsrv.mongo_projects().findOne({ id: newproject });
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!project) {
-        res.status(404).send({ message: 'Project not found' });
-        return;
+        return res.status(404).send({ message: 'Project not found' });
     }
 
     if (!isadmin && session_user.uid != project.owner) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     try {
@@ -1784,25 +1611,21 @@ router.post('/user/:id/project/:project', async function (req, res) {
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
-            res.status(e.code).send({ message: e.message });
-            return;
+            return res.status(e.code).send({ message: e.message });
         } else {
-            res.status(500).send({ message: 'Server Error, contact admin' });
-            return;
+            return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
 
-    res.send({ message: 'User added to project' });
+    return res.send({ message: 'User added to project' });
 });
 
 router.delete('/user/:id/project/:project', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id, req.params.project])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let oldproject = req.params.project;
     let uid = req.params.id;
@@ -1817,23 +1640,19 @@ router.delete('/user/:id/project/:project', async function (req, res) {
         project = await dbsrv.mongo_projects().findOne({ id: oldproject });
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!project) {
-        res.status(404).send({ message: 'Project not found' });
-        return;
+        return res.status(404).send({ message: 'Project not found' });
     }
 
     if (!isadmin && session_user.uid != project.owner && session_user.uid != uid) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     try {
@@ -1841,25 +1660,21 @@ router.delete('/user/:id/project/:project', async function (req, res) {
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
-            res.status(e.code).send({ message: e.message });
-            return;
+            return res.status(e.code).send({ message: e.message });
         } else {
-            res.status(500).send({ message: 'Server Error, contact admin' });
-            return;
+            return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
 
-    res.send({ message: 'User removed from project' });
+    return res.send({ message: 'User removed from project' });
 });
 
 router.get('/list/:list', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.list])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -1869,23 +1684,20 @@ router.get('/list/:list', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user || !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let list_name = req.params.list;
     let members = await notif.getMembers(list_name);
-    res.send(members);
+    return res.send(members);
 });
 
 router.get('/lists', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 
     let session_user = null;
@@ -1895,26 +1707,22 @@ router.get('/lists', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user || !isadmin) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let listOfLists = await notif.getLists();
-    res.send(listOfLists);
+    return res.send(listOfLists);
 });
 
 router.get('/user/:id/unlock', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let session_user = null;
@@ -1924,18 +1732,15 @@ router.get('/user/:id/unlock', async function (req, res) {
         isadmin = await rolsrv.is_admin(session_user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!session_user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
-        res.status(404).send({ message: 'User not found' });
-        return;
+        return res.status(404).send({ message: 'User not found' });
     }
 
     session_user.is_admin = isadmin;
@@ -1944,14 +1749,11 @@ router.get('/user/:id/unlock', async function (req, res) {
         try {
             await idsrv.user_unlock(user.uid);
         } catch (err) {
-            res.status(500).send({ message: 'Error during operation' });
-            return;
+            return res.status(500).send({ message: 'Error during operation' });
         }
-        res.send({ message: 'User was unlocked' });
-        return;
+        return res.send({ message: 'User was unlocked' });
     } else {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
 });
 

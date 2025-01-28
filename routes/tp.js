@@ -20,22 +20,19 @@ var STATUS_EXPIRED = 'Expired';
 
 router.get('/tp', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     let reservations = await dbsrv.mongo_reservations().find({}).toArray();
-    res.send(reservations);
+    return res.send(reservations);
 });
 
 router.post('/tp', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(401).send({ message: 'Not authorized' });
-        return;
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let user = null;
     let is_admin = false;
@@ -44,24 +41,19 @@ router.post('/tp', async function (req, res) {
         is_admin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (!(is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
     if (req.body.quantity === undefined || req.body.quantity === null || req.body.quantity <= 0) {
-        res.status(403).send({ message: 'Quantity must be >= 1' });
-        return;
+        return res.status(403).send({ message: 'Quantity must be >= 1' });
     }
     if (req.body.about === undefined || req.body.about == '') {
-        res.status(403).send({ message: 'Tell us why you need some tp accounts' });
-        return;
+        return res.status(403).send({ message: 'Tell us why you need some tp accounts' });
     }
     tpssrv
         .tp_reservation(
@@ -74,19 +66,16 @@ router.post('/tp', async function (req, res) {
             req.body.name
         )
         .then(function (reservation) {
-            res.send({ reservation: reservation, message: 'Reservation done' });
-            return;
+            return res.send({ reservation: reservation, message: 'Reservation done' });
         });
 });
 
 router.get('/tp/:id', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let user = null;
@@ -96,16 +85,13 @@ router.get('/tp/:id', async function (req, res) {
         is_admin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (!(is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
@@ -117,20 +103,17 @@ router.get('/tp/:id', async function (req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if (!reservation) {
-        res.status(403).send({ message: 'Not allowed to get this reservation' });
-        return;
+        return res.status(403).send({ message: 'Not allowed to get this reservation' });
     }
-    res.send({ reservation: reservation });
+    return res.send({ reservation: reservation });
 });
 
 router.delete('/tp/:id', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let user = null;
@@ -140,16 +123,13 @@ router.delete('/tp/:id', async function (req, res) {
         is_admin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (!(is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
@@ -161,18 +141,15 @@ router.delete('/tp/:id', async function (req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if (!reservation) {
-        res.status(403).send({ message: 'Not allowed to delete this reservation' });
-        return;
+        return res.status(403).send({ message: 'Not allowed to delete this reservation' });
     }
     if (reservation.over) {
-        res.status(403).send({ message: 'Reservation is already closed' });
-        return;
+        return res.status(403).send({ message: 'Reservation is already closed' });
     }
     if (reservation.created) {
-        res.status(403).send({
+        return res.status(403).send({
             message: 'Reservation accounts already created, reservation will be closed after closing date'
         });
-        return;
     }
 
     await dbsrv.mongo_reservations().updateOne(
@@ -181,18 +158,15 @@ router.delete('/tp/:id', async function (req, res) {
             $set: { over: true }
         }
     );
-    res.send({ message: 'Reservation cancelled' });
-    return;
+    return res.send({ message: 'Reservation cancelled' });
 });
 
 router.put('/tp/:id/reserve/stop', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let user = null;
@@ -202,16 +176,13 @@ router.put('/tp/:id/reserve/stop', async function (req, res) {
         is_admin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (!(is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
@@ -223,28 +194,24 @@ router.put('/tp/:id/reserve/stop', async function (req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if (!reservation) {
-        res.status(403).send({ message: 'Not allowed to delete this reservation' });
-        return;
+        return res.status(403).send({ message: 'Not allowed to delete this reservation' });
     }
 
     try {
         tpssrv.remove_tp_reservation(reservation);
     } catch (error) {
         logger.error(error);
-        res.status(500).send({ message: 'Error while removing tp reservation' });
-        return;
+        return res.status(500).send({ message: 'Error while removing tp reservation' });
     }
-    res.send({ message: 'Reservation closed' });
+    return res.send({ message: 'Reservation closed' });
 });
 
 router.put('/tp/:id/reserve/now', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let user = null;
@@ -254,16 +221,13 @@ router.put('/tp/:id/reserve/now', async function (req, res) {
         is_admin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
     if (!(is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
@@ -275,12 +239,10 @@ router.put('/tp/:id/reserve/now', async function (req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if (!reservation) {
-        res.status(403).send({ message: 'Not allowed to reserve now this reservation' });
-        return;
+        return res.status(403).send({ message: 'Not allowed to reserve now this reservation' });
     }
     if (reservation.to < new Date().getTime()) {
-        res.status(403).send({ message: 'End date can not be in the past' });
-        return;
+        return res.status(403).send({ message: 'End date can not be in the past' });
     }
 
     let newresa;
@@ -288,26 +250,22 @@ router.put('/tp/:id/reserve/now', async function (req, res) {
         newresa = await tpssrv.create_tp_reservation(reservation_id, 'auto');
     } catch (error) {
         logger.error(error);
-        res.status(500).send({ message: 'Error while creating tp reservation' });
-        return;
+        return res.status(500).send({ message: 'Error while creating tp reservation' });
     }
     logger.debug('set reservation as done', newresa);
     newresa.created = true;
-    res.send({ reservation: newresa });
+    return res.send({ reservation: newresa });
 });
 
 router.put('/tp/:id/reserve/extend', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
     if (!req.body.to) {
-        res.status(403).send({ message: 'No input' });
-        return;
+        return res.status(403).send({ message: 'No input' });
     }
     if (!sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({ message: 'Invalid parameters' });
-        return;
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
 
     let user = null;
@@ -317,44 +275,37 @@ router.put('/tp/:id/reserve/extend', async function (req, res) {
         is_admin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
-        res.status(404).send({ message: 'User session not found' });
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
     if (!user) {
-        res.status(404).send({ message: 'User does not exist' });
-        return;
+        return res.status(404).send({ message: 'User does not exist' });
     }
 
     if (!is_admin) {
-        res.status(403).send({ message: 'Not authorized' });
-        return;
+        return res.status(403).send({ message: 'Not authorized' });
     }
 
     let reservation_id = ObjectID.createFromHexString(req.params.id);
     let reservation = await dbsrv.mongo_reservations().findOne({ _id: reservation_id });
     if (!reservation) {
-        res.status(404).send({ message: 'Reservation does not exist' });
-        return;
+        return res.status(404).send({ message: 'Reservation does not exist' });
     }
     if (req.body.to < reservation.to) {
-        res.status(403).send({ message: 'Extended end date must be after current end date' });
-        return;
+        return res.status(403).send({ message: 'Extended end date must be after current end date' });
     }
     if (req.body.to < new Date().getTime()) {
-        res.status(403).send({ message: 'Extended end date can not be in the past' });
-        return;
+        return res.status(403).send({ message: 'Extended end date can not be in the past' });
     }
 
     try {
         tpssrv.extend_tp_reservation(reservation, req.body);
     } catch (error) {
         logger.error(error);
-        res.status(500).send({ message: 'Error while extending tp reservation' });
-        return;
+        return res.status(500).send({ message: 'Error while extending tp reservation' });
     }
 
-    res.send({ message: 'Reservation extended' });
+    return res.send({ message: 'Reservation extended' });
 });
 
 module.exports = router;
