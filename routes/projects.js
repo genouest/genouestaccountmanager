@@ -392,7 +392,7 @@ router.post('/project/:id/request/user', async function(req, res) {
         return;
     }
 
-    if(!project.managers.includes(user.uid)) {
+    if(!project.managers.includes(user.uid) && user.uid != project.owner) {
         res.status(401).send({message: 'User ' + user.uid + ' is not project manager for project ' + project.id});
         return;
     }

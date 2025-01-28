@@ -363,8 +363,6 @@
                 <th>Access?</th>
                 <th>Manager?</th>
                 <th>Owner?</th>
-                <th></th>
-                <th></th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-user>
@@ -377,13 +375,6 @@
               <td><span *ngIf="user.temp?.access">x</span></td>
               <td><span *ngIf="user.temp?.is_manager">x</span></td>
               <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
-              <td>
-                <button *ngIf="selectedProject.managers.includes(session_user.uid) && !selectedProject.managers.includes(user.uid)" type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(selectedProject, user.uid, 'remove')">Request Removal</button>
-              </td>
-              <td>
-                <button *ngIf="session_user.uid === selectedProject.owner && user.uid != selectedProject.owner && selectedProject.managers.includes(user.uid)" type="button" class="p-button p-button-sm p-button-danger" (click)="remove_manager(selectedProject, user.uid)">Demote to Member</button>
-                <button *ngIf="session_user.uid === selectedProject.owner && !selectedProject.managers.includes(user.uid)" type="button" class="p-button p-button-sm p-button-success" (click)="add_manager(selectedProject, user.uid)">Promote to Manager</button>
-              </td>
               </tr>
             </ng-template>
           </p-table>
