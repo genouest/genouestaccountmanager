@@ -1,23 +1,16 @@
-
-
 <div class="table-responsive table-striped">
-          <p-table #dtp [value]="events"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true" 
-                      [rowsPerPageOptions]="[10,25,50]"
-          >
-            <ng-template pTemplate="header">
-            <tr>
-            <th>Date</th>
-            <th>Action</th>
-            </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-hist>
-                  <tr>
-                <td>{{hist.date | date}}</td>
-                <td>{{hist.action}}</td>
-                  </tr>
-            </ng-template>
-          </p-table>
+  <p-table #dtp [value]="events" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-hist>
+      <tr>
+        <td>{{ hist.date | date }}</td>
+        <td>{{ hist.action }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
 </div>
