@@ -19,7 +19,7 @@ if (process.env.MY_REDIS_PORT) {
 }
 
 if (CONFIG.redis !== undefined && CONFIG.redis.host !== undefined && CONFIG.redis.host !== null) {
-    let redis_cfg = {host: CONFIG.redis.host, port: (CONFIG.redis.port || 6379)};
+    let redis_cfg = { host: CONFIG.redis.host, port: CONFIG.redis.port || 6379 };
     logger.info('Using Redis', redis_cfg);
     redis_client = redis.createClient(redis_cfg);
 } else {
@@ -39,7 +39,7 @@ exports.isInitOver = function () {
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject) {
         if (redis_client !== null) {
-            redis_client.get('my:ids:set', function(err , res){
+            redis_client.get('my:ids:set', function (err, res) {
                 resolve(res !== undefined && res === 'done');
             });
         } else {
@@ -57,22 +57,26 @@ exports.loadAvailableIds = function (strategy) {
         }
         if (redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
             // eslint-disable-next-line no-unused-vars
-            redis_client.del('my:ids:set', function(err, res){
+            redis_client.del('my:ids:set', function (err, res) {
                 // eslint-disable-next-line no-unused-vars
-                redis_client.del('my:ids:user', function(err, res) {
+                redis_client.del('my:ids:user', function (err, res) {
                     // eslint-disable-next-line no-unused-vars
-                    redis_client.del('my:ids:group', function(err, res) {
-                        _loadAvailableIds().then(function(){resolve();});
+                    redis_client.del('my:ids:group', function (err, res) {
+                        _loadAvailableIds().then(function () {
+                            resolve();
+                        });
                     });
                 });
             });
         } else {
-            _loadAvailableIds().then(function(){resolve();});
+            _loadAvailableIds().then(function () {
+                resolve();
+            });
         }
     });
 };
 
-async function _loadAvailableIds () {
+async function _loadAvailableIds() {
     if (idsLoaded) {
         return false;
     }
@@ -171,15 +175,17 @@ exports.getGroupAvailableId = function () {
 
 async function _getUsersMaxId(minID) {
     let minUserID = minID;
-    let data = await dbsrv.mongo_users().find({}, {limit: 1 , sort: {uidnumber: -1}}).toArray();
-    if (!data)  {
+    let data = await dbsrv
+        .mongo_users()
+        .find({}, { limit: 1, sort: { uidnumber: -1 } })
+        .toArray();
+    if (!data) {
         return minUserID;
     }
-    if (data.length > 0){
+    if (data.length > 0) {
         minUserID = data[0].uidnumber + 1;
     }
-    if (minUserID < minID)
-    {
+    if (minUserID < minID) {
         minUserID = minID;
     }
     return minUserID;
@@ -187,21 +193,23 @@ async function _getUsersMaxId(minID) {
 
 async function _getGroupsMaxId(minID) {
     let minGroupID = minID;
-    let data = await dbsrv.mongo_groups().find({}, {limit: 1 , sort: {gid: -1}}).toArray();
-    if (!data)  {
+    let data = await dbsrv
+        .mongo_groups()
+        .find({}, { limit: 1, sort: { gid: -1 } })
+        .toArray();
+    if (!data) {
         return minGroupID;
     }
-    if (data.length > 0){
+    if (data.length > 0) {
         minGroupID = data[0].gid + 1;
     }
-    if (minGroupID < minID)
-    {
+    if (minGroupID < minID) {
         minGroupID = minID;
     }
     return minGroupID;
 }
 
-function _getAvailableId (objType) {
+function _getAvailableId(objType) {
     return new Promise(function (resolve, reject) {
         if (redis_client !== null) {
             let key = 'my:ids:user';
@@ -230,8 +238,8 @@ function _getAvailableId (objType) {
 exports.getNumberOfUserAvailableIds = function () {
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject) {
-        if(redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
-            redis_client.llen('my:ids:user', function(err, res) {
+        if (redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
+            redis_client.llen('my:ids:user', function (err, res) {
                 resolve(res);
             });
         } else {
@@ -242,8 +250,8 @@ exports.getNumberOfUserAvailableIds = function () {
 exports.getNumberOfGroupAvailableIds = function () {
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject) {
-        if(redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
-            redis_client.llen('my:ids:group', function(err, res) {
+        if (redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
+            redis_client.llen('my:ids:group', function (err, res) {
                 resolve(res);
             });
         } else {
@@ -265,7 +273,7 @@ exports.freeUsers = function () {
     return new Promise(function (resolve, reject) {
         if (redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
             // eslint-disable-next-line no-unused-vars
-            redis_client.del('my:ids:user', function(err) {
+            redis_client.del('my:ids:user', function (err) {
                 resolve();
             });
         } else {
@@ -279,7 +287,7 @@ exports.freeGroups = function () {
     return new Promise(function (resolve, reject) {
         if (redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
             // eslint-disable-next-line no-unused-vars
-            redis_client.del('my:ids:group', function(err) {
+            redis_client.del('my:ids:group', function (err) {
                 resolve();
             });
         } else {
@@ -288,7 +296,7 @@ exports.freeGroups = function () {
     });
 };
 
-function _freeId (objType, id) {
+function _freeId(objType, id) {
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject) {
         if (redis_client !== null && ID_STRATEGY === ID_STRATEGY_POOL) {
@@ -300,7 +308,7 @@ function _freeId (objType, id) {
                 key = 'my:ids:group';
             }
             // eslint-disable-next-line no-unused-vars
-            redis_client.lpush(key, id, function(err, res) {
+            redis_client.lpush(key, id, function (err, res) {
                 resolve();
             });
         } else {
@@ -314,8 +322,8 @@ exports.user_locked = function (user) {
     return new Promise(function (resolve, reject) {
         if (redis_client !== null) {
             // eslint-disable-next-line no-unused-vars
-            redis_client.get('my:lock:' + user, function(err, res) {
-                if(res && parseInt(res) >= 3) {
+            redis_client.get('my:lock:' + user, function (err, res) {
+                if (res && parseInt(res) >= 3) {
                     resolve(true);
                 } else {
                     resolve(false);
@@ -327,20 +335,19 @@ exports.user_locked = function (user) {
     });
 };
 
-
 exports.user_lock_remaining_time = function (user) {
     // eslint-disable-next-line no-unused-vars
     return new Promise(function (resolve, reject) {
         if (redis_client !== null) {
             // eslint-disable-next-line no-unused-vars
-            redis_client.get(`my:lock:${user}:last`,  function(err, res) {
-                if(res) {
+            redis_client.get(`my:lock:${user}:last`, function (err, res) {
+                if (res) {
                     let bansec = 3600;
-                    if(CONFIG.general.bansec) {
+                    if (CONFIG.general.bansec) {
                         bansec = CONFIG.general.bansec;
                     }
-                    let remains = (parseInt(res)  + (1000 * bansec)) - Date.now();
-                    resolve(remains/1000);
+                    let remains = parseInt(res) + 1000 * bansec - Date.now();
+                    resolve(remains / 1000);
                 } else {
                     resolve(0);
                 }
@@ -356,14 +363,14 @@ exports.user_lock = function (user) {
     return new Promise(function (resolve, reject) {
         let bansec = 3600;
 
-        if(CONFIG.general.bansec) {
+        if (CONFIG.general.bansec) {
             bansec = CONFIG.general.bansec;
         }
 
         if (redis_client !== null) {
             // eslint-disable-next-line no-unused-vars
-            redis_client.incr('my:lock:' + user, function(err, res) {
-                redis_client.set(`my:lock:${user}:last`, Date.now(), function() {
+            redis_client.incr('my:lock:' + user, function (err, res) {
+                redis_client.set(`my:lock:${user}:last`, Date.now(), function () {
                     redis_client.expire(`my:lock:${user}:last`, bansec);
                 });
                 redis_client.expire('my:lock:' + user, bansec);
@@ -381,7 +388,7 @@ exports.user_unlock = function (user) {
         if (redis_client !== null) {
             // eslint-disable-next-line no-unused-vars
             redis_client.del(`my:lock:${user}:last`);
-            redis_client.del('my:lock:' + user, function() {
+            redis_client.del('my:lock:' + user, function () {
                 resolve();
             });
         } else {

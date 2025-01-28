@@ -12,21 +12,16 @@ const templates_dir_default = 'templates/default';
 
 // Todo: Manage mail template with nunjuck
 
-nunjucks.configure(
-    [templates_dir, templates_dir_default],
-    {
-        autoescape: true,
-        trimBlocks: true,
-        lstripBlocks: true
-    }
-);
-
+nunjucks.configure([templates_dir, templates_dir_default], {
+    autoescape: true,
+    trimBlocks: true,
+    lstripBlocks: true
+});
 
 const tplconf = require('../' + templates_dir + '/templates.json');
 
-function create_file (name, data) {
-    return new Promise( function (resolve, reject) {
-
+function create_file(name, data) {
+    return new Promise(function (resolve, reject) {
         if (!tplconf[name]) {
             logger.warn('Templates file are missing for ' + name);
             reject('Templates file are missing for ' + name);
@@ -71,7 +66,7 @@ function create_file (name, data) {
                     if (tpl.filename_mode) {
                         fs.chmodSync(filepath + '/' + filename, tpl.filename_mode);
                     }
-                    resolve (filepath + '/' + filename);
+                    resolve(filepath + '/' + filename);
                     return;
                 });
             });
@@ -79,11 +74,9 @@ function create_file (name, data) {
     });
 }
 
-
 /* Todo: find if we should export create_file or not */
 /* Todo: should find a clean way to set name of param from function prototype) */
 module.exports = {
-
     /*
     set_suffix: function (suffix) {
         filename_suffix = suffix;
@@ -122,7 +115,12 @@ module.exports = {
     },
 
     ldap_change_user_groups: function (user, group_add_dn, group_remove_dn, fid) { // will use user.group
-        return create_file('ldap_change_user_groups', { user: user, group_add_dn: group_add_dn, group_remove_dn: group_remove_dn, fid: fid });
+        return create_file('ldap_change_user_groups', {
+            user: user,
+            group_add_dn: group_add_dn,
+            group_remove_dn: group_remove_dn,
+            fid: fid
+        });
     },
 
     /* method for users.js */
@@ -144,7 +142,12 @@ module.exports = {
     },
 
     user_change_group: function (user, group_add, group_remove, fid) {
-        return create_file('user_change_group', { user: user, group_add: group_add, group_remove: group_remove, fid: fid });
+        return create_file('user_change_group', {
+            user: user,
+            group_add: group_add,
+            group_remove: group_remove,
+            fid: fid
+        });
     },
 
     user_delete_user: function (user, fid) {
@@ -171,7 +174,6 @@ module.exports = {
     user_add_ssh_key: function (user, fid) {
         return create_file('user_add_ssh_key', { user: user, fid: fid });
     },
-
 
     /* method for ssh.js */
     ssh_keygen: function (user, fid) {
@@ -202,7 +204,5 @@ module.exports = {
 
     project_add_group_to_project: function (project, group, fid) {
         return create_file('project_add_group_to_project', { project: project, group: group, fid: fid });
-    },
-
-
+    }
 };

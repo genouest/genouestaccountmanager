@@ -17,37 +17,40 @@ const sansrv = require('../core/sanitize.service.js');
 const grpsrv = require('../core/group.service.js');
 const rolsrv = require('../core/role.service.js');
 
-router.get('/group/:id/users', async function(req, res) {
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.get('/group/:id/users', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
 
     let user = null;
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         res.end();
         return;
     }
 
-    if(!user){
-        res.status(404).send({message: 'User not found'});
+    if (!user) {
+        res.status(404).send({ message: 'User not found' });
         return;
     }
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
+    if (!isadmin) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
+    let users_in_group = await dbsrv
+        .mongo_users()
+        .find({ $or: [{ secondarygroups: req.params.id }, { group: req.params.id }] })
+        .toArray();
     res.send(users_in_group);
     res.end();
 });
@@ -65,7 +68,7 @@ router.get('/group/:id', async function (req, res) {
     let isadmin = false;
     try {
         user = await dbsrv.mongo_users().findOne({
-            _id: req.locals.logInfo.id,
+            _id: req.locals.logInfo.id
         });
         isadmin = await rolsrv.is_admin(user);
     } catch (e) {
@@ -81,7 +84,7 @@ router.get('/group/:id', async function (req, res) {
         res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    const group = await dbsrv.mongo_groups().findOne({ 'name': req.params.id });
+    const group = await dbsrv.mongo_groups().findOne({ name: req.params.id });
     if (!group) {
         res.status(404).send({ message: 'Group ' + req.params.id + ' not found' });
         return;
@@ -89,166 +92,171 @@ router.get('/group/:id', async function (req, res) {
     res.send(group);
 });
 
-router.delete('/group/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.delete('/group/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
 
     let user = null;
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         res.end();
         return;
     }
 
-    if(!user){
-        res.status(404).send({message: 'User not found'});
+    if (!user) {
+        res.status(404).send({ message: 'User not found' });
         return;
     }
 
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
+    if (!isadmin) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    let group = await dbsrv.mongo_groups().findOne({name: req.params.id});
-    if(!group) {
-        res.status(403).send({message: 'Group does not exist'});
+    let group = await dbsrv.mongo_groups().findOne({ name: req.params.id });
+    if (!group) {
+        res.status(403).send({ message: 'Group does not exist' });
         return;
     }
-    let users_in_group = await dbsrv.mongo_users().find({'$or': [{'secondarygroups': req.params.id}, {'group': req.params.id}]}).toArray();
-    if(users_in_group && users_in_group.length > 0){
-        res.status(403).send({message: 'Group has some users, cannot delete it'});
+    let users_in_group = await dbsrv
+        .mongo_users()
+        .find({ $or: [{ secondarygroups: req.params.id }, { group: req.params.id }] })
+        .toArray();
+    if (users_in_group && users_in_group.length > 0) {
+        res.status(403).send({ message: 'Group has some users, cannot delete it' });
         return;
     }
-    grpsrv.delete_group(group, user.uid).then(function(){
-        res.send({message: 'group ' + req.params.id + ' deleted'});
+    grpsrv.delete_group(group, user.uid).then(function () {
+        res.send({ message: 'group ' + req.params.id + ' deleted' });
         res.end();
     });
 });
 
-
-router.put('/group/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.put('/group/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
     let session_user = null;
     let isadmin = false;
     try {
-        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(session_user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         res.end();
         return;
     }
 
-    if(!session_user){
-        res.status(404).send({message: 'User not found'});
+    if (!session_user) {
+        res.status(404).send({ message: 'User not found' });
         return;
     }
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
+    if (!isadmin) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     let owner = req.body.owner;
-    let user = await dbsrv.mongo_users().findOne({uid: owner});
-    if(owner && !user) {
-        res.status(404).send({message: 'Owner user does not exist'});
+    let user = await dbsrv.mongo_users().findOne({ uid: owner });
+    if (owner && !user) {
+        res.status(404).send({ message: 'Owner user does not exist' });
         res.end();
         return;
     }
 
     let description = req.body.description;
 
-    let group = await dbsrv.mongo_groups().findOne({name: req.params.id});
-    if(! group) {
-        res.status(404).send({message: 'Group does not exist'});
+    let group = await dbsrv.mongo_groups().findOne({ name: req.params.id });
+    if (!group) {
+        res.status(404).send({ message: 'Group does not exist' });
         return;
     }
     await dbsrv.mongo_events().insertOne({
-        'owner': session_user.uid,
-        'date': new Date().getTime(),
-        'action': 'group modification ' + group.name,
-        'logs': []});
+        owner: session_user.uid,
+        date: new Date().getTime(),
+        action: 'group modification ' + group.name,
+        logs: []
+    });
 
-    let data = await dbsrv.mongo_groups().updateOne({name: group.name}, {'$set':{'owner': owner, 'description': description}});
+    let data = await dbsrv
+        .mongo_groups()
+        .updateOne({ name: group.name }, { $set: { owner: owner, description: description } });
     res.send(data);
     res.end();
 });
 
-router.post('/group/:id', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.post('/group/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
     let session_user = null;
     let isadmin = false;
     try {
-        session_user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(session_user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         res.end();
         return;
     }
 
-    if(!session_user){
-        res.status(404).send({message: 'User not found'});
+    if (!session_user) {
+        res.status(404).send({ message: 'User not found' });
         return;
     }
 
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
+    if (!isadmin) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     let owner = req.body.owner;
-    let user = await dbsrv.mongo_users().findOne({uid: owner});
-    if(owner && !user) {
-        res.status(404).send({message: 'Owner user does not exist'});
+    let user = await dbsrv.mongo_users().findOne({ uid: owner });
+    if (owner && !user) {
+        res.status(404).send({ message: 'Owner user does not exist' });
         res.end();
         return;
     }
 
     let description = req.body.description;
 
-    let group = await dbsrv.mongo_groups().findOne({name: req.params.id });
-    if(group) {
-        res.status(403).send({message: 'Group already exists'});
+    let group = await dbsrv.mongo_groups().findOne({ name: req.params.id });
+    if (group) {
+        res.status(403).send({ message: 'Group already exists' });
         return;
     }
-    let groupexisted = await dbsrv.mongo_oldgroups().findOne({name: req.params.id});
-    if(groupexisted && (CONFIG.general.prevent_reuse_group === undefined || CONFIG.general.prevent_reuse_group)){
+    let groupexisted = await dbsrv.mongo_oldgroups().findOne({ name: req.params.id });
+    if (groupexisted && (CONFIG.general.prevent_reuse_group === undefined || CONFIG.general.prevent_reuse_group)) {
         logger.error(`Group name ${req.params.id} already used in the past, preventing reuse`);
         res.status(403).send('Group name already used in the past, preventing reuse');
         return;
     }
 
     try {
-        group = await grpsrv.create_group(req.params.id , owner, description, session_user.uid);
-    } catch(error){
+        group = await grpsrv.create_group(req.params.id, owner, description, session_user.uid);
+    } catch (error) {
         logger.error('Add Group Failed for: ' + req.params.id, error);
-        res.status(500).send({message: 'Add Group Failed'});
+        res.status(500).send({ message: 'Add Group Failed' });
         return;
     }
 
@@ -257,29 +265,29 @@ router.post('/group/:id', async function(req, res){
     return;
 });
 
-router.get('/group', async function(req, res){
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
+router.get('/group', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         res.end();
         return;
     }
 
-    if(!user){
-        res.status(404).send({message: 'User not found'});
+    if (!user) {
+        res.status(404).send({ message: 'User not found' });
         return;
     }
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
+    if (!isadmin) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
     let groups = await dbsrv.mongo_groups().find().toArray();
@@ -289,38 +297,37 @@ router.get('/group', async function(req, res){
 });
 
 //Return all projects using this group
-router.get('/group/:id/projects', async function(req, res){
-    if(! req.locals.logInfo.is_logged){
-        res.status(401).send({message: 'Not authorized'});
+router.get('/group/:id/projects', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        res.status(403).send({ message: 'Invalid parameters' });
         return;
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         res.end();
         return;
     }
-    if(!user){
-        res.status(404).send({message: 'User not found'});
+    if (!user) {
+        res.status(404).send({ message: 'User not found' });
         return;
     }
-    if(!isadmin){
-        res.status(401).send({message: 'Not authorized'});
+    if (!isadmin) {
+        res.status(401).send({ message: 'Not authorized' });
         return;
     }
-    let projects_with_group = await dbsrv.mongo_projects().find({'group': req.params.id}).toArray();
+    let projects_with_group = await dbsrv.mongo_projects().find({ group: req.params.id }).toArray();
     res.send(projects_with_group);
     res.end();
 });
-
 
 module.exports = router;
