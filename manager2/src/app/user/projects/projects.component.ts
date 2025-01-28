@@ -43,7 +43,7 @@ export class ProjectsComponent implements OnInit {
             this.userService.addToProject(this.user.uid, new_project.id).subscribe(
                 resp => {
                     this.add_to_project_msg = resp['message'];
-                    this.user_projects.push({id: new_project.id, owner: false, member: true});
+                    this.user_projects.push({id: new_project.id, is_owner: false, is_manager: false, is_member: true});
                 },
                 err => {
                     this.add_to_project_error_msg = err.error.message;
