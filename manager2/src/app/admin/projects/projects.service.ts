@@ -305,5 +305,4 @@ export class ProjectsService {
             httpOptions
         );
     }
-
 }

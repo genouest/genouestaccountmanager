@@ -7,7 +7,6 @@ import { User, UserService } from 'src/app/user/user.service';
 import * as latinize from 'latinize'
 import { Table } from 'primeng/table'
 
-
 @Component({
     selector: 'app-projects',
     templateUrl: './projects.component.html',
@@ -46,6 +45,11 @@ export class ProjectsComponent implements OnInit {
     default_path: string
     default_size: number
     default_cpu: number
+
+    rejectionReason: string = ''
+    currentProject: any = null
+    user_uid: string = null
+    sendCopyToSupport: boolean = true;
 
     constructor(
         private route: ActivatedRoute,
@@ -288,15 +292,61 @@ export class ProjectsComponent implements OnInit {
 
     reject_project(input_project: any) {
         const project: Project = this.projectService.mapToProject(input_project);
-        this.reset_msgs()
+        this.reset_msgs();
         this.projectService.delete_pending(project.uuid).subscribe(
-            resp => {
+            (resp) => {
                 this.pending_msg = resp.message;
                 this.pending_list(true);
             },
-            err => this.pending_err_msg = err.error
+            (err) => {
+                this.pending_err_msg = err.error;
+            }
         );
+    }
 
+    openRejectModal(project: any, user_uid: any) {
+        this.currentProject = project
+        this.user_uid = user_uid
+    }
+
+    closeRejectModal() {
+        const rejectModal = document.getElementById('rejectModal');
+        if (rejectModal) {
+            // Simulate the close functionality
+            rejectModal.classList.remove('show');
+            rejectModal.setAttribute('aria-hidden', 'true');
+            rejectModal.style.display = 'none';
+    
+            // Remove the backdrop if present
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.remove();
+            }
+    
+            // Restore scrolling
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+        this.rejectionReason = ''
+        this.currentProject = null
+        this.user_uid = null
+    }
+
+    confirmRejectProject() {
+        this.reject_project(this.currentProject);
+        if(this.rejectionReason)
+            this.userService.notify(this.currentProject.owner, {
+                subject: `: Project ${this.currentProject.id} creation rejected`,
+                message: `The reason why your project was not accepted by one of our admins is the following: ${this.rejectionReason}`,
+                send_copy_to_support: this.sendCopyToSupport
+            }).subscribe(
+                err => {
+                    console.log(('failed to send mail'));
+                }
+            );
+    
+        this.closeRejectModal();
     }
 
     reset_msgs() {
