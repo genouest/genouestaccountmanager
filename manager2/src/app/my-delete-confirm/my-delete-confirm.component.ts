@@ -20,6 +20,9 @@ export class MyDeleteConfirmComponent implements OnInit {
     @Input()
     explainMessage: boolean
 
+    @Input()
+    button_disp: string = "Delete"
+
     constructor() { }
 
     ngOnInit() {

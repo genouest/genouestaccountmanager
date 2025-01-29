@@ -109,7 +109,7 @@
             </div>
             <div class="col-sm-3">
               <label style="opacity: 0;">Remove member</label>
-              <button type="button" class="p-button p-button-sm p-button-danger" (click)="remove_user()">Remove member</button>
+              <app-my-delete-confirm [onConfirm]="remove_user" button_disp="Remove member"></app-my-delete-confirm>
             </div>
           </div>
         </form>
