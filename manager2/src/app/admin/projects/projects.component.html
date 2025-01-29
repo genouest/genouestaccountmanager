@@ -143,7 +143,7 @@
                   <td>
                     <div class="btn-group">
                       <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-info " (click)="modify_project(pending)">View</button>
-                      <app-my-delete-confirm [onConfirm]="reject_project" [data]="pending" button_disp="Reject"></app-my-delete-confirm>
+                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-danger " (click)="reject_project(pending)">Reject</button>
                     </div>
                   </td>
                 </tr>

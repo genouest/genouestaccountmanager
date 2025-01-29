@@ -64,7 +64,6 @@ export class ProjectsComponent implements OnInit {
     // TODO sort groups by name
 
     ngOnInit() {
-        this.reject_project = this.reject_project.bind(this);
         this.route.queryParams
             .subscribe(params => {
                 if (params.deleted == "ok") {
