@@ -202,7 +202,9 @@
               </span>
             </a>
           </td>          <td><a routerLink="/user/{{project.owner}}"><span class="p-button p-button-sm p-button-primary">{{project.owner}}</span></a></td>
-          <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
+          <td *ngIf="(!config.project || config.project.enable_group) && project.group">
+            <a routerLink="/admin/group/{{project.group}}"><span class="p-button p-button-sm p-button-primary">{{project.group}}</span></a>
+          </td>
           <td>{{project.path}}</td>
           <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
               <meter *ngIf="project.current_size"
@@ -267,7 +269,9 @@
           <tr>
             <td><a routerLink="/admin/project/{{project.id}}"><span class="p-button p-button-sm p-button-primary project-name">{{project.id}}</span></a></td>
             <td><a routerLink="/user/{{project.owner}}"><span class="p-button p-button-sm p-button-primary">{{project.owner}}</span></a></td>
-            <td *ngIf="!config.project || config.project.enable_group">{{project.group}}</td>
+            <td *ngIf="(!config.project || config.project.enable_group) && project.group">
+              <a routerLink="/admin/group/{{project.group}}"><span class="p-button p-button-sm p-button-primary">{{project.group}}</span></a>
+            </td>
             <td>{{project.path}}</td>
             <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
                 <meter *ngIf="project.current_size"
