@@ -6,10 +6,7 @@ import { Component, OnInit } from '@angular/core';
     styleUrls: ['./pending-account.component.css']
 })
 export class PendingAccountComponent implements OnInit {
+    constructor() {}
 
-    constructor() { }
-
-    ngOnInit() {
-    }
-
+    ngOnInit() {}
 }

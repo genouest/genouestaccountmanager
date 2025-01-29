@@ -1,137 +1,152 @@
 <div class="col-sm-6">
-	<a routerLink="/admin/project" class="btn btn-primary">Back to projects</a>
+  <a routerLink="/admin/project" class="btn btn-primary">Back to projects</a>
 </div>
+
+
 <div class="card bg-light card-header">
-	<div class="row">
-		<div class="col-sm-9">
-			<h4>Project <strong>{{project.id}}</strong></h4>
-		</div>
-		<div class="col-sm-3" >
-			<button class="p-button p-button-sm p-button-danger" (click)="delete_project()">Delete project</button>
-		</div>
-	</div>
-</div>
-    <div class="card bg-light">
-      <div class="card-header">Update project</div>
-      <div class="card-body">
-        <div class="alert alert-danger" *ngIf="prj_err_msg">{{prj_err_msg}}</div>
-        <div class="alert alert-info" *ngIf="prj_msg">{{prj_msg}}</div>
-        <form aria-label="project edition form" role="form" class="user-form form-horizontal form-register">
-          <div class="form-group row">
-            <div class="col-sm-2">
-              <label for="update_project_owner">Owner</label>
-              <select id="update_project_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.owner" class="form-control">
-                <option *ngFor="let user_o of users" [ngValue]="user_o.uid">{{user_o.uid}}</option>
-                </select>
-            </div>
-            <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
-              <label for="update_project_group">Group</label>
-              <select id="update_project_group" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.group" class="form-control">
-                <option *ngFor="let group of groups" [ngValue]="group.name">{{group.name}}</option>
-              </select>
-
-            </div>
-            <div class="col-sm-2">
-                <label for="update_project_size">Size (GB)</label>
-                <input id="update_project_size" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.size" class="form-control"/>
-            </div>
-            <div class="col-sm-2">
-                <label for="update_project_cpu">Cpu (Hour)</label>
-                <input id="update_project_cpu" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.cpu" class="form-control"/>
-            </div>
-            <div class="col-sm-2">
-              <label for="project_date">Creation date</label>
-              <input type="date" id="project_date" value="{{ date_convert(project.created_at) }}" class="form-control" readonly/>
-            </div>
-            <div class="col-sm-2">
-              <label for="update_project_exp">Expiration date</label>
-              <input type="date" id="update_project_exp" [ngModelOptions]="{standalone: true}" [(ngModel)]="project_expire" class="form-control"/>
-            </div>
-            <div class="col-sm-2">
-              <label >Financing</label>
-              <input type="text" id="update_project_orga" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.orga" class="form-control"/>
-            </div>
-          </div>
-          <div class="form-group row">
-            <div class="col-sm-12">
-              <label for="project_description">Description</label>
-              <textarea rows="2" id="project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.description" class="form-control"></textarea>
-            </div>
-          </div>
-          <div class="form-group row">
-            <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
-            <label >Write permission&nbsp;
-              <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
-            </label>
-            <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.access" class="form-control">
-                <option value="Group">Group</option>
-                <option value="Data manager">Data manager</option>
-              </select>
-            </div>
-            <div class="col-sm-3">
-              <label for="update_project_path">Path to project</label>
-              <input type="text" id="update_project_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="project.path" class="form-control"/>
-            </div>
-          </div>
-          <div class="form-group row">
-            <div class="col-sm-2">
-              <label style="opacity: 0;">Update project</label>
-              <button type="button" class="p-button p-button-sm p-button-success" (click)="update_project()">Update project</button>
-            </div>
-          </div>
-        </form>
-      </div>
+  <div class="row">
+    <div class="col-sm-9">
+      <h4>
+        Project <strong>{{ project.id }}</strong>
+      </h4>
     </div>
-    <div class="card bg-light">
-      <div class="card-header">User management</div>
-      <div class="card-body">
-        <form role="form" class="user-form form-horizontal form-register">
-          <div *ngIf="admin_user_msg" class="alert alert-success">{{admin_user_msg}}</div>
-          <div *ngIf="admin_user_err_msg" class="alert alert-danger">{{admin_user_err_msg}}</div>
-          <div class="form-group row">
-            <div class="col-sm-3">
-              <label for="new_user_admin">New project member</label>
-              <select id="new_user_admin" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_user_admin" class="form-control">
-                <option *ngFor="let user_a of all_users" [ngValue]="user_a.uid">{{user_a.uid}}</option>
-             </select>
-            </div>
-            <div class="col-sm-2">
-              <label style="opacity: 0;">Add member</label>
-              <button type="button" class="p-button p-button-sm p-button-success" (click)="add_user();  ">Add member</button>
-            </div>
-            <div class="col-sm-1"></div>
-            <div class="col-sm-3">
-              <label for="remove_user_admin">Remove project member</label>
-              <select id="remove_user_admin"  [ngModelOptions]="{standalone: true}" [(ngModel)]="remove_user_admin" class="form-control">
-                <option *ngFor="let user_r of users" [ngValue]="user_r.uid">{{user_r.uid}}</option>
-                </select>
+    <div class="col-sm-3">
+      <button class="p-button p-button-sm p-button-danger" (click)="delete_project()">Delete project</button>
+    </div>
+  </div>
+</div>
 
-            </div>
-            <div class="col-sm-3">
-              <label style="opacity: 0;">Remove member</label>
-              <button type="button" class="p-button p-button-sm p-button-danger" (click)="remove_user()">Remove member</button>
-            </div>
-          </div>
-        </form>
-        <div class="table-responsive table-striped">
-          <p-table #dtp [value]="users"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true"
-                      [rowsPerPageOptions]="[10,25,50]"
-          >
-            <ng-template pTemplate="header">
-                <tr><th>User</th><th>Email</th><th>Access</th><th>Owner</th></tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-user_l>
-              <tr>
-                <td><a routerLink="/user/{{user_l.uid}}"><span class="p-button p-button-sm p-button-primary">{{user_l.uid}}</span></a></td>
-                <td>{{user_l.email}}</td>
-                <td><span *ngIf="user_l.temp?.access">x</span></td>
-                <td><span *ngIf="user_l.uid === project.owner">x</span></td>
-              </tr>
-            </ng-template>
-          </p-table>
+
+<div class="card bg-light">
+  <div class="card-header">Update project</div>
+  <div class="card-body">
+    <div class="alert alert-danger" *ngIf="prj_err_msg">{{ prj_err_msg }}</div>
+    <div class="alert alert-info" *ngIf="prj_msg">{{ prj_msg }}</div>
+    <form aria-label="project edition form" role="form" class="user-form form-horizontal form-register">
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label for="update_project_owner">Owner</label>
+          <select id="update_project_owner" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.owner" class="form-control">
+            <option *ngFor="let user_o of users" [ngValue]="user_o.uid">{{ user_o.uid }}</option>
+          </select>
+        </div>
+        <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
+          <label for="update_project_group">Group</label>
+          <select id="update_project_group" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.group" class="form-control">
+            <option *ngFor="let group of groups" [ngValue]="group.name">{{ group.name }}</option>
+          </select>
+        </div>
+        <div class="col-sm-2">
+          <label for="update_project_size">Size (GB)</label>
+          <input id="update_project_size" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.size" class="form-control" />
+        </div>
+        <div class="col-sm-2">
+          <label for="update_project_cpu">Cpu (Hour)</label>
+          <input id="update_project_cpu" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.cpu" class="form-control" />
+        </div>
+        <div class="col-sm-2">
+          <label for="project_date">Creation date</label>
+          <input type="date" id="project_date" value="{{ date_convert(project.created_at) }}" class="form-control" readonly />
+        </div>
+        <div class="col-sm-2">
+          <label for="update_project_exp">Expiration date</label>
+          <input type="date" id="update_project_exp" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project_expire" class="form-control" />
+        </div>
+        <div class="col-sm-2">
+          <label>Financing</label>
+          <input type="text" id="update_project_orga" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.orga" class="form-control" />
         </div>
       </div>
+
+      <div class="form-group row">
+        <div class="col-sm-12">
+          <label for="project_description">Description</label>
+          <textarea rows="2" id="project_description" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.description" class="form-control"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
+          <label
+            >Write permission&nbsp;
+            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
+          </label>
+          <select id="project_access" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.access" class="form-control">
+            <option value="Group">Group</option>
+            <option value="Data manager">Data manager</option>
+          </select>
+        </div>
+        <div class="col-sm-3">
+          <label for="update_project_path">Path to project</label>
+          <input type="text" id="update_project_path" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.path" class="form-control" />
+        </div>
+      </div>
+      
+      <div class="form-group row">
+        <div class="col-sm-2">
+          <label style="opacity: 0">Update project</label>
+          <button type="button" class="p-button p-button-sm p-button-success" (click)="update_project()">Update project</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div class="card bg-light">
+  <div class="card-header">User management</div>
+  <div class="card-body">
+    <form role="form" class="user-form form-horizontal form-register">
+      <div *ngIf="admin_user_msg" class="alert alert-success">{{ admin_user_msg }}</div>
+      <div *ngIf="admin_user_err_msg" class="alert alert-danger">{{ admin_user_err_msg }}</div>
+      <div class="form-group row">
+        <div class="col-sm-3">
+          <label for="new_user_admin">New project member</label>
+          <select id="new_user_admin" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_user_admin" class="form-control">
+            <option *ngFor="let user_a of all_users" [ngValue]="user_a.uid">{{ user_a.uid }}</option>
+          </select>
+        </div>
+        <div class="col-sm-2">
+          <label style="opacity: 0">Add member</label>
+          <button type="button" class="p-button p-button-sm p-button-success" (click)="add_user()">Add member</button>
+        </div>
+        <div class="col-sm-1"></div>
+        <div class="col-sm-3">
+          <label for="remove_user_admin">Remove project member</label>
+          <select id="remove_user_admin" [ngModelOptions]="{ standalone: true }" [(ngModel)]="remove_user_admin" class="form-control">
+            <option *ngFor="let user_r of users" [ngValue]="user_r.uid">{{ user_r.uid }}</option>
+          </select>
+        </div>
+        <div class="col-sm-3">
+          <label style="opacity: 0">Remove member</label>
+          <button type="button" class="p-button p-button-sm p-button-danger" (click)="remove_user()">Remove member</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="table-responsive table-striped">
+      <p-table #dtp [value]="users" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Access</th>
+            <th>Owner</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-user_l>
+          <tr>
+            <td>
+              <a routerLink="/user/{{ user_l.uid }}">
+                <span class="p-button p-button-sm p-button-primary">{{ user_l.uid }}</span>
+              </a>
+            </td>
+            <td>{{ user_l.email }}</td>
+            <td><span *ngIf="user_l.temp?.access">x</span></td>
+            <td><span *ngIf="user_l.uid === project.owner">x</span></td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
+  </div>
+</div>

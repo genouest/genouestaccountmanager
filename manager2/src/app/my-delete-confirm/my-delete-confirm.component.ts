@@ -6,32 +6,31 @@ import { Component, Input, OnInit } from '@angular/core';
     styleUrls: ['./my-delete-confirm.component.css']
 })
 export class MyDeleteConfirmComponent implements OnInit {
-
-    isDeleting: boolean
-    message: string
-    sendmail: boolean
-
-    @Input()
-    onConfirm: any
+    isDeleting: boolean;
+    message: string;
+    sendmail: boolean;
 
     @Input()
-    data: any
+    onConfirm: any;
 
     @Input()
-    explainMessage: boolean
+    data: any;
 
-    constructor() { }
+    @Input()
+    explainMessage: boolean;
+
+    constructor() {}
 
     ngOnInit() {
-        this.sendmail =  true;
+        this.sendmail = true;
     }
 
-    startDelete(){
+    startDelete() {
         this.isDeleting = true;
     }
     cancel() {
         this.isDeleting = false;
-        this.message = "";
+        this.message = '';
     }
     confirm() {
         if (this.explainMessage) {
