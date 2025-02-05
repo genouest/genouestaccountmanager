@@ -40,6 +40,7 @@ export class TpsComponent implements OnInit {
     quantity: number
     fromDate: Date
     toDate: Date
+    lockDate: Date
     about: string
     authorized: boolean
 
@@ -48,7 +49,8 @@ export class TpsComponent implements OnInit {
 
     activeDayIsOpen: boolean = true;
 
-    new_expire: Date
+    new_toDate: Date
+    new_lockDate: Date
 
     constructor(
         private authService: AuthService,
@@ -79,6 +81,7 @@ export class TpsComponent implements OnInit {
                         title: `${event.owner}, ${event.quantity} students`,
                         start: new Date(event.from),
                         end: new Date(event.to),
+                        lock: new Date(event.lock ? event.lock : event.to),
                         color: this.choseColor(event._id, event.over, event.created),
                         meta: {
                             'id': event._id,
@@ -111,6 +114,7 @@ export class TpsComponent implements OnInit {
         );
         this.fromDate = new Date();
         this.toDate = new Date();
+        this.lockDate = null;
         this.viewDate = new Date();
         this.quantity = 1;
         this.events = [];
@@ -149,7 +153,8 @@ export class TpsComponent implements OnInit {
             }
             const fromDate = new Date(this.fromDate).getTime();
             const toDate = new Date(this.toDate).getTime();
-            if(isNaN(fromDate) || isNaN(toDate)) {
+            const lockDate = this.lockDate ? new Date(this.lockDate).getTime() : toDate;
+            if(isNaN(fromDate) || isNaN(toDate) || isNaN(lockDate)) {
                 this.reserrmsg = 'Invalid date format';
                 return;
             }
@@ -161,10 +166,19 @@ export class TpsComponent implements OnInit {
                 this.reserrmsg = 'End date can not be in the past';
                 return;
             }
+            if(lockDate < new Date().getTime()) {
+                this.reserrmsg = 'Lock date can not be in the past';
+                return;
+            }
+            if(toDate < lockDate) {
+                this.reserrmsg = 'End date must be later than lock date';
+                return;
+            }
             let reservation = {
                 quantity: this.quantity,
                 from: fromDate,
                 to: toDate,
+                lock: lockDate,
                 about: this.about,
                 group_or_project: this.group_or_project,
                 name: this.name
@@ -225,15 +239,24 @@ export class TpsComponent implements OnInit {
     extend_reservation() {
         this.msg = '';
         this.errmsg = '';
-        if(new Date(this.new_expire).getTime() < this.selectedEvent.meta.end) {
+        const new_to_Date = new Date(this.new_toDate).getTime();
+        if(new_to_Date < this.selectedEvent.meta.end) {
             this.errmsg = 'Extended end date must be after current end date';
             return;
         }
-        if(new Date(this.new_expire).getTime() < new Date().getTime()) {
+        if(new_to_Date < new Date().getTime()) {
             this.errmsg = 'Extended end date can not be in the past';
             return;
         }
-        const extension = { 'to': new Date(this.new_expire).getTime() };
+        const new_lock_Date = this.new_lockDate ? new Date(this.new_lockDate).getTime() : new_to_Date;
+        if(new_to_Date < new_lock_Date) {
+            this.errmsg = 'New lock date can not be after new end date'
+        }
+        if(new_lock_Date < new Date().getTime()) {
+            this.errmsg = 'New lock date can not be in the past';
+            return;
+        }
+        const extension = { 'to': new_to_Date, 'lock': new_lock_Date }
         this.tpService.extend(this.selectedEvent.meta.id, extension).subscribe(
             resp => {
                 this.msg = resp['message'];
