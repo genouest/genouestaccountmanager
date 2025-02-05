@@ -114,8 +114,9 @@ router.post('/user/:id/notify', async function(req, res) {
     }
     let message = req.body.message;
     let subject = req.body.subject;
+    let send_copy_to_support = req.body.send_copy_to_support;
     let msg_destinations = [user.email];
-    if (user.send_copy_to_support) {
+    if (user.send_copy_to_support || send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
 

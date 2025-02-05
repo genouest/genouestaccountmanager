@@ -143,7 +143,7 @@
                   <td>
                     <div class="btn-group">
                       <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-info " (click)="modify_project(pending)">View</button>
-                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-danger " (click)="reject_project(pending)">Reject</button>
+                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-danger " data-toggle="modal" data-target="#rejectModal" (click)="openRejectModal(pending)">Reject</button>
                     </div>
                   </td>
                 </tr>
@@ -293,31 +293,61 @@
   </div>
 </div>
 
-<!-- Modal -->
-<div class="modal" style="z-index: 1500;" id="group_creation" tabindex="-1" role="dialog">
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="panel-title">Group creation</h3>
+        <h5 class="modal-title">Reject Project</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+          (click)="closeRejectModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <form role="form" class="user-form form-horizonal">
-          <div class="form-group row">
-            <div class="col-sm-4">
-            <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
-            </div>
-            <div class="col-sm-4">
-            <input placeholder="Owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
-            </div>
-            <div class="col-sm-4">
-            <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
-            </div>
-          </div>
-        </form>
+        <div>
+          <label for="rejectionReason">Describe the rejection reason (optional)</label>
+          <textarea
+            id="rejectionReason"
+            [(ngModel)]="rejectionReason"
+            placeholder="Enter your rejection reason"
+            class="form-control"
+            rows="4"
+          ></textarea>
+        </div>
+        <div class="form-check mt-3">
+          <input
+            type="checkbox"
+            id="sendCopyToSupport"
+            [(ngModel)]="sendCopyToSupport"
+            class="form-check-input"
+            [checked]="true"
+          />
+          <label class="form-check-label" for="sendCopyToSupport">
+            Send a copy of the message to support
+          </label>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="!new_group.name" data-dismiss="modal" (click)="addGroup()">Create</button>
-        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-dismiss="modal"
+          (click)="closeRejectModal()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmRejectProject()"
+        >
+          Confirm Reject
+        </button>
       </div>
     </div>
   </div>
