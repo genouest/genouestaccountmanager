@@ -27,7 +27,8 @@ router.get('/conf', async function(req, res){
         'project': my_conf.project,
         'registration': my_conf.registration || [],
         'reservation': my_conf.reservation,
-        'mailer': my_conf.general.mailer
+        'mailer': my_conf.general.mailer,
+        'tp': my_conf.tp
     };
 
     // should be check on each call

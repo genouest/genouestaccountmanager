@@ -29,6 +29,8 @@ exports.tp_reservation = tp_reservation;
 exports.create_tp_reservation = create_tp_reservation;
 exports.remove_tp_reservation = remove_tp_reservation;
 exports.extend_tp_reservation = extend_tp_reservation;
+exports.send_admin_mail_tp_reservation_created = send_admin_mail_tp_reservation_created;
+
 
 
 async function createExtraGroup(trainingName, ownerName) {
@@ -204,6 +206,38 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
 
     return users;
 }
+
+
+async function send_admin_mail_tp_reservation_created(owner, from_date, to_date, quantity, about, name) {
+    logger.debug('send_admin_mail_tp_reservation_created');
+    let from = new Date(from_date);
+    let to = new Date(to_date);
+
+    let email_html = `
+        <p>
+            You have to accept/decline the TP Reservation of 
+            <strong>${owner}</strong>, named <strong>${name}</strong>, 
+            for <strong>${quantity}</strong> TP(s) about 
+            <strong>${about}</strong>.
+        </p>
+    `;
+    try {
+        await maisrv.send_notif_mail({
+            'name': 'tps_reservation_notif',
+            'destinations': [CONFIG.general.accounts],
+            'subject': '[TP reservation to accept/decline] ' + owner
+        }, {
+            '#FROMDATE#':  from.toDateString(),
+            '#TODATE#':  to.toDateString(),
+            '#TP_INFO#': email_html
+        });
+    } catch(error) {
+        logger.error(error);
+    }
+
+    return;
+}
+
 
 
 async function delete_tp_user(user) {

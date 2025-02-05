@@ -7,6 +7,7 @@
 * Add User, Project and Group static classes to front end (refactor)
 * Add checks for website owner update
 * Fix error in 'projects' tab from user page
+* Add an email to general.account when TP is created + add a `config.tp.notify_reservation_request` to enable/disable this feature
 * increase size of input field in users page
 * add a readonly input field under email for showing the email domain*
 * Add "custom_users" key to config file, to be used with various scripts
