@@ -19,7 +19,7 @@ router.get('/ssh/:id/putty', async function(req, res) {
     }
     let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
     if(!user) {
-        res.send({message: 'User does not exist'});
+        res.status(404).send({message: 'User does not exist'});
         res.end();
         return;
     }
@@ -58,13 +58,13 @@ router.get('/ssh/:id/private', async function(req, res) {
     }
 
     if(!user) {
-        res.send({message: 'User does not exist'});
+        res.status(404).send({message: 'User does not exist'});
         res.end();
         return;
     }
     // todo maybe remove this a next if do the job, and it will allow admin to download it's own private key
     if(isadmin){
-        res.status(403).send('[admin user] not authorized to download private key');
+        res.status(401).send('[admin user] not authorized to download private key');
         return;
     }
     if(user._id.toString() != req.locals.logInfo.id.toString()){

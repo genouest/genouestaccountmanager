@@ -658,7 +658,7 @@ router.get('/project/:id/extend', async function(req, res){
     }
 
     if(!isadmin && user.uid != project.owner){
-        res.status(403).send({message: 'Not authorized'});
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
