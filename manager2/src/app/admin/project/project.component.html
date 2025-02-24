@@ -131,6 +131,7 @@
             <th>User</th>
             <th>Email</th>
             <th>Access</th>
+            <th>Manager</th>
             <th>Owner</th>
           </tr>
         </ng-template>
@@ -143,6 +144,7 @@
             </td>
             <td>{{ user_l.email }}</td>
             <td><span *ngIf="user_l.temp?.access">x</span></td>
+            <td><span *ngIf="project.managers.includes(user_l.uid)">x</span></td>
             <td><span *ngIf="user_l.uid === project.owner">x</span></td>
           </tr>
         </ng-template>

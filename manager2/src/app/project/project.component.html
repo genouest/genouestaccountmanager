@@ -91,10 +91,10 @@
 
 
 <div class="card bg-light">
-  <div class="card-header">
+  <div class="card-header" (click)="projects_visible=!projects_visible" style="cursor: pointer;">
     <h3>Projects</h3>
   </div>
-  <div class="card-body">
+  <div class="card-body" *ngIf="projects_visible">
     <div class="table-responsive">
       <p-table #dtp [value]="projects" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['id', 'owner']" [filterDelay]="0">
         <ng-template pTemplate="caption">
@@ -156,16 +156,56 @@
 <div *ngIf="selectedProject">
   <hr />
   <div class="well">
-    <h4>
-      Project <b>{{ selectedProject.id }}</b>
-    </h4>
+    <h2>
+        Project <b>{{ selectedProject.id }}</b>
+    </h2>
   </div>
 
   <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">
-    <div class="card-header" (click)="manager_visible = !manager_visible" style="cursor: pointer">
-      <h2>Management console</h2>
+    <div class="card-header" (click)="owner_visible = !owner_visible" style="cursor: pointer;">
+      <h3>Owner console</h3>
+    </div>
+    <div class="card-body" *ngIf="owner_visible">
+      <div class="alert alert-danger" *ngIf="owner_request_err_msg">{{owner_request_err_msg}}</div>
+      <div *ngIf="owner_request_msg" class="alert alert-info">{{owner_request_msg}}</div>
+      <form role="form" class="user-form form-horizontal">
+        <div class="form-group row">
+          <div class="col-sm-3">
+            <label for="new_manager">New project manager</label>
+            <select id="add_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="new_manager" class="form-control">
+              <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
+            </select>
+          </div>
+          <div class="col-sm-3">
+            <label style="opacity: 0;">Add new manager</label>
+            <button type="button" class="p-button p-button-sm p-button-success" (click)="add_manager(selectedProject, new_manager)">Promote to Manager</button>
+          </div>
+          <div class="col-sm-3">
+            <label for="rm_manager">Remove project manager</label>
+            <select id="rm_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="rm_manager" class="form-control">
+              <option *ngFor="let manager of selectedProject.managers" [value]="manager">{{manager}}</option>
+            </select>
+          </div>
+          <div class="col-sm-3">
+            <label style="opacity: 0;">Remove manager</label>
+            <button type="button" class="p-button p-button-sm p-button-danger"(click)="remove_manager(selectedProject, rm_manager)">Demote to Member</button>
+          </div>
+        </div>
+      </form>
+      <h6>Project managers :</h6>
+      <ul>
+        <li *ngFor="let manager of selectedProject.managers">{{ manager }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card bg-light" *ngIf="selectedProject.managers.includes(session_user.uid)">
+    <div class="card-header" (click)="manager_visible = !manager_visible" style="cursor: pointer;">
+      <h3>Manager console</h3>
     </div>
     <div class="card-body" *ngIf="manager_visible">
+      <div class="alert alert-danger" *ngIf="manager_request_err_msg">{{manager_request_err_msg}}</div>
+      <div *ngIf="manager_request_msg" class="alert alert-info">{{manager_request_msg}}</div>
       <form role="form" class="user-form form-horizontal">
         <div class="form-group row">
           <div class="col-sm-3">
@@ -173,18 +213,18 @@
             <input placeholder="User id" id="new_user" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_user" class="form-control" />
           </div>
           <div class="col-sm-3">
-            <label style="opacity: 0">Request member</label>
-            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_user(selectedProject, new_user, 'add')">Request member</button>
+            <label style="opacity: 0;">Request new member</label>
+            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_user(selectedProject, new_user, 'add')">Request New Member</button>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-3">
             <label for="remove_user">Remove project member</label>
             <select id="remove_user" [ngModelOptions]="{ standalone: true }" [(ngModel)]="remove_user" class="form-control">
               <option *ngFor="let user of users" [value]="user.uid">{{ user.uid }}</option>
             </select>
           </div>
           <div class="col-sm-3">
-            <label style="opacity: 0">Request member removal</label>
-            <button type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(selectedProject, remove_user, 'remove')">Request member removal</button>
+            <label style="opacity: 0;">Request member removal</label>
+            <button type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(selectedProject, remove_user, 'remove')">Request Member Removal</button>
           </div>
         </div>
       </form>
@@ -192,10 +232,10 @@
   </div>
 
   <div class="card bg-light">
-    <div class="card-header">
+    <div class="card-header" (click)="overview_visible=!overview_visible" style="cursor: pointer;">
       <h3>Project overview</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body" *ngIf="overview_visible">
       <div class="table-responsive">
         <table class="table table-striped">
           <tbody>
@@ -289,18 +329,19 @@
   </div>
 
   <div class="card bg-light">
-    <div class="card-header">
+    <div class="card-header" (click)="members_visible=!members_visible" style="cursor: pointer;">
       <h3>Project members</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body" *ngIf="members_visible">
       <div class="table-responsive table-striped">
         <p-table #dtu [value]="users" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
           <ng-template pTemplate="header">
             <tr>
               <th>User</th>
               <th>Email</th>
-              <th>Access</th>
-              <th>Owner</th>
+              <th>Access?</th>
+              <th>Manager?</th>
+              <th>Owner?</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-user>
@@ -311,6 +352,7 @@
                 <span *ngIf="session_user.uid !== selectedProject.owner">Restricted to owner</span>
               </td>
               <td><span *ngIf="user.temp?.access">x</span></td>
+              <td><span *ngIf="user.temp?.is_manager">x</span></td>
               <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
             </tr>
           </ng-template>

@@ -317,7 +317,7 @@ router.post('/project/:id', async function (req, res) {
     return res.send({ message: 'Project updated' });
 });
 
-router.post('/project/:id/request', async function (req, res) {
+router.post('/project/:id/request/user', async function (req, res) {
     if (!req.locals.logInfo.is_logged) {
         return res.status(401).send({ message: 'Not authorized' });
     }
@@ -333,7 +333,7 @@ router.post('/project/:id/request', async function (req, res) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
 
-    if (user.uid != project.owner) {
+    if (!project.managers.includes(user.uid) && user.uid != project.owner) {
         return res.status(401).send({ message: 'User ' + user.uid + ' is not project manager for project ' + project.id });
     }
     let newuser = await dbsrv.mongo_users().findOne({ uid: req.body.user });
@@ -362,8 +362,96 @@ router.post('/project/:id/request', async function (req, res) {
     return res.send({ message: req.body.request + ' ' + req.body.user + ' done' });
 });
 
-router.post('/ask/project', async function (req, res) {
+router.post('/project/:id/add/manager/:uid', async function(req, res) {
     if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'Not authorized' });
+    }
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        return res.status(403).send({ message: 'Invalid parameters' });
+    }
+    let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
+    }
+    let project = await dbsrv.mongo_projects().findOne({ 'id': req.params.id });
+    if (!project) {
+        return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
+    }
+    if (user.uid != project.owner) {
+        return res.status(401).send({ message: 'User ' + user.uid + ' is not the owner of project ' + project.id });
+    }
+    const new_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
+    if (!new_manager) {
+        return res.status(404).send({ message: 'User ' + req.params.uid + ' not found' });
+    }
+    if (!(new_manager.projects && new_manager.projects.indexOf(project.id) >= 0)) {
+        return res.status(403).send({ message: 'User ' + req.params.uid + ' is not in project ' + project.id });
+    }
+    if (project.managers.includes(new_manager.uid)) {
+        return res.status(403).send({ message: 'User ' + req.params.uid + ' is already a manager of project ' + project.id });
+    }
+
+    try {
+        project.managers.push(new_manager.uid);
+        await dbsrv.mongo_projects().updateOne({ 'id': project.id}, { '$set': { 'managers': project.managers } });
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            return res.status(e.code).send({ message: e.message });
+        } else {
+            return res.status(500).send({ message: 'Server Error, contact admin' });
+        }
+    }
+    return res.send({ message: req.body.request + ' ' + req.body.user + ' done' });
+});
+
+
+router.post('/project/:id/remove/manager/:uid', async function(req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'Not authorized' });
+    }
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        return res.status(403).send({ message: 'Invalid parameters' });
+    }
+    let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
+    }
+    let project = await dbsrv.mongo_projects().findOne({ 'id': req.params.id });
+    if (!project) {
+        return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
+    }
+    if (user.uid != project.owner) {
+        return res.status(401).send({ message: 'User ' + user.uid + ' is not the owner of project ' + project.id });
+    }
+    const ex_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
+    if (!ex_manager) {
+        return res.status(404).send({ message: 'User ' + req.params.uid + ' not found' });
+    }
+    if (!(ex_manager.projects && ex_manager.projects.indexOf(project.id) >= 0)) {
+        return res.status(403).send({ message: 'User ' + req.params.uid + ' is not in project ' + project.id });
+    }
+    if (!project.managers.includes(ex_manager.uid)) {
+        return res.status(403).send({ message: 'User ' + req.params.uid + ' is not a manager of project ' + project.id });
+    }
+
+    try {
+        project.managers.splice(project.managers.indexOf(ex_manager.uid), 1);
+        await dbsrv.mongo_projects().updateOne({ 'id': project.id }, { '$set': { 'managers': project.managers } });
+    } catch (e) {
+        logger.error(e);
+        if (e.code && e.message) {
+            return res.status(e.code).send({ message: e.message });
+        } else {
+            return res.status(500).send({ message: 'Server Error, contact admin' });
+        }
+    }
+    return res.send({ message: req.body.request + ' ' + req.body.user + ' done' });
+});
+
+
+router.post('/ask/project', async function(req, res) {
+    if(!req.locals.logInfo.is_logged) {
         return res.status(401).send({ message: 'Not authorized' });
     }
     let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
