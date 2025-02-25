@@ -14,18 +14,31 @@ servers:
 
 tags:
   - name: auth
+    description: Authentication routes
   - name: conf
+    description: Loading the account manger's Configuration
   - name: database
+    description: GenOuest can host a User's Database
   - name: groups
+    description: A Group is a bunch of users
   - name: logs
+    description: Every action is logged
   - name: plugin
+    description: Administering plugins
   - name: projects
+    description: Projects generally last 2-ish years
   - name: quota
+    description: Users are limited in storage usage
   - name: ssh
+    description: Secure SHell
   - name: tags
+    description: Users and Groups can have optional tags
   - name: tp
+    description: From the French "Travaux Pratiques", TPs provide short-lived practice accounts
   - name: users
+    description: Administering User accounts
   - name: web
+    description: GenOuest can host a User's Website
 
 
 paths:
@@ -367,7 +380,7 @@ paths:
   /database:
     get:
       operationId: list-database
-      summary: Returns the config object
+      summary: List all databases
       tags:
         - database
       responses:
@@ -442,44 +455,6 @@ paths:
         '5XX':
           $ref: '#/components/responses/500-ServerError'
 
-  /database/{id}/owner/{old}/{new}:
-    parameters:
-      - $ref: '#/components/parameters/dbid'
-      - $ref: '#/components/parameters/old-owner'
-      - $ref: '#/components/parameters/new-owner'
-    put:
-      operationId: changeOwner-database
-      summary: Change database owner
-      tags:
-        - database
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendConfirmation'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-UnsanitaryId'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
-  /database/owner/{owner}:
-    parameters:
-      - $ref: '#/components/parameters/owner'
-    get:
-      operationId: listOwner-database
-      summary: List databases that belong to {owner}
-      tags:
-        - database
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendDatabaseArray'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-UnsanitaryId'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
   /database/request/{id}:
     parameters:
       - $ref: '#/components/parameters/dbid'
@@ -501,6 +476,44 @@ paths:
           $ref: '#/components/responses/404-UserNotFound'
         '5XX':
           $ref: '#/components/responses/500-ServerError'
+
+  /database/owner/{owner}:
+    parameters:
+      - $ref: '#/components/parameters/owner'
+    get:
+      operationId: listOwner-database
+      summary: List databases that belong to a user
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendDatabaseArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /database/{id}/owner/{old}/{new}:
+    parameters:
+      - $ref: '#/components/parameters/dbid'
+      - $ref: '#/components/parameters/old-owner'
+      - $ref: '#/components/parameters/new-owner'
+    put:
+      operationId: changeOwner-database
+      summary: Change database owner
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
 
   /pending/database:
     get:
@@ -889,6 +902,24 @@ paths:
         '5XX':
           $ref: '#/components/responses/500-ServerError'
 
+  /project/{id}/users:
+    parameters:
+      - $ref: '#/components/parameters/pid'
+    get:
+      operationId: getUsers-projects
+      summary: Get users in a project
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendUserArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
   /project/{id}/extend:
     parameters:
       - $ref: '#/components/parameters/pid'
@@ -915,24 +946,6 @@ paths:
           $ref: '#/components/responses/403-UnsanitaryId'
         '404':
           $ref: '#/components/responses/404-NotFound'
-
-  /project/{id}/users:
-    parameters:
-      - $ref: '#/components/parameters/pid'
-    get:
-      operationId: getUsers-projects
-      summary: Get users in a project
-      tags:
-        - projects
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendUserArray'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-UnsanitaryId'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
 
   /project/{id}/request:
     parameters:
@@ -1083,11 +1096,11 @@ paths:
         '404':
           $ref: '#/components/responses/404-NotFound'
 
-  /ssh/{id}/private:
+  /ssh/{id}/public:
     parameters:
       - $ref: '#/components/parameters/uid'
     get:
-      summary: Download private SSH key
+      summary: Download public SSH key
       tags:
         - ssh
       responses:
@@ -1100,11 +1113,11 @@ paths:
         '404':
           $ref: '#/components/responses/404-NotFound'
 
-  /ssh/{id}/public:
+  /ssh/{id}/private:
     parameters:
       - $ref: '#/components/parameters/uid'
     get:
-      summary: Download public SSH key
+      summary: Download private SSH key
       tags:
         - ssh
       responses:
@@ -1238,25 +1251,6 @@ paths:
         '404':
           $ref: '#/components/responses/404-UserNotFound'
 
-  /tp/{id}/reserve/stop:
-    parameters:
-      - $ref: '#/components/parameters/tpid'
-    put:
-      summary: Stop a TP reservation
-      tags:
-        - tp
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendConfirmation'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-UnsanitaryId'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-        '5XX':
-          $ref: '#/components/responses/500-ServerError'
-
   /tp/{id}/reserve/now:
     parameters:
       - $ref: '#/components/parameters/tpid'
@@ -1281,6 +1275,25 @@ paths:
         '404':
           $ref: '#/components/responses/404-UserNotFound'
         '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /tp/{id}/reserve/stop:
+    parameters:
+      - $ref: '#/components/parameters/tpid'
+    put:
+      summary: Stop a TP reservation
+      tags:
+        - tp
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
           $ref: '#/components/responses/500-ServerError'
 
   /tp/{id}/reserve/extend:
@@ -1311,174 +1324,6 @@ paths:
         '500':
           $ref: '#/components/responses/500-ServerError'
 
-  /user/{id}/apikey:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    get:
-      summary: Get user API key
-      tags:
-        - users
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendAPIKey'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-    post:
-      summary: Generate new API key for user
-      tags:
-        - users
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendAPIKey'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
-  /user/{id}/notify:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    post:
-      summary: Notify user
-      tags:
-        - users
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                subject:
-                  type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendConfirmation'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-        '500':
-          $ref: '#/components/responses/500-ServerError' # + error
-
-  /user/{id}/subscribe:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    put:
-      summary: Subscribe user to notifications
-      tags:
-        - users
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendSubscribe'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
-  /user/{id}/unsubscribe:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    put:
-      summary: Unsubscribe user from notifications
-      tags:
-        - users
-      responses:
-        '200':
-          description: User unsubscribed
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  unsubscribed:
-                    type: boolean
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
-  /user/{id}/subscribed:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    get:
-      summary: Check if user is subscribed to notifications
-      tags:
-        - users
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendSubscribe'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
-  /ip:
-    get:
-      summary: Get client IP address
-      tags:
-        - users
-      responses:
-        '200':
-          description: IP address retrieved
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  ip:
-                    type: string
-
-  /message:
-    post:
-      summary: Send a message
-      tags:
-        - users
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                from:
-                  type: string
-                subject:
-                  type: string
-                message:
-                  type: string
-                input:
-                  type: string
-                list:
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendConfirmation'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
   /user:
     get:
       summary: Get users listing (admin only)
@@ -1497,45 +1342,6 @@ paths:
           $ref: '#/components/responses/401-NotAuthorized'
         '404':
           $ref: '#/components/responses/404-UserNotFound'
-
-  /user/{id}/group/{group}:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-      - in: path
-        name: group
-        required: true
-        schema:
-          type: string
-    post:
-      summary: Add user to group
-      tags:
-        - users
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendConfirmation'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-        '5XX':
-          $ref: '#/components/responses/500-ServerError'
-    delete:
-      summary: Remove user from group
-      tags:
-        - users
-      responses:
-        '200':
-          $ref: '#/components/responses/200-SendConfirmation'
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-        '5XX':
-          $ref: '#/components/responses/500-ServerError'
 
   /user/{id}:
     parameters:
@@ -1604,44 +1410,119 @@ paths:
         '404':
           $ref: '#/components/responses/404-UserNotFound'
 
-  /user/{id}/activate:
+  /user/{id}/ssh:
     parameters:
       - $ref: '#/components/parameters/uid'
-    get:
-      summary: Activate user
+    put:
       tags:
         - users
+      summary: Update user SSH key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ssh:
+                  type: string
       responses:
         '200':
-          $ref: '#/components/responses/200-SendConfirmation' # + error
+          description: SSH key updated
         '401':
           $ref: '#/components/responses/401-NotAuthorized'
         '403':
           $ref: '#/components/responses/403-InvalidInput'
         '404':
           $ref: '#/components/responses/404-UserNotFound'
-        '5XX':
-          $ref: '#/components/responses/500-ServerError' # + error
+        '500':
+          description: SSH key update failed
 
-  /user/{id}/confirm:
+  /user/{id}/usage:
     parameters:
       - $ref: '#/components/parameters/uid'
-      - name: regkey
-        in: query
-        required: true
-        schema:
-          type: string
     get:
-      summary: Confirm user registration
       tags:
         - users
+      summary: Get user usage information
       responses:
         '200':
-          description: User confirmed, redirect to pending
+          description: Usage information retrieved
         '401':
           $ref: '#/components/responses/401-NotAuthorized'
         '403':
           $ref: '#/components/responses/403-InvalidInput'
+
+  /user/{id}/renew:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      tags:
+        - users
+      summary: Reactivate user account
+      responses:
+        '200':
+          description: Activation in progress
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          description: Activation error
+
+  /user/{id}/renew/{regkey}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+      - name: regkey
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - users
+      summary: Extend user validity period
+      responses:
+        '200':
+          description: Validity period extended
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/apikey:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Get user API key
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendAPIKey'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Generate new API key for user
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendAPIKey'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
 
   /user/{id}/expire:
     parameters:
@@ -1666,6 +1547,150 @@ paths:
           $ref: '#/components/responses/404-UserNotFound'
         '5XX':
           $ref: '#/components/responses/500-ServerError'
+
+  /user/{id}/notify:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    post:
+      summary: Notify user
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                subject:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError' # + error
+
+  /user/{id}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      tags:
+        - users
+      summary: Unlock user account
+      responses:
+        '200':
+          description: User unlocked
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/confirm:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+      - name: regkey
+        in: query
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Confirm user registration
+      tags:
+        - users
+      responses:
+        '200':
+          description: User confirmed, redirect to pending
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+
+  /user/{id}/activate:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Activate user
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation' # + error
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError' # + error
+
+  /user/{id}/subscribe:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    put:
+      summary: Subscribe user to notifications
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendSubscribe'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/subscribed:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Check if user is subscribed to notifications
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendSubscribe'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/unsubscribe:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    put:
+      summary: Unsubscribe user from notifications
+      tags:
+        - users
+      responses:
+        '200':
+          description: User unsubscribed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unsubscribed:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
 
   /user/{id}/passwordreset:
     parameters:
@@ -1730,89 +1755,44 @@ paths:
         '500':
           description: Error during operation
 
-  /user/{id}/renew/{regkey}:
+  /user/{id}/group/{group}:
     parameters:
       - $ref: '#/components/parameters/uid'
-      - name: regkey
-        in: path
+      - in: path
+        name: group
         required: true
         schema:
           type: string
-    get:
+    post:
+      summary: Add user to group
       tags:
         - users
-      summary: Extend user validity period
       responses:
         '200':
-          description: Validity period extended
+          $ref: '#/components/responses/200-SendConfirmation'
         '401':
           $ref: '#/components/responses/401-NotAuthorized'
         '403':
           $ref: '#/components/responses/403-InvalidInput'
         '404':
           $ref: '#/components/responses/404-UserNotFound'
-
-  /user/{id}/renew:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    get:
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+    delete:
+      summary: Remove user from group
       tags:
         - users
-      summary: Reactivate user account
       responses:
         '200':
-          description: Activation in progress
+          $ref: '#/components/responses/200-SendConfirmation'
         '401':
           $ref: '#/components/responses/401-NotAuthorized'
         '403':
           $ref: '#/components/responses/403-InvalidInput'
         '404':
           $ref: '#/components/responses/404-UserNotFound'
-        '500':
-          description: Activation error
-
-  /user/{id}/ssh:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    put:
-      tags:
-        - users
-      summary: Update user SSH key
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                ssh:
-                  type: string
-      responses:
-        '200':
-          description: SSH key updated
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-        '500':
-          description: SSH key update failed
-
-  /user/{id}/usage:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    get:
-      tags:
-        - users
-      summary: Get user usage information
-      responses:
-        '200':
-          description: Usage information retrieved
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
 
   /user/{id}/project/{project}:
     parameters:
@@ -1853,6 +1833,35 @@ paths:
         '500':
           $ref: '#/components/responses/500-ServerError'
 
+  /ip:
+    get:
+      summary: Get client IP address
+      tags:
+        - users
+      responses:
+        '200':
+          description: IP address retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ip:
+                    type: string
+
+  /lists:
+    get:
+      tags:
+        - users
+      summary: Get all lists
+      responses:
+        '200':
+          description: Lists retrieved
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
   /list/{list}:
     parameters:
       - in: path
@@ -1874,29 +1883,33 @@ paths:
         '404':
           $ref: '#/components/responses/404-UserNotFound'
 
-  /lists:
-    get:
+  /message:
+    post:
+      summary: Send a message
       tags:
         - users
-      summary: Get all lists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                subject:
+                  type: string
+                message:
+                  type: string
+                input:
+                  type: string
+                list:
+                  type: array
+                  items:
+                    type: string
       responses:
         '200':
-          description: Lists retrieved
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
-  /user/{id}/unlock:
-    parameters:
-      - $ref: '#/components/parameters/uid'
-    get:
-      tags:
-        - users
-      summary: Unlock user account
-      responses:
-        '200':
-          description: User unlocked
+          $ref: '#/components/responses/200-SendConfirmation'
         '401':
           $ref: '#/components/responses/401-NotAuthorized'
         '403':
@@ -1922,51 +1935,6 @@ paths:
           $ref: '#/components/responses/401-NotAuthorized'
         '404':
           $ref: '#/components/responses/404-UserNotFound'
-
-  /web/owner/{owner}:
-    parameters:
-      - $ref: '#/components/parameters/owner'
-    get:
-      tags:
-        - web
-      summary: Get websites by owner
-      responses:
-        '200':
-          description: Websites retrieved
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-UserNotFound'
-
-  /web/{id}/owner/{old}/{new}:
-    parameters:
-      - $ref: '#/components/parameters/webid'
-      - $ref: '#/components/parameters/old-owner'
-      - $ref: '#/components/parameters/new-owner'
-    put:
-      tags:
-        - web
-      summary: Change website owner
-      responses:
-        '200':
-          description: Website owner changed
-          $ref: '#/components/responses/200-SendConfirmation'
-        '400':
-          description: Old owner and new owner are the same person
-        '401':
-          $ref: '#/components/responses/401-NotAuthorized'
-        '403':
-          $ref: '#/components/responses/403-InvalidInput'
-        '404':
-          $ref: '#/components/responses/404-NotFound'
 
   /web/{id}:
     parameters:
@@ -2019,6 +1987,51 @@ paths:
           $ref: '#/components/responses/403-InvalidInput'
         '404':
           $ref: '#/components/responses/404-UserNotFound'
+
+  /web/owner/{owner}:
+    parameters:
+      - $ref: '#/components/parameters/owner'
+    get:
+      tags:
+        - web
+      summary: Get websites by owner
+      responses:
+        '200':
+          description: Websites retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /web/{id}/owner/{old}/{new}:
+    parameters:
+      - $ref: '#/components/parameters/webid'
+      - $ref: '#/components/parameters/old-owner'
+      - $ref: '#/components/parameters/new-owner'
+    put:
+      tags:
+        - web
+      summary: Change website owner
+      responses:
+        '200':
+          description: Website owner changed
+          $ref: '#/components/responses/200-SendConfirmation'
+        '400':
+          description: Old owner and new owner are the same person
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
 
 
 components:
