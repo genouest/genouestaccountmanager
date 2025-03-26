@@ -70,6 +70,10 @@
                                 <td>{{selectedEvent.end | date}}</td>
                             </tr>
                             <tr>
+                                <th>Lock</th>
+                                <td>{{selectedEvent.lock | date}}</td>
+                            </tr>
+                            <tr>
                                 <th>Name</th>
                                 <td>{{selectedEvent.meta.name}}</td>
                             </tr>
@@ -136,12 +140,21 @@
             <form aria-label="TP extension request form" role="form" class="user-form form-horizonal">
                 <div class="modal-body">
                 <div class="form-group row col-sm-8">
-                    <label for="new_expire">New Expiration Date&nbsp;
+                    <label for="new_to">New End Date&nbsp;
                         <span style="color:red">(required)&nbsp;</span>
-                        <span class="glyphicon glyphicon-question-sign" title="Project expiration date" tooltip></span>
+                        <span class="glyphicon glyphicon-question-sign" title="Project end date" tooltip></span>
                     </label>
-                    <input required id="new_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_expire" type="date" class="form-control"/>
-                    </div>
+                    <input required id="new_to" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_toDate" type="date" class="form-control"/>
+                </div>
+                <div class="form-group row col-sm-12">
+                    <label for="new_lock">
+                        New Lock Date <small class="text-muted"><i>
+                            (date beyond which TP accounts are inaccessible, but not deleted)
+                            Optional
+                        </i></small>
+                    </label>
+                    <input id="new_lock" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_lockDate" type="date" class="form-control"/>
+                </div>
                 </div>
                 <div class="modal-footer">
                 <div class="form-group row col-sm-12">
@@ -165,7 +178,7 @@
                 <div class="alert alert-success" *ngIf="resmsg">{{resmsg}}</div>
                 <div class="alert alert-danger" *ngIf="reserrmsg">{{reserrmsg}}</div>
                 <form #tpForm="ngForm" role="form" class="user-form form-horizontal" (ngSubmit)="reserve(tpForm)" novalidate>
-
+                    <div class="form-group row">
                     <div class="col-md-4">
                         <label for="quantity" class="control-label">Number of students</label>
                         <input required type="number" class="form-control" [(ngModel)]="quantity" name="quant" #quant="ngModel" id="tp_quantity"/>
@@ -206,6 +219,14 @@
                         </div>
                     </div>
 
+                    <div class="col-md-8">
+                        <label for="lock_date" class="control-label">
+                            Lock <small id="lockHelp" class="text-muted"><i>(optional, date beyond which TP accounts are inaccessible, but not deleted)</i></small>
+                        </label>
+                        <input [(ngModel)]="lockDate" type="date" class="form-control" name="lock" #lock="ngModel" id="tp_lock"/>
+                    </div>
+                    </div>
+
                     <div *ngIf="config && config.reservation && config.reservation.show_choice_in_ui" class="form-group row">
                         <div class="col-4">
                             <p>Associate account to:</p>
@@ -224,7 +245,6 @@
                         <label class="control-label"></label>
                         <button type="submit" class="p-button p-button-sm p-button-secondary">Reserve</button>
                     </div>
-
                 </form>
             </div>
         </div>
