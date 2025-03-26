@@ -55,7 +55,7 @@ router.post('/tags/:kind/:id', async function(req, res) {
     }
 
     if(!session_user.is_admin) {
-        res.status(403).send({message: 'Admin only'});
+        res.status(401).send({message: 'Admin only'});
         return;
     }
 
