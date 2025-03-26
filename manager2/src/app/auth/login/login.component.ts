@@ -125,7 +125,7 @@ export class LoginComponent implements OnInit {
                         
                         this._manageU2F(userData);
                     } else {
-                        this.router.navigate(['/']); // as home will redirect us in the right page
+                        this.router.navigate(['/']); // home will redirect us to the right page
                     }
                 }
             ).catch( err => {this.msg = err.error.message;});
