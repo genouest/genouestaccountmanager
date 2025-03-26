@@ -13,35 +13,31 @@ export class BasePluginComponent {
 
     constructor(private pluginService: PluginService) {}
 
-    ngOnDestroy(): void {
-    }
-    ngAfterViewInit(): void {
-    }
-
+    ngOnDestroy(): void {}
+    ngAfterViewInit(): void {}
 
     loadData(userId: string) {
-        if (!userId) { return; }
+        if (!userId) {
+            return;
+        }
         this.loading = true;
         this.userId = userId;
-        this.pluginService.get(this.pluginName, userId)
-            .subscribe(
-                resp => {
-                    this.loading = false;
-                    this.data = resp;
-                },
-                err => console.log('failed to get plugin data:', err)
-            );
+        this.pluginService.get(this.pluginName, userId).subscribe(
+            (resp) => {
+                this.loading = false;
+                this.data = resp;
+            },
+            (err) => console.log('failed to get plugin data:', err)
+        );
     }
-    sendData(){
-        this.pluginService.set(this.pluginName, this.userId, this.data)
-            .subscribe(
-                resp => this.data = resp,
-                err => console.log('failed to get plugin data:', err)
-            );
+    sendData() {
+        this.pluginService.set(this.pluginName, this.userId, this.data).subscribe(
+            (resp) => (this.data = resp),
+            (err) => console.log('failed to get plugin data:', err)
+        );
     }
 
     setData(attr, value) {
         this.data[attr] = value;
     }
-
 }

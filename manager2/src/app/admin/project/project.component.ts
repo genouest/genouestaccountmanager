@@ -14,21 +14,21 @@ import { Table } from 'primeng/table';
 export class ProjectComponent implements OnInit {
     @ViewChild('dtp') table: Table;
 
-    config: any
-    project: Project
-    project_expire: string
-    groups: Group[]
-    users: User[]
-    all_users: User[]
-    prj_err_msg: string
-    prj_msg: string
-    oldGroup: string
+    config: any;
+    project: Project;
+    project_expire: string;
+    groups: Group[];
+    users: User[];
+    all_users: User[];
+    prj_err_msg: string;
+    prj_msg: string;
+    oldGroup: string;
 
-    new_user_admin: string = ''
-    remove_user_admin: string = ''
+    new_user_admin: string = '';
+    remove_user_admin: string = '';
 
-    admin_user_err_msg: string
-    admin_user_msg: string
+    admin_user_err_msg: string;
+    admin_user_msg: string;
 
     constructor(
         private route: ActivatedRoute,
@@ -45,124 +45,117 @@ export class ProjectComponent implements OnInit {
         this.config = {};
     }
 
-    ngOnDestroy(): void {
-    }
+    ngOnDestroy(): void {}
 
-    ngAfterViewInit(): void {
-    }
+    ngAfterViewInit(): void {}
 
     ngOnInit() {
-        this.route.params
-            .subscribe(params => {
-                let projectId = params.id;
-                this.show_project_users(projectId);
-            });
+        this.route.params.subscribe((params) => {
+            let projectId = params.id;
+            this.show_project_users(projectId);
+        });
         this.groupService.list().subscribe(
-            resp => this.groups = resp,
-            err => console.log('failed to get groups')
+            (resp) => (this.groups = resp),
+            (err) => console.log('failed to get groups')
         );
         this.userService.list().subscribe(
-            resp => this.all_users = resp,
-            err => console.log('failed to get all users')
+            (resp) => (this.all_users = resp),
+            (err) => console.log('failed to get all users')
         );
         this.configService.config.subscribe(
-            resp => {
-                this.config = resp;
-            },
-            err => console.log('failed to get config')
+            (resp) => (this.config = resp),
+            (err) => console.log('failed to get config')
         );
-
     }
 
     show_project_users(projectId: string) {
         this.projectsService.get(projectId).subscribe(
-            resp => {
+            (resp) => {
                 this.project = resp;
                 this.project_expire = this.date_convert(resp.expire);
                 this.projectsService.getUsers(projectId).subscribe(
-                    resp => {
+                    (resp) => {
                         this.users = resp;
                         this.oldGroup = this.project.group;
-                        for(var i = 0; i<resp.length;i++){
-                            if(resp[i].group.indexOf(this.project.group) >= 0 || resp[i].secondarygroups.indexOf(this.project.group) >= 0) {
-                                this.users[i].temp = { ...this.users[i].temp, 'access': true };
+                        for (var i = 0; i < resp.length; i++) {
+                            if (
+                                resp[i].group.indexOf(this.project.group) >= 0 ||
+                                resp[i].secondarygroups.indexOf(this.project.group) >= 0
+                            ) {
+                                this.users[i].temp = { ...this.users[i].temp, access: true };
                             }
                         }
                         this.remove_user_admin = '';
                         this.new_user_admin = '';
-
                     },
-                    err => console.log('failed to get project users')
-                )
+                    (err) => console.log('failed to get project users')
+                );
             },
-            err => console.log('failed to get project')
-        )
-
+            (err) => console.log('failed to get project')
+        );
     }
 
     add_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
         this.userService.addToProject(this.new_user_admin, this.project.id).subscribe(
-            resp => {
+            (resp) => {
                 this.admin_user_msg = resp['message'];
                 this.show_project_users(this.project.id);
             },
-            err => this.admin_user_err_msg = err.error.message
-        )
+            (err) => (this.admin_user_err_msg = err.error.message)
+        );
     }
 
     remove_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
         this.userService.removeFromProject(this.remove_user_admin, this.project.id).subscribe(
-            resp => {
+            (resp) => {
                 this.admin_user_msg = resp['message'];
                 this.show_project_users(this.project.id);
             },
-            err => this.admin_user_err_msg = err.error.message
+            (err) => (this.admin_user_err_msg = err.error.message)
         );
     }
 
     // todo: maybe move this in backend too
     update_users_group(usersList: User[], newGroupId: string) {
-        for(var i = 0; i< usersList.length; i++){
+        for (var i = 0; i < usersList.length; i++) {
             this.userService.addGroup(usersList[i].uid, newGroupId).subscribe(
-                resp => {},
-                err => this.prj_err_msg = err.error.message
+                (resp) => {},
+                (err) => (this.prj_err_msg = err.error.message)
             );
-        };
+        }
     }
 
     delete_project() {
         this.admin_user_err_msg = '';
-        for(var i = 0; i < this.users.length; i++){
-            this.userService.removeFromProject(this.users[i].uid, this.project.id)
-                .subscribe(
-                    resp => {},
-                    err => this.prj_err_msg = err.error.message);
+        for (var i = 0; i < this.users.length; i++) {
+            this.userService.removeFromProject(this.users[i].uid, this.project.id).subscribe(
+                (resp) => {},
+                (err) => (this.prj_err_msg = err.error.message)
+            );
         }
         this.projectsService.delete(this.project.id).subscribe(
-            resp => {
-                this.router.navigate(['/admin/project'], { queryParams: {'deleted': 'ok'}})
-            },
-            err => this.admin_user_err_msg = err.error.message
-        )
+            (resp) => this.router.navigate(['/admin/project'], { queryParams: { deleted: 'ok' } }),
+            (err) => (this.admin_user_err_msg = err.error.message)
+        );
     }
 
     update_project() {
         this.project.expire = new Date(this.project_expire).getTime();
-        this.project.group = this.config.project.enable_group ? this.project.group : ''
+        this.project.group = this.config.project.enable_group ? this.project.group : '';
         this.projectsService.update(this.project.id, this.project).subscribe(
-            resp => {
+            (resp) => {
                 this.prj_msg = resp['message'];
-                if(this.config.project.enable_group && this.project.group !== this.oldGroup) {
+                if (this.config.project.enable_group && this.project.group !== this.oldGroup) {
                     this.update_users_group(this.users, this.project.group);
                 }
                 this.show_project_users(this.project.id);
             },
-            err => this.prj_err_msg = err.error.message
-        )
+            (err) => (this.prj_err_msg = err.error.message)
+        );
     }
 
     date_convert = function timeConverter(tsp: number): string {
@@ -170,11 +163,9 @@ export class ProjectComponent implements OnInit {
         try {
             var a = new Date(tsp);
             res = a.toISOString().substring(0, 10);
-        }
-        catch (e) {
+        } catch (e) {
             res = '';
         }
         return res;
-    }
-
+    };
 }

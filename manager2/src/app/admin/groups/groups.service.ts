@@ -7,12 +7,12 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class Group {
-    gid: string
-    name: string
-    owner: string
-    description: string
-    tags: string[]
-    new: boolean
+    gid: string;
+    name: string;
+    owner: string;
+    description: string;
+    tags: string[];
+    new: boolean;
 
     constructor(
         gid: string = '', name: string = '', owner: string = '',
@@ -32,7 +32,7 @@ export class GroupsService {
         private http: HttpClient,
         private authService: AuthService,
         private userService: UserService
-    ) { }
+    ) {}
 
     mapToGroup(resp: any): Group {
         return new Group(

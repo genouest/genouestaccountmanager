@@ -15,7 +15,7 @@ export class MyStatusFilterPipe implements PipeTransform {
         }
         // filter items array, items which match and return true will be
         // kept, false will be filtered out
-        return items.filter(item => item.status === filter);
+        return items.filter((item) => item.status === filter);
     }
 }
 
@@ -30,33 +30,30 @@ export class UsersComponent implements OnInit {
     @ViewChild('dt3') table3: Table;
     @ViewChild('dt4') table4: Table;
 
-
     STATUS_PENDING_EMAIL = 'Waiting for email approval';
     STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
     STATUS_ACTIVE = 'Active';
     STATUS_EXPIRED = 'Expired';
 
-    users: User[]
+    users: User[];
+    pending_email_users: User[] = [];
+    pending_approval_users: User[] = [];
+    active_users: User[] = [];
+    expired_users: User[] = [];
 
-    pending_email_users: User[] = []
-    pending_approval_users: User[] = []
-    active_users: User[] = []
-    expired_users: User[] = []
+    constructor(private userService: UserService) {}
 
-    constructor(private userService: UserService) { }
-
-    ngOnDestroy(): void {
-    }
+    ngOnDestroy(): void {}
 
     ngOnInit() {
         this.userService.list().subscribe(
-            resp => {
+            (resp) => {
                 //this.users = resp;
                 let pendingEmail: User[] = [];
                 let pendingApproval: User[] = [];
                 let active: User[] = [];
                 let expired: User[] = [];
-                resp.forEach(user => {
+                resp.forEach((user) => {
                     if (user.status == this.STATUS_PENDING_EMAIL) {
                         pendingEmail.push(user);
                     } else if (user.status == this.STATUS_PENDING_APPROVAL) {
@@ -72,8 +69,7 @@ export class UsersComponent implements OnInit {
                 this.active_users = active;
                 this.expired_users = expired;
             },
-            err => console.log('failed to get users')
-        )
+            (err) => console.log('failed to get users')
+        );
     }
-
 }

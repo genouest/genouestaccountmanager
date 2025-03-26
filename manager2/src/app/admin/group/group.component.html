@@ -13,9 +13,7 @@
         </h4>
       </div>
       <div class="col-sm-3">
-        <app-my-delete-confirm
-          [onConfirm]="deleteGroup"
-        ></app-my-delete-confirm>
+        <app-my-delete-confirm [onConfirm]="deleteGroup"></app-my-delete-confirm>
       </div>
     </div>
   </div>
@@ -24,34 +22,14 @@
       <div class="form-group row">
         <div class="col-sm-3">
           <label for="group_id" class="col-form-label">Owner</label>
-          <input
-            type="text"
-            placeholder="Owner"
-            id="group_id"
-            [ngModelOptions]="{ standalone: true }"
-            [(ngModel)]="group.owner"
-            class="form-control"
-          />
+          <input type="text" placeholder="Owner" id="group_id" [ngModelOptions]="{ standalone: true }" [(ngModel)]="group.owner" class="form-control" />
         </div>
         <div class="col-sm-9">
           <label for="group_desc" class="col-form-label">Description</label>
-          <input
-            type="text"
-            placeholder="Description"
-            id="group_desc"
-            [ngModelOptions]="{ standalone: true }"
-            [(ngModel)]="group.description"
-            class="form-control"
-          />
+          <input type="text" placeholder="Description" id="group_desc" [ngModelOptions]="{ standalone: true }" [(ngModel)]="group.description" class="form-control" />
         </div>
       </div>
-      <button
-        type="button"
-        class="p-button p-button-sm p-button-primary"
-        (click)="updateGroup()"
-      >
-        Update
-      </button>
+      <button type="button" class="p-button p-button-sm p-button-primary" (click)="updateGroup()">Update</button>
       <div class="form-group"></div>
     </form>
   </div>
@@ -108,14 +86,7 @@
     <div class="alert alert-info" *ngIf="msg">{{ msg }}</div>
     <div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
     <div class="table-responsive table-striped">
-      <p-table
-        #dtu
-        [value]="users"
-        [paginator]="true"
-        [rows]="10"
-        [showCurrentPageReport]="true"
-        [rowsPerPageOptions]="[10, 25, 50]"
-      >
+      <p-table #dtu [value]="users" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
         <ng-template pTemplate="header">
           <tr>
             <th>User</th>

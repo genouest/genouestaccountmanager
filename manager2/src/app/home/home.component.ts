@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-import { ConfigService } from '../config.service'
+import { ConfigService } from '../config.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -9,13 +9,10 @@ import { Router } from '@angular/router';
     styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+    config: any;
 
-    config: any
-
-    constructor(private authService: AuthService,
-                private configService: ConfigService,
-                private router: Router) {
-        this.config = {}
+    constructor(private authService: AuthService, private configService: ConfigService, private router: Router) {
+        this.config = {};
     }
 
     async ngOnInit() {
@@ -24,20 +21,19 @@ export class HomeComponent implements OnInit {
         if (logged) {
             // Maybe we should try to use promise and async in angular too ...
             this.configService.config.subscribe(
-                resp => {
+                (resp) => {
                     this.config = resp;
-                    if ( this.config.default_home == 'project' )
-                    {
+                    if (this.config.default_home == 'project') {
                         this.router.navigate(['/project']);
-                    } else { // default to user profile page
+                    } else {
+                        // default to user profile page
                         this.router.navigate(['/user/' + user.uid]);
                     }
                 },
-                err => console.log('failed to get config')
-            )
+                (err) => console.log('failed to get config')
+            );
         } else {
             this.router.navigate(['/login']);
         }
     }
-
 }

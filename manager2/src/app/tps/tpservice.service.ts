@@ -8,8 +8,7 @@ import { Observable } from 'rxjs';
     providedIn: 'root'
 })
 export class TpserviceService {
-
-    constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(private http: HttpClient, private authService: AuthService) {}
 
     list(): Observable<any> {
         //let user = this.authService.profile;
@@ -18,7 +17,7 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.get(environment.apiUrl + '/tp', httpOptions)
+        return this.http.get(environment.apiUrl + '/tp', httpOptions);
     }
 
     reserve(reservation): Observable<any> {
@@ -28,7 +27,7 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.post(environment.apiUrl + '/tp', reservation, httpOptions)
+        return this.http.post(environment.apiUrl + '/tp', reservation, httpOptions);
     }
 
     cancel(reservationId: string): Observable<any> {
@@ -38,9 +37,8 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.delete(environment.apiUrl + '/tp/' + reservationId, httpOptions)
+        return this.http.delete(environment.apiUrl + '/tp/' + reservationId, httpOptions);
     }
-
 
     create(reservationId: string): Observable<any> {
         //let user = this.authService.profile;
@@ -49,7 +47,7 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/now', httpOptions)
+        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/now', httpOptions);
     }
 
     remove(reservationId: string): Observable<any> {
@@ -59,7 +57,7 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/stop', httpOptions)
+        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/stop', httpOptions);
     }
 
     extend(reservationId: string, extension): Observable<any> {
@@ -69,6 +67,6 @@ export class TpserviceService {
             //  'x-api-key': user.apikey
             //}),
         };
-        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/extend', extension, httpOptions)
+        return this.http.put(environment.apiUrl + '/tp/' + reservationId + '/reserve/extend', extension, httpOptions);
     }
 }
