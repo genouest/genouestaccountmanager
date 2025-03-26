@@ -52,6 +52,8 @@ export class ProjectComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.delete_project = this.delete_project.bind(this);
+        this.remove_user = this.remove_user.bind(this);
         this.route.params
             .subscribe(params => {
                 let projectId = params.id;
