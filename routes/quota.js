@@ -7,7 +7,7 @@ let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
 var GENERAL_CONFIG = CONFIG.general;
 
-router.get('/quota/:user/:id', function(req, res) {
+router.get('/quota/:user/:id', function (req, res) {
     /*
       "quota": {
       "home": {
@@ -36,39 +36,31 @@ router.get('/quota/:user/:id', function(req, res) {
         host: GENERAL_CONFIG.quota[req.params.id]['hostname'],
         path: '/query?db=' + GENERAL_CONFIG.quota[req.params.id]['db'] + '&q=SELECT%20last(%22value%22)%20FROM%20/' + serie + '/'
     };
-    http.get(options
-        , function(response){
-            let body = '';
-            response.on('data', function(d) {
-                body += d;
-            });
-            response.on('end', function() {
-                let points = JSON.parse(body);
-                let series = points.results[0]['series'];
-                // If no stat available
-                if(series == undefined) {
-                    res.status(404);
-                    res.end();
-                    return;
-                }
-                for(let s=0;s<series.length;s++){
-                    quotas.push(series[s]['values'][0][1] / 1000000);
-                }
-                if(quotas.length==0){
-                    quotas.push(0);
-                    quotas.push(0);
-                }
-                if(quotas.length==1){
-                    quotas.push(0);
-                }
-                res.send({name: req.params.id, value: quotas[0], max: quotas[1]});
-                res.end();
-            });
+    http.get(options, function (response) {
+        let body = '';
+        response.on('data', function (d) {
+            body += d;
         });
-
-
+        response.on('end', function () {
+            let points = JSON.parse(body);
+            let series = points.results[0]['series'];
+            // If no stat available
+            if (series == undefined) {
+                return res.status(404);
+            }
+            for (let s = 0; s < series.length; s++) {
+                quotas.push(series[s]['values'][0][1] / 1000000);
+            }
+            if (quotas.length == 0) {
+                quotas.push(0);
+                quotas.push(0);
+            }
+            if (quotas.length == 1) {
+                quotas.push(0);
+            }
+            return res.send({ name: req.params.id, value: quotas[0], max: quotas[1] });
+        });
+    });
 });
-
-
 
 module.exports = router;

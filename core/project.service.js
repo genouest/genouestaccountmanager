@@ -36,41 +36,50 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     try {
         let created_file = await filer.project_add_project(new_project, fid);
         logger.debug('Created file', created_file);
-    } catch(error) {
+    } catch (error) {
         logger.error('Add Project Failed for: ' + new_project.id, error);
-        throw {code: 500, message: 'Add Project Failed'};
+        throw { code: 500, message: 'Add Project Failed' };
     }
 
     if (uuid) {
         await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
     }
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'new project creation: ' + new_project.id , 'logs': []});
+    await dbsrv
+        .mongo_events()
+        .insertOne({
+            owner: action_owner,
+            date: new Date().getTime(),
+            action: 'new project creation: ' + new_project.id,
+            logs: []
+        });
 
     try {
         if (new_project.owner) {
             await usrsrv.add_user_to_project(new_project.id, new_project.owner);
         }
-    }
-    catch(error) {
+    } catch (error) {
         logger.error(error);
     }
-    
+
     const owner = await dbsrv.mongo_users().findOne({ uid: new_project.owner });
-    const msg_destinations =  [owner.email];
+    const msg_destinations = [owner.email];
     if (owner.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
     try {
-        await maisrv.send_notif_mail( {
-            'name': 'ask_project',
-            'destinations': msg_destinations,
-            'subject': 'Project ' + new_project.id + ' created'
-        }, {
-            '#NAME#': new_project.id,
-            '#PATH#': new_project.path,
-            '#GROUP#':new_project.group
-        });
-    } catch(error) {
+        await maisrv.send_notif_mail(
+            {
+                name: 'ask_project',
+                destinations: msg_destinations,
+                subject: 'Project ' + new_project.id + ' created'
+            },
+            {
+                '#NAME#': new_project.id,
+                '#PATH#': new_project.path,
+                '#GROUP#': new_project.group
+            }
+        );
+    } catch (error) {
         logger.error(error);
     }
     return new_project;
@@ -78,81 +87,97 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
 
 async function remove_project(id, action_owner = 'auto') {
     logger.info('Remove Project ' + id);
-    await dbsrv.mongo_projects().deleteOne({'id': id});
+    await dbsrv.mongo_projects().deleteOne({ id: id });
     let fid = new Date().getTime();
     try {
-        let created_file = await filer.project_delete_project({'id': id}, fid);
+        let created_file = await filer.project_delete_project({ id: id }, fid);
         logger.debug('Created file', created_file);
-    } catch(error){
+    } catch (error) {
         logger.error('Delete Project Failed for: ' + id, error);
-        throw {code: 500, message: 'Delete Project Failed'};
+        throw { code: 500, message: 'Delete Project Failed' };
     }
 
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'remove project ' + id , 'logs': []});
-
+    await dbsrv
+        .mongo_events()
+        .insertOne({ owner: action_owner, date: new Date().getTime(), action: 'remove project ' + id, logs: [] });
 }
 
 async function edit_project(project, uuid, action_owner = 'auto') {
     logger.info('Editing Project ' + project.id);
     project.expiration_notif = 0;
-    await dbsrv.mongo_pending_projects().updateOne({'uuid': uuid},  {'$set': project});
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
+    await dbsrv.mongo_pending_projects().updateOne({ uuid: uuid }, { $set: project });
+    await dbsrv
+        .mongo_events()
+        .insertOne({
+            owner: action_owner,
+            date: new Date().getTime(),
+            action: 'update project ' + project.id,
+            logs: []
+        });
 }
 
 async function update_project(id, project, action_owner = 'auto') {
     logger.info('Update Project ' + id);
     project.expiration_notif = 0;
-    await dbsrv.mongo_projects().updateOne({'id': id},  {'$set': project});
+    await dbsrv.mongo_projects().updateOne({ id: id }, { $set: project });
     let fid = new Date().getTime();
-    project.id =  id;
+    project.id = id;
     try {
         let created_file = await filer.project_update_project(project, fid);
         logger.debug('Created file', created_file);
-    } catch(error) {
+    } catch (error) {
         logger.error('Update Project Failed for: ' + project.id, error);
-        throw {code: 500, message: 'Update Project Failed'};
+        throw { code: 500, message: 'Update Project Failed' };
     }
 
-    await dbsrv.mongo_events().insertOne({'owner': action_owner, 'date': new Date().getTime(), 'action': 'update project ' + project.id , 'logs': []});
-
+    await dbsrv
+        .mongo_events()
+        .insertOne({
+            owner: action_owner,
+            date: new Date().getTime(),
+            action: 'update project ' + project.id,
+            logs: []
+        });
 }
 
 async function create_project_request(asked_project, user) {
     logger.info('Create Project Request' + asked_project.id + ' for ' + user.uid);
-    asked_project.uuid = (new Date().getTime()).toString();
+    asked_project.uuid = new Date().getTime().toString();
 
     await dbsrv.mongo_pending_projects().insertOne(asked_project);
     await dbsrv.mongo_events().insertOne({
         owner: user.uid,
         date: new Date().getTime(),
         action: 'new pending project creation: ' + asked_project.id,
-        logs: [],
+        logs: []
     });
 
-    let msg_destinations =  [CONFIG.general.accounts, user.email];
+    let msg_destinations = [CONFIG.general.accounts, user.email];
     if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
 
     try {
-        await maisrv.send_notif_mail({
-            'name': 'ask_project',
-            'destinations': msg_destinations,
-            'subject': 'Project creation request: ' + asked_project.id
-        }, {
-            '#UID#':  user.uid,
-            '#NAME#': asked_project.id,
-            '#SIZE#': asked_project.size,
-            '#CPU#': asked_project.cpu,
-            '#EXPIRE#': new Date(asked_project.expire).toISOString().split('T')[0],
-            '#ORGA#': asked_project.orga,
-            '#DESC#': asked_project.description
-        });
-    } catch(error) {
+        await maisrv.send_notif_mail(
+            {
+                name: 'ask_project',
+                destinations: msg_destinations,
+                subject: 'Project creation request: ' + asked_project.id
+            },
+            {
+                '#UID#': user.uid,
+                '#NAME#': asked_project.id,
+                '#SIZE#': asked_project.size,
+                '#CPU#': asked_project.cpu,
+                '#EXPIRE#': new Date(asked_project.expire).toISOString().split('T')[0],
+                '#ORGA#': asked_project.orga,
+                '#DESC#': asked_project.description
+            }
+        );
+    } catch (error) {
         logger.error(error);
     }
 }
-
 
 async function remove_project_request(uuid, action_owner = 'auto') {
     logger.info('Remove Project Request' + uuid);
@@ -162,11 +187,9 @@ async function remove_project_request(uuid, action_owner = 'auto') {
             owner: action_owner,
             date: new Date().getTime(),
             action: 'remove Pending project ' + uuid,
-            logs: [],
+            logs: []
         });
+    } else {
+        throw { code: 404, message: 'No pending project found' };
     }
-    else {
-        throw {code: 404, message: 'No pending project found'};
-    }
-
 }

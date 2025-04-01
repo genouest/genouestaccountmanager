@@ -1,18 +1,18 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { Group, GroupsService } from "../groups/groups.service";
-import { Project, ProjectsService } from "../projects/projects.service";
-import { User } from "../../user/user.service";
-import { Table } from "primeng/table";
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Group, GroupsService } from '../groups/groups.service';
+import { Project, ProjectsService } from '../projects/projects.service';
+import { User } from '../../user/user.service';
+import { Table } from 'primeng/table';
 
 @Component({
-    selector: "app-groups",
-    templateUrl: "./group.component.html"
+    selector: 'app-groups',
+    templateUrl: './group.component.html'
     // styleUrls: ['./group.component.css']
 })
 export class GroupComponent implements OnInit {
-    @ViewChild("dtg") tableGroups: Table;
-    @ViewChild("dtu") tableUsers: Table;
+    @ViewChild('dtg') tableGroups: Table;
+    @ViewChild('dtu') tableUsers: Table;
 
     msg: string;
     err_msg: string;
@@ -42,11 +42,11 @@ export class GroupComponent implements OnInit {
             let group_name = params.id;
             this.groupsService.get(group_name).subscribe(
                 (group) => (this.group = group),
-                (err) => console.log("failed to get group")
+                (err) => console.log('failed to get group')
             );
             this.projectsService.getProjectsInGroup(group_name).subscribe(
                 (project_list) => (this.projects = project_list),
-                (err) => console.log("failed to get projects in group")
+                (err) => console.log('failed to get projects in group')
             );
             this.groupsService.getUsers(group_name).subscribe(
                 (user_list) => {
@@ -75,18 +75,18 @@ export class GroupComponent implements OnInit {
     deleteGroup() {
         this.groupsService.delete(this.group.name).subscribe(
             (resp) =>
-                this.router.navigate(["/admin/group"], {
-                    queryParams: { deleted: "ok" }
+                this.router.navigate(['/admin/group'], {
+                    queryParams: { deleted: 'ok' }
                 }),
             (err) => (this.del_err_msg = err.error.message)
         );
     }
 
     updateGroup() {
-        this.msg = "";
-        this.err_msg = "";
+        this.msg = '';
+        this.err_msg = '';
         this.groupsService.update(this.group).subscribe(
-            (resp) => (this.msg = "Group updated"),
+            (resp) => (this.msg = 'Group updated'),
             (err) => (this.err_msg = err.error.message)
         );
     }

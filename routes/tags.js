@@ -8,72 +8,60 @@ const dbsrv = require('../core/db.service.js');
 const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 
-router.get('/tags', async function(req, res) {
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
+router.get('/tags', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'Not authorized' });
     }
     let tags = await dbsrv.mongo_tags().find({}).toArray();
     let tagList = [];
     if (!tags) {
-        return {'tags': tagList};
+        return { tags: tagList };
     }
-    for(let i=0;i<tags.length;i++) {
+    for (let i = 0; i < tags.length; i++) {
         tagList.push(tags[i].name);
     }
-    res.send({tags: tagList});
-    res.end;
+    return res.send({ tags: tagList });
 });
 
-
-router.post('/tags/:kind/:id', async function(req, res) {
-    if(! req.locals.logInfo.is_logged) {
-        res.status(401).send({message: 'Not authorized'});
-        return;
+router.post('/tags/:kind/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'Not authorized' });
     }
-    if(! sansrv.sanitizeAll([req.params.id])) {
-        res.status(403).send({message: 'Invalid parameters'});
-        return;
+    if (!sansrv.sanitizeAll([req.params.id])) {
+        return res.status(403).send({ message: 'Invalid parameters' });
     }
     let tags = req.body.tags;
     let session_user = null;
     let isadmin = false;
     try {
-        session_user= await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(session_user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
     session_user.is_admin = isadmin;
 
-    if(req.params.kind != 'group' && req.params.kind != 'user') {
-        res.status(404).send({message: 'Not found'});
-        return;
+    if (req.params.kind != 'group' && req.params.kind != 'user') {
+        return res.status(404).send({ message: 'Not found' });
     }
 
-    if(!session_user.is_admin) {
-        res.status(403).send({message: 'Admin only'});
-        return;
+    if (!session_user.is_admin) {
+        return res.status(403).send({ message: 'Admin only' });
     }
 
-    tags.forEach(tag => {
-        dbsrv.mongo_tags().updateOne({'name': tag}, {'$set': {'name': tag}}, {upsert: true});
+    tags.forEach((tag) => {
+        dbsrv.mongo_tags().updateOne({ name: tag }, { $set: { name: tag } }, { upsert: true });
     });
 
-    if(req.params.kind == 'group') {
-        await dbsrv.mongo_groups().updateOne({'name': req.params.id} , {'$set': {'tags': tags}});
-        res.send({message: 'tags updated'});
-        return;
+    if (req.params.kind == 'group') {
+        await dbsrv.mongo_groups().updateOne({ name: req.params.id }, { $set: { tags: tags } });
+        return res.send({ message: 'tags updated' });
     }
-    if(req.params.kind == 'user') {
-        await dbsrv.mongo_users().updateOne({'uid': req.params.id} , {'$set': {'tags': tags}});
-        res.send({message: 'tags updated'});
-        return;
+    if (req.params.kind == 'user') {
+        await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { tags: tags } });
+        return res.send({ message: 'tags updated' });
     }
 });
-
 
 module.exports = router;
