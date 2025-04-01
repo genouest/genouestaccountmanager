@@ -126,7 +126,7 @@ router.get('/tp/:id', async function(req, res) {
 
 router.delete('/tp/:id', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(403).send({message: 'Not authorized'});
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
@@ -149,7 +149,7 @@ router.delete('/tp/:id', async function(req, res) {
         return;
     }
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({message: 'Not authorized'});
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -163,7 +163,7 @@ router.delete('/tp/:id', async function(req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({message: 'Not allowed to delete this reservation'});
+        res.status(401).send({message: 'Not allowed to delete this reservation'});
         return;
     }
     if(reservation.over){
@@ -184,7 +184,7 @@ router.delete('/tp/:id', async function(req, res) {
 
 router.put('/tp/:id/reserve/stop', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(403).send({message: 'Not authorized'});
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
@@ -207,7 +207,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
         return;
     }
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({message: 'Not authorized'});
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
@@ -221,7 +221,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
     }
     let reservation = await dbsrv.mongo_reservations().findOne(filter);
     if(!reservation){
-        res.status(403).send({message: 'Not allowed to delete this reservation'});
+        res.status(401).send({message: 'Not allowed to delete this reservation'});
         return;
     }
 
@@ -237,7 +237,7 @@ router.put('/tp/:id/reserve/stop', async function(req, res) {
 
 router.put('/tp/:id/reserve/now', async function(req, res) {
     if(! req.locals.logInfo.is_logged) {
-        res.status(403).send({message: 'Not authorized'});
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
     if(! sansrv.sanitizeAll([req.params.id])) {
@@ -260,7 +260,7 @@ router.put('/tp/:id/reserve/now', async function(req, res) {
         return;
     }
     if(! (is_admin || (user.is_trainer !== undefined && user.is_trainer))) {
-        res.status(403).send({message: 'Not authorized'});
+        res.status(401).send({message: 'Not authorized'});
         return;
     }
 
