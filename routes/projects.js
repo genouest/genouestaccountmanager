@@ -650,14 +650,16 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.status(401).send('Not authorized');
         return;
     }
+
     let user = null;
     let isadmin = false;
+
     try {
         user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
+        res.status(404).send({ message: 'User session not found' });
         res.end();
         return;
     }
@@ -666,6 +668,7 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         res.status(404).send('User not found');
         return;
     }
+
     if (!isadmin) {
         res.status(401).send('Not authorized');
         return;
@@ -673,21 +676,20 @@ router.delete('/pending/project/:uuid', async function (req, res) {
 
     try {
         await prjsrv.remove_project_request(req.params.uuid, user.uid);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
-            res.status(e.code).send({message: e.message});
-            res.end();
-            return;
+            res.status(e.code).send({ message: e.message });
         } else {
-            res.status(500).send({message: 'Server Error, contact admin'});
-            res.end();
-            return;
+            res.status(500).send({ message: 'Server Error, contact admin' });
         }
+        res.end();
+        return;
     }
-    res.send({ message: 'Pending Project deleted'});
 
+    res.send({ message: 'Pending Project deleted' });
 });
+
 
 router.get('/project/:id/users', async function(req, res){
     if(! req.locals.logInfo.is_logged) {
