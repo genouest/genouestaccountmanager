@@ -9,7 +9,7 @@ export class MyDeleteConfirmComponent implements OnInit {
 
     isDeleting: boolean
     message: string
-    sendmail: boolean
+    sendmail: boolean = true
 
     @Input()
     onConfirm: any
