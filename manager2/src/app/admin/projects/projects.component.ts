@@ -187,6 +187,19 @@ export class ProjectsComponent implements OnInit {
         );
     }
 
+    reject_project() {
+        this.reset_msgs()
+        this.projectService.delete_pending(this.new_project.uuid).subscribe(
+            resp => {
+                this.pending_msg = resp.message;
+                this.new_project = new Project();
+                this.new_project_expire = '';
+                this.pending_list(true);
+            },
+            err => this.pending_err_msg = err.error
+        );
+    }
+
     edit_project() {
 
         if (!this.new_project.id || (this.config.project.enable_group && !this.new_project.group) || !this.new_project.owner || !this.new_project_expire) {
@@ -285,19 +298,6 @@ export class ProjectsComponent implements OnInit {
         this.new_project = project;
         this.new_project_expire = this.date_convert(project.expire);
         this.update_project_on_event(project.id);
-    }
-
-    reject_project(input_project: any) {
-        const project: Project = this.projectService.mapToProject(input_project);
-        this.reset_msgs()
-        this.projectService.delete_pending(project.uuid).subscribe(
-            resp => {
-                this.pending_msg = resp.message;
-                this.pending_list(true);
-            },
-            err => this.pending_err_msg = err.error
-        );
-
     }
 
     reset_msgs() {
