@@ -14,6 +14,7 @@
 * Add email sent to a project owner when their project is activated
 * Separate global overview from individual group view in admin group management
 * Allow accents in user's first and last names
+* Add a Swagger file for documentation
 
 ## 1.4.31 (2024-09-27)
 

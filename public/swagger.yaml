@@ -2022,6 +2022,7 @@ paths:
       summary: Change website owner
       responses:
         '200':
+        #! All other properties in a "$ref" object are ignored
           description: Website owner changed
           $ref: '#/components/responses/200-SendConfirmation'
         '400':
@@ -2077,34 +2078,179 @@ components:
     User:
       type: object
       properties:
-        first_name:
+        uid:
           type: string
-        last_name:
+        id:
+          type: number
+        firstname:
           type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        lab:
+          type: string
+        responsible:
+          type: string
+        address:
+          type: string
+        team:
+          type: string
+        why:
+          type: string
+        ip:
+          type: string
+        is_admin:
+          type: boolean
+        is_fake:
+          type: boolean
+        is_locked:
+          type: boolean
+        is_trainer:
+          type: boolean
+        send_copy_to_support:
+          type: boolean
+        create_imap_mailbox:
+          type: boolean
+        created_at:
+          type: number
+        expiration:
+          type: number
+        duration:
+          type: string
+        registration:
+          type: number
+        group:
+          type: string
+        secondarygroups:
+          type: array
+          items:
+            type: string
+        newgroup:
+          type: string
+        projects:
+          type: array
+          items:
+            type: string
+        newproject:
+          type: object
+        tags:
+          type: array
+          items:
+            type: string
+        regkey:
+          type: number
+        apikey:
+          type: number
+        ssh:
+          type: string
+        u2f:
+          type: object
+        otp:
+          type: object
+        history:
+          type: array
+        extra_info:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              value:
+                type: string
+        status:
+          type: string
+        temp:
+          type: object
+        loginShell:
+          type: string
+        maingroup:
+          type: string
+        uidnumber:
+          type: number
     Project:
       type: object
       properties:
+        _id:
+          type: string
+        uuid:
+          type: string
         id:
           type: string
-        expiration:
+        owner:
+          type: string
+        group:
+          type: string
+        size:
+          type: number
+        current_size:
+          type: number
+        low_size:
+          type: number
+        high_size:
+          type: number
+        cpu:
+          type: number
+        current_cpu:
+          type: number
+        low_cpu:
+          type: number
+        high_cpu:
+          type: number
+        orga:
+          type: string
+        description:
+          type: string
+        access:
+          type: string
+        path:
+          type: string
+        expire:
+          type: number
+        created_at:
           type: number
     Group:
       type: object
       properties:
+        gid:
+          type: string
         name:
           type: string
-        gid:
-          type: number
         owner:
           type: string
         description:
           type: string
+        tags:
+          type: array
+          items:
+            type: string
+        is_new:
+          type: boolean
     Database:
       type: object
       properties:
         name:
           type: string
+        type:
+          type: string
+        host:
+          type: string
         owner:
+          type: string
+        create:
+          type: boolean
+        usage:
+          type: string
+        size:
+          type: string
+        expire:
+          type: number
+        created_at:
+          type: number
+        single_user:
+          type: boolean
+        _id:
           type: string
     TP:
       type: object

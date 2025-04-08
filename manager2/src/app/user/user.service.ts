@@ -25,14 +25,14 @@ export class User {
     create_imap_mailbox: boolean
     created_at: number
     expiration: number
-    duration: any
+    duration: string
     registration: number
     group: string
     secondarygroups: string[]
     newgroup: string
     projects: string[]
     newproject: any
-    tags: any
+    tags: string[]
     regkey: number
     apikey: number
     ssh: string
@@ -52,9 +52,9 @@ export class User {
         team: string = '', why: string = '', ip: string = '',
         is_admin: boolean = false, is_fake: boolean = false, is_locked: boolean = false, is_trainer: boolean = false,
         send_copy_to_support: boolean = false, create_imap_mailbox: boolean = false,
-        created_at: number = null, expiration: number = 0, duration: any = null, registration: number = 0,
+        created_at: number = null, expiration: number = 0, duration: string = '', registration: number = 0,
         group: string = '', secondary_groups: string[] = [], new_group: string = '',
-        projects: string[] = null, new_project: any = null, tags: any = null,
+        projects: string[] = null, new_project: any = null, tags: string[] = [],
         reg_key: number = 0, api_key: number = 0, ssh: string = '', u2f: any = null, otp: any = null,
         history: any[] = [], extra_info: any[] = [], status: string = '', temp: any = null, loginShell: string = '',
         maingroup: string = "", uidnumber: number = 0
@@ -91,9 +91,9 @@ export class UserService {
             resp.is_admin || false, resp.is_fake || false, resp.is_locked || false, resp.is_trainer || false,
             resp.send_copy_to_support || false, resp.create_imap_mailbox || false,
             resp.created_at || null, new Date(resp.expiration).getTime() || 0,
-            resp.duration || null, new Date(resp.registration).getTime() || 0,
+            resp.duration || '', new Date(resp.registration).getTime() || 0,
             resp.group || '', resp.secondarygroups || [], resp.newgroup || '',
-            resp.projects || null, resp.newproject || null, resp.tags || null,
+            resp.projects || null, resp.newproject || null, resp.tags || [],
             resp.regkey || 0, resp.apikey || 0, resp.ssh || '', resp.u2f || null, resp.otp || null,
             resp.history || [], resp.extra_info || [], resp.status || '', resp.temp || null, resp.loginShell || '',
             resp.maingroup || '', resp.uidnumber || 0
