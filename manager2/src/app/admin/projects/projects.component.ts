@@ -187,9 +187,9 @@ export class ProjectsComponent implements OnInit {
         );
     }
 
-    reject_project() {
+    reject_project(message: string, sendmail: boolean) {
         this.reset_msgs()
-        this.projectService.delete_pending(this.new_project.uuid).subscribe(
+        this.projectService.delete_pending(this.new_project.uuid, message, sendmail).subscribe(
             resp => {
                 this.pending_msg = resp.message;
                 this.new_project = new Project();

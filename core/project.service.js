@@ -154,8 +154,9 @@ async function create_project_request(asked_project, user) {
 }
 
 
-async function remove_project_request(uuid, action_owner = 'auto') {
+async function remove_project_request(uuid, action_owner = 'auto', message = '', sendmail = false) {
     logger.info('Remove Project Request' + uuid);
+    const project = await dbsrv.mongo_pending_projects().findOne({ uuid: uuid });
     const result = await dbsrv.mongo_pending_projects().deleteOne({ uuid: uuid });
     if (result.deletedCount === 1) {
         await dbsrv.mongo_events().insertOne({
@@ -164,6 +165,27 @@ async function remove_project_request(uuid, action_owner = 'auto') {
             action: 'remove Pending project ' + uuid,
             logs: [],
         });
+        if (sendmail) {
+            try {
+                const owner = await dbsrv.mongo_users().findOne({ uid: project.owner });
+                let msg_destinations = [
+                    CONFIG.general.accounts,
+                    owner.email,
+                    ...(owner.send_copy_to_support ? [CONFIG.general.support] : [])
+                ];
+                await maisrv.send_notif_mail({
+                    'name': 'project_rejection',
+                    'destinations': msg_destinations,
+                    'subject': 'Project request rejection: ' + project.id
+                }, {
+                    '#PROJECT#': project.id,
+                    '#USER#': action_owner,
+                    '#MSG#': message || 'No explanation provided.'
+                });
+            } catch(error) {
+                logger.error(error);
+            }
+        }
     }
     else {
         throw {code: 404, message: 'No pending project found'};

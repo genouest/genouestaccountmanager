@@ -232,6 +232,16 @@
     "project_expiration_html": [
         "<p>Project for #NAME# will expire at #DATE#</p>"
     ],
+    "project_rejection": [
+        "Your requested project '#PROJECT#' has been rejected by #USER#.",
+        "Reason:",
+        "#MSG#"
+    ],
+    "project_rejection_html": [
+      "<p>Your requested project '#PROJECT#' has been rejected by #USER#.</p>",
+      "<p>Reason:</p>",
+      "<i>#MSG#</i>"
+    ],
     "user_deletion": [
         "Your account #UID# have been deleted by #USER#",
         "Because:",
