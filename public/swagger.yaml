@@ -1,0 +1,2603 @@
+openapi: 3.0.0
+
+
+info:
+  title: Genouest Account Manager (My) API
+  description: Account manager for core facility
+  version: 1.4.32
+
+
+servers:
+  - url: https://my.genouest.org/manager2
+    description: Main (production) server
+
+
+tags:
+  - name: auth
+    description: Authentication routes
+  - name: conf
+    description: Loading the account manger's Configuration
+  - name: database
+    description: GenOuest can host a User's Database
+  - name: groups
+    description: A Group is a bunch of users
+  - name: logs
+    description: Every action is logged
+  - name: plugin
+    description: Administering plugins
+  - name: projects
+    description: Projects generally last 2-ish years
+  - name: quota
+    description: Users are limited in storage usage
+  - name: ssh
+    description: Secure SHell
+  - name: tags
+    description: Users and Groups can have optional tags
+  - name: tp
+    description: From the French "Travaux Pratiques", TPs provide short-lived practice accounts
+  - name: users
+    description: Administering User accounts
+  - name: web
+    description: GenOuest can host a User's Website
+
+
+paths:
+  /auth:
+    get:
+      summary: Returns token, user information and account status
+      tags:
+        - auth
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: # Optional
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+                example:
+                  token: xY7d-10
+                  user: {}  # todo
+                  message: 'Your account is waiting for admin approval'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /auth/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    post:
+      summary: Authenticate user
+      tags:
+        - auth
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+                  double_auth:
+                    type: boolean
+                example:
+                  token: xY7d-10
+                  user: {}  # todo
+                  message: ''
+                  double_auth: true
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /mail/auth/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Get mail authentication status
+      tags:
+        - auth
+      responses:
+        '200':
+          description: Mail authentication status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                  token: # Optional
+                    type: string
+    post:
+      summary: Authenticate via mail
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Mail authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /u2f/auth/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Get U2F authentication status
+      tags:
+        - auth
+      responses:
+        '200':
+          description: U2F authentication status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  challenge:
+                    type: string
+                  allowCredentials:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        id:
+                          type: string
+                        transports:
+                          type: array
+                          items:
+                            type: string
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+    post:
+      summary: Authenticate via U2F
+      tags:
+        - auth
+      responses:
+        '200':
+          description: U2F authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: BadRequest
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          description: InvalidInput
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /u2f/register/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Get U2F registration status
+      tags:
+        - auth
+      responses:
+        '200':
+          description: U2F registration status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  challenge:
+                    type: string
+                  rp:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      displayName:
+                        type: string
+                      name:
+                        type: string
+                  attestation:
+                    type: string
+                  pubKeyCredParams:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        alg:
+                          type: integer
+        '400':
+          description: BadRequest
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Register U2F device
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key: # Optional
+                  type: string
+                challenge: # Optional
+                  type: string
+      responses:
+        '200':
+          description: U2F device registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+        '400':
+          description: BadRequest
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+    delete:
+      summary: Delete U2F registration
+      tags:
+        - auth
+      responses:
+        '200':
+          description: U2F registration deleted
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+
+  /otp/check/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    post:
+      summary: Check OTP
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: OTP verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          description: Invalid Input
+
+  /otp/register/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    post:
+      summary: Register OTP device
+      tags:
+        - auth
+      responses:
+        '200':
+          description: OTP device registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:
+                    type: string
+                  imageUrl: # Optional
+                    type: string
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+    delete:
+      summary: Delete OTP registration
+      tags:
+        - auth
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /conf:
+    get:
+      summary: Returns the config object
+      tags:
+        - conf
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+
+  /database:
+    get:
+      operationId: list-database
+      summary: List all databases
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendDatabaseArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /database/{id}:
+    parameters:
+      - $ref: '#/components/parameters/dbid'
+    delete:
+      operationId: refuse-database
+      summary: Refuse database creation
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /database/create/{id}:
+    parameters:
+      - $ref: '#/components/parameters/dbid'
+    post:
+      operationId: create-database
+      summary: Create a new database
+      tags:
+        - database
+      requestBody:
+        $ref: '#/components/requestBodies/Database'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidDatabase'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /database/declare/{id}:
+    parameters:
+      - $ref: '#/components/parameters/dbid'
+    post:
+      operationId: declare-database
+      summary: Declare a database
+      tags:
+        - database
+      requestBody:
+        $ref: '#/components/requestBodies/Database'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidDatabase'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /database/request/{id}:
+    parameters:
+      - $ref: '#/components/parameters/dbid'
+    post:
+      operationId: ask-database
+      summary: Request a database
+      tags:
+        - database
+      requestBody:
+        $ref: '#/components/requestBodies/Database'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidDatabase'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /database/owner/{owner}:
+    parameters:
+      - $ref: '#/components/parameters/owner'
+    get:
+      operationId: listOwner-database
+      summary: List databases that belong to a user
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendDatabaseArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /database/{id}/owner/{old}/{new}:
+    parameters:
+      - $ref: '#/components/parameters/dbid'
+      - $ref: '#/components/parameters/old-owner'
+      - $ref: '#/components/parameters/new-owner'
+    put:
+      operationId: changeOwner-database
+      summary: Change database owner
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /pending/database:
+    get:
+      operationId: list_pending-database
+      summary: List pending databases
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendDatabaseArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /pending/database/{id}:
+    parameters:
+      - $ref: '#/components/parameters/dbid'
+    delete:
+      operationId: remove-database
+      summary: Remove a pending database
+      tags:
+        - database
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /logout:
+    get:
+      summary: Logout
+      tags:
+        - auth
+      responses:
+        '200':
+          description: User logged out
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /group:
+    get:
+      operationId: list-groups
+      summary: List all groups
+      tags:
+        - groups
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendGroupArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /group/{id}/:
+    parameters:
+      - $ref: '#/components/parameters/gid'
+    get:
+      operationId: get-groups
+      summary: Get the input group's details
+      tags:
+        - groups
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendGroup'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+    delete:
+      operationId: delete-groups
+      summary: Delete the input group from the database
+      tags:
+        - groups
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+    put:
+      operationId: update-groups
+      summary: Update the input group's owner or description
+      tags:
+        - groups
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+    post:
+      operationId: add-groups
+      summary: Add a new group to the database
+      tags:
+        - groups
+      requestBody:
+        $ref: '#/components/requestBodies/Group'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendGroup'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /group/{id}/users:
+    parameters:
+      - $ref: '#/components/parameters/gid'
+    get:
+      operationId: getUsers-groups
+      summary: Returns all users belonging to the input group
+      tags:
+        - groups
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendUserArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /group/{id}/projects:
+    parameters:
+      - $ref: '#/components/parameters/gid'
+    get:
+      operationId: getProjectsInGroup-projects
+      summary: Returns a list of all projects that are associated with the input group
+      tags:
+        - groups
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendProjectArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /log:
+    get:
+      summary: Get logs
+      tags:
+        - logs
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendLogArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /log/{id}:
+    parameters:
+      - $ref: '#/components/parameters/lid'
+    get:
+      summary: Get a specific log
+      tags:
+        - logs
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendLog'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /log/user/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Get the input user's logs
+      tags:
+        - logs
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendLogArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Add log
+      tags:
+        - logs
+      requestBody:
+        $ref: '#/components/requestBodies/LogString'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /log/status/{id}/{status}:
+    parameters:
+      - $ref: '#/components/parameters/lid'
+      - in: path
+        name: status
+        required: true
+        schema:
+          type: string
+        description: Log status
+    get:
+      summary: Set log status
+      tags:
+        - logs
+      responses:
+        '200':
+          description: OK # todo
+
+  /plugin:
+    get:
+      summary: List plugins
+      tags:
+        - plugin
+      responses:
+        '200': # todo
+          description: OK
+
+  /plugin/{id}:
+    parameters:
+      - $ref: '#/components/parameters/plugid'
+    get:
+      summary: Get plugin template
+      tags:
+        - plugin
+      responses:
+        '200': # todo
+          description: OK
+
+  /plugin/{id}/{user}:
+    parameters:
+      - $ref: '#/components/parameters/plugid'
+      - $ref: '#/components/parameters/user'
+    get:
+      summary: Get plugin details for a user
+      tags:
+        - plugin
+      responses:
+        '200': # todo
+          description: OK
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Add plugin for a user
+      tags:
+        - plugin
+      responses:
+        '200': # todo
+          description: OK
+        '400':
+          $ref: '#/components/responses/403-InvalidInput'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /project:
+    get:
+      operationId: list-projects
+      summary: List all projects
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendProjectArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      operationId: add-projects
+      summary: Add a new project
+      tags:
+        - projects
+      requestBody:
+        $ref: '#/components/requestBodies/Project'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+    put:
+      operationId: edit-projects
+      summary: Edit project details
+      tags:
+        - projects
+      requestBody:
+        $ref: '#/components/requestBodies/Project'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /project/{id}:
+    parameters:
+      - $ref: '#/components/parameters/pid'
+    get:
+      operationId: get-projects
+      summary: Get project details
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendProject'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      operationId: update-projects
+      summary: Update project details
+      tags:
+        - projects
+      requestBody:
+        $ref: '#/components/requestBodies/Project'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+    delete:
+      operationId: delete-projects
+      summary: Delete a project
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /project/{id}/users:
+    parameters:
+      - $ref: '#/components/parameters/pid'
+    get:
+      operationId: getUsers-projects
+      summary: Get users in a project
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendUserArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /project/{id}/extend:
+    parameters:
+      - $ref: '#/components/parameters/pid'
+    get:
+      operationId: extend-projects
+      summary: Extend project duration
+      tags:
+        - projects
+      responses:
+        '200':
+          description: Project duration extended
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  expiration:
+                    type: number
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+
+  /project/{id}/request:
+    parameters:
+      - $ref: '#/components/parameters/pid'
+    post:
+      operationId: request-projects
+      summary: Request a project
+      tags:
+        - projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                request:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /ask/project:
+    post:
+      operationId: askNew-projects
+      summary: Ask for a new project
+      tags:
+        - projects
+      requestBody:
+        $ref: '#/components/requestBodies/Project'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /pending/project:
+    get:
+      operationId: list_pending-projects
+      summary: List pending projects
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendProjectArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /pending/project/{uuid}:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+        description: Project uuid
+    delete:
+      operationId: delete_pending-projects
+      summary: Delete a pending project
+      tags:
+        - projects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /quota/{user}/{id}:
+    parameters:
+      - $ref: '#/components/parameters/user'
+      - $ref: '#/components/parameters/qid'
+    get:
+      summary: Get user quota
+      tags:
+        - quota
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: number
+                  max:
+                    type: number
+        '404':
+          description: No stats available
+
+  /ssh/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Generate SSH key
+      tags:
+        - ssh
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /ssh/{id}/putty:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Download Putty SSH key
+      tags:
+        - ssh
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SSHDownload'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+
+  /ssh/{id}/public:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Download public SSH key
+      tags:
+        - ssh
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SSHDownload'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+
+  /ssh/{id}/private:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Download private SSH key
+      tags:
+        - ssh
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SSHDownload'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+
+  /tags:
+    get:
+      summary: Get all tags
+      tags:
+        - tags
+      responses:
+        '200':
+          description: OK - Send tags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+
+  /tags/{kind}/{id}:
+    parameters:
+      - in: path
+        name: kind
+        required: true
+        schema:
+          type: string
+        description: Either 'group' or 'user'
+      - $ref: '#/components/parameters/uid'
+    post:
+      summary: Get all tags associated with a user or a group
+      tags:
+        - tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+
+  /tp:
+    get:
+      summary: Get all TP reservations
+      tags:
+        - tp
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendTPArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Create a new TP reservation
+      tags:
+        - tp
+      requestBody:
+        $ref: '#/components/requestBodies/TP'
+      responses:
+        '200':
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservation:
+                    $ref: '#/components/schemas/TP'
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /tp/{id}:
+    parameters:
+      - $ref: '#/components/parameters/tpid'
+    get:
+      summary: Get a specific TP reservation
+      tags:
+        - tp
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendTP'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    delete:
+      summary: Delete a specific TP reservation
+      tags:
+        - tp
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /tp/{id}/reserve/now:
+    parameters:
+      - $ref: '#/components/parameters/tpid'
+    put:
+      summary: Reserve a TP reservation now
+      tags:
+        - tp
+      responses:
+        '200':
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservation:
+                    $ref: '#/components/schemas/TP'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /tp/{id}/reserve/stop:
+    parameters:
+      - $ref: '#/components/parameters/tpid'
+    put:
+      summary: Stop a TP reservation
+      tags:
+        - tp
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /tp/{id}/reserve/extend:
+    parameters:
+      - $ref: '#/components/parameters/tpid'
+    put:
+      summary: Extend a TP reservation
+      tags:
+        - tp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /user:
+    get:
+      summary: Get users listing (admin only)
+      tags:
+        - users
+      parameters:
+        - name: short
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendUserArray'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Get user details
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendUser'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Register new user
+      tags:
+        - users
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendStatus'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+    put:
+      summary: Update user information
+      tags:
+        - users
+      requestBody:
+        $ref: '#/components/requestBodies/User'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendUser'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    delete:
+      summary: Delete user
+      tags:
+        - users
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                sendmail:
+                  type: boolean
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/ssh:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    put:
+      tags:
+        - users
+      summary: Update user SSH key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ssh:
+                  type: string
+      responses:
+        '200':
+          description: SSH key updated
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          description: SSH key update failed
+
+  /user/{id}/usage:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      tags:
+        - users
+      summary: Get user usage information
+      responses:
+        '200':
+          description: Usage information retrieved
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+
+  /user/{id}/renew:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      tags:
+        - users
+      summary: Reactivate user account
+      responses:
+        '200':
+          description: Activation in progress
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          description: Activation error
+
+  /user/{id}/renew/{regkey}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+      - name: regkey
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - users
+      summary: Extend user validity period
+      responses:
+        '200':
+          description: Validity period extended
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/apikey:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Get user API key
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendAPIKey'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Generate new API key for user
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendAPIKey'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/expire:
+    parameters:
+        - $ref: '#/components/parameters/uid'
+        - name: sendmail
+          in: query
+          required: false
+          schema:
+            type: boolean
+    get:
+      summary: Expire user account
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation' # + fid + error
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /user/{id}/notify:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    post:
+      summary: Notify user
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                subject:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError' # + error
+
+  /user/{id}/unlock:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      tags:
+        - users
+      summary: Unlock user account
+      responses:
+        '200':
+          description: User unlocked
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/confirm:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+      - name: regkey
+        in: query
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Confirm user registration
+      tags:
+        - users
+      responses:
+        '200':
+          description: User confirmed, redirect to pending
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+
+  /user/{id}/activate:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Activate user
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation' # + error
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError' # + error
+
+  /user/{id}/subscribe:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    put:
+      summary: Subscribe user to notifications
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendSubscribe'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/subscribed:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Check if user is subscribed to notifications
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendSubscribe'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/unsubscribe:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    put:
+      summary: Unsubscribe user from notifications
+      tags:
+        - users
+      responses:
+        '200':
+          description: User unsubscribed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unsubscribed:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /user/{id}/passwordreset:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+    get:
+      summary: Request password reset
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    post:
+      summary: Reset user password
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /user/{id}/passwordreset/{key}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Confirm password reset
+      tags:
+        - users
+      responses:
+        '200':
+          description: Password reset confirmed
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          description: Error during operation
+
+  /user/{id}/group/{group}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+      - in: path
+        name: group
+        required: true
+        schema:
+          type: string
+    post:
+      summary: Add user to group
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+    delete:
+      summary: Remove user from group
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '5XX':
+          $ref: '#/components/responses/500-ServerError'
+
+  /user/{id}/project/{project}:
+    parameters:
+      - $ref: '#/components/parameters/uid'
+      - in: path
+        name: project
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - users
+      summary: Add user to project
+      responses:
+        '200':
+          description: User added to project
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+    delete:
+      tags:
+        - users
+      summary: Remove user from project
+      responses:
+        '200':
+          description: User removed from project
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+        '500':
+          $ref: '#/components/responses/500-ServerError'
+
+  /ip:
+    get:
+      summary: Get client IP address
+      tags:
+        - users
+      responses:
+        '200':
+          description: IP address retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ip:
+                    type: string
+
+  /lists:
+    get:
+      tags:
+        - users
+      summary: Get all lists
+      responses:
+        '200':
+          description: Lists retrieved
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /list/{list}:
+    parameters:
+      - in: path
+        name: list
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - users
+      summary: Get members of a list
+      responses:
+        '200':
+          description: List members retrieved
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /message:
+    post:
+      summary: Send a message
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                subject:
+                  type: string
+                message:
+                  type: string
+                input:
+                  type: string
+                list:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /web:
+    get:
+      tags:
+        - web
+      summary: Get websites
+      responses:
+        '200':
+          description: Websites retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /web/{id}:
+    parameters:
+      - $ref: '#/components/parameters/webid'
+    post:
+      tags:
+        - web
+      summary: Register new website
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                description:
+                  type: string
+                owner:
+                  type: string
+      responses:
+        '200':
+          description: New website added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  web:
+                    type: object
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-UnsanitaryId'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+    delete:
+      tags:
+        - web
+      summary: Delete website
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SendConfirmation'
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /web/owner/{owner}:
+    parameters:
+      - $ref: '#/components/parameters/owner'
+    get:
+      tags:
+        - web
+      summary: Get websites by owner
+      responses:
+        '200':
+          description: Websites retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-UserNotFound'
+
+  /web/{id}/owner/{old}/{new}:
+    parameters:
+      - $ref: '#/components/parameters/webid'
+      - $ref: '#/components/parameters/old-owner'
+      - $ref: '#/components/parameters/new-owner'
+    put:
+      tags:
+        - web
+      summary: Change website owner
+      responses:
+        '200':
+        #! All other properties in a "$ref" object are ignored
+          description: Website owner changed
+          $ref: '#/components/responses/200-SendConfirmation'
+        '400':
+          description: Old owner and new owner are the same person
+        '401':
+          $ref: '#/components/responses/401-NotAuthorized'
+        '403':
+          $ref: '#/components/responses/403-InvalidInput'
+        '404':
+          $ref: '#/components/responses/404-NotFound'
+
+
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: 'User session not found'
+    Config:
+      type: object
+      properties:
+        main_groups:
+          type: string
+        terms_of_use:
+          type: string
+        default_home:
+          type: string
+        name:
+          type: string
+        support:
+          type: string
+        main_list:
+          type: string
+        origin:
+          type: string
+        max_account:
+          type: boolean
+        enable_ui:
+          type: string
+        duration:
+          type: string
+        project:
+          type: string
+        registration:
+          type: string
+        reservation:
+          type: string
+        mailer:
+          type: string
+    User:
+      type: object
+      properties:
+        uid:
+          type: string
+        id:
+          type: number
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        lab:
+          type: string
+        responsible:
+          type: string
+        address:
+          type: string
+        team:
+          type: string
+        why:
+          type: string
+        ip:
+          type: string
+        is_admin:
+          type: boolean
+        is_fake:
+          type: boolean
+        is_locked:
+          type: boolean
+        is_trainer:
+          type: boolean
+        send_copy_to_support:
+          type: boolean
+        create_imap_mailbox:
+          type: boolean
+        created_at:
+          type: number
+        expiration:
+          type: number
+        duration:
+          type: string
+        registration:
+          type: number
+        group:
+          type: string
+        secondarygroups:
+          type: array
+          items:
+            type: string
+        newgroup:
+          type: string
+        projects:
+          type: array
+          items:
+            type: string
+        newproject:
+          type: object
+        tags:
+          type: array
+          items:
+            type: string
+        regkey:
+          type: number
+        apikey:
+          type: number
+        ssh:
+          type: string
+        u2f:
+          type: object
+        otp:
+          type: object
+        history:
+          type: array
+        extra_info:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              value:
+                type: string
+        status:
+          type: string
+        temp:
+          type: object
+        loginShell:
+          type: string
+        maingroup:
+          type: string
+        uidnumber:
+          type: number
+    Project:
+      type: object
+      properties:
+        _id:
+          type: string
+        uuid:
+          type: string
+        id:
+          type: string
+        owner:
+          type: string
+        group:
+          type: string
+        size:
+          type: number
+        current_size:
+          type: number
+        low_size:
+          type: number
+        high_size:
+          type: number
+        cpu:
+          type: number
+        current_cpu:
+          type: number
+        low_cpu:
+          type: number
+        high_cpu:
+          type: number
+        orga:
+          type: string
+        description:
+          type: string
+        access:
+          type: string
+        path:
+          type: string
+        expire:
+          type: number
+        created_at:
+          type: number
+    Group:
+      type: object
+      properties:
+        gid:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        is_new:
+          type: boolean
+    Database:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        host:
+          type: string
+        owner:
+          type: string
+        create:
+          type: boolean
+        usage:
+          type: string
+        size:
+          type: string
+        expire:
+          type: number
+        created_at:
+          type: number
+        single_user:
+          type: boolean
+        _id:
+          type: string
+    TP:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        quantity:
+          type: integer
+        about:
+          type: string
+        group_or_project:
+          type: string
+        name:
+          type: string
+    Log:
+      type: object
+      properties:
+        owner:
+          type: string
+        date:
+          type: number
+        action:
+          type: string
+        logs:
+          type: array
+    APIKey:
+      type: object
+      properties:
+        apikey:
+          type: string
+
+  parameters:
+    uid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: User uid (username)
+    gid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Group gid
+    pid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Project id (name)
+    dbid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Database id (name)
+    tpid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: TP id (hex string)
+    webid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Website id
+    lid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Log id
+    plugid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Plugin id
+    qid:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: Quota id
+    user:
+      in: path
+      name: user
+      required: true
+      schema:
+        type: string
+      description: User uid (username)
+    owner:
+      in: path
+      name: owner
+      required: true
+      schema:
+        type: string
+      description: Owner uid (username)
+    old-owner:
+      in: path
+      name: old
+      required: true
+      schema:
+        type: string
+      description: Old owner uid (username)
+    new-owner:
+      in: path
+      name: new
+      required: true
+      schema:
+        type: string
+      description: New owner uid (username)
+
+  requestBodies:
+    User:
+      description: An input User object
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    Project:
+      description: An input Project object
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Project'
+    Group:
+      description: An input Group object
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Group'
+    Database:
+      description: An input Database object
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Database'
+    TP:
+      description: An input TP object
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TP'
+    LogString:
+      description: An input Log string
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              log:
+                type: string
+
+  responses:
+    200-SendConfirmation:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    200-SendUser:
+      description: OK - Send User
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    200-SendProject:
+      description: OK - Send Project
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Project'
+    200-SendGroup:
+      description: OK - Send Group
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Group'
+    200-SendTP:
+      description: OK - Send TP
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TP'
+    200-SendLog:
+      description: OK - Send Log
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              log:
+                $ref: '#/components/schemas/Log'
+    200-SendUserArray:
+      description: OK - Send Users
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+    200-SendProjectArray:
+      description: OK - Send Projects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Project'
+    200-SendGroupArray:
+      description: OK - Send Groups
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Group'
+    200-SendDatabaseArray:
+      description: OK - Send Databases
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Database'
+    200-SendTPArray:
+      description: OK - Send TPs
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TP'
+    200-SendLogArray:
+      description: OK - Send Logs
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Log'
+    200-SendAPIKey:
+      description: OK - Send API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIKey'
+    200-SendSubscribe:
+      description: oK - Send subscription status
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              subscribed:
+                type: boolean
+    200-SendStatus:
+      description: OK - Send a status and a confirmation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+              message:
+                type: string
+    200-SSHDownload:
+      description: SSH key downloaded
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    400-BadRequest:
+      description: The request was invalid or cannot be served
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    401-NotAuthorized:
+      description: Authorization information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    403-InvalidInput:
+      description: The given input caused an error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    403-UnsanitaryId:
+      description: Input id is not sanitized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    403-InvalidDatabase:
+      description: The given input caused an error
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/Message'
+              - type: object
+                properties:
+                  database:
+                    type: object
+                    nullable: true
+                  message:
+                    type: string
+    404-NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    404-UserNotFound:
+      description: The user was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+    500-ServerError:
+      description: An unexpected server error has occurred
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
