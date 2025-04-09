@@ -10,11 +10,13 @@
 * increase size of input field in users page
 * add a readonly input field under email for showing the email domain*
 * Add "custom_users" key to config file, to be used with various scripts
+* Add "project managers" that can request admins to add/remove project members
 * Check that user being removed is not owner or last member of a project
 * Add email sent to a project owner when their project is activated
 * Separate global overview from individual group view in admin group management
 * Allow accents in user's first and last names
-* Add a Swagger file for documentation
+* * Add a Swagger file for documentation
+* Remove 'Home works' message
 
 ## 1.4.31 (2024-09-27)
 

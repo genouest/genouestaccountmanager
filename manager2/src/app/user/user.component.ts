@@ -364,16 +364,20 @@ export class UserComponent implements OnInit {
             if (this.user.projects == null) { this.user.projects = []; }
             if (this.user.projects.indexOf(projects[i].id) >= 0) {
                 let is_owner = false;
-                let user_in_group = false;
+                let is_manager = false;
+                let is_member = false;
                 if (this.user.uid === projects[i].owner) {
                     is_owner = true;
                 }
-                if (this.user.group.indexOf(projects[i].group) >= 0 || this.user.secondarygroups.indexOf(projects[i].group) >= 0) {
-                    user_in_group = true;
+                if (projects[i].managers.includes(this.user.uid)) {
+                    is_manager = true;
                 }
-                user_projects.push({ id: projects[i].id, owner: is_owner, group: projects[i].group, member: user_in_group });
+                if (this.user.group.indexOf(projects[i].group) >= 0 || this.user.secondarygroups.indexOf(projects[i].group) >= 0) {
+                    is_member = true;
+                }
+                user_projects.push({ id: projects[i].id, is_owner: is_owner, is_manager: is_manager, is_member: is_member, group: projects[i].group });
             } else {
-                new_projects.push({ id: projects[i].id, owner: false, group: projects[i].group, member: false });
+                new_projects.push({ id: projects[i].id, is_owner: false, is_manager: false, is_member: false, group: projects[i].group });
             }
         }
         user_projects.sort(this._compareId)
@@ -854,7 +858,7 @@ export class UserComponent implements OnInit {
             this.userService.addToProject(this.user.uid, new_project.id).subscribe(
                 resp => {
                     this.add_to_project_msg = resp['message'];
-                    this.user_projects.push({ id: new_project.id, owner: false, member: true });
+                    this.user_projects.push({ id: new_project.id, is_owner: false, is_manager: false, is_member: true });
                 },
                 err => this.add_to_project_error_msg = err.error.message
             )
