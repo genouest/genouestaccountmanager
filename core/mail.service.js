@@ -26,19 +26,26 @@ function get_mail_config () {
 async function gen_mail_opt (options, variables)
 {
     var MAIL_CONFIG = get_mail_config();
-    // todo: check if each option exist and use default value
-    let name = options['name'];
-    let destinations = options['destinations'];
-    let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
-
+    if (options['name'] == null || options['name'].trim() === '') {
+        logger.error('No email name!');
+        return null;
+    }
+    if (options['destinations'] == null || options['destinations'].trim() === '') {
+        logger.error('No email destinations!');
+        return null;
+    }
+    if (!options['subject'] || options['subject'].trim() === '') {
+        logger.error('No email subject!');
+        return null;
+    }
     //find message
     let message = undefined;
-    if (name && CONFIG.message[name]) {
-        message = CONFIG.message[name].join('\n');
+    if (options['name'] && CONFIG.message[options['name']]) {
+        message = CONFIG.message[options['name']].join('\n');
     }
     let html_message = message;
-    if (name && CONFIG.message[name + '_html']) {
-        html_message = CONFIG.message[name + '_html'].join('');
+    if (options['name'] && CONFIG.message[options['name'] + '_html']) {
+        html_message = CONFIG.message[options['name'] + '_html'].join('');
     }
 
     if (options['markdown'] !== undefined && options['markdown'] != '') {
@@ -91,8 +98,8 @@ async function gen_mail_opt (options, variables)
     // set mailOptions
     let mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
-        destinations:  destinations, // list of receivers
-        subject: subject, // Subject line
+        destinations:  options['destinations'], // list of receivers
+        subject: GENERAL_CONFIG.name + ' ' + options['subject'], // Subject line
         message: message, // plaintext body
         html_message: html_message // html body
     };
