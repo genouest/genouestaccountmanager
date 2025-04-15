@@ -169,7 +169,6 @@ async function remove_project_request(uuid, action_owner = 'auto', message = '',
             try {
                 const owner = await dbsrv.mongo_users().findOne({ uid: project.owner });
                 let msg_destinations = [
-                    CONFIG.general.accounts,
                     owner.email,
                     ...(owner.send_copy_to_support ? [CONFIG.general.support] : [])
                 ];
