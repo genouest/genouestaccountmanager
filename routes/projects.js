@@ -410,7 +410,7 @@ router.post('/project/:id/request/user', async function(req, res) {
         if (req.body.request === 'add'){
             await usrsrv.add_user_to_project(project.id, req.body.user, user.uid);
         } else if (req.body.request === 'remove') {
-            await usrsrv.remove_user_from_project(project.id, req.body.user, user.uid, false);
+            await usrsrv.remove_user_from_project(project.id, req.body.user, user.uid, user.is_admin, false);
         }
     } catch (e) {
         logger.error(e);
