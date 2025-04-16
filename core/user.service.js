@@ -387,7 +387,7 @@ async function add_user_to_group(uid, secgroup, action_owner = 'auto') {
 
 }
 
-async function remove_user_from_project(oldproject, uid, action_owner = 'auto', force = false) {
+async function remove_user_from_project(oldproject, uid, action_owner = 'auto', action_owner_is_admin = false, force = false) {
     logger.info('Remove user ' + uid + ' from project ' + oldproject);
 
     let fid = new Date().getTime();
@@ -426,11 +426,19 @@ async function remove_user_from_project(oldproject, uid, action_owner = 'auto', 
 
     if (project.group && (CONFIG.project === undefined || CONFIG.project.enable_group)) {
         try {
-            await grpsrv.remove_from_group(user.uid, project.group);
+            if (user.group === project.group) {
+                if (action_owner_is_admin) {
+                    throw {code: 403, message: `Cannot remove primary group ${project.group}. Please adjust the group settings first.`};
+                } else {
+                    throw {code: 403, message: `Cannot change the primary group of ${user.uid}. Please contact an admin at ${CONFIG.general.support}.`};
+                }
+            }
+            else if (user.secondarygroups.includes(project.group)) {
+                await grpsrv.remove_from_group(user.uid, project.group);
+            }
         } catch(error) {
             logger.error(`Removal of user from project ${oldproject} group ${project.group} failed`, error);
             throw {code: 500, message: 'Remove from Project Failed'};
-
         }
     }
 }
