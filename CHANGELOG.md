@@ -16,6 +16,8 @@
 * Separate global overview from individual group view in admin group management
 * Allow accents in user's first and last names
 * Add checks when removing user from a project's linked group
+* Remove 'Home works' message
+
 
 ## 1.4.31 (2024-09-27)
 
