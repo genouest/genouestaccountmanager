@@ -671,8 +671,17 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         return;
     }
 
+    let mail_message = '';
+    let mail_send = false;
+    if (req.body.message) {
+        mail_message = req.body.message;
+    }
+    if (req.body.sendmail) {
+        mail_send = req.body.sendmail;
+    }
+
     try {
-        await prjsrv.remove_project_request(req.params.uuid, user.uid);
+        await prjsrv.remove_project_request(req.params.uuid, user.uid, mail_message, mail_send);
     } catch(e) {
         logger.error(e);
         if (e.code && e.message) {

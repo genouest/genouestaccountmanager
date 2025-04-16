@@ -323,7 +323,7 @@ export class ProjectsService {
         }));
     }
 
-    delete_pending(projectUuid: string): Observable<any> {
+    delete_pending(projectUuid: string, message: string, sendmail: boolean): Observable<any> {
         //let user = this.authService.profile;
         let params = new HttpParams();
 
@@ -331,7 +331,11 @@ export class ProjectsService {
             //headers: new HttpHeaders({
             //  'x-api-key': user.apikey
             //}),
-            params: params
+            params: params,
+            body: {
+                message: message,
+                sendmail: sendmail
+            }
         };
         return this.http.delete(
             environment.apiUrl + '/pending/project/' + projectUuid,
