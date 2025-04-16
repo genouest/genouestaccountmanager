@@ -26,10 +26,6 @@ function get_mail_config () {
 async function gen_mail_opt (options, variables)
 {
     var MAIL_CONFIG = get_mail_config();
-    if (options['name'] == null || options['name'].trim() === '') {
-        logger.error('No email name!');
-        return null;
-    }
     if (options['destinations'] == null || options['destinations'].trim() === '') {
         logger.error('No email destinations!');
         return null;
@@ -126,5 +122,4 @@ async function send_notif_mail (options, variables) {
 
 // exports mail functions
 exports.get_mail_config = get_mail_config;
-exports.gen_mail_opt = gen_mail_opt;
 exports.send_notif_mail = send_notif_mail;
