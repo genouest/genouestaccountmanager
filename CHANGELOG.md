@@ -15,9 +15,10 @@
 * Add email sent to a project owner when their project is activated
 * Separate global overview from individual group view in admin group management
 * Allow accents in user's first and last names
+* Secure project deletion (and removing users from project) with a confirmation modal
 * Add checks when removing user from a project's linked group
 * Remove 'Home works' message
-
+* Add rejection message for projects
 
 ## 1.4.31 (2024-09-27)
 
