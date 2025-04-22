@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.32 (Unreleased)
+## 1.4.32 (2025-04-22)
 
 * Fix error when subscribing / unsubscribing to email
 * Clearer error message when adding a website
