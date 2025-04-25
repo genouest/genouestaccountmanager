@@ -392,7 +392,7 @@ router.post('/project/:id/request/user', async function(req, res) {
         return;
     }
 
-    if(!project.managers.includes(user.uid) && user.uid != project.owner) {
+    if((!project.manager || !project.managers.includes(user.uid)) && user.uid != project.owner) {
         res.status(401).send({message: 'User ' + user.uid + ' is not project manager for project ' + project.id});
         return;
     }
@@ -461,12 +461,15 @@ router.post('/project/:id/add/manager/:uid', async function(req, res) {
         res.status(403).send({message: 'User ' + req.params.uid + ' is not in project ' + project.id});
         return;
     }
-    if(project.managers.includes(new_manager.uid)) {
+    if(project.managers && project.managers.includes(new_manager.uid)) {
         res.status(403).send({message: 'User ' + req.params.uid + ' is already a manager of project ' + project.id});
         return;
     }
 
     try {
+        if (! project.managers){
+            project.managers = [];
+        }
         project.managers.push(new_manager.uid);
         await dbsrv.mongo_projects().updateOne({'id': project.id},  {'$set': { 'managers': project.managers } });
     } catch (e) {
@@ -515,7 +518,7 @@ router.post('/project/:id/remove/manager/:uid', async function(req, res) {
         res.status(403).send({message: 'User ' + req.params.uid + ' is not in project ' + project.id});
         return;
     }
-    if(!project.managers.includes(ex_manager.uid)) {
+    if(!project.managers || !project.managers.includes(ex_manager.uid)) {
         res.status(403).send({message: 'User ' + req.params.uid + ' is not a manager of project ' + project.id});
         return;
     }
