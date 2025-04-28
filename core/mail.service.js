@@ -26,14 +26,6 @@ function get_mail_config () {
 async function gen_mail_opt (options, variables)
 {
     var MAIL_CONFIG = get_mail_config();
-    if (options['destinations'] == null || options['destinations'].trim() === '') {
-        logger.error('No email destinations!');
-        return null;
-    }
-    if (!options['subject'] || options['subject'].trim() === '') {
-        logger.error('No email subject!');
-        return null;
-    }
     //find message
     let message = undefined;
     if (options['name'] && CONFIG.message[options['name']]) {

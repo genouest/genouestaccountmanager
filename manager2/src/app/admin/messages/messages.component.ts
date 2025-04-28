@@ -123,7 +123,7 @@ export class MessagesComponent implements OnInit {
     send() {
         this.msg = '';
         this.error_msg = '';
-        if(this.message === '' || this.subject === '' || this.mailing_list === ''){
+        if(this.message === '' || this.subject.trim() === '' || this.mailing_list === ''){
             this.error_msg = "You need a subject, text, and mailing list";
             return;
         }
