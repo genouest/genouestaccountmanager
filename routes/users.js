@@ -116,7 +116,7 @@ router.post('/user/:id/notify', async function(req, res) {
     if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
-    if (req.body.message === '' || req.body.subject.trim() === '' || msg_destinations == []) {
+    if (req.body.message.trim() === '' || req.body.subject.trim() === '' || msg_destinations == []) {
         return res.status(403).send({ message: 'Invalid parameters' });
     }
 
