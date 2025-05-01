@@ -169,12 +169,13 @@ export class TpsComponent implements OnInit {
                 group_or_project: this.group_or_project,
                 name: this.name
             }
-            console.log(reservation);
+
             this.tpService.reserve(reservation).subscribe(
                 resp => {
                     this.msg = resp['message'];
                     this.listEvents();
-                },
+                }
+                ,
                 err => this.errmsg = err.error.message
             )
         } else {
