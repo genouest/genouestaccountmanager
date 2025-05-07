@@ -62,7 +62,7 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     }
     try {
         await maisrv.send_notif_mail( {
-            'name': 'ask_project',
+            'name': 'activated_project',
             'destinations': msg_destinations,
             'subject': 'Project ' + new_project.id + ' created'
         }, {
