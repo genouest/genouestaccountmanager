@@ -28,6 +28,7 @@ var STATUS_EXPIRED = 'Expired';
 exports.tp_reservation = tp_reservation;
 exports.create_tp_reservation = create_tp_reservation;
 exports.remove_tp_reservation = remove_tp_reservation;
+exports.lock_tp_reservation = lock_tp_reservation;
 exports.extend_tp_reservation = extend_tp_reservation;
 
 
@@ -196,7 +197,6 @@ async function send_user_passwords(owner, from_date, to_date, users, group) {
             '#GROUP#': group,
             '#URL#': CONFIG.general.url,
             '#SUPPORT#': CONFIG.general.support
-
         });
     } catch(error) {
         logger.error(error);
@@ -286,12 +286,28 @@ async function remove_tp_reservation(reservation) {
     }
 }
 
+async function lock_tp_reservation(reservation) {
+    logger.debug('Lock reservation', reservation);
+    try {
+        await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, { '$set': {
+            'locked': true
+        } });
+        await dbsrv.mongo_events().insertOne( {
+            'owner': 'auto',
+            'date': new Date().getTime(),
+            'action': 'lock reservation for ' + reservation.owner ,
+            'logs': []
+        });
+    } catch (error) {
+        logger.error(error);
+    }
+}
+
 async function extend_tp_reservation(reservation, extension) {
     logger.debug('Extend reservation', reservation);
-
     try {
         await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, {
-            '$set': { 'to': extension.to }
+            '$set': { 'to': extension.to, 'lock': extension.lock }
         });
         await dbsrv.mongo_events().insertOne( {
             'owner': 'auto',
@@ -389,12 +405,13 @@ async function create_tp_reservation(reservation_id) {
     }
 }
 
-async function tp_reservation(userId, from_date, to_date, quantity, about, group_or_project, name) {
+async function tp_reservation(userId, from_date, to_date, lock_date, quantity, about, group_or_project, name) {
     // Create a reservation
     let reservation = {
         'owner': userId,
         'from': from_date,
         'to': to_date,
+        'lock': lock_date,
         'quantity': quantity,
         'accounts': [],
         'about': about,

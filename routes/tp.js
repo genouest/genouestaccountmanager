@@ -69,6 +69,7 @@ router.post('/tp', async function(req, res) {
         user.uid,
         req.body.from,
         req.body.to,
+        req.body.lock,
         req.body.quantity,
         req.body.about,
         req.body.group_or_project,
@@ -343,6 +344,17 @@ router.put('/tp/:id/reserve/extend', async function(req, res) {
     if (req.body.to < new Date().getTime()) {
         res.status(403).send({message: 'Extended end date can not be in the past'});
         return;
+    }
+
+    if (req.body.lock) {
+        if (req.body.lock < reservation.lock) {
+            res.status(403).send({message: 'Extended lock date must be after current end date'});
+            return;
+        }
+        if (req.body.lock < new Date().getTime()) {
+            res.status(403).send({message: 'Extended lock date can not be in the past'});
+            return;
+        }
     }
 
     try {
