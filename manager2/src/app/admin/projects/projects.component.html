@@ -97,7 +97,11 @@
           <button type="button" class="p-button p-button-success" (click)="add_project()">Create project</button>
         </div>
         <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
-          <label style="opacity: 0">Edit</label>
+          <label style="opacity: 0;">Reject</label>
+          <app-my-delete-confirm [onConfirm]="reject_project" [data]="" [explainMessage]="true" button_disp="Reject project"></app-my-delete-confirm>
+        </div>
+        <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
+          <label style="opacity: 0;">Edit</label>
           <button type="button" class="p-button" (click)="edit_project()">Save changes</button>
         </div>
         <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
@@ -136,7 +140,7 @@
                   <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
                   <th>Cpu (Hour)</th>
                   <th>Org</th>
-                  <th>Action</th>
+                  <th></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-pending>
@@ -144,7 +148,7 @@
                   <td>{{ pending.created_at | date }}</td>
                   <td>{{ pending.id }}</td>
                   <td>
-                    <a routerLink="/user/{{ pending.owner }}">
+                    <a routerLink="/user/{{pending.owner}}">
                       <span class="p-button p-button-sm p-button-primary">{{ pending.owner }}</span>
                     </a>
                   </td>
@@ -153,10 +157,7 @@
                   <td>{{ pending.cpu }}</td>
                   <td>{{ pending.orga }}</td>
                   <td>
-                    <div class="btn-group">
-                      <button type="button" style="margin-right: 0px !important" class="p-button p-button-sm p-button-info" (click)="modify_project(pending)">View</button>
-                      <button type="button" style="margin-right: 0px !important" class="p-button p-button-sm p-button-danger" (click)="reject_project(pending)">Reject</button>
-                    </div>
+                    <button type="button" style="margin-right: 0px !important" class="p-button p-button-sm p-button-info" (click)="modify_project(pending)">View</button>
                   </td>
                 </tr>
               </ng-template>

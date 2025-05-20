@@ -332,8 +332,7 @@ router.post('/project/:id/request/user', async function (req, res) {
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-
-    if (!project.managers.includes(user.uid) && user.uid != project.owner) {
+    if((!project.manager || !project.managers.includes(user.uid)) && user.uid != project.owner) {
         return res.status(401).send({ message: 'User ' + user.uid + ' is not project manager for project ' + project.id });
     }
     let newuser = await dbsrv.mongo_users().findOne({ uid: req.body.user });
@@ -348,7 +347,7 @@ router.post('/project/:id/request/user', async function (req, res) {
         if (req.body.request === 'add') {
             await usrsrv.add_user_to_project(project.id, req.body.user, user.uid);
         } else if (req.body.request === 'remove') {
-            await usrsrv.remove_user_from_project(project.id, req.body.user, user.uid, false);
+            await usrsrv.remove_user_from_project(project.id, req.body.user, user.uid, user.is_admin, false);
         }
     } catch (e) {
         logger.error(e);
@@ -387,11 +386,14 @@ router.post('/project/:id/add/manager/:uid', async function(req, res) {
     if (!(new_manager.projects && new_manager.projects.indexOf(project.id) >= 0)) {
         return res.status(403).send({ message: 'User ' + req.params.uid + ' is not in project ' + project.id });
     }
-    if (project.managers.includes(new_manager.uid)) {
+    if(project.managers && project.managers.includes(new_manager.uid)) {
         return res.status(403).send({ message: 'User ' + req.params.uid + ' is already a manager of project ' + project.id });
     }
 
     try {
+        if (! project.managers){
+            project.managers = [];
+        }
         project.managers.push(new_manager.uid);
         await dbsrv.mongo_projects().updateOne({ 'id': project.id}, { '$set': { 'managers': project.managers } });
     } catch (e) {
@@ -431,7 +433,7 @@ router.post('/project/:id/remove/manager/:uid', async function(req, res) {
     if (!(ex_manager.projects && ex_manager.projects.indexOf(project.id) >= 0)) {
         return res.status(403).send({ message: 'User ' + req.params.uid + ' is not in project ' + project.id });
     }
-    if (!project.managers.includes(ex_manager.uid)) {
+    if(!project.managers || !project.managers.includes(ex_manager.uid)) {
         return res.status(403).send({ message: 'User ' + req.params.uid + ' is not a manager of project ' + project.id });
     }
 
@@ -567,8 +569,17 @@ router.delete('/pending/project/:uuid', async function (req, res) {
         return res.status(401).send('Not authorized');
     }
 
+    let mail_message = '';
+    let mail_send = false;
+    if (req.body.message) {
+        mail_message = req.body.message;
+    }
+    if (req.body.sendmail) {
+        mail_send = req.body.sendmail;
+    }
+
     try {
-        await prjsrv.remove_project_request(req.params.uuid, user.uid);
+        await prjsrv.remove_project_request(req.params.uuid, user.uid, mail_message, mail_send);
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {

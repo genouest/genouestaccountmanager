@@ -50,7 +50,9 @@ export class ProjectComponent implements OnInit {
     ngAfterViewInit(): void {}
 
     ngOnInit() {
-        this.route.params.subscribe((params) => {
+        this.delete_project = this.delete_project.bind(this);
+        this.remove_user = this.remove_user.bind(this);
+        this.route.params.subscribe(params => {
             let projectId = params.id;
             this.show_project_users(projectId);
         });

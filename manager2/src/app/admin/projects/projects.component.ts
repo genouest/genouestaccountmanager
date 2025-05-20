@@ -62,6 +62,7 @@ export class ProjectsComponent implements OnInit {
     // TODO sort groups by name
 
     ngOnInit() {
+        this.reject_project = this.reject_project.bind(this);
         this.route.queryParams.subscribe((params) => {
             if (params.deleted == 'ok') {
                 this.notification = 'Project was deleted successfully';
@@ -185,6 +186,19 @@ export class ProjectsComponent implements OnInit {
                 console.log('failed to add project', this.new_project);
                 this.add_project_error_msg = err.error.message;
             }
+        );
+    }
+
+    reject_project(message: string, sendmail: boolean) {
+        this.reset_msgs()
+        this.projectService.delete_pending(this.new_project.uuid, message, sendmail).subscribe(
+            resp => {
+                this.pending_msg = resp.message;
+                this.new_project = new Project();
+                this.new_project_expire = '';
+                this.pending_list(true);
+            },
+            err => this.pending_err_msg = err.error
         );
     }
 

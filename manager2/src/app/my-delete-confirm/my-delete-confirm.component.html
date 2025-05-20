@@ -1,6 +1,6 @@
 <div class="deleteConfirmation">
-  <div *ngIf="!isDeleting">
-    <button type="button" class="p-button p-button-sm p-button-danger btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i> Delete</button>
+  <div *ngIf="!isDeleting" >
+    <button type="button" class="p-button p-button-sm p-button-danger btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i>{{ button_disp }}</button>
   </div>
   <div *ngIf="isDeleting">
     <div *ngIf="explainMessage">

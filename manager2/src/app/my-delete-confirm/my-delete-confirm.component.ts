@@ -8,7 +8,7 @@ import { Component, Input, OnInit } from '@angular/core';
 export class MyDeleteConfirmComponent implements OnInit {
     isDeleting: boolean;
     message: string;
-    sendmail: boolean;
+    sendmail: boolean = true;
 
     @Input()
     onConfirm: any;
@@ -18,6 +18,9 @@ export class MyDeleteConfirmComponent implements OnInit {
 
     @Input()
     explainMessage: boolean;
+
+    @Input()
+    button_disp: string = "Delete"
 
     constructor() {}
 

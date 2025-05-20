@@ -4,16 +4,16 @@
 
 
 <div class="card bg-light card-header">
-  <div class="row">
-    <div class="col-sm-9">
-      <h4>
+	<div class="row">
+		<div class="col-sm-9">
+			<h4>
         Project <strong>{{ project.id }}</strong>
       </h4>
-    </div>
-    <div class="col-sm-3">
-      <button class="p-button p-button-sm p-button-danger" (click)="delete_project()">Delete project</button>
-    </div>
-  </div>
+		</div>
+		<div class="col-sm-3" >
+      <app-my-delete-confirm [onConfirm]="delete_project"></app-my-delete-confirm>
+		</div>
+	</div>
 </div>
 
 
@@ -57,18 +57,15 @@
           <input type="text" id="update_project_orga" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.orga" class="form-control" />
         </div>
       </div>
-
       <div class="form-group row">
         <div class="col-sm-12">
           <label for="project_description">Description</label>
           <textarea rows="2" id="project_description" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.description" class="form-control"></textarea>
         </div>
       </div>
-
       <div class="form-group row">
         <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
-          <label
-            >Write permission&nbsp;
+          <label>Write permission&nbsp;
             <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
           </label>
           <select id="project_access" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.access" class="form-control">
