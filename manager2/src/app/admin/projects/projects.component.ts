@@ -297,18 +297,6 @@ export class ProjectsComponent implements OnInit {
         this.update_project_on_event(project.id);
     }
 
-    reject_project(input_project: any) {
-        const project: Project = this.projectService.mapToProject(input_project);
-        this.reset_msgs();
-        this.projectService.delete_pending(project.uuid).subscribe(
-            (resp) => {
-                this.pending_msg = resp.message;
-                this.pending_list(true);
-            },
-            (err) => (this.pending_err_msg = err.error)
-        );
-    }
-
     reset_msgs() {
         this.add_project_msg = '';
         this.add_project_error_msg = '';

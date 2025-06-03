@@ -68,15 +68,15 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
     }
     try {
         await maisrv.send_notif_mail( {
-            'name': 'activated_project',
-            'destinations': msg_destinations,
-            'subject': 'Project ' + new_project.id + ' created'
+            name: 'activated_project',
+            destinations: msg_destinations,
+            subject: 'Project ' + new_project.id + ' created'
         }, {
             '#NAME#': new_project.id,
             '#PATH#': new_project.path,
             '#GROUP#':new_project.group
         });
-    } catch(error) {
+    } catch (error) {
         logger.error(error);
     }
     return new_project;
@@ -195,15 +195,15 @@ async function remove_project_request(uuid, action_owner = 'auto', message = '',
                     ...(owner.send_copy_to_support ? [CONFIG.general.support] : [])
                 ];
                 await maisrv.send_notif_mail({
-                    'name': 'project_rejection',
-                    'destinations': msg_destinations,
-                    'subject': 'Project request rejection: ' + project.id
+                    name: 'project_rejection',
+                    destinations: msg_destinations,
+                    subject: 'Project request rejection: ' + project.id
                 }, {
                     '#PROJECT#': project.id,
                     '#USER#': action_owner,
                     '#MSG#': message || 'No explanation provided.'
                 });
-            } catch(error) {
+            } catch (error) {
                 logger.error(error);
             }
         }
