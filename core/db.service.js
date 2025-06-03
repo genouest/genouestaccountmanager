@@ -21,11 +21,14 @@ var mongo_tags = null;
 var mongo_pending_projects = null;
 var mongo_pending_databases = null;
 
-var mongo_connect = async function() {
+var mongo_connect = async function () {
     let url = CONFIG.mongo.url;
     let client = null;
-    if(!url) {
-        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`, { useNewUrlParser: true, useUnifiedTopology: true });
+    if (!url) {
+        client = new MongoClient(`mongodb://${CONFIG.mongo.host}:${CONFIG.mongo.port}`, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
     } else {
         client = new MongoClient(CONFIG.mongo.url, { useNewUrlParser: true, useUnifiedTopology: true });
     }
@@ -46,31 +49,57 @@ var mongo_connect = async function() {
 };
 // mongo_connect();
 
-exports.init_db = async function() {
+exports.init_db = async function () {
     logger.info('initialize db connection');
     try {
-        if(mongodb != null) {
+        if (mongodb != null) {
             return null;
         }
         await mongo_connect();
         logger.info('connected');
         return null;
-    } catch(err){
+    } catch (err) {
         logger.debug('Failed to init db', err);
         return err;
     }
 };
 exports.mongodb = mongodb;
-exports.mongo_users = function() {return mongo_users;};
-exports.mongo_groups = function() {return mongo_groups;};
-exports.mongo_events = function() {return mongo_events;};
-exports.mongo_reservations = function() {return mongo_reservations;};
-exports.mongo_databases = function() {return mongo_databases;};
-exports.mongo_web = function() {return mongo_web;};
-exports.mongo_projects = function() {return mongo_projects;};
-exports.mongo_tags = function() {return mongo_tags;};
-exports.mongo_pending_projects = function() {return mongo_pending_projects;};
-exports.mongo_oldusers = function() {return mongo_oldusers;};
-exports.mongo_oldgroups = function() {return mongo_oldgroups;};
-exports.mongo_others = function(coll) { return mongodb.collection(coll);};
-exports.mongo_pending_databases = function() {return mongo_pending_databases;};
+exports.mongo_users = function () {
+    return mongo_users;
+};
+exports.mongo_groups = function () {
+    return mongo_groups;
+};
+exports.mongo_events = function () {
+    return mongo_events;
+};
+exports.mongo_reservations = function () {
+    return mongo_reservations;
+};
+exports.mongo_databases = function () {
+    return mongo_databases;
+};
+exports.mongo_web = function () {
+    return mongo_web;
+};
+exports.mongo_projects = function () {
+    return mongo_projects;
+};
+exports.mongo_tags = function () {
+    return mongo_tags;
+};
+exports.mongo_pending_projects = function () {
+    return mongo_pending_projects;
+};
+exports.mongo_oldusers = function () {
+    return mongo_oldusers;
+};
+exports.mongo_oldgroups = function () {
+    return mongo_oldgroups;
+};
+exports.mongo_others = function (coll) {
+    return mongodb.collection(coll);
+};
+exports.mongo_pending_databases = function () {
+    return mongo_pending_databases;
+};

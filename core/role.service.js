@@ -23,8 +23,7 @@ async function is_admin(user) {
         }
         return false;
     }
-    if (CONFIG.general.admin.indexOf(user.uid) >= 0)
-    {
+    if (CONFIG.general.admin.indexOf(user.uid) >= 0) {
         return true;
     }
     if (CONFIG.general.admin_group) {

@@ -1,63 +1,59 @@
 <div>
-    <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
-    <div class="card bg-light">
-        <div class="card-header">
-            <h3>Event logs</h3>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive table-striped">
-            <p-table #dtp [value]="logs"
-                     [paginator]="true"
-                     [rows]="10"
-                     [showCurrentPageReport]="true"
-                     [rowsPerPageOptions]="[10,25,50]"
-                     [globalFilterFields]="['owner', 'action', 'logs']"
-                     [filterDelay]="0"
-                     sortMode="multiple"
-            >
-            <ng-template pTemplate="caption">
-              <div class="table-header">
-                <span class="p-input-icon-right">
-                  <i class="pi pi-search"></i>
-                  <input pInputText type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-                </span>
-              </div>
-            </ng-template>
-            <ng-template pTemplate="header">
-                <tr>
-                  <th>ID</th>
-                  <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
-                  <th pSortableColumn="date">Date <p-sortIcon field="date"></p-sortIcon></th>
-                  <th pSortableColumn="action">Action <p-sortIcon field="action"></p-sortIcon></th>
-                  <th>Logs</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-log>
-              <tr>
-                            <td (class)="get_status(log.status)">{{log._id}}</td>
-                            <td>{{log.owner}}</td>
-                            <td>{{log.date | date}}</td>
-                            <td>{{log.action}}</td>
-                            <td>
-                                <span *ngFor="let event of log.logs">
-                                    <div (click)="getlog(log._id, event)"><span [className]="(log.status && log.status > 0) ? 'label label-danger' : 'label label-primary'"  style="cursor: pointer;">{{event}}</span></div>
-                                </span>
-                            </td>
-                        </tr>
-            </ng-template>
-          </p-table>
-          </div>
-        </div>
+  <div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
+  <div class="card bg-light">
+    <div class="card-header">
+      <h3>Event logs</h3>
     </div>
+    <div class="card-body">
+      <div class="table-responsive table-striped">
+        <p-table #dtp [value]="logs" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['owner', 'action', 'logs']" [filterDelay]="0" sortMode="multiple">
+          <ng-template pTemplate="caption">
+            <div class="table-header">
+              <span class="p-input-icon-right">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+              </span>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th>ID</th>
+              <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
+              <th pSortableColumn="date">Date <p-sortIcon field="date"></p-sortIcon></th>
+              <th pSortableColumn="action">Action <p-sortIcon field="action"></p-sortIcon></th>
+              <th>Logs</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-log>
+            <tr>
+              <td (class)="get_status(log.status)">{{ log._id }}</td>
+              <td>{{ log.owner }}</td>
+              <td>{{ log.date | date }}</td>
+              <td>{{ log.action }}</td>
+              <td>
+                <span *ngFor="let event of log.logs">
+                  <div (click)="getlog(log._id, event)">
+                    <span [className]="log.status && log.status > 0 ? 'label label-danger' : 'label label-primary'" style="cursor: pointer">{{ event }}</span>
+                  </div>
+                </span>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div *ngIf="logcontent">
-    <div class="card bg-light">
-        <div class="card-header">
-            <h3><b>{{event}}</b> file content</h3>
-        </div>
-        <div class="card-body">
-            <div [innerHTML]="logcontent"></div>
-        </div>
+  <div class="card bg-light">
+    <div class="card-header">
+      <h3>
+        <b>{{ event }}</b> file content
+      </h3>
     </div>
+    <div class="card-body">
+      <div [innerHTML]="logcontent"></div>
+    </div>
+  </div>
 </div>
