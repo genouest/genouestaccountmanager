@@ -6,7 +6,7 @@ let conf = null;
 exports.get_conf = get_conf;
 
 // todo: maybe add a file in config with all the default value, load it and overide it with custom config
-function init () {
+function init() {
     if (!is_init) {
         conf = CONFIG;
         if (!conf.duration) {
@@ -27,14 +27,14 @@ function init () {
         }
         if (!conf.enable_ui) {
             conf.enable_ui = {
-                'messages': true,
-                'databases': true,
-                'tps': true,
-                'websites': true,
-                'u2f_key': true,
-                'ip': true,
-                'newsletters': true,
-                'log': true
+                messages: true,
+                databases: true,
+                tps: true,
+                websites: true,
+                u2f_key: true,
+                ip: true,
+                newsletters: true,
+                log: true
             };
         }
         conf.enable_ui.main_group = CONFIG.general.use_group_in_path;
@@ -42,18 +42,18 @@ function init () {
 
         if (!conf.project) {
             conf.project = {
-                'enable_group': true,
-                'default_size': 500,
-                'default_path': '/opt/project',
-                'default_expire': 360,
-                'allow_extend': false
+                enable_group: true,
+                default_size: 500,
+                default_path: '/opt/project',
+                default_expire: 360,
+                allow_extend: false
             };
         }
 
         if (!conf.reservation) {
             conf.reservation = {
-                'group_or_project': 'group',
-                'show_choice_in_ui': false
+                group_or_project: 'group',
+                show_choice_in_ui: false
             };
         }
 
@@ -62,7 +62,7 @@ function init () {
 }
 
 // todo: should replace all {const CONFIG = require('config');} by a call to this function
-function get_conf () {
+function get_conf() {
     init();
     return conf;
 }

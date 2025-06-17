@@ -6,15 +6,11 @@ import { environment } from '../environments/environment';
     providedIn: 'root'
 })
 export class ConfigService {
+    configuration: any;
 
-    configuration: any
-
-    constructor(private http: HttpClient) {
-    }
+    constructor(private http: HttpClient) {}
 
     get config(): any {
-        return this.http.get(
-            environment.apiUrl + '/conf',
-            {})
+        return this.http.get(environment.apiUrl + '/conf', {});
     }
 }

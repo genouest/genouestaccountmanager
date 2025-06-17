@@ -12,16 +12,16 @@ import { ProjectComponent } from './project/project.component';
 import { DatabasesComponent as AdminDatabaseComponent } from './admin/databases/databases.component';
 import { GroupsComponent as AdminGroupsComponent } from './admin/groups/groups.component';
 import { GroupComponent as AdminGroupComponent } from './admin/group/group.component';
-import { LogsComponent as AdminLogComponent} from './admin/logs/logs.component';
-import { MessagesComponent as AdminMessageComponent} from './admin/messages/messages.component';
-import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/projects.component';
-import { ProjectComponent as AdminProjectComponent} from './admin/project/project.component';
-import { UsersComponent as AdminUserComponent} from './admin/users/users.component';
-import { WebsitesComponent as AdminWebsiteComponent} from './admin/websites/websites.component';
-import { RegisteredInfoComponent } from "./info/RegisteredInfoComponent";
-import { PendingApprovalInfoComponent } from "./info/PendingApprovalInfoComponent";
-import { RenewInfoComponent } from "./info/RenewInfoComponent";
-import { PwdResetConfirmInfoComponent } from "./info/PwdResetConfirmInfoComponent";
+import { LogsComponent as AdminLogComponent } from './admin/logs/logs.component';
+import { MessagesComponent as AdminMessageComponent } from './admin/messages/messages.component';
+import { ProjectsComponent as AdminProjectsComponent } from './admin/projects/projects.component';
+import { ProjectComponent as AdminProjectComponent } from './admin/project/project.component';
+import { UsersComponent as AdminUserComponent } from './admin/users/users.component';
+import { WebsitesComponent as AdminWebsiteComponent } from './admin/websites/websites.component';
+import { RegisteredInfoComponent } from './info/RegisteredInfoComponent';
+import { PendingApprovalInfoComponent } from './info/PendingApprovalInfoComponent';
+import { RenewInfoComponent } from './info/RenewInfoComponent';
+import { PwdResetConfirmInfoComponent } from './info/PwdResetConfirmInfoComponent';
 import { RegisteredComponent } from './callback/registered/registered.component';
 import { PasswordResetConfirmComponent } from './callback/password-reset-confirm/password-reset-confirm.component';
 import { PendingAccountComponent } from './callback/pending-account/pending-account.component';
@@ -33,107 +33,77 @@ const routes: Routes = [
     {
         path: 'user/:id',
         component: UserComponent,
-        canActivate: [
-            AuthGuard
-        ]
+        canActivate: [AuthGuard]
     },
     {
         path: 'tps',
         component: TpsComponent,
-        canActivate: [
-            AuthGuard
-        ]
+        canActivate: [AuthGuard]
     },
     {
         path: 'project',
         component: ProjectComponent,
-        canActivate: [
-            AuthGuard
-        ]
+        canActivate: [AuthGuard]
     },
     {
         path: 'database',
         component: DatabaseComponent,
-        canActivate: [
-            AuthGuard
-        ]
+        canActivate: [AuthGuard]
     },
     {
         path: 'admin/user',
         component: AdminUserComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/group',
         component: AdminGroupsComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/group/:id',
         component: AdminGroupComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/project',
         component: AdminProjectsComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/stats',
         component: AdminStatComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/project/:id',
         component: AdminProjectComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/message',
         component: AdminMessageComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/database',
         component: AdminDatabaseComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/web',
         component: AdminWebsiteComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/log',
         component: AdminLogComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'admin/plugin/:id',
         component: AdminpluginComponent,
-        canActivate: [
-            AdminAuthGuard
-        ]
+        canActivate: [AdminAuthGuard]
     },
     {
         path: 'login',
@@ -186,10 +156,12 @@ const routes: Routes = [
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(
-        routes,
-        { enableTracing: false } // <-- debugging purposes only
-    )],
+    imports: [
+        RouterModule.forRoot(
+            routes,
+            { enableTracing: false } // <-- debugging purposes only
+        )
+    ],
     exports: [RouterModule],
     providers: [AuthGuard]
 })

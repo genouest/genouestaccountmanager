@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, Injectable, ErrorHandler } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -15,11 +15,11 @@ import { MyExpireConfirmComponent } from './my-expire-confirm/my-expire-confirm.
 import { TpsComponent } from './tps/tps.component';
 import { ProjectComponent } from './project/project.component';
 import { UsersComponent, MyStatusFilterPipe } from './admin/users/users.component';
-import { AdminStatComponent} from './admin/stats/stats.component';
+import { AdminStatComponent } from './admin/stats/stats.component';
 import { GroupsComponent } from './admin/groups/groups.component';
 import { GroupComponent } from './admin/group/group.component';
-import { ProjectsComponent as AdminProjectsComponent} from './admin/projects/projects.component';
-import { ProjectComponent as AdminProjectComponent} from './admin/project/project.component';
+import { ProjectsComponent as AdminProjectsComponent } from './admin/projects/projects.component';
+import { ProjectComponent as AdminProjectComponent } from './admin/project/project.component';
 import { MessagesComponent } from './admin/messages/messages.component';
 import { DatabasesComponent } from './admin/databases/databases.component';
 import { DatabaseComponent } from './database/database.component';
@@ -27,12 +27,12 @@ import { WebsitesComponent } from './admin/websites/websites.component';
 import { LogsComponent } from './admin/logs/logs.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { InfoComponent } from './info/info.component';
-import { RegisteredInfoComponent } from "./info/RegisteredInfoComponent";
-import { PendingApprovalInfoComponent } from "./info/PendingApprovalInfoComponent";
-import { RenewInfoComponent } from "./info/RenewInfoComponent";
-import { PwdResetConfirmInfoComponent } from "./info/PwdResetConfirmInfoComponent";
+import { RegisteredInfoComponent } from './info/RegisteredInfoComponent';
+import { PendingApprovalInfoComponent } from './info/PendingApprovalInfoComponent';
+import { RenewInfoComponent } from './info/RenewInfoComponent';
+import { PwdResetConfirmInfoComponent } from './info/PwdResetConfirmInfoComponent';
 import { PluginDirective, PluginComponent, TestPluginComponent, GalaxyPluginComponent, DataAccessPluginComponent, PopulateHomePluginComponent, GenostackPluginComponent, QuotasPluginComponent, GomailPluginComponent, AdminQuotaExamplePluginComponent } from './plugin/plugin.component';
-import { ProjectsComponent as UserProjectsComponent} from './user/projects/projects.component';
+import { ProjectsComponent as UserProjectsComponent } from './user/projects/projects.component';
 import { RegisteredComponent } from './callback/registered/registered.component';
 import { PasswordResetConfirmComponent } from './callback/password-reset-confirm/password-reset-confirm.component';
 import { UserExtendComponent } from './callback/user-extend/user-extend.component';
@@ -47,9 +47,9 @@ import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component'
 import { FlashComponent } from './utils/flash/flash.component';
 import { TagComponent } from './utils/tag/tag.component';
 import { UserLogsComponent } from './user/userlogs.component';
-import {TableModule} from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { environment } from '../environments/environment';
-import * as Sentry from "@sentry/browser";
+import * as Sentry from '@sentry/browser';
 
 if (environment.sentry) {
     Sentry.init({
@@ -61,10 +61,10 @@ if (environment.sentry) {
 export class SentryErrorHandler implements ErrorHandler {
     constructor() {}
     handleError(error) {
-        if (!environment.sentry && !environment.production) { 
-	  console.log(error.originalError || error)
-	  return 
-	}
+        if (!environment.sentry && !environment.production) {
+            console.log(error.originalError || error);
+            return;
+        }
         const eventId = Sentry.captureException(error.originalError || error);
         Sentry.showReportDialog({ eventId });
     }
@@ -135,8 +135,8 @@ export class SentryErrorHandler implements ErrorHandler {
         })
     ],
     providers: [
-        {provide: WindowWrapper, useFactory: getWindow, multi: true},
-        {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
+        { provide: WindowWrapper, useFactory: getWindow, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: ErrorHandler, useClass: SentryErrorHandler }
     ],
     bootstrap: [AppComponent],
@@ -151,4 +151,4 @@ export class SentryErrorHandler implements ErrorHandler {
         AdminQuotaExamplePluginComponent
     ]
 })
-export class AppModule { }
+export class AppModule {}

@@ -8,8 +8,7 @@ import { Component, OnInit } from '@angular/core';
 export class PendingApprovalInfoComponent implements OnInit {
     msg: string;
     constructor() {
-        this.msg = "Your account is waiting for admin approval.";
+        this.msg = 'Your account is waiting for admin approval.';
     }
-    ngOnInit() {
-    }
+    ngOnInit() {}
 }
