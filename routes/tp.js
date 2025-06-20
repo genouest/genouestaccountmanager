@@ -11,6 +11,8 @@ const rolsrv = require('../core/role.service.js');
 const tpssrv = require('../core/tps.service.js');
 
 const ObjectID = require('mongodb').ObjectID;
+const cfgsrv = require('../core/config.service.js');
+let my_conf = cfgsrv.get_conf();
 
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
@@ -65,6 +67,7 @@ router.post('/tp', async function(req, res) {
         res.status(403).send({message: 'Tell us why you need some tp accounts'});
         return;
     }
+
     tpssrv.tp_reservation(
         user.uid,
         req.body.from,
@@ -75,6 +78,22 @@ router.post('/tp', async function(req, res) {
         req.body.name
     ).then(function(reservation){
         res.send({reservation: reservation, message: 'Reservation done'});
+        if(my_conf.tp && my_conf.tp.notify_reservation_request){
+            try {
+                tpssrv.send_admin_mail_tp_reservation_created(
+                    user.uid,
+                    req.body.from,
+                    req.body.to,
+                    req.body.quantity,
+                    req.body.about,
+                    req.body.name
+                );
+            } catch (error) {
+                logger.error(error);
+                res.status(500).send({message: 'Error sending mail to admins for confirmation'});
+                return;
+            }
+        }
         return;
     });
 });

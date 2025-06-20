@@ -115,6 +115,7 @@ const metricsMiddleware = promBundle({
         ['^/plugin/.*', '/plugin/#name'],
         ['^/quota/.*', '/quota/#name'],
         ['^/tp/.*', '/tp/#name'],
+        ['^/notify/.*', '/notify/#name'],
         ['^/tags/.*', '/tags'],
         ['^/auth/.*', '/auth/#name'],
         ['^/u2f/.*', '/u2f'],
