@@ -112,14 +112,17 @@ router.post('/user/:id/notify', async function(req, res) {
         res.status(404).send({ message: 'User does not exist' });
         return;
     }
+    if (
+        !req.body.message || req.body.message.trim() === '' ||
+        !req.body.subject || req.body.subject.trim() === '' ||
+        !user.email || user.email.trim() === ''
+    ) {
+        return res.status(403).send({ message: 'Invalid parameters' });
+    }
     let msg_destinations = [user.email];
     if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
-    if (req.body.message.trim() === '' || req.body.subject.trim() === '' || msg_destinations == []) {
-        return res.status(403).send({ message: 'Invalid parameters' });
-    }
-
     try {
         await maisrv.send_notif_mail({
             'name': null,
