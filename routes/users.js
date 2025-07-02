@@ -112,20 +112,23 @@ router.post('/user/:id/notify', async function(req, res) {
         res.status(404).send({ message: 'User does not exist' });
         return;
     }
-    let message = req.body.message;
-    let subject = req.body.subject;
+    if (
+        !req.body.message || req.body.message.trim() === '' ||
+        !req.body.subject || req.body.subject.trim() === '' ||
+        !user.email || user.email.trim() === ''
+    ) {
+        return res.status(403).send({ message: 'Invalid parameters' });
+    }
     let msg_destinations = [user.email];
     if (user.send_copy_to_support) {
         msg_destinations.push(CONFIG.general.support);
     }
-
-
     try {
         await maisrv.send_notif_mail({
             'name': null,
             'destinations': msg_destinations,
-            'subject': subject,
-            'markdown': message,
+            'subject': req.body.subject,
+            'markdown': req.body.message,
         }, { });
     } catch (error) {
         logger.error(error);
@@ -135,7 +138,7 @@ router.post('/user/:id/notify', async function(req, res) {
     await dbsrv.mongo_events().insertOne({
         'owner': user.uid,
         'date': new Date().getTime(),
-        'action': 'message: ' + subject,
+        'action': 'message: ' + req.body.subject,
         'logs': []
     });
 
