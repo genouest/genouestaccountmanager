@@ -1817,7 +1817,7 @@ router.delete('/user/:id/project/:project', async function(req, res) {
     }
 
     try {
-        await usrsrv.remove_user_from_project(oldproject, uid, session_user.uid, force);
+        await usrsrv.remove_user_from_project(oldproject, uid, session_user.uid, session_user.is_admin, force);
     } catch (e) {
         logger.error(e);
         if (e.code && e.message) {
