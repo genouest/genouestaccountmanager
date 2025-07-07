@@ -26,19 +26,14 @@ function get_mail_config () {
 async function gen_mail_opt (options, variables)
 {
     var MAIL_CONFIG = get_mail_config();
-    // todo: check if each option exist and use default value
-    let name = options['name'];
-    let destinations = options['destinations'];
-    let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
-
     //find message
     let message = undefined;
-    if (name && CONFIG.message[name]) {
-        message = CONFIG.message[name].join('\n');
+    if (options['name'] && CONFIG.message[options['name']]) {
+        message = CONFIG.message[options['name']].join('\n');
     }
     let html_message = message;
-    if (name && CONFIG.message[name + '_html']) {
-        html_message = CONFIG.message[name + '_html'].join('');
+    if (options['name'] && CONFIG.message[options['name'] + '_html']) {
+        html_message = CONFIG.message[options['name'] + '_html'].join('');
     }
 
     if (options['markdown'] !== undefined && options['markdown'] != '') {
@@ -91,8 +86,8 @@ async function gen_mail_opt (options, variables)
     // set mailOptions
     let mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
-        destinations:  destinations, // list of receivers
-        subject: subject, // Subject line
+        destinations:  options['destinations'], // list of receivers
+        subject: GENERAL_CONFIG.name + ' ' + options['subject'], // Subject line
         message: message, // plaintext body
         html_message: html_message // html body
     };
@@ -119,5 +114,4 @@ async function send_notif_mail (options, variables) {
 
 // exports mail functions
 exports.get_mail_config = get_mail_config;
-exports.gen_mail_opt = gen_mail_opt;
 exports.send_notif_mail = send_notif_mail;
