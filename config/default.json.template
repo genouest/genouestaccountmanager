@@ -376,6 +376,13 @@
       "Expiration date: #EXP#",
       "Please review it, and keep #UID# informed"
     ],
+    "ask_database_html": [
+      "<p>#UID# has requested a new database '#NAME#' in My</p>",
+      "<p>Size needed: #SIZE# GB</p>",
+      "<p>Usage: #USAGE#</p>",
+      "<p>Expiration date: #EXP#</p>",
+      "<p>Please review it, and keep #UID# informed</p>"
+    ],
     "database_creation": [
         "The MySQL database you requested (#DBNAME#, owned by #OWNER#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
         "\tHost: #DBHOST#\t\r\n",

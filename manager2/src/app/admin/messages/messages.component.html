@@ -54,7 +54,7 @@
       </div>
     </div>
     <!-- Button trigger modal -->
-    <button type="button" *ngIf="message && (input_type == 'HTML' || input_type == 'Markdown')" class="p-button p-button-sm p-button-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">Viewer</button>
+    <button type="button" *ngIf="message && subject && (input_type == 'HTML' || input_type == 'Markdown')" class="p-button p-button-sm p-button-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">Viewer</button>
 
     <button type="button" *ngIf="mailing_lists && mailing_lists.length > 0" class="p-button p-button-sm p-button-secondary" (click)="send()">Send</button>
     <div class="row">

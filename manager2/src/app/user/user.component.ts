@@ -584,6 +584,10 @@ export class UserComponent implements OnInit {
 
     sendmail() {
         console.log('should send mail', { subject: this.notify_subject, msg: this.notify_message });
+        if (this.notify_subject.trim() == '' || this.notify_message.trim() == '') {
+            this.notify_err = 'Missing subject or message';
+            return;
+        }
         this.userService
             .notify(this.user.uid, {
                 subject: this.notify_subject,

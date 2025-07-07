@@ -206,8 +206,7 @@ async function delete_tp_user(user) {
     try {
         await udbsrv.delete_dbs(user);
         await fwebs.delete_webs(user);
-        await usrsrv.delete_user(user);
-        await plgsrv.run_plugins('remove', user.uid, user, 'auto@tp');
+        await usrsrv.delete_user(user, 'auto@tp');
     } catch (exception) {
         logger.error(exception);
     }

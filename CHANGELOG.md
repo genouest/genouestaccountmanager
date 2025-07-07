@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.33 (Unreleased)
+
+* Ensure emails have name, destination and subject
+* Fix bug in TP account deletion
+
 ## 1.4.32 (2025-04-22)
 
 * Fix error when subscribing / unsubscribing to email
