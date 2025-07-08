@@ -1,72 +1,69 @@
-    <div>{{msg}}</div>
-    <div class="card bg-light">
-      <div class="card-header">
-        <h3>Web sites</h3>
-      </div>
-      <div class="card-body">
-          <div class="table-responsive table-striped">
-          <p-table #dtp [value]="websites"
-                      [paginator]="true"
-                      [rows]="10"
-                      [showCurrentPageReport]="true"
-                      [rowsPerPageOptions]="[10,25,50]"
-                      [globalFilterFields]="['name', 'description', 'owner', 'url']"
-                      [filterDelay]="0"
-                      sortMode="multiple"
-          >
-        <ng-template pTemplate="caption">
-            <div class="table-header">
-                <span class="p-input-icon-right">
-                    <i class="pi pi-search"></i>
-                    <input pInputText id="search_websites" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
-                </span>
-            </div>
-        </ng-template>
-            <ng-template pTemplate="header">
-                <tr>
-                  <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
-                  <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
-                  <th pSortableColumn="url">URL <p-sortIcon field="url"></p-sortIcon></th>
-                  <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-web>
-                  <tr>
-                    <td><span>{{web.name}}</span></td>
-                    <td><a routerLink="/user/{{web.owner}}"><span class="p-button p-button-sm p-button-primary">{{web.owner}}</span></a></td>
-                    <td>{{web.url}}</td>
-                    <td>{{web.description}}</td>
-                  </tr>
-            </ng-template>
-          </p-table>
-          </div>
-      </div>
+<div>{{ msg }}</div>
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Web sites</h3>
   </div>
-
-    <div class="alert alert-success" *ngIf="chowner_msg">{{chowner_msg}}</div>
-    <div class="alert alert-danger" *ngIf="chowner_err_msg">{{chowner_err_msg}}</div>
-
-      <div class="card bg-light">
-
-          <div class="card-header">
-            <h3>Change web site owner</h3>
+  <div class="card-body">
+    <div class="table-responsive table-striped">
+      <p-table #dtp [value]="websites" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['name', 'description', 'owner', 'url']" [filterDelay]="0" sortMode="multiple">
+        <ng-template pTemplate="caption">
+          <div class="table-header">
+            <span class="p-input-icon-right">
+              <i class="pi pi-search"></i>
+              <input pInputText id="search_websites" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Global Search" />
+            </span>
           </div>
-          <div class="card-body">
-              <div class="col-sm-2">
-                  <label for="owner_web_name">Website</label>
-                  <select id="owner_web_name" [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_web_name" class="form-control">
-                    <option *ngFor="let web of websites" [ngValue]="web">{{web.name}}</option>
-                  </select>
-              </div>
-              <div class="col-sm-2">
-                  <label for="owner_web_owner">Website owner</label>
-                  <select [ngModelOptions]="{standalone: true}" [(ngModel)]="owner_web_owner" id="owner_web_owner" class="form-control">
-                      <option *ngFor="let user of users" [ngValue]="user">{{user.uid}}</option>
-                  </select>
-              </div>
-              <div class="col-sm-2">
-                  <label style="opacity: 0;">Modify</label>
-                  <button type="button" class="p-button p-button-sm p-button-secondary" (click)="change_owner()" class="form-control">Modify</button>
-              </div>
-          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+            <th pSortableColumn="owner">Owner <p-sortIcon field="owner"></p-sortIcon></th>
+            <th pSortableColumn="url">URL <p-sortIcon field="url"></p-sortIcon></th>
+            <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-web>
+          <tr>
+            <td>
+              <span>{{ web.name }}</span>
+            </td>
+            <td>
+              <a routerLink="/user/{{ web.owner }}">
+                <span class="p-button p-button-sm p-button-primary">{{ web.owner }}</span>
+              </a>
+            </td>
+            <td>{{ web.url }}</td>
+            <td>{{ web.description }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
+  </div>
+</div>
+
+<div class="alert alert-success" *ngIf="chowner_msg">{{ chowner_msg }}</div>
+<div class="alert alert-danger" *ngIf="chowner_err_msg">{{ chowner_err_msg }}</div>
+
+<div class="card bg-light">
+  <div class="card-header">
+    <h3>Change web site owner</h3>
+  </div>
+  <div class="card-body">
+    <div class="col-sm-2">
+      <label for="owner_web_name">Website</label>
+      <select id="owner_web_name" [ngModelOptions]="{ standalone: true }" [(ngModel)]="owner_web_name" class="form-control">
+        <option *ngFor="let web of websites" [ngValue]="web">{{ web.name }}</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <label for="owner_web_owner">Website owner</label>
+      <select [ngModelOptions]="{ standalone: true }" [(ngModel)]="owner_web_owner" id="owner_web_owner" class="form-control">
+        <option *ngFor="let user of users" [ngValue]="user">{{ user.uid }}</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <label style="opacity: 0">Modify</label>
+      <button type="button" class="p-button p-button-sm p-button-secondary" (click)="change_owner()" class="form-control">Modify</button>
+    </div>
+  </div>
+</div>

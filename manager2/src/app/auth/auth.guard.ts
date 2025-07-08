@@ -8,15 +8,12 @@ import { Router } from '@angular/router';
     providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
-
-    constructor(
-        private authService: AuthService,
-        private router: Router
-    ) {}
+    constructor(private authService: AuthService, private router: Router) {}
 
     canActivate(
         next: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+        state: RouterStateSnapshot
+    ): Observable<boolean> | Promise<boolean> | boolean {
         if (!this.authService.isLoggedIn) {
             this.router.navigate(['/login']);
             return false;
@@ -29,20 +26,17 @@ export class AuthGuard implements CanActivate {
     providedIn: 'root'
 })
 export class AdminAuthGuard implements CanActivate {
-
-    constructor(
-        private authService: AuthService,
-        private router: Router
-    ) {}
+    constructor(private authService: AuthService, private router: Router) {}
 
     canActivate(
         next: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-        if (!this.authService.isLoggedIn ) {
+        state: RouterStateSnapshot
+    ): Observable<boolean> | Promise<boolean> | boolean {
+        if (!this.authService.isLoggedIn) {
             this.router.navigate(['/login']);
             return false;
         }
-        if(! this.authService.profile.is_admin) {
+        if (!this.authService.profile.is_admin) {
             this.router.navigate(['/login']);
             return false;
         }

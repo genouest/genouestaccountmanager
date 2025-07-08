@@ -9,85 +9,85 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          Do you wish to logout?
-        </div>
+        <div class="modal-body">Do you wish to logout?</div>
         <div class="modal-footer">
           <button type="button" class="p-button p-button-sm p-button-outline-secondary" data-dismiss="modal">Stay logged in</button>
-          <button type="button " routerLink="/logout" data-dismiss="modal" class="p-button p-button-sm p-button-danger ">Logout</button>
+          <button type="button " routerLink="/logout" data-dismiss="modal" class="p-button p-button-sm p-button-danger">Logout</button>
         </div>
       </div>
     </div>
   </div>
   <nav class="navbar navbar-expand-lg navbar-fixed-top navbar-dark bg-dark navbar-inverse">
     <a class="navbar-brand" routerLink="/">
-      <img class="d-inline-block align-top" style="width: 70px; height: 50px;" src="assets/images/logo-brand.png" alt="">
-          {{ config.name }} Account Manager
+      <img class="d-inline-block align-top" style="width: 70px; height: 50px" src="assets/images/logo-brand.png" alt="" />
+      {{ config.name }} Account Manager
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ml-auto">
-          <li *ngIf="isLogged && usages.length > 0" class="nav-item dropdown">
-            <a href="" id="dropdownMenu0" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="oi oi-bar-chart"></i> Usage</a>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenu0">
-                  <li *ngFor="let usage of usages"><a class="dropdown-item" href="{{usage.link}}" rel="noopener noreferrer" target="_blank">{{usage.name}}</a></li>
-            </ul>
-          </li>
+      <ul class="navbar-nav ml-auto">
+        <li *ngIf="isLogged && usages.length > 0" class="nav-item dropdown">
+          <a href="" id="dropdownMenu0" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="oi oi-bar-chart"></i> Usage</a>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu0">
+            <li *ngFor="let usage of usages">
+              <a class="dropdown-item" href="{{ usage.link }}" rel="noopener noreferrer" target="_blank">{{ usage.name }}</a>
+            </li>
+          </ul>
+        </li>
 
-          <li *ngIf="isLogged && config.enable_ui && config.enable_ui.tps" class="nav-item">
-            <a class="nav-link" routerLink="/tps">
-              <i class="glyphicon glyphicon-calendar"></i>
-              TP reservations
-            </a>
-          </li>
-          <li *ngIf="isLogged" class="nav-item">
-            <a class="nav-link" routerLink="/user/{{user.uid}}">
-              <i class="glyphicon glyphicon-user"></i>
-              My profile
-            </a>
-          </li>
-          <li *ngIf="isLogged" class="nav-item">
-            <a class="nav-link" routerLink="/project">
-              <i class="glyphicon glyphicon-briefcase"></i>
-              My projects
-            </a>
-          </li>
-          <li *ngIf="isLogged && config.enable_ui && config.enable_ui.databases" class="nav-item">
-            <a class="nav-link" routerLink="/database">
-              <i class="glyphicon glyphicon-briefcase"></i>
-              My databases
-            </a>
-          </li>
+        <li *ngIf="isLogged && config.enable_ui && config.enable_ui.tps" class="nav-item">
+          <a class="nav-link" routerLink="/tps">
+            <i class="glyphicon glyphicon-calendar"></i>
+            TP reservations
+          </a>
+        </li>
+        <li *ngIf="isLogged" class="nav-item">
+          <a class="nav-link" routerLink="/user/{{ user.uid }}">
+            <i class="glyphicon glyphicon-user"></i>
+            My profile
+          </a>
+        </li>
+        <li *ngIf="isLogged" class="nav-item">
+          <a class="nav-link" routerLink="/project">
+            <i class="glyphicon glyphicon-briefcase"></i>
+            My projects
+          </a>
+        </li>
+        <li *ngIf="isLogged && config.enable_ui && config.enable_ui.databases" class="nav-item">
+          <a class="nav-link" routerLink="/database">
+            <i class="glyphicon glyphicon-briefcase"></i>
+            My databases
+          </a>
+        </li>
 
-          <li *ngIf="user && user.is_admin" class="nav-item dropdown">
-            <a href="" id="dropdownMenu1" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-cog"></i> Admin</a>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                <li><a class="dropdown-item" routerLink="/register">New Account</a></li>
-                <li><a class="dropdown-item" routerLink="/admin/user">Users</a></li>
-              <li><a class="dropdown-item" routerLink="/admin/group">Groups</a></li>
-              <li><a class="dropdown-item" routerLink="/admin/project">Projects</a></li>
-              <li *ngIf="config.enable_ui && config.enable_ui.messages"><a class="dropdown-item" routerLink="/admin/message">Send message</a></li>
-              <li *ngIf="config.enable_ui && config.enable_ui.databases" ><a class="dropdown-item" routerLink="/admin/database">Databases</a></li>
-              <li *ngIf="config.enable_ui && config.enable_ui.websites" ><a class="dropdown-item" routerLink="/admin/web">Web sites</a></li>
-              <li><a class="dropdown-item" routerLink="/admin/log">Logs</a></li>
-              <li><a class="dropdown-item" routerLink="/admin/stats">Stats</a></li>
-              <li *ngFor="let plugin of plugins">
-                <a class="dropdown-item" routerLink="/admin/plugin/{{plugin.name}}">{{plugin.display_name}}</a>
-              </li>
-            </ul>
-          </li>
-          <li *ngIf="!isLogged" class="nav-item">
-            <a class="nav-link" routerLink="/login"><span class="oi oi-person" aria-hidden="true" title="login"> </span> Sign In</a>
-          </li>
-          <li *ngIf="!isLogged" class="nav-item">
-            <a class="nav-link" routerLink="/register"><span class="oi oi-plus" aria-hidden="true" title="register"> </span> Sign Up</a>
-          </li>
-          <li *ngIf="isLogged" class="nav-item">
-            <a class="nav-link" href="#" data-toggle="modal" data-target="#confirmLogout">Log Out</a>
-          </li>
-        </ul>
+        <li *ngIf="user && user.is_admin" class="nav-item dropdown">
+          <a href="" id="dropdownMenu1" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-cog"></i> Admin</a>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li><a class="dropdown-item" routerLink="/register">New Account</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/user">Users</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/group">Groups</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/project">Projects</a></li>
+            <li *ngIf="config.enable_ui && config.enable_ui.messages"><a class="dropdown-item" routerLink="/admin/message">Send message</a></li>
+            <li *ngIf="config.enable_ui && config.enable_ui.databases"><a class="dropdown-item" routerLink="/admin/database">Databases</a></li>
+            <li *ngIf="config.enable_ui && config.enable_ui.websites"><a class="dropdown-item" routerLink="/admin/web">Web sites</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/log">Logs</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/stats">Stats</a></li>
+            <li *ngFor="let plugin of plugins">
+              <a class="dropdown-item" routerLink="/admin/plugin/{{ plugin.name }}">{{ plugin.display_name }}</a>
+            </li>
+          </ul>
+        </li>
+        <li *ngIf="!isLogged" class="nav-item">
+          <a class="nav-link" routerLink="/login"><span class="oi oi-person" aria-hidden="true" title="login"> </span> Sign In</a>
+        </li>
+        <li *ngIf="!isLogged" class="nav-item">
+          <a class="nav-link" routerLink="/register"><span class="oi oi-plus" aria-hidden="true" title="register"> </span> Sign Up</a>
+        </li>
+        <li *ngIf="isLogged" class="nav-item">
+          <a class="nav-link" href="#" data-toggle="modal" data-target="#confirmLogout">Log Out</a>
+        </li>
+      </ul>
     </div>
   </nav>
   <div class="col-sm-12">

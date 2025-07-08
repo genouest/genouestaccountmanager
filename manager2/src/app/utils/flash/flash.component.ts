@@ -5,7 +5,6 @@
  */
 import { Component, OnInit, Injectable, ChangeDetectorRef } from '@angular/core';
 
-
 @Injectable({
     providedIn: 'root'
 })
@@ -20,7 +19,6 @@ export class FlashMessagesService {
     styleUrls: ['./flash.component.css']
 })
 export class FlashComponent implements OnInit {
-
     private _defaults = {
         text: 'default message',
         closeOnClick: false,
@@ -41,36 +39,33 @@ export class FlashComponent implements OnInit {
     ngOnInit() {}
 
     show(text?: string, options = {}): void {
-
         let defaults = {
             timeout: 2500,
             closeOnClick: false,
             showCloseBtn: false,
             cssClass: '',
-            text: "default message"
+            text: 'default message'
         };
-
-        for (var attrname in options) { (<any>defaults)[attrname] = (<any>options)[attrname]; }
-
+        for (var attrname in options) {
+            (<any>defaults)[attrname] = (<any>options)[attrname];
+        }
         let message = new FlashMessage(text, defaults.cssClass, defaults.closeOnClick, defaults.showCloseBtn);
-
         message.timer = window.setTimeout(() => {
             this._remove(message);
             this._cdRef.detectChanges();
         }, defaults.timeout);
-
         this.messages.push(message);
         this._cdRef.detectChanges();
     }
 
-    close(message:FlashMessage): void {
+    close(message: FlashMessage): void {
         clearTimeout(message.timer);
         this._remove(message);
         this._cdRef.detectChanges();
     }
 
-    alertClicked(message:FlashMessage): void {
-        if(message.closeOnClick){
+    alertClicked(message: FlashMessage): void {
+        if (message.closeOnClick) {
             this.close(message);
         }
     }
@@ -82,14 +77,12 @@ export class FlashComponent implements OnInit {
     private _remove(message: FlashMessage) {
         this.messages = this.messages.filter((msg) => msg.id !== message.id);
     }
-
 }
-
 
 export class FlashMessage {
     static nextId = 0;
 
-    id: number = (FlashMessage.nextId++);
+    id: number = FlashMessage.nextId++;
     text: string = 'default text';
     cssClass: string = '';
     closeOnClick: boolean = false;

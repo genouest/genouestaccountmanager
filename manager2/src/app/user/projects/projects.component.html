@@ -1,65 +1,71 @@
 <div *ngIf="add_to_project_msg" class="alert alert-success alert-dismissible" role="alert">
-  {{add_to_project_msg}}
+  {{ add_to_project_msg }}
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true">&times;</span>
   </button>
 </div>
 <div *ngIf="add_to_project_grp_msg" class="alert alert-success alert-dismissible" role="alert">
-  {{add_to_project_grp_msg}}
+  {{ add_to_project_grp_msg }}
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true">&times;</span>
   </button>
 </div>
 <div *ngIf="add_to_project_error_msg" class="alert alert-warning alert-dismissible" role="alert">
-  {{add_to_project_error_msg}}
+  {{ add_to_project_error_msg }}
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true">&times;</span>
   </button>
 </div>
 <div *ngIf="remove_from_project_msg" class="alert alert-success alert-dismissible" role="alert">
-  {{remove_from_project_msg}}
+  {{ remove_from_project_msg }}
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true">&times;</span>
   </button>
 </div>
 <div *ngIf="remove_from_project_error_msg" class="alert alert-warning alert-dismissible" role="alert">
-  {{remove_from_project_error_msg}}
+  {{ remove_from_project_error_msg }}
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true">&times;</span>
   </button>
 </div>
 
 <div class="form-group row">
   <div class="col-sm-6">
-      <label for="newproject" class="col-form-label">Projects</label>
-      <select id="newproject" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.newproject" class="form-control">
-        <option *ngFor="let project of projects" [ngValue]="project">{{project.id}}</option>
-      </select>
+    <label for="newproject" class="col-form-label">Projects</label>
+    <select id="newproject" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.newproject" class="form-control">
+      <option *ngFor="let project of projects" [ngValue]="project">{{ project.id }}</option>
+    </select>
   </div>
 </div>
 <div class="form-group">
   <button type="button" class="p-button p-button-sm p-button-primary" (click)="add_to_project()">Add to project</button>
 </div>
-<hr/>
+<hr />
 <div class="table-responsive">
   <table *ngIf="user_projects.length > 0" class="table table-striped">
-      <thead>
-          <th>Name</th>
-          <th>Group</th>
-          <th>Owner?</th>
-          <th>Manager?</th>
-          <th>User in group?</th>
-          <th></th>
-      </thead>
-      <tbody>
-          <tr *ngFor="let project of user_projects">
-              <td><a routerLink="/admin/project/{{project.id}}"><span class="p-button p-button-sm p-button-primary">{{project.id}}</span></a></td>
-              <td><span>{{project.group}}</span></td>
-              <td><span *ngIf="project.is_owner">x</span></td>
-              <td><span *ngIf="project.is_manager">x</span></td>
-              <td><span *ngIf="project.is_member">x</span></td>
-              <td><app-my-delete-confirm [onConfirm]="remove_from_project" [data]="project.id"></app-my-delete-confirm></td>
-          </tr>
-      </tbody>
+    <thead>
+      <th>Name</th>
+      <th>Group</th>
+      <th>Owner?</th>
+      <th>Manager?</th>
+      <th>User in group?</th>
+      <th></th>
+    </thead>
+    <tbody>
+      <tr *ngFor="let project of user_projects">
+        <td>
+          <a routerLink="/admin/project/{{ project.id }}">
+            <span class="p-button p-button-sm p-button-primary">{{ project.id }}</span>
+          </a>
+        </td>
+        <td>
+          <span>{{ project.group }}</span>
+        </td>
+        <td><span *ngIf="project.owner">x</span></td>
+        <td><span *ngIf="project.is_manager">x</span></td>
+        <td><span *ngIf="project.member">x</span></td>
+        <td><app-my-delete-confirm [onConfirm]="remove_from_project" [data]="project.id"></app-my-delete-confirm></td>
+      </tr>
+    </tbody>
   </table>
 </div>

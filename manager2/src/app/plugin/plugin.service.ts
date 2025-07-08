@@ -6,16 +6,16 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class Plugin {
-    name: string
-    url: string
-    display_name: string
-    admin: boolean = false
+    name: string;
+    url: string;
+    display_name: string;
+    admin: boolean = false;
 
     constructor(name: string = '', url: string = '', display: string = '', admin: boolean = false) {
-        this.name = name
-        this.url = url
-        this.display_name = display
-        this.admin = admin
+        this.name = name;
+        this.url = url;
+        this.display_name = display;
+        this.admin = admin;
     }
 }
 
@@ -23,8 +23,7 @@ export class Plugin {
     providedIn: 'root'
 })
 export class PluginService {
-
-    constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(private http: HttpClient, private authService: AuthService) {}
 
     list(): Observable<Plugin[]> {
         //let user = this.authService.profile;
@@ -33,24 +32,19 @@ export class PluginService {
             //  'x-api-key': user.apikey
             //}),
         };
-
-        return this.http.get(environment.apiUrl + '/plugin', httpOptions)
-            .pipe(map((response: any) => {
-                return response.map(item => {
-                    return new Plugin(
-                        item.name,
-                        item.url,
-                        item.display_name,
-                        item.admin
-                    );
+        return this.http.get(environment.apiUrl + '/plugin', httpOptions).pipe(
+            map((response: any) => {
+                return response.map((item) => {
+                    return new Plugin(item.name, item.url, item.display_name, item.admin);
                 });
-            }));
+            })
+        );
     }
 
-    dateConvert = function timeConverter(tsp){
+    dateConvert = function timeConverter(tsp) {
         var a = new Date(tsp);
         return a.toLocaleDateString();
-    }
+    };
 
     get(pluginName: string, user: string) {
         //let suser = this.authService.profile;
@@ -59,8 +53,7 @@ export class PluginService {
             //  'x-api-key': suser.apikey
             //}),
         };
-
-        return this.http.get(environment.apiUrl + '/plugin/' + pluginName + '/' + user, httpOptions)
+        return this.http.get(environment.apiUrl + '/plugin/' + pluginName + '/' + user, httpOptions);
     }
 
     set(pluginName: string, user: string, data: any) {
@@ -70,7 +63,6 @@ export class PluginService {
             //  'x-api-key': suser.apikey
             //}),
         };
-
-        return this.http.post(environment.apiUrl + '/plugin/' + pluginName + '/' + user, data, httpOptions)
+        return this.http.post(environment.apiUrl + '/plugin/' + pluginName + '/' + user, data, httpOptions);
     }
 }

@@ -1,111 +1,81 @@
 <div class="loginform">
-    <div class="row justify-content-center">
-            <img class="profile-img" src="assets/images/logo-login.png" alt=""/>
-    </div>
-    <div class="row justify-content-center">
-            <h1 class="text-center login-title"><strong>Sign in to access your account</strong></h1>
-    </div>
-    <div class="row justify-content-center">
-        <div *ngIf="! double_auth">
-            <form class="form-signin form-group">
-                <div class="form-group">
-                    <input
-                        [ngModelOptions]="{standalone: true}"
-                        [(ngModel)]="userId"
-                        id="sign_user_id"
-                        type="text"
-                        class="form-control"
-                        placeholder="User id"
-                        autocomplete="username"
-                        required
-                        autofocus
-                    />
-                </div>
-                <div class="form-group password-field">
-                    <input
-                        [ngModelOptions]="{standalone: true}"
-                        [(ngModel)]="password"
-                        [type]="passwordVisible ? 'text' : 'password'"
-                        id="sign_password"
-                        placeholder="Password"
-                        class="form-control password-input"
-                        autocomplete="current-password"
-                        required
-                    />
-                    <i
-                        class="toggle-password pi"
-                        [ngClass]="passwordVisible ? 'pi-eye-slash' : 'pi-eye'"
-                        (click)="togglePasswordVisibility()"
-                        aria-label="Toggle password visibility"
-                        role="button"
-                        tabindex="0"
-                    ></i>          
-                </div>
-                <div class="form-group">
-                    <button
-                        class="p-button p-button-lg p-button-primary btn-block"
-                        [ngStyle]="{ display: 'block' }"
-                        type="submit"
-                        (click)="login()"
-                    >
-                        Sign in
-                    </button>
-                </div>
-                <div class="alert alert-warning" *ngIf="msg">{{ msg }}</div>
-                <div class="form-group">
-                    <span class="lost">Lost your password?</span>
-                    <button class="btn btn-sm" (click)="password_reset_request()">RESET</button>
-                </div>
-            </form>
+  <div class="row justify-content-center">
+    <img class="profile-img" src="assets/images/logo-login.png" alt="" />
+  </div>
+  <div class="row justify-content-center">
+    <h1 class="text-center login-title"><strong>Sign in to access your account</strong></h1>
+  </div>
+  <div class="row justify-content-center">
+    <div *ngIf="!double_auth">
+      <form class="form-signin form-group">
+        <div class="form-group">
+          <input [ngModelOptions]="{ standalone: true }" [(ngModel)]="userId" id="sign_user_id" type="text" class="form-control" placeholder="User id" autocomplete="username" required autofocus />
         </div>
-            <div *ngIf="double_auth">
-                <form class="form-signin">
-                    <div class="alert alert-warning">Double authentication is needed for admin access!!</div>
-                    <hr>
-                    <div class="alert alert-info"><div class="glyphicon glyphicon-save"></div> Insert your u2f device and press device</div>
-                    <div class="alert alert-success" *ngIf="msg">{{msg}}</div>
-                    <div class="alert alert-danger" *ngIf="error_msg">{{error_msg}}</div>
-                    <div class="row" *ngIf="userData && userData.otp && userData.otp.secret">
-                        <div class="col-md-12">
-                            <h4 class="text-center login-title"><strong>or</strong></h4>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <input autocomplete="one-time-code" [ngModelOptions]="{standalone: true}" [(ngModel)]="otp_token" type="text" class="form-control" placeholder="OTP token" autofocus/>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                                <button type="button" class="p-button p-button-sm p-button--primary" (click)="manageOTP()">Check OTP token</button>
-                        </div>
-                    </div>
-                    <h4 class="text-center login-title"><strong>or</strong></h4>
-
-                    <div class="alert alert-info"><div class="glyphicon glyphicon-envelope"></div> Request a temporary email token</div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                                <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_email_token()">Request</button>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <input autocomplete="one-time-code" [ngModelOptions]="{standalone: true}" [(ngModel)]="mail_token" type="text" class="form-control" placeholder="Token received" autofocus/>
-                            </div>
-                        </div>
-                    </div>
-                    <button *ngIf="mail_token" type="button" class="p-button p-button-lg p-button-primary btn-block" [ngStyle]="{'display': 'block'}" (click)="validate_email_token()">Check token</button>
-                </form>
+        <div class="form-group password-field">
+          <input [ngModelOptions]="{ standalone: true }" [(ngModel)]="password" [type]="passwordVisible ? 'text' : 'password'" id="sign_password" placeholder="Password" class="form-control password-input" autocomplete="current-password" required />
+          <i class="toggle-password pi" [ngClass]="passwordVisible ? 'pi-eye-slash' : 'pi-eye'" (click)="togglePasswordVisibility()" aria-label="Toggle password visibility" role="button" tabindex="0"></i>
+        </div>
+        <div class="form-group">
+          <button class="p-button p-button-lg p-button-primary btn-block" [ngStyle]="{ display: 'block' }" type="submit" (click)="login()">Sign in</button>
+        </div>
+        <div class="alert alert-warning" *ngIf="msg">{{ msg }}</div>
+        <div class="form-group">
+          <span class="lost">Lost your password?</span>
+          <button class="btn btn-sm" (click)="password_reset_request()">RESET</button>
+        </div>
+      </form>
+    </div>
+    <div *ngIf="double_auth">
+      <form class="form-signin">
+        <div class="alert alert-warning">Double authentication is needed for admin access!!</div>
+        <hr />
+        <div class="alert alert-info">
+          <div class="glyphicon glyphicon-save"></div>
+          Insert your u2f device and press device
+        </div>
+        <div class="alert alert-success" *ngIf="msg">{{ msg }}</div>
+        <div class="alert alert-danger" *ngIf="error_msg">{{ error_msg }}</div>
+        <div class="row" *ngIf="userData && userData.otp && userData.otp.secret">
+          <div class="col-md-12">
+            <h4 class="text-center login-title"><strong>or</strong></h4>
+          </div>
+          <div class="col-md-8">
+            <div class="form-group">
+              <input autocomplete="one-time-code" [ngModelOptions]="{ standalone: true }" [(ngModel)]="otp_token" type="text" class="form-control" placeholder="OTP token" autofocus />
             </div>
-
+          </div>
+          <div class="col-md-4">
+            <button type="button" class="p-button p-button-sm p-button--primary" (click)="manageOTP()">Check OTP token</button>
+          </div>
+        </div>
+        <h4 class="text-center login-title"><strong>or</strong></h4>
+        <div class="alert alert-info">
+          <div class="glyphicon glyphicon-envelope"></div>
+          Request a temporary email token
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_email_token()">Request</button>
+          </div>
+          <div class="col-md-8">
+            <div class="form-group">
+              <input autocomplete="one-time-code" [ngModelOptions]="{ standalone: true }" [(ngModel)]="mail_token" type="text" class="form-control" placeholder="Token received" autofocus />
+            </div>
+          </div>
+        </div>
+        <button *ngIf="mail_token" type="button" class="p-button p-button-lg p-button-primary btn-block" [ngStyle]="{ display: 'block' }" (click)="validate_email_token()">Check token</button>
+      </form>
     </div>
-    <div class="form-signin">
-        <hr>
-    </div>
-    <div *ngIf="! double_auth" class="row justify-content-center">
-            <h1 class="text-center login-title"><strong>or</strong></h1>
-    </div>
-    <div class="row justify-content-center">
-            <form class="form-signin">
-                <a routerLink="/register" class="p-button p-button-lg btn-primary btn-block" [ngStyle]="{'display': 'block'}">Create an account</a>
-            </form>
-    </div>
+  </div>
+  <div class="form-signin">
+    <hr />
+  </div>
+  <div *ngIf="!double_auth" class="row justify-content-center">
+    <h1 class="text-center login-title"><strong>or</strong></h1>
+  </div>
+  <div class="row justify-content-center">
+    <form class="form-signin">
+      <a routerLink="/register" class="p-button p-button-lg btn-primary btn-block" [ngStyle]="{ display: 'block' }">Create an account</a>
+    </form>
+  </div>
 </div>

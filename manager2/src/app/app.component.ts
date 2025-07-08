@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from './auth/auth.service';
 import { Subscription } from 'rxjs';
-import { ConfigService } from './config.service'
+import { ConfigService } from './config.service';
 import { UserService } from './user/user.service';
 import { PluginService } from './plugin/plugin.service';
 
@@ -15,22 +15,21 @@ export class AppComponent {
     title = 'Account Manager';
     user = null;
     isLogged: boolean = false;
-    usages: any = []
-    plugins: any = []
-    config: any
+    usages: any = [];
+    plugins: any = [];
+    config: any;
 
     private loginSubscription: Subscription;
 
     ngOnInit() {
         this.plugins = [];
         this.configService.config.subscribe(
-            resp => {
+            (resp) => {
                 this.config = resp;
                 this.titleService.setTitle(this.config.name + ' ' + this.title);
             },
-            err => console.log('failed to get config')
-        )
-
+            (err) => console.log('failed to get config')
+        );
     }
 
     ngAfterViewInit() {
@@ -38,26 +37,24 @@ export class AppComponent {
             setTimeout(() => {
                 this.user = this.authService.userProfile;
                 this.isLogged = authenticated;
-            })
-            if(authenticated) {
+            });
+            if (authenticated) {
                 this.userService.getUsages().subscribe(
-                    resp => {
-                        this.usages = resp['usages'];
-                    },
-                    err => console.log('failed to get usages')
-                )
+                    (resp) => (this.usages = resp['usages']),
+                    (err) => console.log('failed to get usages')
+                );
                 this.pluginService.list().subscribe(
-                    resp => {
-                        for(let i=0;i<resp.length;i++){
-                            if(resp[i]['admin']){
+                    (resp) => {
+                        for (let i = 0; i < resp.length; i++) {
+                            if (resp[i]['admin']) {
                                 this.plugins.push(resp[i]);
                             }
                         }
                     },
-                    err => console.log('failed to get plugins')
-                )
+                    (err) => console.log('failed to get plugins')
+                );
             }
-        })
+        });
     }
 
     ngOnDestroy() {
@@ -72,13 +69,11 @@ export class AppComponent {
         private userService: UserService,
         private configService: ConfigService,
         private pluginService: PluginService
-
     ) {
         this.user = {
             is_admin: false
-        }
+        };
         this.authService.autoLog();
-        this.config = {"name": "My"};
+        this.config = { name: 'My' };
     }
-
 }

@@ -5,16 +5,14 @@ import { AuthService } from '../../auth/auth.service';
 //import { Observable } from 'rxjs';
 //import { map } from 'rxjs/operators';
 
-
 @Injectable({
     providedIn: 'root'
 })
 export class TagService {
-
-    constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(private http: HttpClient, private authService: AuthService) {}
 
     set(tags: string[], kind: string, id: string) {
-        return this.http.post(environment.apiUrl + '/tags/' + kind + '/' + id , {'tags': tags}, {})
+        return this.http.post(environment.apiUrl + '/tags/' + kind + '/' + id, { tags: tags }, {});
     }
 
     get() {

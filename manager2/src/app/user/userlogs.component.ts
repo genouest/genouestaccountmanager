@@ -12,29 +12,22 @@ export class UserLogsComponent {
 
     @ViewChild('dtp') table: Table;
 
-
-
-    constructor(private userService: UserService) {
-    }
+    constructor(private userService: UserService) {}
 
     ngOnInit() {
         console.log('load logs');
         this.load_logs();
     }
 
-    ngOnDestroy(): void {
-    }
+    ngOnDestroy(): void {}
 
     load_logs() {
         if (!this.user) {
             return;
         }
         this.userService.getUserLogs(this.user).subscribe(
-            resp => {
-                this.events=(<any[]> resp).reverse();
-            },
-            err => console.log('failed to get events')
+            (resp) => (this.events = (<any[]>resp).reverse()),
+            (err) => console.log('failed to get events')
         );
     }
-
 }
