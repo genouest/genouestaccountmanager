@@ -332,7 +332,7 @@ router.post('/project/:id/request/user', async function (req, res) {
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if ((!project.manager || !project.managers.includes(user.uid)) && user.uid != project.owner) {
+    if ((!project.managers || !project.managers.includes(user.uid)) && user.uid != project.owner) {
         return res.status(401).send({ message: 'User ' + user.uid + ' is not project manager for project ' + project.id });
     }
     let newuser = await dbsrv.mongo_users().findOne({ uid: req.body.user });
