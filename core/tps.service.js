@@ -17,7 +17,6 @@ const grpsrv = require('../core/group.service.js');
 const prjsrv = require('../core/project.service.js');
 const plgsrv = require('../core/plugin.service.js');
 
-
 // eslint-disable-next-line no-unused-vars
 var STATUS_PENDING_EMAIL = 'Waiting for email approval';
 //var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
@@ -30,7 +29,6 @@ exports.create_tp_reservation = create_tp_reservation;
 exports.remove_tp_reservation = remove_tp_reservation;
 exports.extend_tp_reservation = extend_tp_reservation;
 
-
 async function createExtraGroup(trainingName, ownerName) {
     let mingid = await idsrv.getGroupAvailableId();
     let group = await grpsrv.create_group(trainingName + '_' + mingid, ownerName);
@@ -40,27 +38,26 @@ async function createExtraGroup(trainingName, ownerName) {
 async function createExtraProject(trainingName, ownerName) {
     let mingid = await idsrv.getGroupAvailableId();
     let project = await prjsrv.create_project({
-        'id': trainingName + '_' + mingid,
-        'owner': ownerName
+        id: trainingName + '_' + mingid,
+        owner: ownerName
     });
     return project;
 }
-
 
 async function deleteExtraGroup(group) {
     if (group === undefined || group === null) {
         return false;
     }
-    let group_to_remove = await dbsrv.mongo_groups().findOne({'name': group});
-    if(!group_to_remove) {
-        logger.error('Cant find group to remove ' +  group);
+    let group_to_remove = await dbsrv.mongo_groups().findOne({ name: group });
+    if (!group_to_remove) {
+        logger.error('Cant find group to remove ' + group);
         return false;
     }
     try {
         await usrsrv.remove_user_from_group(group_to_remove.owner, group_to_remove.name);
         let res = await grpsrv.delete_group(group_to_remove);
         return res;
-    } catch(error) {
+    } catch (error) {
         logger.error(error);
     }
     return false;
@@ -70,43 +67,41 @@ async function deleteExtraProject(project) {
     if (project === undefined || project === null) {
         return false;
     }
-    let project_to_remove = await dbsrv.mongo_projects().findOne({'id': project});
-    if(!project_to_remove) {
-        logger.error('Cant find project to remove ' +  project);
+    let project_to_remove = await dbsrv.mongo_projects().findOne({ id: project });
+    if (!project_to_remove) {
+        logger.error('Cant find project to remove ' + project);
         return false;
     }
     try {
-        await usrsrv.remove_user_from_project(project_to_remove.id, project_to_remove.owner, 'auto', true);
+        await usrsrv.remove_user_from_project(project_to_remove.id, project_to_remove.owner, 'auto', false, true);
         let res = await prjsrv.remove_project(project_to_remove.id);
         return res;
-    } catch(error) {
+    } catch (error) {
         logger.error(error);
     }
     return false;
 }
 
-
 async function extendExtraProject(project, extension) {
     if (project === undefined || project === null) {
         return false;
     }
-    let project_to_extend = await dbsrv.mongo_projects().findOne({'id': project});
-    if(!project_to_extend) {
-        logger.error('Cant find project to extend ' +  project);
+    let project_to_extend = await dbsrv.mongo_projects().findOne({ id: project });
+    if (!project_to_extend) {
+        logger.error('Cant find project to extend ' + project);
         return false;
     }
     try {
         const extended_project = { ...project_to_extend, expire: extension.to };
         let res = await prjsrv.update_project(project_to_extend.id, extended_project);
         return res;
-    } catch(error) {
+    } catch (error) {
         logger.error(error);
     }
     return false;
 }
 
-
-async function create_tp_users_db (owner, quantity, duration, end_date, userGroup, userProject) {
+async function create_tp_users_db(owner, quantity, duration, end_date, userGroup, userProject) {
     // Duration in days
     logger.debug('create_tp_users ', owner, quantity, duration);
     let startnbr = await idsrv.getUserAvailableId();
@@ -122,7 +117,7 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
 
     let users = [];
     try {
-        for(let i=0;i<quantity;i++) {
+        for (let i = 0; i < quantity; i++) {
             logger.debug('create user ', CONFIG.tp.prefix + startnbr);
             let tp_email = CONFIG.tp.mail_template;
             if (!tp_email) {
@@ -137,13 +132,13 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
                 lastname: startnbr,
                 email: tp_email,
                 responsible: owner,
-                group: (CONFIG.general.disable_user_group) ? '' : groupName,
-                secondarygroups: (!CONFIG.general.disable_user_group && groupName != '') ? [groupName] : [],
+                group: CONFIG.general.disable_user_group ? '' : groupName,
+                secondarygroups: !CONFIG.general.disable_user_group && groupName != '' ? [groupName] : [],
                 why: 'TP/Training',
                 is_internal: false,
                 is_fake: true,
                 duration: duration,
-                expiration: end_date + 1000*3600*24*(duration+CONFIG.tp.extra_expiration),
+                expiration: end_date + 1000 * 3600 * 24 * (duration + CONFIG.tp.extra_expiration)
             };
             user = await usrsrv.create_user(user);
             user.password = usrsrv.new_password(16);
@@ -170,90 +165,85 @@ async function create_tp_users_db (owner, quantity, duration, end_date, userGrou
     return users;
 }
 
-
 async function send_user_passwords(owner, from_date, to_date, users, group) {
     logger.debug('send_user_passwords');
     let from = new Date(from_date);
     let to = new Date(to_date);
 
     let credentials_html = '<table border="0" cellpadding="0" cellspacing="15"><thead><tr><th align="left" valign="top">Login</th><th align="left" valign="top">Password</th><th>Fake email</th></tr></thead><tbody>' + '\n';
-    for(let i=0;i<users.length;i++) {
+    for(let i = 0; i < users.length; i++) {
         credentials_html += '<tr><td align="left" valign="top">' + users[i].uid + '</td><td align="left" valign="top">' + users[i].password + '</td><td align="left" valign="top">' + users[i].email + '</td></tr>' + '\n';
     }
     credentials_html += '</tbody></table>' + '\n';
 
-    let user_owner = await dbsrv.mongo_users().findOne({'uid': owner});
+    let user_owner = await dbsrv.mongo_users().findOne({ uid: owner });
     try {
-        await maisrv.send_notif_mail({
-            'name': 'tps_password',
-            'destinations': [user_owner.email, CONFIG.general.accounts],
-            'subject': '[TP accounts reservation] ' + owner
-        }, {
-            '#FROMDATE#':  from.toDateString(),
-            '#TODATE#':  to.toDateString(),
-            '#EXPIRATION#': CONFIG.tp.extra_expiration,
-            '#CREDENTIALS#': credentials_html, // should be converted by maisrv.send_notif_mail in plain text for text mail
-            '#GROUP#': group,
-            '#URL#': CONFIG.general.url,
-            '#SUPPORT#': CONFIG.general.support
-
-        });
-    } catch(error) {
+        await maisrv.send_notif_mail(
+            {
+                name: 'tps_password',
+                destinations: [user_owner.email, CONFIG.general.accounts],
+                subject: '[TP accounts reservation] ' + owner
+            },
+            {
+                '#FROMDATE#': from.toDateString(),
+                '#TODATE#': to.toDateString(),
+                '#EXPIRATION#': CONFIG.tp.extra_expiration,
+                '#CREDENTIALS#': credentials_html, // should be converted by maisrv.send_notif_mail in plain text for text mail
+                '#GROUP#': group,
+                '#URL#': CONFIG.general.url,
+                '#SUPPORT#': CONFIG.general.support
+            }
+        );
+    } catch (error) {
         logger.error(error);
     }
 
     return users;
 }
 
-
 async function delete_tp_user(user) {
     logger.debug('delete_tp_user', user.uid);
     try {
         await udbsrv.delete_dbs(user);
         await fwebs.delete_webs(user);
-        await usrsrv.delete_user(user);
-        await plgsrv.run_plugins('remove', user.uid, user, 'auto@tp');
-    } catch(exception) {
+        await usrsrv.delete_user(user, 'auto@tp');
+    } catch (exception) {
         logger.error(exception);
     }
 }
 
 async function delete_tp_users(users) {
-    for(let i = 0; i < users.length; i++) {
-        let user = await dbsrv.mongo_users().findOne({'uid': users[i]});
+    for (let i = 0; i < users.length; i++) {
+        let user = await dbsrv.mongo_users().findOne({ uid: users[i] });
         if (user && user.uid) {
             await delete_tp_user(user);
         }
     }
 }
 
-
 async function extend_tp_user(user, extension) {
     logger.debug('extend_tp_user', user.uid);
-    try{
-        user.history.push( {
-            'action': 'Extend user until ' + new Date(extension.to).toDateString(),
+    try {
+        user.history.push({
+            action: 'Extend user until ' + new Date(extension.to).toDateString(),
             date: new Date().getTime()
         });
-        await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set': {
-            expiration: extension.to,
-            history: user.history
-        }});
-    }
-    catch(exception) {
+        await dbsrv
+            .mongo_users()
+            .updateOne({ uid: user.uid }, { $set: { expiration: extension.to, history: user.history } });
+    } catch (exception) {
         logger.error(exception);
     }
 }
 
 async function extend_tp_users(users, extension) {
-    for(let i = 0; i < users.length; i++) {
-        let user = await dbsrv.mongo_users().findOne({'uid': users[i]});
+    for (let i = 0; i < users.length; i++) {
+        let user = await dbsrv.mongo_users().findOne({ uid: users[i] });
         if (user && user.uid) {
             await extend_tp_user(user, extension);
         }
     }
 }
-
 
 async function remove_tp_reservation(reservation) {
     logger.debug('Close reservation', reservation);
@@ -272,14 +262,12 @@ async function remove_tp_reservation(reservation) {
     }
 
     try {
-        await dbsrv.mongo_reservations().updateOne({'_id': reservation._id}, {'$set': {
-            'over': true
-        }});
-        await dbsrv.mongo_events().insertOne( {
-            'owner': 'auto',
-            'date': new Date().getTime(),
-            'action': 'close reservation for ' + reservation.owner ,
-            'logs': []
+        await dbsrv.mongo_reservations().updateOne({ _id: reservation._id }, { $set: { over: true } });
+        await dbsrv.mongo_events().insertOne({
+            owner: 'auto',
+            date: new Date().getTime(),
+            action: 'close reservation for ' + reservation.owner,
+            logs: []
         });
     } catch (error) {
         logger.error(error);
@@ -290,20 +278,19 @@ async function extend_tp_reservation(reservation, extension) {
     logger.debug('Extend reservation', reservation);
 
     try {
-        await dbsrv.mongo_reservations().updateOne({ '_id': reservation._id }, {
-            '$set': { 'to': extension.to }
+        await dbsrv.mongo_reservations().updateOne({ _id: reservation._id }, { $set: { to: extension.to } });
+        await dbsrv.mongo_events().insertOne({
+            owner: 'auto',
+            date: new Date().getTime(),
+            action: 'extend reservation for ' + reservation.owner,
+            logs: []
         });
-        await dbsrv.mongo_events().insertOne( {
-            'owner': 'auto',
-            'date': new Date().getTime(),
-            'action': 'extend reservation for ' + reservation.owner ,
-            'logs': []});
     } catch (error) {
         logger.error(error);
     }
 
     // add grace period to extension
-    extension = {...extension, to: extension.to + 1000*3600*24*(CONFIG.tp.extra_expiration)};
+    extension = { ...extension, to: extension.to + 1000 * 3600 * 24 * CONFIG.tp.extra_expiration };
     if (reservation.accounts) {
         logger.info('Extend Accounts', reservation.accounts);
         await extend_tp_users(reservation.accounts, extension);
@@ -318,14 +305,14 @@ async function create_tp_reservation(reservation_id) {
     logger.info('Create reservation', reservation_id);
 
     // Create users for reservation
-    let reservation = await dbsrv.mongo_reservations().findOne({'_id': reservation_id});
-    if(!reservation) {
-        throw {code: 404, message: 'Reservation not found'};
+    let reservation = await dbsrv.mongo_reservations().findOne({ _id: reservation_id });
+    if (!reservation) {
+        throw { code: 404, message: 'Reservation not found' };
     }
     if (!reservation.name) {
         reservation.name = 'tp';
     }
-    let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi,'_');
+    let trainingName = latinize(reservation.name.toLowerCase()).replace(/[^0-9a-z]+/gi, '_');
     if (CONFIG.tp.prefix) {
         trainingName = CONFIG.tp.prefix + '_' + trainingName;
     }
@@ -348,42 +335,34 @@ async function create_tp_reservation(reservation_id) {
     let activated_users = await create_tp_users_db(
         reservation.owner,
         reservation.quantity,
-        Math.ceil((reservation.to-reservation.from)/(1000*3600*24)),
+        Math.ceil((reservation.to - reservation.from) / (1000 * 3600 * 24)),
         reservation.to,
         newGroup,
         newProject
     );
-    
-    for(let i = 0; i < activated_users.length; i++) {
+
+    for (let i = 0; i < activated_users.length; i++) {
         logger.debug('activated user ', activated_users[i].uid);
         reservation.accounts.push(activated_users[i].uid);
     }
-    try{
+    try {
         logger.info('Send Password', trainingName);
-        await send_user_passwords(
-            reservation.owner,
-            reservation.from,
-            reservation.to,
-            activated_users,
-            gpname
-        );
-        await dbsrv.mongo_reservations().updateOne({'_id': reservation_id}, {'$set': {
-            'accounts': reservation.accounts,
-            'group': newGroup,
-            'project': newProject,
-            'created': true
-        }});
-
+        await send_user_passwords(reservation.owner, reservation.from, reservation.to, activated_users, gpname);
+        await dbsrv
+            .mongo_reservations()
+            .updateOne(
+                { _id: reservation_id },
+                { $set: { accounts: reservation.accounts, group: newGroup, project: newProject, created: true } }
+            );
         logger.debug('reservation ', reservation);
-        await dbsrv.mongo_events().insertOne( {
-            'owner': 'auto',
-            'date': new Date().getTime(),
-            'action': 'create reservation for ' + reservation.owner ,
-            'logs': []
+        await dbsrv.mongo_events().insertOne({
+            owner: 'auto',
+            date: new Date().getTime(),
+            action: 'create reservation for ' + reservation.owner,
+            logs: []
         });
         return reservation;
-    }
-    catch(exception) {
+    } catch (exception) {
         logger.error(exception);
         throw exception;
     }
@@ -392,16 +371,16 @@ async function create_tp_reservation(reservation_id) {
 async function tp_reservation(userId, from_date, to_date, quantity, about, group_or_project, name) {
     // Create a reservation
     let reservation = {
-        'owner': userId,
-        'from': from_date,
-        'to': to_date,
-        'quantity': quantity,
-        'accounts': [],
-        'about': about,
-        'created': false,
-        'over': false,
-        'group_or_project': group_or_project,
-        'name': name
+        owner: userId,
+        from: from_date,
+        to: to_date,
+        quantity: quantity,
+        accounts: [],
+        about: about,
+        created: false,
+        over: false,
+        group_or_project: group_or_project,
+        name: name
     };
     await dbsrv.mongo_reservations().insertOne(reservation);
     logger.debug('reservation ', reservation);

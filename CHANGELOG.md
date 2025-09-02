@@ -1,6 +1,11 @@
 # Changelog
 
-## 1.4.32 (Unreleased)
+## 1.4.33 (Unreleased)
+
+* Ensure emails have name, destination and subject
+* Fix bug in TP account deletion
+
+## 1.4.32 (2025-04-22)
 
 * Fix error when subscribing / unsubscribing to email
 * Clearer error message when adding a website
@@ -10,10 +15,15 @@
 * increase size of input field in users page
 * add a readonly input field under email for showing the email domain*
 * Add "custom_users" key to config file, to be used with various scripts
+* Add "project managers" that can request admins to add/remove project members
 * Check that user being removed is not owner or last member of a project
 * Add email sent to a project owner when their project is activated
 * Separate global overview from individual group view in admin group management
 * Allow accents in user's first and last names
+* Secure project deletion (and removing users from project) with a confirmation modal
+* Add checks when removing user from a project's linked group
+* Remove 'Home works' message
+* Add rejection message for projects
 
 ## 1.4.31 (2024-09-27)
 

@@ -1,6 +1,6 @@
 {
   "name": "go-mngr",
-  "version": "1.4.29",
+  "version": "1.4.32",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"

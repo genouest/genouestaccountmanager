@@ -10,29 +10,26 @@ import { User } from '../../user/user.service';
     styleUrls: ['./adminplugin.component.css']
 })
 export class AdminpluginComponent implements OnInit {
-
-    pluginId: string
-    user: User
+    pluginId: string;
+    user: User;
 
     constructor(
         private route: ActivatedRoute,
         private authService: AuthService,
         private pluginService: PluginService
-    ) { }
+    ) {}
 
     ngOnInit() {
         this.user = this.authService.profile;
-        this.route.params
-            .subscribe(params => {
-                this.pluginId = params.id;
-                console.log('manage plugin',this.pluginId);
-                /*
-                  this.pluginService.get(pluginId, this.authService.profile.uid).subscribe(
-                  resp => console.log(resp),
-                  err => console.log('failed to get plugin data')
-                  )
-                */
-            });
+        this.route.params.subscribe((params) => {
+            this.pluginId = params.id;
+            console.log('manage plugin', this.pluginId);
+            /*
+                this.pluginService.get(pluginId, this.authService.profile.uid).subscribe(
+                resp => console.log(resp),
+                err => console.log('failed to get plugin data')
+                )
+            */
+        });
     }
-
 }

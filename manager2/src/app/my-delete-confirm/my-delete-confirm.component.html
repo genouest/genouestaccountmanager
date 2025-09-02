@@ -1,21 +1,21 @@
 <div class="deleteConfirmation">
-  <div *ngIf="!isDeleting" >
-    <button type="button" class="p-button p-button-sm p-button-danger btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i> Delete</button>
+  <div *ngIf="!isDeleting">
+    <button type="button" class="p-button p-button-sm p-button-danger btn-xs" (click)="startDelete()"><i class="fa fa-trash-o"></i>{{ button_disp }}</button>
   </div>
   <div *ngIf="isDeleting">
     <div *ngIf="explainMessage">
       <div class="form-group row">
-	<label for="message" class="col-form-label"><b>Please Explain Why: </b></label>
-	<textarea type="text" id="message" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="message"> </textarea>
+        <label for="message" class="col-form-label"><b>Please Explain Why: </b></label>
+        <textarea type="text" id="message" class="form-control" [ngModelOptions]="{ standalone: true }" [(ngModel)]="message"> </textarea>
       </div>
-      <div class="form-check row" style="float:right">
-	<input id="sendmail" type="checkbox" class="form-check-input" [ngModelOptions]="{standalone: true}" [(ngModel)]="sendmail">
-	<label for="sendmail" class="form-check-label"><b>Send Mail </b></label>
+      <div class="form-check row" style="float: right">
+        <input id="sendmail" type="checkbox" class="form-check-input" [ngModelOptions]="{ standalone: true }" [(ngModel)]="sendmail" />
+        <label for="sendmail" class="form-check-label"><b>Send Mail </b></label>
       </div>
     </div>
     <div class="form-group row">
       <button type="button" class="p-button p-button-sm p-button-secondary btn-xs" (click)="cancel()">Abort deletion</button>
-      <button type="button" class="p-button p-button-sm p-button-danger btn-xs"  (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
+      <button type="button" class="p-button p-button-sm p-button-danger btn-xs" (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
     </div>
   </div>
 </div>

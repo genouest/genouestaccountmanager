@@ -5,7 +5,7 @@ const {
     parseRegisterRequest,
     generateLoginChallenge,
     parseLoginRequest,
-    verifyAuthenticatorAssertion,
+    verifyAuthenticatorAssertion
 } = require('@webauthn/server');
 const { authenticator } = require('otplib');
 const qrcode = require('qrcode');
@@ -24,7 +24,7 @@ const idsrv = require('../core/id.service.js');
 
 let my_conf = cfgsrv.get_conf();
 const CONFIG = my_conf;
-const APP_ID= CONFIG.general.url;
+const APP_ID = CONFIG.general.url;
 var GENERAL_CONFIG = CONFIG.general;
 
 const MAILER = CONFIG.general.mailer;
@@ -35,39 +35,39 @@ var STATUS_PENDING_APPROVAL = 'Waiting for admin approval';
 var STATUS_ACTIVE = 'Active';
 var STATUS_EXPIRED = 'Expired';
 
-const notif = require('../core/notif_'+MAILER+'.js');
+const notif = require('../core/notif_' + MAILER + '.js');
 const dbsrv = require('../core/db.service.js');
 const maisrv = require('../core/mail.service.js');
 const rolsrv = require('../core/role.service.js');
 
-router.get('/logout', function(req, res) {
+router.get('/logout', function (req, res) {
     req.session.destroy();
     res.send({});
 });
 
-router.get('/mail/auth/:id', async function(req, res) {
+router.get('/mail/auth/:id', async function (req, res) {
     // Request email token
-    if(!req.locals.logInfo.is_logged){
-        return res.status(401).send({message: 'You need to login first'});
+    if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
 
-    if(! notif.mailSet()){
-        return res.status(403).send({message: 'No mail provider set : cannot send mail'});
+    if (!notif.mailSet()) {
+        return res.status(403).send({ message: 'No mail provider set : cannot send mail' });
     }
     //let password = Math.random().toString(36).slice(-10);
     let password = usrsrv.new_password(10);
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user) {
-        return res.status(404).send({message: 'User not found'});
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
     }
 
-    let expire = new Date().getTime() + 60*10*1000;
-    req.session.mail_token = {'token': password, 'expire': expire, 'user': user._id};
-    let mail_token = {'token': password, 'expire': expire, 'user': user._id};
+    let expire = new Date().getTime() + 60 * 10 * 1000;
+    req.session.mail_token = { token: password, expire: expire, user: user._id };
+    let mail_token = { token: password, expire: expire, user: user._id };
     let usertoken = jwt.sign(
         { user: user._id, isLogged: true, mail_token: mail_token },
         CONFIG.general.secret,
-        {expiresIn: '2 days'}
+        { expiresIn: '2 days' }
     );
 
     try {
@@ -75,94 +75,87 @@ router.get('/mail/auth/:id', async function(req, res) {
         if (user.send_copy_to_support) {
             msg_destinations.push(CONFIG.general.support);
         }
-        await maisrv.send_notif_mail({
-            'name': 'mail_token',
-            'destinations': msg_destinations,
-            'subject': 'Authentication mail token request'
-        }, {
-            '#TOKEN#': password
-        });
-    } catch(err) {
+        await maisrv.send_notif_mail(
+            {
+                name: 'mail_token',
+                destinations: msg_destinations,
+                subject: 'Authentication mail token request'
+            },
+            { '#TOKEN#': password }
+        );
+    } catch (err) {
         logger.error('failed to send notif', err);
-        return res.send({status: false});
+        return res.send({ status: false });
     }
-    res.send({status: true, token: usertoken});
+    return res.send({ status: true, token: usertoken });
 });
 
-
-router.post('/mail/auth/:id', async function(req, res) {
+router.post('/mail/auth/:id', async function (req, res) {
     // Check email token
-    if(!req.locals.logInfo.is_logged){
-        return res.status(401).send({message: 'You need to login first'});
+    if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+        user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
         isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
-    if(!user) {
-        return res.status(404).send({message: 'User not found'});
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
     }
-    let usertoken = jwt.sign(
-        { user: user._id, isLogged: true },
-        CONFIG.general.secret,
-        {expiresIn: '2 days'}
-    );
+    let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
     let sess = req.session;
     let now = new Date().getTime();
-    if(!req.locals.logInfo.mail_token || user._id != req.locals.logInfo.mail_token['user'] || req.body.token != req.locals.logInfo.mail_token['token'] || now > sess.mail_token['expire']) {
-        return res.status(403).send({message: 'Invalid or expired token'});
+    if (
+        !req.locals.logInfo.mail_token ||
+        user._id != req.locals.logInfo.mail_token['user'] ||
+        req.body.token != req.locals.logInfo.mail_token['token'] ||
+        now > sess.mail_token['expire']
+    ) {
+        return res.status(403).send({ message: 'Invalid or expired token' });
     }
     sess.gomngr = sess.mail_token['user'];
     sess.mail_token = null;
 
     user.is_admin = isadmin;
 
-    res.send({user: user, token: usertoken});
-    res.end();
+    return res.send({ user: user, token: usertoken });
 });
 
-router.get('/u2f/auth/:id', async function(req, res) {
+router.get('/u2f/auth/:id', async function (req, res) {
     // challenge
-    if(!req.locals.logInfo.is_logged){
-        return res.status(401).send({message: 'You need to login first'});
+    if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
     req.session.u2f = null;
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
     }
-    if(!user.u2f || !user.u2f.key) {
-        res.status(404).send({message: 'no webauthn key declared'});
-        return;
+    if (!user.u2f || !user.u2f.key) {
+        return res.status(404).send({ message: 'no webauthn key declared' });
     }
     const assertionChallenge = generateLoginChallenge(user.u2f.key);
-    await dbsrv.mongo_users().updateOne({uid: user.uid},{'$set': {'u2f.challenge': assertionChallenge.challenge}});
+    await dbsrv.mongo_users().updateOne({ uid: user.uid }, { $set: { 'u2f.challenge': assertionChallenge.challenge } });
     res.send(assertionChallenge);
 });
 
-
-router.post('/u2f/auth/:id', async function(req, res) {
-    if(!req.locals.logInfo.is_logged){
-        return res.status(401).send({message: 'You need to login first'});
+router.post('/u2f/auth/:id', async function (req, res) {
+    if (!req.locals.logInfo.is_logged) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
     }
 
-    if(!req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
-        res.status(401).send({message: 'U2F not challenged or invalid user'});
-        return;
+    if (!req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id) {
+        return res.status(401).send({ message: 'U2F not challenged or invalid user' });
     }
 
     const { challenge, keyId } = parseLoginRequest(req.body);
@@ -177,32 +170,26 @@ router.post('/u2f/auth/:id', async function(req, res) {
     if (loggedIn) {
         // Success!
         // User is authenticated.
-        let usertoken = jwt.sign(
-            { user: user._id, isLogged: true },
-            CONFIG.general.secret,
-            {expiresIn: '2 days'}
-        );
+        let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
         user.is_admin = await rolsrv.is_admin(user);
         user.u2f.key = true;
         sess.gomngr = sess.u2f;
         sess.u2f = null;
-        return res.send({token: usertoken, user: user});
-    }
-    else {
+        return res.send({ token: usertoken, user: user });
+    } else {
         sess.gomngr = null;
         sess.u2f = null;
         return res.sendStatus(403);
     }
 });
 
-router.get('/u2f/register/:id', async function(req, res) {
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user){
-        res.status(404).send({message: 'User not found'});
-        return;
+router.get('/u2f/register/:id', async function (req, res) {
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
     }
-    if(!req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
-        return res.status(401).send({message: 'You need to login first'});
+    if (!req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
 
     try {
@@ -210,215 +197,190 @@ router.get('/u2f/register/:id', async function(req, res) {
             relyingParty: { name: APP_ID },
             user: { id: user.uid, name: user.email }
         });
-        await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.challenge': challengeResponse.challenge}});
-        res.send(challengeResponse);
-    } catch(err) {
+        await dbsrv
+            .mongo_users()
+            .updateOne({ uid: req.params.id }, { $set: { 'u2f.challenge': challengeResponse.challenge } });
+        return res.send(challengeResponse);
+    } catch (err) {
         logger.error('u2f registration request error', err);
-        res.sendStatus(400);
-        return;
+        return res.sendStatus(400);
     }
-
 });
 
-router.post('/u2f/register/:id', async function(req, res) {
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
-        return res.status(401).send({message: 'You need to login first'});
+router.post('/u2f/register/:id', async function (req, res) {
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
 
     try {
         const { key, challenge } = parseRegisterRequest(req.body);
 
         if (user.u2f && user.u2f.challenge === challenge) {
-            await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': key, 'u2f.challenge': null}});
-            return res.send({key: key});
+            await dbsrv
+                .mongo_users()
+                .updateOne({ uid: req.params.id }, { $set: { 'u2f.key': key, 'u2f.challenge': null } });
+            return res.send({ key: key });
         }
-    } catch(err) {
+    } catch (err) {
         logger.error('u2f registration error');
-        res.sendStatus(400);
+        return res.sendStatus(400);
     }
-
 });
 
-router.post('/otp/register/:id', async function(req, res) {
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()){
-        return res.status(401).send({message: 'You need to login first'});
+router.post('/otp/register/:id', async function (req, res) {
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
 
     const secret = authenticator.generateSecret();
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp.secret': secret}});
+    await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { 'otp.secret': secret } });
 
     const service = 'My';
     const otpauth = authenticator.keyuri(user.uid, service, secret);
     qrcode.toDataURL(otpauth, (err, imageUrl) => {
         if (err) {
             //console.debug('Error with QR');
-            res.send({secret});
-            return;
+            return res.send({ secret });
         }
-        res.send({secret,imageUrl});
+        return res.send({ secret, imageUrl });
     });
-
 });
 
-router.delete('/otp/register/:id', async function(req, res) {
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+router.delete('/otp/register/:id', async function (req, res) {
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
 
     let adminuser = null;
     let isadmin = false;
     try {
-        adminuser = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+        adminuser = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(adminuser);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
-    if(!user || !req.locals.logInfo.id || (req.locals.logInfo.id.toString() != user._id.toString() && !isadmin)){
-        return res.status(401).send({message: 'You need to login first'});
+    if (!user || !req.locals.logInfo.id || (req.locals.logInfo.id.toString() != user._id.toString() && !isadmin)) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
 
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'otp.secret': null}});
-    res.send({message: 'OTP removed'});
+    await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { 'otp.secret': null } });
+    return res.send({ message: 'OTP removed' });
 });
 
-router.post('/otp/check/:id', async function(req, res) {
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id){
-        return res.status(401).send({message: 'You need to login first'});
+router.post('/otp/check/:id', async function (req, res) {
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user || !req.locals.logInfo.u2f || req.locals.logInfo.u2f != user._id) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
     const token = req.body.token;
     try {
         const isValid = authenticator.verify({ token: token, secret: user.otp.secret });
-        if(!isValid) {
-            res.sendStatus(403);
-            return;
+        if (!isValid) {
+            return res.sendStatus(403);
         }
-    }catch(err) {
-        res.sendStatus(403);
+    } catch (err) {
+        return res.sendStatus(403);
     }
-    let usertoken = jwt.sign(
-        { user: user._id, isLogged: true },
-        CONFIG.general.secret,
-        {expiresIn: '2 days'}
-    );
+    let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
     user.is_admin = await rolsrv.is_admin(user);
     user.otp.secret = true;
     let sess = req.session;
     sess.gomngr = sess.u2f;
     sess.u2f = null;
-    return res.send({token: usertoken, user: user});
+    return res.send({ token: usertoken, user: user });
 });
 
-router.delete('/u2f/register/:id', async function(req, res) {
-    let user = await dbsrv.mongo_users().findOne({uid: req.params.id});
-    if(!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
-        return res.status(401).send({message: 'You need to login first'});
+router.delete('/u2f/register/:id', async function (req, res) {
+    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    if (!user || !req.locals.logInfo.id || req.locals.logInfo.id.toString() != user._id.toString()) {
+        return res.status(401).send({ message: 'You need to login first' });
     }
-    await dbsrv.mongo_users().updateOne({uid: req.params.id},{'$set': {'u2f.key': null, 'u2f.challenge': null}});
+    await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { 'u2f.key': null, 'u2f.challenge': null } });
     return res.sendStatus(200);
 });
 
-router.get('/auth', async function(req, res) {
-    if(req.locals.logInfo.id) {
+router.get('/auth', async function (req, res) {
+    if (req.locals.logInfo.id) {
         let user = null;
         let isadmin = false;
         try {
-            user = await dbsrv.mongo_users().findOne({_id: req.locals.logInfo.id});
+            user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
             isadmin = await rolsrv.is_admin(user);
-        } catch(e) {
+        } catch (e) {
             logger.error(e);
-            res.status(404).send({message: 'User session not found'});
-            res.end();
-            return;
+            return res.status(404).send({ message: 'User session not found' });
         }
 
-        if(!user) {
-            res.send({user: null, message: 'user not found'});
-            return;
+        if (!user) {
+            return res.send({ user: null, message: 'user not found' });
         }
-        let token = jwt.sign(
-            { user: user._id, isLogged: true },
-            CONFIG.general.secret,
-            {expiresIn: '2 days'}
-        );
-        if(user.u2f) {user.u2f.key = null;}
-        if(user.otp) {user.otp.secret=null;}
+        let token = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
+        if (user.u2f) { user.u2f.key = null; }
+        if (user.otp) { user.otp.secret = null; }
 
         user.is_admin = isadmin;
 
-        if(user.status == STATUS_PENDING_EMAIL){
-            res.send({token: token, user: user, message: 'Your account is waiting for email approval, check your mail inbox'});
-            return;
+        if (user.status == STATUS_PENDING_EMAIL) {
+            return res.send({ token: token, user: user, message: 'Your account is waiting for email approval, check your mail inbox'
+            });
         }
-        if(user.status == STATUS_PENDING_APPROVAL){
-            res.send({token: token, user: user, message: 'Your account is waiting for admin approval'});
-            return;
+        if (user.status == STATUS_PENDING_APPROVAL) {
+            return res.send({ token: token, user: user, message: 'Your account is waiting for admin approval' });
         }
-        if(user.status == STATUS_EXPIRED){
-            res.send({token: token, user: user, message: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
-            return;
+        if (user.status == STATUS_EXPIRED) {
+            return res.send({ token: token, user: user, message: 'Your account is expired, please contact the support for reactivation at ' + GENERAL_CONFIG.support});
         }
-        res.send({token: token, user: user, message: ''});
-    }
-    else {
-        res.send({user: null, message: 'User does not exist or not logged'});
+        return res.send({ token: token, user: user, message: '' });
+    } else {
+        return res.send({ user: null, message: 'User does not exist or not logged' });
     }
 });
 
-router.post('/auth/:id', async function(req, res) {
+router.post('/auth/:id', async function (req, res) {
     let apikey = req.headers['x-my-apikey'] || '';
-    if(apikey === ''){
-        if(req.body.password === undefined || req.body.password === null || req.body.password == '') {
-            res.status(401).send({message: 'Missing password'});
-            return;
+    if (apikey === '') {
+        if (req.body.password === undefined || req.body.password === null || req.body.password == '') {
+            return res.status(401).send({ message: 'Missing password' });
         }
     }
     let user = null;
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({uid: req.params.id});
+        user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
         isadmin = await rolsrv.is_admin(user);
-    } catch(e) {
+    } catch (e) {
         logger.error(e);
-        res.status(404).send({message: 'User session not found'});
-        res.end();
-        return;
+        return res.status(404).send({ message: 'User session not found' });
     }
 
-    if(! user) {
-        res.status(404).send({message: 'User not found'});
-        return;
+    if (!user) {
+        return res.status(404).send({ message: 'User not found' });
     }
 
-    if(user.status == STATUS_EXPIRED){
-        res.status(401).send({message: 'Your account is expired, please contact the support for reactivation at '+GENERAL_CONFIG.support});
-        return;
+    if (user.status == STATUS_EXPIRED) {
+        return res.status(401).send({ message: 'Your account is expired, please contact the support for reactivation at ' + GENERAL_CONFIG.support });
     }
 
-    let usertoken = jwt.sign(
-        { user: user._id, isLogged: true, u2f: user._id },
-        CONFIG.general.secret,
-        {expiresIn: '2 days'}
-    );
+    let usertoken = jwt.sign({ user: user._id, isLogged: true, u2f: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
     let sess = req.session;
     if (apikey !== '' && apikey === user.apikey) {
         user.is_admin = isadmin;
         sess.gomngr = user._id;
         sess.apikey = true;
-        res.send({token: usertoken, user: user, message: '', double_auth: false});
-        res.end();
-        return;
+        return res.send({ token: usertoken, user: user, message: '', double_auth: false });
     }
 
     let is_locked = await idsrv.user_locked(user.uid);
     if (is_locked) {
         let remains = await idsrv.user_lock_remaining_time(user.uid);
-        res.status(401).send({message: 'You have reached the maximum of login attempts, your account access is blocked for ' + Math.floor(remains / 60) + ' minutes'});
-        return;
+        return res.status(401).send({
+            message:
+                'You have reached the maximum of login attempts, your account access is blocked for ' +
+                Math.floor(remains / 60) +
+                ' minutes'
+        });
     }
 
     // Check bind with ldap
@@ -434,36 +396,29 @@ router.post('/auth/:id', async function(req, res) {
     }
 
     user.is_admin = isadmin;
-    if(isadmin) {
-        if(CONFIG.general.double_authentication_for_admin){
+    if (isadmin) {
+        if (CONFIG.general.double_authentication_for_admin) {
             need_double_auth = true;
-        }
-        else {
+        } else {
             sess.gomngr = user._id;
         }
-    }
-    else {
+    } else {
         sess.gomngr = user._id;
     }
 
-    if(need_double_auth) {
-        usertoken = jwt.sign(
-            { isLogged: true, u2f: user._id },
-            CONFIG.general.secret,
-            {expiresIn: '2 days'}
-        );
+    if (need_double_auth) {
+        usertoken = jwt.sign({ isLogged: true, u2f: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
     }
 
-    let ip = req.headers['x-forwarded-for'] ||
+    let ip =
+        req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
         req.connection.socket.remoteAddress;
-    if((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth=='fake') {
+    if ((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth == 'fake') {
         // Skip auth
-        res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
-        res.end();
-    }
-    else {
+        return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
+    } else {
         try {
             let token = await goldap.bind(user.uid, req.body.password);
             user['token'] = token;
@@ -471,36 +426,26 @@ router.post('/auth/:id', async function(req, res) {
                 // let newApikey = Math.random().toString(36).slice(-10);
                 let newApikey = usrsrv.new_random(10);
                 user.apikey = newApikey;
-                await dbsrv.mongo_users().updateOne({uid: user.uid}, {'$set':{'apikey': newApikey}});
-                res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
-                res.end();
-                return;
-
+                await dbsrv.mongo_users().updateOne({ uid: user.uid }, { $set: { apikey: newApikey } });
+                return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
             } else {
-                res.send({token: usertoken, user: user, message: '', double_auth: need_double_auth});
-                res.end();
-                return;
+                return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
             }
-
-        } catch(err) {
+        } catch (err) {
             console.error('[auth] error', err);
-            if(req.session !== undefined){
+            if (req.session !== undefined) {
                 req.session.destroy();
             }
 
             // no ban
             if (CONFIG.general.bansec === 0) {
-                res.status(401).send({message: 'Login error'});
-                res.end();
+                return res.status(401).send({ message: 'Login error' });
             } else {
                 let locks = await idsrv.user_lock(user.uid);
-                res.status(401).send({message: 'Login error, remains ' + (3-locks) + ' attempts.'});
-                res.end();
+                return res.status(401).send({ message: 'Login error, remains ' + (3 - locks) + ' attempts.' });
             }
-            return;
         }
     }
 });
-
 
 module.exports = router;

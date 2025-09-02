@@ -11,34 +11,30 @@ var GENERAL_CONFIG = CONFIG.general;
 const MAILER = CONFIG.general.mailer;
 const marked = require('marked');
 
-const notif = require('../core/notif_'+MAILER+'.js');
+const notif = require('../core/notif_' + MAILER + '.js');
 
-function get_mail_config () {
+function get_mail_config() {
     var MAIL_CONFIG = {};
     // todo: more and more ugly init...
-    if (CONFIG[MAILER]) { MAIL_CONFIG = CONFIG[MAILER]; }
+    if (CONFIG[MAILER]) {
+        MAIL_CONFIG = CONFIG[MAILER];
+    }
     if (!MAIL_CONFIG.origin) {
         logger.error('No email origin are configured !');
     }
     return MAIL_CONFIG;
 }
 
-async function gen_mail_opt (options, variables)
-{
+async function gen_mail_opt(options, variables) {
     var MAIL_CONFIG = get_mail_config();
-    // todo: check if each option exist and use default value
-    let name = options['name'];
-    let destinations = options['destinations'];
-    let subject = GENERAL_CONFIG.name + ' ' + options['subject'];
-
     //find message
     let message = undefined;
-    if (name && CONFIG.message[name]) {
-        message = CONFIG.message[name].join('\n');
+    if (options['name'] && CONFIG.message[options['name']]) {
+        message = CONFIG.message[options['name']].join('\n');
     }
     let html_message = message;
-    if (name && CONFIG.message[name + '_html']) {
-        html_message = CONFIG.message[name + '_html'].join('');
+    if (options['name'] && CONFIG.message[options['name'] + '_html']) {
+        html_message = CONFIG.message[options['name'] + '_html'].join('');
     }
 
     if (options['markdown'] !== undefined && options['markdown'] != '') {
@@ -57,8 +53,7 @@ async function gen_mail_opt (options, variables)
         let value = variables[key];
         if (value === undefined || value === null) { value = '';} // value may not be defined
         let html_value = value;
-        let re = new RegExp(key,'g');
-
+        let re = new RegExp(key, 'g');
 
         // check if there is html tag in variable
         let re_html = /(<([^>]+)>)/;
@@ -79,7 +74,7 @@ async function gen_mail_opt (options, variables)
     }
     if (CONFIG.message.footer_html) {
         html_footer = CONFIG.message.footer_html.join('<br/>');
-        if (! CONFIG.message.footer) { // if there is only html value
+        if (!CONFIG.message.footer) { // if there is only html value
             footer = htmlToText.fromString(html_footer);
         }
     }
@@ -91,8 +86,8 @@ async function gen_mail_opt (options, variables)
     // set mailOptions
     let mailOptions = {
         origin: MAIL_CONFIG.origin, // sender address
-        destinations:  destinations, // list of receivers
-        subject: subject, // Subject line
+        destinations:  options['destinations'], // list of receivers
+        subject: GENERAL_CONFIG.name + ' ' + options['subject'], // Subject line
         message: message, // plaintext body
         html_message: html_message // html body
     };
@@ -104,14 +99,14 @@ async function gen_mail_opt (options, variables)
     return mailOptions;
 }
 
-async function send_notif_mail (options, variables) {
-    if(notif.mailSet()) {
+async function send_notif_mail(options, variables) {
+    if (notif.mailSet()) {
         try {
             let mailOptions = await gen_mail_opt(options, variables);
             if (mailOptions) {
                 await notif.sendUser(mailOptions);
             }
-        } catch(err) {
+        } catch (err) {
             logger.error('send notif mail error', err);
         }
     }
@@ -119,5 +114,4 @@ async function send_notif_mail (options, variables) {
 
 // exports mail functions
 exports.get_mail_config = get_mail_config;
-exports.gen_mail_opt = gen_mail_opt;
 exports.send_notif_mail = send_notif_mail;

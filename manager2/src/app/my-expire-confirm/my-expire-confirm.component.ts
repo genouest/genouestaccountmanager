@@ -6,23 +6,22 @@ import { Component, Input, OnInit } from '@angular/core';
     styleUrls: ['./my-expire-confirm.component.css']
 })
 export class MyExpireConfirmComponent implements OnInit {
-
-    isExpiring: boolean
-    sendmail: boolean
-
-    @Input()
-    onConfirm: any
+    isExpiring: boolean;
+    sendmail: boolean;
 
     @Input()
-    mailer: string
+    onConfirm: any;
 
-    constructor() { }
+    @Input()
+    mailer: string;
+
+    constructor() {}
 
     ngOnInit() {
-        this.sendmail =  true;
+        this.sendmail = true;
     }
 
-    startExpire(){
+    startExpire() {
         this.isExpiring = true;
     }
     cancel() {

@@ -292,6 +292,16 @@
     "project_expiration_html": [
         "<p>Project for #NAME# will expire at #DATE#</p>"
     ],
+    "project_rejection": [
+        "Your requested project '#PROJECT#' has been rejected by #USER#.",
+        "Reason:",
+        "#MSG#"
+    ],
+    "project_rejection_html": [
+      "<p>Your requested project '#PROJECT#' has been rejected by #USER#.</p>",
+      "<p>Reason:</p>",
+      "<i>#MSG#</i>"
+    ],
     "user_deletion": [
         "Your account #UID# have been deleted by #USER#",
         "Because:",
@@ -365,6 +375,13 @@
       "Usage: #USAGE#",
       "Expiration date: #EXP#",
       "Please review it, and keep #UID# informed"
+    ],
+    "ask_database_html": [
+      "<p>#UID# has requested a new database '#NAME#' in My</p>",
+      "<p>Size needed: #SIZE# GB</p>",
+      "<p>Usage: #USAGE#</p>",
+      "<p>Expiration date: #EXP#</p>",
+      "<p>Please review it, and keep #UID# informed</p>"
     ],
     "database_creation": [
         "The MySQL database you requested (#DBNAME#, owned by #OWNER#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",

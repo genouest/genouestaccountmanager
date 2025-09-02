@@ -1,4 +1,4 @@
-<div *ngIf="notification" class="alert alert-success">{{notification}}</div>
+<div *ngIf="notification" class="alert alert-success">{{ notification }}</div>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -6,17 +6,17 @@
   </div>
   <div class="card-body">
     <div class="alert alert-info">Group creation can require a few minutes to be effective</div>
-    <div class="alert alert-success" *ngIf="success_msg">{{success_msg}}</div>
-    <div class="alert alert-danger" *ngIf="err_msg">{{err_msg}}</div>
+    <div class="alert alert-success" *ngIf="success_msg">{{ success_msg }}</div>
+    <div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
     <form role="form" class="user-form form-inline">
       <div class="form-group">
-        <input placeholder="Group name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
+        <input placeholder="Group name" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.name" class="form-control" />
       </div>
       <div class="form-group">
-        <input placeholder="Owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
+        <input placeholder="Owner" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.owner" class="form-control" />
       </div>
       <div class="form-group">
-        <input placeholder="Description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
+        <input placeholder="Description" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.description" class="form-control" />
       </div>
       <div class="form-group">
         <button type="button" class="p-button p-button-sm p-button-secondary" (click)="addGroup()">Create</button>
@@ -31,15 +31,7 @@
   </div>
   <div class="card-body">
     <div class="table-responsive table-striped">
-      <p-table #dtg [value]="groups"
-               [paginator]="true"
-               [rows]="10"
-               [showCurrentPageReport]="true"
-               [rowsPerPageOptions]="[10,25,50]"
-               [globalFilterFields]="['name', 'gid', 'owner', 'tags', 'description']"
-               [filterDelay]="0"
-               sortMode="multiple"
-               >
+      <p-table #dtg [value]="groups" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['name', 'gid', 'owner', 'tags', 'description']" [filterDelay]="0" sortMode="multiple">
         <ng-template pTemplate="caption">
           <div class="table-header">
             <span class="p-input-icon-right">
@@ -59,11 +51,19 @@
         </ng-template>
         <ng-template pTemplate="body" let-group>
           <tr>
-            <td><a routerLink="/admin/group/{{group.name}}"><span class="p-button p-button-sm p-button-primary">{{group.name}}</span></a></td>
-            <td>{{group.gid}}</td>
-            <td><a *ngIf="group.owner" routerLink="/user/{{group.owner}}"><span class="p-button p-button-sm p-button-primary">{{group?.owner}}</span></a></td>
-            <td>{{group.description}}</td>
-            <td>{{group.tags ? group.tags.join(", ") : ""}}</td>
+            <td>
+              <a routerLink="/admin/group/{{ group.name }}">
+                <span class="p-button p-button-sm p-button-primary">{{ group.name }}</span>
+              </a>
+            </td>
+            <td>{{ group.gid }}</td>
+            <td>
+              <a *ngIf="group.owner" routerLink="/user/{{ group.owner }}">
+                <span class="p-button p-button-sm p-button-primary">{{ group?.owner }}</span>
+              </a>
+            </td>
+            <td>{{ group.description }}</td>
+            <td>{{ group.tags ? group.tags.join(", ") : "" }}</td>
           </tr>
         </ng-template>
       </p-table>

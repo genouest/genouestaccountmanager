@@ -6,10 +6,7 @@ import { Component, OnInit } from '@angular/core';
     styleUrls: ['./password-reset-confirm.component.css']
 })
 export class PasswordResetConfirmComponent implements OnInit {
+    constructor() {}
 
-    constructor() { }
-
-    ngOnInit() {
-    }
-
+    ngOnInit() {}
 }

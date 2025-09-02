@@ -1,5 +1,5 @@
-<div *ngIf="msg" class="alert alert-success">{{msg}}</div>
-<div *ngIf="error_msg" class="alert alert-danger">{{error_msg}}</div>
+<div *ngIf="msg" class="alert alert-success">{{ msg }}</div>
+<div *ngIf="error_msg" class="alert alert-danger">{{ error_msg }}</div>
 
 <div class="card bg-light">
   <div class="card-header">
@@ -10,23 +10,21 @@
       <div class="col-md-4">
         <div class="form-group">
           <label for="mailing_list" class="col-form-label">Mailing list</label>
-            <select id="mailing_list" placeholder="Choose your mailing list" [ngModelOptions]="{standalone: true}" [(ngModel)]="mailing_list" (change)="decode_template($event); generate_list_members($event);" class="form-control" >
-              <option value="" disabled selected>Select your mailing list</option>
-              <option *ngFor="let list of mailing_lists" [value]="list.list_name">{{list.list_name}}</option>
-            </select>
-            <br *ngIf="mailing_list"/>
-            <button type="button" *ngIf="mailing_list" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#members_view">
-              View list members
-            </button>
-          </div>
+          <select id="mailing_list" placeholder="Choose your mailing list" [ngModelOptions]="{ standalone: true }" [(ngModel)]="mailing_list" (change)="decode_template($event); generate_list_members($event)" class="form-control">
+            <option value="" disabled selected>Select your mailing list</option>
+            <option *ngFor="let list of mailing_lists" [value]="list.list_name">{{ list.list_name }}</option>
+          </select>
+          <br *ngIf="mailing_list" />
+          <button type="button" *ngIf="mailing_list" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#members_view">View list members</button>
+        </div>
       </div>
     </div>
     <div class="row">
       <div class="col-sm-2">
         <div class="form-group">
           <label for="input_type" class="col-form-label">Input type</label>
-          <select id="input_type" (change)="decode_template($event.target.value)" [ngModelOptions]="{standalone: true}" [(ngModel)]="input_type" class="form-control">
-            <option *ngFor="let input of input_choices" [value]="input">{{input}}</option>
+          <select id="input_type" (change)="decode_template($event.target.value)" [ngModelOptions]="{ standalone: true }" [(ngModel)]="input_type" class="form-control">
+            <option *ngFor="let input of input_choices" [value]="input">{{ input }}</option>
           </select>
         </div>
       </div>
@@ -35,7 +33,7 @@
       <div class="col-sm-4">
         <div class="form-group">
           <label for="from" class="col-form-label">From</label>
-          <input class="form-control" id="from" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="origin" class="form-control"/>
+          <input class="form-control" id="from" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="origin" class="form-control" />
         </div>
       </div>
     </div>
@@ -43,7 +41,7 @@
       <div class="col-sm-4">
         <div class="form-group">
           <label for="subject" class="col-form-label">Subject</label>
-          <input class="form-control" placeholder="Subject" id="subject" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="subject" class="form-control"/>
+          <input class="form-control" placeholder="Subject" id="subject" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="subject" class="form-control" />
         </div>
       </div>
     </div>
@@ -51,25 +49,23 @@
       <div class="col-sm-12">
         <div class="form-group">
           <label for="message" class="col-form-label">Message</label>
-          <textarea class="form-control" placeholder="Type your message" [ngModelOptions]="{standalone: true}" [(ngModel)]="message" rows="20" cols="100" class="form-control"></textarea>
+          <textarea class="form-control" placeholder="Type your message" [ngModelOptions]="{ standalone: true }" [(ngModel)]="message" rows="20" cols="100" class="form-control"></textarea>
         </div>
       </div>
     </div>
     <!-- Button trigger modal -->
-    <button type="button" *ngIf="message && (input_type == 'HTML' || input_type == 'Markdown')" class="p-button p-button-sm p-button-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">
-      Viewer
-    </button>
+    <button type="button" *ngIf="message && subject && (input_type == 'HTML' || input_type == 'Markdown')" class="p-button p-button-sm p-button-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">Viewer</button>
 
-    <button type="button" *ngIf="mailing_lists && mailing_lists.length>0" class="p-button p-button-sm p-button-secondary" (click)="send()">Send</button>
+    <button type="button" *ngIf="mailing_lists && mailing_lists.length > 0" class="p-button p-button-sm p-button-secondary" (click)="send()">Send</button>
     <div class="row">
-      <div *ngIf="msg" class="alert alert-success">{{msg}}</div>
-      <div *ngIf="error_msg" class="alert alert-danger">{{error_msg}}</div>
+      <div *ngIf="msg" class="alert alert-success">{{ msg }}</div>
+      <div *ngIf="error_msg" class="alert alert-danger">{{ error_msg }}</div>
     </div>
   </div>
 </div>
 
 <!-- Modal -->
-<div class="modal" style="z-index: 1500;" id="HTML_viewer" tabindex="-1" role="dialog">
+<div class="modal" style="z-index: 1500" id="HTML_viewer" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-body">
@@ -83,30 +79,25 @@
   </div>
 </div>
 
-<div class="modal" style="z-index: 1500;" id="members_view" tabindex="-1" role="dialog">
+<div class="modal" style="z-index: 1500" id="members_view" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-body">
         <div class="list-members">
-            <div class="table-responsive table-striped">
-                      <p-table #dtp [value]="members"
-                                  [paginator]="true"
-                                  [rows]="10"
-                                  [showCurrentPageReport]="true" 
-                                  [rowsPerPageOptions]="[10,25,50]"
-                      >
-                        <ng-template pTemplate="header">
-                        <tr>
-                        <th>Email</th>
-                        </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-member>
-                              <tr>
-                                <td>{{member}}</td>
-                              </tr>
-                        </ng-template>
-                      </p-table>
-            </div>
+          <div class="table-responsive table-striped">
+            <p-table #dtp [value]="members" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Email</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-member>
+                <tr>
+                  <td>{{ member }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
         </div>
       </div>
       <div class="modal-footer">

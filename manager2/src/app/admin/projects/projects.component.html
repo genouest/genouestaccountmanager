@@ -1,100 +1,113 @@
-<div *ngIf="notification" class="alert alert-success">{{notification}}</div>
+<div *ngIf="notification" class="alert alert-success">{{ notification }}</div>
 
 <div class="card bg-light">
   <div class="card-header">
     <h3>Project creation</h3>
   </div>
   <div class="card-body">
-    <div *ngIf="add_project_msg" class="alert alert-success">{{add_project_msg}}</div>
-    <div *ngIf="add_project_error_msg" class="alert alert-danger">{{add_project_error_msg}}</div>
+    <div *ngIf="add_project_msg" class="alert alert-success">{{ add_project_msg }}</div>
+    <div *ngIf="add_project_error_msg" class="alert alert-danger">{{ add_project_error_msg }}</div>
     <form role="form" class="user-form form-horizonal">
       <div class="form-group row">
         <div class="col-sm-2">
-          <label for="project_id">Name&nbsp;
-            <span style="color:red">(required)&nbsp;</span>
+          <label for="project_id">
+            Name&nbsp;
+            <span style="color: red">(required)&nbsp;</span>
             <span class="glyphicon glyphicon-question-sign" title="Unique name for the project" tooltip></span>
           </label>
-          <input placeholder="project name" type="text" id="project_id" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.id" (ngModelChange)="update_project_on_event($event)" class="form-control"/>
+          <input placeholder="project name" type="text" id="project_id" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.id" (ngModelChange)="update_project_on_event($event)" class="form-control" />
         </div>
         <div class="col-sm-2">
-          <label for="project_owner">Owner&nbsp;
-            <span style="color:red">(required)&nbsp;</span>
+          <label for="project_owner">
+            Owner&nbsp;
+            <span style="color: red">(required)&nbsp;</span>
             <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" tooltip> </span>
           </label>
-          <select id="project_owner" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.owner" class="form-control">
-            <option *ngFor="let user of all_users" [value]="user.uid">{{user.uid}}</option>
+          <select id="project_owner" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.owner" class="form-control">
+            <option *ngFor="let user of all_users" [value]="user.uid">{{ user.uid }}</option>
           </select>
         </div>
         <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
-          <label for="project_group">Group&nbsp;
-            <span style="color:red">(required)&nbsp;</span>
+          <label for="project_group">
+            Group&nbsp;
+            <span style="color: red">(required)&nbsp;</span>
             <span class="glyphicon glyphicon-question-sign" data-html="true" title="Unix group: <br> Project members will be added to it" tooltip> </span>
           </label>
-          <select  id="project_group" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.group" class="form-control">
-            <option *ngFor="let group of groups" [value]="group.name">{{group.name}}</option>
+          <select id="project_group" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.group" class="form-control">
+            <option *ngFor="let group of groups" [value]="group.name">{{ group.name }}</option>
           </select>
         </div>
         <div class="col-sm-1" *ngIf="!config.project || config.project.enable_group">
-          <label for="group_create" style="opacity: 0;">Create</label>
+          <label for="group_create" style="opacity: 0">Create</label>
           <button id="group_create" type="button" class="p-button button-primary" data-toggle="modal" data-target="#group_creation">
             <span class="oi oi-plus" aria-hidden="true"></span>
             <span class="glyphicon glyphicon-question-sign" data-html="true" title="Create a new group for this project" tooltip> </span>
           </button>
         </div>
         <div class="col-sm-2">
-            <label for="project_size">Size (GB)</label>
-            <input placeholder="project size in GB" type="number" id="project_size" [value]="default_size" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.size" class="form-control"/>
+          <label for="project_size">Size (GB)</label>
+          <input placeholder="project size in GB" type="number" id="project_size" [value]="default_size" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.size" class="form-control" />
         </div>
         <div class="col-sm-2">
-            <label for="project_cpu">Cpu (Hour)</label>
-            <input placeholder="project cpu in Hour" type="number" id="project_cpu" [value]="default_cpu" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.cpu" class="form-control"/>
+          <label for="project_cpu">Cpu (Hour)</label>
+          <input placeholder="project cpu in Hour" type="number" id="project_cpu" [value]="default_cpu" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.cpu" class="form-control" />
         </div>
         <div class="col-sm-2">
           <label for="project_expire">Expiration date</label>
-          <input type="date" id="project_expire" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project_expire" class="form-control"/>
+          <input type="date" id="project_expire" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project_expire" class="form-control" />
         </div>
         <div class="col-sm-2">
-          <label for="project_org">Financing&nbsp;
+          <label for="project_org">
+            Financing&nbsp;
             <span class="glyphicon glyphicon-question-sign" title="Entity financing the project" tooltip> </span>
           </label>
-          <input placeholder="Ex : CNRS" type="text" id="project_org" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.orga" class="form-control"/>
+          <input placeholder="Ex : CNRS" type="text" id="project_org" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.orga" class="form-control" />
         </div>
       </div>
+
       <div class="form-group row">
         <div class="col-sm-12">
           <label for="project_description">Description</label>
-          <textarea placeholder="A short description for the project" rows="2" id="project_description" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.description" class="form-control"></textarea>
+          <textarea placeholder="A short description for the project" rows="2" id="project_description" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.description" class="form-control"></textarea>
         </div>
       </div>
+
       <div class="form-group row">
         <div class="col-sm-2" *ngIf="!config.project || config.project.enable_group">
-          <label >Write permission&nbsp;
+          <label>
+            Write permission&nbsp;
             <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip> </span>
           </label>
-          <select id="project_access" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.access" class="form-control">
-            <option value="Group" [selected]="true" >Group</option>
+          <select id="project_access" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.access" class="form-control">
+            <option value="Group" [selected]="true">Group</option>
             <option value="Data manager">Data manager</option>
           </select>
         </div>
         <div class="col-sm-3">
-          <label >Path to project&nbsp;
+          <label>
+            Path to project&nbsp;
             <span class="glyphicon glyphicon-question-sign" title="Path to the project folder" tooltip> </span>
           </label>
-          <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [value]="default_path" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_project.path" class="form-control"/>
+          <input placeholder="PATH/TO/THE/FOLDER" type="text" id="project_path" [value]="default_path" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.path" class="form-control" />
         </div>
       </div>
+
       <div class="form-group row">
         <div class="col-sm-2">
-          <label style="opacity: 0;">Create</label>
+          <label style="opacity: 0">Create</label>
           <button type="button" class="p-button p-button-success" (click)="add_project()">Create project</button>
+        </div>
+        <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
+          <label style="opacity: 0;">Reject</label>
+          <app-my-delete-confirm [onConfirm]="reject_project" [data]="" [explainMessage]="true" button_disp="Reject project"></app-my-delete-confirm>
         </div>
         <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
           <label style="opacity: 0;">Edit</label>
           <button type="button" class="p-button" (click)="edit_project()">Save changes</button>
         </div>
         <div class="col-sm-2" *ngIf="new_project.uuid && new_project.uuid != ''">
-          <label style="opacity: 0;">De-select</label>
-          <button type="button" class="p-button p-button-secondary" (click)="new_project = { };">Undo selection</button>
+          <label style="opacity: 0">De-select</label>
+          <button type="button" class="p-button p-button-secondary" (click)="new_project = {}">Undo selection</button>
         </div>
       </div>
     </form>
@@ -102,13 +115,12 @@
 </div>
 
 <div class="card bg-light">
-  <div class="card-header" (click)="requests_visible=!requests_visible" style="cursor: pointer;">
-    <h3>{{pending_number}} request(s) waiting </h3>
+  <div class="card-header" (click)="requests_visible = !requests_visible" style="cursor: pointer">
+    <h3>{{ pending_number }} request(s) waiting</h3>
   </div>
 
   <div *ngIf="requests_visible" class="card-body">
     <div class="row">
-
       <div class="col-md-12">
         <div class="card bg-light">
           <div class="card-header">
@@ -116,8 +128,8 @@
           </div>
           <div class="card-body">
             <div>
-              <div class="alert alert-danger" *ngIf="pending_err_msg">{{pending_err_msg}}</div>
-              <div *ngIf="pending_msg" class="alert alert-info">{{pending_msg}}</div>
+              <div class="alert alert-danger" *ngIf="pending_err_msg">{{ pending_err_msg }}</div>
+              <div *ngIf="pending_msg" class="alert alert-info">{{ pending_msg }}</div>
             </div>
             <p-table #dtw [(value)]="pending_projects" [autolayout]="false" sortMode="multiple">
               <ng-template pTemplate="header">
@@ -129,23 +141,24 @@
                   <th pSortableColumn="size">Size (GB) <p-sortIcon field="size"></p-sortIcon></th>
                   <th>Cpu (Hour)</th>
                   <th>Org</th>
-                  <th>Action</th>
+                  <th></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-pending>
                 <tr>
-                  <td>{{pending.created_at | date}}</td>
-                  <td>{{pending.id}}</td>
-                  <td><a routerLink="/user/{{pending.owner}}"><span class="p-button p-button-sm p-button-primary">{{pending.owner}}</span></a></td>
-                  <td>{{pending.expire | date}}</td>
-                  <td>{{pending.size}}</td>
-                  <td>{{pending.cpu}}</td>
-                  <td>{{pending.orga}}</td>
+                  <td>{{ pending.created_at | date }}</td>
+                  <td>{{ pending.id }}</td>
                   <td>
-                    <div class="btn-group">
-                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-info " (click)="modify_project(pending)">View</button>
-                      <button type="button" style="margin-right: 0px !important; " class="p-button p-button-sm p-button-danger " (click)="reject_project(pending)">Reject</button>
-                    </div>
+                    <a routerLink="/user/{{pending.owner}}">
+                      <span class="p-button p-button-sm p-button-primary">{{ pending.owner }}</span>
+                    </a>
+                  </td>
+                  <td>{{ pending.expire | date }}</td>
+                  <td>{{ pending.size }}</td>
+                  <td>{{ pending.cpu }}</td>
+                  <td>{{ pending.orga }}</td>
+                  <td>
+                    <button type="button" style="margin-right: 0px !important" class="p-button p-button-sm p-button-info" (click)="modify_project(pending)">View</button>
                   </td>
                 </tr>
               </ng-template>
@@ -157,22 +170,12 @@
   </div>
 </div>
 
-
 <div class="card bg-light">
   <div class="card-header">
     <h3>All projects</h3>
   </div>
   <div class="card-body">
-    <p-table #dtp [value]="projects"
-             [paginator]="true"
-             [rows]="10"
-             [showCurrentPageReport]="true"
-
-             [rowsPerPageOptions]="[10,25,50]"
-             [globalFilterFields]="['id','owner', 'group']"
-             [filterDelay]="0"
-             sortMode="multiple"
-             >
+    <p-table #dtp [value]="projects" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['id', 'owner', 'group']" [filterDelay]="0" sortMode="multiple">
       <ng-template pTemplate="caption">
         <div class="table-header">
           List of Projects
@@ -182,6 +185,7 @@
           </span>
         </div>
       </ng-template>
+
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="id">Project <p-sortIcon field="id"></p-sortIcon></th>
@@ -194,35 +198,35 @@
           <th pSortableColumn="expire">Expiration <p-sortIcon field="expire"></p-sortIcon></th>
         </tr>
       </ng-template>
+
       <ng-template pTemplate="body" let-project>
         <tr>
           <td>
-            <a routerLink="/admin/project/{{project.id}}">
-              <span class="p-button p-button-sm p-button-primary project-name" [title]="project.id">
-                {{project.id}}
-              </span>
+            <a routerLink="/admin/project/{{ project.id }}">
+              <span class="p-button p-button-sm p-button-primary project-name" [title]="project.id">{{ project.id }}</span>
             </a>
-          </td>          <td><a routerLink="/user/{{project.owner}}"><span class="p-button p-button-sm p-button-primary">{{project.owner}}</span></a></td>
+          </td>
+          <td>
+            <a routerLink="/user/{{ project.owner }}">
+              <span class="p-button p-button-sm p-button-primary">{{ project.owner }}</span>
+            </a>
+          </td>
           <td *ngIf="(!config.project || config.project.enable_group) && project.group">
-            <a routerLink="/admin/group/{{project.group}}"><span class="p-button p-button-sm p-button-primary">{{project.group}}</span></a>
+            <a routerLink="/admin/group/{{ project.group }}">
+              <span class="p-button p-button-sm p-button-primary">{{ project.group }}</span>
+            </a>
           </td>
-          <td>{{project.path}}</td>
-          <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
-              <meter *ngIf="project.current_size"
-                  min="0" max="{{project.size}}"
-                  optimum="0" low="{{project.low_size}}" high="{{project.high_size}}"
-                  value="{{project.current_size}}">
-              </meter>
+          <td>{{ project.path }}</td>
+          <td>
+            <span *ngIf="project.current_size">{{ project.current_size }}&#47;</span>{{ project.size }}
+            <meter *ngIf="project.current_size" min="0" max="{{ project.size }}" optimum="0" low="{{ project.low_size }}" high="{{ project.high_size }}" value="{{ project.current_size }}"></meter>
           </td>
-          <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&#47;</span>{{project.cpu}}
-              <meter *ngIf="project.current_cpu"
-                  min="0" max="{{project.cpu}}"
-                  optimum="0" low="{{project.low_cpu}}" high="{{project.high_cpu}}"
-                  value="{{project.current_cpu}}">
-              </meter>
+          <td>
+            <span *ngIf="project.current_cpu">{{ project.current_cpu }}&#47;</span>{{ project.cpu }}
+            <meter *ngIf="project.current_cpu" min="0" max="{{ project.cpu }}" optimum="0" low="{{ project.low_cpu }}" high="{{ project.high_cpu }}" value="{{ project.current_cpu }}"></meter>
           </td>
-          <td>{{project.created_at | date}}</td>
-          <td>{{project.expire | date}}</td>
+          <td>{{ project.created_at | date }}</td>
+          <td>{{ project.expire | date }}</td>
         </tr>
       </ng-template>
     </p-table>
@@ -231,19 +235,11 @@
 
 <div class="card bg-light">
   <div class="card-header bg-danger">
-      <h3>Expired [{{expired_projects.length}}]</h3>
+    <h3>Expired [{{ expired_projects.length }}]</h3>
   </div>
   <div class="card-body">
     <div class="table-responsive table-striped">
-      <p-table #dte [value]="expired_projects"
-                  [paginator]="true"
-                  [rows]="10"
-                  [showCurrentPageReport]="true"
-                  [rowsPerPageOptions]="[10,25,50]"
-                  [globalFilterFields]="['id','owner']"
-                  [filterDelay]="0"
-                  sortMode="multiple"
-      >
+      <p-table #dte [value]="expired_projects" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['id', 'owner']" [filterDelay]="0" sortMode="multiple">
         <ng-template pTemplate="caption">
           <div class="table-header">
             List of Expired Projects
@@ -253,6 +249,7 @@
             </span>
           </div>
         </ng-template>
+
         <ng-template pTemplate="header">
           <tr>
             <th pSortableColumn="id">Project <p-sortIcon field="id"></p-sortIcon></th>
@@ -266,31 +263,36 @@
             <th>Nb Notification</th>
           </tr>
         </ng-template>
+        
         <ng-template pTemplate="body" let-project>
           <tr>
-            <td><a routerLink="/admin/project/{{project.id}}"><span class="p-button p-button-sm p-button-primary project-name">{{project.id}}</span></a></td>
-            <td><a routerLink="/user/{{project.owner}}"><span class="p-button p-button-sm p-button-primary">{{project.owner}}</span></a></td>
+            <td>
+              <a routerLink="/admin/project/{{ project.id }}">
+                <span class="p-button p-button-sm p-button-primary project-name">{{ project.id }}</span>
+              </a>
+            </td>
+            <td>
+              <a routerLink="/user/{{ project.owner }}">
+                <span class="p-button p-button-sm p-button-primary">{{ project.owner }}</span>
+              </a>
+            </td>
             <td *ngIf="(!config.project || config.project.enable_group) && project.group">
-              <a routerLink="/admin/group/{{project.group}}"><span class="p-button p-button-sm p-button-primary">{{project.group}}</span></a>
+              <a routerLink="/admin/group/{{ project.group }}">
+                <span class="p-button p-button-sm p-button-primary">{{ project.group }}</span>
+              </a>
             </td>
-            <td>{{project.path}}</td>
-            <td><span *ngIf="project.current_size">{{project.current_size}}&#47;</span>{{project.size}}
-                <meter *ngIf="project.current_size"
-                    min="0" max="{{project.size}}"
-                    optimum="0" low="{{project.low_size}}" high="{{project.high_size}}"
-                    value="{{project.current_size}}">
-                </meter>
+            <td>{{ project.path }}</td>
+            <td>
+              <span *ngIf="project.current_size">{{ project.current_size }}&#47;</span>{{ project.size }}
+              <meter *ngIf="project.current_size" min="0" max="{{ project.size }}" optimum="0" low="{{ project.low_size }}" high="{{ project.high_size }}" value="{{ project.current_size }}"></meter>
             </td>
-            <td><span *ngIf="project.current_cpu">{{project.current_cpu}}&#47;</span>{{project.cpu}}
-                <meter *ngIf="project.current_cpu"
-                    min="0" max="{{project.cpu}}"
-                    optimum="0" low="{{project.low_cpu}}" high="{{project.high_cpu}}"
-                    value="{{project.current_cpu}}">
-                </meter>
+            <td>
+              <span *ngIf="project.current_cpu">{{ project.current_cpu }}&#47;</span>{{ project.cpu }}
+              <meter *ngIf="project.current_cpu" min="0" max="{{ project.cpu }}" optimum="0" low="{{ project.low_cpu }}" high="{{ project.high_cpu }}" value="{{ project.current_cpu }}"></meter>
             </td>
-            <td>{{project.created_at | date}}</td>
-            <td>{{project.expire | date}}</td>
-            <td>{{project.expiration_notif}}</td>
+            <td>{{ project.created_at | date }}</td>
+            <td>{{ project.expire | date }}</td>
+            <td>{{ project.expiration_notif }}</td>
           </tr>
         </ng-template>
       </p-table>
@@ -298,8 +300,9 @@
   </div>
 </div>
 
+
 <!-- Modal -->
-<div class="modal" style="z-index: 1500;" id="group_creation" tabindex="-1" role="dialog">
+<div class="modal" style="z-index: 1500" id="group_creation" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -309,22 +312,22 @@
         <form role="form" class="user-form form-horizonal">
           <div class="form-group row">
             <div class="col-sm-4">
-            <label for="create_group_name">Group Name</label>
-            <input id="create_group_name" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.name" class="form-control"/>
+              <label for="create_group_name">Group Name</label>
+              <input id="create_group_name" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.name" class="form-control"/>
             </div>
             <div class="col-sm-4">
-            <label for="create_group_owner">Owner</label>
-            <input id="create_group_owner" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.owner" class="form-control"/>
+              <label for="create_group_owner">Owner</label>
+              <input id="create_group_owner" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.owner" class="form-control"/>
             </div>
             <div class="col-sm-4">
-            <label for="create_group_description">Description</label>
-            <input id="create_group_description" type="text" [ngModelOptions]="{standalone: true}" [(ngModel)]="new_group.description" class="form-control"/>
+              <label for="create_group_description">Description</label>
+              <input id="create_group_description" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.description" class="form-control"/>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="p-button p-button-sm p-button-primary"  [disabled]="!new_group.name" data-dismiss="modal" (click)="addGroup()">Create</button>
+        <button type="button" class="p-button p-button-sm p-button-primary" [disabled]="!new_group.name" data-dismiss="modal" (click)="addGroup()">Create</button>
         <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
