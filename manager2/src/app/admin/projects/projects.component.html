@@ -21,7 +21,7 @@
           <label for="project_owner">
             Owner&nbsp;
             <span style="color: red">(required)&nbsp;</span>
-            <span class="glyphicon glyphicon-question-sign" title="Owner Genouest uid" tooltip> </span>
+            <span class="glyphicon glyphicon-question-sign" title="Owner uid" tooltip> </span>
           </label>
           <select id="project_owner" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.owner" class="form-control">
             <option *ngFor="let user of all_users" [value]="user.uid">{{ user.uid }}</option>
