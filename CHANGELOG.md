@@ -4,6 +4,7 @@
 
 * Ensure emails have name, destination and subject
 * Fix bug in TP account deletion
+* UI improvements on projects page
 
 ## 1.4.32 (2025-04-22)
 
