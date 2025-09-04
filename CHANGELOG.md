@@ -4,6 +4,8 @@
 
 * Ensure emails have name, destination and subject
 * Fix bug in TP account deletion
+* Clarify permission checks in user routes
+* Add project triggers
 
 ## 1.4.32 (2025-04-22)
 
