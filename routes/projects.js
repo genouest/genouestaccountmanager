@@ -155,15 +155,6 @@ router.post('/project', async function (req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-
-    let fid = new Date().getTime();
-    try {
-        let created_file = await filer.project_add_project(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch (error) {
-        logger.error('Project Creation Failed for: ' + user.uid, error);
-        return res.status(500).send({ message: 'Project Creation Failed' });
-    }
     return res.send({ message: 'Project created' });
 });
 
@@ -231,15 +222,6 @@ router.put('/project', async function (req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-
-    let fid = new Date().getTime();
-    try {
-        let created_file = await filer.project_update_project(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch (error) {
-        logger.error('Project Update Failed for: ' + user.uid, error);
-        return res.status(500).send({ message: 'Project Update Failed' });
-    }
     return res.send({ message: 'Project updated' });
 });
 
@@ -276,15 +258,6 @@ router.delete('/project/:id', async function (req, res) {
         } else {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
-    }
-
-    let fid = new Date().getTime();
-    try {
-        let created_file = await filer.project_delete_project(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch (error) {
-        logger.error('Project Deletion Failed for: ' + user.uid, error);
-        return res.status(500).send({ message: 'Project Deletion Failed' });
     }
     return res.send({ message: 'Project deleted' });
 });
@@ -340,15 +313,6 @@ router.post('/project/:id', async function (req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-
-    let fid = new Date().getTime();
-    try {
-        let created_file = await filer.project_update_project(user, fid);
-        logger.info('File Created: ', created_file);
-    } catch (error) {
-        logger.error('Project Update Failed for: ' + user.uid, error);
-        return res.status(500).send({ message: 'Project Update Failed' });
-    }
     return res.send({ message: 'Project updated' });
 });
 
@@ -391,20 +355,6 @@ router.post('/project/:id/request/user', async function (req, res) {
         } else {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
-    }
-
-    let fid = new Date().getTime();
-    try {
-        let created_file;
-        if (req.body.request === 'add') {
-            created_file = await filer.project_add_user_to_project(user, fid);
-        } else if (req.body.request === 'remove') {
-            created_file = await filer.project_remove_user_from_project(user, fid);
-        }
-        logger.info('File Created: ', created_file);
-    } catch (error) {
-        logger.error('Project Request Failed for: ' + user.uid, error);
-        return res.status(500).send({ message: 'Project Request Failed' });
     }
     return res.send({ message: req.body.request + ' ' + req.body.user + ' done' });
 });
