@@ -10,7 +10,6 @@ const sansrv = require('../core/sanitize.service.js');
 const rolsrv = require('../core/role.service.js');
 const prjsrv = require('../core/project.service.js');
 const usrsrv = require('../core/user.service.js');
-const filer = require('../core/file.js');
 
 const cfgsrv = require('../core/config.service.js');
 let my_conf = cfgsrv.get_conf();
