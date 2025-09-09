@@ -27,6 +27,7 @@ export class Project {
     path: string;
     expire: number;
     created_at: number;
+    last_extended: number;
 
     constructor(
         _id: string = '', uuid: string = '', id: string = '',
@@ -37,16 +38,16 @@ export class Project {
         low_cpu: number = null, high_cpu: number = null,
         orga: string = '',  description: string = '',
         access: string =  'Group', path: string = '',
-        expire: number = 0, created_at: number = null
+        expire: number = 0, created_at: number = null,
+        last_extended: number = null
     ) {
         this._id = _id; this.uuid = uuid, this.id = id; this.owner = owner;
         this.managers = [...new Set([owner, ...managers])]; this.group = group; this.size = size;
         this.current_size = current_size; this.low_size = low_size; this.high_size = high_size;
         this.cpu = cpu; this.current_cpu = current_cpu; this.low_cpu = low_cpu; this.high_cpu = high_cpu;
         this.orga = orga; this.description = description; this.access = access; this.path = path;
-        this.expire = expire; this.created_at = created_at;
+        this.expire = expire; this.created_at = created_at; this.last_extended = last_extended;
     }
-
 }
 
 @Injectable({
@@ -70,7 +71,8 @@ export class ProjectsService {
             resp.orga || '', resp.description || '',
             resp.access || 'Group', resp.path || '',
             new Date(resp.expire).getTime() || 0,
-            new Date(resp.created_at).getTime() || null
+            new Date(resp.created_at).getTime() || null,
+            new Date(resp.last_extended).getTime() || null
         );
     }
 
