@@ -88,7 +88,7 @@ module.exports = {
         return create_file('ssh_config', { user: user });
     },
 
-    /* method for goldap.js */
+    /* methods for goldap.js */
     ldap_reset_password: function (user, user_dn, fid) {
         return create_file('ldap_reset_password', { user: user, user_dn: user_dn, fid: fid });
     },
@@ -123,7 +123,7 @@ module.exports = {
         });
     },
 
-    /* method for users.js */
+    /* methods for users.js */
     user_create_extra_user: function (user, fid) {
         return create_file('user_create_extra_user', { user: user, fid: fid });
     },
@@ -180,8 +180,7 @@ module.exports = {
         return create_file('ssh_keygen', { user: user, fid: fid });
     },
 
-    /* method for projects.js */
-
+    /* methods for projects.js */
     project_add_project: function (project, fid) {
         return create_file('project_add_project', { project: project, fid: fid });
     },

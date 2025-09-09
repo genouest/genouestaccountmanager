@@ -638,50 +638,49 @@ router.get('/user/:id/confirm', async function (req, res) {
     let user = await dbsrv.mongo_users().findOne({ uid: uid });
     if (!user) {
         return res.status(401).send({ message: 'Invalid user' });
-    } else {
-        if (user.regkey == regkey) {
-            //if (user.status == STATUS_PENDING_APPROVAL) {
-            if (user.status != STATUS_PENDING_EMAIL) {
-                // Already pending or active
-                return res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
-            }
-            let account_event = { action: 'email_confirm', date: new Date().getTime() };
-            await dbsrv.mongo_users().updateOne(
-                { _id: user._id },
-                {
-                    $set: { status: STATUS_PENDING_APPROVAL },
-                    $push: { history: account_event }
-                }
-            );
-
-            let link = GENERAL_CONFIG.url + encodeURI('/manager2/user/' + user.uid);
-            try {
-                await maisrv.send_notif_mail(
-                    {
-                        name: 'registration',
-                        destinations: [GENERAL_CONFIG.accounts],
-                        subject: 'account registration: ' + uid
-                    },
-                    {
-                        '#UID#': user.uid,
-                        '#LINK#': link
-                    }
-                );
-            } catch (error) {
-                logger.error(error);
-            }
-
-            await dbsrv.mongo_events().insertOne({
-                owner: user.uid,
-                date: new Date().getTime(),
-                action: 'user confirmed email:' + req.params.id,
-                logs: []
-            });
-            return res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
-        } else {
-            return res.status(401).send({ message: 'Invalid registration key' });
-        }
     }
+    if (user.regkey != regkey) {
+        return res.status(401).send({ message: 'Invalid registration key' });
+    }
+
+    //if (user.status == STATUS_PENDING_APPROVAL) {
+    if (user.status != STATUS_PENDING_EMAIL) {
+        // Already pending or active
+        return res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
+    }
+    let account_event = { action: 'email_confirm', date: new Date().getTime() };
+    await dbsrv.mongo_users().updateOne(
+        { _id: user._id },
+        {
+            $set: { status: STATUS_PENDING_APPROVAL },
+            $push: { history: account_event }
+        }
+    );
+
+    let link = GENERAL_CONFIG.url + encodeURI('/manager2/user/' + user.uid);
+    try {
+        await maisrv.send_notif_mail(
+            {
+                name: 'registration',
+                destinations: [GENERAL_CONFIG.accounts],
+                subject: 'account registration: ' + uid
+            },
+            {
+                '#UID#': user.uid,
+                '#LINK#': link
+            }
+        );
+    } catch (error) {
+        logger.error(error);
+    }
+
+    await dbsrv.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'user confirmed email:' + req.params.id,
+        logs: []
+    });
+    return res.redirect(GENERAL_CONFIG.url + '/manager2/pending');
 });
 
 // Register
@@ -838,61 +837,58 @@ router.get('/user/:id/expire', async function (req, res) {
     if (!user) {
         return res.status(404).send({ message: 'User not found' });
     }
-
-    session_user.is_admin = isadmin;
-
-    if (session_user.is_admin) {
-        //let new_password = Math.random().toString(36).slice(-10);
-        let new_password = usrsrv.new_password(10);
-        user.password = new_password;
-        let fid = new Date().getTime();
-        try {
-            await goldap.reset_password(user, fid);
-        } catch (err) {
-            return res.status(500).send({ message: 'Error during operation' });
-        }
-        user.history.push({ action: 'expire', date: new Date().getTime() });
-        // eslint-disable-next-line no-unused-vars
-        await dbsrv
-            .mongo_users()
-            .updateOne(
-                { uid: user.uid },
-                {
-                    $set: {
-                        status: STATUS_EXPIRED,
-                        expiration: new Date().getTime(),
-                        history: user.history,
-                        expiration_notif: 0
-                    }
-                }
-            );
-
-        try {
-            let created_file = await filer.user_expire_user(user, fid);
-            logger.info('File Created: ', created_file);
-        } catch (error) {
-            logger.error('Expire User Failed for: ' + user.uid, error);
-            return res.status(500).send({ message: 'Expire User Failed' });
-        }
-
-        await dbsrv.mongo_events().insertOne({
-            owner: user.uid,
-            date: new Date().getTime(),
-            action: 'user expired by ' + session_user.uid,
-            logs: [user.uid + '.' + fid + '.update']
-        });
-
-        // Now remove from mailing list
-        try {
-            // eslint-disable-next-line no-unused-vars
-            await notif.remove(user.email, sendmail);
-            await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
-            return res.send({ message: 'Operation in progress', fid: fid, error: [] });
-        } catch (error) {
-            return res.send({ message: 'Operation in progress, user not in mailing list', fid: fid, error: error });
-        }
-    } else {
+    if (!isadmin) {
         return res.status(401).send({ message: 'Not authorized' });
+    }
+
+    //let new_password = Math.random().toString(36).slice(-10);
+    let new_password = usrsrv.new_password(10);
+    user.password = new_password;
+    let fid = new Date().getTime();
+    try {
+        await goldap.reset_password(user, fid);
+    } catch (err) {
+        return res.status(500).send({ message: 'Error during operation' });
+    }
+    user.history.push({ action: 'expire', date: new Date().getTime() });
+    // eslint-disable-next-line no-unused-vars
+    await dbsrv
+        .mongo_users()
+        .updateOne(
+            { uid: user.uid },
+            {
+                $set: {
+                    status: STATUS_EXPIRED,
+                    expiration: new Date().getTime(),
+                    history: user.history,
+                    expiration_notif: 0
+                }
+            }
+        );
+
+    try {
+        let created_file = await filer.user_expire_user(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch (error) {
+        logger.error('Expire User Failed for: ' + user.uid, error);
+        return res.status(500).send({ message: 'Expire User Failed' });
+    }
+
+    await dbsrv.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'user expired by ' + session_user.uid,
+        logs: [user.uid + '.' + fid + '.update']
+    });
+
+    // Now remove from mailing list
+    try {
+        // eslint-disable-next-line no-unused-vars
+        await notif.remove(user.email, sendmail);
+        await plgsrv.run_plugins('deactivate', user.uid, user, session_user.uid);
+        return res.send({ message: 'Operation in progress', fid: fid, error: [] });
+    } catch (error) {
+        return res.send({ message: 'Operation in progress, user not in mailing list', fid: fid, error: error });
     }
 });
 
@@ -1030,69 +1026,69 @@ router.get('/user/:id/passwordreset/:key', async function (req, res) {
     if (!user) {
         return res.status(404).send({ message: 'User does not exist' });
     }
-    if (req.params.key == user.regkey) {
-        // reset the password
-        //let new_password = Math.random().toString(36).slice(-10);
-        let new_password = usrsrv.new_password(10);
-        user.password = new_password;
-        let fid = new Date().getTime();
-        try {
-            await goldap.reset_password(user, fid);
-        } catch (err) {
-            return res.status(500).send({ message: 'Error during operation' });
-        }
-        user.history.push({ action: 'password reset', date: new Date().getTime() });
-        await dbsrv.mongo_users().updateOne({ uid: user.uid }, { $set: { history: user.history } });
-
-        // Todo: find if we need another template (or not)
-        try {
-            let created_file = await filer.user_reset_password(user, fid);
-            logger.info('File Created: ', created_file);
-        } catch (error) {
-            logger.error('Reset Password Failed for: ' + user.uid, error);
-            return res.status(500).send({ message: 'Reset Password Failed' });
-        }
-
-        // disable previous link sent
-        //let new_key = Math.random().toString(36).substring(7);
-        let new_key = usrsrv.new_random(7);
-        await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { regkey: new_key } });
-
-        // Now send email
-        try {
-            let msg_destinations = [user.email];
-            if (user.send_copy_to_support) {
-                msg_destinations.push(CONFIG.general.support);
-            }
-            await maisrv.send_notif_mail(
-                {
-                    name: 'password_reset',
-                    destinations: msg_destinations,
-                    subject: 'account password reset'
-                },
-                {
-                    '#UID#': user.uid,
-                    '#PASSWORD#': user.password
-                }
-            );
-        } catch (error) {
-            logger.error(error);
-        }
-
-        await dbsrv.mongo_events().insertOne({
-            owner: user.uid,
-            date: new Date().getTime(),
-            action: 'user password ' + req.params.id + ' reset confirmation',
-            logs: [user.uid + '.' + fid + '.update']
-        });
-
-        if (notif.mailSet()) {
-            return res.redirect(GENERAL_CONFIG.url + '/manager2/passwordresetconfirm');
-        } else {
-            return res.send({ message: 'Could not send an email, please contact the support' });
-        }
-    } else {
+    if (req.params.key != user.regkey) {
         return res.status(401).send({ message: 'Invalid authorization key.' });
+    }
+
+    // reset the password
+    //let new_password = Math.random().toString(36).slice(-10);
+    let new_password = usrsrv.new_password(10);
+    user.password = new_password;
+    let fid = new Date().getTime();
+    try {
+        await goldap.reset_password(user, fid);
+    } catch (err) {
+        return res.status(500).send({ message: 'Error during operation' });
+    }
+    user.history.push({ action: 'password reset', date: new Date().getTime() });
+    await dbsrv.mongo_users().updateOne({ uid: user.uid }, { $set: { history: user.history } });
+
+    // Todo: find if we need another template (or not)
+    try {
+        let created_file = await filer.user_reset_password(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch (error) {
+        logger.error('Reset Password Failed for: ' + user.uid, error);
+        return res.status(500).send({ message: 'Reset Password Failed' });
+    }
+
+    // disable previous link sent
+    //let new_key = Math.random().toString(36).substring(7);
+    let new_key = usrsrv.new_random(7);
+    await dbsrv.mongo_users().updateOne({ uid: req.params.id }, { $set: { regkey: new_key } });
+
+    // Now send email
+    try {
+        let msg_destinations = [user.email];
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
+        await maisrv.send_notif_mail(
+            {
+                name: 'password_reset',
+                destinations: msg_destinations,
+                subject: 'account password reset'
+            },
+            {
+                '#UID#': user.uid,
+                '#PASSWORD#': user.password
+            }
+        );
+    } catch (error) {
+        logger.error(error);
+    }
+
+    await dbsrv.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'user password ' + req.params.id + ' reset confirmation',
+        logs: [user.uid + '.' + fid + '.update']
+    });
+
+    if (notif.mailSet()) {
+        return res.redirect(GENERAL_CONFIG.url + '/manager2/passwordresetconfirm');
+    } else {
+        return res.send({ message: 'Could not send an email, please contact the support' });
     }
 });
 
@@ -1163,91 +1159,88 @@ router.get('/user/:id/renew', async function (req, res) {
     if (!user) {
         return res.status(404).send({ message: 'User not found' });
     }
+    if (!isadmin) {
+        return res.status(401).send({ message: 'Not authorized' });
+    }
 
-    session_user.is_admin = isadmin;
-
-    if (session_user.is_admin) {
-        //let new_password = Math.random().toString(36).slice(-10);
-        let new_password = usrsrv.new_password(10);
-        user.password = new_password;
-        let fid = new Date().getTime();
-        try {
-            await goldap.reset_password(user, fid);
-        } catch (err) {
-            return res.status(500).send({ message: 'Error during operation' });
+    //let new_password = Math.random().toString(36).slice(-10);
+    let new_password = usrsrv.new_password(10);
+    user.password = new_password;
+    let fid = new Date().getTime();
+    try {
+        await goldap.reset_password(user, fid);
+    } catch (err) {
+        return res.status(500).send({ message: 'Error during operation' });
+    }
+    user.history.push({ action: 'reactivate', date: new Date().getTime() });
+    await dbsrv.mongo_users().updateOne(
+        { uid: user.uid },
+        {
+            $set: {
+                status: STATUS_ACTIVE,
+                expiration: new Date().getTime() + day_time * duration_list[user.duration],
+                expiration_notif: 0,
+                history: user.history
+            }
         }
-        user.history.push({ action: 'reactivate', date: new Date().getTime() });
-        await dbsrv.mongo_users().updateOne(
-            { uid: user.uid },
+    );
+
+    try {
+        let created_file = await filer.user_renew_user(user, fid);
+        logger.info('File Created: ', created_file);
+    } catch (error) {
+        logger.error('Renew User Failed for: ' + user.uid, error);
+        return res.status(500).send({ message: 'Renew User Failed' });
+    }
+
+    await dbsrv.mongo_events().insertOne({
+        owner: user.uid,
+        date: new Date().getTime(),
+        action: 'user reactivated by ' + session_user.uid,
+        logs: [user.uid + '.' + fid + '.update']
+    });
+
+    try {
+        let msg_destinations = [user.email];
+        if (user.send_copy_to_support) {
+            msg_destinations.push(CONFIG.general.support);
+        }
+        await maisrv.send_notif_mail(
             {
-                $set: {
-                    status: STATUS_ACTIVE,
-                    expiration: new Date().getTime() + day_time * duration_list[user.duration],
-                    expiration_notif: 0,
-                    history: user.history
-                }
+                name: 'reactivation',
+                destinations: msg_destinations,
+                subject: 'account reactivation'
+            },
+            {
+                '#UID#': user.uid,
+                '#PASSWORD#': user.password,
+                '#IP#': user.ip
             }
         );
+    } catch (error) {
+        logger.error(error);
+    }
 
+    let error = false;
+    try {
+        error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
+    } catch (err) {
+        logger.error('activation errors', err);
+        error = true;
+    }
+
+    if (!user.is_fake) {
         try {
-            let created_file = await filer.user_renew_user(user, fid);
-            logger.info('File Created: ', created_file);
-        } catch (error) {
-            logger.error('Renew User Failed for: ' + user.uid, error);
-            return res.status(500).send({ message: 'Renew User Failed' });
-        }
-
-        await dbsrv.mongo_events().insertOne({
-            owner: user.uid,
-            date: new Date().getTime(),
-            action: 'user reactivated by ' + session_user.uid,
-            logs: [user.uid + '.' + fid + '.update']
-        });
-
-        try {
-            let msg_destinations = [user.email];
-            if (user.send_copy_to_support) {
-                msg_destinations.push(CONFIG.general.support);
-            }
-            await maisrv.send_notif_mail(
-                {
-                    name: 'reactivation',
-                    destinations: msg_destinations,
-                    subject: 'account reactivation'
-                },
-                {
-                    '#UID#': user.uid,
-                    '#PASSWORD#': user.password,
-                    '#IP#': user.ip
-                }
-            );
-        } catch (error) {
-            logger.error(error);
-        }
-
-        let error = false;
-        try {
-            error = await plgsrv.run_plugins('activate', user.uid, user, session_user.uid);
+            await notif.add(user.email, user.uid);
         } catch (err) {
-            logger.error('activation errors', err);
-            error = true;
+            logger.error('[notif][error=add][mail=' + user.email + ']');
         }
+    }
 
-        if (!user.is_fake) {
-            try {
-                await notif.add(user.email, user.uid);
-            } catch (err) {
-                logger.error('[notif][error=add][mail=' + user.email + ']');
-            }
-        }
-
-        if (error) {
-            return res.status(500).send({ message: 'Activation Error', fid: fid, error: [] });
-        } else {
-            return res.send({ message: 'Activation in progress', fid: fid, error: [] });
-        }
+    if (error) {
+        return res.status(500).send({ message: 'Activation Error', fid: fid, error: [] });
     } else {
-        return res.status(401).send({ message: 'Not authorized' });
+        return res.send({ message: 'Activation in progress', fid: fid, error: [] });
     }
 });
 
@@ -1746,19 +1739,16 @@ router.get('/user/:id/unlock', async function (req, res) {
     if (!user) {
         return res.status(404).send({ message: 'User not found' });
     }
-
-    session_user.is_admin = isadmin;
-
-    if (session_user.is_admin) {
-        try {
-            await idsrv.user_unlock(user.uid);
-        } catch (err) {
-            return res.status(500).send({ message: 'Error during operation' });
-        }
-        return res.send({ message: 'User was unlocked' });
-    } else {
+    if (!isadmin) {
         return res.status(401).send({ message: 'Not authorized' });
     }
+
+    try {
+        await idsrv.user_unlock(user.uid);
+    } catch (err) {
+        return res.status(500).send({ message: 'Error during operation' });
+    }
+    return res.send({ message: 'User was unlocked' });
 });
 
 module.exports = router;

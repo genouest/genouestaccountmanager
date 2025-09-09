@@ -103,6 +103,14 @@ async function edit_project(project, uuid, action_owner = 'auto') {
     logger.info('Editing Project ' + project.id);
     project.expiration_notif = 0;
     await dbsrv.mongo_pending_projects().updateOne({ uuid: uuid }, { $set: project });
+    let fid = new Date().getTime();
+    try {
+        let created_file = await filer.project_update_project(project, fid);
+        logger.info('File Created: ', created_file);
+    } catch (error) {
+        logger.error('Project Update Failed for: ' + action_owner, error);
+        throw { code: 500, message: 'Project Update Failed' };
+    }
     await dbsrv
         .mongo_events()
         .insertOne({

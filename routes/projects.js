@@ -154,7 +154,6 @@ router.post('/project', async function (req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-
     return res.send({ message: 'Project created' });
 });
 
@@ -222,7 +221,6 @@ router.put('/project', async function (req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-
     return res.send({ message: 'Project updated' });
 });
 
@@ -357,7 +355,6 @@ router.post('/project/:id/request/user', async function (req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-
     return res.send({ message: req.body.request + ' ' + req.body.user + ' done' });
 });
 
