@@ -72,7 +72,7 @@ async function create_db_request(asked_db, user) {
             {
                 name: 'ask_database',
                 destinations: msg_destinations,
-                subject: 'Database creation request: ' + asked_db.id
+                subject: 'Database creation request: ' + asked_db.name
             },
             {
                 '#UID#': user.uid,
