@@ -77,7 +77,6 @@ async function create_db_request(asked_db, user) {
             {
                 '#UID#': user.uid,
                 '#NAME#': asked_db.name,
-                '#SIZE#': asked_db.size,
                 '#USAGE#': asked_db.usage,
                 '#EXP#': asked_db.expire
             }
