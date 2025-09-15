@@ -5,6 +5,8 @@
 * Ensure emails have name, destination and subject
 * Fix bug in TP account deletion
 * Fix database creation validation confirmation email
+* Fix database creation request email title
+* Remove DB 'size' attribute
 
 ## 1.4.32 (2025-04-22)
 
