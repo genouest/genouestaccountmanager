@@ -138,7 +138,6 @@ router.post('/database/request/:id', async function (req, res) {
         type: 'mysql',
         host: CONFIG.mysql.host,
         usage: req.body.usage ? req.body.usage : '',
-        size: req.body.size ? req.body.size : '',
         expire: req.body.expire,
         single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
@@ -191,7 +190,6 @@ router.post('/database/create/:id', async function (req, res) {
         type: req.body.type ? req.body.type : 'mysql',
         host: req.body.host && sansrv.sanitize(req.body.host) ? req.body.host : CONFIG.mysql.host,
         usage: req.body.usage ? req.body.usage : '',
-        size: req.body.size ? req.body.size : '',
         expire: req.body.expire,
         single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
@@ -245,7 +243,6 @@ router.post('/database/declare/:id', async function (req, res) {
         type: req.body.type ? req.body.type : 'mysql',
         host: req.body.host && sansrv.sanitize(req.body.host) ? req.body.host : CONFIG.mysql.host,
         usage: req.body.usage ? req.body.usage : '',
-        size: req.body.size ? req.body.size : '',
         single_user: req.body.single_user !== undefined ? req.body.single_user : true
     };
     try {

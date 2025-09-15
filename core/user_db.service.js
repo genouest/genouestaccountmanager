@@ -72,12 +72,11 @@ async function create_db_request(asked_db, user) {
             {
                 name: 'ask_database',
                 destinations: msg_destinations,
-                subject: 'Database creation request: ' + asked_db.id
+                subject: 'Database creation request: ' + asked_db.name
             },
             {
                 '#UID#': user.uid,
                 '#NAME#': asked_db.name,
-                '#SIZE#': asked_db.size,
                 '#USAGE#': asked_db.usage,
                 '#EXP#': asked_db.expire
             }
@@ -124,10 +123,11 @@ async function create_db(new_db, user, id) {
     }
 
     try {
+        let owner = await dbsrv.mongo_users().findOne({ uid: new_db.owner });
         await maisrv.send_notif_mail(
             {
                 name: 'database_creation',
-                destinations: [user.email, CONFIG.general.accounts],
+                destinations: [owner.email, CONFIG.general.accounts],
                 subject: 'Database creation'
             },
             {
