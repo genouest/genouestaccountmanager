@@ -12,7 +12,6 @@ export class Database {
     owner: string
     create: boolean
     usage: string
-    size: string
     expire: number
     created_at: number
     single_user: boolean
@@ -21,12 +20,12 @@ export class Database {
     constructor(
         name: string = '', type: string = 'mysql', host: string = '',
         owner: string = '', create: boolean = false, usage: string = '',
-        size: string = '', expire: number = 0, created_at: number = 0,
+        expire: number = 0, created_at: number = 0,
         single_user: boolean = true, _id: string = ''
     ) {
         this.name = name; this.type = type; this.host = host;
         this.owner = owner; this.create = create; this.usage = usage;
-        this.size = size; this.expire = expire; this.created_at = created_at;
+        this.expire = expire; this.created_at = created_at;
         this.single_user = single_user; this._id = _id
     }
 
@@ -34,7 +33,7 @@ export class Database {
         return {
             name: this.name, type: this.type, host: this.host,
             owner: this.owner, create: this.create, usage: this.usage,
-            size: this.size, expire: this.expire, created_at: this.created_at,
+            expire: this.expire, created_at: this.created_at,
             single_user: this.single_user, _id: this._id
         };
     }
@@ -52,9 +51,9 @@ export class DatabaseService {
         return new Database(
             resp.name || '', resp.type || 'mysql', resp.host || '',
             resp.owner || '', resp.create || false, resp.usage || '',
-            resp.size || '', new Date(resp.expire).getTime() || 0,
-            new Date(resp.created_at).getTime() || 0, resp.single_user || true,
-            resp._id || ''
+            new Date(resp.expire).getTime() || 0,
+            new Date(resp.created_at).getTime() || 0,
+            resp.single_user || true, resp._id || ''
         );
     }
 
