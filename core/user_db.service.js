@@ -123,10 +123,11 @@ async function create_db(new_db, user, id) {
     }
 
     try {
+        let owner = await dbsrv.mongo_users().findOne({ uid: new_db.owner });
         await maisrv.send_notif_mail(
             {
                 name: 'database_creation',
-                destinations: [user.email, CONFIG.general.accounts],
+                destinations: [owner.email, CONFIG.general.accounts],
                 subject: 'Database creation'
             },
             {
