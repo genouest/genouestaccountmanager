@@ -299,6 +299,7 @@ router.post('/project/:id', async function (req, res) {
                 size: req.body.size,
                 cpu: req.body.cpu,
                 expire: req.body.expire,
+                last_extended: req.body.last_extended,
                 description: req.body.description,
                 access: req.body.access,
                 orga: req.body.orga,
