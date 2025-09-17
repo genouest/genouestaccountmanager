@@ -299,6 +299,7 @@ router.post('/project/:id', async function (req, res) {
                 size: req.body.size,
                 cpu: req.body.cpu,
                 expire: req.body.expire,
+                last_extended: req.body.last_extended,
                 description: req.body.description,
                 access: req.body.access,
                 orga: req.body.orga,
@@ -658,7 +659,9 @@ router.get('/project/:id/extend', async function (req, res) {
 
     if (CONFIG.project && CONFIG.project.allow_extend) {
         let expiration = new Date().getTime() + 360 * 1000 * 60 * 60 * 24; // one year
-        await dbsrv.mongo_projects().updateOne({ id: project.id }, { $set: { expire: expiration } });
+        await dbsrv
+            .mongo_projects()
+            .updateOne({ id: project.id }, { $set: { expire: expiration, last_extended: new Date().getTime() } });
         return res.send({ message: 'validity period extended', expiration: expiration });
     }
     return;

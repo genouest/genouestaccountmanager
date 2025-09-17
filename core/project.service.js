@@ -22,6 +22,7 @@ exports.edit_project = edit_project;
 async function create_project(new_project, uuid, action_owner = 'auto') {
     logger.info('Create Project ' + new_project.id + ' uuid ' + uuid);
     new_project.created_at = new Date().getTime();
+    new_project.last_extended = new_project.created_at;
     if (!new_project.expire) {
         new_project.expire = new Date().getTime() + CONFIG.project.default_expire * day_time;
     }

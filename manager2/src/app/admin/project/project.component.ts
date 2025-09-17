@@ -146,7 +146,11 @@ export class ProjectComponent implements OnInit {
     }
 
     update_project() {
-        this.project.expire = new Date(this.project_expire).getTime();
+        let new_expire = new Date(this.project_expire).getTime();
+        if (new_expire != this.project.expire) {
+            this.project.last_extended = new Date().getTime();
+            this.project.expire = new_expire;
+        }
         this.project.group = this.config.project.enable_group ? this.project.group : '';
         this.projectsService.update(this.project.id, this.project).subscribe(
             (resp) => {

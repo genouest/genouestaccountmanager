@@ -246,6 +246,9 @@ export class ProjectsComponent implements OnInit {
                     if (!projects[i].created_at) {
                         projects[i].created_at = parseInt(projects[i]['_id'].substring(0, 8), 16) * 1000;
                     }
+                    if (!projects[i].last_extended) {
+                        projects[i].last_extended = projects[i].created_at;
+                    }
                 }
                 this.projects = active_projects;
                 this.expired_projects = expired_projects;
