@@ -408,7 +408,7 @@ router.post('/project/:id/add/manager/:uid', async function(req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-    return res.send({ message: req.body.request + ' ' + req.body.user + ' done' });
+    return res.send({ message: 'Add manager ' + new_manager.uid + ' done' });
 });
 
 
@@ -452,7 +452,7 @@ router.post('/project/:id/remove/manager/:uid', async function(req, res) {
             return res.status(500).send({ message: 'Server Error, contact admin' });
         }
     }
-    return res.send({ message: req.body.request + ' ' + req.body.user + ' done' });
+    return res.send({ message: 'Remove manager ' + ex_manager.uid + ' done' });
 });
 
 
