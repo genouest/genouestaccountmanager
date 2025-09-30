@@ -299,7 +299,6 @@ router.post('/project/:id', async function (req, res) {
                 size: req.body.size,
                 cpu: req.body.cpu,
                 expire: req.body.expire,
-                last_extended: req.body.last_extended,
                 description: req.body.description,
                 access: req.body.access,
                 orga: req.body.orga,
@@ -333,7 +332,7 @@ router.post('/project/:id/request/user', async function (req, res) {
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if (!project.managers || !project.managers.includes(user.uid) || user.uid != project.owner) {
+    if ((!project.managers || !project.managers.includes(user.uid)) && user.uid !== project.owner && !user.is_admin) {
         return res.status(401).send({ message: 'User ' + user.uid + ' is not project manager for project ' + project.id });
     }
     if (req.body.user == project.owner) {
@@ -380,7 +379,7 @@ router.post('/project/:id/add/manager/:uid', async function(req, res) {
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if (user.uid != project.owner && user.is_admin !== true) {
+    if (user.uid != project.owner && !user.is_admin) {
         return res.status(401).send({ message: 'Non-admin user ' + user.uid + ' is not the owner of project ' + project.id });
     }
     const new_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
@@ -427,7 +426,7 @@ router.post('/project/:id/remove/manager/:uid', async function(req, res) {
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if (user.uid != project.owner && user.is_admin !== true) {
+    if (user.uid != project.owner && !user.is_admin) {
         return res.status(401).send({ message: 'Non-admin user ' + user.uid + ' is not the owner of project ' + project.id });
     }
     const ex_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
@@ -662,9 +661,7 @@ router.get('/project/:id/extend', async function (req, res) {
 
     if (CONFIG.project && CONFIG.project.allow_extend) {
         let expiration = new Date().getTime() + 360 * 1000 * 60 * 60 * 24; // one year
-        await dbsrv
-            .mongo_projects()
-            .updateOne({ id: project.id }, { $set: { expire: expiration, last_extended: new Date().getTime() } });
+        await dbsrv.mongo_projects().updateOne({ id: project.id }, { $set: { expire: expiration } });
         return res.send({ message: 'validity period extended', expiration: expiration });
     }
     return;
