@@ -8,6 +8,8 @@
 * Fix database creation validation confirmation email
 * Fix database creation request email title
 * Remove DB 'size' attribute
+* Allow admins to add/remove project managers
+* Fix add/remove manager http returns
 
 ## 1.4.32 (2025-04-22)
 
