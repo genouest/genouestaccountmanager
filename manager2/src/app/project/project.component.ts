@@ -227,7 +227,7 @@ export class ProjectComponent implements OnInit {
             );
             return;
         }
-        // Owner request
+        // Owner or Manager request
         this.projectsService.request_user(project.id, { request: request_type, user: user_id }).subscribe(
             (resp) => {
                 this.manager_request_msg = resp['message'];

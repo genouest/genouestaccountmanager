@@ -26,6 +26,8 @@ export class ProjectComponent implements OnInit {
 
     new_user_admin: string = '';
     remove_user_admin: string = '';
+    new_manager: string = '';
+    rm_manager: string = '';
 
     admin_user_err_msg: string;
     admin_user_msg: string;
@@ -94,6 +96,48 @@ export class ProjectComponent implements OnInit {
                 );
             },
             (err) => console.log('failed to get project')
+        );
+    }
+
+    add_manager(new_manager: string) {
+        this.admin_user_msg = '';
+        this.admin_user_err_msg = '';
+        if (!new_manager) {
+            this.admin_user_err_msg = 'User id is required';
+            return;
+        }
+        for (var i = 0; i < this.project.managers.length; i++) {
+            if (this.project.managers[i] === new_manager) {
+                this.admin_user_err_msg = 'User is already a manager';
+                return;
+            }
+        }
+        this.projectsService.add_manager(this.project.id, new_manager).subscribe(
+            resp => {
+                this.admin_user_msg = resp['message']
+                this.show_project_users(this.project.id)
+            },
+            err => this.admin_user_err_msg = err.error.message
+        );
+    }
+
+    remove_manager(rm_manager: string) {
+        this.admin_user_msg = '';
+        this.admin_user_err_msg = '';
+        if (!rm_manager) {
+            this.admin_user_err_msg = 'User id is required';
+            return;
+        }
+        if (this.project.owner === rm_manager) {
+            this.admin_user_err_msg = 'The project owner is always a manager';
+            return;
+        }
+        this.projectsService.remove_manager(this.project.id, rm_manager).subscribe(
+            resp => {
+                this.admin_user_msg = resp['message']
+                this.show_project_users(this.project.id);
+            },
+            err => this.admin_user_err_msg = err.error.message
         );
     }
 

@@ -380,8 +380,8 @@ router.post('/project/:id/add/manager/:uid', async function(req, res) {
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if (user.uid != project.owner) {
-        return res.status(401).send({ message: 'User ' + user.uid + ' is not the owner of project ' + project.id });
+    if (user.uid != project.owner && user.is_admin !== true) {
+        return res.status(401).send({ message: 'Non-admin user ' + user.uid + ' is not the owner of project ' + project.id });
     }
     const new_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
     if (!new_manager) {
@@ -427,8 +427,8 @@ router.post('/project/:id/remove/manager/:uid', async function(req, res) {
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if (user.uid != project.owner) {
-        return res.status(401).send({ message: 'User ' + user.uid + ' is not the owner of project ' + project.id });
+    if (user.uid != project.owner && user.is_admin !== true) {
+        return res.status(401).send({ message: 'Non-admin user ' + user.uid + ' is not the owner of project ' + project.id });
     }
     const ex_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
     if (!ex_manager) {
