@@ -41,6 +41,7 @@
           <label for="group_create" style="opacity: 0">Create</label>
           <button id="group_create" type="button" class="p-button button-primary" data-toggle="modal" data-target="#group_creation">
             <span class="oi oi-plus" aria-hidden="true"></span>
+            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Create a new group for this project" tooltip> </span>
           </button>
         </div>
         <div class="col-sm-2">
@@ -210,7 +211,11 @@
               <span class="p-button p-button-sm p-button-primary">{{ project.owner }}</span>
             </a>
           </td>
-          <td *ngIf="!config.project || config.project.enable_group">{{ project.group }}</td>
+          <td *ngIf="(!config.project || config.project.enable_group) && project.group">
+            <a routerLink="/admin/group/{{ project.group }}">
+              <span class="p-button p-button-sm p-button-primary">{{ project.group }}</span>
+            </a>
+          </td>
           <td>{{ project.path }}</td>
           <td>
             <span *ngIf="project.current_size">{{ project.current_size }}&#47;</span>{{ project.size }}
@@ -271,7 +276,11 @@
                 <span class="p-button p-button-sm p-button-primary">{{ project.owner }}</span>
               </a>
             </td>
-            <td *ngIf="!config.project || config.project.enable_group">{{ project.group }}</td>
+            <td *ngIf="(!config.project || config.project.enable_group) && project.group">
+              <a routerLink="/admin/group/{{ project.group }}">
+                <span class="p-button p-button-sm p-button-primary">{{ project.group }}</span>
+              </a>
+            </td>
             <td>{{ project.path }}</td>
             <td>
               <span *ngIf="project.current_size">{{ project.current_size }}&#47;</span>{{ project.size }}
@@ -303,13 +312,16 @@
         <form role="form" class="user-form form-horizonal">
           <div class="form-group row">
             <div class="col-sm-4">
-              <input placeholder="Group name" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.name" class="form-control" />
+              <label for="create_group_name">Group Name</label>
+              <input id="create_group_name" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.name" class="form-control"/>
             </div>
             <div class="col-sm-4">
-              <input placeholder="Owner" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.owner" class="form-control" />
+              <label for="create_group_owner">Owner</label>
+              <input id="create_group_owner" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.owner" class="form-control"/>
             </div>
             <div class="col-sm-4">
-              <input placeholder="Description" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.description" class="form-control" />
+              <label for="create_group_description">Description</label>
+              <input id="create_group_description" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.description" class="form-control"/>
             </div>
           </div>
         </form>

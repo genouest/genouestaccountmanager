@@ -5,6 +5,10 @@
 * Ensure emails have name, destination and subject
 * Fix bug in TP account deletion
 * Adds a 'last_extended' attribute to the Project type
+* UI improvements on projects page
+* Fix database creation validation confirmation email
+* Fix database creation request email title
+* Remove DB 'size' attribute
 
 ## 1.4.32 (2025-04-22)
 
