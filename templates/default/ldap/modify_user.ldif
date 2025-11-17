@@ -46,3 +46,8 @@ changetype: modify
 add: memberUid
 memberUid: {{ user.uid }}
 {% endif %}
+{% if user.firstname and user.lastname %}
+-
+replace: cn
+cn: {{ user.firstname }} {{ user.lastname }}
+{% endif %}
