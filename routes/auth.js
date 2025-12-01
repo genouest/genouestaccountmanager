@@ -427,7 +427,7 @@ router.post('/auth/:id', async function (req, res) {
             sentuser['token'] = token;
             if (!user.apikey) {
                 // let newApikey = Math.random().toString(36).slice(-10);
-                let newApikey = usrsrv.new_random(10);
+                let newApikey = usrsrv.new_random(16);
                 sentuser.apikey = newApikey;
                 await dbsrv.mongo_users().updateOne({ uid: user.uid }, { $set: { apikey: newApikey } });
             }
