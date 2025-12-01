@@ -175,7 +175,8 @@ app.all('*', async function(req, res, next){
         mail_token: null,
         id: null,
         u2f: null,
-        session_user: null
+        session_user: null,
+        double_auth: null
     };
     if(! req.locals) {
         req.locals = {};
@@ -198,6 +199,7 @@ app.all('*', async function(req, res, next){
             req.session.gomngr=null;
             req.session.is_logged = false;
             req.session.mail_token = null;
+            req.session.double_auth = null
         }
         try{
             if(jwtToken.isLogged) {
@@ -210,6 +212,10 @@ app.all('*', async function(req, res, next){
             }
             if(jwtToken.u2f) {
                 logInfo.u2f = jwtToken.u2f;
+            }
+            if(jwtToken.double_auth) {
+                req.session.double_auth = jwtToken.double_auth;
+                logInfo.double_auth = jwtToken.double_auth;
             }
             if(jwtToken.user) {
                 let session_user = await dbsrv.mongo_users().findOne({'_id': ObjectID.createFromHexString(jwtToken.user)});
@@ -268,6 +274,9 @@ app.all('*', async function(req, res, next){
         }
         if(req.session.u2f) {
             logInfo.u2f =req.session.u2f;
+        }
+        if(req.double_auth){
+            logInfo.double_auth = req.double_auth
         }
         if(req.session.gomngr) {
             let session_user = await dbsrv.mongo_users().findOne({'_id': ObjectID.createFromHexString(req.session.gomngr)});
