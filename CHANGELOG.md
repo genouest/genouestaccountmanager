@@ -2,6 +2,7 @@
 
 ## 1.4.33 (Unreleased)
 
+* Change login process for double auth
 * Ensure emails have name, destination and subject
 * Fix bug in TP account deletion
 * Adds a 'last_extended' attribute to the Project type

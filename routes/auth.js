@@ -47,8 +47,8 @@ router.get('/logout', function (req, res) {
 
 router.get('/mail/auth/:id', async function (req, res) {
     // Request email token
-    if (!req.locals.logInfo.is_logged) {
-        return res.status(401).send({ message: 'You need to login first' });
+    if (!req.locals.logInfo.double_auth) {
+        return res.status(401).send({ message: 'Not double auth in progress' });
     }
 
     if (!notif.mailSet()) {
@@ -65,9 +65,9 @@ router.get('/mail/auth/:id', async function (req, res) {
     req.session.mail_token = { token: password, expire: expire, user: user._id };
     let mail_token = { token: password, expire: expire, user: user._id };
     let usertoken = jwt.sign(
-        { user: user._id, isLogged: true, mail_token: mail_token },
+        { user: user._id, isLogged: false, mail_token: mail_token, double_auth: true },
         CONFIG.general.secret,
-        { expiresIn: '2 days' }
+        { expiresIn: '10 minutes' }
     );
 
     try {
@@ -92,8 +92,8 @@ router.get('/mail/auth/:id', async function (req, res) {
 
 router.post('/mail/auth/:id', async function (req, res) {
     // Check email token
-    if (!req.locals.logInfo.is_logged) {
-        return res.status(401).send({ message: 'You need to login first' });
+    if (!req.locals.logInfo.double_auth) {
+        return res.status(401).send({ message: 'No double auth in progress' });
     }
     let user = null;
     let isadmin = false;
@@ -129,8 +129,8 @@ router.post('/mail/auth/:id', async function (req, res) {
 
 router.get('/u2f/auth/:id', async function (req, res) {
     // challenge
-    if (!req.locals.logInfo.is_logged) {
-        return res.status(401).send({ message: 'You need to login first' });
+    if (!req.locals.logInfo.double_auth) {
+        return res.status(401).send({ message: 'No double auth in progress' });
     }
     req.session.u2f = null;
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
@@ -146,8 +146,8 @@ router.get('/u2f/auth/:id', async function (req, res) {
 });
 
 router.post('/u2f/auth/:id', async function (req, res) {
-    if (!req.locals.logInfo.is_logged) {
-        return res.status(401).send({ message: 'You need to login first' });
+    if (!req.locals.logInfo.double_auth) {
+        return res.status(401).send({ message: 'No double auth in progress' });
     }
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
@@ -407,7 +407,7 @@ router.post('/auth/:id', async function (req, res) {
     }
 
     if (need_double_auth) {
-        usertoken = jwt.sign({ isLogged: true, u2f: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
+        usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true }, CONFIG.general.secret, { expiresIn: '2 days' });
     }
 
     let ip =
@@ -417,20 +417,25 @@ router.post('/auth/:id', async function (req, res) {
         req.connection.socket.remoteAddress;
     if ((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth == 'fake') {
         // Skip auth
+        usertoken = jwt.sign({ isLogged: true, u2f: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
         return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
     } else {
         try {
+            let sentuser = user;
+
             let token = await goldap.bind(user.uid, req.body.password);
-            user['token'] = token;
+            sentuser['token'] = token;
             if (!user.apikey) {
                 // let newApikey = Math.random().toString(36).slice(-10);
-                let newApikey = usrsrv.new_random(10);
-                user.apikey = newApikey;
+                let newApikey = usrsrv.new_random(16);
+                sentuser.apikey = newApikey;
                 await dbsrv.mongo_users().updateOne({ uid: user.uid }, { $set: { apikey: newApikey } });
-                return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
-            } else {
-                return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
             }
+            // Not logged yet: do not send user data
+            if (need_double_auth){
+                sentuser =  {uid: user.uid};
+            }
+            return res.send({ token: usertoken, user: sentuser, message: '', double_auth: need_double_auth });
         } catch (err) {
             console.error('[auth] error', err);
             if (req.session !== undefined) {
