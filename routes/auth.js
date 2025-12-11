@@ -433,7 +433,7 @@ router.post('/auth/:id', async function (req, res) {
             }
             // Not logged yet: do not send user data
             if (need_double_auth){
-                sentuser =  {uid: user.uid}
+                sentuser =  {uid: user.uid};
             }
             return res.send({ token: usertoken, user: sentuser, message: '', double_auth: need_double_auth });
         } catch (err) {
