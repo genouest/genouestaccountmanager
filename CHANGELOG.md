@@ -12,6 +12,7 @@
 * Remove DB 'size' attribute
 * Allow admins to add/remove project managers
 * Fix add/remove manager http returns
+* Modified add_readme template
 
 ## 1.4.32 (2025-04-22)
 
