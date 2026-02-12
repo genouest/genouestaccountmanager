@@ -39,7 +39,7 @@ dbsrv.init_db().then(()=>{
         Promise.all(reservations.map(function(reservation){
             console.log('[INFO] Delete accounts for reservation', reservation);
             console.log('[INFO] Reservation expired at ', new Date(reservation.to));
-            return tpssrv.remove_tp_reservation(reservation._id);
+            return tpssrv.remove_tp_reservation(reservation);
         })).then(function(){
             process.exit(0);
         });
