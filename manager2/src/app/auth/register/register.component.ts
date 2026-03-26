@@ -137,7 +137,7 @@ export class RegisterComponent implements OnInit {
             this.msg = 'User identifier too short (min 4 characters)';
             return;
         }
-        if (!this.first_name.match(/^[a-zA-Zà-ü]+$/) || !this.last_name.match(/^[a-zA-Zà-ü]+$/)) {
+        if (!this.first_name.match(/^[a-zA-Zà-ü -']+$/) || !this.last_name.match(/^[a-zA-Zà-ü -']+$/)) {
             this.msg = 'Name contains unauthorized characters';
             return;
         }
