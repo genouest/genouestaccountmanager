@@ -1,5 +1,7 @@
 echo "Start add_readme.sh in $0 ..."
 
+{% if CONFIG.general.readme %}
+
 if [ ! -e {{ user.home }}/user_guides ]
 then
     mkdir -p "{{ user.home }}/user_guides"
@@ -8,5 +10,7 @@ then
     ln -s "{{ item.source_folder }}" "{{ user.home }}/user_guides/{{ item.language }}"
     {% endfor %}
 fi
+
+{% endif %}
 
 echo "End add_readme.sh in $0 ..."
