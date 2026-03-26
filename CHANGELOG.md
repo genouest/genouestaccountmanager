@@ -12,6 +12,7 @@
 * Remove DB 'size' attribute
 * Allow admins to add/remove project managers
 * Fix add/remove manager http returns
+* Modified add_readme template
 * Fix typo in cron due to remove_tp_reservation changes
 * Allow spaces, - and ' in user first/last names
 
