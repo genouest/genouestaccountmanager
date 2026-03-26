@@ -31,6 +31,11 @@ mail: {{ user.email }}
 -
 replace: loginShell
 loginShell: /bin/bash
+{% if user.firstname and user.lastname %}
+-
+replace: cn
+cn: {{ user.firstname }} {{ user.lastname }}
+{% endif %}
 {% if user.is_admin and user.oldgroup != user.group %}
 -
 replace:gidNumber
@@ -45,9 +50,4 @@ dn: cn={{ user.group }},ou=groups,{{ CONFIG.ldap.dn }}
 changetype: modify
 add: memberUid
 memberUid: {{ user.uid }}
-{% endif %}
-{% if user.firstname and user.lastname %}
--
-replace: cn
-cn: {{ user.firstname }} {{ user.lastname }}
 {% endif %}
