@@ -145,6 +145,7 @@ describe('My', () => {
                     'duration': '1 year'
                 })
                 .end((err, res) => {
+                    console.log(err)
                     assert(res.body.status == 0);
                     done();
                 });
@@ -583,7 +584,7 @@ describe('My', () => {
                 create: true
 
             };
-            
+
             chai.request('http://localhost:3000')
                 .post('/database/create/' + test_db_id)
                 .set('X-Api-Key', token_id)
@@ -594,7 +595,7 @@ describe('My', () => {
                         .get('/database')
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-  
+
                             expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
@@ -743,7 +744,7 @@ describe('My', () => {
                 single_user: true,
                 create: true
             };
-            
+
             chai.request('http://localhost:3000')
                 .post('/database/create/' + db.name)
                 .set('X-Api-Key', user_token_id)
@@ -754,7 +755,7 @@ describe('My', () => {
                 });
         });
 
-       
+
         it('User delete database', (done) => {
             chai.request('http://localhost:3000')
                 .delete('/database/' + test_db_id)
