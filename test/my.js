@@ -133,8 +133,8 @@ describe('My', () => {
             chai.request('http://localhost:3000')
                 .post('/user/' + test_user_id2)
                 .send({
-                    'firstname': 'ftest2',
-                    'lastname': 'ltest2',
+                    'firstname': 'ftestt',
+                    'lastname': 'ltestt',
                     'email': test_user_id2 + '@my.org',
                     'address': 'test address',
                     'lab': 'test',
@@ -145,7 +145,6 @@ describe('My', () => {
                     'duration': '1 year'
                 })
                 .end((err, res) => {
-                    console.log(err)
                     assert(res.body.status == 0);
                     done();
                 });
