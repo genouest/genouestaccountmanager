@@ -177,16 +177,23 @@ export class ProjectComponent implements OnInit {
 
     delete_project() {
         this.admin_user_err_msg = '';
+        let hasUserError = false;
         for (var i = 0; i < this.users.length; i++) {
-            this.userService.removeFromProject(this.users[i].uid, this.project.id).subscribe(
+            this.userService.removeFromProject(this.users[i].uid, this.project.id, true).subscribe(
                 (resp) => {},
-                (err) => (this.prj_err_msg = err.error.message)
+                (err) => {
+                  this.prj_err_msg = err.error.message;
+                  hasUserError = true;
+                }
             );
         }
-        this.projectsService.delete(this.project.id).subscribe(
-            (resp) => this.router.navigate(['/admin/project'], { queryParams: { deleted: 'ok' } }),
-            (err) => (this.admin_user_err_msg = err.error.message)
-        );
+
+        if (!hasUserError){
+          this.projectsService.delete(this.project.id).subscribe(
+              (resp) => this.router.navigate(['/admin/project'], { queryParams: { deleted: 'ok' } }),
+              (err) => (this.admin_user_err_msg = err.error.message)
+          );
+        }
     }
 
     update_project() {

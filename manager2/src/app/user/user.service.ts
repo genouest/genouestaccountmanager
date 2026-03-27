@@ -410,7 +410,7 @@ export class UserService {
         }));
     }
 
-    removeFromProject(userId: string, projectId: string) {
+    removeFromProject(userId: string, projectId: string, force: boolean) {
         //let user = this.authService.profile;
         let httpOptions = {
             //headers: new HttpHeaders({
@@ -418,7 +418,7 @@ export class UserService {
             //}),
         };
         return this.http.delete(
-            environment.apiUrl + '/user/' + userId + '/project/' + projectId,
+            environment.apiUrl + '/user/' + userId + '/project/' + projectId + '?force=' + force,
             httpOptions)
     }
 
