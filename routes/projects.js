@@ -331,16 +331,26 @@ router.post('/project/:id/request/user', async function (req, res) {
     if (!sansrv.sanitizeAll([req.params.id])) {
         return res.status(403).send({ message: 'Invalid parameters' });
     }
-    let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-    if (!user) {
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch (e) {
+        logger.error(e);
+        return res.status(404).send({ message: 'User session not found' });
+    }
+
+    if (!session_user) {
         return res.status(404).send({ message: 'User not found' });
     }
     let project = await dbsrv.mongo_projects().findOne({ id: req.params.id });
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if ((!project.managers || !project.managers.includes(user.uid)) && user.uid !== project.owner && !user.is_admin) {
-        return res.status(401).send({ message: 'User ' + user.uid + ' is not project manager for project ' + project.id });
+    if ((!project.managers || !project.managers.includes(session_user.uid)) && session_user.uid !== project.owner && !isadmin) {
+        return res.status(401).send({ message: 'User ' + session_user.uid + ' is not project manager for project ' + project.id });
     }
     if (req.body.user == project.owner) {
         return res.status(403).send({ message: 'User ' + req.body.user + ' is the owner of project ' + project.id });
@@ -355,9 +365,9 @@ router.post('/project/:id/request/user', async function (req, res) {
 
     try {
         if (req.body.request === 'add') {
-            await usrsrv.add_user_to_project(project.id, req.body.user, user.uid);
+            await usrsrv.add_user_to_project(project.id, req.body.user, session_user.uid);
         } else if (req.body.request === 'remove') {
-            await usrsrv.remove_user_from_project(project.id, req.body.user, user.uid, user.is_admin, false);
+            await usrsrv.remove_user_from_project(project.id, req.body.user, session_user.uid, isadmin, false);
         }
     } catch (e) {
         logger.error(e);
@@ -375,19 +385,30 @@ router.post('/project/:id/add/manager/:uid', async function(req, res) {
     if (!req.locals.logInfo.is_logged) {
         return res.status(401).send({ message: 'Not authorized' });
     }
-    if (!sansrv.sanitizeAll([req.params.id])) {
+    if (!sansrv.sanitizeAll([req.params.id]) || !sansrv.sanitizeAll([req.params.uid])) {
         return res.status(403).send({ message: 'Invalid parameters' });
     }
-    let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-    if (!user) {
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch (e) {
+        logger.error(e);
+        return res.status(404).send({ message: 'User session not found' });
+    }
+
+    if (!session_user) {
         return res.status(404).send({ message: 'User not found' });
     }
+
     let project = await dbsrv.mongo_projects().findOne({ 'id': req.params.id });
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if (user.uid != project.owner && !user.is_admin) {
-        return res.status(401).send({ message: 'Non-admin user ' + user.uid + ' is not the owner of project ' + project.id });
+    if (session_user.uid != project.owner && !isadmin) {
+        return res.status(401).send({ message: 'Non-admin user ' + session_user.uid + ' is not the owner of project ' + project.id });
     }
     const new_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
     if (!new_manager) {
@@ -422,19 +443,30 @@ router.post('/project/:id/remove/manager/:uid', async function(req, res) {
     if (!req.locals.logInfo.is_logged) {
         return res.status(401).send({ message: 'Not authorized' });
     }
-    if (!sansrv.sanitizeAll([req.params.id])) {
+    if (!sansrv.sanitizeAll([req.params.id]) || !sansrv.sanitizeAll([req.params.uid])) {
         return res.status(403).send({ message: 'Invalid parameters' });
     }
-    let user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
-    if (!user) {
+
+    let session_user = null;
+    let isadmin = false;
+    try {
+        session_user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+        isadmin = await rolsrv.is_admin(session_user);
+    } catch (e) {
+        logger.error(e);
+        return res.status(404).send({ message: 'User session not found' });
+    }
+
+    if (!session_user) {
         return res.status(404).send({ message: 'User not found' });
     }
+
     let project = await dbsrv.mongo_projects().findOne({ 'id': req.params.id });
     if (!project) {
         return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
     }
-    if (user.uid != project.owner && !user.is_admin) {
-        return res.status(401).send({ message: 'Non-admin user ' + user.uid + ' is not the owner of project ' + project.id });
+    if (session_user.uid != project.owner && !isadmin) {
+        return res.status(401).send({ message: 'Non-admin user ' + session_user.uid + ' is not the owner of project ' + project.id });
     }
     const ex_manager = await dbsrv.mongo_users().findOne({ 'uid': req.params.uid });
     if (!ex_manager) {
