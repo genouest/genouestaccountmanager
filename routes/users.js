@@ -1658,7 +1658,7 @@ router.delete('/user/:id/project/:project', async function (req, res) {
     }
 
     // Force is restricted to admins
-    let force = req.query.force && is_admin;
+    let force = req.query.force && isadmin;
 
     if (!session_user) {
         return res.status(404).send({ message: 'User session not found' });

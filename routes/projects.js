@@ -253,7 +253,7 @@ router.delete('/project/:id', async function (req, res) {
     let users_in_project = await dbsrv.mongo_users().find({ projects: req.params.id }).toArray();
 
     if (users_in_project.length > 0){
-      return res.status(403).send({ message: 'Project is not empty. Cannot remove' });
+        return res.status(403).send({ message: 'Project is not empty. Cannot remove' });
     }
 
     try {
