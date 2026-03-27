@@ -156,7 +156,7 @@ export class ProjectComponent implements OnInit {
     remove_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
-        this.userService.removeFromProject(this.remove_user_admin, this.project.id).subscribe(
+        this.userService.removeFromProject(this.remove_user_admin, this.project.id, false).subscribe(
             (resp) => {
                 this.admin_user_msg = resp['message'];
                 this.show_project_users(this.project.id);

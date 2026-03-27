@@ -860,7 +860,7 @@ export class UserComponent implements OnInit {
     }
 
     remove_from_project(project_id) {
-        this.userService.removeFromProject(this.user.uid, project_id).subscribe(
+        this.userService.removeFromProject(this.user.uid, project_id, false).subscribe(
             (resp) => {
                 this.remove_from_project_msg = resp['message'];
                 var tmp_project: any[] = [];

@@ -39,7 +39,7 @@ export class ProjectComponent implements OnInit {
     manager_visible: boolean;
     overview_visible: boolean;
     members_visible: boolean;
-    
+
     request_err_msg: string;
     request_msg: string;
     owner_request_err_msg: string;
@@ -151,7 +151,7 @@ export class ProjectComponent implements OnInit {
                     for (let i = 0; i < resp.length; i++) {
                         this.users[i].temp = { ...this.users[i].temp, is_manager: this.selectedProject.managers.includes(this.users[i].uid) }
                         if (
-                            resp[i].group.indexOf(this.selectedProject.group) >= 0 || 
+                            resp[i].group.indexOf(this.selectedProject.group) >= 0 ||
                             resp[i].secondarygroups.indexOf(this.selectedProject.group) >= 0
                         ) {
                             this.users[i].temp = { ...this.users[i].temp, access: true };
@@ -216,7 +216,7 @@ export class ProjectComponent implements OnInit {
         }
         if (request_type === 'remove' && this.session_user.uid === user_id) {
             // Self removal
-            this.userService.removeFromProject(user_id, project.id).subscribe(
+            this.userService.removeFromProject(user_id, project.id, false).subscribe(
                 (resp) => {
                     this.manager_request_msg = resp['message'];
                     this.project_list();
