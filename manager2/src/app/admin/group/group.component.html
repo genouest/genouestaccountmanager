@@ -96,7 +96,7 @@
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-user>
-          <tr *ngFor="let user of users">
+          <tr>
             <td>
               <a routerLink="/user/{{ user.uid }}">
                 <span class="p-button p-button-sm p-button-primary">
