@@ -88,7 +88,7 @@ async function remove_project(id, action_owner = 'auto') {
     let project = await dbsrv.mongo_projects().findOne({ id: id });
 
     // Check associated group, if it exists and is empty, remove it.
-    if ((CONFIG.project === undefined || CONFIG.project.enable_group) && projet && project.group) {
+    if ((CONFIG.project === undefined || CONFIG.project.enable_group) && project && project.group) {
         let users_in_group = await dbsrv
             .mongo_users()
             .find({ $or: [{ secondarygroups: project.group }, { group: project.group }] })
