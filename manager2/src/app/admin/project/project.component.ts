@@ -6,6 +6,8 @@ import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
 import { User, UserService } from 'src/app/user/user.service';
 import { Table } from 'primeng/table';
 
+import { forkJoin } from 'rxjs';
+
 @Component({
     selector: 'app-project',
     templateUrl: './project.component.html',
@@ -156,7 +158,7 @@ export class ProjectComponent implements OnInit {
     remove_user() {
         this.admin_user_msg = '';
         this.admin_user_err_msg = '';
-        this.userService.removeFromProject(this.remove_user_admin, this.project.id).subscribe(
+        this.userService.removeFromProject(this.remove_user_admin, this.project.id, false).subscribe(
             (resp) => {
                 this.admin_user_msg = resp['message'];
                 this.show_project_users(this.project.id);
@@ -177,16 +179,23 @@ export class ProjectComponent implements OnInit {
 
     delete_project() {
         this.admin_user_err_msg = '';
-        for (var i = 0; i < this.users.length; i++) {
-            this.userService.removeFromProject(this.users[i].uid, this.project.id).subscribe(
-                (resp) => {},
-                (err) => (this.prj_err_msg = err.error.message)
-            );
-        }
-        this.projectsService.delete(this.project.id).subscribe(
-            (resp) => this.router.navigate(['/admin/project'], { queryParams: { deleted: 'ok' } }),
-            (err) => (this.admin_user_err_msg = err.error.message)
+        this.prj_err_msg = '';
+
+        const deleteRequests = this.users.map(user => 
+            this.userService.removeFromProject(user.uid, this.project.id, true)
         );
+
+        forkJoin(deleteRequests).subscribe({
+            next: () => {
+                this.projectsService.delete(this.project.id).subscribe(
+                    () => this.router.navigate(['/admin/project'], { queryParams: { deleted: 'ok' } }),
+                    (err) => (this.admin_user_err_msg = err.error.message)
+                );
+            },
+            error: (err) => {
+                this.prj_err_msg = err.error?.message || 'Error removing users from project';
+            }
+        }); 
     }
 
     update_project() {

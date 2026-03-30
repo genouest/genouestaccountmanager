@@ -417,7 +417,7 @@ router.post('/auth/:id', async function (req, res) {
         req.connection.socket.remoteAddress;
     if ((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth == 'fake') {
         // Skip auth
-        usertoken = jwt.sign({ isLogged: true, u2f: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
+        usertoken = jwt.sign({ isLogged: true, u2f: user._id, user: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
         return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
     } else {
         try {

@@ -693,9 +693,19 @@ router.post('/user/:id', async function (req, res) {
     if (req.body.firstname == '' || req.body.firstname === null || req.body.firstname === undefined) {
         return res.send({ status: 1, message: 'Missing field: firstname' });
     }
+
+    if (!req.body.firstname.match(/^[a-zA-Zà-ü -']+$/)) {
+        return res.send({ status: 1, message: 'Firstname contains unauthorized characters' });
+    }
+
     if (req.body.lastname == '' || req.body.lastname === null || req.body.lastname === undefined) {
         return res.send({ status: 1, message: 'Missing field: lastname' });
     }
+
+    if (!req.body.lastname.match(/^[a-zA-Zà-ü -']+$/)) {
+        return res.send({ status: 1, message: 'Lastname contains unauthorized characters' });
+    }
+
     if (req.body.team == '' || req.body.team === null || req.body.team === undefined) {
         return res.send({ status: 1, message: 'Missing field: team' });
     }
@@ -1633,7 +1643,7 @@ router.delete('/user/:id/project/:project', async function (req, res) {
     }
     let oldproject = req.params.project;
     let uid = req.params.id;
-    let force = req.query.force ? true : false;
+
 
     let session_user = null;
     let isadmin = false;
@@ -1646,6 +1656,9 @@ router.delete('/user/:id/project/:project', async function (req, res) {
         logger.error(e);
         return res.status(404).send({ message: 'User session not found' });
     }
+
+    // Force is restricted to admins
+    let force = req.query.force && isadmin;
 
     if (!session_user) {
         return res.status(404).send({ message: 'User session not found' });

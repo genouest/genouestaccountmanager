@@ -133,8 +133,8 @@ describe('My', () => {
             chai.request('http://localhost:3000')
                 .post('/user/' + test_user_id2)
                 .send({
-                    'firstname': 'ftest2',
-                    'lastname': 'ltest2',
+                    'firstname': 'ftestt',
+                    'lastname': 'ltestt',
                     'email': test_user_id2 + '@my.org',
                     'address': 'test address',
                     'lab': 'test',
@@ -583,7 +583,7 @@ describe('My', () => {
                 create: true
 
             };
-            
+
             chai.request('http://localhost:3000')
                 .post('/database/create/' + test_db_id)
                 .set('X-Api-Key', token_id)
@@ -594,7 +594,7 @@ describe('My', () => {
                         .get('/database')
                         .set('X-Api-Key', token_id)
                         .end((err, res) => {
-  
+
                             expect(res).to.have.status(200);
                             let found = false;
                             for(let i=0; i<res.body.length; i++){
@@ -743,7 +743,7 @@ describe('My', () => {
                 single_user: true,
                 create: true
             };
-            
+
             chai.request('http://localhost:3000')
                 .post('/database/create/' + db.name)
                 .set('X-Api-Key', user_token_id)
@@ -754,7 +754,7 @@ describe('My', () => {
                 });
         });
 
-       
+
         it('User delete database', (done) => {
             chai.request('http://localhost:3000')
                 .delete('/database/' + test_db_id)
