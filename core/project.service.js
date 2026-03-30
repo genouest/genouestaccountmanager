@@ -100,7 +100,6 @@ async function remove_project(id, action_owner = 'auto') {
             let group = await dbsrv.mongo_groups().findOne({ name: project.group });
             if (group) {
                 await grpsrv.delete_group(group, action_owner);
-                throw { code: 200, message: 'Removing project. Empty group ' + project.group + ' was deleted' };
             }
         }
     }
