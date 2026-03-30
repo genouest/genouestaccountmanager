@@ -6,6 +6,8 @@ import { Group, GroupsService } from 'src/app/admin/groups/groups.service';
 import { User, UserService } from 'src/app/user/user.service';
 import { Table } from 'primeng/table';
 
+import { forkJoin } from 'rxjs';
+
 @Component({
     selector: 'app-project',
     templateUrl: './project.component.html',
@@ -177,23 +179,23 @@ export class ProjectComponent implements OnInit {
 
     delete_project() {
         this.admin_user_err_msg = '';
-        let hasUserError = false;
-        for (var i = 0; i < this.users.length; i++) {
-            this.userService.removeFromProject(this.users[i].uid, this.project.id, true).subscribe(
-                (resp) => {},
-                (err) => {
-                  this.prj_err_msg = err.error.message;
-                  hasUserError = true;
-                }
-            );
-        }
+        this.prj_err_msg = '';
 
-        if (!hasUserError){
-          this.projectsService.delete(this.project.id).subscribe(
-              (resp) => this.router.navigate(['/admin/project'], { queryParams: { deleted: 'ok' } }),
-              (err) => (this.admin_user_err_msg = err.error.message)
-          );
-        }
+        const deleteRequests = this.users.map(user => 
+            this.userService.removeFromProject(user.uid, this.project.id, true)
+        );
+
+        forkJoin(deleteRequests).subscribe({
+            next: () => {
+                this.projectsService.delete(this.project.id).subscribe(
+                    () => this.router.navigate(['/admin/project'], { queryParams: { deleted: 'ok' } }),
+                    (err) => (this.admin_user_err_msg = err.error.message)
+                );
+            },
+            error: (err) => {
+                this.prj_err_msg = err.error?.message || 'Error removing users from project';
+            }
+        }); 
     }
 
     update_project() {
