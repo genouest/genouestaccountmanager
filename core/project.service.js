@@ -85,6 +85,25 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
 
 async function remove_project(id, action_owner = 'auto') {
     logger.info('Remove Project ' + id);
+    let project = await dbsrv.mongo_projects().findOne({ id: id });
+
+    // Check associated group, if it exists and is empty, remove it.
+    if ((CONFIG.project === undefined || CONFIG.project.enable_group) && projet && project.group) {
+        let users_in_group = await dbsrv
+            .mongo_users()
+            .find({ $or: [{ secondarygroups: project.group }, { group: project.group }] })
+            .toArray();
+
+        if (!users_in_group || users_in_group.length == 0) {
+            // If group is empty, delete it
+            let group = await dbsrv.mongo_groups().findOne({ name: project.group });
+            if (group) {
+                await grpsrv.delete_group(group, action_owner);
+                throw { code: 200, message: 'Removing project. Empty group ' + project.group + ' was deleted' };
+            }
+        }
+    }
+
     await dbsrv.mongo_projects().deleteOne({ id: id });
     let fid = new Date().getTime();
     try {
