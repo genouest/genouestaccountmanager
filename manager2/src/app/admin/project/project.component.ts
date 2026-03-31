@@ -181,7 +181,7 @@ export class ProjectComponent implements OnInit {
         this.admin_user_err_msg = '';
         this.prj_err_msg = '';
 
-<<<<<<< master
+
         // Shoud not happend, but more of a fix
         if (!this.users || this.users.length == 0){
           this.projectsService.delete(this.project.id).subscribe(
@@ -191,9 +191,6 @@ export class ProjectComponent implements OnInit {
         }
 
         const deleteRequests = this.users.map(user =>
-=======
-        const deleteRequests = this.users.map(user => 
->>>>>>> master
             this.userService.removeFromProject(user.uid, this.project.id, true)
         );
 
@@ -207,11 +204,7 @@ export class ProjectComponent implements OnInit {
             error: (err) => {
                 this.prj_err_msg = err.error?.message || 'Error removing users from project';
             }
-<<<<<<< master
         });
-=======
-        }); 
->>>>>>> master
     }
 
     update_project() {
