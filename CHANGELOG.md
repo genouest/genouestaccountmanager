@@ -15,7 +15,7 @@
 * Modified add_readme template
 * Fix typo in cron due to remove_tp_reservation changes
 * Allow spaces, - and ' in user first/last names
-* Fix project deletion process
+* Fix project deletion process (and remove associated group if it is empty)
 
 ## 1.4.32 (2025-04-22)
 

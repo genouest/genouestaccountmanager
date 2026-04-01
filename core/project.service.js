@@ -9,6 +9,7 @@ const dbsrv = require('../core/db.service.js');
 const filer = require('../core/file.js');
 const maisrv = require('../core/mail.service.js');
 const usrsrv = require('../core/user.service.js');
+const grpsrv = require('../core/group.service.js');
 
 let day_time = 1000 * 60 * 60 * 24;
 
@@ -85,6 +86,24 @@ async function create_project(new_project, uuid, action_owner = 'auto') {
 
 async function remove_project(id, action_owner = 'auto') {
     logger.info('Remove Project ' + id);
+    let project = await dbsrv.mongo_projects().findOne({ id: id });
+
+    // Check associated group, if it exists and is empty, remove it.
+    if ((CONFIG.project === undefined || CONFIG.project.enable_group) && project && project.group) {
+        let users_in_group = await dbsrv
+            .mongo_users()
+            .find({ $or: [{ secondarygroups: project.group }, { group: project.group }] })
+            .toArray();
+
+        if (!users_in_group || users_in_group.length == 0) {
+            // If group is empty, delete it
+            let group = await dbsrv.mongo_groups().findOne({ name: project.group });
+            if (group) {
+                await grpsrv.delete_group(group, action_owner);
+            }
+        }
+    }
+
     await dbsrv.mongo_projects().deleteOne({ id: id });
     let fid = new Date().getTime();
     try {
