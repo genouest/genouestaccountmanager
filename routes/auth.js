@@ -124,7 +124,6 @@ router.post('/mail/auth/:id', async function (req, res) {
     }
 
     let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
-    let sess = req.session;
     let now = new Date().getTime();
  
     let storedToken = user.mail_token;
