@@ -62,10 +62,15 @@ router.get('/mail/auth/:id', async function (req, res) {
     }
 
     let expire = new Date().getTime() + 60 * 10 * 1000;
-    req.session.mail_token = { token: password, expire: expire, user: user._id };
-    let mail_token = { token: password, expire: expire, user: user._id };
+    // Do NOT send the token in the jwt: it can be easily read user side.
+    // Store it in DB instead
+    await dbsrv.mongo_users().updateOne(
+        { uid: req.params.id },
+        { $set: { mail_token: { token: password, expire: expire } } }
+    );
+
     let usertoken = jwt.sign(
-        { user: user._id, isLogged: false, mail_token: mail_token, double_auth: true },
+        { user: user._id, isLogged: false, double_auth: true },
         CONFIG.general.secret,
         { expiresIn: '10 minutes' }
     );
@@ -108,17 +113,27 @@ router.post('/mail/auth/:id', async function (req, res) {
     if (!user) {
         return res.status(404).send({ message: 'User not found' });
     }
+
     let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
     let sess = req.session;
     let now = new Date().getTime();
+ 
+    let storedToken = user.mail_token;
     if (
-        !req.locals.logInfo.mail_token ||
+        !storedToken ||
         user._id != req.locals.logInfo.mail_token['user'] ||
-        req.body.token != req.locals.logInfo.mail_token['token'] ||
-        now > sess.mail_token['expire']
+        now > storedToken.expire || 
+        req.body.token != storedToken.token
     ) {
         return res.status(403).send({ message: 'Invalid or expired token' });
     }
+
+    // Clear token after successful use
+    await dbsrv.mongo_users().updateOne(
+        { uid: req.params.id },
+        { $unset: { mail_token: '' } }
+    );
+
     sess.gomngr = sess.mail_token['user'];
     sess.mail_token = null;
 
