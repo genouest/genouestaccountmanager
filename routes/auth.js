@@ -100,10 +100,15 @@ router.post('/mail/auth/:id', async function (req, res) {
     if (!req.locals.logInfo.double_auth) {
         return res.status(401).send({ message: 'No double auth in progress' });
     }
+
+    if (!req.locals.logInfo.id) {
+        return res.status(401).send({ message: 'Incorrect session' });
+    }
+
     let user = null;
     let isadmin = false;
     try {
-        user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
         isadmin = await rolsrv.is_admin(user);
     } catch (e) {
         logger.error(e);
@@ -114,6 +119,10 @@ router.post('/mail/auth/:id', async function (req, res) {
         return res.status(404).send({ message: 'User not found' });
     }
 
+    if (user.uid !== req.params.id) {
+        return res.status(401).send({ message: 'Not authorized' });
+    }
+
     let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
     let sess = req.session;
     let now = new Date().getTime();
@@ -121,7 +130,6 @@ router.post('/mail/auth/:id', async function (req, res) {
     let storedToken = user.mail_token;
     if (
         !storedToken ||
-        user._id != req.locals.logInfo.mail_token['user'] ||
         now > storedToken.expire || 
         req.body.token != storedToken.token
     ) {
@@ -133,9 +141,6 @@ router.post('/mail/auth/:id', async function (req, res) {
         { uid: req.params.id },
         { $unset: { mail_token: '' } }
     );
-
-    sess.gomngr = sess.mail_token['user'];
-    sess.mail_token = null;
 
     user.is_admin = isadmin;
 
@@ -164,6 +169,7 @@ router.post('/u2f/auth/:id', async function (req, res) {
     if (!req.locals.logInfo.double_auth) {
         return res.status(401).send({ message: 'No double auth in progress' });
     }
+
     let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
     if (!user) {
         return res.status(404).send({ message: 'User not found' });
