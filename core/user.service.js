@@ -42,6 +42,14 @@ exports.activate_user = activate_user;
 exports.new_password = new_password;
 exports.new_random = new_random;
 exports.is_active = is_active;
+exports.get_users_filtered = get_users_filtered;
+
+async function get_users_filtered(custom_fields = {}){
+  let default_fields = { uid: 1 }
+  Object.assign(default_fields, custom_fields)
+  let data = await dbsrv.mongo_groups().find({}).project(default_fields).toArray();
+  return data
+}
 
 function new_random(len = 16) {
     return crypto.randomBytes(32).toString('hex').slice(0, len);

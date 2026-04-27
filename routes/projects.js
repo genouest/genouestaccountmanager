@@ -652,6 +652,13 @@ router.get('/project/:id/users', async function (req, res) {
         return res.status(404).send({ message: 'User session not found' });
     }
 
+    // Check project exists
+    let project = await dbsrv.mongo_projects().findOne({ id: req.params.id });
+    if (!project) {
+        logger.error('failed to get project', req.params.id);
+        return res.status(404).send({ message: 'Project ' + req.params.id + ' not found' });
+    }
+
     if (!user) {
         return res.status(404).send({ message: 'User not found' });
     }
@@ -660,11 +667,24 @@ router.get('/project/:id/users', async function (req, res) {
         user.projects = [];
     }
 
-    if (user.projects.includes(req.params.id) || isadmin) {
-        let users_in_project = await dbsrv.mongo_users().find({ projects: req.params.id }).toArray();
-        return res.send(users_in_project);
+    let users_in_project = []
+
+    if (isadmin){
+      users_in_project = await usrsrv.get_users_filtered({mail: 1, group: 1, secondarygroups: 1})
+      return res.send(users_in_project);
     }
-    return res.status(401).send({ message: 'Not authorized' });
+
+    if (user.projects.includes(req.params.id)){
+      if (user.uid === project.owner){
+        // return uid + mail
+        users_in_project = await usrsrv.get_users_filtered({mail: 1})
+      } else {
+        // member, but not owner or manager: return only uid
+        users_in_project = await usrsrv.get_users_filtered()
+      }
+    } else {
+      return res.status(401).send({ message: 'Not authorized' });
+    }
 });
 
 router.get('/project/:id/extend', async function (req, res) {
