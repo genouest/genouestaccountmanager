@@ -48,7 +48,7 @@ async function get_users_filtered(filter = {}, custom_fields = {}){
     let default_fields = { uid: 1 };
     Object.assign(default_fields, custom_fields);
     let data = await dbsrv.mongo_users().find(filter).project(default_fields).toArray();
-    return data
+    return data;
 }
 
 function new_random(len = 16) {
