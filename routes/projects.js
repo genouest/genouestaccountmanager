@@ -667,26 +667,26 @@ router.get('/project/:id/users', async function (req, res) {
         user.projects = [];
     }
 
-    let users_in_project = []
-    let filter = { projects: req.params.id }
+    let users_in_project = [];
+    let filter = { projects: req.params.id };
 
 
     if (isadmin){
-      users_in_project = await usrsrv.get_users_filtered(filter, {email: 1, group: 1, secondarygroups: 1})
-      return res.send(users_in_project);
+        users_in_project = await usrsrv.get_users_filtered(filter, {email: 1, group: 1, secondarygroups: 1});
+        return res.send(users_in_project);
     }
 
     if (user.projects.includes(req.params.id)){
-      if (user.uid === project.owner){
-        // return uid + mail
-        users_in_project = await usrsrv.get_users_filtered(filter, {email: 1})
-      } else {
-        // member, but not owner or manager: return only uid
-        users_in_project = await usrsrv.get_users_filtered(filter)
-      }
-      return res.send(users_in_project);
+        if (user.uid === project.owner){
+            // return uid + mail
+            users_in_project = await usrsrv.get_users_filtered(filter, {email: 1});
+        } else {
+            // member, but not owner or manager: return only uid
+            users_in_project = await usrsrv.get_users_filtered(filter);
+        }
+        return res.send(users_in_project);
     } else {
-      return res.status(401).send({ message: 'Not authorized' });
+        return res.status(401).send({ message: 'Not authorized' });
     }
 });
 
