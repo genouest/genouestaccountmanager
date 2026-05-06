@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.33 (Unreleased)
+## 1.4.33 (2026-05-06)
 
 * Change login process for double auth
 * Ensure emails have name, destination and subject
