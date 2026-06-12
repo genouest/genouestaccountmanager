@@ -35,6 +35,7 @@ function timeConverter(tsp){
     let hour = a.getHours();
     let min = a.getMinutes();
     let sec = a.getSeconds();
+    let mail_type = undefined;
     return date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
 }
 
@@ -82,13 +83,20 @@ dbsrv.init_db().then(async ()=>{
             if (CONFIG.general.send_expiration_notif_to_admin) {
                 dest_mail.push(CONFIG.general.support);
             }
+            if (user.disable_extend) {
+                mail_type = 'expiration_without_self_extend_right';
+            } else {
+                mail_type = 'expiration';
+            }
+
             await maisrv.send_notif_mail({
-                'name': 'expiration',
+                'name': mail_type,
                 'destinations': dest_mail,
                 'subject': 'account expiration ' + user.uid
             }, {
                 '#LINK#': link,
-                '#EXPIRE#': timeConverter(user.expiration)
+                '#EXPIRE#': timeConverter(user.expiration),
+                '#SUPPORT#': CONFIG.general.support
             });
 
             if (CONFIG.general.limit_expire_mail) {

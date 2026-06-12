@@ -281,6 +281,15 @@
       "<p>#LINK#</p>",
       "<hr>"
     ],
+    "expiration_without_self_extend_right": ["Your account will expire at #EXPIRE#, if you wish to extend the duration of your account, please contact the support:",
+    "mailto:#SUPPORT#",
+    ""],
+    "expiration_without_self_extend_right_html": [
+      "<h2>GenOuest account expiration</h2>",
+      "<p>Your account will expire at #EXPIRE#</p>",
+      "<p>If you wish to extend the duration of your account, please contact the support:</p>",
+      "<p>mailto:#SUPPORT#</p>",
+      "<hr>"],
     "expired": [
         "User #UID# has expired, updating account"
     ],
