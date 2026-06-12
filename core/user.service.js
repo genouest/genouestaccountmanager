@@ -268,7 +268,8 @@ async function create_extra_user(user_name, group, internal_user) {
         is_fake: false,
         duration: '1 year',
         expiration: new Date().getTime() + day_time * 360,
-        extra_info: []
+        extra_info: [],
+        disable_extend: CONFIG.general.default_disable_extend
     };
 
     // as it is auto created on startup we considere action_owner to be current admin user
