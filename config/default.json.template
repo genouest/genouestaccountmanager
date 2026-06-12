@@ -36,6 +36,7 @@
     "registration_group": "team",
     "auto_add_group": false,
     "disable_user_group": false,
+    "default_disable_extend": false,
     "quota": {
         "home": {
             "protocol": "http:",

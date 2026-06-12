@@ -29,6 +29,7 @@
     "default_main_group": "my",
     "mailer" : "gomail",
     "templates": "genouest",
+    "default_disable_extend": false,
     "quota": {
     },
     "plugin_script_dir": "/opt/my/plugin-scripts"
