@@ -1123,9 +1123,9 @@ router.get('/user/:id/renew/:regkey', async function (req, res) {
     }
 
     if (user.disable_extend === true || 
-        (user.disable_extend === undefined & CONFIG.general.default_disable_extend === true)) {
-            return res.status(401).send({ message: 'Not authorized' });
-        }
+    (user.disable_extend === undefined & CONFIG.general.default_disable_extend === true)) {
+        return res.status(401).send({ message: 'Not authorized' });
+    }
 
     let regkey = req.params.regkey;
     if (user.regkey == regkey) {
