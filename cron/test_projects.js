@@ -85,7 +85,7 @@ dbsrv.init_db().then(async ()=>{
                     'subject': 'Project expiration ' + project.id
                 }, {
                     '#NAME#': project.id,
-                    '#DATE#': timeConverter(project.expire)
+                    '#DATE#': new Date(project.expire).toISOString().split('T')[0]
                 });
 
                 if (CONFIG.general.limit_expire_mail) {

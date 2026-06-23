@@ -95,7 +95,7 @@ dbsrv.init_db().then(async ()=>{
                 'subject': 'account expiration ' + user.uid
             }, {
                 '#LINK#': link,
-                '#EXPIRE#': timeConverter(user.expiration),
+                '#EXPIRE#': new Date(user.expiration).toISOString().split('T')[0],
                 '#SUPPORT#': CONFIG.general.support
             });
 
