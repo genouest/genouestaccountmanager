@@ -20,7 +20,7 @@
     </div>
     <div class="col-sm-2">
       <button *ngIf="session_user.is_admin && (user.status == STATUS_PENDING_APPROVAL || user.status == STATUS_PENDING_EMAIL)" class="p-button p-button-sm p-button-success" (click)="activate()">Activate</button>
-      <button *ngIf="user.status == STATUS_ACTIVE" class="p-button p-button-sm p-button-success" (click)="extend()">Extend</button>
+      <button *ngIf="user.status == STATUS_ACTIVE && (session_user.is_admin || user.disable_extend === false)" class="p-button p-button-sm p-button-success" (click)="extend()">Extend</button>
       <button *ngIf="session_user.is_admin && user.status == STATUS_EXPIRED" class="p-button p-button-sm p-button-success" (click)="renew()">Renew</button>
     </div>
     <div *ngIf="user.is_locked && session_user.is_admin" class="col-sm-2">
