@@ -1413,6 +1413,9 @@ router.put('/user/:id', async function (req, res) {
         if (req.body.send_copy_to_support !== undefined) {
             user.send_copy_to_support = req.body.send_copy_to_support;
         }
+        if (req.body.disable_extend !== undefined) {
+            user.disable_extend = req.body.disable_extend;
+        }
     }
 
     if (user.email == '' || user.firstname == '' || user.lastname == '') {

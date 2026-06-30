@@ -45,6 +45,7 @@ export class User {
     loginShell: string
     maingroup: string
     uidnumber: number
+    disable_extend: boolean
 
     constructor(
         uid: string = '', id: number = 0, first_name: string = '', last_name: string = '',
@@ -57,7 +58,7 @@ export class User {
         projects: string[] = null, new_project: any = null, tags: any = null,
         reg_key: number = 0, api_key: number = 0, ssh: string = '', u2f: any = null, otp: any = null,
         history: any[] = [], extra_info: any[] = [], status: string = '', temp: any = null, loginShell: string = '',
-        maingroup: string = "", uidnumber: number = 0
+        maingroup: string = "", uidnumber: number = 0, disable_extend: boolean = false
     ) {
         this.uid = uid; this.id = id; this.firstname = first_name; this.lastname = last_name;
         this.email = email; this.lab = lab; this.responsible = responsible; this.address = address;
@@ -69,7 +70,7 @@ export class User {
         this.projects = projects; this.newproject = new_project; this.tags = tags;
         this.regkey = reg_key; this.apikey = api_key; this.ssh = ssh; this.u2f = u2f; this.otp = otp;
         this.history = history; this.extra_info = extra_info; this.status = status; this.temp = temp;
-        this.loginShell = loginShell; this.maingroup = maingroup; this.uidnumber = uidnumber
+        this.loginShell = loginShell; this.maingroup = maingroup; this.uidnumber = uidnumber, this.disable_extend = disable_extend
     }
 }
 
@@ -96,8 +97,7 @@ export class UserService {
             resp.projects || null, resp.newproject || null, resp.tags || null,
             resp.regkey || 0, resp.apikey || 0, resp.ssh || '', resp.u2f || null, resp.otp || null,
             resp.history || [], resp.extra_info || [], resp.status || '', resp.temp || null, resp.loginShell || '',
-            resp.maingroup || '', resp.uidnumber || 0
-
+            resp.maingroup || '', resp.uidnumber || 0, resp.disable_extend || false
         );
     }
 

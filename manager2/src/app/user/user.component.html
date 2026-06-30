@@ -220,6 +220,10 @@
                     <input [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.send_copy_to_support" type="checkbox" class="form-check-input" />
                     <label class="col-8 form-check-label">Copy mail to Support Team</label>
                   </div>
+                  <div class="form-check row">
+                    <input [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.disable_extend" type="checkbox" class="form-check-input" />
+                    <label class="col-8 form-check-label">Disable user self-extend rights</label>
+                  </div>
                 </div>
 
                 <div *ngIf="!session_user.is_admin">
