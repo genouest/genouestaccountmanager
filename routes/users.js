@@ -777,7 +777,7 @@ router.post('/user/:id', async function (req, res) {
         history: [{ action: 'register', date: new Date().getTime() }],
         extra_info: req.body.extra_info || [],
         registration: new Date().getTime(),
-        disable_extend: CONFIG.general.default_disable_extend
+        disable_extend: CONFIG.general.default_disable_extend || false
     };
 
     // check if register user is done by admin or by anonymouse user
