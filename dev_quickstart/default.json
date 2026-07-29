@@ -16,7 +16,7 @@
     "double_authentication_for_admin": true,
     "db": "gomngr",
     "url": "http://localhost:3000",
-    "admin": [""],
+    "admin": ["admin"],
     "admin_group": "",
     "support": "",
     "accounts": "",
@@ -36,6 +36,7 @@
     "registration_group": "team",
     "auto_add_group": false,
     "disable_user_group": false,
+    "default_disable_extend": false,
     "quota": {
         "home": {
             "protocol": "http:",
@@ -280,6 +281,15 @@
       "<p>#LINK#</p>",
       "<hr>"
     ],
+    "expiration_without_self_extend_right": ["Your account will expire at #EXPIRE#, if you wish to extend the duration of your account, please contact the support:",
+    "mailto:#SUPPORT#",
+    ""],
+    "expiration_without_self_extend_right_html": [
+      "<h2>GenOuest account expiration</h2>",
+      "<p>Your account will expire at #EXPIRE#</p>",
+      "<p>If you wish to extend the duration of your account, please contact the support:</p>",
+      "<p>mailto:#SUPPORT#</p>",
+      "<hr>"],
     "expired": [
         "User #UID# has expired, updating account"
     ],
@@ -291,6 +301,16 @@
     ],
     "project_expiration_html": [
         "<p>Project for #NAME# will expire at #DATE#</p>"
+    ],
+    "project_rejection": [
+        "Your requested project '#PROJECT#' has been rejected by #USER#.",
+        "Reason:",
+        "#MSG#"
+    ],
+    "project_rejection_html": [
+      "<p>Your requested project '#PROJECT#' has been rejected by #USER#.</p>",
+      "<p>Reason:</p>",
+      "<i>#MSG#</i>"
     ],
     "user_deletion": [
         "Your account #UID# have been deleted by #USER#",
@@ -314,6 +334,18 @@
      "<p><a href='#LINK#'>#LINK#</a></p>",
      "<p>You will receive an email when your account has been validated.</p>",
      "<hr>"
+    ],
+    "activated_project": [
+      "Your requested project '#NAME#' has been approved and activated by an admin in My.",
+      "It is for members of the '#GROUP#' group, you can find it at the following path:",
+      "'#PATH#'",
+      "Congratulations!"
+    ],
+    "activated_project_html": [
+      "<p>Your requested project '#NAME#' has been approved and activated by an admin in My.</p>",
+      "<p>It is for members of the '#GROUP#' group, you can find it at the following path:</p>",
+      "<p>'#PATH#'</p>",
+      "<p>Congratulations!</p>"
     ],
     "add_to_project": [
         "#UID# has been added to project '#NAME#' in My",
@@ -346,6 +378,18 @@
     ],
     "ask_project_user_html": [
       "<p>#UID# has requested to #REQUEST# #USER# to project '#NAME#' in My</p>"
+    ],
+    "ask_database": [
+      "#UID# has requested a new database '#NAME#' in My",
+      "Usage: #USAGE#",
+      "Expiration date: #EXP#",
+      "Please review it, and keep #UID# informed"
+    ],
+    "ask_database_html": [
+      "<p>#UID# has requested a new database '#NAME#' in My</p>",
+      "<p>Usage: #USAGE#</p>",
+      "<p>Expiration date: #EXP#</p>",
+      "<p>Please review it, and keep #UID# informed</p>"
     ],
     "database_creation": [
         "The MySQL database you requested (#DBNAME#, owned by #OWNER#) was created. You can connect to it using the following credentials:\t\r\n\t\r\n",
@@ -413,5 +457,6 @@
     "test": {
       "parameter1" : "test1"
     }
-  }
+  },
+  "custom_users": {}
 }
