@@ -80,7 +80,7 @@ services:
             - LDAP_SERVER_HOST=openldap
 
     my-app:
-        image: osallou/my
+        image: quay.io/genouest/my
         ports:
             - "3000:3000"
         environment:
@@ -101,7 +101,7 @@ services:
         entrypoint: node app.js
 
     #my-cron:
-    #    image: osallou/mycron
+    #    image: quay.io/genouest/mycron
     #    build:
     #        context: .
     #        dockerfile: Dockerfile-cron
