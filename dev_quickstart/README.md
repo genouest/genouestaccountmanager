@@ -19,8 +19,8 @@ Genouestaccountmanager is fairly modular, so it will not fit a deployment for pr
 
 * Install node > 18.0 (using nvm, or by hand)
 * Install ldap-utils
-  * /!\ Depending on your ldap-utils version, the '-h' option might not exists anymore. (Check the `ldapadd` command)
-  * If that's the case, you'll need to edit the scripts in templates/default/user/, and remplace `-h {{ CONFIG.ldap.host }}` by `-H ldap://{{ CONFIG.ldap.host }}`
+  * /!\ If you use an old ldap-utils version, the '-H' option might not exists. (Check the `ldapadd` command)
+  * If that's the case, you'll need to edit the scripts in templates/default/user/, and remplace `-H ldap://{{ CONFIG.ldap.host }}` by `-h {{ CONFIG.ldap.host }}`.
 * Export the following env variables:
 
 
