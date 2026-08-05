@@ -11,3 +11,4 @@ manager2/node_modules
 manager2/dist
 templates/default/user/*
 dev_quickstart/env.sh
+tests/local_testing/act
