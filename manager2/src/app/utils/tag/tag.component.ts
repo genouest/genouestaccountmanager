@@ -64,9 +64,6 @@ export class TagComponent implements OnInit {
     }
 
     updateTags() {
-        if (this.tags.length == 0) {
-            return;
-        }
         this.tagService.set(this.tags, this.kindTag, this.userID).subscribe(
             (resp) => this.msg = 'Tags updated',
             (err) => this.msg = 'Failed to update tags'
