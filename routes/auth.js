@@ -435,7 +435,7 @@ router.post('/auth/:id', async function (req, res) {
     }
 
     if (need_double_auth) {
-        usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true }, CONFIG.general.secret, { expiresIn: '2 days' });
+        usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true, user: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
     }
 
     let ip =
