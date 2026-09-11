@@ -69,7 +69,7 @@ module.exports = {
         return deactivate_user(userId, data);
     },
     template: function(){
-        return '<div>hello {{user.uid}}</div><div><input ng-model="plugin_data.test0.my"></input> <button ng-click="plugin_update(\'test0\')" class="button">Update</button></div>';
+        return '<div>hello {{user.uid}}</div><div><input ng-model="plugin_data.test0.my"></input> <p-button ng-click="plugin_update(\'test0\')" styleClass="button" label="Update"></p-button></div>';
     },
     // eslint-disable-next-line no-unused-vars
     get_data: function(userId, adminId){

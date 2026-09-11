@@ -10,5 +10,16 @@
   ],
   "include": [
     "src/**/*.d.ts"
-  ]
+  ],
+  // Enable again if templates are improved someday to follow the criteria of
+  // strictTemplates parameter
+  "angularCompilerOptions": {
+  //   "extendedDiagnostics": {
+  //     "checks": {
+  //       "nullishCoalescingNotNullable": "suppress",
+  //       "optionalChainNotNullable": "suppress"
+  //     }
+  //  },
+    "strictTemplates": false
+  }
 }

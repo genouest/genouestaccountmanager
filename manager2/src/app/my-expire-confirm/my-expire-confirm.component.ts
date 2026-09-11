@@ -1,9 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-my-expire-confirm',
     templateUrl: './my-expire-confirm.component.html',
-    styleUrls: ['./my-expire-confirm.component.css']
+    styleUrls: ['./my-expire-confirm.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class MyExpireConfirmComponent implements OnInit {
     isExpiring: boolean;

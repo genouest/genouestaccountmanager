@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MyExpireConfirmComponent } from './my-expire-confirm.component';
 
@@ -6,7 +6,7 @@ describe('MyExpireConfirmComponent', () => {
     let component: MyExpireConfirmComponent;
     let fixture: ComponentFixture<MyExpireConfirmComponent>;
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             declarations: [ MyExpireConfirmComponent ]
         })

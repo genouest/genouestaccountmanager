@@ -1,14 +1,16 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Database, DatabaseService } from 'src/app/user/database.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { User, UserService } from 'src/app/user/user.service';
 import { NgForm } from '@angular/forms';
-import { Table } from 'primeng/table';
+import { Table } from '@openng/optimus-ui/table';
 
 @Component({
     selector: 'app-database',
     templateUrl: './database.component.html',
-    styleUrls: ['./database.component.css']
+    styleUrls: ['./database.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class DatabaseComponent implements OnInit {
     @ViewChild('dtp') table: Table;

@@ -1,16 +1,14 @@
 FROM node:jod-trixie
-RUN npm install -g @angular/cli@10.2.0
+RUN npm install -g @angular/cli@22.1.6
 ARG APIURL
 ARG SENTRY
 ARG UITHEME=cerulean
-# This line is used because the project use old version of Angular.
-# If someday the Angular version is updated, please delete this line.
-ENV NODE_OPTIONS='--openssl-legacy-provider --no-experimental-fetch'
+
 COPY manager2 /root/genouestaccountmanager/manager2
 RUN cd /root/genouestaccountmanager/manager2/src/assets/css && cp ${UITHEME}.min.css theme.css
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
 RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
-RUN cd /root/genouestaccountmanager/manager2 && npm ci && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules && rm -f dist/my-ui/*.gz &&  npm run compress || true
+RUN cd /root/genouestaccountmanager/manager2 && npm ci && ng build --base-href /manager2/ --configuration production --source-map && rm -rf src && rm -rf node_modules && rm -f dist/my-ui/browser/*.gz && npm run compress
 
 FROM node:jod-trixie
 RUN apt-get update && apt-get install -y ldap-utils vim openssh-client putty-tools libldap2-dev uuid-dev
@@ -42,12 +40,4 @@ RUN mkdir -p /opt/my/plugin-scripts
 
 COPY --from=0 /root/genouestaccountmanager/manager2 /root/genouestaccountmanager/manager2
 
-#COPY manager2 /root/genouestaccountmanager/manager2
-#RUN npm install -g @angular/cli@7.0.3
-#ARG APIURL
-#ARG SENTRY
-#RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;apiUrl: "";apiUrl: "'"$SAPIURL"'";' environment.prod.ts
-#RUN cd /root/genouestaccountmanager/manager2/src/environments && sed -i 's;sentry: "";sentry: "'"$SENTRY"'";' environment.prod.ts
-#RUN cd /root/genouestaccountmanager/manager2 && npm install && ng build --base-href /manager2/ --prod --source-map && rm -rf src && rm -rf node_modules
-
-ENTRYPOINT node app.js
+ENTRYPOINT ["node", "app.js"]

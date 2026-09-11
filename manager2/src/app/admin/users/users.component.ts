@@ -1,12 +1,13 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Pipe, PipeTransform } from '@angular/core';
 import { User, UserService } from 'src/app/user/user.service';
 
-import { Table } from 'primeng/table';
+import { Table } from '@openng/optimus-ui/table';
 
 @Pipe({
     name: 'statusFilter',
-    pure: false
+    pure: false,
+    standalone: false
 })
 export class MyStatusFilterPipe implements PipeTransform {
     transform(items: any[], filter: string): any {
@@ -22,7 +23,9 @@ export class MyStatusFilterPipe implements PipeTransform {
 @Component({
     selector: 'app-users',
     templateUrl: './users.component.html',
-    styleUrls: ['./users.component.css']
+    styleUrls: ['./users.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class UsersComponent implements OnInit {
     @ViewChild('dt1') table1: Table;

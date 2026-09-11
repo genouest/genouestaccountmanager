@@ -1,26 +1,34 @@
-import { Component, ComponentFactoryResolver, Input, OnInit, OnChanges, ViewChild, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, ViewChild, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Directive, Type, ViewContainerRef } from '@angular/core';
 import { BasePluginComponent } from './base-plugin/base-plugin.component';
 
 @Component({
     template: `
-        <div *ngIf="data">
+        @if (data) {
+          <div>
             <div><input [ngModelOptions]="{ standalone: true }" [(ngModel)]="data.newlist" /></div>
             <div style="margin-top: 10px;">
-                <button (click)="sendData()" type="button" class="p-button p-button-sm p-button-default">Create</button>
+              <p-button size="small" (onClick)="sendData()" type="button" styleClass="-default" label="Create"></p-button>
             </div>
-        </div>
-        <div *ngIf="data" class="table-responsive">
+          </div>
+        }
+        @if (data) {
+          <div class="table-responsive">
             <table class="table table-striped ng-scope">
+              <tr>
+                <th>List</th>
+              </tr>
+              @for (list of data.lists; track list) {
                 <tr>
-                    <th>List</th>
+                  <td>{{ list.list_name }}</td>
                 </tr>
-                <tr *ngFor="let list of data.lists">
-                    <td>{{ list.list_name }}</td>
-                </tr>
+              }
             </table>
-        </div>
-    `
+          </div>
+        }
+        `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class GomailPluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -31,34 +39,47 @@ export class GomailPluginComponent extends BasePluginComponent implements OnInit
 
 @Component({
     template: `
-        <div *ngIf="data">
-            <div *ngIf="loading">Loading...</div>
+        @if (data) {
+          <div>
+            @if (loading) {
+              <div>Loading...</div>
+            }
             <div class="alert alert-info">
-                Using this button, you can set your home and groups in
-                <a href="http://data-access.cesgo.org/" target="blank">data-access </a> for easy access
+              Using this button, you can set your home and groups in
+              <a href="http://data-access.cesgo.org/" target="blank">data-access </a> for easy access
             </div>
-
             <div style="text-align:center;">
-                <button (click)="sendData()" type="button" class="p-button p-button-sm p-button-primary">Update</button>
+              <p-button severity="primary" size="small" (onClick)="sendData()" type="button" label="Update"></p-button>
             </div>
             <br />
-            <div *ngIf="data.api_status" class="alert alert-danger">{{ data.api_status }}</div>
-            <div *ngIf="data.user_status" class="alert alert-danger">{{ data.user_status }}</div>
-            <div *ngIf="data.my" class="alert alert-success">{{ data.my }}</div>
+            @if (data.api_status) {
+              <div class="alert alert-danger">{{ data.api_status }}</div>
+            }
+            @if (data.user_status) {
+              <div class="alert alert-danger">{{ data.user_status }}</div>
+            }
+            @if (data.my) {
+              <div class="alert alert-success">{{ data.my }}</div>
+            }
             <div>Current registered shares :</div>
             <br />
             <table style="width:100%;" class="table table-striped">
+              <tr>
+                <th>Path</th>
+                <th>Host</th>
+              </tr>
+              @for (share of data.user_shares; track share) {
                 <tr>
-                    <th>Path</th>
-                    <th>Host</th>
+                  <td>{{ share.path }}</td>
+                  <td>{{ share.host }}</td>
                 </tr>
-                <tr *ngFor="let share of data.user_shares">
-                    <td>{{ share.path }}</td>
-                    <td>{{ share.host }}</td>
-                </tr>
+              }
             </table>
-        </div>
-    `
+          </div>
+        }
+        `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class DataAccessPluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -68,7 +89,9 @@ export class DataAccessPluginComponent extends BasePluginComponent implements On
 }
 
 @Component({
-    template: ` <div></div> `
+    template: ` <div></div> `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class GalaxyPluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -79,26 +102,42 @@ export class GalaxyPluginComponent extends BasePluginComponent implements OnInit
 
 @Component({
     template: `
-        <div *ngIf="data">
-            <div *ngIf="loading">Loading...</div>
-            <div *ngIf="data.api_status" class="alert alert-danger">{{ data.api_status }}</div>
-            <div *ngIf="data.has_project == 'False'" style="text-align:center;">
-                <button (click)="sendData()" type="button" class="p-button p-button-sm p-button-primary">
-                    Activate cloud account
-                </button>
-            </div>
-            <div *ngIf="data.my" class="alert alert-success">{{ data.my }}</div>
-            <div *ngIf="data.has_project == 'True'">
+        @if (data) {
+          <div>
+            @if (loading) {
+              <div>Loading...</div>
+            }
+            @if (data.api_status) {
+              <div class="alert alert-danger">{{ data.api_status }}</div>
+            }
+            @if (data.has_project == 'False') {
+              <div style="text-align:center;">
+                <p-button severity="primary" size="small" (onClick)="sendData()" type="button" >
+                  Activate cloud account
+                </p-button>
+              </div>
+            }
+            @if (data.my) {
+              <div class="alert alert-success">{{ data.my }}</div>
+            }
+            @if (data.has_project == 'True') {
+              <div>
                 <div>Current project(s) :</div>
                 <br />
                 <table style="width:100%;" class="table table-striped">
-                    <tr *ngFor="let project of data.projects">
-                        <td>{{ project.name }}</td>
+                  @for (project of data.projects; track project) {
+                    <tr>
+                      <td>{{ project.name }}</td>
                     </tr>
+                  }
                 </table>
-            </div>
-        </div>
-    `
+              </div>
+            }
+          </div>
+        }
+        `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class GenostackPluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -112,7 +151,9 @@ export class GenostackPluginComponent extends BasePluginComponent implements OnI
         <div>
             <div>Populate_home will create a project_demo folder upon user activation.</div>
         </div>
-    `
+    `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PopulateHomePluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -124,24 +165,31 @@ export class PopulateHomePluginComponent extends BasePluginComponent implements 
 @Component({
     template: `
         <div class="table-responsive">
-            <div *ngIf="loading">Loading...</div>
-            <table *ngIf="data" class="table table-striped ng-scope">
-                <tr>
-                    <th>Namespace</th>
-                    <th>Used</th>
-                    <th>Max</th>
-                </tr>
+          @if (loading) {
+            <div>Loading...</div>
+          }
+          @if (data) {
+            <table class="table table-striped ng-scope">
+              <tr>
+                <th>Namespace</th>
+                <th>Used</th>
+                <th>Max</th>
+              </tr>
+              @for (quota of data.quotas; track quota) {
                 <tr
-                    [ngClass]="data.error || data.warning ? 'label label-warning' : ''"
-                    *ngFor="let quota of data.quotas"
-                >
-                    <td>{{ quota.name }}</td>
-                    <td>{{ quota.value | number : '1.0-2' }} G</td>
-                    <td>{{ quota.max | number : '1.0-2' }} G</td>
+                  [ngClass]="data.error || data.warning ? 'label label-warning' : ''"
+                  >
+                  <td>{{ quota.name }}</td>
+                  <td>{{ quota.value | number : '1.0-2' }} G</td>
+                  <td>{{ quota.max | number : '1.0-2' }} G</td>
                 </tr>
+              }
             </table>
+          }
         </div>
-    `
+        `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class QuotasPluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -153,13 +201,19 @@ export class QuotasPluginComponent extends BasePluginComponent implements OnInit
 @Component({
     template: `
         <div>
-            <div *ngIf="data && data.alert" class="alert alert-warning"><strong>Warning!</strong> {{ data.alert }}</div>
-            <div *ngIf="data">
-                <p>hello {{ data.my }}</p>
-                <button (click)="sendData()">Test me</button>
+          @if (data && data.alert) {
+            <div class="alert alert-warning"><strong>Warning!</strong> {{ data.alert }}</div>
+          }
+          @if (data) {
+            <div>
+              <p>hello {{ data.my }}</p>
+              <p-button (onClick)="sendData()" label="Test me"></p-button>
             </div>
+          }
         </div>
-    `
+        `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TestPluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -170,66 +224,84 @@ export class TestPluginComponent extends BasePluginComponent implements OnInit {
 
 @Component({
     template: `
-        <div *ngIf="data">
-            <div *ngIf="loading">Loading...</div>
-            <div *ngIf="data.alert" class="alert alert-warning"><strong>Warning!</strong> {{ data.alert }}</div>
+        @if (data) {
+          <div>
+            @if (loading) {
+              <div>Loading...</div>
+            }
+            @if (data.alert) {
+              <div class="alert alert-warning"><strong>Warning!</strong> {{ data.alert }}</div>
+            }
             <div class="row">
-                <div class="col-md-6">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <td>User</td>
-                                <td>Quota</td>
-                                <td>Expire</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let l of data.list">
-                                <td (click)="setData('selected', l)">{{ l.id }}</td>
-                                <td>
-                                    <div *ngFor="let q of l.quota">{{ q.id }}:{{ q.value }}</div>
-                                </td>
-                                <td>{{ l.expire }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <form *ngIf="data.selected">
-                        <div class="form-group">
-                            <label>User</label>
-                            <input
-                                readonly
-                                class="form-control"
-                                type="text"
-                                [ngModelOptions]="{ standalone: true }"
-                                [(ngModel)]="data.selected.id"
-                            />
-                        </div>
-                        <div class="form-group" *ngFor="let q of data.selected.quota">
-                            <label>{{ q.id }} quota (GB)</label>
-                            <input
-                                class="form-control"
-                                type="number"
-                                [ngModelOptions]="{ standalone: true }"
-                                [(ngModel)]="q.value"
-                            />
-                        </div>
-                        <div class="form-group">
-                            <label>Expiration</label>
-                            <input
-                                class="form-control"
-                                type="date"
-                                [ngModelOptions]="{ standalone: true }"
-                                [(ngModel)]="data.selected.expire"
-                            />
-                        </div>
-                    </form>
-                    <button *ngIf="data.selected" (click)="sendData()">Update</button>
-                </div>
+              <div class="col-md-6">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <td>User</td>
+                      <td>Quota</td>
+                      <td>Expire</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (l of data.list; track l) {
+                      <tr>
+                        <td (click)="setData('selected', l)">{{ l.id }}</td>
+                        <td>
+                          @for (q of l.quota; track q) {
+                            <div>{{ q.id }}:{{ q.value }}</div>
+                          }
+                        </td>
+                        <td>{{ l.expire }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <div class="col-md-6">
+                @if (data.selected) {
+                  <form>
+                    <div class="form-group">
+                      <label>User</label>
+                      <input
+                        readonly
+                        class="form-control"
+                        type="text"
+                        [ngModelOptions]="{ standalone: true }"
+                        [(ngModel)]="data.selected.id"
+                        />
+                    </div>
+                    @for (q of data.selected.quota; track q) {
+                      <div class="form-group">
+                        <label>{{ q.id }} quota (GB)</label>
+                        <input
+                          class="form-control"
+                          type="number"
+                          [ngModelOptions]="{ standalone: true }"
+                          [(ngModel)]="q.value"
+                          />
+                      </div>
+                    }
+                    <div class="form-group">
+                      <label>Expiration</label>
+                      <input
+                        class="form-control"
+                        type="date"
+                        [ngModelOptions]="{ standalone: true }"
+                        [(ngModel)]="data.selected.expire"
+                        />
+                    </div>
+                  </form>
+                }
+                @if (data.selected) {
+                  <p-button (onClick)="sendData()" label="Update"></p-button>
+                }
+              </div>
             </div>
-        </div>
-    `
+          </div>
+        }
+        `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class AdminQuotaExamplePluginComponent extends BasePluginComponent implements OnInit {
     ngOnInit() {
@@ -240,7 +312,8 @@ export class AdminQuotaExamplePluginComponent extends BasePluginComponent implem
 }
 
 @Directive({
-    selector: '[app-plugin-view]'
+    selector: '[app-plugin-view]',
+    standalone: false
 })
 export class PluginDirective {
     constructor(public viewContainerRef: ViewContainerRef) {}
@@ -298,28 +371,28 @@ export class PluginItems {
 @Component({
     selector: 'app-plugin',
     templateUrl: './plugin.component.html',
-    styleUrls: ['./plugin.component.css']
+    styleUrls: ['./plugin.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PluginComponent implements OnInit, OnChanges {
     @Input() pluginItem: string;
     @Input() userId: string;
-    @ViewChild(PluginDirective, { static: true }) appPlugin: PluginDirective;
-    constructor(private componentFactoryResolver: ComponentFactoryResolver) {}
+    @ViewChild('pluginContainer', { read: ViewContainerRef }) pluginContainer: ViewContainerRef;
 
     ngOnInit() {
-        // should load component from its name (pluginItem should be plugin name, a string)
+        this.loadComponent();
+    }
+
+    private loadComponent() {
         let pItem = PluginItems.getItem(this.pluginItem);
         if (!pItem) {
             return;
         }
 
-        // pItem.userId = this.userId;
-        let componentFactory = this.componentFactoryResolver.resolveComponentFactory(pItem.component);
-
-        let viewContainerRef = this.appPlugin.viewContainerRef;
-        viewContainerRef.clear();
-
-        let componentRef = viewContainerRef.createComponent(componentFactory);
+        this.pluginContainer.clear();
+        
+        let componentRef = this.pluginContainer.createComponent(pItem.component);
         (<BasePluginComponent>componentRef.instance).userId = this.userId;
         //(<BasePluginComponent>componentRef.instance).loadData(this.userId);
     }
@@ -331,13 +404,9 @@ export class PluginComponent implements OnInit, OnChanges {
                 return;
             }
 
-            // pItem.userId = this.userId;
-            let componentFactory = this.componentFactoryResolver.resolveComponentFactory(pItem.component);
+            this.pluginContainer.clear();
 
-            let viewContainerRef = this.appPlugin.viewContainerRef;
-            viewContainerRef.clear();
-
-            let componentRef = viewContainerRef.createComponent(componentFactory);
+            let componentRef = this.pluginContainer.createComponent(pItem.component);
             (<BasePluginComponent>componentRef.instance).userId = changes.userId.currentValue;
         }
     }

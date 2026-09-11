@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ConfigService } from 'src/app/config.service';
 
 @Component({
     selector: 'app-registered',
     templateUrl: './registered.component.html',
-    styleUrls: ['./registered.component.css']
+    styleUrls: ['./registered.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class RegisteredComponent implements OnInit {
     config: any;

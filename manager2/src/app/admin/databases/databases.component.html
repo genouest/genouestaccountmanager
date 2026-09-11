@@ -2,57 +2,66 @@
   <div class="card-header" (click)="requests_visible = !requests_visible" style="cursor: pointer">
     <h3>{{ pending_number }} request(s) waiting</h3>
   </div>
-  <div *ngIf="requests_visible" class="card-body">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card bg-light">
-          <div class="card-header">
-            <h3>Pending databases</h3>
-          </div>
-          <div class="card-body">
-            <div>
-              <div class="alert alert-danger" *ngIf="dbmsg_error">{{ dbmsg_error }}</div>
-              <div *ngIf="dbmsg" class="alert alert-info">{{ dbmsg }}</div>
+  @if (requests_visible) {
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card bg-light">
+            <div class="card-header">
+              <h3>Pending databases</h3>
             </div>
-            <p-table #dtw [(value)]="pending_databases" [autolayout]="false" [(selection)]="selecteddb">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th style="width: 2.25em"></th>
-                  <th>Request</th>
-                  <th>Name</th>
-                  <th>Owner</th>
-                  <th>Expiration</th>
-                  <th>Sole User</th>
-                </tr>
-              </ng-template>
-
-              <ng-template pTemplate="body" let-pending>
-                <tr>
-                  <td>
-                    <p-tableCheckbox [value]="pending"></p-tableCheckbox>
-                  </td>
-                  <td>{{ pending.created_at | date }}</td>
-                  <td>{{ pending.name }}</td>
-                  <td>
-                    <a routerLink="/user/{{ pending.owner }}">
-                      <span class="p-button p-button-sm p-button-primary">{{ pending.owner }}</span>
-                    </a>
-                  </td>
-                  <td>{{ pending.expire | date }}</td>
-                  <td>
-                    <i *ngIf="pending.single_user" class="pi pi-check" style="color: green" aria-label="Sole User"></i>
-                    <i *ngIf="!pending.single_user" class="pi pi-times" style="color: red" aria-label="Multiple Users"></i>
-                  </td>
-                </tr>
-              </ng-template>
-            </p-table>
+            <div class="card-body">
+              <div>
+                @if (dbmsg_error) {
+                  <div class="alert alert-danger">{{ dbmsg_error }}</div>
+                }
+                @if (dbmsg) {
+                  <div class="alert alert-info">{{ dbmsg }}</div>
+                }
+              </div>
+              <p-table #dtw [(value)]="pending_databases" [(selection)]="selecteddb">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th style="width: 2.25em"></th>
+                    <th>Request</th>
+                    <th>Name</th>
+                    <th>Owner</th>
+                    <th>Expiration</th>
+                    <th>Sole User</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-pending>
+                  <tr>
+                    <td>
+                      <p-tableCheckbox [value]="pending"></p-tableCheckbox>
+                    </td>
+                    <td>{{ pending.created_at | date }}</td>
+                    <td>{{ pending.name }}</td>
+                    <td>
+                      <a routerLink="/user/{{ pending.owner }}">
+                        <span class="p-button p-button-sm p-button-primary">{{ pending.owner }}</span>
+                      </a>
+                    </td>
+                    <td>{{ pending.expire | date }}</td>
+                    <td>
+                      @if (pending.single_user) {
+                        <i class="pi pi-check" style="color: green" aria-label="Sole User"></i>
+                      }
+                      @if (!pending.single_user) {
+                        <i class="pi pi-times" style="color: red" aria-label="Multiple Users"></i>
+                      }
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
           </div>
+          <p-button size="small" severity="success" (onClick)="validate_selected_databases()" label="Accept"></p-button>
+          <p-button size="small" severity="danger" (onClick)="refuse_selected_databases()" label="Reject"></p-button>
         </div>
-        <button class="btn btn-sm btn-success" (click)="validate_selected_databases()">Accept</button>
-        <button class="btn btn-sm btn-danger" (click)="refuse_selected_databases()">Reject</button>
       </div>
     </div>
-  </div>
+  }
 </div>
 
 
@@ -98,8 +107,12 @@
             <td>{{ database.host }}</td>
             <td>{{ database.expire | date }}</td>
             <td>
-              <i *ngIf="database.single_user" class="pi pi-check" style="color: green" aria-label="Single User"></i>
-              <i *ngIf="!database.single_user" class="pi pi-times" style="color: red" aria-label="Multiple Users"></i>
+              @if (database.single_user) {
+                <i class="pi pi-check" style="color: green" aria-label="Single User"></i>
+              }
+              @if (!database.single_user) {
+                <i class="pi pi-times" style="color: red" aria-label="Multiple Users"></i>
+              }
             </td>
             <td><app-my-delete-confirm [onConfirm]="db_delete.bind(this)" [data]="database"></app-my-delete-confirm></td>
           </tr>
@@ -110,8 +123,12 @@
 </div>
 
 
-<div class="alert alert-success" *ngIf="msg">{{ msg }}</div>
-<div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
+@if (msg) {
+  <div class="alert alert-success">{{ msg }}</div>
+}
+@if (err_msg) {
+  <div class="alert alert-danger">{{ err_msg }}</div>
+}
 
 
 <div class="card bg-light">
@@ -119,7 +136,7 @@
     <h3>Declare existing database (no creation)</h3>
   </div>
   <div class="card-body">
-    <form role="form" data-toggle="validator" class="user-form form-horizonal">
+    <form role="form" data-bs-toggle="validator" class="user-form form-horizonal">
       <div class="form-group row">
         <div class="col-sm-2">
           <label for="dbname" class="control-label">Database name</label>
@@ -129,7 +146,9 @@
         <div class="col-sm-2">
           <label for="dbowner" class="control-label">Database owner</label>
           <select [ngModelOptions]="{ standalone: true }" [(ngModel)]="db.owner" id="dbowner" class="form-control" required>
-            <option *ngFor="let user of users" [value]="user.uid">{{ user.uid }}</option>
+            @for (user of users; track user) {
+              <option [value]="user.uid">{{ user.uid }}</option>
+            }
           </select>
         </div>
 
@@ -155,7 +174,7 @@
 
         <div class="col-sm-1">
           <label style="opacity: 0" class="control-label">Create</label>
-          <button type="button" class="p-button p-button-sm p-button-secondary" (click)="declare_db()">Declare</button>
+          <p-button type="button" severity="secondary" size="small" (onClick)="declare_db()" label="Declare"></p-button>
         </div>
       </div>
     </form>
@@ -163,30 +182,38 @@
 </div>
 
 
-<div class="alert alert-success" *ngIf="chowner_msg">{{ chowner_msg }}</div>
-<div class="alert alert-danger" *ngIf="chowner_err_msg">{{ chowner_err_msg }}</div>
+@if (chowner_msg) {
+  <div class="alert alert-success">{{ chowner_msg }}</div>
+}
+@if (chowner_err_msg) {
+  <div class="alert alert-danger">{{ chowner_err_msg }}</div>
+}
 <div class="card bg-light">
   <div class="card-header">
     <h3>Change database owner</h3>
   </div>
   <div class="card-body">
-    <form role="form" data-toggle="validator" class="user-form form-horizonal">
+    <form role="form" data-bs-toggle="validator" class="user-form form-horizonal">
       <div class="form-group">
         <div class="col-sm-2">
           <label for="owner_db_name">Database name</label>
           <select id="owner_db_name" [ngModelOptions]="{ standalone: true }" [(ngModel)]="owner_db_name" class="form-control">
-            <option *ngFor="let database of databases" [ngValue]="database">{{ database.name }}</option>
+            @for (database of databases; track database) {
+              <option [ngValue]="database">{{ database.name }}</option>
+            }
           </select>
         </div>
         <div class="col-sm-2">
           <label for="owner_dbhost">Database owner</label>
           <select [ngModelOptions]="{ standalone: true }" [(ngModel)]="owner_db_owner" id="owner_dbhost" class="form-control">
-            <option *ngFor="let user of users" [ngValue]="user">{{ user.uid }}</option>
+            @for (user of users; track user) {
+              <option [ngValue]="user">{{ user.uid }}</option>
+            }
           </select>
         </div>
         <div class="col-sm-2">
           <label for="modifyOwner" style="opacity: 0">Modify</label>
-          <button id="modifyOwner" type="button" class="p-button p-button-sm p-button-secondary" (click)="changeOwner()" class="form-control">Modify</button>
+          <p-button id="modifyOwner" type="button" size="small" severity="secondary" (onClick)="changeOwner()" styleClass="form-control" label="Modify"></p-button>
         </div>
       </div>
     </form>

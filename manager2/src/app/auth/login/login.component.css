@@ -75,3 +75,7 @@
 .password-field:focus-within .toggle-password {
     z-index: 9;
   }
+
+:host ::ng-deep .bigger-login-button.p-button .p-button-label {
+  font-size: 1.2rem !important;
+}

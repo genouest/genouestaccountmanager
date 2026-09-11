@@ -3,7 +3,7 @@
  * License MIT
  * Author: Paul Moff
  */
-import { Component, OnInit, Injectable, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Injectable, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 
 @Injectable({
     providedIn: 'root'
@@ -16,7 +16,9 @@ export class FlashMessagesService {
 @Component({
     selector: 'flash-messages',
     templateUrl: './flash.component.html',
-    styleUrls: ['./flash.component.css']
+    styleUrls: ['./flash.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class FlashComponent implements OnInit {
     private _defaults = {

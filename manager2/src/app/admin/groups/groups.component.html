@@ -1,4 +1,6 @@
-<div *ngIf="notification" class="alert alert-success">{{ notification }}</div>
+@if (notification) {
+  <div class="alert alert-success">{{ notification }}</div>
+}
 
 <div class="card bg-light">
   <div class="card-header">
@@ -6,8 +8,12 @@
   </div>
   <div class="card-body">
     <div class="alert alert-info">Group creation can require a few minutes to be effective</div>
-    <div class="alert alert-success" *ngIf="success_msg">{{ success_msg }}</div>
-    <div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
+    @if (success_msg) {
+      <div class="alert alert-success">{{ success_msg }}</div>
+    }
+    @if (err_msg) {
+      <div class="alert alert-danger">{{ err_msg }}</div>
+    }
     <form role="form" class="user-form form-inline">
       <div class="form-group">
         <input placeholder="Group name" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.name" class="form-control" />
@@ -19,7 +25,7 @@
         <input placeholder="Description" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_group.description" class="form-control" />
       </div>
       <div class="form-group">
-        <button type="button" class="p-button p-button-sm p-button-secondary" (click)="addGroup()">Create</button>
+        <p-button type="button" size="small" severity="secondary" (onClick)="addGroup()" label="Create"></p-button>
       </div>
     </form>
   </div>
@@ -58,9 +64,11 @@
             </td>
             <td>{{ group.gid }}</td>
             <td>
-              <a *ngIf="group.owner" routerLink="/user/{{ group.owner }}">
-                <span class="p-button p-button-sm p-button-primary">{{ group?.owner }}</span>
-              </a>
+              @if (group.owner) {
+                <a routerLink="/user/{{ group.owner }}">
+                  <span class="p-button p-button-sm p-button-primary">{{ group?.owner }}</span>
+                </a>
+              }
             </td>
             <td>{{ group.description }}</td>
             <td>{{ group.tags ? group.tags.join(", ") : "" }}</td>

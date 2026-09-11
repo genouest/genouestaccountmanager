@@ -2,23 +2,22 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
-    "downlevelIteration": true,
+    "ignoreDeprecations": "6.0",
     "importHelpers": true,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "esModuleInterop": true,
     "declaration": false,
-    "module": "es2020",
-    "moduleResolution": "node",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2015",
+    "target": "ES2022",
     "typeRoots": [
       "node_modules/@types"
     ],
-    "lib": [
-      "es2018",
-      "dom"
-    ]
+    "useDefineForClassFields": false
   }
 }

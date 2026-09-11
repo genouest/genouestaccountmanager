@@ -14,10 +14,16 @@
             </label>
             <input required placeholder="project name" type="text" maxlength="42" id="new_project_id" name="id" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.id" class="form-control" #id="ngModel" />
             <small id="nameHelp" class="form-text text-muted">Avoid generic name, team name, technology name or your name. <b>Please, choose a project name that matches your cluster research project</b>. <i>If you work on several projects, you can request more project spaces.</i></small>
-            <div *ngIf="id.invalid && (id.dirty || id.touched)" class="text-danger">
-              <div *ngIf="id.errors.required">Name is required</div>
-              <div *ngIf="id.errors.maxlength">Name can't be more than 42 characters long</div>
-            </div>
+            @if (id.invalid && (id.dirty || id.touched)) {
+              <div class="text-danger">
+                @if (id.errors.required) {
+                  <div>Name is required</div>
+                }
+                @if (id.errors.maxlength) {
+                  <div>Name can't be more than 42 characters long</div>
+                }
+              </div>
+            }
           </div>
 
           <div class="form-group row col-sm-12">
@@ -27,9 +33,13 @@
               <i class="pi pi-question-circle" title="Project expiration date"></i>
             </label>
             <input required type="date" id="new_project_expire" name="expire" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project_expire" class="form-control" #expire="ngModel" />
-            <div *ngIf="expire.invalid && (expire.dirty || expire.touched)" class="text-danger">
-              <div *ngIf="expire.errors.required">Expiration date is required</div>
-            </div>
+            @if (expire.invalid && (expire.dirty || expire.touched)) {
+              <div class="text-danger">
+                @if (expire.errors.required) {
+                  <div>Expiration date is required</div>
+                }
+              </div>
+            }
           </div>
 
           <div class="form-group row col-sm-12">
@@ -58,322 +68,406 @@
           <div class="form-group row col-sm-12">
             <label for="new_project_description">Description <span style="color: red">(required)</span> </label>
             <textarea required placeholder="A description for the project" minlength="30" rows="2" id="new_project_description" name="description" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_project.description" class="form-control" #description="ngModel"></textarea>
-            <div *ngIf="description.invalid && (description.dirty || description.touched)" class="text-danger">
-              <div *ngIf="description.errors.minlength">Description must be at least 30 characters long</div>
-            </div>
+            @if (description.invalid && (description.dirty || description.touched)) {
+              <div class="text-danger">
+                @if (description.errors.minlength) {
+                  <div>Description must be at least 30 characters long</div>
+                }
+              </div>
+            }
           </div>
 
-          <div class="form-group" *ngIf="config.project && config.project.terms_and_conditions_hds">
-            <div class="form-check">
-              <input class="form-check-input is-invalid" type="checkbox" value="" id="new_project_terms_and_conditions_hds" name="terms_and_conditions_hds" [(ngModel)]="new_project.terms_and_conditions_hds" #terms_and_conditions_hds="ngModel" required />
-              <label class="form-check-label" for="new_project_terms_and_conditions_hds">
-                I hereby certify that I will not upload, store or process health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up.
-                <a href="#termsAndConditionsHdsModal" data-toggle="modal">(Learn more)</a>
-              </label>
-              <div *ngIf="terms_and_conditions_hds.invalid" class="invalid-feedback">You must agree to the terms and conditions before submitting.</div>
+          @if (config.project && config.project.terms_and_conditions_hds) {
+            <div class="form-group">
+              <div class="form-check">
+                <input class="form-check-input is-invalid" type="checkbox" value="" id="new_project_terms_and_conditions_hds" name="terms_and_conditions_hds" [(ngModel)]="new_project.terms_and_conditions_hds" #terms_and_conditions_hds="ngModel" required />
+                <label class="form-check-label" for="new_project_terms_and_conditions_hds">
+                  I hereby certify that I will not upload, store or process health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up.
+                  <a href="#termsAndConditionsHdsModal" data-bs-toggle="modal">(Learn more)</a>
+                </label>
+                @if (terms_and_conditions_hds.invalid) {
+                  <div class="invalid-feedback">You must agree to the terms and conditions before submitting.</div>
+                }
+              </div>
             </div>
-          </div>
+          }
         </div>
         <div class="modal-footer" id="submit">
           <div class="form-group row col-sm-12">
             <!-- Button with terms_and_conditions_hds -->
-            <button *ngIf="config.project && config.project.terms_and_conditions_hds" id="test" type="submit" class="p-button p-button-sm p-button-primary" [disabled]="id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid" [ngClass]="{ 'disabled-btn': id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid }">Ask Admin</button>
+            @if (config.project && config.project.terms_and_conditions_hds) {
+              <p-button severity="primary" size="small" id="test" type="submit" [disabled]="id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid" [ngstyleClass]="{ 'disabled-btn': id.invalid || expire.invalid || description.invalid || terms_and_conditions_hds.invalid }" label="Ask Admin"></p-button>
+            }
             <!-- Button without terms_and_conditions_hds -->
-            <button *ngIf="!(config.project && config.project.terms_and_conditions_hds)" id="test" type="submit" class="p-button p-button-sm p-button-primary" [disabled]="id.invalid || expire.invalid || description.invalid" [ngClass]="{ 'disabled-btn': id.invalid || expire.invalid || description.invalid }">Ask Admin</button>
-            <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Cancel</button>
+            @if (!(config.project && config.project.terms_and_conditions_hds)) {
+              <p-button severity="primary" size="small" id="test" type="submit" [disabled]="id.invalid || expire.invalid || description.invalid" [ngstyleClass]="{ 'disabled-btn': id.invalid || expire.invalid || description.invalid }" label="Ask Admin"></p-button>
+            }
+            <button type="button" class="p-button p-button-sm p-button-secondary" data-bs-dismiss="modal">Cancel</button>
           </div>
         </div>
       </form>
     </div>
   </div>
 </div>
-<button *ngIf="session_user" type="button" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#ask_project">Request A New Project</button>
+@if (session_user) {
+  <p-button type="button" size="small" severity="primary" data-bs-toggle="modal" data-bs-target="#ask_project" label="Request A New Project"></p-button>
+}
 
 
 <div class="card bg-light">
   <div class="card-header" (click)="projects_visible=!projects_visible" style="cursor: pointer;">
     <h3>Projects</h3>
   </div>
-  <div class="card-body" *ngIf="projects_visible">
-    <div class="table-responsive">
-      <p-table #dtp [value]="projects" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['id', 'owner']" [filterDelay]="0">
-        <ng-template pTemplate="caption">
-          <span class="p-input-icon-right">
-            <i class="pi pi-search"></i>
-            <input pInputText id="search_projects" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Search" />
-          </span>
-        </ng-template>
-
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Project</th>
-            <th>Owner</th>
-            <th *ngIf="!config.project || config.project.enable_group">Group</th>
-            <th>Path</th>
-            <th>Size (GB)</th>
-            <th>Cpu (Hour)</th>
-            <th>Creation</th>
-            <th>Expiration</th>
-            <th></th>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="body" let-project>
-          <tr>
-            <td (click)="show_project_users_and_scroll(project, selectedProjectAnchor)" style="cursor: pointer">
-              <span class="p-button p-button-sm p-button-primary">{{ project.id }}</span>
-            </td>
-            <td>{{ project.owner }}</td>
-            <td *ngIf="!config.project || config.project.enable_group">{{ project.group }}</td>
-            <td>{{ project.path }}</td>
-            <td>
-              <span *ngIf="project.current_size">{{ project.current_size }}&#47;</span>{{ project.size }}
-              <meter *ngIf="project.current_size" min="0" max="{{ project.size }}" optimum="0" low="{{ project.low_size }}" high="{{ project.high_size }}" value="{{ project.current_size }}"></meter>
-            </td>
-            <td>
-              <span *ngIf="project.current_cpu">{{ project.current_cpu }}&#47;</span>{{ project.cpu }}
-              <meter *ngIf="project.current_cpu" min="0" max="{{ project.cpu }}" optimum="0" low="{{ project.low_cpu }}" high="{{ project.high_cpu }}" value="{{ project.current_cpu }}"></meter>
-            </td>
-            <td>{{ project.created_at | date }}</td>
-            <td>{{ project.expire | date }}</td>
-            <td>
-              <button *ngIf="!session_user.is_admin && project.owner != session_user.uid" type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(project, session_user.uid, 'remove')">Leave project</button>
-              <a *ngIf="session_user.is_admin" routerLink="/admin/project/{{ project.id }}"><span class="p-button p-button-sm p-button-danger">Admin</span></a>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
-  </div>
-</div>
-
-
-<div class="alert alert-danger" *ngIf="request_err_msg">{{ request_err_msg }}</div>
-<div *ngIf="request_msg" class="alert alert-info">{{ request_msg }}</div>
-
-
-<a #selectedProjectAnchor></a>
-<div *ngIf="selectedProject">
-  <hr />
-  <div class="well">
-    <h2>
-        Project <b>{{ selectedProject.id }}</b>
-    </h2>
-  </div>
-
-  <div class="card bg-light" *ngIf="session_user.uid === selectedProject.owner">
-    <div class="card-header" (click)="owner_visible = !owner_visible" style="cursor: pointer;">
-      <h3>Owner console</h3>
-    </div>
-    <div class="card-body" *ngIf="owner_visible">
-      <div class="alert alert-danger" *ngIf="owner_request_err_msg">{{owner_request_err_msg}}</div>
-      <div *ngIf="owner_request_msg" class="alert alert-info">{{owner_request_msg}}</div>
-      <form role="form" class="user-form form-horizontal">
-        <div class="form-group row">
-          <div class="col-sm-3">
-            <label for="new_manager">New project manager</label>
-            <select id="add_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="new_manager" class="form-control">
-              <option *ngFor="let user of users" [value]="user.uid">{{user.uid}}</option>
-            </select>
-          </div>
-          <div class="col-sm-3">
-            <label style="opacity: 0;">Add new manager</label>
-            <button type="button" class="p-button p-button-sm p-button-success" (click)="add_manager(selectedProject, new_manager)">Promote to Manager</button>
-          </div>
-          <div class="col-sm-3">
-            <label for="rm_manager">Remove project manager</label>
-            <select id="rm_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="rm_manager" class="form-control">
-              <option *ngFor="let manager of selectedProject.managers" [value]="manager">{{manager}}</option>
-            </select>
-          </div>
-          <div class="col-sm-3">
-            <label style="opacity: 0;">Remove manager</label>
-            <button type="button" class="p-button p-button-sm p-button-danger"(click)="remove_manager(selectedProject, rm_manager)">Demote to Member</button>
-          </div>
-        </div>
-      </form>
-      <h6>Project managers :</h6>
-      <ul>
-        <li *ngFor="let manager of selectedProject.managers">{{ manager }}</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="card bg-light" *ngIf="selectedProject.managers.includes(session_user.uid)">
-    <div class="card-header" (click)="manager_visible = !manager_visible" style="cursor: pointer;">
-      <h3>Manager console</h3>
-    </div>
-    <div class="card-body" *ngIf="manager_visible">
-      <div class="alert alert-danger" *ngIf="manager_request_err_msg">{{manager_request_err_msg}}</div>
-      <div *ngIf="manager_request_msg" class="alert alert-info">{{manager_request_msg}}</div>
-      <form role="form" class="user-form form-horizontal">
-        <div class="form-group row">
-          <div class="col-sm-3">
-            <label for="new_user">New project member</label>
-            <input placeholder="User id" id="new_user" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_user" class="form-control" />
-          </div>
-          <div class="col-sm-3">
-            <label style="opacity: 0;">Request new member</label>
-            <button type="button" class="p-button p-button-sm p-button-primary" (click)="request_user(selectedProject, new_user, 'add')">Request New Member</button>
-          </div>
-          <div class="col-sm-3">
-            <label for="remove_user">Remove project member</label>
-            <select id="remove_user" [ngModelOptions]="{ standalone: true }" [(ngModel)]="remove_user" class="form-control">
-              <option *ngFor="let user of users" [value]="user.uid">{{ user.uid }}</option>
-            </select>
-          </div>
-          <div class="col-sm-3">
-            <label style="opacity: 0;">Request member removal</label>
-            <button type="button" class="p-button p-button-sm p-button-warning" (click)="request_user(selectedProject, remove_user, 'remove')">Request Member Removal</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="card bg-light">
-    <div class="card-header" (click)="overview_visible=!overview_visible" style="cursor: pointer;">
-      <h3>Project overview</h3>
-    </div>
-    <div class="card-body" *ngIf="overview_visible">
+  @if (projects_visible) {
+    <div class="card-body">
       <div class="table-responsive">
-        <table class="table table-striped">
-          <tbody>
-            <tr>
-              <td>
-                <b>Name</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Project name" tooltip> </span>
-              </td>
-              <td>{{ selectedProject.id }}</td>
-            </tr>
-            <tr>
-              <td>
-                <b>Owner</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Owner uid" tooltip> </span>
-              </td>
-              <td>{{ selectedProject.owner }}</td>
-            </tr>
-            <tr>
-              <td>
-                <b>Unix Group</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Unix group for members" tooltip></span>
-              </td>
-              <td>{{ selectedProject.group }}</td>
-            </tr>
-            <tr>
-              <td>
-                <b>Path</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Path to project folder" tooltip></span>
-              </td>
-              <td>{{ selectedProject.path }}</td>
-            </tr>
-            <tr>
-              <td>
-                <b>Size</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
-              </td>
-              <td>
-                <span *ngIf="selectedProject.current_size">{{ selectedProject.current_size }}&#47;</span>{{ selectedProject.size }} GB
-                <meter *ngIf="selectedProject.current_size" min="0" max="{{ selectedProject.size }}" optimum="0" low="{{ selectedProject.low_size }}" high="{{ selectedProject.high_size }}" value="{{ selectedProject.current_size }}"></meter>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <b>Cpu</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
-              </td>
-              <td>
-                <span *ngIf="selectedProject.current_cpu">{{ selectedProject.current_cpu }}&#47;</span>{{ selectedProject.cpu }} Hour
-                <meter *ngIf="selectedProject.current_cpu" min="0" max="{{ selectedProject.cpu }}" optimum="0" low="{{ selectedProject.low_cpu }}" high="{{ selectedProject.high_cpu }}" value="{{ selectedProject.current_cpu }}"></meter>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <b>Creation</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Creation date" tooltip></span>
-              </td>
-              <td>{{ selectedProject.created_at | date }}</td>
-            </tr>
-            <tr>
-              <td>
-                <b>Expiration</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Expiration date" tooltip></span>
-              </td>
-              <td>{{ selectedProject.expire | date }} &nbsp; <button *ngIf="config.project && config.project.allow_extend" class="p-button p-button-sm p-button-success" (click)="extend(selectedProject)">Extend validity</button></td>
-            </tr>
-            <tr>
-              <td>
-                <b>Financing</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Organism financing the project" tooltip></span>
-              </td>
-              <td>{{ selectedProject.orga }}</td>
-            </tr>
-            <tr>
-              <td>
-                <b>Write permissions</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip></span>
-              </td>
-              <td>{{ selectedProject.access }}</td>
-            </tr>
-            <tr>
-              <td>
-                <b>Description</b>&nbsp;
-                <span class="glyphicon glyphicon-question-sign" title="Short project description" tooltip></span>
-              </td>
-              <td>{{ selectedProject.description }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="card bg-light">
-    <div class="card-header" (click)="members_visible=!members_visible" style="cursor: pointer;">
-      <h3>Project members</h3>
-    </div>
-    <div class="card-body" *ngIf="members_visible">
-      <div class="table-responsive table-striped">
-        <p-table #dtu [value]="users" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
+        <p-table #dtp [value]="projects" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['id', 'owner']" [filterDelay]="0">
+          <ng-template pTemplate="caption">
+            <span class="p-input-icon-right">
+              <i class="pi pi-search"></i>
+              <input pInputText id="search_projects" type="text" (input)="dtp.filterGlobal($event.target.value, 'contains')" placeholder="Search" />
+            </span>
+          </ng-template>
           <ng-template pTemplate="header">
             <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Manager?</th>
-              <th>Owner?</th>
+              <th>Project</th>
+              <th>Owner</th>
+              @if (!config.project || config.project.enable_group) {
+                <th>Group</th>
+              }
+              <th>Path</th>
+              <th>Size (GB)</th>
+              <th>Cpu (Hour)</th>
+              <th>Creation</th>
+              <th>Expiration</th>
+              <th></th>
             </tr>
           </ng-template>
-          <ng-template pTemplate="body" let-user>
+          <ng-template pTemplate="body" let-project>
             <tr>
-              <td>{{ user.uid }}</td>
-              <td>
-                <span *ngIf="session_user.uid === selectedProject.owner">{{ user.email }}</span>
-                <span *ngIf="session_user.uid !== selectedProject.owner">Restricted to owner</span>
+              <td (click)="show_project_users_and_scroll(project, selectedProjectAnchor)" style="cursor: pointer">
+                <span class="p-button p-button-sm p-button-primary">{{ project.id }}</span>
               </td>
-              <td><span *ngIf="user.temp?.is_manager">x</span></td>
-              <td><span *ngIf="user.uid === selectedProject.owner">x</span></td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
+              <td>{{ project.owner }}</td>
+              @if (!config.project || config.project.enable_group) {
+                <td>{{ project.group }}</td>
+              }
+              <td>{{ project.path }}</td>
+              <td>
+                @if (project.current_size) {
+                  <span>{{ project.current_size }}&#47;</span>
+                  }{{ project.size }}
+                  @if (project.current_size) {
+                    <meter min="0" max="{{ project.size }}" optimum="0" low="{{ project.low_size }}" high="{{ project.high_size }}" value="{{ project.current_size }}"></meter>
+                  }
+                </td>
+                <td>
+                  @if (project.current_cpu) {
+                    <span>{{ project.current_cpu }}&#47;</span>
+                    }{{ project.cpu }}
+                    @if (project.current_cpu) {
+                      <meter min="0" max="{{ project.cpu }}" optimum="0" low="{{ project.low_cpu }}" high="{{ project.high_cpu }}" value="{{ project.current_cpu }}"></meter>
+                    }
+                  </td>
+                  <td>{{ project.created_at | date }}</td>
+                  <td>{{ project.expire | date }}</td>
+                  <td>
+                    @if (!session_user.is_admin && project.owner != session_user.uid) {
+                      <p-button severity="warn" size="small" type="button" (onClick)="request_user(project, session_user.uid, 'remove')" label="Leave project"></p-button>
+                    }
+                    @if (session_user.is_admin) {
+                      <a routerLink="/admin/project/{{ project.id }}"><span class="p-button p-button-sm p-button-danger">Admin</span></a>
+                    }
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      }
     </div>
-  </div>
-</div>
 
 
-<div *ngIf="config.project && config.project.terms_and_conditions_hds" #termsAndConditionsHdsModal class="modal fade" id="termsAndConditionsHdsModal" data-backdrop="static" role="dialog">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Terms and Conditions HDS</h4>
-      </div>
-      <div class="container"></div>
-      <div class="modal-body">
-        <p>As our computing infrastructure is not HDS-certified (Health Data Hosting), health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up cannot be uploaded, stored or processed (article L.1111-8, French Public Health Code).</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+    @if (request_err_msg) {
+      <div class="alert alert-danger">{{ request_err_msg }}</div>
+    }
+    @if (request_msg) {
+      <div class="alert alert-info">{{ request_msg }}</div>
+    }
+
+
+    <a #selectedProjectAnchor></a>
+    @if (selectedProject) {
+      <div>
+        <hr />
+        <div class="well">
+          <h2>
+            Project <b>{{ selectedProject.id }}</b>
+          </h2>
+        </div>
+        @if (session_user.uid === selectedProject.owner) {
+          <div class="card bg-light">
+            <div class="card-header" (click)="owner_visible = !owner_visible" style="cursor: pointer;">
+              <h3>Owner console</h3>
+            </div>
+            @if (owner_visible) {
+              <div class="card-body">
+                @if (owner_request_err_msg) {
+                  <div class="alert alert-danger">{{owner_request_err_msg}}</div>
+                }
+                @if (owner_request_msg) {
+                  <div class="alert alert-info">{{owner_request_msg}}</div>
+                }
+                <form role="form" class="user-form form-horizontal">
+                  <div class="form-group row">
+                    <div class="col-sm-3">
+                      <label for="new_manager">New project manager</label>
+                      <select id="add_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="new_manager" class="form-control">
+                        @for (user of users; track user) {
+                          <option [value]="user.uid">{{user.uid}}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="col-sm-3">
+                      <label style="opacity: 0;">Add new manager</label>
+                      <p-button severity="success" size="small" type="button" (onClick)="add_manager(selectedProject, new_manager)" label="Promote to Manager"></p-button>
+                    </div>
+                    <div class="col-sm-3">
+                      <label for="rm_manager">Remove project manager</label>
+                      <select id="rm_manager"  [ngModelOptions]="{standalone: true}" [(ngModel)]="rm_manager" class="form-control">
+                        @for (manager of selectedProject.managers; track manager) {
+                          <option [value]="manager">{{manager}}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="col-sm-3">
+                      <label style="opacity: 0;">Remove manager</label>
+                      <p-button severity="danger" size="small" type="button" (onClick)="remove_manager(selectedProject, rm_manager)" label="Demote to Member"></p-button>
+                    </div>
+                  </div>
+                </form>
+                <h6>Project managers :</h6>
+                <ul>
+                  @for (manager of selectedProject.managers; track manager) {
+                    <li>{{ manager }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        }
+        @if (selectedProject.managers.includes(session_user.uid)) {
+          <div class="card bg-light">
+            <div class="card-header" (click)="manager_visible = !manager_visible" style="cursor: pointer;">
+              <h3>Manager console</h3>
+            </div>
+            @if (manager_visible) {
+              <div class="card-body">
+                @if (manager_request_err_msg) {
+                  <div class="alert alert-danger">{{manager_request_err_msg}}</div>
+                }
+                @if (manager_request_msg) {
+                  <div class="alert alert-info">{{manager_request_msg}}</div>
+                }
+                <form role="form" class="user-form form-horizontal">
+                  <div class="form-group row">
+                    <div class="col-sm-3">
+                      <label for="new_user">New project member</label>
+                      <input placeholder="User id" id="new_user" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="new_user" class="form-control" />
+                    </div>
+                    <div class="col-sm-3">
+                      <label style="opacity: 0;">Request new member</label>
+                      <p-button severity="primary" size="small" type="button" (onClick)="request_user(selectedProject, new_user, 'add')" label="Request New Member"></p-button>
+                    </div>
+                    <div class="col-sm-3">
+                      <label for="remove_user">Remove project member</label>
+                      <select id="remove_user" [ngModelOptions]="{ standalone: true }" [(ngModel)]="remove_user" class="form-control">
+                        @for (user of users; track user) {
+                          <option [value]="user.uid">{{ user.uid }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="col-sm-3">
+                      <label style="opacity: 0;">Request member removal</label>
+                      <p-button severity="warn" size="small" type="button" (onClick)="request_user(selectedProject, remove_user, 'remove')" label="Request Member Removal"></p-button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            }
+          </div>
+        }
+        <div class="card bg-light">
+          <div class="card-header" (click)="overview_visible=!overview_visible" style="cursor: pointer;">
+            <h3>Project overview</h3>
+          </div>
+          @if (overview_visible) {
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <tbody>
+                    <tr>
+                      <td>
+                        <b>Name</b>&nbsp;
+                        <span class="glyphicon glyphicon-question-sign" title="Project name" tooltip> </span>
+                      </td>
+                      <td>{{ selectedProject.id }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Owner</b>&nbsp;
+                        <span class="glyphicon glyphicon-question-sign" title="Owner uid" tooltip> </span>
+                      </td>
+                      <td>{{ selectedProject.owner }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Unix Group</b>&nbsp;
+                        <span class="glyphicon glyphicon-question-sign" title="Unix group for members" tooltip></span>
+                      </td>
+                      <td>{{ selectedProject.group }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Path</b>&nbsp;
+                        <span class="glyphicon glyphicon-question-sign" title="Path to project folder" tooltip></span>
+                      </td>
+                      <td>{{ selectedProject.path }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Size</b>&nbsp;
+                        <span class="glyphicon glyphicon-question-sign" title="Storage quota" tooltip></span>
+                      </td>
+                      <td>
+                        @if (selectedProject.current_size) {
+                          <span>{{ selectedProject.current_size }}&#47;</span>
+                          }{{ selectedProject.size }} GB
+                          @if (selectedProject.current_size) {
+                            <meter min="0" max="{{ selectedProject.size }}" optimum="0" low="{{ selectedProject.low_size }}" high="{{ selectedProject.high_size }}" value="{{ selectedProject.current_size }}"></meter>
+                          }
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <b>Cpu</b>&nbsp;
+                          <span class="glyphicon glyphicon-question-sign" title="Cpu quota" tooltip></span>
+                        </td>
+                        <td>
+                          @if (selectedProject.current_cpu) {
+                            <span>{{ selectedProject.current_cpu }}&#47;</span>
+                            }{{ selectedProject.cpu }} Hour
+                            @if (selectedProject.current_cpu) {
+                              <meter min="0" max="{{ selectedProject.cpu }}" optimum="0" low="{{ selectedProject.low_cpu }}" high="{{ selectedProject.high_cpu }}" value="{{ selectedProject.current_cpu }}"></meter>
+                            }
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Creation</b>&nbsp;
+                            <span class="glyphicon glyphicon-question-sign" title="Creation date" tooltip></span>
+                          </td>
+                          <td>{{ selectedProject.created_at | date }}</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Expiration</b>&nbsp;
+                            <span class="glyphicon glyphicon-question-sign" title="Expiration date" tooltip></span>
+                          </td>
+                          <td>{{ selectedProject.expire | date }} &nbsp; @if (config.project && config.project.allow_extend) {
+                            <p-button severity="success" size="small" (onClick)="extend(selectedProject)" label="Extend validity"></p-button>
+                          }</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Financing</b>&nbsp;
+                            <span class="glyphicon glyphicon-question-sign" title="Organism financing the project" tooltip></span>
+                          </td>
+                          <td>{{ selectedProject.orga }}</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Write permissions</b>&nbsp;
+                            <span class="glyphicon glyphicon-question-sign" data-html="true" title="Write access<br>Group : all members<br>Data manager : owner" tooltip></span>
+                          </td>
+                          <td>{{ selectedProject.access }}</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>Description</b>&nbsp;
+                            <span class="glyphicon glyphicon-question-sign" title="Short project description" tooltip></span>
+                          </td>
+                          <td>{{ selectedProject.description }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="card bg-light">
+              <div class="card-header" (click)="members_visible=!members_visible" style="cursor: pointer;">
+                <h3>Project members</h3>
+              </div>
+              @if (members_visible) {
+                <div class="card-body">
+                  <div class="table-responsive table-striped">
+                    <p-table #dtu [value]="users" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
+                      <ng-template pTemplate="header">
+                        <tr>
+                          <th>User</th>
+                          <th>Email</th>
+                          <th>Access?</th>
+                          <th>Manager?</th>
+                          <th>Owner?</th>
+                        </tr>
+                      </ng-template>
+                      <ng-template pTemplate="body" let-user>
+                        <tr>
+                          <td>{{ user.uid }}</td>
+                          <td>
+                            @if (session_user.uid === selectedProject.owner) {
+                              <span>{{ user.email }}</span>
+                            }
+                            @if (session_user.uid !== selectedProject.owner) {
+                              <span>Restricted to owner</span>
+                            }
+                          </td>
+                          <td>@if (user.temp?.access) {
+                            <span>x</span>
+                          }</td>
+                          <td>@if (user.temp?.is_manager) {
+                            <span>x</span>
+                          }</td>
+                          <td>@if (user.uid === selectedProject.owner) {
+                            <span>x</span>
+                          }</td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+
+        @if (config.project && config.project.terms_and_conditions_hds) {
+          <div #termsAndConditionsHdsModal class="modal fade" id="termsAndConditionsHdsModal" data-backdrop="static" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Terms and Conditions HDS</h4>
+                </div>
+                <div class="container"></div>
+                <div class="modal-body">
+                  <p>As our computing infrastructure is not HDS-certified (Health Data Hosting), health data collected during activities of prevention, diagnostic and care or related to social and medical and social follow-up cannot be uploaded, stored or processed (article L.1111-8, French Public Health Code).</p>
+                </div>
+                <div class="modal-footer">
+                  <p-button type="button" styleClass="btn btn-secondary" data-bs-dismiss="modal" label="Close"></p-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }

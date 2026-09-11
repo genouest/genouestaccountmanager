@@ -12,9 +12,13 @@
               <span class="glyphicon glyphicon-question-sign" title="Unique name for the database" tooltip></span>
             </label>
             <input required placeholder="database name" type="text" maxlength="42" id="new_database_id" [ngModelOptions]="{ standalone: true }" [(ngModel)]="db.name" class="form-control" name="name" #name="ngModel" />
-            <div *ngIf="name.invalid && (name.dirty || name.touched)" class="text-danger">
-              <div *ngIf="name.errors.required">name required</div>
-            </div>
+            @if (name.invalid && (name.dirty || name.touched)) {
+              <div class="text-danger">
+                @if (name.errors.required) {
+                  <div>name required</div>
+                }
+              </div>
+            }
           </div>
           <div class="form-group row col-sm-8">
             <label for="db_usage">Usage</label>
@@ -24,27 +28,37 @@
           <div class="form-group row col-sm-8">
             <label for="db_expire">Expiration date<span style="color: red">(required)</span></label>
             <input required type="date" id="db_expire" [ngModelOptions]="{ standalone: true }" [(ngModel)]="db_expire" class="form-control" name="expire" #expire="ngModel" />
-            <div *ngIf="expire.invalid && (expire.dirty || expire.touched)" class="text-danger">
-              <div *ngIf="expire.errors.required">expiration date required</div>
-            </div>
+            @if (expire.invalid && (expire.dirty || expire.touched)) {
+              <div class="text-danger">
+                @if (expire.errors.required) {
+                  <div>expiration date required</div>
+                }
+              </div>
+            }
           </div>
           <div class="form-group row col-sm-8">
             <label><input type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="db.single_user" />I will be the only one using this database</label>
           </div>
         </div>
-        <div class="alert alert-success alert-dismissible" *ngIf="form_msg">{{ form_msg }}</div>
-        <div class="alert alert-danger" *ngIf="form_err_msg">{{ form_err_msg }}</div>
+        @if (form_msg) {
+          <div class="alert alert-success alert-dismissible">{{ form_msg }}</div>
+        }
+        @if (form_err_msg) {
+          <div class="alert alert-danger">{{ form_err_msg }}</div>
+        }
         <div class="modal-footer">
           <div class="form-group row col-sm-12">
-            <button type="submit" class="btn btn-primary">Request MySQL Database</button>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <p-button type="submit" styleClass="btn btn-primary" label="Request MySQL Database"></p-button>
+            <p-button type="button" styleClass="btn btn-secondary" data-bs-dismiss="modal" label="Close"></p-button>
           </div>
         </div>
       </form>
     </div>
   </div>
 </div>
-<button *ngIf="session_user" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ask_database">Request A New Database</button>
+@if (session_user) {
+  <p-button type="button" severity="primary" data-bs-toggle="modal" data-bs-target="#ask_database" label="Request A New Database"></p-button>
+}
 
 <div class="card bg-light">
   <div class="card-header">
@@ -90,5 +104,9 @@
   </div>
 </div>
 
-<div *ngIf="msg" class="alert alert-success alert-dismissible" role="alert">{{ msg }}</div>
-<div *ngIf="err_msg" class="alert alert-warning alert-dismissible" role="alert">{{ err_msg }}</div>
+@if (msg) {
+  <div class="alert alert-success alert-dismissible" role="alert">{{ msg }}</div>
+}
+@if (err_msg) {
+  <div class="alert alert-warning alert-dismissible" role="alert">{{ err_msg }}</div>
+}

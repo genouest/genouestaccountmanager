@@ -6,7 +6,7 @@
       </div>
       <div class="card-body">
         <div class="table-responsive table-striped">
-          <p-table #dt1 [value]="pending_email_users" [resizableColumns]="true" [autoLayout]="true" [tableStyle]="{ 'text-align': 'center' }" sortMode="multiple">
+          <p-table #dt1 [value]="pending_email_users" [resizableColumns]="true" [tableStyle]="{ 'text-align': 'center' }" sortMode="multiple">
             <ng-template pTemplate="header">
               <th pSortableColumn="uid">UID <p-sortIcon field="uid"></p-sortIcon></th>
               <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
@@ -17,7 +17,7 @@
               <tr>
                 <td>
                   <a routerLink="/user/{{ user.uid }}">
-                    <span class="p-button p-button-sm p-button-warning">{{ user.uid }}</span>
+                    <p-button size="small" severity="warn">{{ user.uid }}</p-button>
                   </a>
                 </td>
                 <td>{{ user.email }}</td>
@@ -38,7 +38,7 @@
       </div>
       <div class="card-body">
         <div class="table-responsive table-striped">
-          <p-table #dt2 [value]="pending_approval_users" [resizableColumns]="true" [autoLayout]="true">
+          <p-table #dt2 [value]="pending_approval_users" [resizableColumns]="true">
             <ng-template pTemplate="header">
               <th pSortableColumn="uid">UID <p-sortIcon field="uid"></p-sortIcon></th>
               <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
@@ -49,7 +49,7 @@
               <tr>
                 <td>
                   <a routerLink="/user/{{ user.uid }}"
-                    ><span class="p-button p-button-sm p-button-warning">{{ user.uid }}</span></a
+                    ><p-button size="small" severity="warn">{{ user.uid }}</p-button></a
                   >
                 </td>
                 <td>{{ user.email }}</td>
@@ -73,7 +73,7 @@
       </div>
       <div class="card-body">
         <div class="table-responsive table-striped">
-          <p-table #dt3 [value]="active_users" [resizableColumns]="true" [autoLayout]="true" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['name', 'uid', 'email', 'uidnumber', 'why', 'firstname', 'lastname']" [filterDelay]="0">
+          <p-table #dt3 [value]="active_users" [resizableColumns]="true" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['name', 'uid', 'email', 'uidnumber', 'why', 'firstname', 'lastname']" [filterDelay]="0">
             <ng-template pTemplate="caption">
               <div class="table-header">
                 <span class="p-input-icon-right">
@@ -118,7 +118,7 @@
       </div>
       <div class="card-body">
         <div class="table-responsive table-striped">
-          <p-table #dt4 [value]="expired_users" [resizableColumns]="true" [autoLayout]="true" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['name', 'uid', 'email', 'uidnumber']" [filterDelay]="0">
+          <p-table #dt4 [value]="expired_users" [resizableColumns]="true" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]" [globalFilterFields]="['name', 'uid', 'email', 'uidnumber']" [filterDelay]="0">
             <ng-template pTemplate="caption">
               <div class="table-header">
                 <span class="p-input-icon-right">

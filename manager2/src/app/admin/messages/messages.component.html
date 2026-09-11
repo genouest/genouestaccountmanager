@@ -1,5 +1,9 @@
-<div *ngIf="msg" class="alert alert-success">{{ msg }}</div>
-<div *ngIf="error_msg" class="alert alert-danger">{{ error_msg }}</div>
+@if (msg) {
+  <div class="alert alert-success">{{ msg }}</div>
+}
+@if (error_msg) {
+  <div class="alert alert-danger">{{ error_msg }}</div>
+}
 
 <div class="card bg-light">
   <div class="card-header">
@@ -12,10 +16,16 @@
           <label for="mailing_list" class="col-form-label">Mailing list</label>
           <select id="mailing_list" placeholder="Choose your mailing list" [ngModelOptions]="{ standalone: true }" [(ngModel)]="mailing_list" (change)="decode_template($event); generate_list_members($event)" class="form-control">
             <option value="" disabled selected>Select your mailing list</option>
-            <option *ngFor="let list of mailing_lists" [value]="list.list_name">{{ list.list_name }}</option>
+            @for (list of mailing_lists; track list) {
+              <option [value]="list.list_name">{{ list.list_name }}</option>
+            }
           </select>
-          <br *ngIf="mailing_list" />
-          <button type="button" *ngIf="mailing_list" class="p-button p-button-sm p-button-primary" data-toggle="modal" data-target="#members_view">View list members</button>
+          @if (mailing_list) {
+            <br />
+          }
+          @if (mailing_list) {
+            <p-button type="button" size="small" severity="primary" data-bs-toggle="modal" data-bs-target="#members_view" label="View list members"></p-button>
+          }
         </div>
       </div>
     </div>
@@ -24,7 +34,9 @@
         <div class="form-group">
           <label for="input_type" class="col-form-label">Input type</label>
           <select id="input_type" (change)="decode_template($event.target.value)" [ngModelOptions]="{ standalone: true }" [(ngModel)]="input_type" class="form-control">
-            <option *ngFor="let input of input_choices" [value]="input">{{ input }}</option>
+            @for (input of input_choices; track input) {
+              <option [value]="input">{{ input }}</option>
+            }
           </select>
         </div>
       </div>
@@ -54,12 +66,20 @@
       </div>
     </div>
     <!-- Button trigger modal -->
-    <button type="button" *ngIf="message && subject && (input_type == 'HTML' || input_type == 'Markdown')" class="p-button p-button-sm p-button-primary pull-right" data-toggle="modal" data-target="#HTML_viewer">Viewer</button>
+    @if (message && subject && (input_type == 'HTML' || input_type == 'Markdown')) {
+      <p-button type="button" size="small" severity="primary" styleClass="pull-right" data-bs-toggle="modal" data-bs-target="#HTML_viewer" label="Viewer"></p-button>
+    }
 
-    <button type="button" *ngIf="mailing_lists && mailing_lists.length > 0" class="p-button p-button-sm p-button-secondary" (click)="send()">Send</button>
+    @if (mailing_lists && mailing_lists.length > 0) {
+      <p-button type="button" size="small" severity="secondary" (onClick)="send()" label="Send"></p-button>
+    }
     <div class="row">
-      <div *ngIf="msg" class="alert alert-success">{{ msg }}</div>
-      <div *ngIf="error_msg" class="alert alert-danger">{{ error_msg }}</div>
+      @if (msg) {
+        <div class="alert alert-success">{{ msg }}</div>
+      }
+      @if (error_msg) {
+        <div class="alert alert-danger">{{ error_msg }}</div>
+      }
     </div>
   </div>
 </div>
@@ -69,11 +89,15 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-body">
-        <p *ngIf="input_type == 'HTML'" [innerHTML]="trustAsHtml(message)"></p>
-        <p *ngIf="input_type == 'Markdown'" [innerHTML]="trustAsMarkdown(message)"></p>
+        @if (input_type == 'HTML') {
+          <p [innerHTML]="trustAsHtml(message)"></p>
+        }
+        @if (input_type == 'Markdown') {
+          <p [innerHTML]="trustAsMarkdown(message)"></p>
+        }
       </div>
       <div class="modal-footer">
-        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
+        <p-button type="button" size="small" severity="secondary" data-bs-dismiss="modal" label="Close"></p-button>
       </div>
     </div>
   </div>
@@ -101,7 +125,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="p-button p-button-sm p-button-secondary" data-dismiss="modal">Close</button>
+        <p-button type="button" size="small" severity="secondary" data-bs-dismiss="modal" label="Close"></p-button>
       </div>
     </div>
   </div>

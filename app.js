@@ -96,7 +96,7 @@ app.use(session({
     cookie: { maxAge: 3600*1000},
     store: mongoStoreClient
 }));
-app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui')));
+app.use('/manager2', expressStaticGzip(path.join(__dirname, 'manager2/dist/my-ui/browser')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const metricsMiddleware = promBundle({
@@ -415,7 +415,7 @@ app.get('/manager/*', function(request, response){
 });
 // Default route if no match (for spa handling)
 app.get('*', function (request, response) {
-    response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/index.html'));
+    response.sendFile(path.resolve(__dirname, 'manager2/dist/my-ui/browser/index.html'));
 });
 
 

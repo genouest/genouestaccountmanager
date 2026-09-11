@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { User, UserService } from './user.service';
 import { AuthService } from '../auth/auth.service';
 import { ConfigService } from '../config.service';
@@ -32,7 +32,9 @@ import { NgModel } from '@angular/forms';
 @Component({
     selector: 'app-user-extra',
     templateUrl: './user-extra.component.html',
-    styleUrls: ['./user-extra.component.css']
+    styleUrls: ['./user-extra.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class UserExtraComponent implements OnInit {
     @Input() user: User;
@@ -122,7 +124,9 @@ export class UserExtraComponent implements OnInit {
 @Component({
     selector: 'app-user',
     templateUrl: './user.component.html',
-    styleUrls: ['./user.component.css']
+    styleUrls: ['./user.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class UserComponent implements OnInit {
     user_projects: any[];
@@ -467,10 +471,11 @@ export class UserComponent implements OnInit {
 
                 // IE doesn't allow using a blob object directly as link href
                 // instead it is necessary to use msSaveOrOpenBlob
-                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                    window.navigator.msSaveOrOpenBlob(blob);
-                    return;
-                }
+                // MB: Deprecated, IE is obsolete
+                //if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                //    window.navigator.msSaveOrOpenBlob(blob);
+                //    return;
+                //}
 
                 // For other browsers:
                 // Create a link pointing to the ObjectURL containing the blob.

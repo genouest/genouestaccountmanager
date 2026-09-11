@@ -65,7 +65,7 @@ module.exports = {
         return deactivate_user(userId, data, adminId);
     },
     template: function(){
-        return '<div>hello {{user.uid}}</div><div><input ng-model="plugin_data.test.my"></input> <button ng-click="plugin_update(\'test\')" class="button">Update</button></div>';
+        return '<div>hello {{user.uid}}</div><div><input ng-model="plugin_data.test.my"></input> <p-button ng-click="plugin_update(\'test\')" styleClass="button" label="Update"></p-button></div>';
     },
     get_data: function(userId, adminId){
         return get_user_info(userId, adminId);

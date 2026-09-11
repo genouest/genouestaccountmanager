@@ -23,6 +23,8 @@ body {
     padding-right: 1em;
     border-radius: 0;
     font-weight: 300;
+    width: auto;
+    border-radius: 8%
 }
 
 .label-primary {
@@ -212,7 +214,7 @@ button {
 
 .profile-img
 {
-    max-width: 330px;
+    max-width: 110px;
     margin: 0 auto 10px;
     display: block;
 }
@@ -245,4 +247,8 @@ button {
     z-index: 1051 !important;
 }
 
-    
+hr {
+    border: none;
+    height: 1px;
+    background-color: black;
+}

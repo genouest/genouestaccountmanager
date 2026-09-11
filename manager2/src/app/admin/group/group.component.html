@@ -2,7 +2,9 @@
   <a routerLink="/admin/group" class="btn btn-primary">Back to groups</a>
 </div>
 
-<div class="alert alert-danger" *ngIf="del_err_msg">{{ del_err_msg }}</div>
+@if (del_err_msg) {
+  <div class="alert alert-danger">{{ del_err_msg }}</div>
+}
 
 <div class="card bg-light">
   <div class="card bg-light card-header">
@@ -29,7 +31,7 @@
           <input type="text" placeholder="Description" id="group_desc" [ngModelOptions]="{ standalone: true }" [(ngModel)]="group.description" class="form-control" />
         </div>
       </div>
-      <button type="button" class="p-button p-button-sm p-button-primary" (click)="updateGroup()">Update</button>
+      <p-button type="button" size="small" severity="primary" (onClick)="updateGroup()" label="Update"></p-button>
       <div class="form-group"></div>
     </form>
   </div>
@@ -56,22 +58,24 @@
           <th>Owner</th>
         </thead>
         <tbody>
-          <tr *ngFor="let project of projects">
-            <td>
-              <a routerLink="/admin/project/{{ project.id }}">
-                <span class="p-button p-button-sm p-button-primary">
-                  {{ project.id }}
-                </span>
-              </a>
-            </td>
-            <td>
-              <a routerLink="/user/{{ project.owner }}">
-                <span class="p-button p-button-sm p-button-primary">
-                  {{ project.owner }}
-                </span>
-              </a>
-            </td>
-          </tr>
+          @for (project of projects; track project) {
+            <tr>
+              <td>
+                <a routerLink="/admin/project/{{ project.id }}">
+                  <span class="p-button p-button-sm p-button-primary">
+                    {{ project.id }}
+                  </span>
+                </a>
+              </td>
+              <td>
+                <a routerLink="/user/{{ project.owner }}">
+                  <span class="p-button p-button-sm p-button-primary">
+                    {{ project.owner }}
+                  </span>
+                </a>
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
@@ -83,8 +87,12 @@
     <h3>Users in {{ group.name }} :</h3>
   </div>
   <div class="card-body">
-    <div class="alert alert-info" *ngIf="msg">{{ msg }}</div>
-    <div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
+    @if (msg) {
+      <div class="alert alert-info">{{ msg }}</div>
+    }
+    @if (err_msg) {
+      <div class="alert alert-danger">{{ err_msg }}</div>
+    }
     <div class="table-responsive table-striped">
       <p-table #dtu [value]="users" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 25, 50]">
         <ng-template pTemplate="header">
@@ -105,8 +113,12 @@
               </a>
             </td>
             <td>{{ user.email }}</td>
-            <td><span *ngIf="user.temp?.authorized">x</span></td>
-            <td><span *ngIf="user.group == group.name">x</span></td>
+            <td>@if (user.temp?.authorized) {
+              <span>x</span>
+            }</td>
+            <td>@if (user.group == group.name) {
+              <span>x</span>
+            }</td>
           </tr>
         </ng-template>
       </p-table>

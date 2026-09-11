@@ -19,7 +19,8 @@ const eventColors = {
     selector: 'app-tps',
     templateUrl: './tps.component.html',
     styleUrls: ['./tps.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TpsComponent implements OnInit {
     config: any;
@@ -31,7 +32,7 @@ export class TpsComponent implements OnInit {
     viewDate: Date;
     events: CalendarEvent[];
     selectedEvent: CalendarEvent;
-    refresh: Subject<any> = new Subject();
+    refresh = new Subject<void>();
     quantity: number;
     fromDate: Date;
     toDate: Date;

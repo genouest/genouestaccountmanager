@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ConfigService } from 'src/app/config.service';
 import { UserService } from 'src/app/user/user.service';
 
@@ -8,15 +8,17 @@ import { AuthService } from '../../auth/auth.service';
 
 import { Observable } from 'rxjs';
 
-import marked from 'marked';
+import { marked } from 'marked';
 import { Router } from '@angular/router';
 import { FlashMessagesService } from 'src/app/utils/flash/flash.component';
-import { Table } from 'primeng/table';
+import { Table } from '@openng/optimus-ui/table';
 
 @Component({
     selector: 'app-messages',
     templateUrl: './messages.component.html',
-    styleUrls: ['./messages.component.css']
+    styleUrls: ['./messages.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class MessagesComponent implements OnInit {
     @ViewChild('dtp') table: Table;
@@ -134,7 +136,7 @@ export class MessagesComponent implements OnInit {
     trustAsHtml(message): string { return message; }
 
     trustAsMarkdown(message): string {
-        let mark = marked(message);
+        let mark = marked(message, { async: false });
         return mark;
     }
 

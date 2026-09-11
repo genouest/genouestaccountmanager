@@ -1,14 +1,17 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Group, GroupsService } from '../groups/groups.service';
 import { Project, ProjectsService } from '../projects/projects.service';
 import { User } from '../../user/user.service';
-import { Table } from 'primeng/table';
+import { Table } from '@openng/optimus-ui/table';
 
 @Component({
     selector: 'app-groups',
     templateUrl: './group.component.html'
     // styleUrls: ['./group.component.css']
+    ,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class GroupComponent implements OnInit {
     @ViewChild('dtg') tableGroups: Table;

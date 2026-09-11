@@ -1,11 +1,17 @@
-<button *ngIf="!isExpiring" type="button" class="p-button p-button-sm p-button-warning btn-xs" (click)="startExpire()">Expire</button>
-<div *ngIf="isExpiring">
-  <div *ngIf="mailer === 'gomail'" class="form-group row">
-    <label for="sendmail" class="form-check-label"><b>Send list removal mail </b></label>
-    <input id="sendmail" type="checkbox" class="form-check-input" [ngModelOptions]="{ standalone: true }" [(ngModel)]="sendmail" />
+@if (!isExpiring) {
+  <p-button type="button" size="small" severity="warn" (onClick)="startExpire()" label="Expire"></p-button>
+}
+@if (isExpiring) {
+  <div>
+    @if (mailer === 'gomail') {
+      <div class="form-group row">
+        <label for="sendmail" class="form-check-label"><b>Send list removal mail </b></label>
+        <input id="sendmail" type="checkbox" class="form-check-input" [ngModelOptions]="{ standalone: true }" [(ngModel)]="sendmail" />
+      </div>
+    }
+    <div class="form-group row">
+      <p-button severity="secondary" size="small" type="button" styleClass="  btn-xs" (onClick)="cancel()" label="Abort expiration"></p-button>
+      <p-button severity="danger" size="small" type="button" styleClass="  btn-xs" (onClick)="confirm()" label="Confirm"></p-button>
+    </div>
   </div>
-  <div class="form-group row">
-    <button type="button" class="p-button p-button-sm p-button-secondary btn-xs" (click)="cancel()">Abort expiration</button>
-    <button type="button" class="p-button p-button-sm p-button-danger btn-xs" (click)="confirm()"><i class="fa fa-trash-o"></i>Confirm</button>
-  </div>
-</div>
+}

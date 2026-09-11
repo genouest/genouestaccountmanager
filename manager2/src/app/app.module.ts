@@ -1,8 +1,12 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, Injectable, ErrorHandler } from '@angular/core';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideOptimus } from '@openng/optimus-ui/config';
+
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -47,9 +51,10 @@ import { AdminpluginComponent } from './admin/adminplugin/adminplugin.component'
 import { FlashComponent } from './utils/flash/flash.component';
 import { TagComponent } from './utils/tag/tag.component';
 import { UserLogsComponent } from './user/userlogs.component';
-import { TableModule } from 'primeng/table';
+import { TableModule } from '@openng/optimus-ui/table';
 import { environment } from '../environments/environment';
 import * as Sentry from '@sentry/browser';
+import { Preset } from './custom.preset';
 
 if (environment.sentry) {
     Sentry.init({
@@ -70,8 +75,7 @@ export class SentryErrorHandler implements ErrorHandler {
     }
 }
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         UserComponent,
         UserExtraComponent,
@@ -121,34 +125,27 @@ export class SentryErrorHandler implements ErrorHandler {
         TagComponent,
         UserLogsComponent
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         NgbModule,
-        HttpClientModule,
         AppRoutingModule,
         FormsModule,
         BrowserAnimationsModule,
         TableModule,
+        BrowserAnimationsModule,
+        ButtonModule,
         CalendarModule.forRoot({
             provide: DateAdapter,
             useFactory: adapterFactory
-        })
-    ],
-    providers: [
+        })], providers: [
         { provide: WindowWrapper, useFactory: getWindow, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-        { provide: ErrorHandler, useClass: SentryErrorHandler }
-    ],
-    bootstrap: [AppComponent],
-    entryComponents: [
-        TestPluginComponent,
-        GalaxyPluginComponent,
-        DataAccessPluginComponent,
-        PopulateHomePluginComponent,
-        GenostackPluginComponent,
-        QuotasPluginComponent,
-        GomailPluginComponent,
-        AdminQuotaExamplePluginComponent
-    ]
-})
+        { provide: ErrorHandler, useClass: SentryErrorHandler },
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        provideAnimationsAsync(),
+        provideOptimus({ 
+            theme: {
+                preset: Preset,
+                }
+            })
+    ] })
 export class AppModule {}

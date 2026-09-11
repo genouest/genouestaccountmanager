@@ -41,8 +41,12 @@
   </div>
 </div>
 
-<div class="alert alert-success" *ngIf="chowner_msg">{{ chowner_msg }}</div>
-<div class="alert alert-danger" *ngIf="chowner_err_msg">{{ chowner_err_msg }}</div>
+@if (chowner_msg) {
+  <div class="alert alert-success">{{ chowner_msg }}</div>
+}
+@if (chowner_err_msg) {
+  <div class="alert alert-danger">{{ chowner_err_msg }}</div>
+}
 
 <div class="card bg-light">
   <div class="card-header">
@@ -52,18 +56,22 @@
     <div class="col-sm-2">
       <label for="owner_web_name">Website</label>
       <select id="owner_web_name" [ngModelOptions]="{ standalone: true }" [(ngModel)]="owner_web_name" class="form-control">
-        <option *ngFor="let web of websites" [ngValue]="web">{{ web.name }}</option>
+        @for (web of websites; track web) {
+          <option [ngValue]="web">{{ web.name }}</option>
+        }
       </select>
     </div>
     <div class="col-sm-2">
       <label for="owner_web_owner">Website owner</label>
       <select [ngModelOptions]="{ standalone: true }" [(ngModel)]="owner_web_owner" id="owner_web_owner" class="form-control">
-        <option *ngFor="let user of users" [ngValue]="user">{{ user.uid }}</option>
+        @for (user of users; track user) {
+          <option [ngValue]="user">{{ user.uid }}</option>
+        }
       </select>
     </div>
     <div class="col-sm-2">
       <label style="opacity: 0">Modify</label>
-      <button type="button" class="p-button p-button-sm p-button-secondary" (click)="change_owner()" class="form-control">Modify</button>
+      <p-button severity="secondary" size="small" type="button" (onClick)="change_owner()" styleClass="form-control" label="Modify"></p-button>
     </div>
   </div>
 </div>

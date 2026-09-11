@@ -1,5 +1,7 @@
 <div>
-  <div class="alert alert-danger" *ngIf="err_msg">{{ err_msg }}</div>
+  @if (err_msg) {
+    <div class="alert alert-danger">{{ err_msg }}</div>
+  }
   <div class="card bg-light">
     <div class="card-header">
       <h3>Event logs</h3>
@@ -31,11 +33,13 @@
               <td>{{ log.date | date }}</td>
               <td>{{ log.action }}</td>
               <td>
-                <span *ngFor="let event of log.logs">
-                  <div (click)="getlog(log._id, event)">
-                    <span [className]="log.status && log.status > 0 ? 'label label-danger' : 'label label-primary'" style="cursor: pointer">{{ event }}</span>
-                  </div>
-                </span>
+                @for (event of log.logs; track event) {
+                  <span>
+                    <div (click)="getlog(log._id, event)">
+                      <span [className]="log.status && log.status > 0 ? 'label label-danger' : 'label label-primary'" style="cursor: pointer">{{ event }}</span>
+                    </div>
+                  </span>
+                }
               </td>
             </tr>
           </ng-template>
@@ -45,15 +49,17 @@
   </div>
 </div>
 
-<div *ngIf="logcontent">
-  <div class="card bg-light">
-    <div class="card-header">
-      <h3>
-        <b>{{ event }}</b> file content
-      </h3>
-    </div>
-    <div class="card-body">
-      <div [innerHTML]="logcontent"></div>
+@if (logcontent) {
+  <div>
+    <div class="card bg-light">
+      <div class="card-header">
+        <h3>
+          <b>{{ event }}</b> file content
+        </h3>
+      </div>
+      <div class="card-body">
+        <div [innerHTML]="logcontent"></div>
+      </div>
     </div>
   </div>
-</div>
+}

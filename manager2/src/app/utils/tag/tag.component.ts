@@ -5,7 +5,8 @@ import { TagService } from './tag.service';
     selector: 'app-tag',
     templateUrl: './tag.component.html',
     styleUrls: ['./tag.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class TagComponent implements OnInit {
     tags: string[];
