@@ -17,7 +17,7 @@
             <i class="toggle-password pi" [ngClass]="passwordVisible ? 'pi-eye-slash' : 'pi-eye'" (click)="togglePasswordVisibility()" aria-label="Toggle password visibility" role="button" tabindex="0"></i>
           </div>
           <div class="form-group">
-            <p-button label="Sign in" styleClass="bigger-login-button w-100" severity="primary" size="large" type="submit" (onClick)="login()"></p-button>
+            <p-button label="Sign in" styleClass="bigger-login-button w-100" severity="primary" size="large" (onClick)="login()"></p-button>
           </div>
           @if (msg) {
             <div class="alert alert-warning">{{ msg }}</div>
