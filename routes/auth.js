@@ -80,7 +80,7 @@ router.get('/mail/auth/:id', async function (req, res) {
     );
 
     let usertoken = jwt.sign(
-        { user: user._id, isLogged: false, double_auth: true, double_auth_user: req.params.id },
+        { user: user._id, isLogged: false, double_auth: true },
         CONFIG.general.secret,
         { expiresIn: '10 minutes' }
     );
@@ -436,7 +436,7 @@ router.post('/auth/:id', async function (req, res) {
     }
 
     if (need_double_auth) {
-        usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true, user: user._id, double_auth_user: user.uid }, CONFIG.general.secret, { expiresIn: '2 days' });
+        usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true, user: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
     }
 
     let ip =
