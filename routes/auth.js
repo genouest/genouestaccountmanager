@@ -331,7 +331,7 @@ router.delete('/u2f/register/:id', async function (req, res) {
 });
 
 router.get('/auth', async function (req, res) {
-    if (req.session.is_logged && req.locals.logInfo.id) {
+    if (req.locals.logInfo.is_logged && req.locals.logInfo.id) {
         let user = null;
         let isadmin = false;
         try {
