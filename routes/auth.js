@@ -46,10 +46,6 @@ router.get('/logout', function (req, res) {
 });
 
 router.get('/mail/auth/:id', async function (req, res) {
-    // Request email token
-    if (req.locals.logInfo.double_auth_user !== req.params.id) {
-        return res.status(401).send({ message: 'Not authorized : cannot request token for another user' });
-    }
 
     if (!req.locals.logInfo.double_auth) {
         return res.status(401).send({ message: 'No double auth in progress' });
@@ -58,11 +54,21 @@ router.get('/mail/auth/:id', async function (req, res) {
     if (!notif.mailSet()) {
         return res.status(403).send({ message: 'No mail provider set : cannot send mail' });
     }
-    //let password = Math.random().toString(36).slice(-10);
     let password = usrsrv.new_password(10);
-    let user = await dbsrv.mongo_users().findOne({ uid: req.params.id });
+    let user = null;
+    try {
+        user = await dbsrv.mongo_users().findOne({ _id: req.locals.logInfo.id });
+    } catch (e) {
+        logger.error(e);
+        return res.status(404).send({ message: 'User session not found' });
+    }
+
     if (!user) {
         return res.status(404).send({ message: 'User not found' });
+    }
+
+    if (user.uid !== req.params.id) {
+        return res.status(401).send({ message: 'Cannot request mail token for another user' });
     }
 
     let expire = new Date().getTime() + 60 * 10 * 1000;
@@ -99,12 +105,7 @@ router.get('/mail/auth/:id', async function (req, res) {
     return res.send({ status: true, token: usertoken });
 });
 
-router.post('/mail/auth/:id', async function (req, res) {
-    // Check email token
-    if (req.locals.logInfo.double_auth_user !== req.params.id) {
-        return res.status(401).send({ message: 'Not authorized : cannot request token for another user' });
-    }
-    
+router.post('/mail/auth/:id', async function (req, res) {    
     if (!req.locals.logInfo.double_auth) {
         return res.status(401).send({ message: 'No double auth in progress' });
     }
@@ -128,7 +129,7 @@ router.post('/mail/auth/:id', async function (req, res) {
     }
 
     if (user.uid !== req.params.id) {
-        return res.status(401).send({ message: 'Not authorized' });
+        return res.status(401).send({ message: 'Cannot validate mail token for another user' });
     }
 
     let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
