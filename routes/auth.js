@@ -47,7 +47,7 @@ router.get('/logout', function (req, res) {
 
 router.get('/mail/auth/:id', async function (req, res) {
     // Request email token
-    if (req.locals.logInfo.session_user.uid !== req.params.id) {
+    if (req.locals.logInfo.double_auth_user !== req.params.id) {
         return res.status(401).send({ message: 'Not authorized : cannot request token for another user' });
     }
 
@@ -74,7 +74,7 @@ router.get('/mail/auth/:id', async function (req, res) {
     );
 
     let usertoken = jwt.sign(
-        { user: user._id, isLogged: false, double_auth: true },
+        { user: user._id, isLogged: false, double_auth: true, double_auth_user: req.params.id },
         CONFIG.general.secret,
         { expiresIn: '10 minutes' }
     );
@@ -101,7 +101,7 @@ router.get('/mail/auth/:id', async function (req, res) {
 
 router.post('/mail/auth/:id', async function (req, res) {
     // Check email token
-    if (req.locals.logInfo.session_user.uid !== req.params.id) {
+    if (req.locals.logInfo.double_auth_user !== req.params.id) {
         return res.status(401).send({ message: 'Not authorized : cannot request token for another user' });
     }
     
@@ -330,7 +330,7 @@ router.delete('/u2f/register/:id', async function (req, res) {
 });
 
 router.get('/auth', async function (req, res) {
-    if (req.locals.logInfo.id) {
+    if (req.session.is_logged && req.locals.logInfo.id) {
         let user = null;
         let isadmin = false;
         try {
@@ -435,7 +435,7 @@ router.post('/auth/:id', async function (req, res) {
     }
 
     if (need_double_auth) {
-        usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true, user: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
+        usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true, user: user._id, double_auth_user: user.uid }, CONFIG.general.secret, { expiresIn: '2 days' });
     }
 
     let ip =
