@@ -145,6 +145,9 @@ export class SentryErrorHandler implements ErrorHandler {
         provideOptimus({ 
             theme: {
                 preset: Preset,
+                options: {
+                  darkModeSelector: false,
+                }
                 }
             })
     ] })
