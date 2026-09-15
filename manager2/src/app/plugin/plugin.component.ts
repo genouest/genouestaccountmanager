@@ -148,6 +148,52 @@ export class GenostackPluginComponent extends BasePluginComponent implements OnI
 
 @Component({
     template: `
+        @if (data) {
+          <div>
+            @if (loading) {
+              <div>Loading...</div>
+            }
+            @if (data.api_status) {
+              <div class="alert alert-danger">{{ data.api_status }}</div>
+            }
+            @if (data.has_project == 'False') {
+              <div style="text-align:center;">
+                <p-button severity="primary" size="small" (onClick)="sendData()" type="button" >
+                  Activate cloud account
+                </p-button>
+              </div>
+            }
+            @if (data.my) {
+              <div class="alert alert-success">{{ data.my }}</div>
+            }
+            @if (data.has_project == 'True') {
+              <div>
+                <div>Current project(s) :</div>
+                <br />
+                <table style="width:100%;" class="table table-striped">
+                  @for (project of data.projects; track project) {
+                    <tr>
+                      <td>{{ project.name }}</td>
+                    </tr>
+                  }
+                </table>
+              </div>
+            }
+          </div>
+        }
+        `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
+})
+export class CloudPluginComponent extends BasePluginComponent implements OnInit {
+    ngOnInit() {
+        this.pluginName = 'cloud';
+        this.loadData(this.userId);
+    }
+}
+
+@Component({
+    template: `
         <div>
             <div>Populate_home will create a project_demo folder upon user activation.</div>
         </div>
@@ -328,6 +374,7 @@ export class PluginItems {
         new PluginItem('test', TestPluginComponent, null, null),
         new PluginItem('galaxy', GalaxyPluginComponent, null, null),
         new PluginItem('genostack', GenostackPluginComponent, null, null),
+        new PluginItem('cloud', CloudPluginComponent, null, null),
         new PluginItem('populate_home', PopulateHomePluginComponent, null, null),
         new PluginItem('data_access', DataAccessPluginComponent, null, null),
         new PluginItem('quota', QuotasPluginComponent, null, null),
@@ -346,6 +393,8 @@ export class PluginItems {
             PluginItems.items.push(new PluginItem(pluginName, GalaxyPluginComponent, null, null));
         } else if (pluginName == 'genostack') {
             PluginItems.items.push(new PluginItem(pluginName, GenostackPluginComponent, null, null));
+        } else if (pluginName == 'cloud') {
+            PluginItems.items.push(new PluginItem(pluginName, CloudPluginComponent, null, null));
         } else if (pluginName == 'populate_home') {
             PluginItems.items.push(new PluginItem(pluginName, PopulateHomePluginComponent, null, null));
         } else if (pluginName == 'data_access') {
