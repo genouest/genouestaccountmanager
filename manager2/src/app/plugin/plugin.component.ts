@@ -378,7 +378,7 @@ export class PluginItems {
 export class PluginComponent implements OnInit, OnChanges {
     @Input() pluginItem: string;
     @Input() userId: string;
-    @ViewChild('pluginContainer', { read: ViewContainerRef }) pluginContainer: ViewContainerRef;
+    @ViewChild('pluginContainer', { read: ViewContainerRef, static: true }) pluginContainer: ViewContainerRef;
 
     ngOnInit() {
         this.loadComponent();
