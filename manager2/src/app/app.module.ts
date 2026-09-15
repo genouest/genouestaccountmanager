@@ -66,7 +66,7 @@ if (environment.sentry) {
 export class SentryErrorHandler implements ErrorHandler {
     constructor() {}
     handleError(error) {
-        if (!environment.sentry && !environment.production) {
+        if (!environment.sentry || !environment.production) {
             console.log(error.originalError || error);
             return;
         }
