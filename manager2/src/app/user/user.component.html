@@ -416,7 +416,7 @@
             </div>
             <div class="card-body">
               <span>{{ user.apikey }}</span>
-              <p-button severity="primary" size="small" style="margin-left: 10px" (onClick)="generate_apikey(user.uid)" label="Generate"></p-button>
+              <p-button severity="primary" size="small" [style]="{ 'margin-left': '10px' }" (onClick)="generate_apikey(user.uid)" label="Generate"></p-button>
             </div>
           </div>
           <div class="card bg-light">

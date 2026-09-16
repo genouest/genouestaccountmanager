@@ -86,7 +86,6 @@ export class UserExtraComponent implements OnInit {
         }
         
         this.extras = extras;
-        console.log('extras', this.extras);
     }
 
     extraChange(title: string, data) {
