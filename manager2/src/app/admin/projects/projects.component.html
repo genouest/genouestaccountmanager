@@ -185,7 +185,7 @@
                     <td>{{ pending.cpu }}</td>
                     <td>{{ pending.orga }}</td>
                     <td>
-                      <p-button severity="info" size="small" type="button" style="margin-right: 0px !important" (onClick)="modify_project(pending)" label="View"></p-button>
+                      <p-button severity="info" size="small" type="button" [style]="{'margin-right': '0px !important'}" (onClick)="modify_project(pending)" label="View"></p-button>
                     </td>
                   </tr>
                 </ng-template>
