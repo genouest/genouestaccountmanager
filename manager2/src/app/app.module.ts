@@ -110,6 +110,7 @@ export class SentryErrorHandler implements ErrorHandler {
         DataAccessPluginComponent,
         PopulateHomePluginComponent,
         GenostackPluginComponent,
+        CloudPluginComponent,
         QuotasPluginComponent,
         GomailPluginComponent,
         PluginDirective,
