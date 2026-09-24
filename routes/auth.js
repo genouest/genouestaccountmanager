@@ -402,15 +402,15 @@ router.post('/auth/:id', async function (req, res) {
     let sess = req.session;
     if (apikey !== '' && apikey === user.apikey) {
         if (CONFIG.general.disable_api_login){
-          return res.status(401).send({
-              message: 'API key login is disabled'
-          });
+            return res.status(401).send({
+                message: 'API key login is disabled'
+            });
         }
 
         if (isadmin && CONFIG.general.disable_api_login_admin){
-          return res.status(401).send({
-              message: 'API key login is disabled for admins'
-          });
+            return res.status(401).send({
+                message: 'API key login is disabled for admins'
+            });
         }
 
         if (!isadmin || !CONFIG.general.double_authentication_for_admin || is_trusted_admin_ip(req)) {
