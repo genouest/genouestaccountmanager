@@ -105,7 +105,7 @@ router.get('/mail/auth/:id', async function (req, res) {
     return res.send({ status: true, token: usertoken });
 });
 
-router.post('/mail/auth/:id', async function (req, res) {    
+router.post('/mail/auth/:id', async function (req, res) {
     if (!req.locals.logInfo.double_auth) {
         return res.status(401).send({ message: 'No double auth in progress' });
     }
@@ -134,11 +134,11 @@ router.post('/mail/auth/:id', async function (req, res) {
 
     let usertoken = jwt.sign({ user: user._id, isLogged: true }, CONFIG.general.secret, { expiresIn: '2 days' });
     let now = new Date().getTime();
- 
+
     let storedToken = user.mail_token;
     if (
         !storedToken ||
-        now > storedToken.expire || 
+        now > storedToken.expire ||
         req.body.token != storedToken.token
     ) {
         return res.status(403).send({ message: 'Invalid or expired token' });
@@ -367,6 +367,12 @@ router.get('/auth', async function (req, res) {
     }
 });
 
+
+function is_trusted_admin_ip(req) {
+    let allowed = (GENERAL_CONFIG.admin_ip || []);
+    return allowed.indexOf(req.ip) >= 0;
+}
+
 router.post('/auth/:id', async function (req, res) {
     let apikey = req.headers['x-my-apikey'] || '';
     if (apikey === '') {
@@ -395,10 +401,28 @@ router.post('/auth/:id', async function (req, res) {
     let usertoken = jwt.sign({ user: user._id, isLogged: true, u2f: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
     let sess = req.session;
     if (apikey !== '' && apikey === user.apikey) {
-        user.is_admin = isadmin;
-        sess.gomngr = user._id;
-        sess.apikey = true;
-        return res.send({ token: usertoken, user: user, message: '', double_auth: false });
+        if (CONFIG.general.disable_api_login){
+          return res.status(401).send({
+              message: 'API key login is disabled'
+          });
+        }
+
+        if (isadmin && CONFIG.general.disable_api_login_admin){
+          return res.status(401).send({
+              message: 'API key login is disabled for admins'
+          });
+        }
+
+        if (!isadmin || !CONFIG.general.double_authentication_for_admin || is_trusted_admin_ip(req)) {
+            user.is_admin = isadmin;
+            sess.gomngr = user._id;
+            sess.apikey = true;
+            return res.send({ token: usertoken, user: user, message: '', double_auth: false });
+        }
+        logger.warn('API key login rejected for admin ' + user.uid + ': request IP is not in the configured admin_ip list');
+        return res.status(401).send({
+            message: 'API key login for this administrator account is only allowed from an approved network location; please sign in with your password instead'
+        });
     }
 
     let is_locked = await idsrv.user_locked(user.uid);
@@ -439,13 +463,7 @@ router.post('/auth/:id', async function (req, res) {
         usertoken = jwt.sign({ isLogged: false, u2f: user._id, double_auth: true, user: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
     }
 
-    let ip =
-        req.headers['x-forwarded-for'] ||
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        req.connection.socket.remoteAddress;
-    if ((user.is_admin && GENERAL_CONFIG.admin_ip.indexOf(ip) >= 0) || process.env.gomngr_auth == 'fake') {
-        // Skip auth
+    if (process.env.gomngr_auth === 'fake') {
         usertoken = jwt.sign({ isLogged: true, u2f: user._id, user: user._id }, CONFIG.general.secret, { expiresIn: '2 days' });
         return res.send({ token: usertoken, user: user, message: '', double_auth: need_double_auth });
     } else {
